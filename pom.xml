@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <prerequisites>
+        <maven>3.0.2</maven>
+    </prerequisites>
+
+    <groupId>fr.sym</groupId>
+    <artifactId>symadrem</artifactId>
+    <packaging>pom</packaging>
+    <version>1.x-SNAPSHOT</version>
+    <name>Symadrem</name>
+
+
+    <!--
+    External dependencies inherited by all modules.
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+
+    <!-- =========================================================== -->
+    <!--     Global project parameters                               -->
+    <!-- =========================================================== -->
+    <properties>
+        <!-- Define parent projects versions -->
+        <geoapi.version>3.1-SNAPSHOT</geoapi.version>
+        <sis.version>0.5-jdk7-SNAPSHOT</sis.version>
+        <geotoolkit.version>4.x-SNAPSHOT</geotoolkit.version>
+        <jai.version>1.1.4</jai.version>
+        <jai-io.version>1.1.1</jai-io.version>
+        <project.encoding>UTF-8</project.encoding>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+
+    <!--
+    Optional dependencies. These dependencies are not automatically inherited
+    by parameters modules. But if a child module declare one of those depencies
+    without specifying any number of version, then the version by default will
+    be the one declared below.
+    -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.derby</groupId>
+                <artifactId>derby</artifactId>
+                <version>10.10.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>9.3-1101-jdbc41</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+
+    <!--
+    Repositories where to find dependencies. A directory http://*.maven.org/
+    is implicit. One can find the necessary dependencies for Maven itself, and
+    some usual dependencies as the JDBC driver for PostgreSQL. The directory
+    "GeotoolKit" contains JARs of GeotoolKit as well as some needed dependencies
+    for GeotoolKit but not published on the Maven repository, for example the
+    UCAR library for the reading of NetCDF files.
+  -->
+    <repositories>
+        <repository>
+            <id>geotoolkit</id>
+            <name>GeoToolkit repository</name>
+            <url>http://maven.geotoolkit.org</url>
+        </repository>
+        <repository>
+            <id>geomatys1</id>
+            <name>Builds from Geomatys</name>
+            <url>http://maven.geomatys.com</url>
+        </repository>
+    </repositories>
+
+    <!--
+    Configuration of the compiler and archiver. For each JAR file, an entry "class-path"
+    will be added in "META-INF/MANIFEST.MF" with the list of every used dependencies.
+    Furthermore, these dependencies will be copied in the directory "target/binaries"
+    for convenience (this task is done by an owned Geotools' plugin). These combined
+    functionnalites allow to launch an application easily by specifying the final JAR,
+    without specifying any dependencies in the "classpath".
+
+    http://maven.apache.org/plugins/index.html
+    http://repo1.maven.org/maven2/org/apache/maven/plugins/
+  -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>        <!-- The -source argument for the Java compiler.   -->
+                    <target>1.8</target>        <!-- The -target argument for the Java compiler.   -->
+                    <debug>true</debug>         <!-- Whether to include debugging information.     -->
+                    <optimize>true</optimize>   <!-- Whether to optimize the compiled code.        -->
+                    <encoding>${project.encoding}</encoding>  <!-- The -encoding argument for the Java compiler. -->
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <modules>
+        <module>desktop</module>
+    </modules>
+
+</project>
