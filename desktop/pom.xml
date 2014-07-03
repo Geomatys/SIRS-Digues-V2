@@ -16,6 +16,17 @@
     <description>Desktop</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.geotoolkit</groupId>
+            <artifactId>geotk-widgets-swing</artifactId>
+            <version>${geotoolkit.version}</version>
+        </dependency>
+        
+        <!-- EPSG database -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
