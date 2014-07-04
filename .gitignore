@@ -1,1 +1,6 @@
-/desktop/target/
+target/
+*.log
+//eclipse
+.project
+.classpath
+.settings/
