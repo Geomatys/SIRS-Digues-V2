@@ -9,5 +9,9 @@ package fr.sym.plugin;
 public class Plugins {
     
     
+    public static Plugin[] getPlugins(){
+        return null;
+    }
+    
     
 }

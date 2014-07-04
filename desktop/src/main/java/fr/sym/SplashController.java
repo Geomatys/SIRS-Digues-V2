@@ -2,7 +2,9 @@
 
 package fr.sym;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 
@@ -10,7 +12,7 @@ import javafx.scene.control.ProgressBar;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXSplashController {
+public class SplashController {
 
     @FXML
     public Label uiProgressLabel;
@@ -18,4 +20,12 @@ public class FXSplashController {
     @FXML
     public ProgressBar uiProgressBar;
 
+    @FXML
+    public Button uiCancel;
+    
+    @FXML
+    void closeApp(ActionEvent event) {
+        System.exit(0);
+    }
+    
 }

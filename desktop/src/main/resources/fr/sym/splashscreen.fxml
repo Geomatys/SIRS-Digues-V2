@@ -7,15 +7,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="193.0" prefWidth="506.0" style="-fx-background-color: rgba(0, 0, 0, 0);;" stylesheets="@splashscreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.FXSplashController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="258.0" prefWidth="510.0" style="-fx-background-color: rgba(0, 0, 0, 0);;" stylesheets="@splashscreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.SplashController">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="358.0" minWidth="10.0" prefWidth="294.0" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="324.0" minWidth="10.0" prefWidth="310.0" />
   </columnConstraints>
   <rowConstraints>
-    <RowConstraints maxHeight="201.0" minHeight="3.0" prefHeight="145.0" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="249.0" minHeight="0.0" prefHeight="42.0" vgrow="SOMETIMES" />
-<RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="31.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="115.0" minHeight="3.0" prefHeight="115.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="40.0" vgrow="SOMETIMES" />
+<RowConstraints maxHeight="40.0" minHeight="9.0" prefHeight="40.0" vgrow="SOMETIMES" />
+<RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
   </rowConstraints>
 <children><ProgressBar fx:id="uiProgressBar" prefHeight="20.0" prefWidth="432.0" progress="0.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" /><Label text="Gestion des digues" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
 <font>
@@ -26,6 +27,6 @@
 </GridPane.margin></Label><ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
 <image>
 <Image url="@symadrem.png" />
-</image></ImageView>
+</image></ImageView><Button fx:id="uiCancel" mnemonicParsing="false" onAction="#closeApp" text="Annuler" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
 </children>
 </GridPane>
