@@ -1,5 +1,6 @@
 package fr.sym;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
@@ -16,13 +17,26 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javax.imageio.ImageIO;
+import javax.sql.DataSource;
+import org.geotoolkit.factory.Hints;
+import org.geotoolkit.image.io.plugin.WorldFileImageReader;
+import org.geotoolkit.image.io.plugin.WorldFileImageWriter;
+import org.geotoolkit.image.jai.Registry;
+import org.geotoolkit.internal.sql.DefaultDataSource;
+import org.geotoolkit.lang.Setup;
+import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
+import org.geotoolkit.sld.xml.JAXBSLDUtilities;
+import org.geotoolkit.sld.xml.StyleXmlIO;
+import org.opengis.util.FactoryException;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class Platform extends Application {
+public class Loader extends Application {
 
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
@@ -118,19 +132,77 @@ public class Platform extends Application {
         @Override
         protected Object call() throws InterruptedException {
             try {
-                for (int i = 0; i < 10; i++) {
-                    Thread.sleep(400);
-                    updateProgress(i, 10);
-                    updateMessage("Load plugin . . . " + i);
-                }
+                int inc = 0;
+                final int total = 5;
+                
+                
+                // IMAGE ///////////////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Chargement des lecteurs d'images...");
+                //force loading world file image readers
+                Registry.setDefaultCodecPreferences();
+                WorldFileImageReader.Spi.registerDefaults(null);
+                WorldFileImageWriter.Spi.registerDefaults(null);
+                //global initialization
+                ImageIO.scanForPlugins();
+                
+                // GEOTK ///////////////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Chargement de Geotoolkit...");
+                //Geotoolkit startup
+                Setup.initialize(null);
+                //work in lazy mode, do your best for lenient datum shift
+                Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
+                
+                // DATABASE ////////////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Chargement des pilotes pour base de données...");
+                //loading drivers, some plugin systems requiere this call , like netbeans RCP
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+                Class.forName("org.postgresql.Driver").newInstance();                
+                
+                // EPSG ////////////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Creation de la base EPSG...");
+                //create a database in user directory
+                final File storageFolder = new File(Symadrem.getConfigPath()+File.separator+"EPSG");
+                final String url = "jdbc:derby:"+Symadrem.getConfigPath()+File.separator+"EPSG"+File.separator+"EPSG;create=true";
+                final DataSource ds = new DefaultDataSource(url);
+                Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
+
+                //try to create it, won't do anything if already exist
+                createEpsgDB(storageFolder,url);
+                //force loading epsg
+                CRS.decode("EPSG:3395");
+                
+                // DATABASE ////////////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Chargement des parseurs XML/JSON...");
+                //force loading marshallers
+                JAXBSLDUtilities.getMarshallerPoolSLD110();
+                JAXBSLDUtilities.getMarshallerPoolSLD100();
+                StyleXmlIO io = new StyleXmlIO();
+                
+                
+                updateProgress(5, 5);
+                updateMessage("Chargement terminé.");
                 Thread.sleep(400);
-                updateMessage("All plugins loaded.");
-                updateProgress(10, 10);
             } catch (Throwable ex) {
                 Symadrem.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 cancel();
             }
             return null;
+        }
+    }
+    
+    private static void createEpsgDB(final File folder, final String url) throws FactoryException{
+        folder.mkdirs();
+        final EpsgInstaller installer = new EpsgInstaller();
+        installer.setDatabase(url);
+        if(!installer.exists()){
+            installer.call();
+            final DataSource ds = new DefaultDataSource(url);
+            Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
         }
     }
 

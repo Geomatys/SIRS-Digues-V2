@@ -18,13 +18,16 @@
 <RowConstraints maxHeight="40.0" minHeight="9.0" prefHeight="40.0" vgrow="SOMETIMES" />
 <RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
   </rowConstraints>
-<children><ProgressBar fx:id="uiProgressBar" prefHeight="20.0" prefWidth="432.0" progress="0.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" /><Label text="Gestion des digues" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+<children><ProgressBar fx:id="uiProgressBar" prefHeight="20.0" prefWidth="491.0" progress="0.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" /><Label text="Gestion des digues" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
 <font>
 <Font size="24.0" />
 </font></Label><ImageView fitHeight="101.0" fitWidth="126.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER" /><Label fx:id="uiProgressLabel" text="Label" GridPane.columnSpan="2" GridPane.rowIndex="2">
 <GridPane.margin>
 <Insets left="20.0" />
-</GridPane.margin></Label><ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+</GridPane.margin>
+<font>
+<Font size="11.0" />
+</font></Label><ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
 <image>
 <Image url="@symadrem.png" />
 </image></ImageView><Button fx:id="uiCancel" mnemonicParsing="false" onAction="#closeApp" text="Annuler" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />

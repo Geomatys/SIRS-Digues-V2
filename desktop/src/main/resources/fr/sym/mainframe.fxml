@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@mainframe.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.MainFrameController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@mainframe.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.MainFrameController">
 <top><MenuBar BorderPane.alignment="CENTER">
   <menus>
     <Menu mnemonicParsing="false" text="Fichier">
@@ -21,6 +21,6 @@
 </items>
 </ToolBar>
 </top>
-<center><TabPane fx:id="uiTabs" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
+<center><TabPane fx:id="uiTabs" prefHeight="369.0" prefWidth="635.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
 </center></BorderPane>
 </center></BorderPane>
