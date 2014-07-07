@@ -21,6 +21,15 @@
             <artifactId>geotk-widgets-swing</artifactId>
             <version>${geotoolkit.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.geotoolkit</groupId>
+            <artifactId>geotk-client-osmtms</artifactId>
+            <version>${geotoolkit.version}</version>
+        </dependency>
+            <dependency>
+                <groupId>org.controlsfx</groupId>
+                <artifactId>controlsfx</artifactId>
+            </dependency>
         
         <!-- EPSG database -->
         <dependency>

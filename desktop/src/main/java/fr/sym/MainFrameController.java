@@ -71,8 +71,9 @@ public class MainFrameController extends Stage{
         controller.init();
         
         final Scene scene = new Scene(root);
-        controller.setScene(scene);
+        scene.getStylesheets().add("/fr/sym/mainframe.css");
         
+        controller.setScene(scene);
         return controller;
     }
     

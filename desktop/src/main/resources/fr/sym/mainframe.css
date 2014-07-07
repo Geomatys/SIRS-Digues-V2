@@ -1,2 +1,5 @@
 
+.button-noborder {
+    -fx-border-width : 0;
+}
 
