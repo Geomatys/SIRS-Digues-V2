@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -12,12 +15,92 @@
         <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="Quitter" />
       </items>
     </Menu>
+            <Menu mnemonicParsing="false" text="Aide">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Guide utilisateur" />
+                  <MenuItem mnemonicParsing="false" text="A propos" />
+              </items>
+            </Menu>
   </menus>
 </MenuBar>
 </top>
 <center><BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-<top><ToolBar fx:id="uiToolBar" prefWidth="200.0" BorderPane.alignment="CENTER">
-<items><Button fx:id="uiMapButton" mnemonicParsing="false" onAction="#openMap" />
+<top><ToolBar fx:id="uiToolBar" prefHeight="80.0" prefWidth="1045.0" BorderPane.alignment="CENTER">
+<items><Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefHeight="70.0" prefWidth="104.0" text="Cartographie">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/menu-carto.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
+                  <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Gestion des digues">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/menu-digue.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <VBox prefHeight="70.0" prefWidth="123.0">
+                     <children>
+                        <MenuButton fx:id="uiThemesMenuButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Thèmes">
+                          <items>
+                            <MenuItem fx:id="uiThemesStructureButton" mnemonicParsing="false" text="Structure" />
+                            <MenuItem fx:id="uiThemesFreeBordButton" mnemonicParsing="false" text="Franc-bord" />
+                              <MenuItem fx:id="uiThemesSeeWorkButton" mnemonicParsing="false" text="Ouvrages à la mer" />
+                              <MenuItem fx:id="uiThemesRoadNetworksButton" mnemonicParsing="false" text="Réseaux de voirie" />
+                              <MenuItem fx:id="uiThemesWorksNetworksButton" mnemonicParsing="false" text="Réseaux et ouvrages" />
+                              <MenuItem fx:id="uiThemesDisordersButton" mnemonicParsing="false" text="Désordres" />
+                              <MenuItem fx:id="uiThemesPrestationsButton" mnemonicParsing="false" text="Prestations" />
+                              <MenuItem fx:id="uiThemesDocumentsButton" mnemonicParsing="false" text="Documents" />
+                              <MenuItem fx:id="uiThemesHydraulicsMesuresButton" mnemonicParsing="false" text="Mesures d'évènements hydrauliques" />
+                              <MenuItem fx:id="uiThemesTownEmprisesButton" mnemonicParsing="false" text="Emprises communales" />
+                              <MenuItem fx:id="uiThemesPhotosButton" mnemonicParsing="false" text="Photos localisées" />
+                          </items>
+                           <VBox.margin>
+                              <Insets top="6.0" />
+                           </VBox.margin>
+                        </MenuButton>
+                        <MenuButton fx:id="uiOtherMenuButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Autres">
+                          <items>
+                            <MenuItem fx:id="uiOtherIslandButton" mnemonicParsing="false" text="Iles et bancs" />
+                            <MenuItem fx:id="uiOtherTransversesProfilesButton" mnemonicParsing="false" text="Profils en travers" />
+                              <MenuItem fx:id="uiOtherContactButton" mnemonicParsing="false" text="Contacts" />
+                              <MenuItem fx:id="uiOtherMarketsButton" mnemonicParsing="false" text="Marchés" />
+                              <MenuItem fx:id="uiOtherConventionsButton" mnemonicParsing="false" text="Conventions" />
+                              <MenuItem fx:id="uiOtherHydraulicsEventsButton" mnemonicParsing="false" text="Evènements hydrauliques" />
+                              <MenuItem fx:id="uiOtherArticlesButton" mnemonicParsing="false" text="Articles de journaux" />
+                              <MenuItem fx:id="uiOtherReportsButton" mnemonicParsing="false" text="rapports d'études" />
+                          </items>
+                           <VBox.margin>
+                              <Insets top="6.0" />
+                           </VBox.margin>
+                        </MenuButton>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                  </VBox>
+                  <Button fx:id="uiToolsButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="74.0" text="Outils">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/menu-outils.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="95.0" text="Impressions">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/menu-print.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
 </items>
 </ToolBar>
 </top>
