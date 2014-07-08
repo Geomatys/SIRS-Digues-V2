@@ -31,6 +31,7 @@ public class FXMapPane extends BorderPane {
     private final MapContext context;
     private final FXMap uiMap;
     private final FXNavigationBar uiNavBar;
+    private final FXCoordinateBar uiCoordBar;
     private final FXMapItemPane uiTree;
 
     public FXMapPane() {
@@ -39,6 +40,7 @@ public class FXMapPane extends BorderPane {
         uiMap = new FXMap(false);
         uiMap.getContainer().setContext(context);
         uiNavBar = new FXNavigationBar(uiMap);
+        uiCoordBar = new FXCoordinateBar(uiMap);
         
         uiTree = new FXMapItemPane(context);
         
@@ -53,6 +55,7 @@ public class FXMapPane extends BorderPane {
         final BorderPane border = new BorderPane();
         border.setTop(uiNavBar);
         border.setCenter(uiMap);
+        border.setBottom(uiCoordBar);
         
         
         split.setOrientation(Orientation.HORIZONTAL);

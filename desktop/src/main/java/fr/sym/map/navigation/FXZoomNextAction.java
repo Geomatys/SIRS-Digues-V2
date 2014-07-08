@@ -17,10 +17,7 @@
 
 package fr.sym.map.navigation;
 
-import fr.sym.map.FXCanvasHandler;
 import fr.sym.map.FXMap;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.image.Image;
@@ -32,27 +29,17 @@ import org.geotoolkit.gui.swing.resource.MessageBundle;
  *
  * @author Johann Sorel (Geomatys)
  */
-public final class FXPanAction extends FXMapAction {
-    private final boolean infoOnClick;
-    public static final Image ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ARROWS, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
+public final class FXZoomNextAction extends FXMapAction {
+    public static final Image ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHEVRON_RIGHT, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
     
-    public FXPanAction(FXMap map, boolean infoOnClick) {
-        super(map,MessageBundle.getString("map_pan"),MessageBundle.getString("map_pan"),ICON);
-        this.infoOnClick = infoOnClick;
-        
-        map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
-            @Override
-            public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty.set(newValue instanceof FXPanHandler);
-            }
-        });
-        
+    public FXZoomNextAction(FXMap map) {
+        super(map,MessageBundle.getString("map_zoom_next"),MessageBundle.getString("map_zoom_next"),ICON);
     }
-
+    
     @Override
     public void handle(ActionEvent event) {
         if (map != null) {
-            map.setHandler(new FXPanHandler(map, infoOnClick));
+            map.setHandler(new FXZoomInHandler(map));
         }
     }
     

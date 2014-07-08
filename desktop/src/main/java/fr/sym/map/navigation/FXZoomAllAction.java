@@ -22,8 +22,6 @@ import java.util.logging.Level;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import org.controlsfx.control.action.AbstractAction;
 import org.geotoolkit.display.container.GraphicContainer;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.gui.swing.render2d.control.AbstractMapAction;
@@ -37,14 +35,11 @@ import org.opengis.referencing.operation.TransformException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public final class FXZoomAllAction extends AbstractAction {
+public final class FXZoomAllAction extends FXMapAction {
     public static final Image ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
-    private final FXMap map;
-
+    
     public FXZoomAllAction(FXMap map) {
-        super(MessageBundle.getString("map_zoom_all"));
-        this.map = map;
-        graphicProperty().setValue(new ImageView(ICON));
+        super(map,MessageBundle.getString("map_zoom_all"),MessageBundle.getString("map_zoom_all"),ICON);
     }
 
     @Override
