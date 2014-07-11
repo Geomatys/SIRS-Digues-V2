@@ -1,0 +1,24 @@
+
+.table-row-cell {
+    -fx-cell-size: 35;
+}
+
+.list-header{
+	-fx-border-width: 0 0 1 0;
+	-fx-border-color: rgb(230,230,230);
+	-fx-background-color: rgb(240,240,240);
+}
+
+.object-mode{
+	-fx-background-color: rgb(74,123,165);
+	-fx-background-radius: 0 0 0 5;
+}
+
+.button-list-objects{
+	-fx-background-color: rgb(74,123,165);
+	-fx-background-radius: 5 0 0 0;
+}
+
+.contact-pane{
+	-fx-background-radius: 0 0 0 5;
+}
