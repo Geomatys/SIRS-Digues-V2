@@ -1,7 +1,5 @@
 package fr.sym;
 
-import fr.sym.plugin.Plugin;
-import fr.sym.plugin.Plugins;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;

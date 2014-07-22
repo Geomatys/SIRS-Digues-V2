@@ -1,6 +1,6 @@
 
 
-package fr.sym.plugin;
+package fr.sym;
 
 import java.util.ArrayList;
 import java.util.Iterator;

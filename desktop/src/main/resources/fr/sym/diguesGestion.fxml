@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -65,7 +64,7 @@
                                                 <Insets left="7.0" />
                                              </GridPane.margin>
                                           </Label>
-                                          <ToggleButton mnemonicParsing="false" prefHeight="26.0" prefWidth="63.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <ToggleButton ellipsisString="" mnemonicParsing="false" prefHeight="26.0" prefWidth="63.0" textOverrun="WORD_ELLIPSIS" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                        </children>
                                        <columnConstraints>
                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="103.0" minWidth="10.0" prefWidth="90.0" />
@@ -202,91 +201,4 @@
          </children>
       </AnchorPane>
    </left>
-   <top>
-      <VBox prefHeight="111.0" prefWidth="1026.0" BorderPane.alignment="CENTER">
-         <children>
-            <MenuBar>
-               <menus>
-                  <Menu mnemonicParsing="false" text="Fichier">
-                     <items>
-                        <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="Préférences" />
-                        <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="Quitter" />
-                     </items>
-                  </Menu>
-                  <Menu mnemonicParsing="false" text="Aide">
-                     <items>
-                        <MenuItem mnemonicParsing="false" text="Guide utilisateur" />
-                        <MenuItem mnemonicParsing="false" text="A propos" />
-                     </items>
-                  </Menu>
-               </menus>
-            </MenuBar>
-            <ToolBar fx:id="uiToolBar" prefHeight="54.0" prefWidth="1026.0">
-               <items>
-                  <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefHeight="70.0" prefWidth="104.0" text="Cartographie">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@images/menu-carto.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Gestion des digues">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@images/menu-digue.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <VBox prefHeight="70.0" prefWidth="123.0">
-                     <children>
-                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Thèmes">
-                           <items>
-                              <MenuItem mnemonicParsing="false" text="Action 1" />
-                              <MenuItem mnemonicParsing="false" text="Action 2" />
-                           </items>
-                           <VBox.margin>
-                              <Insets top="6.0" />
-                           </VBox.margin>
-                        </MenuButton>
-                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Autres">
-                           <items>
-                              <MenuItem mnemonicParsing="false" text="Action 1" />
-                              <MenuItem mnemonicParsing="false" text="Action 2" />
-                           </items>
-                           <VBox.margin>
-                              <Insets top="6.0" />
-                           </VBox.margin>
-                        </MenuButton>
-                     </children>
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                  </VBox>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="74.0" text="Outils">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@images/menu-outils.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="95.0" text="Impressions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@images/menu-print.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-               </items>
-            </ToolBar>
-         </children>
-      </VBox>
-   </top>
 </BorderPane>

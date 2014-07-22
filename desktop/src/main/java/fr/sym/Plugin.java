@@ -1,5 +1,5 @@
 
-package fr.sym.plugin;
+package fr.sym;
 
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -34,7 +34,7 @@ public class Plugin {
     /**
      * Load the plugin.
      */
-    public void load(){
+    public void load() throws Exception {
         
     }
        
