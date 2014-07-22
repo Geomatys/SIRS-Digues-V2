@@ -20,6 +20,7 @@ package fr.sym.map;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -44,6 +45,8 @@ import org.geotoolkit.display.canvas.control.NeverFailMonitor;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
 import org.geotoolkit.display2d.canvas.J2DCanvasVolatile;
 import org.geotoolkit.display2d.container.ContextContainer2D;
+import org.opengis.referencing.operation.TransformException;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -100,17 +103,10 @@ public class FXMap extends BorderPane {
         canvas.setContainer(new ContextContainer2D(canvas, statefull));
         canvas.setAutoRepaint(true);
 
-
         canvas.addPropertyChangeListener(new PropertyChangeListener() {
 
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-
-//                if(canvas.isAutoRepaint()){
-//                    //dont show the painting icon if the cans is in auto render mode
-//                    // since it may repaint dynamic graphic it would show up all the time
-//                    return;
-//                }
 
                 if(AbstractCanvas.RENDERSTATE_KEY.equals(evt.getPropertyName())){
                     Platform.runLater(new Runnable() {
@@ -133,9 +129,25 @@ public class FXMap extends BorderPane {
                 }
             }
         });
-
+        
     }
 
+    private boolean first = true;
+    
+    @Override
+    protected void updateBounds() {
+        super.updateBounds();
+        if(first){
+            //zoom on map area
+            first = false;
+            try {
+                getCanvas().setVisibleArea(getContainer().getContext().getAreaOfInterest());
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+    }
+    
     private void updateImage() {
         final Runnable r = new Runnable() {
             @Override
@@ -336,25 +348,5 @@ public class FXMap extends BorderPane {
         mapDecorationPane.getChildren().add(nextMapDecorationIndex, deco.getComponent());
         nextMapDecorationIndex++;
     }
-
-//    //-----------------------------MAP2D----------------------------------------
-//
-//    /**
-//     * get the visual component
-//     * @return Component
-//     */
-//    public Component getComponent() {
-//        return geoComponent;
-//    }
-//
-//    /**
-//     * Can be used to add more components on the side of the map
-//     * if needed. in any case, dont remove the central component.
-//     * @return JPanel the container in borderlayout mode
-//     */
-//    public JPanel getUIContainer() {
-//        return this;
-//    }
-    
     
 }

@@ -4,7 +4,6 @@ package fr.sym;
 
 import fr.sym.map.FXMapPane;
 import java.io.IOException;
-import java.net.URL;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class MainFrameController extends Stage{
@@ -34,11 +32,6 @@ public class MainFrameController extends Stage{
 
     private void init() {
         setTitle("Symadrem");
-        final URL url = Symadrem.class.getResource("/fr/sym/map.png");
-        final ImageView view = new ImageView(url.toString());
-        view.setFitWidth(50);
-        view.setFitHeight(50);
-        uiMapButton.setGraphic(view);
     }
 
     @FXML
@@ -71,8 +64,6 @@ public class MainFrameController extends Stage{
         controller.init();
         
         final Scene scene = new Scene(root);
-        scene.getStylesheets().add("/fr/sym/mainframe.css");
-        
         controller.setScene(scene);
         return controller;
     }
