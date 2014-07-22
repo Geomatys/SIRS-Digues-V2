@@ -146,6 +146,7 @@
 
     <modules>
         <module>desktop</module>
+        <module>server</module>
     </modules>
 
 </project>
