@@ -245,17 +245,20 @@
                                                       <Insets top="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <TextField fx:id="system_id" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" />
+                                                <TextField fx:id="system_id" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" />
                                                 <Label text="Libellé" GridPane.columnIndex="3" />
                                                 <TextField fx:id="system_label" GridPane.columnIndex="4" />
-                                                <TextArea prefHeight="71.0" prefWidth="615.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="1" />
+                                                <TextArea prefHeight="71.0" prefWidth="615.0" GridPane.columnIndex="1" GridPane.columnSpan="6" GridPane.rowIndex="1" />
+                                                <CheckBox mnemonicParsing="false" text="SR par défaut" GridPane.columnIndex="6" />
                                              </children>
                                              <columnConstraints>
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="10.0" prefWidth="93.0" />
-                                                <ColumnConstraints hgrow="NEVER" maxWidth="132.0" minWidth="10.0" prefWidth="114.0" />
-                                                <ColumnConstraints hgrow="NEVER" maxWidth="146.0" minWidth="10.0" prefWidth="30.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="149.0" minWidth="1.0" prefWidth="62.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="398.0" minWidth="10.0" prefWidth="384.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="10.0" prefWidth="97.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="132.0" minWidth="10.0" prefWidth="59.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="146.0" minWidth="0.0" prefWidth="4.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="216.0" minWidth="1.0" prefWidth="44.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="514.0" minWidth="10.0" prefWidth="348.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="1.0" prefWidth="3.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="119.0" />
                                              </columnConstraints>
                                              <padding>
                                                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -463,7 +466,7 @@
             </MenuBar>
             <ToolBar fx:id="uiToolBar" prefHeight="54.0" prefWidth="1026.0">
                <items>
-                  <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefHeight="70.0" prefWidth="104.0" text="Cartographie">
+                  <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefHeight="70.0" prefWidth="145.0" text="Cartographie">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -472,7 +475,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Gestion des digues">
+                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Gestion des digues" translateX="5.0">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -481,9 +484,9 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <VBox prefHeight="70.0" prefWidth="123.0">
+                  <VBox prefHeight="70.0" prefWidth="145.0" translateX="10.0">
                      <children>
-                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Thèmes">
+                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Thèmes">
                            <items>
                               <MenuItem mnemonicParsing="false" text="Action 1" />
                               <MenuItem mnemonicParsing="false" text="Action 2" />
@@ -492,7 +495,7 @@
                               <Insets top="6.0" />
                            </VBox.margin>
                         </MenuButton>
-                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="104.0" text="Autres">
+                        <MenuButton mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Autres">
                            <items>
                               <MenuItem mnemonicParsing="false" text="Action 1" />
                               <MenuItem mnemonicParsing="false" text="Action 2" />
@@ -502,11 +505,8 @@
                            </VBox.margin>
                         </MenuButton>
                      </children>
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
                   </VBox>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="74.0" text="Outils">
+                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Outils" translateX="15.0">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -515,7 +515,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="95.0" text="Impressions">
+                  <Button contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Impressions" translateX="20.0">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
