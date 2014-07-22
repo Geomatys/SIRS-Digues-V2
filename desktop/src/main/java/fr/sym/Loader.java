@@ -175,7 +175,7 @@ public class Loader extends Application {
                 //force loading epsg
                 CRS.decode("EPSG:3395");
                 
-                // DATABASE ////////////////////////////////////////////////////
+                // JAXB ////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des parseurs XML/JSON...");
                 //force loading marshallers
