@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>org.geotoolkit</groupId>
+            <artifactId>geotk-feature-h2</artifactId>
+            <version>${geotoolkit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotoolkit</groupId>
             <artifactId>geotk-widgets-javafx</artifactId>
             <version>${geotoolkit.version}</version>
         </dependency>

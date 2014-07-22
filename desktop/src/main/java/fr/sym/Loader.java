@@ -1,7 +1,10 @@
 package fr.sym;
 
+import fr.sym.plugin.Plugin;
+import fr.sym.plugin.Plugins;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -29,6 +32,7 @@ import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.opengis.util.FactoryException;
 import org.openide.util.Exceptions;
 
@@ -133,7 +137,8 @@ public class Loader extends Application {
         protected Object call() throws InterruptedException {
             try {
                 int inc = 0;
-                final int total = 5;
+                final Plugin[] plugins = Plugins.getPlugins();
+                final int total = 6 + plugins.length;
                 
                 
                 // IMAGE ///////////////////////////////////////////////////////
@@ -159,9 +164,10 @@ public class Loader extends Application {
                 updateMessage("Chargement des pilotes pour base de données...");
                 //loading drivers, some plugin systems requiere this call , like netbeans RCP
                 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
-                Class.forName("org.postgresql.Driver").newInstance();                
+                Class.forName("org.postgresql.Driver").newInstance();            
+                Class.forName("org.h2.Driver").newInstance();
                 
-                // EPSG ////////////////////////////////////////////////////
+                // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Creation de la base EPSG...");
                 //create a database in user directory
@@ -175,16 +181,31 @@ public class Loader extends Application {
                 //force loading epsg
                 CRS.decode("EPSG:3395");
                 
-                // JAXB ////////////////////////////////////////////////////
+                // LOCAL DATABASE //////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Creation de la base locale...");
+                final JdbcConnectionPool pool = Symadrem.getConnectionPool();
+                //check connection
+                final Connection cnx = pool.getConnection();
+                cnx.close();
+                
+                // JAXB ////////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des parseurs XML/JSON...");
                 //force loading marshallers
                 JAXBSLDUtilities.getMarshallerPoolSLD110();
                 JAXBSLDUtilities.getMarshallerPoolSLD100();
-                StyleXmlIO io = new StyleXmlIO();
+                final StyleXmlIO io = new StyleXmlIO();
+                
+                // LOAD PLUGINS ////////////////////////////////////////////////
+                for(Plugin plugin : plugins){
+                    updateProgress(inc++, total);
+                    updateMessage("Loading plugin : "+plugin.getLoadingMessage().getValue());
+                    plugin.load();
+                }                
                 
                 
-                updateProgress(5, 5);
+                updateProgress(total, total);
                 updateMessage("Chargement terminé.");
                 Thread.sleep(400);
             } catch (Throwable ex) {
