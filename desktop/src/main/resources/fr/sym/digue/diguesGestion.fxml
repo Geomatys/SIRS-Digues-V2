@@ -94,7 +94,7 @@
                                  <children>
                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@images/add-icon.png" />
+                                          <Image url="@../images/add-icon.png" />
                                        </image>
                                        <GridPane.margin>
                                           <Insets left="12.0" />
@@ -102,7 +102,7 @@
                                     </ImageView>
                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1">
                                        <image>
-                                          <Image url="@images/edit-icon-inactif.png" />
+                                          <Image url="@../images/edit-icon-inactif.png" />
                                        </image>
                                        <GridPane.margin>
                                           <Insets left="6.0" />
@@ -110,7 +110,7 @@
                                     </ImageView>
                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3">
                                        <image>
-                                          <Image url="@images/delete-icon-inactif.png" />
+                                          <Image url="@../images/delete-icon-inactif.png" />
                                        </image>
                                        <GridPane.margin>
                                           <Insets left="10.0" />
@@ -118,7 +118,7 @@
                                     </ImageView>
                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4">
                                        <image>
-                                          <Image url="@images/search-icon-white.png" />
+                                          <Image url="@../images/search-icon-white.png" />
                                        </image>
                                        <GridPane.margin>
                                           <Insets left="8.0" />
@@ -126,7 +126,7 @@
                                     </ImageView>
                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2">
                                        <image>
-                                          <Image url="@images/duplicate-icon-inactif.png" />
+                                          <Image url="@../images/duplicate-icon-inactif.png" />
                                        </image>
                                        <GridPane.margin>
                                           <Insets left="7.0" />
@@ -180,25 +180,4 @@
          </children>
       </AnchorPane>
    </center>
-   <left>
-      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="717.0" prefWidth="262.0" BorderPane.alignment="CENTER">
-         <children>
-            <Pane prefHeight="43.0" prefWidth="262.0" styleClass="list-header">
-               <children>
-                  <Label layoutX="10.0" layoutY="14.0" text="Systèmes d'Endiguement">
-                     <font>
-                        <Font name="System Bold" size="14.0" />
-                     </font>
-                  </Label>
-                  <ImageView fx:id="dam_search_button" fitHeight="22.0" fitWidth="22.0" layoutX="230.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@images/search-icon.png" />
-                     </image>
-                  </ImageView>
-               </children>
-            </Pane>
-            <TreeView layoutY="43.0" prefHeight="674.0" prefWidth="263.0" />
-         </children>
-      </AnchorPane>
-   </left>
 </BorderPane>
