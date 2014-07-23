@@ -8,7 +8,7 @@ import fr.sym.Theme;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -27,7 +27,7 @@ public class WrapTreeItem extends TreeItem {
 
     @Override
     public boolean isLeaf() {
-        return false;
+        return getValue() instanceof Theme;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class WrapTreeItem extends TreeItem {
         if(!loaded){
             loaded = true;
             final Object obj = getValue();
-            List candidates = Collections.EMPTY_LIST;
+            List candidates = new ArrayList();
             if(obj instanceof DamSystem){
                 candidates = Session.getInstance().getChildren((DamSystem)obj);
             }else if(obj instanceof Dam){

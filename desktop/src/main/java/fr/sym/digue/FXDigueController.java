@@ -8,6 +8,7 @@ import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
 import fr.sym.util.WrapTreeItem;
 import java.io.IOException;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,11 +16,15 @@ import javafx.scene.Parent;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 
 public class FXDigueController {
 
     public Parent root;
      
+    @FXML
+    private BorderPane uiRight;
+    
     @FXML
     private TreeView uiTree;
 
@@ -36,6 +41,25 @@ public class FXDigueController {
         uiTree.setShowRoot(false);
         uiTree.setCellFactory((Object param) -> new TC());
         
+        uiTree.getSelectionModel().getSelectedIndices().addListener(new ListChangeListener() {
+
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+                Object obj = uiTree.getSelectionModel().getSelectedItem();
+                if(obj instanceof TreeItem){
+                    obj = ((TreeItem)obj).getValue();
+                }
+                
+                if(obj instanceof Dam){
+                    final FXDamController ctrl = FXDamController.create();
+                    uiRight.setCenter(ctrl.root);
+                }else if(obj instanceof Section){
+                    final FXSectionController ctrl = FXSectionController.create();
+                    uiRight.setCenter(ctrl.root);
+                }
+                
+            }
+        });
         
     }
     
@@ -69,11 +93,13 @@ public class FXDigueController {
                 obj = ((TreeItem)obj).getValue();
             }
             if(obj instanceof DamSystem){
-                setText( ((DamSystem)obj).getName().getValue());
+                setText( ((DamSystem)obj).getName().getValue()+" ("+getTreeItem().getChildren().size()+")");
             }else if(obj instanceof Dam){
-                setText( ((Dam)obj).getName().getValue());
+                setText( ((Dam)obj).getName().getValue()+" ("+getTreeItem().getChildren().size()+")");
             }else if(obj instanceof Section){
-                setText( ((Section)obj).getName().getValue());
+                setText( ((Section)obj).getName().getValue()+" ("+getTreeItem().getChildren().size()+")");
+            }else if(obj instanceof Theme){
+                setText( ((Theme)obj).getName());
             }else{
                 setText(null);
             }

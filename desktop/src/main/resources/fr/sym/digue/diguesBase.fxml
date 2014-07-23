@@ -34,6 +34,6 @@
 <content><TreeView fx:id="uiTree" prefHeight="200.0" prefWidth="200.0" showRoot="false" BorderPane.alignment="CENTER" />
 </content>
 </ScrollPane>
-</center></BorderPane><Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+</center></BorderPane><BorderPane fx:id="uiRight" prefHeight="200.0" prefWidth="200.0" />
 </items>
 </SplitPane>
