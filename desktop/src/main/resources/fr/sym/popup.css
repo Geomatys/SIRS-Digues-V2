@@ -20,3 +20,7 @@
 	-fx-background-color: rgb(74,123,165);
 	-fx-background-radius: 5 0 0 0;
 }
+
+.btn-without-style{
+	-fx-background-color:none;
+}
