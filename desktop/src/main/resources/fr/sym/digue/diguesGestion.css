@@ -22,3 +22,15 @@
 .contact-pane{
 	-fx-background-radius: 0 0 0 5;
 }
+
+.info-block{
+	-fx-background-color: rgb(109,149,182);
+}
+
+.btn-without-style{
+	-fx-background-color:none;
+}
+
+.item-contact{
+	-fx-background-color: rgb(220,220,220);
+}
