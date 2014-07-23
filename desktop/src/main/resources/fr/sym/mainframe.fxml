@@ -24,8 +24,11 @@
 </MenuBar>
 </top>
 <center><BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-<top><ToolBar fx:id="uiToolBar" prefHeight="80.0" prefWidth="1045.0" BorderPane.alignment="CENTER">
-<items><Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefHeight="70.0" prefWidth="145.0" text="Cartographie">
+<center><TabPane fx:id="uiTabs" prefHeight="369.0" prefWidth="635.0" BorderPane.alignment="CENTER" />
+</center>
+<top><BorderPane>
+<center><ToolBar prefHeight="82.0" prefWidth="436.0" BorderPane.alignment="CENTER">
+<items><Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefWidth="145.0" text="Cartographie">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -33,7 +36,7 @@
                            </image>
                         </ImageView>
                      </graphic></Button>
-                  <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Gestion des digues" translateX="5.0">
+                  <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" prefWidth="145.0" text="Gestion des digues" translateX="5.0">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -79,16 +82,20 @@
                         </MenuButton>
                      </children>
                   </VBox>
-                  <Button fx:id="uiToolsButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Outils" translateX="15.0">
-                     <graphic>
+</items>
+</ToolBar>
+</center>
+<right><ToolBar BorderPane.alignment="CENTER">
+  <items>
+    <Button contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" text="Outils">
+<graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/menu-outils.png" />
                            </image>
                         </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="145.0" text="Impressions" translateX="20.0">
+</graphic></Button>
+                  <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" text="Impressions">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -97,9 +104,8 @@
                         </ImageView>
                      </graphic>
                   </Button>
-</items>
+  </items>
 </ToolBar>
-</top>
-<center><TabPane fx:id="uiTabs" prefHeight="369.0" prefWidth="635.0" BorderPane.alignment="CENTER" />
-</center></BorderPane>
+</right></BorderPane>
+</top></BorderPane>
 </center></BorderPane>
