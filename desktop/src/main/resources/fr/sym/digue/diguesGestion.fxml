@@ -8,8 +8,8 @@
 <?import javafx.scene.text.*?>
 
 <BorderPane prefHeight="756.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXDamController">
-   <center>
-      <VBox prefHeight="716.0" prefWidth="762.0" BorderPane.alignment="CENTER">
+<top>
+      <VBox BorderPane.alignment="CENTER">
          <children>
             <BorderPane minHeight="180.0" prefHeight="180.0" prefWidth="1024.0" styleClass="info-block" VBox.vgrow="NEVER">
                <center>
@@ -82,7 +82,7 @@
                   </VBox>
                </right>
             </BorderPane>
-            <BorderPane minHeight="43.0" prefHeight="43.0" prefWidth="1024.0" VBox.vgrow="NEVER">
+            <BorderPane VBox.vgrow="NEVER">
                <padding>
                   <Insets top="10.0" />
                </padding>
@@ -165,7 +165,11 @@
                   </Label>
                </left>
             </BorderPane>
-            <BorderPane prefHeight="535.0" prefWidth="1024.0" VBox.vgrow="ALWAYS">
+         </children>
+      </VBox>
+</top>
+<center>
+            <BorderPane prefHeight="535.0" prefWidth="1024.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
                <center>
                   <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="534.0" prefViewportWidth="1024.0">
                      <content>
@@ -182,7 +186,5 @@
                   </ScrollPane>
                </center>
             </BorderPane>
-         </children>
-      </VBox>
-   </center>
+</center>
 </BorderPane>

@@ -7,11 +7,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="756.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXSectionController">
-   <center>
-      <VBox prefHeight="716.0" prefWidth="838.0" BorderPane.alignment="CENTER">
-         <children>
-            <BorderPane minHeight="200.0" prefHeight="200.0" prefWidth="200.0" styleClass="info-block" VBox.vgrow="NEVER">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXSectionController">
+<top>
+            <BorderPane minHeight="200.0" prefHeight="200.0" prefWidth="200.0" styleClass="info-block" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
                <right>
                   <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
                      <children>
@@ -111,9 +109,11 @@
                   </GridPane>
                </center>
             </BorderPane>
-            <BorderPane prefHeight="558.0" prefWidth="1024.0">
-               <center>
-                  <TabPane prefHeight="543.0" prefWidth="762.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+</top>
+<center>
+            <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+<center>
+                  <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                     <tabs>
                       <Tab text="Informations complémentaires">
                            <content>
@@ -145,7 +145,7 @@
                       </Tab>
                       <Tab text="Systèmes de repérage">
                            <content>
-                              <BorderPane prefHeight="200.0" prefWidth="200.0">
+                              <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                                  <top>
                                     <BorderPane maxHeight="43.0" minWidth="43.0" prefHeight="43.0" prefWidth="1024.0" BorderPane.alignment="CENTER">
                                        <right>
@@ -232,9 +232,9 @@
                                     </BorderPane>
                                  </top>
                                  <center>
-                                    <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="481.0" prefViewportWidth="1024.0">
+                                    <ScrollPane fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                                        <content>
-                                          <VBox BorderPane.alignment="CENTER">
+                                          <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
                                              <children>
                                                 <GridPane hgap="8.0" prefHeight="139.0" prefWidth="747.0" styleClass="item-contact" vgap="20.0">
                                                    <children>
@@ -430,9 +430,7 @@
                         <Insets />
                      </BorderPane.margin>
                   </TabPane>
-               </center>
+</center>
             </BorderPane>
-         </children>
-      </VBox>
-   </center>
+</center>
 </BorderPane>
