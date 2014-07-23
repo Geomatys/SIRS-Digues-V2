@@ -9,15 +9,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class MainFrameController extends Stage {
 
     @FXML
     private MenuItem uiPref;
+    @FXML
+    private MenuButton uiThemes;
     @FXML
     private TabPane uiTabs;
     @FXML
@@ -31,6 +35,13 @@ public class MainFrameController extends Stage {
 
     private void init() {
         setTitle("Symadrem");
+        
+        //load themses
+        final Theme[] themes = Plugins.getThemes();
+        for(Theme theme : themes){
+            final MenuItem item = new MenuItem(theme.getName());
+            uiThemes.getItems().add(item);
+        }
     }
 
     @FXML
@@ -51,7 +62,7 @@ public class MainFrameController extends Stage {
         final FXDigueController digueController = FXDigueController.create();
         final Tab tab = new Tab();
         tab.setText("Digues");
-        tab.setContent(digueController.root);
+        tab.setContent(new BorderPane(digueController.root));
         uiTabs.getTabs().add(tab);
     }
 

@@ -47,25 +47,12 @@
                   </Button>
                   <VBox prefHeight="70.0" prefWidth="145.0" translateX="10.0">
                      <children>
-                        <MenuButton fx:id="uiThemesMenuButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Thèmes">
-                          <items>
-                            <MenuItem fx:id="uiThemesStructureButton" mnemonicParsing="false" text="Structure" />
-                            <MenuItem fx:id="uiThemesFreeBordButton" mnemonicParsing="false" text="Franc-bord" />
-                              <MenuItem fx:id="uiThemesSeeWorkButton" mnemonicParsing="false" text="Ouvrages à la mer" />
-                              <MenuItem fx:id="uiThemesRoadNetworksButton" mnemonicParsing="false" text="Réseaux de voirie" />
-                              <MenuItem fx:id="uiThemesWorksNetworksButton" mnemonicParsing="false" text="Réseaux et ouvrages" />
-                              <MenuItem fx:id="uiThemesDisordersButton" mnemonicParsing="false" text="Désordres" />
-                              <MenuItem fx:id="uiThemesPrestationsButton" mnemonicParsing="false" text="Prestations" />
-                              <MenuItem fx:id="uiThemesDocumentsButton" mnemonicParsing="false" text="Documents" />
-                              <MenuItem fx:id="uiThemesHydraulicsMesuresButton" mnemonicParsing="false" text="Mesures d'évènements hydrauliques" />
-                              <MenuItem fx:id="uiThemesTownEmprisesButton" mnemonicParsing="false" text="Emprises communales" />
-                              <MenuItem fx:id="uiThemesPhotosButton" mnemonicParsing="false" text="Photos localisées" />
-                          </items>
+                        <MenuButton fx:id="uiThemes" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Thèmes">
                            <VBox.margin>
                               <Insets top="6.0" />
                            </VBox.margin>
                         </MenuButton>
-                        <MenuButton fx:id="uiOtherMenuButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Autres">
+                        <MenuButton fx:id="uiPlugins" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Autres">
                           <items>
                             <MenuItem fx:id="uiOtherIslandButton" mnemonicParsing="false" text="Iles et bancs" />
                             <MenuItem fx:id="uiOtherTransversesProfilesButton" mnemonicParsing="false" text="Profils en travers" />

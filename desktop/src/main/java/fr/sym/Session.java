@@ -2,7 +2,12 @@
 
 package fr.sym;
 
+import fr.sym.digue.dto.Dam;
+import fr.sym.digue.dto.DamSystem;
+import fr.sym.digue.dto.Section;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.coverage.CoverageReference;
@@ -55,6 +60,56 @@ public class Session {
      */
     public MapContext getMapContext(){
         return mapContext;
+    }
+    
+    public List<DamSystem> getDamSystems(){
+        //TODO database binding
+        final List<DamSystem> damSystems = new ArrayList<>();
+        for(int i=0;i<10;i++){
+            final DamSystem ds = new DamSystem();
+            ds.getName().set("Dam system "+i);
+            damSystems.add(ds);
+        }
+        
+        return damSystems;
+    }
+    
+    /**
+     * DamSystem can contain Dams or Sections.
+     * 
+     * @param ds
+     * @return 
+     */
+    public List<?> getChildren(DamSystem ds){
+        final List children = new ArrayList();
+        for(int i=0;i<8;i++){
+            if(Math.random()<0.5){
+                final Section section = new Section();
+                section.getName().set("Section "+i);
+                children.add(section);
+            }else{
+                final Dam dam = new Dam();
+                dam.getName().set("Dam "+i);
+                children.add(dam);
+            }
+        }
+        return children;
+    }
+    
+    /**
+     * DamSystem can contain Dams or Sections.
+     * 
+     * @param Dam
+     * @return 
+     */
+    public List<Section> getChildren(Dam ds){
+        final List children = new ArrayList();
+        for(int i=0;i<8;i++){
+            final Section section = new Section();
+            section.getName().set("Section "+i);
+            children.add(section);
+        }
+        return children;
     }
     
 }

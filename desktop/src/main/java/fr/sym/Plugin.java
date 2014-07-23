@@ -1,6 +1,8 @@
 
 package fr.sym;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.geotoolkit.map.MapItem;
@@ -13,6 +15,7 @@ public class Plugin {
     
     protected final SimpleStringProperty loadingMessage = new SimpleStringProperty("");
     
+    protected final List<Theme> themes = new ArrayList<>();
     
     /**
      * Get the map layers to display in the main application frame.
@@ -29,6 +32,14 @@ public class Plugin {
      */
     public ReadOnlyStringProperty getLoadingMessage(){
         return loadingMessage;
+    }
+    
+    /**
+     * Get declared themes, themes are attached to sections.
+     * @return 
+     */
+    public List<Theme> getThemes(){
+        return themes;
     }
     
     /**
