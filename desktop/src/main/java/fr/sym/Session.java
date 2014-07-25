@@ -32,12 +32,14 @@ public class Session {
     private Session(){
         mapContext.setName("Carte");
 
+        //Fond de plan
         try{
             final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
 
             for(Name n : store.getNames()){
                 final CoverageReference cr = store.getCoverageReference(n);
                 final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+                cml.setName("Open Street Map");
                 cml.setDescription(new DefaultDescription(
                         new SimpleInternationalString("Open Street Map"),
                         new SimpleInternationalString("Open Street Map")));

@@ -5,10 +5,9 @@ import fr.sym.Session;
 import fr.sym.Symadrem;
 import java.util.logging.Level;
 import javafx.geometry.Orientation;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
-import org.geotoolkit.gui.javafx.contexttree.FXMapItemPane;
+import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
@@ -27,7 +26,7 @@ public class FXMapPane extends BorderPane {
     private final FXMap uiMap;
     private final FXNavigationBar uiNavBar;
     private final FXCoordinateBar uiCoordBar;
-    private final FXMapItemPane uiTree;
+    private final FXMapContextTree uiTree;
 
     public FXMapPane() {
         context = Session.getInstance().getMapContext();
@@ -36,8 +35,7 @@ public class FXMapPane extends BorderPane {
         uiMap.getContainer().setContext(context);
         uiNavBar = new FXNavigationBar(uiMap);
         uiCoordBar = new FXCoordinateBar(uiMap);
-        
-        uiTree = new FXMapItemPane(context);
+        uiTree = new FXMapContextTree(context);
         
         try {
             uiMap.getCanvas().setObjectiveCRS(CRS.decode("EPSG:3857"));
@@ -54,7 +52,7 @@ public class FXMapPane extends BorderPane {
         
         
         split.setOrientation(Orientation.HORIZONTAL);
-        split.getItems().add(new ScrollPane(uiTree));
+        split.getItems().add(uiTree);
         split.getItems().add(border);
         split.setDividerPositions(0.3);
         
