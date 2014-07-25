@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>fr.sym</groupId>
-        <artifactId>symadrem</artifactId>
+        <groupId>fr.symadrem</groupId>
+        <artifactId>sirs</artifactId>
         <version>1.x-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.sym</groupId>
+    <groupId>fr.symadrem.sirs</groupId>
     <artifactId>desktop</artifactId>
     <packaging>jar</packaging>
     <name>Desktop</name>

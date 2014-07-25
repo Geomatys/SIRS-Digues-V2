@@ -10,11 +10,11 @@
         <maven>3.0.2</maven>
     </prerequisites>
 
-    <groupId>fr.sym</groupId>
-    <artifactId>symadrem</artifactId>
+    <groupId>fr.symadrem</groupId>
+    <artifactId>sirs</artifactId>
     <packaging>pom</packaging>
     <version>1.x-SNAPSHOT</version>
-    <name>Symadrem</name>
+    <name>Symadrem - SIRS</name>
 
 
     <!--
@@ -147,6 +147,7 @@
     <modules>
         <module>desktop</module>
         <module>server</module>
+        <module>core</module>
     </modules>
 
 </project>
