@@ -3,7 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fr.symadrem.sirs.core</groupId>
   <artifactId>sirs-core-store</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+
+  <parent>
+    <groupId>fr.symadrem.sirs</groupId>
+    <artifactId>core</artifactId>
+    <version>1.x-SNAPSHOT</version>
+  </parent>
 
   <properties>
     <spring.version>4.0.5.RELEASE</spring.version>
@@ -58,7 +63,25 @@
 
   <build>
     <plugins>
-
+      <plugin>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <configuration>
+              <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+              <changeLogFile>src/main/resources/fr/symadrem/sirs/db/db-changelog.xml</changeLogFile>
+              <driver>org.h2.Driver</driver>
+              <url>jdbc:h2:${basedir}/target/db</url>
+            </configuration>
+            <goals>
+              <goal>update</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -69,42 +92,10 @@
           <target>1.8</target>
         </configuration>
       </plugin>
-<!--       <plugin> -->
-<!--         <groupId>com.geomatys.maven</groupId> -->
-<!--         <artifactId>geomatys-sqlpojo-plugin</artifactId> -->
-<!--         <version>0.0.3-SNAPSHOT</version> -->
-<!--         <dependencies> -->
-<!--           <dependency> -->
-<!--             <groupId>fr.sym</groupId> -->
-<!--             <artifactId>desktop</artifactId> -->
-<!--             <version>1.x-SNAPSHOT</version> -->
-<!--           </dependency> -->
-<!--           <dependency> -->
-<!--             <groupId>com.h2database</groupId> -->
-<!--             <artifactId>h2</artifactId> -->
-<!--             <version>1.4.180</version> -->
-<!--           </dependency> -->
-<!--         </dependencies> -->
-<!--         <executions> -->
-<!--           <execution> -->
-<!--             <id>sqlpojo</id> -->
-<!--             <goals> -->
-<!--               <goal>generate</goal> -->
-<!--             </goals> -->
-<!--             <configuration> -->
-<!--               <jdbcURL>jdbc:h2:mem:db;create=true</jdbcURL> -->
-<!--               <targetPackage>fr.sym.model</targetPackage> -->
-<!--               <changeLog>fr/sym/db/db-changelog.xml</changeLog> -->
-<!--             </configuration> -->
-<!--           </execution> -->
-<!--         </executions> -->
-<!--       </plugin> -->
-<!--       <plugin> -->
-
       <plugin>
         <groupId>com.geomatys.maven</groupId>
-        <artifactId>geomatys-h2-plugin</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>geomatys-sqlpojo-plugin</artifactId>
+        <version>0.0.3-SNAPSHOT</version>
         <dependencies>
           <dependency>
             <groupId>fr.sym</groupId>
@@ -121,12 +112,15 @@
           <execution>
             <id>sqlpojo</id>
             <goals>
-              <goal>exposedb</goal>
+              <goal>generate</goal>
             </goals>
             <configuration>
-              <jdbcURL>jdbc:h2:${basedir}/target/db;create=true</jdbcURL>
-              <targetPackage>fr.sym.model</targetPackage>
-              <changeLog>fr/sym/db/db-changelog.xml</changeLog>
+              <jdbcURL>jdbc:h2:${basedir}/target/db</jdbcURL>
+              <targetPackage>fr.symadrem.sirs.model</targetPackage>
+              <targetSchema>PUBLIC</targetSchema>
+<!--               <changeLog>fr/sym/db/db-changelog.xml</changeLog> -->
+              <notifier>true</notifier>
+              <fluentSetter>false</fluentSetter>
             </configuration>
           </execution>
         </executions>
@@ -164,6 +158,7 @@
           <jdbc>
             <driver>org.h2.Driver</driver>
             <url>jdbc:h2:${basedir}/target/db</url>
+<!--             <url>jdbc:h2:mem:db</url> -->
           </jdbc>
 
 
@@ -192,7 +187,7 @@
               <forcedTypes>
                 <forcedType>
       <!-- Specify again he fully-qualified class name of your custom type -->
-                  <name>java.util.GregorianCalendar</name>
+                  <name>java.util.Calendar</name>
 
       <!-- Add a list of comma-separated regular expressions matching columns -->
                   <types>TIMESTAMP</types>
@@ -200,9 +195,10 @@
               </forcedTypes>
 
             </database>
-            <generate>
-              <pojos>true</pojos>
-            </generate>
+<!--             <generate> -->
+<!--               <pojos>true</pojos> -->
+<!--               <daos>true</daos> -->
+<!--             </generate> -->
             <target>
               <packageName>org.constellation.engine.register.jooq</packageName>
               <directory>target/generated-sources/jooq</directory>
