@@ -1416,21 +1416,6 @@ CREATE TABLE RAPPORT_ETUDE
 
 
 
-CREATE TABLE SelectedObjects
-     (
-     SelectionID                                                       int8 NOT NULL,
-     ObjectID                                                          int8 NOT NULL
-     );
-
-
-CREATE TABLE Selections
-     (
-     SelectionID                                                        serial,
-     TargetName                                                        varchar(255) NOT NULL,
-     UNIQUE (SelectionID)
-     );
-
-
 CREATE TABLE SOURCE_INFO
      (
      ID_SOURCE                                                         int8 NOT NULL,
