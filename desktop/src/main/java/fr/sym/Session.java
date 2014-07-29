@@ -16,6 +16,7 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.style.DefaultDescription;
 
@@ -33,6 +34,9 @@ public class Session {
         mapContext.setName("Carte");
 
         //Fond de plan
+        final MapItem fond = MapBuilder.createItem();
+        fond.setName("Fond de plan");
+        mapContext.items().add(fond);
         try{
             final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
 
@@ -43,7 +47,7 @@ public class Session {
                 cml.setDescription(new DefaultDescription(
                         new SimpleInternationalString("Open Street Map"),
                         new SimpleInternationalString("Open Street Map")));
-                mapContext.layers().add(cml);
+                fond.items().add(cml);
             }
             mapContext.setAreaOfInterest(mapContext.getBounds());
         }catch(Exception ex){

@@ -32,7 +32,6 @@ import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.opengis.util.FactoryException;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -101,7 +100,7 @@ public class Loader extends Application {
                             try {
                                 showMainStage();
                             } catch (IOException ex) {
-                                Exceptions.printStackTrace(ex);
+                                Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                             }
                         }
                     });
