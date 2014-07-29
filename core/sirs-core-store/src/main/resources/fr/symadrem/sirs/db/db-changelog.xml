@@ -4,72 +4,6 @@
     <changeSet author="cheleb (generated)" id="1405074183057-1" dbms="h2">
     <sql dbms="h2" stripComments="true" endDelimiter="\nGO"
             splitStatements="true">
-CREATE TABLE AAA_REQ_HAUTEUR_CRETE_TN_DRAC
-     (
-     ID_TRONCON_GESTION                                                int8,
-     NOM_TRONCON_GESTION                                               varchar(255),
-     NOM                                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIED_DE_DIGUE                                    float8,
-     HAUTEUR_DIGUE_COTE_TERRE                                          float8,
-     X                                                                 float8,
-     Y                                                                 float8
-     );
-
-
-CREATE TABLE AAA_REQ_Vero_charge_isere_Q10
-     (
-     Numéro                                                             serial,
-     ID_TRONCON_GESTION                                                int8,
-     NOM_TRONCON_GESTION                                               varchar(255),
-     NOM                                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIE                                              float8,
-     HAUTEUR_DIGUE_COTE_T                                              float8,
-     COTE_EAU_NGF                                                      float8,
-     charge                                                            float8,
-     NOM_EVENEMENT_HYDRAU                                              varchar(255),
-     ID_EVENEMENT_HYDRAU                                               int8,
-     PRIMARY KEY (Numéro)
-     );
-
-
-CREATE TABLE AAA_REQ_Vero_charge_isere_Q5
-     (
-     Numéro                                                             serial,
-     ID_TRONCON_GESTION                                                int8,
-     NOM_TRONCON_GESTION                                               varchar(255),
-     NOM                                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIE                                              float8,
-     HAUTEUR_DIGUE_COTE_T                                              float8,
-     COTE_EAU_NGF                                                      float8,
-     charge                                                            float8,
-     NOM_EVENEMENT_HYDRAU                                              varchar(255),
-     ID_EVENEMENT_HYDRAU                                               int8,
-     PRIMARY KEY (Numéro)
-     );
-
-
-CREATE TABLE AAAreqveroPanneauAD
-     (
-     Numéro                                                             serial,
-     ID_TRONCON_GESTION                                                int8,
-     NOM                                                               varchar(255),
-     NOM_BORNE_DEBUT                                                   varchar(255),
-     NOM_BORNE_FIN                                                     varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     PRIMARY KEY (Numéro)
-     );
-
-
 CREATE TABLE BORNE_DIGUE
      (
      ID_BORNE                                                           serial,
@@ -746,29 +680,6 @@ CREATE TABLE EVENEMENT_HYDRAU
      NOM_MODELEUR_HYDRAU                                               varchar(255),
      DATE_DERNIERE_MAJ                                                 timestamp,
      PRIMARY KEY (ID_EVENEMENT_HYDRAU)
-     );
-
-
-CREATE TABLE Export_Output
-     (
-     OBJECTID                                                           serial,
-     SHAPE                                                             text,
-     OBJECTID_old                                                      int8,
-     SHAPE_Leng                                                        float8,
-     ID_TRONCON_GESTION                                                int8 NOT NULL,
-     LONGUEUR                                                          float8,
-     SHAPE_Length                                                      float8,
-     UNIQUE (OBJECTID)
-     );
-
-
-CREATE TABLE Export_Output_SHAPE_Index
-     (
-     IndexedObjectId                                                   int8 NOT NULL,
-     MinGX                                                             int8 NOT NULL,
-     MinGY                                                             int8 NOT NULL,
-     MaxGX                                                             int8 NOT NULL,
-     MaxGY                                                             int8 NOT NULL
      );
 
 
@@ -1846,24 +1757,6 @@ CREATE TABLE PROPRIETAIRE_TRONCON_GESTION
      PRIMARY KEY (ID_PROPRIETAIRE_TRONCON_GESTION)
      );
 
-
-CREATE TABLE rampes_Isere_riviere_crete
-     (
-     ID_ELEMENT_RESEAU                                                  serial,
-     ID_TRONCON_GESTION                                                int8,
-     NOM_TRONCON_GESTION                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     COMMENTAIRE                                                       text,
-     NOM                                                               varchar(255),
-     LARGEUR                                                           float8,
-     LIBELLE_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT                   varchar(255),
-     ID_TYPE_OUVRAGE_FRANCHISSEMENT                                    int8,
-     LIBELLE_TYPE_OUVRAGE_FRANCHISSEMENT                               varchar(255),
-     ID_TYPE_COTE                                                      int8
-     );
-
-
 CREATE TABLE RAPPORT_ETUDE
      (
      ID_RAPPORT_ETUDE                                                   serial,
@@ -1878,133 +1771,6 @@ CREATE TABLE RAPPORT_ETUDE
      PRIMARY KEY (ID_RAPPORT_ETUDE)
      );
 
-
-CREATE TABLE REQ_ADIDR_CREATION
-     (
-     Nom_requête                                                       varchar(50),
-     Type_requête                                                      varchar(50),
-     Date                                                              timestamp,
-     Nom_créateur                                                      varchar(50),
-     Commentaire                                                       varchar(255),
-     SQL                                                               text,
-     PRIMARY KEY (Nom_requête)
-     );
-
-
-CREATE TABLE REQ_CC_BORNE_5_EN_5_RD
-     (
-     NOM_BORNE                                                         varchar(255),
-     ID_BORNE                                                           serial,
-     ID_TRONCON_GESTION                                                int8,
-     X_POINT                                                           float8,
-     Y_POINT                                                           float8,
-     Z_POINT                                                           float8,
-     X_POINT_ORIGINE                                                   float8,
-     Y_POINT_ORIGINE                                                   float8,
-     VALEUR_PR                                                         float8
-     );
-
-
-CREATE TABLE REQ_CC_HAUTEUR_DIGUE_SUR_TN_TMP
-     (
-     ID_PROFIL_EN_TRAVERS                                               serial,
-     NOM                                                               varchar(255),
-     ID_TRONCON_GESTION                                                int8,
-     PR_DEBUT_CALCULE                                                  float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIED_DE_DIGUE                                    float8,
-     Hauteur_de_digue                                                  float8,
-     ID_PROFIL_EN_TRAVERS_LEVE                                         int8
-     );
-
-
-CREATE TABLE REQ_CC_LOCALISATION_TMP
-     (
-     ID_PROFIL_EN_TRAVERS                                               serial,
-     NOM                                                               varchar(255),
-     ID_TRONCON_GESTION                                                int8,
-     PR_DEBUT_CALCULE                                                  float8
-     );
-
-
-CREATE TABLE REQ_CC_RAMPES_ACCES
-     (
-     NOM                                                               varchar(255),
-     LIBELLE_TYPE_COTE                                                 varchar(255),
-     ID_TRONCON_GESTION                                                int8,
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     COMMENTAIRE                                                       text
-     );
-
-
-CREATE TABLE REQ_CC_TMP
-     (
-     ID_TRONCON_GESTION                                                int8,
-     ID_ELEMENT_STRUCTURE                                               serial,
-     PR_DEBUT_CALCULE                                                  float8,
-     PR_FIN_CALCULE                                                    float8,
-     NOM_BORNE                                                         varchar(255),
-     DIST_BORNEREF_DEBUT                                               float8,
-     LIBELLE_TYPE_POSITION                                             varchar(255),
-     COMMENTAIRE                                                       text,
-     SONDAGES                                                          float8 DEFAULT 0
-     );
-
-
-CREATE TABLE REQ_CEMAGREF_SENSIBILITE_EVT_HYDRAU
-     (
-     NOM                                                               varchar(255),
-     ID_PROFIL_EN_TRAVERS_LEVE                                          serial,
-     ID_PROFIL_EN_TRAVERS                                              int8,
-     NOM_EVENEMENT_HYDRAU                                              varchar(255),
-     ID_EVENEMENT_HYDRAU                                               int8,
-     COTE_EAU_NGF                                                      float8,
-     ID_DOC                                                            int8,
-     PR_DEBUT_CALCULE                                                  float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIED_DE_DIGUE                                    float8,
-     ID_TRONCON_GESTION                                                int8,
-     DEBIT_DE_POINTE_M3S                                               float8,
-     VITESSE_DE_POINTE_MS                                              float8,
-     Hauteur_digue                                                     float8 DEFAULT 0,
-     Hauteur_charge                                                    float8 DEFAULT 0,
-     Revanche_digue_evt_hydro                                          float8 DEFAULT 0
-     );
-
-
-CREATE TABLE REQ_SOGREAH_SENSIBILITE_EVT_HYDRAU
-     (
-     ID_TRONCON_GESTION                                                int8,
-     NOM                                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     CRETE_Z_NGF                                                       float8,
-     COTE_TERRE_Z_NGF_PIED_DE_DIGUE                                    float8,
-     CRETE_LARG                                                        float8,
-     COTE_EAU_NGF                                                      float8,
-     DEBIT_DE_POINTE_M3S                                               float8,
-     VITESSE_DE_POINTE_MS                                              float8,
-     HAUTEUR_DIGUE                                                     float8 DEFAULT 0,
-     HAUTEUR_CHARGE                                                    float8 DEFAULT 0,
-     HAUTEUR_REVANCHE                                                  float8 DEFAULT 0
-     );
-
-
-CREATE TABLE RQ_CC_SONDAGES
-     (
-     LIBELLE_TYPE_ELEMENT_STRUCTURE                                    varchar(255),
-     NOM_TRONCON_GESTION                                               varchar(255),
-     PR_DEBUT_CALCULE                                                  float8,
-     N_COUCHE                                                          int8,
-     COMMENTAIRE                                                       text,
-     TYPE_MATERIAU_LIBELLE_TYPE_MATERIAU                               varchar(255),
-     LONG_RAMP_HAUT                                                    float8,
-     TYPE_MATERIAU_1_LIBELLE_TYPE_MATERIAU                             varchar(255),
-     LONG_RAMP_BAS                                                     float8,
-     ID_ELEMENT_STRUCTURE                                               serial,
-     ID_TRONCON_GESTION                                                int8,
-     ID_TYPE_ELEMENT_STRUCTURE                                         int8
-     );
 
 
 CREATE TABLE SelectedObjects
