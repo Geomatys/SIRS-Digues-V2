@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem;
+import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -45,6 +46,7 @@ public class FXMapPane extends BorderPane {
         uiCoordBar = new FXCoordinateBar(uiMap);
         uiTree = new FXMapContextTree(context);
         uiTree.getTreetable().setShowRoot(false);
+        uiTree.getMenuItems().add(new ZoomToItem(uiMap));
         uiTree.getMenuItems().add(new DeleteItem());
         
         try {
