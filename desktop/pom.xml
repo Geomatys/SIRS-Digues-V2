@@ -22,6 +22,7 @@
       <artifactId>sirs-core-store</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-h2</artifactId>
@@ -30,6 +31,11 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-widgets-javafx</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-epsg-javadb</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
     
