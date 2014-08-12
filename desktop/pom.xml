@@ -122,7 +122,7 @@
       <plugin>
         <groupId>com.geomatys.maven</groupId>
         <artifactId>geomatys-jfxml-plugin</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.4-SNAPSHOT</version>
         <dependencies>
           <dependency>
             <groupId>fr.symadrem.sirs.core</groupId>

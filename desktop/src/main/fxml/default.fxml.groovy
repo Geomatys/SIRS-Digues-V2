@@ -23,7 +23,7 @@
         control = "DatePicker";
      } 
     %>
-      <Label fx:id="${field.name}Label" <% if(i>0){ %>  GridPane.rowIndex="<%= i %>" <% } %> text="${field.name}" />      
+      <Label fx:id="${field.name}Label" <% if(i>0){ %>  GridPane.rowIndex="<%= i %>" <% } %> text="%${param.classSimpleName}.${field.name}" />      
       <${control} fx:id="${field.name}${control}" <% if(i>0){ %>  GridPane.rowIndex="${i}" <% } %> GridPane.columnIndex="1" /><% } %>
    </children>
 </fx:root>
