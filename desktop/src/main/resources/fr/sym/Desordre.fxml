@@ -18,9 +18,9 @@
             <content>
                   <VBox>
                      <children>
-                        <Pane maxWidth="550.0" minWidth="550.0" prefHeight="81.0" prefWidth="550.0" styleClass="bloc_information">
+                        <Pane maxWidth="581.0" minWidth="550.0" prefHeight="81.0" prefWidth="581.0" styleClass="bloc_information">
                            <children>
-                              <GridPane hgap="8.0" prefHeight="68.0" prefWidth="770.0" vgap="20.0">
+                              <GridPane hgap="8.0" prefHeight="68.0" prefWidth="660.0" vgap="20.0">
                                  <children>
                                     <Label text="Validité">
                                        <font>
@@ -30,40 +30,21 @@
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Début" GridPane.rowIndex="1">
+                                    <Label text="Apparition" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField prefHeight="26.0" prefWidth="176.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <Label text="Fin" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                    <Button fx:id="section_begin_button" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                                       <graphic>
-                                          <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@images/calendar.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                    <Button fx:id="section_begin_button1" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="5" GridPane.rowIndex="1">
-                                       <graphic>
-                                          <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@images/calendar.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                    <TextField prefHeight="26.0" prefWidth="114.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                    <Label text="Disparition" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                    <DatePicker fx:id="dateDebutValDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <DatePicker fx:id="dateFinValDatePicker" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                                  </children>
                                  <columnConstraints>
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="380.0" minWidth="10.0" prefWidth="65.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="115.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="83.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="25.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="115.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="632.0" minWidth="10.0" prefWidth="291.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="380.0" minWidth="10.0" prefWidth="72.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="15.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="77.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
                                  </columnConstraints>
                                  <padding>
                                     <Insets bottom="10.0" left="15.0" right="15.0" top="15.0" />
@@ -86,44 +67,42 @@
                               <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
-                              <GridPane hgap="8.0" minWidth="610.0" prefHeight="251.0" prefWidth="819.0" vgap="20.0">
-                                <columnConstraints>
-                                  <ColumnConstraints hgrow="NEVER" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" />
-                                  <ColumnConstraints hgrow="NEVER" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="0.0" prefWidth="150.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="50.0" minWidth="10.0" prefWidth="20.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="110.0" minWidth="70.0" prefWidth="110.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" minWidth="200.0" prefWidth="250.0" />
-                                </columnConstraints>
-                                <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    <RowConstraints minHeight="10.0" prefHeight="90.0" vgrow="SOMETIMES" />
-                                </rowConstraints>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                 </padding>
+                              <GridPane hgap="8.0" minWidth="610.0" prefHeight="238.0" prefWidth="830.0" vgap="20.0">
                                  <children>
-                                    <Label text="Fonction" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                                    <Label text="Côté" />
+                                    <ChoiceBox fx:id="idTypeCoteTextField" prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                                     <Label text="Source" GridPane.columnIndex="4" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="552.0" GridPane.columnIndex="5" />
-                                    <Label text="N° de couche" GridPane.rowIndex="2" />
-                                    <TextField prefHeight="26.0" prefWidth="95.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label text="Matériau" GridPane.rowIndex="1" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="654.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                                    <Label text="Nature" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                                    <Label text="Nature" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                                    <Label text="Epaisseur" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                                    <TextField prefHeight="26.0" prefWidth="95.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                    <Label text="Commentaires" GridPane.rowIndex="3" GridPane.valignment="TOP">
+                                    <ChoiceBox fx:id="idSourceTextField" prefHeight="26.0" prefWidth="552.0" GridPane.columnIndex="5" />
+                                    <Label text="Description" GridPane.rowIndex="3" GridPane.valignment="TOP">
                                        <GridPane.margin>
                                           <Insets top="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="3" />
+                                    <TextArea fx:id="descriptionDesordreTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="3" />
+                                    <ChoiceBox fx:id="idTypeDesordreTextField" prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                                    <Label text="Type de désordre" GridPane.rowIndex="1" />
+                                    <Label text="Position" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                    <ChoiceBox fx:id="idTypeCoteTextField11" prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                                    <Label text="Lieu-dit" GridPane.rowIndex="2" />
+                                    <TextField fx:id="lieuDitDesordreTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                  </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="127.0" minWidth="119.0" prefWidth="123.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="100.0" minWidth="83.0" prefWidth="87.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="0.0" prefWidth="150.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="50.0" minWidth="10.0" prefWidth="20.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="110.0" minWidth="45.0" prefWidth="74.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" minWidth="200.0" prefWidth="286.0" />
+                                 </columnConstraints>
+                                 <padding>
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                 </padding>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="90.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
                               </GridPane>
                            </children>
                         </GridPane>
@@ -140,10 +119,10 @@
                      <children>
                         <GridPane alignment="TOP_RIGHT" hgap="8.0" prefHeight="31.0" prefWidth="769.0" vgap="20.0">
                            <children>
-                              <Label text="123,456" GridPane.columnIndex="3" />
+                              <Label fx:id="prFinCalculeTextField" prefHeight="16.0" prefWidth="77.0" GridPane.columnIndex="3" />
                               <Label prefHeight="16.0" prefWidth="46.0" text="PR fin :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                               <Label prefHeight="16.0" prefWidth="66.0" text="PR début :" />
-                              <Label text="0" GridPane.columnIndex="1" />
+                              <Label fx:id="prDebutCalculeTextField" prefHeight="16.0" prefWidth="76.0" GridPane.columnIndex="1" />
                            </children>
                            <columnConstraints>
                               <ColumnConstraints hgrow="NEVER" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
@@ -189,12 +168,12 @@
                                        </font>
                                     </Label>
                                     <Label text="Début :" GridPane.rowIndex="1" />
-                                    <TextField styleClass="text-field-empty" text="x" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <TextField styleClass="text-field-empty" text="y" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                    <TextField styleClass="text-field-empty" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="xDebutTextField" />
+                                    <TextField fx:id="yDebutTextField" styleClass="text-field-empty" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                     <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="30.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                                     <Label text="Fin :" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                                    <TextField styleClass="text-field-empty" text="x" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                                    <TextField styleClass="text-field-empty" text="y" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                                    <TextField styleClass="text-field-empty" GridPane.columnIndex="5" GridPane.rowIndex="1" fx:id="xFinTextField" />
+                                    <TextField fx:id="yFinTextField" styleClass="text-field-empty" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                                  </children>
                                  <padding>
                                     <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
@@ -208,21 +187,21 @@
                                        </font>
                                     </Label>
                                     <Label text="Début :" GridPane.rowIndex="2" />
-                                    <TextField styleClass="text-field-empty" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                                    <TextField fx:id="distBornerefDebutTextField" styleClass="text-field-empty" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                                     <Label text="Fin :" GridPane.rowIndex="3" />
-                                    <TextField styleClass="text-field-empty" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                                    <TextField fx:id="distBornerefFinTextField" styleClass="text-field-empty" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                     <Label text="Système de repérage :" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="455.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                    <ChoiceBox fx:id="idSystemeRepTextField" prefHeight="26.0" prefWidth="455.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                     <Label text="Borne" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Label text="Borne" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="521.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                    <ChoiceBox prefHeight="26.0" prefWidth="499.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                    <ChoiceBox fx:id="idBornerefDebutTextField" prefHeight="26.0" prefWidth="521.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                    <ChoiceBox fx:id="idBornerefFinTextField" prefHeight="26.0" prefWidth="499.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                     <Label text="Distance" GridPane.columnIndex="6" GridPane.rowIndex="2" />
                                     <Label text="Distance" GridPane.columnIndex="6" GridPane.rowIndex="3" />
                                     <Label text="Amont" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                     <Label text="Aval" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                    <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                                    <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                                    <Button fx:id="amontAvalDebutCheckBox" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                                    <Button fx:id="amontAvalFinCheckBox" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                                     <Label text="Aval" GridPane.columnIndex="5" GridPane.rowIndex="3" />
                                     <Label text="Amont" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                  </children>
@@ -257,11 +236,6 @@
             </content>
           </Tab>
             <Tab text="Photos">
-               <content>
-                  <ImageView fx:id="map_photos" pickOnBounds="true" preserveRatio="true" />
-               </content>
-            </Tab>
-            <Tab text="Détail photo">
                <content>
                   <BorderPane>
                      <center>
@@ -593,21 +567,21 @@
                <children>
                   <GridPane hgap="8.0" styleClass="troncon_info" vgap="8.0">
                      <children>
-                        <Label text="Tronçon auquel apparient la crête" textFill="WHITE" GridPane.columnSpan="4">
+                        <Label fx:id="formStructureTitle" text="Tronçon auquel apparient le desordre" textFill="WHITE" GridPane.columnSpan="4">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
                         <Label text="Nom du tronçon" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Identifiant : " textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <Label text="Id" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label prefHeight="16.0" prefWidth="77.0" text="Identifiant : " textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                        <Label fx:id="idTronconGestionTextField" prefHeight="16.0" prefWidth="43.0" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                         <Label text="Nom :" textFill="WHITE" GridPane.rowIndex="1" />
                      </children>
                      <columnConstraints>
                         <ColumnConstraints hgrow="NEVER" maxWidth="202.0" minWidth="10.0" prefWidth="42.0" />
                         <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="349.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="422.0" minWidth="0.0" prefWidth="127.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="40.0" minWidth="30.0" prefWidth="40.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="422.0" minWidth="0.0" prefWidth="124.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="47.0" minWidth="30.0" prefWidth="43.0" />
                         <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
                         <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
                      </columnConstraints>
@@ -621,21 +595,21 @@
                   </GridPane>
                   <GridPane hgap="8.0" vgap="20.0" GridPane.rowIndex="1">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="300.0" />
-                      <ColumnConstraints hgrow="NEVER" maxWidth="342.0" minWidth="10.0" prefWidth="75.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="40.0" minWidth="30.0" prefWidth="40.0" />
+                      <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="446.0" />
+                      <ColumnConstraints hgrow="NEVER" maxWidth="342.0" minWidth="10.0" prefWidth="73.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="48.0" minWidth="30.0" prefWidth="48.0" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="Informations sur la crête">
+                        <Label fx:id="formStructureInformationsTitle" text="Informations sur le desordre">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
                         <Label text="Identifiant :" GridPane.columnIndex="1" />
-                        <Label prefHeight="16.0" prefWidth="0.0" text="Id" GridPane.columnIndex="2" />
+                        <Label fx:id="idDesordreTextField" prefHeight="16.0" prefWidth="47.0" GridPane.columnIndex="2" />
                      </children>
                      <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />

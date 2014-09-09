@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -9,7 +10,7 @@
 
 <BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXSectionController">
 <top>
-            <BorderPane minHeight="200.0" prefHeight="200.0" prefWidth="200.0" styleClass="info-block" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
+            <BorderPane minHeight="139.0" prefHeight="139.0" prefWidth="1024.0" styleClass="info-block" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
                <right>
                   <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
                      <children>
@@ -50,43 +51,23 @@
                   </VBox>
                </right>
                <center>
-                  <GridPane hgap="8.0" prefHeight="176.0" prefWidth="533.0" vgap="20.0" BorderPane.alignment="CENTER">
+                  <GridPane hgap="8.0" prefHeight="168.0" prefWidth="777.0" vgap="15.0" BorderPane.alignment="CENTER">
                      <children>
                         <Label prefHeight="18.0" prefWidth="233.0" text="Informations sur le tronçon" textFill="WHITE" GridPane.columnSpan="4">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <Label text="Digue" textFill="WHITE" GridPane.rowIndex="3" GridPane.valignment="TOP" />
+                        <Label text="Digue" textFill="WHITE" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
                         <TextField fx:id="section_name" minWidth="150.0" prefHeight="26.0" prefWidth="335.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                         <Label text="Nom" textFill="WHITE" GridPane.rowIndex="1" />
-                        <Label text="Début" textFill="WHITE" GridPane.rowIndex="2" />
-                        <TextField fx:id="section_begin" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label text="Fin" textFill="WHITE" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                        <TextField fx:id="section_end" prefHeight="26.0" prefWidth="61.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                        <Button fx:id="section_begin_button" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                           <graphic>
-                              <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/calendar.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                        <Label text="Identifiant : 29" textFill="WHITE" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" />
-                        <ChoiceBox fx:id="section_dam" maxWidth="250.0" minWidth="150.0" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                        <Label text="Rive" textFill="WHITE" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                        <ChoiceBox fx:id="section_bank" prefHeight="26.0" prefWidth="204.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-                        <Label text="SR par défaut : Nom du SR" textFill="WHITE" GridPane.columnIndex="4" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                        <Button fx:id="section_end_button" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="6" GridPane.rowIndex="2">
-                           <graphic>
-                              <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/calendar.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
+                        <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" />
+                        <ChoiceBox fx:id="idDigueTextField" maxWidth="250.0" minWidth="150.0" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <Label text="Rive" textFill="WHITE" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="idTypeRiveTextField" prefHeight="26.0" prefWidth="204.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <Label prefHeight="16.0" prefWidth="143.0" text="SR par défaut :" textFill="WHITE" GridPane.columnIndex="4" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                  <Label fx:id="idTronconGestionTextField" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="7" />
+                  <Label fx:id="idSystemeRepDefautTextField" prefHeight="16.0" prefWidth="231.0" textFill="WHITE" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                      </children>
                      <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="42.0" prefWidth="42.0" />
@@ -94,17 +75,17 @@
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="234.0" />
                         <ColumnConstraints hgrow="NEVER" maxWidth="422.0" minWidth="8.0" prefWidth="11.0" />
                         <ColumnConstraints hgrow="NEVER" maxWidth="75.0" minWidth="42.0" prefWidth="43.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="100.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="0.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="50.0" prefWidth="50.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="0.0" prefWidth="158.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="65.0" />
                      </columnConstraints>
                      <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
                      </padding>
                      <rowConstraints>
-                        <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="24.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="18.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                   </GridPane>
                </center>
@@ -113,317 +94,318 @@
 <center>
             <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
 <center>
-                  <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                  <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: rgb(245,245,245);" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                     <tabs>
-                      <Tab text="Informations complémentaires">
-                           <content>
-                              <BorderPane prefHeight="200.0" prefWidth="200.0">
-                                 <center>
-                                    <GridPane hgap="8.0" prefHeight="395.0" prefWidth="1023.0" vgap="20.0" BorderPane.alignment="CENTER">
-                                      <columnConstraints>
-                                        <ColumnConstraints hgrow="NEVER" maxWidth="357.0" minWidth="100.0" prefWidth="120.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="858.0" />
-                                      </columnConstraints>
-                                      <rowConstraints>
-                                        <RowConstraints maxHeight="166.0" minHeight="20.0" prefHeight="138.0" vgrow="SOMETIMES" />
-                                      </rowConstraints>
-                                       <padding>
-                                          <Insets bottom="15.0" left="15.0" right="15.0" top="20.0" />
-                                       </padding>
+                      <Tab text="Description">
+                     <content>
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Pane maxWidth="550.0" minWidth="550.0" prefHeight="81.0" prefWidth="550.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc_information">
+                                 <children>
+                                    <GridPane hgap="8.0" prefHeight="68.0" prefWidth="770.0" vgap="20.0">
                                        <children>
-                                          <Label text="Commentaires" GridPane.valignment="TOP">
+                                          <Label text="Validité">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
                                              <GridPane.margin>
-                                                <Insets top="10.0" />
+                                                <Insets />
                                              </GridPane.margin>
                                           </Label>
-                                          <TextArea prefHeight="104.0" prefWidth="866.0" GridPane.columnIndex="1" />
+                                          <Label text="Début" GridPane.rowIndex="1">
+                                             <GridPane.margin>
+                                                <Insets />
+                                             </GridPane.margin>
+                                          </Label>
+                                          <Label text="Fin" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                          <DatePicker fx:id="dateDebutValTronconDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <DatePicker fx:id="dateFinValTronconDatePicker" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                                        </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="NEVER" maxWidth="380.0" minWidth="10.0" prefWidth="65.0" />
+                                          <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
+                                          <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="20.0" />
+                                          <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="25.0" />
+                                          <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="632.0" minWidth="10.0" prefWidth="234.0" />
+                                       </columnConstraints>
+                                       <padding>
+                                          <Insets bottom="10.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                       <rowConstraints>
+                                          <RowConstraints maxHeight="11.0" minHeight="10.0" prefHeight="11.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="12.0" minHeight="10.0" prefHeight="12.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
                                     </GridPane>
-                                 </center>
-                              </BorderPane>
-                           </content>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="15.0" />
+                                 </VBox.margin>
+                              </Pane>
+                              <GridPane prefHeight="217.0" prefWidth="994.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc_information">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="447.0" minWidth="10.0" prefWidth="140.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="910.0" minWidth="10.0" prefWidth="854.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="Commentaire" GridPane.valignment="TOP">
+                                       <padding>
+                                          <Insets top="10.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextArea fx:id="commentaireTronconTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                                 </padding>
+                              </GridPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                           </padding>
+                        </VBox>
+                     </content>
                       </Tab>
                       <Tab text="Systèmes de repérage">
-                           <content>
-                              <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                                 <top>
-                                    <BorderPane maxHeight="43.0" minWidth="43.0" prefHeight="43.0" prefWidth="1024.0" BorderPane.alignment="CENTER">
-                                       <right>
-                                          <Pane prefHeight="37.0" prefWidth="190.0" styleClass="button-list-objects" BorderPane.alignment="CENTER">
+                     <content>
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <GridPane prefHeight="30.0" prefWidth="1018.0">
+                                 <children>
+                                    <Pane maxWidth="179.0" minWidth="116.0" prefHeight="30.0" prefWidth="122.0" styleClass="button-list-objects" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                       <children>
+                                          <GridPane alignment="TOP_RIGHT" prefHeight="30.0" prefWidth="116.0">
                                              <children>
-                                                <GridPane prefHeight="30.0" prefWidth="191.0">
-                                                   <children>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style">
-                                                         <graphic>
-                                                            <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/add-icon.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/edit-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="4">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/search-icon-white.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/duplicate-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="3">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/delete-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                   </children>
-                                                   <columnConstraints>
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                   </columnConstraints>
-                                                   <padding>
-                                                      <Insets right="5.0" />
-                                                   </padding>
-                                                   <rowConstraints>
-                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                   </rowConstraints>
-                                                </GridPane>
+                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="49.0" style="-fx-background-color: none;" styleClass="btn-without-style" GridPane.halignment="LEFT">
+                                                   <graphic>
+                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/add-icon.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/delete-icon.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/search-icon-white.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
                                              </children>
-                                          </Pane>
-                                       </right>
-                                       <left>
-                                          <Label text="Liste des systèmes de repérage" BorderPane.alignment="CENTER">
-                                             <font>
-                                                <Font name="System Bold" size="14.0" />
-                                             </font>
-                                             <BorderPane.margin>
-                                                <Insets left="10.0" />
-                                             </BorderPane.margin>
-                                          </Label>
-                                       </left>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets right="5.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                       </children>
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
                                        <padding>
-                                          <Insets top="10.0" />
+                                          <Insets right="5.0" />
                                        </padding>
-                                    </BorderPane>
-                                 </top>
-                                 <center>
-                                    <ScrollPane fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                                       <content>
-                                          <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
-                                             <children>
-                                                <GridPane hgap="8.0" prefHeight="139.0" prefWidth="747.0" styleClass="item-contact" vgap="20.0">
-                                                   <children>
-                                                      <Label text="Identifiant" />
-                                                      <Label text="Commentaire" GridPane.rowIndex="1" GridPane.valignment="TOP">
-                                                         <GridPane.margin>
-                                                            <Insets top="10.0" />
-                                                         </GridPane.margin>
-                                                      </Label>
-                                                      <TextField fx:id="system_id" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" />
-                                                      <Label text="Libellé" GridPane.columnIndex="3" />
-                                                      <TextField fx:id="system_label" GridPane.columnIndex="4" />
-                                                      <TextArea prefHeight="71.0" prefWidth="615.0" GridPane.columnIndex="1" GridPane.columnSpan="6" GridPane.rowIndex="1" />
-                                                      <CheckBox mnemonicParsing="false" text="SR par défaut" GridPane.columnIndex="6" GridPane.halignment="RIGHT" />
-                                                   </children>
-                                                   <columnConstraints>
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="97.0" />
-                                                      <ColumnConstraints hgrow="NEVER" maxWidth="132.0" minWidth="55.0" prefWidth="75.0" />
-                                                      <ColumnConstraints hgrow="NEVER" maxWidth="146.0" minWidth="0.0" prefWidth="4.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="45.0" prefWidth="44.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="514.0" minWidth="10.0" prefWidth="348.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="1.0" prefWidth="3.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="119.0" />
-                                                   </columnConstraints>
-                                                   <padding>
-                                                      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                   </padding>
-                                                   <rowConstraints>
-                                                      <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="NEVER" />
-                                                      <RowConstraints maxHeight="92.0" minHeight="63.0" prefHeight="63.0" vgrow="NEVER" />
-                                                   </rowConstraints>
-                                                   <VBox.margin>
-                                                      <Insets bottom="10.0" />
-                                                   </VBox.margin>
-                                                </GridPane>
-                                             </children>
-                                          </VBox>
-                                       </content>
-                                    </ScrollPane>
-                                 </center>
-                              </BorderPane>
-                           </content>
+                                    </Pane>
+                                    <Label text="Liste des systèmes de repérages">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="880.0" minWidth="10.0" prefWidth="878.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="116.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                              <GridPane hgap="8.0" prefHeight="139.0" prefWidth="747.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 0 5 5;" styleClass="bloc-info" vgap="20.0">
+                                 <children>
+                                    <Label text="Identifiant" />
+                                    <Label text="Commentaire" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                                       <GridPane.margin>
+                                          <Insets top="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="system_id1" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" />
+                                    <Label text="Libellé" GridPane.columnIndex="3" />
+                                    <TextField fx:id="system_label1" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" />
+                                    <TextArea prefHeight="71.0" prefWidth="615.0" GridPane.columnIndex="1" GridPane.columnSpan="6" GridPane.rowIndex="1" />
+                                    <CheckBox mnemonicParsing="false" text="SR par défaut" GridPane.columnIndex="6" GridPane.halignment="RIGHT" />
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="97.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="132.0" minWidth="55.0" prefWidth="75.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="146.0" minWidth="0.0" prefWidth="4.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="45.0" prefWidth="44.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="522.0" minWidth="10.0" prefWidth="522.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="56.0" minWidth="0.0" prefWidth="0.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="149.0" />
+                                 </columnConstraints>
+                                 <padding>
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                 </padding>
+                                 <rowConstraints>
+                                    <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="NEVER" />
+                                    <RowConstraints maxHeight="92.0" minHeight="63.0" prefHeight="63.0" vgrow="NEVER" />
+                                 </rowConstraints>
+                                 <VBox.margin>
+                                    <Insets bottom="15.0" />
+                                 </VBox.margin>
+                              </GridPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                           </padding>
+                        </VBox>
+                     </content>
                       </Tab>
                         <Tab text="Contacts">
-                           <content>
-                              <BorderPane prefHeight="200.0" prefWidth="200.0">
-                                 <top>
-                                    <BorderPane minWidth="44.0" prefHeight="44.0" prefWidth="1024.0" BorderPane.alignment="CENTER">
-                                       <right>
-                                          <Pane prefHeight="37.0" prefWidth="190.0" styleClass="button-list-objects" BorderPane.alignment="CENTER">
+                     <content>
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <GridPane prefHeight="30.0" prefWidth="1018.0">
+                                 <children>
+                                    <Pane maxWidth="179.0" minWidth="116.0" prefHeight="30.0" prefWidth="122.0" styleClass="button-list-objects" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                       <children>
+                                          <GridPane alignment="TOP_RIGHT" prefHeight="30.0" prefWidth="116.0">
                                              <children>
-                                                <GridPane prefHeight="30.0" prefWidth="191.0">
-                                                   <children>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style">
-                                                         <graphic>
-                                                            <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/add-icon.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/edit-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="3">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/delete-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="4">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/search-icon-white.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
-                                                         <graphic>
-                                                            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/duplicate-icon-inactif.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                   </children>
-                                                   <columnConstraints>
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                   </columnConstraints>
-                                                   <padding>
-                                                      <Insets right="5.0" />
-                                                   </padding>
-                                                   <rowConstraints>
-                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                   </rowConstraints>
-                                                </GridPane>
+                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="49.0" style="-fx-background-color: none;" styleClass="btn-without-style" GridPane.halignment="LEFT">
+                                                   <graphic>
+                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/add-icon.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/delete-icon.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../images/search-icon-white.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
                                              </children>
-                                          </Pane>
-                                       </right>
-                                       <left>
-                                          <Label text="Liste des contacts" BorderPane.alignment="CENTER">
-                                             <font>
-                                                <Font name="System Bold" size="14.0" />
-                                             </font>
-                                             <BorderPane.margin>
-                                                <Insets left="10.0" />
-                                             </BorderPane.margin>
-                                          </Label>
-                                       </left>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets right="5.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                       </children>
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
                                        <padding>
-                                          <Insets top="10.0" />
+                                          <Insets right="5.0" />
                                        </padding>
-                                    </BorderPane>
-                                 </top>
-                                 <center>
-                                    <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="480.0" prefViewportWidth="1024.0">
-                                       <content>
-                                          <VBox BorderPane.alignment="CENTER">
-                                             <children>
-                                                <GridPane hgap="8.0" prefHeight="75.0" prefWidth="1024.0" styleClass="item-contact" vgap="20.0">
-                                                  <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="117.0" minWidth="10.0" prefWidth="117.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="90.0" minWidth="1.0" prefWidth="18.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="109.0" />
-                                                  </columnConstraints>
-                                                  <rowConstraints>
-                                                    <RowConstraints maxHeight="24.0" minHeight="26.0" prefHeight="26.0" vgrow="SOMETIMES" />
-                                                    <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="SOMETIMES" />
-                                                  </rowConstraints>
-                                                   <children>
-                                                      <Label text="Nom" />
-                                                      <Label text="Début de gestion" GridPane.rowIndex="1" />
-                                                      <TextField fx:id="contact_name" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                                                      <TextField fx:id="contact_begin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                      <Button fx:id="contact_begin_button" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                                                         <graphic>
-                                                            <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/calendar.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <Label text="Fin de gestion" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                                                      <Label text="Fonction" GridPane.columnIndex="4" />
-                                                      <TextField fx:id="contact_end" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                                                      <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="6" GridPane.rowIndex="1">
-                                                         <graphic>
-                                                            <ImageView fx:id="contact_end_button" fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                                                               <image>
-                                                                  <Image url="@../images/calendar.png" />
-                                                               </image>
-                                                            </ImageView>
-                                                         </graphic>
-                                                      </Button>
-                                                      <ComboBox fx:id="contact_function" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="5" GridPane.columnSpan="2" />
-                                                   </children>
-                                                   <padding>
-                                                      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                   </padding>
-                                                </GridPane>
-                                             </children>
-                                          </VBox>
-                                       </content>
-                                    </ScrollPane>
-                                 </center>
-                              </BorderPane>
-                           </content>
+                                    </Pane>
+                                    <Label text="Liste des contacts">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="880.0" minWidth="10.0" prefWidth="878.0" />
+                                    <ColumnConstraints hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="116.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                                    <GridPane hgap="8.0" prefHeight="75.0" prefWidth="1024.0" style="-fx-background-radius: 5 0 5 5;" styleClass="item-contact" vgap="20.0">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="117.0" minWidth="10.0" prefWidth="117.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="90.0" minWidth="1.0" prefWidth="18.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="109.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints maxHeight="24.0" minHeight="26.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                                        <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label text="Nom" />
+                                          <Label text="Début de gestion" GridPane.rowIndex="1" />
+                                          <TextField fx:id="contact_name" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                                          <TextField fx:id="contact_begin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <Button fx:id="contact_begin_button" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                             <graphic>
+                                                <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../images/calendar.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Label text="Fin de gestion" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                          <Label text="Fonction" GridPane.columnIndex="4" />
+                                          <TextField fx:id="contact_end" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                                          <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" GridPane.columnIndex="6" GridPane.rowIndex="1">
+                                             <graphic>
+                                                <ImageView fx:id="contact_end_button" fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../images/calendar.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <ComboBox fx:id="contact_function" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="5" GridPane.columnSpan="2" />
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </GridPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                           </padding>
+                        </VBox>
+                     </content>
                         </Tab>
                     </tabs>
                      <BorderPane.margin>

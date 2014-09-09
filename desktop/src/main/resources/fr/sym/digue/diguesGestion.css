@@ -34,3 +34,8 @@
 .item-contact{
 	-fx-background-color: rgb(220,220,220);
 }
+
+.bloc-info{
+	-fx-background-color: rgb(220,220,220);
+	-fx-background-radius: 5 5 5 5;
+}

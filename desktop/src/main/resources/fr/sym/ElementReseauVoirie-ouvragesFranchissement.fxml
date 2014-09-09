@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane hgap="8.0" minWidth="610.0" prefHeight="337.0" prefWidth="819.0" vgap="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label text="Orientation" GridPane.rowIndex="4" />
+      <Label text="Source" GridPane.columnIndex="4" />
+      <ChoiceBox fx:id="idSourceTextField" prefHeight="26.0" prefWidth="552.0" GridPane.columnIndex="5" />
+      <Label text="Nom de l'ouvrage" />
+      <TextField fx:id="nomTextField" maxWidth="600.0" minWidth="100.0" prefHeight="26.0" prefWidth="275.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+      <Label text="Position basse" GridPane.rowIndex="2" />
+      <ChoiceBox fx:id="idTypePositionTextField" prefHeight="26.0" prefWidth="654.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+      <Label text="Largeur" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+      <TextField fx:id="largeurTextField" maxWidth="100.0" minWidth="100.0" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+      <Label text="Commentaires" GridPane.rowIndex="5" GridPane.valignment="TOP">
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextArea fx:id="commentaireTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="5" />
+      <Label text="Revêtement" GridPane.rowIndex="3" />
+      <Label text="Usage" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+      <ChoiceBox fx:id="idTypeRevetementTextField" prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+      <ChoiceBox fx:id="idTypeUsageVoieTextField" prefHeight="26.0" prefWidth="654.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+      <Label text="Côté" GridPane.rowIndex="1" />
+      <ChoiceBox fx:id="idTypeCoteTextField" maxHeight="600.0" prefHeight="26.0" prefWidth="552.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+      <ChoiceBox fx:id="idTypeOuvrageVoirieTextField" prefHeight="26.0" prefWidth="654.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+      <Label text="Type d'ouvrage" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+      <ChoiceBox fx:id="idTypePositionHauteTextField" prefHeight="26.0" prefWidth="654.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+      <Label text="Position haute" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+      <ChoiceBox fx:id="idTypeOrientationOuvrageFranchissementTextField" prefHeight="26.0" prefWidth="673.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+   </children>
+   <columnConstraints>
+      <ColumnConstraints hgrow="NEVER" maxWidth="151.0" minWidth="110.0" prefWidth="127.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="122.0" minWidth="59.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="35.0" prefWidth="150.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="50.0" minWidth="0.0" prefWidth="5.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="110.0" minWidth="97.0" prefWidth="109.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" minWidth="100.0" prefWidth="258.0" />
+   </columnConstraints>
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="90.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+</GridPane>

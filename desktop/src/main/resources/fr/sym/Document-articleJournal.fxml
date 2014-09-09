@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Tab text="Description" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <VBox minHeight="430.0">
+         <children>
+            <GridPane prefHeight="179.0" prefWidth="830.0" styleClass="bloc_information">
+               <children>
+                  <GridPane hgap="8.0" minWidth="610.0" prefHeight="160.0" prefWidth="830.0" vgap="20.0">
+                     <children>
+                        <Label text="Article" />
+                        <Label prefHeight="68.0" prefWidth="161.0" style="-fx-wrap-text: true;" text="Commentaire" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                           <GridPane.margin>
+                              <Insets top="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <TextArea fx:id="commentaireTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="1" />
+                        <TextField fx:id="nomJournalTextField" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+                        <Label text="Date de l'article" GridPane.columnIndex="4" />
+                        <DatePicker fx:id="dateJournalDatePicker" GridPane.columnIndex="5" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" maxWidth="197.0" minWidth="100.0" prefWidth="102.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="203.0" minWidth="13.0" prefWidth="200.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="0.0" prefWidth="178.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="98.0" minWidth="0.0" prefWidth="0.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="202.0" minWidth="45.0" prefWidth="104.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" minWidth="176.0" prefWidth="176.0" />
+                     </columnConstraints>
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="33.0" minHeight="10.0" prefHeight="12.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="103.0" minHeight="10.0" prefHeight="103.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+         </children>
+         <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </padding>
+      </VBox>
+   </content>
+</Tab>

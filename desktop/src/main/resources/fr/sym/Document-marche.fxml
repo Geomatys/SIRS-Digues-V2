@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<Tab text="Description" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <VBox minHeight="430.0">
+         <children>
+            <Pane maxWidth="550.0" minWidth="527.0" prefHeight="81.0" prefWidth="527.0" styleClass="bloc_information">
+               <children>
+                  <GridPane hgap="8.0" prefHeight="68.0" prefWidth="770.0" vgap="20.0">
+                     <children>
+                        <Label text="Durée du marché" GridPane.columnSpan="2">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </Label>
+                        <Label text="Début" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </Label>
+                        <Label text="Fin" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <DatePicker fx:id="dateDebutMarcheDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <DatePicker fx:id="dateFinMarcheDatePicker" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" maxWidth="380.0" minWidth="10.0" prefWidth="65.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="20.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="25.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="632.0" minWidth="10.0" prefWidth="178.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="632.0" minWidth="10.0" prefWidth="234.0" />
+                     </columnConstraints>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="11.0" minHeight="10.0" prefHeight="11.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="12.0" minHeight="10.0" prefHeight="12.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="15.0" />
+               </VBox.margin>
+            </Pane>
+            <GridPane styleClass="bloc_information">
+               <children>
+                  <GridPane hgap="8.0" minWidth="610.0" prefHeight="207.0" prefWidth="830.0" vgap="20.0">
+                     <children>
+                        <Label text="Intitulé du marché" />
+                        <Label text="Maître d'ouvrage" GridPane.columnIndex="4" />
+                        <Label text="N° de l'opération" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                        <Label text="Montant (€ HT)" GridPane.rowIndex="1" />
+                        <TextField fx:id="libelleMarcheTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                        <Label prefHeight="87.0" prefWidth="161.0" style="-fx-wrap-text: true;" text="Commentaire" GridPane.rowIndex="2" />
+                        <TextArea fx:id="commentaireTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="2" />
+                        <TextField fx:id="montantMarcheTextField" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="nOperationTextField" maxWidth="120.0" minWidth="120.0" prefHeight="26.0" prefWidth="120.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                        <TextField fx:id="idMaitreOuvrageTextField" GridPane.columnIndex="5" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" maxWidth="197.0" minWidth="119.0" prefWidth="124.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="178.0" minWidth="13.0" prefWidth="123.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="0.0" prefWidth="122.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="50.0" minWidth="0.0" prefWidth="7.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="140.0" minWidth="45.0" prefWidth="115.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" minWidth="200.0" prefWidth="269.0" />
+                     </columnConstraints>
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="33.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="85.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+         </children>
+         <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </padding>
+      </VBox>
+   </content>
+</Tab>

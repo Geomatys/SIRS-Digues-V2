@@ -21,16 +21,18 @@
                            </font>
                         </Label>
                         <Label text="Commentaire" textFill="WHITE" GridPane.rowIndex="2" GridPane.valignment="TOP" />
-                        <TextArea fx:id="dam_comment" prefHeight="73.0" prefWidth="456.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
-                        <TextField fx:id="dam_name" prefHeight="26.0" prefWidth="85.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                        <TextArea fx:id="commentaireDigueTextField" prefHeight="73.0" prefWidth="456.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                        <TextField fx:id="libelleDigueTextField" prefHeight="26.0" prefWidth="85.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="1" />
                         <Label text="Nom" textFill="WHITE" GridPane.rowIndex="1" />
-                        <Label text="Identifiant : 29" textFill="WHITE" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+                        <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+                        <Label fx:id="idDigueTextField" prefHeight="16.0" prefWidth="81.0" textFill="WHITE" GridPane.columnIndex="4" />
                      </children>
                      <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="73.0" />
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="332.0" minWidth="0.0" prefWidth="221.0" />
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="38.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="271.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="344.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="90.0" />
                      </columnConstraints>
                      <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
