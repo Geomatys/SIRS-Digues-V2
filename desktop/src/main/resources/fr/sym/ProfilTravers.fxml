@@ -90,7 +90,7 @@
 <center>
                   <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: rgb(245,245,245);" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                     <tabs>
-                      <Tab text="Levées">
+                      <Tab text="Description">
                      <content>
                         <VBox prefHeight="200.0" prefWidth="100.0">
                            <children>
@@ -223,80 +223,564 @@
                       </Tab>
                       <Tab text="Tronçons associés">
                      <content>
+                        <TabPane prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE">
+                          <tabs>
+                            <Tab text="Tronçon 1">
+                                 <content>
+                                    <VBox prefHeight="200.0" prefWidth="100.0">
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="5.0" />
+                                       </padding>
+                                       <children>
+                                          <GridPane>
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Label text="Informations sur le tronçon 1" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </GridPane>
+                                          <GridPane hgap="8.0" prefHeight="85.0" prefWidth="994.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc-info" vgap="12.0">
+                                             <children>
+                                                <Label text="Nom" />
+                                                <TextField fx:id="system_id11" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="5" />
+                                                <Label text="Identifiant" GridPane.columnIndex="7" />
+                                                <Label text="PR" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label text="Borne" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                   <GridPane.margin>
+                                                      <Insets left="15.0" />
+                                                   </GridPane.margin>
+                                                </Label>
+                                                <ChoiceBox prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label112" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                                                <Label text="Distance" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+                                                <Label text="Amont" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                                <Button fx:id="amontAvalFinCheckBox" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                                <Label text="Aval" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                                                <Label fx:id="idTronconGestionTextField1" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="8" />
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="42.0" prefWidth="42.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="444.0" minWidth="55.0" prefWidth="211.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="73.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="198.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="0.0" prefWidth="51.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="404.0" minWidth="17.0" prefWidth="36.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="522.0" minWidth="10.0" prefWidth="69.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="191.0" minWidth="0.0" prefWidth="76.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="149.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
+                                             </rowConstraints>
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </GridPane>
+                                          <GridPane>
+                                             <children>
+                                                <Label text="Structure du tronçon 1" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                          <GridPane hgap="8.0" prefHeight="85.0" prefWidth="994.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc-info" vgap="8.0">
+                                             <children>
+                                                <Label text="Franc bord" textFill="#979797" GridPane.rowIndex="1">
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Largeur (m)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label1112" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                <ChoiceBox prefHeight="26.0" prefWidth="280.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                <Label text="Côté rivière" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <TextField fx:id="system_label11121" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Risberme" textFill="#979797" GridPane.rowIndex="2">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="system_label111211" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                                                <TextField fx:id="system_label11122" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111221" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                                                <Label text="Largeur sommet (m)" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                                <Label text="Crête" GridPane.rowIndex="5">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Talus" textFill="#979797" GridPane.rowIndex="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111222" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                                                <TextField fx:id="system_label1112111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                <Separator prefWidth="200.0" GridPane.columnSpan="7" GridPane.rowIndex="4" />
+                                                <Label text="Devers" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label11123" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                                <Label text="Largeur (m)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                                <Separator prefWidth="200.0" GridPane.columnSpan="7" GridPane.rowIndex="6" />
+                                                <Label text="Côté terre" GridPane.rowIndex="7">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Talus" textFill="#979797" GridPane.rowIndex="8">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Risberme" textFill="#979797" GridPane.rowIndex="9">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111223" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                                <TextField fx:id="system_label111224" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="8">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111212" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="8" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="9">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111213" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="9" />
+                                                <Label text="Largeur sommet (m)" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="9" />
+                                                <TextField fx:id="system_label1112211" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="6" GridPane.rowIndex="9" />
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="177.0" minWidth="42.0" prefWidth="172.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints maxHeight="40.0" minHeight="14.0" prefHeight="14.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="34.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="30.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="30.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="38.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="58.0" vgrow="NEVER" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                       </children>
+                                    </VBox>
+                                 </content>
+                              </Tab>
+                              <Tab text="Tronçon 2">
+                                 <content>
+                                    <VBox prefHeight="200.0" prefWidth="100.0">
+                                       <children>
+                                          <GridPane>
+                                             <children>
+                                                <Label text="Informations sur le tronçon 2" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                          <GridPane hgap="8.0" prefHeight="85.0" prefWidth="994.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc-info" vgap="12.0">
+                                             <children>
+                                                <Label text="Nom" />
+                                                <TextField fx:id="system_id111" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="5" />
+                                                <Label text="Identifiant" GridPane.columnIndex="7" />
+                                                <Label text="PR" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label1111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label text="Borne" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                   <GridPane.margin>
+                                                      <Insets left="15.0" />
+                                                   </GridPane.margin>
+                                                </Label>
+                                                <ChoiceBox prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label1121" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                                                <Label text="Distance" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+                                                <Label text="Amont" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                                <Button fx:id="amontAvalFinCheckBox1" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                                <Label text="Aval" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                                                <Label fx:id="idTronconGestionTextField11" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="8" />
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="42.0" prefWidth="42.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="444.0" minWidth="55.0" prefWidth="211.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="73.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="198.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="0.0" prefWidth="51.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="404.0" minWidth="17.0" prefWidth="36.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="522.0" minWidth="10.0" prefWidth="69.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="191.0" minWidth="0.0" prefWidth="76.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="149.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
+                                             </rowConstraints>
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </GridPane>
+                                          <GridPane>
+                                             <children>
+                                                <Label text="Structure du tronçon 2" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                          <GridPane hgap="8.0" prefHeight="85.0" prefWidth="994.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc-info" vgap="8.0">
+                                             <children>
+                                                <Label text="Franc bord" textFill="#979797" GridPane.rowIndex="1">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Largeur (m)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="system_label11121" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                <ChoiceBox prefHeight="26.0" prefWidth="280.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                <Label text="Côté rivière" GridPane.columnSpan="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <TextField fx:id="system_label111211" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Risberme" textFill="#979797" GridPane.rowIndex="2">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="system_label1112111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                                                <TextField fx:id="system_label111221" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label1112211" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                                                <Label text="Largeur sommet (m)" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                                <Label text="Crête" GridPane.rowIndex="5">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Talus" textFill="#979797" GridPane.rowIndex="3">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label1112221" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                                                <TextField fx:id="system_label11121111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                <Separator prefWidth="200.0" GridPane.columnSpan="7" GridPane.rowIndex="4" />
+                                                <Label text="Devers" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label111231" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                                <Label text="Largeur (m)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                                <Separator prefWidth="200.0" GridPane.columnSpan="7" GridPane.rowIndex="6" />
+                                                <Label text="Côté terre" GridPane.rowIndex="7">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Talus" textFill="#979797" GridPane.rowIndex="8">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <Label text="Risberme" textFill="#979797" GridPane.rowIndex="9">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <padding>
+                                                      <Insets left="20.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label1112231" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                                <TextField fx:id="system_label1112241" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                                                <Label text="Longueur rampant (m)" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="8">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label1112121" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="8" />
+                                                <Label text="Pente (%)" GridPane.columnIndex="3" GridPane.rowIndex="9">
+                                                   <padding>
+                                                      <Insets left="45.0" />
+                                                   </padding>
+                                                </Label>
+                                                <TextField fx:id="system_label1112131" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="4" GridPane.rowIndex="9" />
+                                                <Label text="Largeur sommet (m)" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="9" />
+                                                <TextField fx:id="system_label11122111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="6" GridPane.rowIndex="9" />
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="177.0" minWidth="42.0" prefWidth="172.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="NEVER" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints maxHeight="40.0" minHeight="14.0" prefHeight="14.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="34.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="30.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="30.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="38.0" vgrow="NEVER" />
+                                                <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="58.0" vgrow="NEVER" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="5.0" />
+                                       </padding>
+                                    </VBox>
+                                 </content>
+                              </Tab>
+                          </tabs>
+                        </TabPane>
+                     </content>
+                      </Tab>
+                  <Tab text="Evènements hydrauliques">
+                     <content>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <center>
+                              <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="469.0" prefViewportWidth="1024.0">
+                                 <content>
+                                    <TableView BorderPane.alignment="CENTER">
+                                       <columns>
+                                          <TableColumn prefWidth="237.0" text="Evènement hydraulique" />
+                                          <TableColumn prefWidth="256.0" text="Débit de pointe (m3/s)" />
+                                          <TableColumn prefWidth="270.0" text="Vitesse de pointe (m/s)" />
+                                          <TableColumn prefWidth="258.0" text="Cote de l'eau (mN)" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </ScrollPane>
+                           </center>
+                           <top>
+                              <BorderPane maxHeight="44.0" minHeight="44.0" prefHeight="44.0" prefWidth="1024.0" BorderPane.alignment="CENTER">
+                                 <left>
+                                    <Label text="Liste des évènements hydrauliques" BorderPane.alignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <BorderPane.margin>
+                                          <Insets left="10.0" />
+                                       </BorderPane.margin>
+                                    </Label>
+                                 </left>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
+                                 <right>
+                                    <Pane prefHeight="34.0" prefWidth="159.0" styleClass="button-list-objects" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <GridPane layoutX="2.0" prefHeight="30.0" prefWidth="157.0">
+                                             <children>
+                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="17.0" styleClass="btn-without-style">
+                                                   <graphic>
+                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/add-icon.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/edit-icon-inactif.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/delete-icon-inactif.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="23.0" styleClass="btn-without-style" GridPane.columnIndex="3">
+                                                   <graphic>
+                                                      <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/search-icon-white.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                             </children>
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <padding>
+                                                <Insets right="5.0" />
+                                             </padding>
+                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
+                                          </GridPane>
+                                       </children>
+                                    </Pane>
+                                 </right>
+                              </BorderPane>
+                           </top>
+                        </BorderPane>
+                     </content>
+                  </Tab>
+                  <Tab text="Coupes et plans">
+                     <content>
                         <VBox prefHeight="200.0" prefWidth="100.0">
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
-                           <children>
-                              <GridPane hgap="8.0" prefHeight="139.0" prefWidth="747.0" style="-fx-background-color: rgb(220,220,220); -fx-background-radius: 5 5 5 5;" styleClass="bloc-info" vgap="12.0">
-                                 <children>
-                                    <Label text="Nom" GridPane.rowIndex="1" />
-                                    <TextField fx:id="system_id11" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="1" />
-                                    <Label text="Identifiant" GridPane.columnIndex="7" GridPane.rowIndex="1" />
-                                    <Label text="Tronçons associés" GridPane.columnSpan="3">
-                                       <font>
-                                          <Font name="System Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <Label text="PR" GridPane.rowIndex="2" />
-                                    <TextField fx:id="system_label111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label text="Borne" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                                       <GridPane.margin>
-                                          <Insets left="15.0" />
-                                       </GridPane.margin>
-                                    </Label>
-                                    <ChoiceBox prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                    <TextField fx:id="system_label112" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                    <Label text="Distance" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                                    <Label text="Amont" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                                    <Button fx:id="amontAvalFinCheckBox" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                                    <Label text="Aval" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                    <Label fx:id="idTronconGestionTextField1" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="8" GridPane.rowIndex="1" />
-                                    <Label text="Nom" GridPane.rowIndex="4" />
-                                    <TextField fx:id="system_id111" editable="false" prefHeight="26.0" prefWidth="226.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="4" />
-                                    <Label text="Identifiant" GridPane.columnIndex="7" GridPane.rowIndex="4" />
-                                    <Label fx:id="idTronconGestionTextField11" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="8" GridPane.rowIndex="4" />
-                                    <Label text="PR" GridPane.rowIndex="5" />
-                                    <TextField fx:id="system_label1111" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                    <Label text="Borne" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                    <ChoiceBox prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                                    <Label text="Amont" GridPane.columnIndex="4" GridPane.rowIndex="5" />
-                                    <Button fx:id="amontAvalFinCheckBox1" mnemonicParsing="false" prefHeight="26.0" prefWidth="36.0" GridPane.columnIndex="5" GridPane.rowIndex="5" />
-                                    <Label text="Aval" GridPane.columnIndex="6" GridPane.rowIndex="5" />
-                                    <Label text="Distance" GridPane.columnIndex="7" GridPane.rowIndex="5" />
-                                    <TextField fx:id="system_label1121" prefHeight="26.0" prefWidth="463.0" GridPane.columnIndex="8" GridPane.rowIndex="5" />
-                                    <Separator prefWidth="200.0" GridPane.columnSpan="9" GridPane.rowIndex="3" />
-                                 </children>
-                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="42.0" prefWidth="42.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="444.0" minWidth="55.0" prefWidth="211.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="73.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="10.0" prefWidth="198.0" />
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="314.0" minWidth="0.0" prefWidth="51.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="404.0" minWidth="17.0" prefWidth="36.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="522.0" minWidth="10.0" prefWidth="69.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="191.0" minWidth="0.0" prefWidth="76.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="149.0" />
-                                 </columnConstraints>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="8.0" />
-                                 </padding>
-                                 <rowConstraints>
-                                    <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="30.0" vgrow="NEVER" />
-                                    <RowConstraints maxHeight="40.0" minHeight="26.0" prefHeight="26.0" vgrow="NEVER" />
-                                    <RowConstraints maxHeight="92.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
-                                    <RowConstraints maxHeight="92.0" minHeight="2.0" prefHeight="29.0" vgrow="NEVER" />
-                                    <RowConstraints maxHeight="97.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
-                                    <RowConstraints maxHeight="97.0" minHeight="29.0" prefHeight="29.0" vgrow="NEVER" />
-                                 </rowConstraints>
-                                 <VBox.margin>
-                                    <Insets bottom="20.0" />
-                                 </VBox.margin>
-                              </GridPane>
-                           </children>
                         </VBox>
                      </content>
-                      </Tab>
+                  </Tab>
                     </tabs>
                      <BorderPane.margin>
                         <Insets />
