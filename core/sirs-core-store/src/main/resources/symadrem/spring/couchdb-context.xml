@@ -12,8 +12,10 @@
 
 <!--   <util:properties id="couchdbProperties" location="classpath:/couchdb.properties" /> -->
 
-  <couchdb:database id="blogPostDatabase" name="symadrem"
-    url="http://localhost:5984" />
+  <couchdb:database id="symadremChouchDB" name="symadrem" 
+    url="http://geouser:geopw@localhost:5984"  />
 
-
+  <context:component-scan base-package="fr.symadrem.sirs.component" />
+  
+  
 </beans>
