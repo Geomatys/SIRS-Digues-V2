@@ -22,15 +22,15 @@ public class DigueRepository extends CouchDbRepositorySupport<Digue>{
     
     @Autowired
     public DigueRepository ( CouchDbConnector db) {
-		super(Digue.class, db);
-		initStandardDesignDocument();
-	}
+        super(Digue.class, db);
+        initStandardDesignDocument();
+    }
     
     @GenerateView @Override
-	public List<Digue> getAll() {
-		ViewQuery q = createQuery("all")
-						.descending(true)
-						.includeDocs(true);
-		return db.queryView(q, Digue.class);
-	}
+    public List<Digue> getAll() {
+        ViewQuery q = createQuery("all")
+                                        .descending(true)
+                                        .includeDocs(true);
+        return db.queryView(q, Digue.class);
+    }
 }

@@ -5,6 +5,7 @@
  */
 package fr.symadrem.sirs.component;
 
+import java.util.Date;
 import org.ektorp.support.CouchDbDocument;
 import org.ektorp.support.TypeDiscriminator;
 
@@ -16,13 +17,10 @@ public class Digue extends CouchDbDocument {
      
     @TypeDiscriminator
     private String digueId;
-
+    private String libelle;
+    private String commentaire;
+    private Date dateMaj;
     
-    private int longueur;
-
-    public int getLongueur() {
-        return longueur;
-    }
     public String getDigueId() {
         return digueId;
     }
@@ -31,18 +29,35 @@ public class Digue extends CouchDbDocument {
         this.digueId = digueId;
     }
 
-    public void setLongueur(int longueur) {
-        this.longueur = longueur;
+    public String getLibelle() {
+        return libelle;
     }
 
-    public String getCommune() {
-        return commune;
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 
-    public void setCommune(String commune) {
-        this.commune = commune;
+    public String getCommentaire() {
+        return commentaire;
     }
-    private String commune;
+
+    public void setCommentaire(String commentaire) {
+        this.commentaire = commentaire;
+    }
+
+    /**
+     * @return the dateMaj
+     */
+    public Date getDateMaj() {
+        return dateMaj;
+    }
+
+    /**
+     * @param dateMaj the dateMaj to set
+     */
+    public void setDateMaj(Date dateMaj) {
+        this.dateMaj = dateMaj;
+    }
     
     
 }
