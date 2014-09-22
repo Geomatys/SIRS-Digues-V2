@@ -39,18 +39,24 @@
                     <center>
                         <ToolBar prefHeight="82.0" prefWidth="436.0" BorderPane.alignment="CENTER">
                             <items>
-                                <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefWidth="145.0" text="Cartographie">
+                                <Button fx:id="uiMapButton" contentDisplay="TOP" 
+                                        mnemonicParsing="false" onAction="#openMap" 
+                                        prefWidth="145.0" text="Cartographie">
                                     <graphic>
-                                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fitHeight="40.0" fitWidth="40.0" 
+                                                   pickOnBounds="true" preserveRatio="true">
                                             <image>
                                                 <Image url="@images/menu-carto.png" />
                                             </image>
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" prefWidth="145.0" text="Gestion des digues" translateX="5.0">
+                                <Button fx:id="uiDamButton" contentDisplay="TOP" 
+                                        mnemonicParsing="false" onAction="#openDigueTab" 
+                                        prefWidth="145.0" text="Gestion des digues" translateX="5.0">
                                     <graphic>
-                                        <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fitHeight="40.0" fitWidth="102.0" 
+                                                   pickOnBounds="true" preserveRatio="true">
                                             <image>
                                                 <Image url="@images/menu-digue.png" />
                                             </image>
@@ -59,12 +65,16 @@
                                 </Button>
                                 <VBox prefHeight="70.0" prefWidth="145.0" translateX="10.0">
                                     <children>
-                                        <MenuButton fx:id="uiThemes" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Thèmes">
+                                        <MenuButton fx:id="uiThemes" mnemonicParsing="false" 
+                                                    prefHeight="26.0" prefWidth="145.0" 
+                                                    text="Thèmes">
                                             <VBox.margin>
                                                 <Insets top="6.0" />
                                             </VBox.margin>
                                         </MenuButton>
-                                        <MenuButton fx:id="uiPlugins" mnemonicParsing="false" prefHeight="26.0" prefWidth="145.0" text="Autres">
+                                        <MenuButton fx:id="uiPlugins" mnemonicParsing="false" 
+                                                    prefHeight="26.0" prefWidth="145.0" 
+                                                    text="Autres">
                                             <items>
                                                 <MenuItem fx:id="uiOtherIslandButton" mnemonicParsing="false" text="Iles et bancs" />
                                                 <MenuItem fx:id="uiOtherTransversesProfilesButton" mnemonicParsing="false" text="Profils en travers" />
