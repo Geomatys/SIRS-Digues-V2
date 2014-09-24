@@ -1,17 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sym.util;
 
-import fr.symadrem.sirs.model.Digue;
-import fr.symadrem.sirs.model.TronconGestionDigue;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Map;
 import net.sf.jasperreports.engine.JasperReport;
 import org.geotoolkit.data.FeatureCollection;
@@ -28,12 +19,19 @@ import org.geotoolkit.report.JasperReportService;
  */
 public class PrinterUtilities {
     
+    /**
+     * Print an object from the model. This method needs the object to have a 
+     * corresponding jasper report template ClassNameToPrint.jrxml preexisting
+     * at the path : /fr/sym/jrxml/
+     * @param objectToPrint
+     * @throws Exception 
+     */
     static public void print(Object objectToPrint) throws Exception {
         
         // Handles the appropriate template ------------------------------------
         final InputStream template = PrinterUtilities.class.getResourceAsStream(
                 "/fr/sym/jrxml/" + objectToPrint.getClass().getSimpleName() + ".jrxml");
-        System.out.println(objectToPrint.getClass().getSimpleName());
+        
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
         final JasperReport report = entry.getKey();
@@ -54,63 +52,43 @@ public class PrinterUtilities {
         
         // Build the feature collection ----------------------------------------
         final FeatureCollection<Feature> featureCollection = FeatureStoreUtilities.collection(feature0);
-        //System.out.println(featureCollection);
         
         // Generate the report -------------------------------------------------
         final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, 
-                new FileOutputStream("/home/samuel/Bureau/report"
+                new FileOutputStream("src/test/resources/report"
                         + objectToPrint.getClass().getSimpleName() + ".pdf"));
         JasperReportService.generateReport(report, featureCollection, null, output);
     }
     
+    /**
+     * Detect if a method is a getter.
+     * @param method
+     * @return true if the method is a getter.
+     */
+    static public boolean isGetter(Method method){
+        if(method == null
+                || !method.getName().startsWith("get")
+                || method.getParameterTypes().length != 0
+                || method.getName().equals("getClass")
+                || void.class.equals(method.getReturnType())) 
+            return false;
+        return true;
+    }
+
+    /**
+     * Detect if a method is a setter.
+     * @param method
+     * @return true if the method is a setter. 
+     */
+    static public boolean isSetter(Method method){
+        if(method == null 
+                || !method.getName().startsWith("set")
+                || method.getParameterTypes().length != 1) 
+            return false;
+        return true;
+    }
     
     static public void main(String[] arg) throws Exception {
         
-         Digue digue0 = new Digue();
-         digue0.setIdDigue(0);
-         digue0.setLibelleDigue("Grande Digue");
-         digue0.setCommentaireDigue("Cette digue est en mauvais état et présente "
-                 + "des signes évidents de vétusté et de délabrement avancé. Des"
-                 + "travaux urgents s'imposent faute de quoi d'importants riques"
-                 + "de rupture sont à prévoir.");
-         digue0.setDateDerniereMaj(Calendar.getInstance());
-        
-        print(digue0);
-
-         
-         
-        TronconGestionDigue tronconGestionDigue0 = new TronconGestionDigue();
-        tronconGestionDigue0.setIdDigue(Long.valueOf(0));
-        tronconGestionDigue0.setCommentaireTroncon("Ceci est un tronçon de la digue.");
-        tronconGestionDigue0.setDateDebutValGestionnaireD(Calendar.getInstance());
-        tronconGestionDigue0.setDateDebutValTroncon(Calendar.getInstance());
-        tronconGestionDigue0.setDateDerniereMaj(Calendar.getInstance());
-        tronconGestionDigue0.setDateFinValGestionnaireD(Calendar.getInstance());
-        tronconGestionDigue0.setDateFinValTroncon(Calendar.getInstance());
-        tronconGestionDigue0.setIdOrgGestionnaire(null);
-        tronconGestionDigue0.setIdSystemeRepDefaut(null);
-        tronconGestionDigue0.setIdTronconGestion(null);
-        tronconGestionDigue0.setIdTypeRive(0);
-        tronconGestionDigue0.setLibelleTronconGestion("Tronçon principal de la Grande Digue");
-        tronconGestionDigue0.setNomTronconGestion("Tronçon du moulin");
-         
-        print(tronconGestionDigue0);
-
-    }
-    
-    
-    
-    static public boolean isGetter(Method method){
-        if(!method.getName().startsWith("get"))      return false;
-        if(method.getParameterTypes().length != 0)   return false; 
-        if(method.getName().equals("getClass"))      return false; 
-        if(void.class.equals(method.getReturnType())) return false;
-        return true;
-    }
-
-    static public boolean isSetter(Method method){
-        if(!method.getName().startsWith("set")) return false;
-        if(method.getParameterTypes().length != 1) return false;
-        return true;
     }
 }
