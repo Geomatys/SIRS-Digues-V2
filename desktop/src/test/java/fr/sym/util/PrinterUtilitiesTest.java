@@ -1,6 +1,7 @@
 package fr.sym.util;
 
 import static fr.sym.util.PrinterUtilities.print;
+import fr.symadrem.sirs.model.BorneDigue;
 import fr.symadrem.sirs.model.Digue;
 import fr.symadrem.sirs.model.TronconGestionDigue;
 import java.lang.reflect.Method;
@@ -79,6 +80,31 @@ public class PrinterUtilitiesTest {
         tronconGestionDigue.setNomTronconGestion("Tronçon du moulin");
          
         print(tronconGestionDigue); 
+    }
+    
+    /**
+     * Test of print method for BorneDigue, of class PrinterUtilities.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPrintBorneDigue() throws Exception {
+        System.out.println("Test print BorneDigue.");
+        BorneDigue borneDigue = new BorneDigue();
+        borneDigue.setIdBorne(1);
+        borneDigue.setCommentaireBorne("Cette borne n'est pas une borne fictive.");
+        borneDigue.setDateDebutVal(Calendar.getInstance());
+        borneDigue.setDateFinVal(Calendar.getInstance());
+        borneDigue.setDateDerniereMaj(Calendar.getInstance());
+        borneDigue.setFictive(false);
+        borneDigue.setIdTronconGestion(2);
+        borneDigue.setNomBorne("Borne principale");
+        borneDigue.setXPoint(1.3);
+        borneDigue.setYPoint(1.4);
+        borneDigue.setZPoint(1.5);
+        borneDigue.setXPointOrigine(1.6);
+        borneDigue.setYPointOrigine(1.7);
+         
+        print(borneDigue); 
     }
 
     /**

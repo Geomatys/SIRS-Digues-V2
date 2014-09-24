@@ -39,13 +39,21 @@ public class PrinterUtilities {
         
         // Build the feature from the object to print --------------------------
         final Feature feature0 = FeatureUtilities.defaultFeature(type, "id0");
-        System.out.println(type);
         
         Method[] methods = objectToPrint.getClass().getMethods();
-        for(Method method : methods){
+        for(Method method : methods) {
             if(isGetter(method)) {
-                String fieldName = method.getName().substring(3, 4).toLowerCase() 
+                final String fieldName;
+                if (method.getName().startsWith("is")) {
+                    fieldName = method.getName().substring(2, 3).toLowerCase() 
+                        + method.getName().substring(3);
+                } else if (method.getName().startsWith("get")) {
+                    fieldName = method.getName().substring(3, 4).toLowerCase() 
                         + method.getName().substring(4);
+                } else {
+                    throw new Exception("This is an original getter.");
+                }
+                
                 feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
             }
         }
@@ -66,13 +74,14 @@ public class PrinterUtilities {
      * @return true if the method is a getter.
      */
     static public boolean isGetter(Method method){
-        if(method == null
-                || !method.getName().startsWith("get")
-                || method.getParameterTypes().length != 0
-                || method.getName().equals("getClass")
-                || void.class.equals(method.getReturnType())) 
-            return false;
-        return true;
+        if (method == null) return false; 
+        else if ((method.getName().startsWith("get") 
+                || method.getName().startsWith("is"))
+                && method.getParameterTypes().length == 0
+                && !method.getName().equals("getClass")
+                && !void.class.equals(method.getReturnType()))
+            return true;
+        else return false;
     }
 
     /**
@@ -81,14 +90,14 @@ public class PrinterUtilities {
      * @return true if the method is a setter. 
      */
     static public boolean isSetter(Method method){
-        if(method == null 
-                || !method.getName().startsWith("set")
-                || method.getParameterTypes().length != 1) 
-            return false;
-        return true;
+        if (method == null) return false;
+        else if (method.getName().startsWith("set")
+                && method.getParameterTypes().length == 1
+                && void.class.equals(method.getReturnType())) 
+            return true;
+        else return false;
     }
     
-    static public void main(String[] arg) throws Exception {
-        
+    static public void main(String[] arg) throws Exception {      
     }
 }
