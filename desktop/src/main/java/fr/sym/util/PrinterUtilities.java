@@ -130,7 +130,7 @@ public class PrinterUtilities {
         else return false;
     }
     
-    static public void main(String[] arg) throws Exception {    
+    static public void main(String[] arg) throws Exception { 
     }
     
     private PrinterUtilities(){}

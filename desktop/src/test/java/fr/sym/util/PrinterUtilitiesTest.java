@@ -1,11 +1,12 @@
 package fr.sym.util;
 
 import static fr.sym.util.PrinterUtilities.print;
-import fr.symadrem.sirs.model.BorneDigue;
-import fr.symadrem.sirs.model.Digue;
-import fr.symadrem.sirs.model.TronconGestionDigue;
+import fr.symadrem.sirs.model.*;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -47,9 +48,17 @@ public class PrinterUtilitiesTest {
     public void testGenerateJasperReportsTemplate() throws Exception {
         System.out.println("generateJasperReportsTemplate");
         
-        PrinterUtilities.generateJasperReportsTemplate(Digue.class);
-        PrinterUtilities.generateJasperReportsTemplate(TronconGestionDigue.class);
-        PrinterUtilities.generateJasperReportsTemplate(BorneDigue.class);
+        final File rep = new File("../core/sirs-core-store/target/generated-sources/pojos/fr/symadrem/sirs/model");
+        
+        final Pattern pattern = Pattern.compile("(.*)\\.java"); 
+        for (final String s : rep.list()) {  
+            final Matcher matcher = pattern.matcher(s);
+            while(matcher.find()){
+                final String className = matcher.group(1);
+                final Class classe = Class.forName("fr.symadrem.sirs.model."+className);
+                PrinterUtilities.generateJasperReportsTemplate(classe);
+            }
+        }
     }
 
     /**
@@ -59,7 +68,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
-        Digue digue = new Digue();
+        final Digue digue = new Digue();
         digue.setIdDigue(0);
         digue.setLibelleDigue("Grande Digue");
         digue.setCommentaireDigue("Cette digue est en mauvais état et présente "
@@ -78,7 +87,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
-        TronconGestionDigue tronconGestionDigue = new TronconGestionDigue();
+        final TronconGestionDigue tronconGestionDigue = new TronconGestionDigue();
         tronconGestionDigue.setIdDigue(Long.valueOf(0));
         tronconGestionDigue.setCommentaireTroncon("Ceci est un tronçon de la digue.");
         tronconGestionDigue.setDateDebutValGestionnaireD(Calendar.getInstance());
@@ -103,7 +112,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintBorneDigue() throws Exception {
         System.out.println("Test print BorneDigue.");
-        BorneDigue borneDigue = new BorneDigue();
+        final BorneDigue borneDigue = new BorneDigue();
         borneDigue.setIdBorne(1);
         borneDigue.setCommentaireBorne("Cette borne n'est pas une borne fictive.");
         borneDigue.setDateDebutVal(Calendar.getInstance());

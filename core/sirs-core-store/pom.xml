@@ -115,7 +115,7 @@
       <plugin>
         <groupId>com.geomatys.maven</groupId>
         <artifactId>geomatys-sqlpojo-plugin</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.5-SNAPSHOT</version>
         <dependencies>
           <dependency>
             <groupId>com.h2database</groupId>
