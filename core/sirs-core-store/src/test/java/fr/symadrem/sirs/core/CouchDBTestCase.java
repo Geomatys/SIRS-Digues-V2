@@ -14,12 +14,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration("classpath:/spring/test/test-context.xml")
 public abstract class CouchDBTestCase {
 
-    
     @Autowired
-   @Qualifier("symadremChouchDB")
+    @Qualifier("symadremChouchDB")
     private CouchDbConnector connector;
-    
-   
+
+
     public void test() {
         System.out.println(connector.getAllDocIds());
     }

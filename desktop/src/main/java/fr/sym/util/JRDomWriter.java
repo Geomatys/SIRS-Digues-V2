@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
  */
 public class JRDomWriter {
     
+    // Template elements.
     private final Document document;
     private final Element root;
     private final Element title;
@@ -43,7 +44,11 @@ public class JRDomWriter {
     private final Element lastPageFooter;
     private File output;
     
+    // Dynamic template parameters.
+    private int fields_interline;
+    private int height_multiplicator;
     
+    // Static template parameters.
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
     private static final int FIELDS_HEIGHT = 16;
@@ -57,13 +62,14 @@ public class JRDomWriter {
     private static final int RIGHT_MARGIN = 20;
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
-    private static final int FIELDS_INTERLINE = 8;
     
-     
+    // Jasper Reports attributes.
     private static final String URI_JRXML = "http://jasperreports.sourceforge.net/jasperreports";
     private static final String URI_XSI = "http://www.w3.org/2001/XMLSchema-instance";
     private static final String PREFIX_XSI = "xsi";
     private static final String ATT_XSI_SCHEMA_LOCATION = "schemaLocation";
+    
+    // Jasper Reports tags.
     private static final String TAG_JASPER_REPORT = "jasperReport";
     private static final String TAG_PAGE_WIDTH = "pageWidth";
     private static final String TAG_PAGE_HEIGHT = "pageHeight";
@@ -93,6 +99,7 @@ public class JRDomWriter {
     private static final String TAG_BOX = "box";
     private static final String TAG_BOTTOM_PEN = "bottomPen";
     
+    // Jasper Reports attributes.
     private static final String ATT_MODE = "mode";
     private static final String ATT_LINE_WIDTH = "lineWidth";
     private static final String ATT_LINE_COLOR = "lineColor";
@@ -136,6 +143,9 @@ public class JRDomWriter {
         this.columnFooter = null;
         this.pageFooter = null;
         this.lastPageFooter = null;
+        
+        this.fields_interline = 8;
+        this.height_multiplicator = 1;
     }
     
     public JRDomWriter(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
@@ -154,6 +164,25 @@ public class JRDomWriter {
         this.pageFooter = (Element) this.root.getElementsByTagName(TAG_PAGE_FOOTER).item(0);
         this.lastPageFooter = (Element) this.root.getElementsByTagName(TAG_LAST_PAGE_FOOTER).item(0);
         
+        this.fields_interline = 8;
+        this.height_multiplicator = 1;
+    }
+    
+    /**
+     * This setter changes the default fields interline.
+     * @param fieldsInterline 
+     */
+    public void setFieldsInterline(int fieldsInterline){
+        this.fields_interline = fieldsInterline;
+    }
+    
+    /**
+     * This setter changes the default height multiplicator for comments or 
+     * description fields.
+     * @param heightMultiplicator 
+     */
+    public void setHeightMultiplicator(int heightMultiplicator){
+        this.height_multiplicator = heightMultiplicator;
     }
     
     /**
@@ -162,8 +191,7 @@ public class JRDomWriter {
      */
     public void setOutput(final File output) {
         this.output = output;
-    }
-    
+    } 
     
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
@@ -283,24 +311,34 @@ public class JRDomWriter {
         int i = 0;
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
+                
+                // Retrives the field name from the setter name.----------------
                 final String fieldName = method.getName().substring(3, 4).toLowerCase() 
                         + method.getName().substring(4);
                 
+                // Provides a multiplied height for comment and description fields.
+                final int heightMultiplicator;
+                if (fieldName.contains("escript") || fieldName.contains("omment")){
+                    heightMultiplicator=this.height_multiplicator;
+                } else {
+                    heightMultiplicator=1;
+                }
+                
                 // Writes a colored band.---------------------------------------
-                this.writeDetailRow(i);
+                this.writeDetailRow(i, heightMultiplicator);
                 
                 // Writes the label.--------------------------------------------
-                this.writeDetailLabel(fieldName, i);
+                this.writeDetailLabel(fieldName, i, heightMultiplicator);
                 
                 // Writes the variable field.-----------------------------------
-                this.writeDetailValue(fieldName, method.getParameterTypes()[0], i);
-                i++;
+                this.writeDetailValue(fieldName, method.getParameterTypes()[0], i, heightMultiplicator);
+                i+=heightMultiplicator;
             }
         }
         
         // Sizes the detail element givent the field number.--------------------
         ((Element) this.detail.getElementsByTagName(TAG_BAND).item(0))
-                .setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+FIELDS_INTERLINE)*i));
+                .setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*i));
         
         // Builds the DOM tree.-------------------------------------------------
         this.root.appendChild(this.detail);
@@ -308,9 +346,10 @@ public class JRDomWriter {
     
     /**
      * <p>This method writes the backgroud of a row.</p>
-     * @param order 
+     * @param order
+     * @param heightMultiplicator 
      */
-    private void writeDetailRow(int order){
+    private void writeDetailRow(final int order, final int heightMultiplicator){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -319,11 +358,14 @@ public class JRDomWriter {
         // Sets the field.------------------------------------------------------
         final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
         reportElement.setAttribute(ATT_X, "0");
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+FIELDS_INTERLINE)*order));
+        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
         reportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
+        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
         reportElement.setAttribute(ATT_MODE, "Opaque");
-        reportElement.setAttribute(ATT_BACKCOLOR, "#F0F0F0");
+        if(order%2==0)
+            reportElement.setAttribute(ATT_BACKCOLOR, "#F0F0F0");
+        else
+            reportElement.setAttribute(ATT_BACKCOLOR, "#F5F5F5");
         
         final Element box = this.document.createElement(TAG_BOX);
         
@@ -342,12 +384,14 @@ public class JRDomWriter {
         staticText.appendChild(text);
         band.appendChild(staticText);
     }
+    
     /**
      * <p>This method writes the label of a given field.</p>
      * @param label
-     * @param order 
+     * @param order
+     * @param heightMultiplicator 
      */
-    private void writeDetailLabel(final String label, int order){
+    private void writeDetailLabel(final String label, final int order, final int heightMultiplicator){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -357,9 +401,9 @@ public class JRDomWriter {
         
         final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
         reportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL));
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+FIELDS_INTERLINE)*order));
+        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
         reportElement.setAttribute(ATT_WIDTH, String.valueOf(LABEL_WIDTH));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
+        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
         
         final Element textElement = this.document.createElement(TAG_TEXT_ELEMENT);
         textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
@@ -385,9 +429,10 @@ public class JRDomWriter {
      * <p>This method writes the variable of a given field.</p>
      * @param field
      * @param c
-     * @param order 
+     * @param order
+     * @param heightMultiplicator 
      */
-    private void writeDetailValue(final String field, final Class c, int order){
+    private void writeDetailValue(final String field, final Class c, final int order, final int heightMultiplicator){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -399,9 +444,9 @@ public class JRDomWriter {
         
         final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
         reportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+FIELDS_INTERLINE)*order));
+        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
         reportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
+        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
         
         final Element textElement = this.document.createElement(TAG_TEXT_ELEMENT);
         textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);

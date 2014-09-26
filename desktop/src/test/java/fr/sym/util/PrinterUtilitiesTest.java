@@ -44,6 +44,7 @@ public class PrinterUtilitiesTest {
      * Test of generateJasperReportsTemplate method, of class PrinterUtilities.
      * @throws java.lang.Exception
      */
+    @Ignore
     @Test
     public void testGenerateJasperReportsTemplate() throws Exception {
         System.out.println("generateJasperReportsTemplate");

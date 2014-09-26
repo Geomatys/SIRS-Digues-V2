@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import net.sf.jasperreports.engine.JasperReport;
 import org.geotoolkit.data.FeatureCollection;
@@ -46,6 +47,8 @@ public class PrinterUtilities {
         
         final JRDomWriter writer = new JRDomWriter(new FileInputStream(
                 "src/main/resources/fr/sym/jrxml/metaTemplate.jrxml"));
+        writer.setFieldsInterline(2);
+        writer.setHeightMultiplicator(3);
         writer.setOutput(new File("src/main/resources/fr/sym/jrxml/"
                 + classToMap.getSimpleName()+".jrxml"));
         writer.write(classToMap);
@@ -61,8 +64,19 @@ public class PrinterUtilities {
     static public void print(final Object objectToPrint) throws Exception {
         
         // Handles the appropriate template ------------------------------------
-        final InputStream template = PrinterUtilities.class.getResourceAsStream(
-                "/fr/sym/jrxml/" + objectToPrint.getClass().getSimpleName() + ".jrxml");
+        /*final InputStream template = PrinterUtilities.class.getResourceAsStream(
+                "/fr/sym/jrxml/" + objectToPrint.getClass().getSimpleName() + ".jrxml");*/
+        
+        // Creates the Jasper Reports specific template from the generic template.
+        final JRDomWriter writer = new JRDomWriter(new FileInputStream(
+                "src/main/resources/fr/sym/jrxml/metaTemplate.jrxml"));
+        writer.setFieldsInterline(2);
+        writer.setHeightMultiplicator(3);
+        final File template = File.createTempFile(objectToPrint.getClass().getSimpleName(), 
+                ".jrxml", new File("src/main/resources/fr/sym/jrxml"));
+        template.deleteOnExit();
+        writer.setOutput(template);
+        writer.write(objectToPrint.getClass());
         
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
@@ -131,6 +145,17 @@ public class PrinterUtilities {
     }
     
     static public void main(String[] arg) throws Exception { 
+        final File rep = new File("../core/sirs-core-store/target/generated-sources/pojos/fr/symadrem/sirs/model");
+        
+        final Pattern pattern = Pattern.compile("(.*)\\.java"); 
+        for (final String s : rep.list()) {  
+            final Matcher matcher = pattern.matcher(s);
+            while(matcher.find()){
+                final String className = matcher.group(1);
+                final Class classe = Class.forName("fr.symadrem.sirs.model."+className);
+                PrinterUtilities.generateJasperReportsTemplate(classe);
+            }
+        }
     }
     
     private PrinterUtilities(){}
