@@ -4,7 +4,9 @@ package fr.sym;
 
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
+import fr.sym.digue.dto.DigueTry;
 import fr.sym.digue.dto.Section;
+import fr.sym.digue.dto.TronconGestionDigueTry;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,63 @@ public class Session {
         }
         
         return damSystems;
+    }
+    
+    private List<DigueTry> digueTrys = null;
+    public List<DigueTry> getDigueTrys(){
+        //TODO database binding
+        if(digueTrys == null){
+            final List<DigueTry> digues = new ArrayList<>();
+            for(int i=0;i<3;i++){
+                final DigueTry ds = new DigueTry();
+                ds.setIdDigue(new Long(i));
+                ds.setLibelleDigue("La digue "+i);
+                digues.add(ds);
+            }
+            digueTrys = digues;
+        }
+        return digueTrys;
+    }
+    
+    private List<TronconGestionDigueTry> tronconGestionDigueTrys = null;
+    public List<TronconGestionDigueTry> getTronconGestionDigueTrys(){
+        //TODO database binding
+        if (tronconGestionDigueTrys == null){
+            final List<TronconGestionDigueTry> troncons = new ArrayList<>();
+            for(int i=0;i<9;i++){
+                final TronconGestionDigueTry ds = new TronconGestionDigueTry();
+                ds.setIdTronconGestion(new Long(i));
+                ds.setLibelleTronconGestion("Le tronçon "+i);
+                ds.setIdDigue(new Long(i%3));
+                troncons.add(ds);
+            }
+            tronconGestionDigueTrys = troncons;
+        }
+        return tronconGestionDigueTrys;
+    }
+    
+    
+    
+    public List<TronconGestionDigueTry> getTronconGestionDigueTrysByDigueTry(DigueTry digue){
+        //TODO database binding
+        final List<TronconGestionDigueTry> troncons = this.getTronconGestionDigueTrys();
+        final List<TronconGestionDigueTry> tronconsDeLaDigue = new ArrayList<>();
+        for(TronconGestionDigueTry troncon : troncons){
+            if(troncon.getIdDigue().equals(digue.getIdDigue())) {
+                tronconsDeLaDigue.add(troncon);
+            }
+        }
+        return tronconsDeLaDigue;
+    }
+    
+    /**
+     * DamSystem can contain Dams or Sections.
+     * 
+     * @param ds
+     * @return 
+     */
+    public List<?> getChildren(DigueTry digue){
+        return this.getTronconGestionDigueTrysByDigueTry(digue);
     }
     
     /**

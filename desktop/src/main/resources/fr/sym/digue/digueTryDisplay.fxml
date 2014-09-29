@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="756.0" prefWidth="1024.0" stylesheets="@digueTryDisplay.css" 
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="fr.sym.digue.FXDigueTryController">
+    <top>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <BorderPane minHeight="180.0" prefHeight="180.0" prefWidth="1024.0" styleClass="info-block" VBox.vgrow="NEVER">
+                    <center>
+                        <GridPane hgap="14.0" prefHeight="175.0" prefWidth="796.0" vgap="20.0" BorderPane.alignment="CENTER">
+                            <children>
+                                <Label prefHeight="18.0" prefWidth="233.0" text="Informations sur la digue" textFill="#dd0000" GridPane.columnSpan="4">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Commentaire" textFill="WHITE" GridPane.rowIndex="2" GridPane.valignment="TOP" />
+                                <TextArea fx:id="commentaireDigueTextField" prefHeight="73.0" prefWidth="456.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                <TextField fx:id="libelleDigueTextField" prefHeight="26.0" prefWidth="85.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="1" />
+                                <Label text="Nom" textFill="WHITE" GridPane.rowIndex="1" />
+                                <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+                                <Label fx:id="idDigueTextField" prefHeight="16.0" prefWidth="81.0" textFill="WHITE" GridPane.columnIndex="4" />
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="73.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="332.0" minWidth="0.0" prefWidth="221.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="38.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="344.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="90.0" />
+                            </columnConstraints>
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
+                            </padding>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="75.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                        </GridPane>
+                    </center>
+                    <right>
+                        <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
+                            <children>
+                                <Pane prefHeight="90.0" prefWidth="227.0" style="-fx-background-color: rgb(74,123,165); -fx-background-radius: 0 0 0 5;" styleClass="object-mode">
+                                    <children>
+                                        <GridPane prefHeight="128.0" prefWidth="227.0" vgap="13.0">
+                                            <children>
+                                                <Label text="Mode" textFill="WHITE">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="mode_label_consultation" text="Consultation" textFill="WHITE" GridPane.rowIndex="1" />
+                                                <Label fx:id="mode_label_saisie" text="Saisie" textFill="#6c95b8" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets left="7.0" />
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <ToggleButton ellipsisString="" mnemonicParsing="false" prefHeight="26.0" prefWidth="63.0" textOverrun="WORD_ELLIPSIS" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                            </children>
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="103.0" minWidth="10.0" prefWidth="90.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="65.0" minWidth="10.0" prefWidth="52.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="65.0" minWidth="10.0" prefWidth="61.0" />
+                                            </columnConstraints>
+                                            <padding>
+                                                <Insets bottom="15.0" left="15.0" right="5.0" top="10.0" />
+                                            </padding>
+                                            <rowConstraints>
+                                                <RowConstraints maxHeight="19.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                        </GridPane>
+                                    </children>
+                                </Pane>
+                            </children>
+                        </VBox>
+                    </right>
+                </BorderPane>
+                <BorderPane VBox.vgrow="NEVER">
+                    <padding>
+                        <Insets top="10.0" />
+                    </padding>
+                    <right>
+                        <Pane prefHeight="32.0" prefWidth="190.0" styleClass="button-list-objects" BorderPane.alignment="CENTER">
+                            <children>
+                                <GridPane prefHeight="30.0" prefWidth="191.0">
+                                    <children>
+                                        <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="32.0" style="-fx-background-color: none;" styleClass="btn-without-style">
+                                            <graphic>
+                                                <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/add-icon.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
+                                            <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/edit-icon-inactif.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="3">
+                                            <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/delete-icon-inactif.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="4">
+                                            <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/search-icon-white.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
+                                            <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/duplicate-icon-inactif.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    </columnConstraints>
+                                    <padding>
+                                        <Insets right="5.0" />
+                                    </padding>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                </GridPane>
+                            </children>
+                        </Pane>
+                    </right>
+                    <left>
+                        <Label text="Liste des tronçons" BorderPane.alignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <BorderPane.margin>
+                                <Insets left="10.0" />
+                            </BorderPane.margin>
+                        </Label>
+                    </left>
+                </BorderPane>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <BorderPane prefHeight="535.0" prefWidth="1024.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+            <center>
+                <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="534.0" prefViewportWidth="1024.0">
+                    <content>
+                        <TableView BorderPane.alignment="CENTER">
+                            <columns>
+                                <TableColumn prefWidth="82.0" text="Identifiant" />
+                                <TableColumn prefWidth="277.0" text="Nom" />
+                                <TableColumn prefWidth="128.0" text="Début de validité" />
+                                <TableColumn prefWidth="128.0" text="Fin de validité" />
+                                <TableColumn prefWidth="128.0" text="SR par défaut" />
+                            </columns>
+                        </TableView>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </center>
+</BorderPane>

@@ -1,6 +1,7 @@
 package fr.sym;
 
 import fr.sym.digue.FXDigueController;
+import fr.sym.digue.FXDiguesTryController;
 import fr.sym.map.FXMapPane;
 import java.io.IOException;
 import javafx.event.ActionEvent;
@@ -59,7 +60,7 @@ public class MainFrameController extends Stage {
 
     @FXML
     void openDigueTab(ActionEvent event) {
-        final FXDigueController digueController = FXDigueController.create();
+        final FXDiguesTryController digueController = FXDiguesTryController.create();
         final Tab tab = new Tab();
         tab.setText("Digues");
         tab.setContent(new BorderPane(digueController.root));
