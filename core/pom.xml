@@ -19,7 +19,6 @@
     <groupId>fr.symadrem.sirs</groupId>
     <artifactId>core</artifactId>
     <packaging>pom</packaging>
-    <version>1.x-SNAPSHOT</version>
     <name>Core</name>
 
     <modules>
