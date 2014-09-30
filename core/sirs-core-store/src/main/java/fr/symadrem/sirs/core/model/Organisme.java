@@ -19,29 +19,29 @@ public class Organisme  extends CouchDbDocument  {
 
    
         
-    private StringProperty  adresse = new SimpleStringProperty();
+    public StringProperty  adresse = new SimpleStringProperty();
         
-    private StringProperty  code_postal = new SimpleStringProperty();
+    public StringProperty  code_postal = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  email = new SimpleStringProperty();
+    public StringProperty  email = new SimpleStringProperty();
         
-    private StringProperty  fax = new SimpleStringProperty();
+    public StringProperty  fax = new SimpleStringProperty();
         
-    private StringProperty  localite = new SimpleStringProperty();
+    public StringProperty  localite = new SimpleStringProperty();
         
-    private StringProperty  mobile = new SimpleStringProperty();
+    public StringProperty  mobile = new SimpleStringProperty();
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private StringProperty  pays = new SimpleStringProperty();
+    public StringProperty  pays = new SimpleStringProperty();
         
-    private StringProperty  statut_juridique = new SimpleStringProperty();
+    public StringProperty  statut_juridique = new SimpleStringProperty();
         
-    private StringProperty  telephone = new SimpleStringProperty();
+    public StringProperty  telephone = new SimpleStringProperty();
     
  
     //

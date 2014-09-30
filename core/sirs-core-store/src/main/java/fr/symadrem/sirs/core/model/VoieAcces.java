@@ -19,17 +19,17 @@ public class VoieAcces  extends StructureAvecContacts  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private FloatProperty  largeur = new SimpleFloatProperty();
+    public FloatProperty  largeur = new SimpleFloatProperty();
         
-    private StringProperty  position_structure = new SimpleStringProperty();
+    public StringProperty  position_structure = new SimpleStringProperty();
         
-    private StringProperty  nature = new SimpleStringProperty();
+    public StringProperty  nature = new SimpleStringProperty();
         
-    private StringProperty  usage = new SimpleStringProperty();
+    public StringProperty  usage = new SimpleStringProperty();
         
-    private IntegerProperty  numéro_secteur = new SimpleIntegerProperty();
+    public IntegerProperty  numéro_secteur = new SimpleIntegerProperty();
     
 
   

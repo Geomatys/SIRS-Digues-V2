@@ -18,19 +18,19 @@ public class TronconDigue  extends Positionable  {
 
    
         
-    private StringProperty  libelle = new SimpleStringProperty();
+    public StringProperty  libelle = new SimpleStringProperty();
         
-    private StringProperty  commentaire = new SimpleStringProperty();
+    public StringProperty  commentaire = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  rive = new SimpleStringProperty();
+    public StringProperty  rive = new SimpleStringProperty();
         
-    private StringProperty  systeme_reperage_defaut = new SimpleStringProperty();
+    public StringProperty  systeme_reperage_defaut = new SimpleStringProperty();
     
  
     public ObservableList<Structure>  stuctures =  FXCollections.observableArrayList() ; 

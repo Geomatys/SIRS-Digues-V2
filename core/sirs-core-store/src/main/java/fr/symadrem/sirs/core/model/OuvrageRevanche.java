@@ -17,15 +17,15 @@ public class OuvrageRevanche  extends Structure  {
 
    
         
-    private FloatProperty  hauteur_murette = new SimpleFloatProperty();
+    public FloatProperty  hauteur_murette = new SimpleFloatProperty();
         
-    private FloatProperty  largeur = new SimpleFloatProperty();
+    public FloatProperty  largeur = new SimpleFloatProperty();
         
-    private StringProperty  materiau_bas = new SimpleStringProperty();
+    public StringProperty  materiau_bas = new SimpleStringProperty();
         
-    private StringProperty  materiau_haut = new SimpleStringProperty();
+    public StringProperty  materiau_haut = new SimpleStringProperty();
         
-    private StringProperty  position_structure = new SimpleStringProperty();
+    public StringProperty  position_structure = new SimpleStringProperty();
     
  
     //

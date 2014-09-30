@@ -19,31 +19,31 @@ public class OuvertureBatardable  extends StructureAvecContacts  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private StringProperty  type_glissiere = new SimpleStringProperty();
+    public StringProperty  type_glissiere = new SimpleStringProperty();
         
-    private FloatProperty  hauteur = new SimpleFloatProperty();
+    public FloatProperty  hauteur = new SimpleFloatProperty();
         
-    private FloatProperty  largeur = new SimpleFloatProperty();
+    public FloatProperty  largeur = new SimpleFloatProperty();
         
-    private FloatProperty  z_du_seuil = new SimpleFloatProperty();
+    public FloatProperty  z_du_seuil = new SimpleFloatProperty();
         
-    private StringProperty  type_seuil = new SimpleStringProperty();
+    public StringProperty  type_seuil = new SimpleStringProperty();
         
-    private StringProperty  nature_batardeaux = new SimpleStringProperty();
+    public StringProperty  nature_batardeaux = new SimpleStringProperty();
         
-    private IntegerProperty  nombre_batardeaux = new SimpleIntegerProperty();
+    public IntegerProperty  nombre_batardeaux = new SimpleIntegerProperty();
         
-    private FloatProperty  poids_unitaires_batardeaux = new SimpleFloatProperty();
+    public FloatProperty  poids_unitaires_batardeaux = new SimpleFloatProperty();
         
-    private StringProperty  moyen_manipulation_batardeaux = new SimpleStringProperty();
+    public StringProperty  moyen_manipulation_batardeaux = new SimpleStringProperty();
         
-    private StringProperty  organisme_manipulateur_batardeaux = new SimpleStringProperty();
+    public StringProperty  organisme_manipulateur_batardeaux = new SimpleStringProperty();
         
-    private StringProperty  organisme_stockant_batardeaux = new SimpleStringProperty();
+    public StringProperty  organisme_stockant_batardeaux = new SimpleStringProperty();
         
-    private StringProperty  intervenant_manipulateur_batardeaux = new SimpleStringProperty();
+    public StringProperty  intervenant_manipulateur_batardeaux = new SimpleStringProperty();
     
  
     //

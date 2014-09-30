@@ -20,19 +20,19 @@ public class VoieDigue  extends StructureAvecContacts  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private StringProperty  type_voie = new SimpleStringProperty();
+    public StringProperty  type_voie = new SimpleStringProperty();
         
-    private FloatProperty  largeur = new SimpleFloatProperty();
+    public FloatProperty  largeur = new SimpleFloatProperty();
         
-    private StringProperty  position_structure = new SimpleStringProperty();
+    public StringProperty  position_structure = new SimpleStringProperty();
         
-    private StringProperty  revetement = new SimpleStringProperty();
+    public StringProperty  revetement = new SimpleStringProperty();
         
-    private StringProperty  usage = new SimpleStringProperty();
+    public StringProperty  usage = new SimpleStringProperty();
         
-    private StringProperty  orientation = new SimpleStringProperty();
+    public StringProperty  orientation = new SimpleStringProperty();
     
  
     //

@@ -17,15 +17,15 @@ public class BorneDigue  extends Positionable  {
 
    
         
-    private StringProperty  commentaire = new SimpleStringProperty();
+    public StringProperty  commentaire = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private BooleanProperty  fictive = new SimpleBooleanProperty();
+    public BooleanProperty  fictive = new SimpleBooleanProperty();
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
     
 
   

@@ -15,11 +15,11 @@ public class ReseauHydroCielOuvert  extends StructureAvecContacts  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private StringProperty  type_reseau = new SimpleStringProperty();
+    public StringProperty  type_reseau = new SimpleStringProperty();
         
-    private StringProperty  position_structure = new SimpleStringProperty();
+    public StringProperty  position_structure = new SimpleStringProperty();
     
  
     //

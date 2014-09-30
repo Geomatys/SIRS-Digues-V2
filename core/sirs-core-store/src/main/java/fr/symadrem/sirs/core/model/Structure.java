@@ -15,15 +15,15 @@ public abstract class Structure  extends Positionable  {
 
    
         
-    private StringProperty  commentaire = new SimpleStringProperty();
+    public StringProperty  commentaire = new SimpleStringProperty();
         
-    private StringProperty  cote = new SimpleStringProperty();
+    public StringProperty  cote = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  source = new SimpleStringProperty();
+    public StringProperty  source = new SimpleStringProperty();
     
  
     //

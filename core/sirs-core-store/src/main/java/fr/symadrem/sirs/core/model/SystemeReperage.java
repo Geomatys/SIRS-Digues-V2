@@ -16,13 +16,13 @@ public class SystemeReperage  extends CouchDbDocument  {
 
    
         
-    private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
-    private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  lineaire = new SimpleStringProperty();
+    public StringProperty  lineaire = new SimpleStringProperty();
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
     
  
     //

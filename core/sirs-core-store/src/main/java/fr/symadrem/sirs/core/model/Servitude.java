@@ -16,9 +16,9 @@ public class Servitude  extends CouchDbDocument  {
 
    
         
-    private StringProperty  type_servitude = new SimpleStringProperty();
+    public StringProperty  type_servitude = new SimpleStringProperty();
         
-    private StringProperty  parcelle = new SimpleStringProperty();
+    public StringProperty  parcelle = new SimpleStringProperty();
     
 
   

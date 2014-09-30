@@ -22,25 +22,25 @@ public class Positionable  extends CouchDbDocument  {
 
    
         
-    private IntegerProperty  borne_debut = new SimpleIntegerProperty();
+    public IntegerProperty  borne_debut = new SimpleIntegerProperty();
         
-    private BooleanProperty  borne_debut_aval = new SimpleBooleanProperty();
+    public BooleanProperty  borne_debut_aval = new SimpleBooleanProperty();
         
-    private FloatProperty  borne_debut_distance = new SimpleFloatProperty();
+    public FloatProperty  borne_debut_distance = new SimpleFloatProperty();
         
-    private IntegerProperty  borne_fin = new SimpleIntegerProperty();
+    public IntegerProperty  borne_fin = new SimpleIntegerProperty();
         
-    private BooleanProperty  borne_fin_aval = new SimpleBooleanProperty();
+    public BooleanProperty  borne_fin_aval = new SimpleBooleanProperty();
         
-    private FloatProperty  borne_fin_distance = new SimpleFloatProperty();
+    public FloatProperty  borne_fin_distance = new SimpleFloatProperty();
         
-    private StringProperty  position = new SimpleStringProperty();
+    public StringProperty  position = new SimpleStringProperty();
         
-    private FloatProperty  PR_debut = new SimpleFloatProperty();
+    public FloatProperty  PR_debut = new SimpleFloatProperty();
         
-    private FloatProperty  PR_fin = new SimpleFloatProperty();
+    public FloatProperty  PR_fin = new SimpleFloatProperty();
         
-    private IntegerProperty  systeme_rep_id = new SimpleIntegerProperty();
+    public IntegerProperty  systeme_rep_id = new SimpleIntegerProperty();
     
 
   

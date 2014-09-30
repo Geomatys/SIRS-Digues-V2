@@ -19,23 +19,23 @@ public class TalusRisberme  extends Structure  {
 
    
         
-    private IntegerProperty  num_couche = new SimpleIntegerProperty();
+    public IntegerProperty  num_couche = new SimpleIntegerProperty();
         
-    private StringProperty  fonction_haut = new SimpleStringProperty();
+    public StringProperty  fonction_haut = new SimpleStringProperty();
         
-    private StringProperty  fonction_bas = new SimpleStringProperty();
+    public StringProperty  fonction_bas = new SimpleStringProperty();
         
-    private StringProperty  materiau_haut = new SimpleStringProperty();
+    public StringProperty  materiau_haut = new SimpleStringProperty();
         
-    private StringProperty  materiau_bas = new SimpleStringProperty();
+    public StringProperty  materiau_bas = new SimpleStringProperty();
         
-    private FloatProperty  epaisseur_sommet = new SimpleFloatProperty();
+    public FloatProperty  epaisseur_sommet = new SimpleFloatProperty();
         
-    private FloatProperty  longueur_rampart_haut = new SimpleFloatProperty();
+    public FloatProperty  longueur_rampart_haut = new SimpleFloatProperty();
         
-    private FloatProperty  longueur_rampart_bas = new SimpleFloatProperty();
+    public FloatProperty  longueur_rampart_bas = new SimpleFloatProperty();
         
-    private FloatProperty  pente_interieur = new SimpleFloatProperty();
+    public FloatProperty  pente_interieur = new SimpleFloatProperty();
     
 
   

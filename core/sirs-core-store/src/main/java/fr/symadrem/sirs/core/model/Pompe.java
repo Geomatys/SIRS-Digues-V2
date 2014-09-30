@@ -18,13 +18,13 @@ public class Pompe  extends CouchDbDocument  {
 
    
         
-    private StringProperty  marque = new SimpleStringProperty();
+    public StringProperty  marque = new SimpleStringProperty();
         
-    private FloatProperty  puissance = new SimpleFloatProperty();
+    public FloatProperty  puissance = new SimpleFloatProperty();
         
-    private FloatProperty  debit = new SimpleFloatProperty();
+    public FloatProperty  debit = new SimpleFloatProperty();
         
-    private FloatProperty  hauteur_refoulement = new SimpleFloatProperty();
+    public FloatProperty  hauteur_refoulement = new SimpleFloatProperty();
     
 
   

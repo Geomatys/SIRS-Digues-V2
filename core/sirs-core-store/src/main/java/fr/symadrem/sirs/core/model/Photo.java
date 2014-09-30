@@ -19,11 +19,11 @@ public class Photo  extends CouchDbDocument  {
 
    
         
-    private StringProperty  cote = new SimpleStringProperty();
+    public StringProperty  cote = new SimpleStringProperty();
         
-    private StringProperty  orientation = new SimpleStringProperty();
+    public StringProperty  orientation = new SimpleStringProperty();
         
-    private StringProperty  photographe = new SimpleStringProperty();
+    public StringProperty  photographe = new SimpleStringProperty();
     
  
     public ObservableList<Document>  photo =  FXCollections.observableArrayList() ;

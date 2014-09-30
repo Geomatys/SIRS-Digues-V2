@@ -20,19 +20,19 @@ public class Document  extends Positionable  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private FloatProperty  taille = new SimpleFloatProperty();
+    public FloatProperty  taille = new SimpleFloatProperty();
         
-    private StringProperty  description = new SimpleStringProperty();
+    public StringProperty  description = new SimpleStringProperty();
         
-    private StringProperty  type = new SimpleStringProperty();
+    public StringProperty  type = new SimpleStringProperty();
         
-    private StringProperty  chemin = new SimpleStringProperty();
+    public StringProperty  chemin = new SimpleStringProperty();
         
-    private StringProperty  contenu = new SimpleStringProperty();
+    public StringProperty  contenu = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_document = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_document = new SimpleObjectProperty<java.util.Date>();
     
  
     //

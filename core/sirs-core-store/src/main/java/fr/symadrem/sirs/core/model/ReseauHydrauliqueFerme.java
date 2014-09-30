@@ -19,21 +19,21 @@ public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
 
    
         
-    private StringProperty  nom = new SimpleStringProperty();
+    public StringProperty  nom = new SimpleStringProperty();
         
-    private StringProperty  type_reseau = new SimpleStringProperty();
+    public StringProperty  type_reseau = new SimpleStringProperty();
         
-    private StringProperty  position_structure = new SimpleStringProperty();
+    public StringProperty  position_structure = new SimpleStringProperty();
         
-    private StringProperty  utilisation = new SimpleStringProperty();
+    public StringProperty  utilisation = new SimpleStringProperty();
         
-    private StringProperty  implatation = new SimpleStringProperty();
+    public StringProperty  implatation = new SimpleStringProperty();
         
-    private StringProperty  ecoulement = new SimpleStringProperty();
+    public StringProperty  ecoulement = new SimpleStringProperty();
         
-    private BooleanProperty  autorise = new SimpleBooleanProperty();
+    public BooleanProperty  autorise = new SimpleBooleanProperty();
         
-    private FloatProperty  diametre = new SimpleFloatProperty();
+    public FloatProperty  diametre = new SimpleFloatProperty();
     
  
     //

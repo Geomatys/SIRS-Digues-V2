@@ -15,7 +15,7 @@ public class FrancBord  extends Structure  {
 
    
         
-    private FloatProperty  largeur = new SimpleFloatProperty();
+    public FloatProperty  largeur = new SimpleFloatProperty();
     
 
   

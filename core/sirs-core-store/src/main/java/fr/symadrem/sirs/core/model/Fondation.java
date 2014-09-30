@@ -19,13 +19,13 @@ public class Fondation  extends Structure  {
 
    
         
-    private IntegerProperty  num_couche = new SimpleIntegerProperty();
+    public IntegerProperty  num_couche = new SimpleIntegerProperty();
         
-    private StringProperty  fonction = new SimpleStringProperty();
+    public StringProperty  fonction = new SimpleStringProperty();
         
-    private StringProperty  materiau = new SimpleStringProperty();
+    public StringProperty  materiau = new SimpleStringProperty();
         
-    private FloatProperty  epaisseur = new SimpleFloatProperty();
+    public FloatProperty  epaisseur = new SimpleFloatProperty();
     
 
   

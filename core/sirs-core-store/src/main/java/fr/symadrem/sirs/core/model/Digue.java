@@ -19,11 +19,11 @@ public class Digue  extends CouchDbDocument  {
 
    
         
-    private StringProperty  libelle = new SimpleStringProperty();
+    public StringProperty  libelle = new SimpleStringProperty();
         
-    private StringProperty  commentaire = new SimpleStringProperty();
+    public StringProperty  commentaire = new SimpleStringProperty();
         
-    private ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
     
  
     //

@@ -15,9 +15,9 @@ public class PiedDigue  extends Structure  {
 
    
         
-    private StringProperty  fonction = new SimpleStringProperty();
+    public StringProperty  fonction = new SimpleStringProperty();
         
-    private StringProperty  materiau = new SimpleStringProperty();
+    public StringProperty  materiau = new SimpleStringProperty();
     
 
   
