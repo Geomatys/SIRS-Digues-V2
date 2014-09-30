@@ -8,7 +8,7 @@ import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
 import fr.sym.util.WrapTreeItem;
 import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -59,8 +59,8 @@ public class FXDiguesTryController {
                 if(obj instanceof Digue){
                     final FXDigueTryController ctrl = FXDigueTryController.create((Digue)obj);
                     uiRight.setCenter(ctrl.root);
-                }else if(obj instanceof Troncon){
-                    final FXTronconGestionDigueTryController ctrl = FXTronconGestionDigueTryController.create((Troncon)obj);
+                }else if(obj instanceof TronconDigue){
+                    final FXTronconGestionDigueTryController ctrl = FXTronconGestionDigueTryController.create((TronconDigue)obj);
                     uiRight.setCenter(ctrl.root);
                 }
                 
@@ -100,10 +100,10 @@ public class FXDiguesTryController {
             }
             
             if(obj instanceof Digue){
-                this.setText(((Digue)obj).getLabel()+" ("+getTreeItem().getChildren().size()+") ");
+                this.setText(((Digue)obj).getLibelle()+" ("+getTreeItem().getChildren().size()+") ");
             }
-            else if(obj instanceof Troncon){
-                this.setText(((Troncon)obj).getName()+" ("+getTreeItem().getChildren().size()+") ");
+            else if(obj instanceof TronconDigue){
+                this.setText(((TronconDigue)obj).getLibelle()+" ("+getTreeItem().getChildren().size()+") ");
             }
             else if(obj instanceof DamSystem){
                 setText( ((DamSystem)obj).getName().getValue()+" ("+getTreeItem().getChildren().size()+")");

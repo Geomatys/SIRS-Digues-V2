@@ -3,7 +3,7 @@
 package fr.sym.digue;
 
 import fr.sym.Symadrem;
-import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,7 +20,7 @@ import javafx.scene.control.ToggleButton;
 public class FXTronconGestionDigueTryController {
     
     public Parent root;
-    private Troncon troncon;
+    private TronconDigue troncon;
     
     @FXML
     TextField section_name;
@@ -42,18 +42,18 @@ public class FXTronconGestionDigueTryController {
         }
     }
     
-    public void init(Troncon troncon){
+    public void init(TronconDigue troncon){
         this.troncon = troncon;
         
         this.section_name.setEditable(true);
-        this.section_name.textProperty().bindBidirectional(this.troncon.name);
+        this.section_name.textProperty().bindBidirectional(this.troncon.libelle);
         
         this.commentaireTronconTextField.setEditable(true);
         this.commentaireTronconTextField.setWrapText(true);
-        this.commentaireTronconTextField.textProperty().bindBidirectional(this.troncon.designation);
+        this.commentaireTronconTextField.textProperty().bindBidirectional(this.troncon.commentaire);
     }
     
-    public static FXTronconGestionDigueTryController create(Troncon troncon) {
+    public static FXTronconGestionDigueTryController create(TronconDigue troncon) {
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource("/fr/sym/digue/tronconGestionDigueTryDisplay.fxml"));
         final Parent root;
         try {

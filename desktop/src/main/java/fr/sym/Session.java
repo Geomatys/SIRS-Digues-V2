@@ -5,8 +5,8 @@ package fr.sym;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
-import fr.symadrem.sirs.core.model.Troncon;
 import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,8 +94,8 @@ public class Session {
             final List<Digue> digs = new ArrayList<>();
             for(int i=0; i<nbDigues; i++){
                 final Digue digue = new Digue();
-                digue.setLabel("La digue "+i);
-                digue.setComment(i+" : Lorem ipsum dolor sit amet, consectetur "
+                digue.setLibelle("La digue "+i);
+                digue.setCommentaire(i+" : Lorem ipsum dolor sit amet, consectetur "
                         + "adipiscing elit. Sed non risus. Suspendisse lectus "
                         + "tortor, dignissim sit amet, adipiscing nec, ultricies "
                         + "sed, dolor. Cras elementum ultrices diam. Maecenas "
@@ -112,7 +112,7 @@ public class Session {
                         + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                         + "sed pede pellentesque fermentum. Maecenas adipiscing "
                         + "ante non diam sodales hendrerit.");
-                digue.setTronconsIds(new HashSet<>());
+                digue.setTronconsIds(new ArrayList<>());
                 digs.add(digue);
             }
             this.digues = digs;
@@ -120,23 +120,23 @@ public class Session {
         return this.digues;
     }
     
-    private Map<Digue, List<Troncon>> digueToTroncons = new HashMap<>();
-    private List<Troncon> tronconsGestionDigue = null;
-    public List<Troncon> getTroncons(){
+    private Map<Digue, List<TronconDigue>> digueToTroncons = new HashMap<>();
+    private List<TronconDigue> tronconsGestionDigue = null;
+    public List<TronconDigue> getTroncons(){
         //TODO database binding
         int nbTroncons = 30;
         if (this.tronconsGestionDigue == null){
-            final List<Troncon> troncons = new ArrayList<>();
+            final List<TronconDigue> troncons = new ArrayList<>();
             for(int i=0; i<nbTroncons; i++){
-                final Troncon tron = new Troncon();
-                tron.setName("Le tronçon "+i);
+                final TronconDigue tron = new TronconDigue();
+                tron.setLibelle("Le tronçon "+i);
                 tron.setDigue(Long.toString(i%3));
                 /*System.out.println("Jojo : "+tron.getJojo());
                 if(i%2==0)
                     tron.setJojo(Troncon.jojoenum.oui);
                 else 
                     tron.setJojo((Troncon.jojoenum.bof));*/
-                tron.setDesignation("Tronçon "+i+" : Lorem ipsum dolor sit amet, consectetur "
+                tron.setCommentaire("Tronçon "+i+" : Lorem ipsum dolor sit amet, consectetur "
                         + "adipiscing elit. Sed non risus. Suspendisse lectus "
                         + "tortor, dignissim sit amet, adipiscing nec, ultricies "
                         + "sed, dolor. Cras elementum ultrices diam. Maecenas "
@@ -161,16 +161,16 @@ public class Session {
             List<Digue> digs = this.getDigues();
             int nbDigues = digs.size();
             for (int i=0; i<nbTroncons; i++){
-                Troncon tron = this.tronconsGestionDigue.get(i);
+                TronconDigue tron = this.tronconsGestionDigue.get(i);
                 Digue digue = digs.get(i%nbDigues);
                 
                 tron.setDigue(String.valueOf(i%nbDigues));
-                Set<String> tronconsIds = digue.getTronconsIds();
+                List<String> tronconsIds = digue.getTronconsIds();
                 tronconsIds.add(String.valueOf(i));
                 digue.setTronconsIds(tronconsIds);
 
                 if(!this.digueToTroncons.containsKey(digue)){
-                    List<Troncon> trons = new ArrayList<>();
+                    List<TronconDigue> trons = new ArrayList<>();
                     trons.add(tron);
                     this.digueToTroncons.put(digue, trons);
                 } else {
@@ -181,7 +181,7 @@ public class Session {
         return this.tronconsGestionDigue;
     }
     
-    public List<Troncon> getTronconGestionDigueTrysByDigueTry(Digue digue){
+    public List<TronconDigue> getTronconGestionDigueTrysByDigueTry(Digue digue){
         //TODO database binding
         //return this.digueToTroncons.get(digue);
         //TODO database binding

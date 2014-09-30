@@ -3,7 +3,7 @@ package fr.sym.digue;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.util.List;
 import javafx.collections.FXCollections;
@@ -54,7 +54,7 @@ public class FXDigueTryController {
     private TextArea commentaireDigueTextField;
 
     @FXML
-    private TableView<Troncon> tronconsTable;
+    private TableView<TronconDigue> tronconsTable;
 
     @FXML
     private ToggleButton editionButton;
@@ -65,11 +65,11 @@ public class FXDigueTryController {
         this.digue = digue;
 
         // Binding levee's name.------------------------------------------------
-        this.libelleDigueTextField.textProperty().bindBidirectional(digue.label);
+        this.libelleDigueTextField.textProperty().bindBidirectional(digue.libelle);
         this.libelleDigueTextField.setEditable(true);
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaireDigueTextField.textProperty().bindBidirectional(digue.comment);
+        this.commentaireDigueTextField.textProperty().bindBidirectional(digue.commentaire);
         this.commentaireDigueTextField.setWrapText(true);
         this.commentaireDigueTextField.setEditable(true);
 
@@ -91,10 +91,10 @@ public class FXDigueTryController {
          );*/
         /* 
          final TableColumn<FieldValue, Field> valueColumn = new TableColumn<>("Value");*/
-        colName.setCellFactory(new Callback<TableColumn<Troncon, String>, CustomizedTableCell>() {
+        colName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedTableCell>() {
 
             @Override
-            public CustomizedTableCell call(TableColumn<Troncon, String> param) {
+            public CustomizedTableCell call(TableColumn<TronconDigue, String> param) {
                 return new CustomizedTableCell();
             }
         });
@@ -136,19 +136,19 @@ public class FXDigueTryController {
         
          );*/
         // Binding levee's section.---------------------------------------------
-        final List<Troncon> troncons = Session.getInstance().getTronconGestionDigueTrysByDigueTry(this.digue);
-        final ObservableList<Troncon> tronconsObservables = FXCollections.observableArrayList();
+        final List<TronconDigue> troncons = Session.getInstance().getTronconGestionDigueTrysByDigueTry(this.digue);
+        final ObservableList<TronconDigue> tronconsObservables = FXCollections.observableArrayList();
         troncons.stream().forEach((troncon) -> {
             tronconsObservables.add(troncon);
         });
         this.tronconsTable.setItems(tronconsObservables);
         this.tronconsTable.setEditable(true);
 
-        PropertyValueFactory<Troncon, String> pvf = new PropertyValueFactory<>("name");
-        TableColumn.CellDataFeatures<Troncon, String> cdf = new TableColumn.CellDataFeatures<Troncon, String>(tronconsTable, colName, null);
+        PropertyValueFactory<TronconDigue, String> pvf = new PropertyValueFactory<>("name");
+        TableColumn.CellDataFeatures<TronconDigue, String> cdf = new TableColumn.CellDataFeatures<TronconDigue, String>(tronconsTable, colName, null);
     }
 
-    class CustomizedTableCell extends TableCell<Troncon, String> {
+    class CustomizedTableCell extends TableCell<TronconDigue, String> {
 
         @Override
         protected void updateItem(String item, boolean empty) {
@@ -175,7 +175,7 @@ public class FXDigueTryController {
 
     @FXML
     public void change(ActionEvent event) {
-        System.out.println(digue.label);
+        System.out.println(digue.libelle);
     }
 
     @FXML
