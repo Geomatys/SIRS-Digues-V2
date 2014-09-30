@@ -1,6 +1,5 @@
 package fr.sym;
 
-import fr.sym.digue.FXDigueController;
 import fr.sym.digue.FXDiguesTryController;
 import fr.sym.map.FXMapPane;
 import java.io.IOException;

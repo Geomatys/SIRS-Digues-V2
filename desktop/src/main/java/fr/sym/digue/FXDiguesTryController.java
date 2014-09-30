@@ -5,10 +5,10 @@ package fr.sym.digue;
 import fr.sym.*;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
-import fr.sym.digue.dto.DigueTry;
 import fr.sym.digue.dto.Section;
-import fr.sym.digue.dto.TronconGestionDigueTry;
 import fr.sym.util.WrapTreeItem;
+import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.Troncon;
 import java.io.IOException;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -39,7 +39,7 @@ public class FXDiguesTryController {
             root.getChildren().add(new WrapTreeItem(ds));
         }*/
         
-        for(DigueTry ds : Session.getInstance().getDigueTrys()){
+        for(Digue ds : Session.getInstance().getDigues()){
             root.getChildren().add(new WrapTreeItem(ds));
         }
         
@@ -56,11 +56,11 @@ public class FXDiguesTryController {
                     obj = ((TreeItem)obj).getValue();
                 }
                 
-                if(obj instanceof DigueTry){
-                    final FXDigueTryController ctrl = FXDigueTryController.create();
+                if(obj instanceof Digue){
+                    final FXDigueTryController ctrl = FXDigueTryController.create((Digue)obj);
                     uiRight.setCenter(ctrl.root);
-                }else if(obj instanceof Section){
-                    final FXSectionController ctrl = FXSectionController.create();
+                }else if(obj instanceof Troncon){
+                    final FXTronconGestionDigueTryController ctrl = FXTronconGestionDigueTryController.create();
                     uiRight.setCenter(ctrl.root);
                 }
                 
@@ -99,11 +99,11 @@ public class FXDiguesTryController {
                 obj = ((TreeItem)obj).getValue();
             }
             
-            if(obj instanceof DigueTry){
-                this.setText(((DigueTry)obj).getLibelleDigue()+" ("+getTreeItem().getChildren().size()+") ");
+            if(obj instanceof Digue){
+                this.setText(((Digue)obj).getLabel()+" ("+getTreeItem().getChildren().size()+") ");
             }
-            else if(obj instanceof TronconGestionDigueTry){
-                this.setText(((TronconGestionDigueTry)obj).getLibelleTronconGestion()+" ("+getTreeItem().getChildren().size()+") ");
+            else if(obj instanceof Troncon){
+                this.setText(((Troncon)obj).getName()+" ("+getTreeItem().getChildren().size()+") ");
             }
             else if(obj instanceof DamSystem){
                 setText( ((DamSystem)obj).getName().getValue()+" ("+getTreeItem().getChildren().size()+")");

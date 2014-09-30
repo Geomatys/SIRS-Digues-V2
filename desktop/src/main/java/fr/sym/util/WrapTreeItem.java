@@ -7,8 +7,8 @@ import fr.sym.Session;
 import fr.sym.Theme;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
-import fr.sym.digue.dto.DigueTry;
 import fr.sym.digue.dto.Section;
+import fr.symadrem.sirs.core.model.Digue;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
@@ -38,9 +38,8 @@ public class WrapTreeItem extends TreeItem {
             final Object obj = getValue();
             List candidates = new ArrayList();
             
-            if(obj instanceof DigueTry){
-                candidates = Session.getInstance().getChildren((DigueTry)obj);
-                System.out.println("On rentre :)");
+            if(obj instanceof Digue){
+                candidates = Session.getInstance().getChildren((Digue)obj);
             }else
             
             

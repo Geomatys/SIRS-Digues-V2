@@ -4,12 +4,18 @@ package fr.sym;
 
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
-import fr.sym.digue.dto.DigueTry;
 import fr.sym.digue.dto.Section;
-import fr.sym.digue.dto.TronconGestionDigueTry;
+import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.model.Digue;
 import java.net.URL;
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.coverage.CoverageReference;
@@ -82,42 +88,93 @@ public class Session {
         return damSystems;
     }
     
-    private List<DigueTry> digueTrys = null;
-    public List<DigueTry> getDigueTrys(){
+    private List<Digue> digues = null;
+    public List<Digue> getDigues(){
         //TODO database binding
-        if(digueTrys == null){
-            final List<DigueTry> digues = new ArrayList<>();
-            for(int i=0;i<3;i++){
-                final DigueTry ds = new DigueTry();
-                ds.setIdDigue(new Long(i));
-                ds.setLibelleDigue("La digue "+i);
-                digues.add(ds);
+        int nbDigues = 10;
+        if(this.digues == null){
+            final List<Digue> digs = new ArrayList<>();
+            for(int i=0; i<nbDigues; i++){
+                final Digue digue = new Digue();
+                digue.setLabel("La digue "+i);
+                digue.setComment(i+" : Lorem ipsum dolor sit amet, consectetur "
+                        + "adipiscing elit. Sed non risus. Suspendisse lectus "
+                        + "tortor, dignissim sit amet, adipiscing nec, ultricies "
+                        + "sed, dolor. Cras elementum ultrices diam. Maecenas "
+                        + "ligula massa, varius a, semper congue, euismod non, "
+                        + "mi. Proin porttitor, orci nec nonummy molestie, enim "
+                        + "est eleifend mi, non fermentum diam nisl sit amet "
+                        + "erat. Duis semper. Duis arcu massa, scelerisque "
+                        + "vitae, consequat in, pretium a, enim. Pellentesque "
+                        + "congue. Ut in risus volutpat libero pharetra tempor. "
+                        + "Cras vestibulum bibendum augue. Praesent egestas leo "
+                        + "in pede. Praesent blandit odio eu enim. Pellentesque "
+                        + "sed dui ut augue blandit sodales. Vestibulum ante "
+                        + "ipsum primis in faucibus orci luctus et ultrices "
+                        + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
+                        + "sed pede pellentesque fermentum. Maecenas adipiscing "
+                        + "ante non diam sodales hendrerit.");
+                digue.setTronconsIds(new HashSet<>());
+                digs.add(digue);
             }
-            digueTrys = digues;
+            this.digues = digs;
         }
-        return digueTrys;
+        return this.digues;
     }
     
-    private List<TronconGestionDigueTry> tronconGestionDigueTrys = null;
-    public List<TronconGestionDigueTry> getTronconGestionDigueTrys(){
+    private Map<Digue, List<Troncon>> digueToTroncons = new HashMap<>();
+    private List<Troncon> tronconsGestionDigue = null;
+    public List<Troncon> getTroncons(){
         //TODO database binding
-        if (tronconGestionDigueTrys == null){
-            final List<TronconGestionDigueTry> troncons = new ArrayList<>();
-            for(int i=0;i<9;i++){
-                final TronconGestionDigueTry ds = new TronconGestionDigueTry();
-                ds.setIdTronconGestion(new Long(i));
-                ds.setLibelleTronconGestion("Le tronçon "+i);
-                ds.setIdDigue(new Long(i%3));
-                troncons.add(ds);
+        int nbTroncons = 30;
+        if (this.tronconsGestionDigue == null){
+            final List<Troncon> troncons = new ArrayList<>();
+            for(int i=0; i<nbTroncons; i++){
+                final Troncon tron = new Troncon();
+                tron.setName("Le tronçon "+i);
+                tron.setDigue(Long.toString(i%3));
+                System.out.println("Jojo : "+tron.getJojo());
+                if(i%2==0)
+                    tron.setJojo(Troncon.jojoenum.oui);
+                else 
+                    tron.setJojo((Troncon.jojoenum.bof));
+                troncons.add(tron);
             }
-            tronconGestionDigueTrys = troncons;
+            this.tronconsGestionDigue = troncons;
+        
+            // Linking troncons to digues
+            List<Digue> digues = this.getDigues();
+            int nbDigues = digues.size();
+            for (int i=0; i<nbTroncons; i++){
+                Troncon tron = this.tronconsGestionDigue.get(i);
+                Digue digue = digues.get(i%nbDigues);
+                
+                tron.setDigue(String.valueOf(i%nbDigues));
+                Set<String> tronconsIds = digue.getTronconsIds();
+                tronconsIds.add(String.valueOf(i));
+                digue.setTronconsIds(tronconsIds);
+
+                if(!this.digueToTroncons.containsKey(digue)){
+                    List<Troncon> trons = new ArrayList<>();
+                    trons.add(tron);
+                    this.digueToTroncons.put(digue, trons);
+                } else {
+                    this.digueToTroncons.get(digue).add(tron);
+                }
+            }
         }
-        return tronconGestionDigueTrys;
+        return this.tronconsGestionDigue;
     }
     
+    public List<Troncon> getTronconGestionDigueTrysByDigueTry(Digue digue){
+        //TODO database binding
+        //return this.digueToTroncons.get(digue);
+        //TODO database binding
+        this.getTroncons();
+        return this.digueToTroncons.get(digue);
+    }
     
-    
-    public List<TronconGestionDigueTry> getTronconGestionDigueTrysByDigueTry(DigueTry digue){
+    /*public List<TronconGestionDigueTry> getTronconGestionDigueTrysByDigueTry(DigueTry digue){
         //TODO database binding
         final List<TronconGestionDigueTry> troncons = this.getTronconGestionDigueTrys();
         final List<TronconGestionDigueTry> tronconsDeLaDigue = new ArrayList<>();
@@ -127,7 +184,7 @@ public class Session {
             }
         }
         return tronconsDeLaDigue;
-    }
+    }*/
     
     /**
      * DamSystem can contain Dams or Sections.
@@ -135,7 +192,7 @@ public class Session {
      * @param ds
      * @return 
      */
-    public List<?> getChildren(DigueTry digue){
+    public List<?> getChildren(Digue digue){
         return this.getTronconGestionDigueTrysByDigueTry(digue);
     }
     
