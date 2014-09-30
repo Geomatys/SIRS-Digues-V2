@@ -7,54 +7,32 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
-public abstract class Structure  extends Positionable  {
+public class SystemeReperage  extends CouchDbDocument  {
 
 
    
-        
-    private StringProperty  commentaire = new SimpleStringProperty();
-        
-    private StringProperty  cote = new SimpleStringProperty();
         
     private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
     private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  source = new SimpleStringProperty();
+    private StringProperty  lineaire = new SimpleStringProperty();
+        
+    private StringProperty  nom = new SimpleStringProperty();
     
  
     //
     // References
     //
-    private String tronconId;
-     
-    //
-    // References
-    //
-    private String documentId;
+    private String troncon_digueId;
     
   
   
       
-    public String getCommentaire(){
-    	return this.commentaire.get();
-    }
-    
-    public void setCommentaire(String commentaire){
-    	this.commentaire.set(commentaire);
-    }
-        
-    public String getCote(){
-    	return this.cote.get();
-    }
-    
-    public void setCote(String cote){
-    	this.cote.set(cote);
-    }
-        
     public java.util.Date getDate_debut(){
     	return this.date_debut.get();
     }
@@ -71,54 +49,49 @@ public abstract class Structure  extends Positionable  {
     	this.date_fin.set(date_fin);
     }
         
-    public String getSource(){
-    	return this.source.get();
+    public String getLineaire(){
+    	return this.lineaire.get();
     }
     
-    public void setSource(String source){
-    	this.source.set(source);
+    public void setLineaire(String lineaire){
+    	this.lineaire.set(lineaire);
+    }
+        
+    public String getNom(){
+    	return this.nom.get();
+    }
+    
+    public void setNom(String nom){
+    	this.nom.set(nom);
     }
     
 
   
   
     
-    public String getTroncon(){
-    	return this.tronconId;
+    public String getTroncon_digue(){
+    	return this.troncon_digueId;
     }
     
-    public void setTroncon(String tronconId){
-    	this.tronconId = tronconId;
-    }
-   
-  
-    
-    public String getDocument(){
-    	return this.documentId;
-    }
-    
-    public void setDocument(String documentId){
-    	this.documentId = documentId;
+    public void setTroncon_digue(String troncon_digueId){
+    	this.troncon_digueId = troncon_digueId;
     }
   
   
   @Override
   public String toString(){
-      StringBuilder builder = new StringBuilder("[Structure ");
-      builder.append("commentaire: ");
-      builder.append(commentaire.get());
-      builder.append(", ");
-      builder.append("cote: ");
-      builder.append(cote.get());
-      builder.append(", ");
+      StringBuilder builder = new StringBuilder("[SystemeReperage ");
       builder.append("date_debut: ");
       builder.append(date_debut.get());
       builder.append(", ");
       builder.append("date_fin: ");
       builder.append(date_fin.get());
       builder.append(", ");
-      builder.append("source: ");
-      builder.append(source.get());
+      builder.append("lineaire: ");
+      builder.append(lineaire.get());
+      builder.append(", ");
+      builder.append("nom: ");
+      builder.append(nom.get());
       return builder.toString();
   }
 

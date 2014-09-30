@@ -5,13 +5,12 @@
  */
 package fr.symadrem.sirs.component;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.symadrem.sirs.core.CouchDBTestCase;
-import fr.symadrem.sirs.core.component.TronconRepository;
-import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.TronconDigue;
 
 /**
  *
@@ -21,7 +20,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 
 
     @Autowired
-    private TronconRepository tronconRepository;
+    private TronconDigueRepository tronconRepository;
     
     /**
      * Test of getAll method, of class DigueRepository.
@@ -29,7 +28,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAll() {
         System.out.println("getAll");
-        for (Troncon digue : tronconRepository.getAll()) {
+        for (TronconDigue digue : tronconRepository.getAll()) {
             System.out.println(digue.getStuctures());
         }
         

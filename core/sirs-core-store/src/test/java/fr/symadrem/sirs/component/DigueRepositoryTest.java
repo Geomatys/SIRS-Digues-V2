@@ -13,12 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.DigueRepository;
-import fr.symadrem.sirs.core.component.TronconRepository;
+import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.Ecluse;
-import fr.symadrem.sirs.core.model.NewEClass6;
+import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
-import fr.symadrem.sirs.core.model.Troncon;
+import fr.symadrem.sirs.core.model.TronconDigue;
 
 /**
  *
@@ -31,7 +30,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     private DigueRepository instance;
 
     @Autowired
-    private TronconRepository tronconRepository;
+    private TronconDigueRepository tronconRepository;
     
     /**
      * Test of getAll method, of class DigueRepository.
@@ -52,27 +51,27 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         Digue digue = new Digue();
 
-        digue.setLabel("une digue");
+        digue.setLibelle("une digue");
 
         List<String> set = new ArrayList<>();
         {
-            Troncon troncon = new Troncon();
-            troncon.setDesignation("Traoncon1");
+            TronconDigue troncon = new TronconDigue();
+            troncon.setCommentaire("Traoncon1");
             tronconRepository.add(troncon);
             set.add(troncon.getId());
         }
         {
-            Troncon troncon = new Troncon();
+            TronconDigue troncon = new TronconDigue();
             
-            Ecluse ecluse = new Ecluse();
-            ecluse.setDesignation("Ecluse");
+            Fondation ecluse = new Fondation();
+            ecluse.setCommentaire("Fondation");
             
             List<Structure> stuctures = new ArrayList<>();
             stuctures.add(ecluse);
             troncon.setStuctures(stuctures);
             
-            troncon.setDesignation("Traoncon2");
-            troncon.setNewEReference(new NewEClass6());
+            troncon.setCommentaire("Traoncon2");
+            
 
             tronconRepository.add(troncon);
             

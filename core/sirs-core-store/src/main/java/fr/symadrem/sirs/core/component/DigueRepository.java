@@ -13,7 +13,7 @@ import fr.symadrem.sirs.core.model.Digue;
 
 
 @Component
-@View(name="all", map="function(doc) {if(doc.type=='Digue') {emit(doc._id, doc._id)}}")
+@View(name="all", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.Digue') {emit(doc._id, doc._id)}}")
 public class DigueRepository extends CouchDbRepositorySupport<Digue> {
 
     @Autowired

@@ -1,7 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -10,32 +12,22 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
-public abstract class Structure  extends Positionable  {
+public class BorneDigue  extends Positionable  {
 
 
    
         
     private StringProperty  commentaire = new SimpleStringProperty();
         
-    private StringProperty  cote = new SimpleStringProperty();
-        
     private ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
         
     private ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
         
-    private StringProperty  source = new SimpleStringProperty();
+    private BooleanProperty  fictive = new SimpleBooleanProperty();
+        
+    private StringProperty  nom = new SimpleStringProperty();
     
- 
-    //
-    // References
-    //
-    private String tronconId;
-     
-    //
-    // References
-    //
-    private String documentId;
-    
+
   
   
       
@@ -45,14 +37,6 @@ public abstract class Structure  extends Positionable  {
     
     public void setCommentaire(String commentaire){
     	this.commentaire.set(commentaire);
-    }
-        
-    public String getCote(){
-    	return this.cote.get();
-    }
-    
-    public void setCote(String cote){
-    	this.cote.set(cote);
     }
         
     public java.util.Date getDate_debut(){
@@ -71,45 +55,30 @@ public abstract class Structure  extends Positionable  {
     	this.date_fin.set(date_fin);
     }
         
-    public String getSource(){
-    	return this.source.get();
+    public boolean getFictive(){
+    	return this.fictive.get();
     }
     
-    public void setSource(String source){
-    	this.source.set(source);
+    public void setFictive(boolean fictive){
+    	this.fictive.set(fictive);
+    }
+        
+    public String getNom(){
+    	return this.nom.get();
+    }
+    
+    public void setNom(String nom){
+    	this.nom.set(nom);
     }
     
 
-  
-  
-    
-    public String getTroncon(){
-    	return this.tronconId;
-    }
-    
-    public void setTroncon(String tronconId){
-    	this.tronconId = tronconId;
-    }
-   
-  
-    
-    public String getDocument(){
-    	return this.documentId;
-    }
-    
-    public void setDocument(String documentId){
-    	this.documentId = documentId;
-    }
-  
+ 
   
   @Override
   public String toString(){
-      StringBuilder builder = new StringBuilder("[Structure ");
+      StringBuilder builder = new StringBuilder("[BorneDigue ");
       builder.append("commentaire: ");
       builder.append(commentaire.get());
-      builder.append(", ");
-      builder.append("cote: ");
-      builder.append(cote.get());
       builder.append(", ");
       builder.append("date_debut: ");
       builder.append(date_debut.get());
@@ -117,8 +86,11 @@ public abstract class Structure  extends Positionable  {
       builder.append("date_fin: ");
       builder.append(date_fin.get());
       builder.append(", ");
-      builder.append("source: ");
-      builder.append(source.get());
+      builder.append("fictive: ");
+      builder.append(fictive.get());
+      builder.append(", ");
+      builder.append("nom: ");
+      builder.append(nom.get());
       return builder.toString();
   }
 

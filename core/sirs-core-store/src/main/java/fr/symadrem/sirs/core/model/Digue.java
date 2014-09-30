@@ -1,74 +1,102 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Set;
+import java.util.List;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
+@JsonIgnoreProperties
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Digue  extends CouchDbDocument  {
 
 
-    private static final String type = "Digue";
-    
-    public String getType() {
-        return type;
-    }
-    
-    void setType(String type){
-    }
-    
+   
         
-    public StringProperty  label = new SimpleStringProperty();
+    private StringProperty  libelle = new SimpleStringProperty();
         
-    public StringProperty  comment = new SimpleStringProperty();
+    private StringProperty  commentaire = new SimpleStringProperty();
+        
+    private ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
     
  
     //
     // References
     //
-    private Set<String> tronconsIds;
+    private List<String> tronconsIds;
+     
+    //
+    // References
+    //
+    private String documentId;
     
   
   
       
-    public String getLabel(){
-    	return this.label.get();
+    public String getLibelle(){
+    	return this.libelle.get();
     }
     
-    public void setLabel(String label){
-    	this.label.set(label);
+    public void setLibelle(String libelle){
+    	this.libelle.set(libelle);
     }
         
-    public String getComment(){
-    	return this.comment.get();
+    public String getCommentaire(){
+    	return this.commentaire.get();
     }
     
-    public void setComment(String comment){
-    	this.comment.set(comment);
+    public void setCommentaire(String commentaire){
+    	this.commentaire.set(commentaire);
+    }
+        
+    public java.util.Date getDate_maj(){
+    	return this.date_maj.get();
+    }
+    
+    public void setDate_maj(java.util.Date date_maj){
+    	this.date_maj.set(date_maj);
     }
     
 
   
   
     
-    public Set<String> getTronconsIds(){
+    public List<String> getTronconsIds(){
     	return this.tronconsIds;
     }
     
-    public void setTronconsIds(Set<String> tronconsIds){
+    public void setTronconsIds(List<String> tronconsIds){
     	this.tronconsIds = tronconsIds;
+    }
+   
+  
+    
+    public String getDocument(){
+    	return this.documentId;
+    }
+    
+    public void setDocument(String documentId){
+    	this.documentId = documentId;
     }
   
   
   @Override
   public String toString(){
       StringBuilder builder = new StringBuilder("[Digue ");
-      builder.append("label: ");
-      builder.append(label.get());
+      builder.append("libelle: ");
+      builder.append(libelle.get());
       builder.append(", ");
-      builder.append("comment: ");
-      builder.append(comment.get());
+      builder.append("commentaire: ");
+      builder.append(commentaire.get());
+      builder.append(", ");
+      builder.append("date_maj: ");
+      builder.append(date_maj.get());
       return builder.toString();
   }
 
