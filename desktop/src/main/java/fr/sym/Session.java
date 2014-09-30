@@ -133,11 +133,11 @@ public class Session {
                 final Troncon tron = new Troncon();
                 tron.setName("Le tronçon "+i);
                 tron.setDigue(Long.toString(i%3));
-                System.out.println("Jojo : "+tron.getJojo());
+                /*System.out.println("Jojo : "+tron.getJojo());
                 if(i%2==0)
                     tron.setJojo(Troncon.jojoenum.oui);
                 else 
-                    tron.setJojo((Troncon.jojoenum.bof));
+                    tron.setJojo((Troncon.jojoenum.bof));*/
                 troncons.add(tron);
             }
             this.tronconsGestionDigue = troncons;
