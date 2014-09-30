@@ -60,7 +60,7 @@ public class FXDiguesTryController {
                     final FXDigueTryController ctrl = FXDigueTryController.create((Digue)obj);
                     uiRight.setCenter(ctrl.root);
                 }else if(obj instanceof Troncon){
-                    final FXTronconGestionDigueTryController ctrl = FXTronconGestionDigueTryController.create();
+                    final FXTronconGestionDigueTryController ctrl = FXTronconGestionDigueTryController.create((Troncon)obj);
                     uiRight.setCenter(ctrl.root);
                 }
                 

@@ -8,11 +8,9 @@ import fr.sym.digue.dto.Section;
 import fr.symadrem.sirs.core.model.Troncon;
 import fr.symadrem.sirs.core.model.Digue;
 import java.net.URL;
-import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,16 +136,33 @@ public class Session {
                     tron.setJojo(Troncon.jojoenum.oui);
                 else 
                     tron.setJojo((Troncon.jojoenum.bof));*/
+                tron.setDesignation("Tronçon "+i+" : Lorem ipsum dolor sit amet, consectetur "
+                        + "adipiscing elit. Sed non risus. Suspendisse lectus "
+                        + "tortor, dignissim sit amet, adipiscing nec, ultricies "
+                        + "sed, dolor. Cras elementum ultrices diam. Maecenas "
+                        + "ligula massa, varius a, semper congue, euismod non, "
+                        + "mi. Proin porttitor, orci nec nonummy molestie, enim "
+                        + "est eleifend mi, non fermentum diam nisl sit amet "
+                        + "erat. Duis semper. Duis arcu massa, scelerisque "
+                        + "vitae, consequat in, pretium a, enim. Pellentesque "
+                        + "congue. Ut in risus volutpat libero pharetra tempor. "
+                        + "Cras vestibulum bibendum augue. Praesent egestas leo "
+                        + "in pede. Praesent blandit odio eu enim. Pellentesque "
+                        + "sed dui ut augue blandit sodales. Vestibulum ante "
+                        + "ipsum primis in faucibus orci luctus et ultrices "
+                        + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
+                        + "sed pede pellentesque fermentum. Maecenas adipiscing "
+                        + "ante non diam sodales hendrerit.");
                 troncons.add(tron);
             }
             this.tronconsGestionDigue = troncons;
         
             // Linking troncons to digues
-            List<Digue> digues = this.getDigues();
-            int nbDigues = digues.size();
+            List<Digue> digs = this.getDigues();
+            int nbDigues = digs.size();
             for (int i=0; i<nbTroncons; i++){
                 Troncon tron = this.tronconsGestionDigue.get(i);
-                Digue digue = digues.get(i%nbDigues);
+                Digue digue = digs.get(i%nbDigues);
                 
                 tron.setDigue(String.valueOf(i%nbDigues));
                 Set<String> tronconsIds = digue.getTronconsIds();
@@ -189,7 +204,7 @@ public class Session {
     /**
      * DamSystem can contain Dams or Sections.
      * 
-     * @param ds
+     * @param digue
      * @return 
      */
     public List<?> getChildren(Digue digue){
@@ -221,7 +236,7 @@ public class Session {
     /**
      * DamSystem can contain Dams or Sections.
      * 
-     * @param Dam
+     * @param ds
      * @return 
      */
     public List<Section> getChildren(Dam ds){
