@@ -2,7 +2,6 @@ package fr.sym.digue;
 
 import fr.sym.Session;
 import fr.sym.Symadrem;
-import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -38,15 +37,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-
-
 public class FXDigueTryController {
     
     public Parent root;
@@ -66,7 +61,6 @@ public class FXDigueTryController {
     
     @Autowired
     private Session session;
-    
 
     public void init(Digue digue) {
 
@@ -74,11 +68,11 @@ public class FXDigueTryController {
         this.digue = digue;
         
         // Binding levee's name.------------------------------------------------
-        this.libelleDigueTextField.textProperty().bindBidirectional(digue.libelle);
+        this.libelleDigueTextField.textProperty().bindBidirectional(digue.libelleProperty());
         this.libelleDigueTextField.setEditable(true);
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaireDigueTextField.textProperty().bindBidirectional(digue.commentaire);
+        this.commentaireDigueTextField.textProperty().bindBidirectional(digue.commentaireProperty());
         this.commentaireDigueTextField.setWrapText(true);
         this.commentaireDigueTextField.setEditable(true);
 
@@ -177,7 +171,7 @@ public class FXDigueTryController {
                 
                 final Label label = new Label(troncon.getLibelle());
                 final TextField editableLabel = new TextField(troncon.getLibelle());
-                troncon.libelle.bindBidirectional(editableLabel.textProperty());
+                troncon.libelleProperty().bindBidirectional(editableLabel.textProperty());
                 ((Button)event.getSource()).textProperty().bindBidirectional(editableLabel.textProperty());
 
                 final Button ok = new Button("Ok");
@@ -208,7 +202,7 @@ public class FXDigueTryController {
 
     @FXML
     public void change(ActionEvent event) {
-        System.out.println(digue.libelle);
+        System.out.println(digue.libelleProperty());
     }
 
     @FXML
@@ -231,17 +225,12 @@ public class FXDigueTryController {
 
         try {
             root = loader.load();
-            
-            
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
 
         final FXDigueTryController controller = loader.getController();
-
         Injector.injectDependencies(controller);
-    
-        
         controller.root = root;
         controller.init(digue);
         return controller;

@@ -12,29 +12,27 @@ import javafx.scene.Parent;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXTronconGestionDigueTryController {
+public class TronconDigueController {
     
     public Parent root;
     private TronconDigue troncon;
     
     @FXML
-    TextField section_name;
+    private TextField section_name;
     
     @FXML
-    TextArea commentaireTronconTextField;
+    private TextArea commentaireTronconTextField;
     
     @FXML
-    ToggleButton editionButton;
-    
+    private ToggleButton editionButton;
     
     @FXML
-    public void enableFields(ActionEvent event){
+    private void enableFields(ActionEvent event){
         if (this.editionButton.isSelected()) {
             this.section_name.setEditable(false);
             this.commentaireTronconTextField.setEditable(false);
@@ -48,22 +46,23 @@ public class FXTronconGestionDigueTryController {
         this.troncon = troncon;
         
         this.section_name.setEditable(true);
-        this.section_name.textProperty().bindBidirectional(this.troncon.libelle);
+        this.section_name.textProperty().bindBidirectional(this.troncon.libelleProperty());
         
         this.commentaireTronconTextField.setEditable(true);
         this.commentaireTronconTextField.setWrapText(true);
-        this.commentaireTronconTextField.textProperty().bindBidirectional(this.troncon.commentaire);
+        this.commentaireTronconTextField.textProperty().bindBidirectional(this.troncon.commentaireProperty());
     }
     
-    public static FXTronconGestionDigueTryController create(TronconDigue troncon) {
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource("/fr/sym/digue/tronconGestionDigueTryDisplay.fxml"));
+    public static TronconDigueController create(TronconDigue troncon) {
+        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
+                "/fr/sym/digue/tronconDigueDisplay.fxml"));
         final Parent root;
         try {
             root = loader.load();
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
-        final FXTronconGestionDigueTryController controller = loader.getController();
+        final TronconDigueController controller = loader.getController();
         controller.root = root;
         controller.init(troncon);
         return controller;

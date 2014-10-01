@@ -12,20 +12,21 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * @author samuel
+ * @author Olivier Nouguier (Géomatys)
+ * @author Samuel Andrés (Géomatys)
  */
 @Component
 public class Injector implements ApplicationContextAware {
+
     private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext ac) throws BeansException {
         applicationContext = ac;
-        
+
     }
-    
-    
-    public static void injectDependencies(Object o){
+
+    public static void injectDependencies(Object o) {
         applicationContext.getAutowireCapableBeanFactory().autowireBean(o);
     }
 }

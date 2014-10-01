@@ -93,7 +93,6 @@ public class DigueRepositoryTest {
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
             tron.setLibelle("Le tronçon " + i);
-            tron.setDigue(Long.toString(i % 3));
             /*System.out.println("Jojo : "+tron.getJojo());
              if(i%2==0)
              tron.setJojo(Troncon.jojoenum.oui);
@@ -138,16 +137,18 @@ public class DigueRepositoryTest {
         int i=0;
         for(final TronconDigue troncon : troncons){
             final Digue digue = digues.get(i);
+            System.out.println("digue : "+digue.getId()+"  ;  troncon : "+troncon.getId());
             troncon.setDigue(digue.getId());
             List<String> tronconsIds = digue.getTronconsIds();
             tronconsIds.add(troncon.getId());
             digue.setTronconsIds(tronconsIds);
             i++;
             if(i==nbDigues) i=0;
+            this.digueRepository.update(digue);
+            this.tronconRepository.update(troncon);
         }
     }
     
-    @Ignore
     @Test
     public void testBase(){
         this.removeDigues();

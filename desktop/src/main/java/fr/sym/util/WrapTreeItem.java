@@ -1,5 +1,3 @@
-
-
 package fr.sym.util;
 
 import fr.sym.Plugins;
@@ -23,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class WrapTreeItem extends TreeItem {
 
     private boolean loaded = false;
-    
+
+    @Autowired
+    private Session session;
+
     public WrapTreeItem(Object candidate) {
         super(candidate);
         Injector.injectDependencies(this);
@@ -33,39 +34,33 @@ public class WrapTreeItem extends TreeItem {
     public boolean isLeaf() {
         return getValue() instanceof Theme;
     }
-    
-    @Autowired
-    private Session session;
 
     @Override
     public synchronized ObservableList getChildren() {
-        if(!loaded){
+        if (!loaded) {
             loaded = true;
             final Object obj = getValue();
             List candidates = new ArrayList();
-            
-            if(obj instanceof Digue){
-                candidates = session.getChildren((Digue)obj);
-            }else
-            
-            
-            if(obj instanceof DamSystem){
-                candidates = session.getChildren((DamSystem)obj);
-            }else if(obj instanceof Dam){
-                candidates = session.getChildren((Dam)obj);
-            }else if(obj instanceof Section){
+
+            if (obj instanceof Digue) {
+                candidates = session.getChildren((Digue) obj);
+            } else if (obj instanceof DamSystem) {
+                candidates = session.getChildren((DamSystem) obj);
+            } else if (obj instanceof Dam) {
+                candidates = session.getChildren((Dam) obj);
+            } else if (obj instanceof Section) {
                 final Theme[] themes = Plugins.getThemes();
-                for(Theme theme : themes){
+                for (Theme theme : themes) {
                     candidates.add(theme);
                 }
             }
-            
-/*            for(Object candidate : candidates){
+
+            for (Object candidate : candidates) {
                 super.getChildren().add(new WrapTreeItem(candidate));
-            }*/
+            }
         }
-        
+
         return super.getChildren();
     }
-    
+
 }
