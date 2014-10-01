@@ -85,104 +85,102 @@ public class Desordre  extends Structure  {
     // References
     // 
     private List<String> articles_journauxIds;
-     
+ 
     private String prestationId;
-     
+ 
     private List<String> observationsIds;
-     
+ 
     private String evenement_hydraulique_origineId;
+ 
+
     
-      
     public String getIntitule(){
     	return this.intitule.get();
     }
     
     public void setIntitule(String intitule){
     	this.intitule.set(intitule);
-    }
-        
+    }    
+    
     public String getType_prestation(){
     	return this.type_prestation.get();
     }
     
     public void setType_prestation(String type_prestation){
     	this.type_prestation.set(type_prestation);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-        
+    }    
+    
     public boolean getRealisation_interne(){
     	return this.realisation_interne.get();
     }
     
     public void setRealisation_interne(boolean realisation_interne){
     	this.realisation_interne.set(realisation_interne);
-    }
-        
+    }    
+    
     public float getCout_metre(){
     	return this.cout_metre.get();
     }
     
     public void setCout_metre(float cout_metre){
     	this.cout_metre.set(cout_metre);
-    }
-        
+    }    
+    
     public float getCout_global(){
     	return this.cout_global.get();
     }
     
     public void setCout_global(float cout_global){
     	this.cout_global.set(cout_global);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getArticles_journauxIds(){
     	return this.articles_journauxIds;
     }
-    
+
     public void setArticles_journauxIds(List<String> articles_journauxIds){
     	this.articles_journauxIds = articles_journauxIds;
     }
-   
-  
+ 
+
     
     public String getPrestation(){
     	return this.prestationId;
     }
-    
+
     public void setPrestation(String prestationId){
     	this.prestationId = prestationId;
     }
-   
-  
+ 
+
     
     public List<String> getObservationsIds(){
     	return this.observationsIds;
     }
-    
+
     public void setObservationsIds(List<String> observationsIds){
     	this.observationsIds = observationsIds;
     }
-   
-  
+ 
+
     
     public String getEvenement_hydraulique_origine(){
     	return this.evenement_hydraulique_origineId;
     }
-    
+
     public void setEvenement_hydraulique_origine(String evenement_hydraulique_origineId){
     	this.evenement_hydraulique_origineId = evenement_hydraulique_origineId;
     }
-  
+
   
   @Override
   public String toString(){

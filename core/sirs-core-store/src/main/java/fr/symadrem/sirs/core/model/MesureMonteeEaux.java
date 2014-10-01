@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,6 +11,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -64,52 +68,52 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
     // References
     // 
     private String observateursId;
-    
-      
+ 
+
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate(){
     	return this.date.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate(Instant date){
     	this.date.set(date);
-    }
-        
+    }    
+    
     public String getReference_hauteur(){
     	return this.reference_hauteur.get();
     }
     
     public void setReference_hauteur(String reference_hauteur){
     	this.reference_hauteur.set(reference_hauteur);
-    }
-        
+    }    
+    
     public float getHauteur(){
     	return this.hauteur.get();
     }
     
     public void setHauteur(float hauteur){
     	this.hauteur.set(hauteur);
-    }
-        
+    }    
+    
     public float getDebit_max(){
     	return this.debit_max.get();
     }
     
     public void setDebit_max(float debit_max){
     	this.debit_max.set(debit_max);
-    }
-    
+    }     
 
-  
-  
     
     public String getObservateurs(){
     	return this.observateursId;
     }
-    
+
     public void setObservateurs(String observateursId){
     	this.observateursId = observateursId;
     }
-  
+
   
   @Override
   public String toString(){

@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -8,6 +10,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -48,60 +52,79 @@ public class Digue  extends CouchDbDocument  {
     public  ObjectProperty<Instant> date_majProperty() {
        return date_maj;
     }
+    /**
+    * JavaFX property for classement.
+    */
+    private StringProperty  classement = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on classement.
+    */
+    public  StringProperty classementProperty() {
+       return classement;
+    }
     //
     // References
     // 
     private List<String> tronconsIds;
-     
+ 
     private String documentId;
+ 
+
     
-      
     public String getLibelle(){
     	return this.libelle.get();
     }
     
     public void setLibelle(String libelle){
     	this.libelle.set(libelle);
-    }
-        
+    }    
+    
     public String getCommentaire(){
     	return this.commentaire.get();
     }
     
     public void setCommentaire(String commentaire){
     	this.commentaire.set(commentaire);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_maj(){
     	return this.date_maj.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_maj(Instant date_maj){
     	this.date_maj.set(date_maj);
+    }    
+    
+    public String getClassement(){
+    	return this.classement.get();
     }
     
+    public void setClassement(String classement){
+    	this.classement.set(classement);
+    }     
 
-  
-  
     
     public List<String> getTronconsIds(){
     	return this.tronconsIds;
     }
-    
+
     public void setTronconsIds(List<String> tronconsIds){
     	this.tronconsIds = tronconsIds;
     }
-   
-  
+ 
+
     
     public String getDocument(){
     	return this.documentId;
     }
-    
+
     public void setDocument(String documentId){
     	this.documentId = documentId;
     }
-  
+
   
   @Override
   public String toString(){
@@ -114,6 +137,9 @@ public class Digue  extends CouchDbDocument  {
       builder.append(", ");
       builder.append("date_maj: ");
       builder.append(date_maj.get());
+      builder.append(", ");
+      builder.append("classement: ");
+      builder.append(classement.get());
       return builder.toString();
   }
 

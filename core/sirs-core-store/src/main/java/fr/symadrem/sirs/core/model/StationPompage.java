@@ -37,48 +37,46 @@ public class StationPompage  extends StructureAvecContacts  {
     // References
     // 
     private List<String> pompesIds;
-     
+ 
     private String reseau_hydraulique_fermeId;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getPompesIds(){
     	return this.pompesIds;
     }
-    
+
     public void setPompesIds(List<String> pompesIds){
     	this.pompesIds = pompesIds;
     }
-   
-  
+ 
+
     
     public String getReseau_hydraulique_ferme(){
     	return this.reseau_hydraulique_fermeId;
     }
-    
+
     public void setReseau_hydraulique_ferme(String reseau_hydraulique_fermeId){
     	this.reseau_hydraulique_fermeId = reseau_hydraulique_fermeId;
     }
-  
+
   
   @Override
   public String toString(){

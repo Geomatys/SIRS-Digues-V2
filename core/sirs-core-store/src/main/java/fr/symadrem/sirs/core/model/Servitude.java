@@ -35,26 +35,24 @@ public class Servitude  extends CouchDbDocument  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getType_servitude(){
     	return this.type_servitude.get();
     }
     
     public void setType_servitude(String type_servitude){
     	this.type_servitude.set(type_servitude);
-    }
-        
+    }    
+    
     public String getParcelle(){
     	return this.parcelle.get();
     }
     
     public void setParcelle(String parcelle){
     	this.parcelle.set(parcelle);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

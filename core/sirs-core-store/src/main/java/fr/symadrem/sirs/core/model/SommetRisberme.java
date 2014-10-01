@@ -60,42 +60,40 @@ public class SommetRisberme  extends Structure  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public int getNum_couche(){
     	return this.num_couche.get();
     }
     
     public void setNum_couche(int num_couche){
     	this.num_couche.set(num_couche);
-    }
-        
+    }    
+    
     public String getFonction(){
     	return this.fonction.get();
     }
     
     public void setFonction(String fonction){
     	this.fonction.set(fonction);
-    }
-        
+    }    
+    
     public String getMateriau(){
     	return this.materiau.get();
     }
     
     public void setMateriau(String materiau){
     	this.materiau.set(materiau);
-    }
-        
+    }    
+    
     public float getEpaisseur(){
     	return this.epaisseur.get();
     }
     
     public void setEpaisseur(float epaisseur){
     	this.epaisseur.set(epaisseur);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

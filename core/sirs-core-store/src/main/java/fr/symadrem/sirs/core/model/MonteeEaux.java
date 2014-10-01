@@ -26,52 +26,50 @@ public class MonteeEaux  extends Structure  {
     // References
     // 
     private List<String> articles_journauxIds;
-     
+ 
     private String evenementhydrauliqueId;
-     
+ 
     private List<String> mesuresIds;
+ 
+
     
-      
     public String getEchelle_limnimetrique(){
     	return this.echelle_limnimetrique.get();
     }
     
     public void setEchelle_limnimetrique(String echelle_limnimetrique){
     	this.echelle_limnimetrique.set(echelle_limnimetrique);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getArticles_journauxIds(){
     	return this.articles_journauxIds;
     }
-    
+
     public void setArticles_journauxIds(List<String> articles_journauxIds){
     	this.articles_journauxIds = articles_journauxIds;
     }
-   
-  
+ 
+
     
     public String getEvenementhydraulique(){
     	return this.evenementhydrauliqueId;
     }
-    
+
     public void setEvenementhydraulique(String evenementhydrauliqueId){
     	this.evenementhydrauliqueId = evenementhydrauliqueId;
     }
-   
-  
+ 
+
     
     public List<String> getMesuresIds(){
     	return this.mesuresIds;
     }
-    
+
     public void setMesuresIds(List<String> mesuresIds){
     	this.mesuresIds = mesuresIds;
     }
-  
+
   
   @Override
   public String toString(){

@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,6 +11,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -75,60 +79,60 @@ public class ObservationSuivi  extends CouchDbDocument  {
     // References
     // 
     private String observateurId;
-    
-      
+ 
+
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_observation(){
     	return this.date_observation.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_observation(Instant date_observation){
     	this.date_observation.set(date_observation);
-    }
-        
+    }    
+    
     public int getNombre_desordres(){
     	return this.nombre_desordres.get();
     }
     
     public void setNombre_desordres(int nombre_desordres){
     	this.nombre_desordres.set(nombre_desordres);
-    }
-        
+    }    
+    
     public String getUrgence(){
     	return this.urgence.get();
     }
     
     public void setUrgence(String urgence){
     	this.urgence.set(urgence);
-    }
-        
+    }    
+    
     public String getEvolution(){
     	return this.evolution.get();
     }
     
     public void setEvolution(String evolution){
     	this.evolution.set(evolution);
-    }
-        
+    }    
+    
     public String getSuite(){
     	return this.suite.get();
     }
     
     public void setSuite(String suite){
     	this.suite.set(suite);
-    }
-    
+    }     
 
-  
-  
     
     public String getObservateur(){
     	return this.observateurId;
     }
-    
+
     public void setObservateur(String observateurId){
     	this.observateurId = observateurId;
     }
-  
+
   
   @Override
   public String toString(){

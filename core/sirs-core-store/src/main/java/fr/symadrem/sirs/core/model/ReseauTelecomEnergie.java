@@ -71,60 +71,58 @@ public class ReseauTelecomEnergie  extends StructureAvecContacts  {
     // References
     // 
     private String ouvrage_telecom_energieId;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getType_reseau(){
     	return this.type_reseau.get();
     }
     
     public void setType_reseau(String type_reseau){
     	this.type_reseau.set(type_reseau);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-        
+    }    
+    
     public String getImplantation(){
     	return this.implantation.get();
     }
     
     public void setImplantation(String implantation){
     	this.implantation.set(implantation);
-    }
-        
+    }    
+    
     public float getHauteur(){
     	return this.hauteur.get();
     }
     
     public void setHauteur(float hauteur){
     	this.hauteur.set(hauteur);
-    }
-    
+    }     
 
-  
-  
     
     public String getOuvrage_telecom_energie(){
     	return this.ouvrage_telecom_energieId;
     }
-    
+
     public void setOuvrage_telecom_energie(String ouvrage_telecom_energieId){
     	this.ouvrage_telecom_energieId = ouvrage_telecom_energieId;
     }
-  
+
   
   @Override
   public String toString(){

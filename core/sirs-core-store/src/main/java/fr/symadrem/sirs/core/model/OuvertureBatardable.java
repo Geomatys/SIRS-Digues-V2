@@ -161,160 +161,158 @@ public class OuvertureBatardable  extends StructureAvecContacts  {
     // References
     // 
     private String intervenants_manupulateursId;
-     
+ 
     private String organismes_manipulateursId;
-     
+ 
     private String organismes_stockantsId;
-     
+ 
     private String ouvrage_revancheId;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getType_glissiere(){
     	return this.type_glissiere.get();
     }
     
     public void setType_glissiere(String type_glissiere){
     	this.type_glissiere.set(type_glissiere);
-    }
-        
+    }    
+    
     public float getHauteur(){
     	return this.hauteur.get();
     }
     
     public void setHauteur(float hauteur){
     	this.hauteur.set(hauteur);
-    }
-        
+    }    
+    
     public float getLargeur(){
     	return this.largeur.get();
     }
     
     public void setLargeur(float largeur){
     	this.largeur.set(largeur);
-    }
-        
+    }    
+    
     public float getZ_du_seuil(){
     	return this.z_du_seuil.get();
     }
     
     public void setZ_du_seuil(float z_du_seuil){
     	this.z_du_seuil.set(z_du_seuil);
-    }
-        
+    }    
+    
     public String getType_seuil(){
     	return this.type_seuil.get();
     }
     
     public void setType_seuil(String type_seuil){
     	this.type_seuil.set(type_seuil);
-    }
-        
+    }    
+    
     public String getNature_batardeaux(){
     	return this.nature_batardeaux.get();
     }
     
     public void setNature_batardeaux(String nature_batardeaux){
     	this.nature_batardeaux.set(nature_batardeaux);
-    }
-        
+    }    
+    
     public int getNombre_batardeaux(){
     	return this.nombre_batardeaux.get();
     }
     
     public void setNombre_batardeaux(int nombre_batardeaux){
     	this.nombre_batardeaux.set(nombre_batardeaux);
-    }
-        
+    }    
+    
     public float getPoids_unitaires_batardeaux(){
     	return this.poids_unitaires_batardeaux.get();
     }
     
     public void setPoids_unitaires_batardeaux(float poids_unitaires_batardeaux){
     	this.poids_unitaires_batardeaux.set(poids_unitaires_batardeaux);
-    }
-        
+    }    
+    
     public String getMoyen_manipulation_batardeaux(){
     	return this.moyen_manipulation_batardeaux.get();
     }
     
     public void setMoyen_manipulation_batardeaux(String moyen_manipulation_batardeaux){
     	this.moyen_manipulation_batardeaux.set(moyen_manipulation_batardeaux);
-    }
-        
+    }    
+    
     public String getOrganisme_manipulateur_batardeaux(){
     	return this.organisme_manipulateur_batardeaux.get();
     }
     
     public void setOrganisme_manipulateur_batardeaux(String organisme_manipulateur_batardeaux){
     	this.organisme_manipulateur_batardeaux.set(organisme_manipulateur_batardeaux);
-    }
-        
+    }    
+    
     public String getOrganisme_stockant_batardeaux(){
     	return this.organisme_stockant_batardeaux.get();
     }
     
     public void setOrganisme_stockant_batardeaux(String organisme_stockant_batardeaux){
     	this.organisme_stockant_batardeaux.set(organisme_stockant_batardeaux);
-    }
-        
+    }    
+    
     public String getIntervenant_manipulateur_batardeaux(){
     	return this.intervenant_manipulateur_batardeaux.get();
     }
     
     public void setIntervenant_manipulateur_batardeaux(String intervenant_manipulateur_batardeaux){
     	this.intervenant_manipulateur_batardeaux.set(intervenant_manipulateur_batardeaux);
-    }
-    
+    }     
 
-  
-  
     
     public String getIntervenants_manupulateurs(){
     	return this.intervenants_manupulateursId;
     }
-    
+
     public void setIntervenants_manupulateurs(String intervenants_manupulateursId){
     	this.intervenants_manupulateursId = intervenants_manupulateursId;
     }
-   
-  
+ 
+
     
     public String getOrganismes_manipulateurs(){
     	return this.organismes_manipulateursId;
     }
-    
+
     public void setOrganismes_manipulateurs(String organismes_manipulateursId){
     	this.organismes_manipulateursId = organismes_manipulateursId;
     }
-   
-  
+ 
+
     
     public String getOrganismes_stockants(){
     	return this.organismes_stockantsId;
     }
-    
+
     public void setOrganismes_stockants(String organismes_stockantsId){
     	this.organismes_stockantsId = organismes_stockantsId;
     }
-   
-  
+ 
+
     
     public String getOuvrage_revanche(){
     	return this.ouvrage_revancheId;
     }
-    
+
     public void setOuvrage_revanche(String ouvrage_revancheId){
     	this.ouvrage_revancheId = ouvrage_revancheId;
     }
-  
+
   
   @Override
   public String toString(){

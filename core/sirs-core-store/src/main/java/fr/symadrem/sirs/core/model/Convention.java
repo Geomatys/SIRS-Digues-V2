@@ -1,12 +1,16 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Convention  extends Document  {
@@ -70,50 +74,52 @@ public class Convention  extends Document  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getType_conventions(){
     	return this.type_conventions.get();
     }
     
     public void setType_conventions(String type_conventions){
     	this.type_conventions.set(type_conventions);
-    }
-        
+    }    
+    
     public String getReference_papier(){
     	return this.reference_papier.get();
     }
     
     public void setReference_papier(String reference_papier){
     	this.reference_papier.set(reference_papier);
-    }
-        
+    }    
+    
     public String getReference_numerique(){
     	return this.reference_numerique.get();
     }
     
     public void setReference_numerique(String reference_numerique){
     	this.reference_numerique.set(reference_numerique);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_debut(){
     	return this.date_debut.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_fin(){
     	return this.date_fin.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

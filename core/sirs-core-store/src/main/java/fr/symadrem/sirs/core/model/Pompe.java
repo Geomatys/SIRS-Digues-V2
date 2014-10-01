@@ -59,42 +59,40 @@ public class Pompe  extends CouchDbDocument  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getMarque(){
     	return this.marque.get();
     }
     
     public void setMarque(String marque){
     	this.marque.set(marque);
-    }
-        
+    }    
+    
     public float getPuissance(){
     	return this.puissance.get();
     }
     
     public void setPuissance(float puissance){
     	this.puissance.set(puissance);
-    }
-        
+    }    
+    
     public float getDebit(){
     	return this.debit.get();
     }
     
     public void setDebit(float debit){
     	this.debit.set(debit);
-    }
-        
+    }    
+    
     public float getHauteur_refoulement(){
     	return this.hauteur_refoulement.get();
     }
     
     public void setHauteur_refoulement(float hauteur_refoulement){
     	this.hauteur_refoulement.set(hauteur_refoulement);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

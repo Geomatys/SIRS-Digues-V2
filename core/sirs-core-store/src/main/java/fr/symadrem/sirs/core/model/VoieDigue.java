@@ -94,76 +94,74 @@ public class VoieDigue  extends StructureAvecContacts  {
     // References
     // 
     private List<String> servitudesIds;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getType_voie(){
     	return this.type_voie.get();
     }
     
     public void setType_voie(String type_voie){
     	this.type_voie.set(type_voie);
-    }
-        
+    }    
+    
     public float getLargeur(){
     	return this.largeur.get();
     }
     
     public void setLargeur(float largeur){
     	this.largeur.set(largeur);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-        
+    }    
+    
     public String getRevetement(){
     	return this.revetement.get();
     }
     
     public void setRevetement(String revetement){
     	this.revetement.set(revetement);
-    }
-        
+    }    
+    
     public String getUsage(){
     	return this.usage.get();
     }
     
     public void setUsage(String usage){
     	this.usage.set(usage);
-    }
-        
+    }    
+    
     public String getOrientation(){
     	return this.orientation.get();
     }
     
     public void setOrientation(String orientation){
     	this.orientation.set(orientation);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getServitudesIds(){
     	return this.servitudesIds;
     }
-    
+
     public void setServitudesIds(List<String> servitudesIds){
     	this.servitudesIds = servitudesIds;
     }
-  
+
   
   @Override
   public String toString(){

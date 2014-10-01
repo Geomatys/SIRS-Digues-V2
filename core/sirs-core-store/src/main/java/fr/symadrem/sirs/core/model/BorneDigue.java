@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,6 +11,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class BorneDigue  extends Positionable  {
@@ -72,50 +76,52 @@ public class BorneDigue  extends Positionable  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getCommentaire(){
     	return this.commentaire.get();
     }
     
     public void setCommentaire(String commentaire){
     	this.commentaire.set(commentaire);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_debut(){
     	return this.date_debut.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_fin(){
     	return this.date_fin.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
-    }
-        
+    }    
+    
     public boolean getFictive(){
     	return this.fictive.get();
     }
     
     public void setFictive(boolean fictive){
     	this.fictive.set(fictive);
-    }
-        
+    }    
+    
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

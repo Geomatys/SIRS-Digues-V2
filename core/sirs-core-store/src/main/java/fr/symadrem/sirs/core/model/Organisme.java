@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -8,6 +10,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -151,116 +155,118 @@ public class Organisme  extends CouchDbDocument  {
     // References
     // 
     private List<String> contactIds;
+ 
+
     
-      
     public String getAdresse(){
     	return this.adresse.get();
     }
     
     public void setAdresse(String adresse){
     	this.adresse.set(adresse);
-    }
-        
+    }    
+    
     public String getCode_postal(){
     	return this.code_postal.get();
     }
     
     public void setCode_postal(String code_postal){
     	this.code_postal.set(code_postal);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_debut(){
     	return this.date_debut.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_fin(){
     	return this.date_fin.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
-    }
-        
+    }    
+    
     public String getEmail(){
     	return this.email.get();
     }
     
     public void setEmail(String email){
     	this.email.set(email);
-    }
-        
+    }    
+    
     public String getFax(){
     	return this.fax.get();
     }
     
     public void setFax(String fax){
     	this.fax.set(fax);
-    }
-        
+    }    
+    
     public String getLocalite(){
     	return this.localite.get();
     }
     
     public void setLocalite(String localite){
     	this.localite.set(localite);
-    }
-        
+    }    
+    
     public String getMobile(){
     	return this.mobile.get();
     }
     
     public void setMobile(String mobile){
     	this.mobile.set(mobile);
-    }
-        
+    }    
+    
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getPays(){
     	return this.pays.get();
     }
     
     public void setPays(String pays){
     	this.pays.set(pays);
-    }
-        
+    }    
+    
     public String getStatut_juridique(){
     	return this.statut_juridique.get();
     }
     
     public void setStatut_juridique(String statut_juridique){
     	this.statut_juridique.set(statut_juridique);
-    }
-        
+    }    
+    
     public String getTelephone(){
     	return this.telephone.get();
     }
     
     public void setTelephone(String telephone){
     	this.telephone.set(telephone);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getContactIds(){
     	return this.contactIds;
     }
-    
+
     public void setContactIds(List<String> contactIds){
     	this.contactIds = contactIds;
     }
-  
+
   
   @Override
   public String toString(){

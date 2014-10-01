@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,6 +11,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Document  extends Positionable  {
@@ -96,100 +100,100 @@ public class Document  extends Positionable  {
     // References
     // 
     private String digueId;
-     
+ 
     private String troncon_digueId;
-     
+ 
     private String structureId;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public float getTaille(){
     	return this.taille.get();
     }
     
     public void setTaille(float taille){
     	this.taille.set(taille);
-    }
-        
+    }    
+    
     public String getDescription(){
     	return this.description.get();
     }
     
     public void setDescription(String description){
     	this.description.set(description);
-    }
-        
+    }    
+    
     public String getType(){
     	return this.type.get();
     }
     
     public void setType(String type){
     	this.type.set(type);
-    }
-        
+    }    
+    
     public String getChemin(){
     	return this.chemin.get();
     }
     
     public void setChemin(String chemin){
     	this.chemin.set(chemin);
-    }
-        
+    }    
+    
     public String getContenu(){
     	return this.contenu.get();
     }
     
     public void setContenu(String contenu){
     	this.contenu.set(contenu);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_document(){
     	return this.date_document.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_document(Instant date_document){
     	this.date_document.set(date_document);
-    }
-    
+    }     
 
-  
-  
     
     public String getDigue(){
     	return this.digueId;
     }
-    
+
     public void setDigue(String digueId){
     	this.digueId = digueId;
     }
-   
-  
+ 
+
     
     public String getTroncon_digue(){
     	return this.troncon_digueId;
     }
-    
+
     public void setTroncon_digue(String troncon_digueId){
     	this.troncon_digueId = troncon_digueId;
     }
-   
-  
+ 
+
     
     public String getStructure(){
     	return this.structureId;
     }
-    
+
     public void setStructure(String structureId){
     	this.structureId = structureId;
     }
-  
+
   
   @Override
   public String toString(){

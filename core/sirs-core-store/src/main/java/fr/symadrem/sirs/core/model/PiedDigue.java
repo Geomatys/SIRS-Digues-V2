@@ -34,26 +34,24 @@ public class PiedDigue  extends Structure  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getFonction(){
     	return this.fonction.get();
     }
     
     public void setFonction(String fonction){
     	this.fonction.set(fonction);
-    }
-        
+    }    
+    
     public String getMateriau(){
     	return this.materiau.get();
     }
     
     public void setMateriau(String materiau){
     	this.materiau.set(materiau);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

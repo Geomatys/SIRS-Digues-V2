@@ -125,100 +125,98 @@ public class Contact  extends CouchDbDocument  {
     // References
     // 
     private String organismeId;
+ 
+
     
-      
     public String getAdresse(){
     	return this.adresse.get();
     }
     
     public void setAdresse(String adresse){
     	this.adresse.set(adresse);
-    }
-        
+    }    
+    
     public String getCode_postal(){
     	return this.code_postal.get();
     }
     
     public void setCode_postal(String code_postal){
     	this.code_postal.set(code_postal);
-    }
-        
+    }    
+    
     public String getEmail(){
     	return this.email.get();
     }
     
     public void setEmail(String email){
     	this.email.set(email);
-    }
-        
+    }    
+    
     public String getFax(){
     	return this.fax.get();
     }
     
     public void setFax(String fax){
     	this.fax.set(fax);
-    }
-        
+    }    
+    
     public String getLocalite(){
     	return this.localite.get();
     }
     
     public void setLocalite(String localite){
     	this.localite.set(localite);
-    }
-        
+    }    
+    
     public String getMobile(){
     	return this.mobile.get();
     }
     
     public void setMobile(String mobile){
     	this.mobile.set(mobile);
-    }
-        
+    }    
+    
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getPays(){
     	return this.pays.get();
     }
     
     public void setPays(String pays){
     	this.pays.set(pays);
-    }
-        
+    }    
+    
     public String getPrenom(){
     	return this.prenom.get();
     }
     
     public void setPrenom(String prenom){
     	this.prenom.set(prenom);
-    }
-        
+    }    
+    
     public String getTelephone(){
     	return this.telephone.get();
     }
     
     public void setTelephone(String telephone){
     	this.telephone.set(telephone);
-    }
-    
+    }     
 
-  
-  
     
     public String getOrganisme(){
     	return this.organismeId;
     }
-    
+
     public void setOrganisme(String organismeId){
     	this.organismeId = organismeId;
     }
-  
+
   
   @Override
   public String toString(){

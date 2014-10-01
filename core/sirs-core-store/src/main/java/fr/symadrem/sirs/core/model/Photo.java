@@ -50,43 +50,41 @@ public class Photo  extends CouchDbDocument  {
     //
     // References
     // 
-    public ObservableList<Document>  photo =  FXCollections.observableArrayList() ;
-      
+    public ObservableList<Document>  photo =  FXCollections.observableArrayList() ; 
+
+    
     public String getCote(){
     	return this.cote.get();
     }
     
     public void setCote(String cote){
     	this.cote.set(cote);
-    }
-        
+    }    
+    
     public String getOrientation(){
     	return this.orientation.get();
     }
     
     public void setOrientation(String orientation){
     	this.orientation.set(orientation);
-    }
-        
+    }    
+    
     public String getPhotographe(){
     	return this.photographe.get();
     }
     
     public void setPhotographe(String photographe){
     	this.photographe.set(photographe);
-    }
-    
-
-  
+    }     
    public List<Document> getPhoto(){
     	return this.photo;
     }
-    
+
     public void setPhoto(List<Document> photo){
         this.photo.clear();
     	this.photo.addAll( photo );
     }
-  
+
   
   @Override
   public String toString(){

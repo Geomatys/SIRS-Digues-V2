@@ -72,60 +72,58 @@ public class OuvrageRevanche  extends Structure  {
     // References
     // 
     private List<String> ouverture_batardableIds;
+ 
+
     
-      
     public float getHauteur_murette(){
     	return this.hauteur_murette.get();
     }
     
     public void setHauteur_murette(float hauteur_murette){
     	this.hauteur_murette.set(hauteur_murette);
-    }
-        
+    }    
+    
     public float getLargeur(){
     	return this.largeur.get();
     }
     
     public void setLargeur(float largeur){
     	this.largeur.set(largeur);
-    }
-        
+    }    
+    
     public String getMateriau_bas(){
     	return this.materiau_bas.get();
     }
     
     public void setMateriau_bas(String materiau_bas){
     	this.materiau_bas.set(materiau_bas);
-    }
-        
+    }    
+    
     public String getMateriau_haut(){
     	return this.materiau_haut.get();
     }
     
     public void setMateriau_haut(String materiau_haut){
     	this.materiau_haut.set(materiau_haut);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getOuverture_batardableIds(){
     	return this.ouverture_batardableIds;
     }
-    
+
     public void setOuverture_batardableIds(List<String> ouverture_batardableIds){
     	this.ouverture_batardableIds = ouverture_batardableIds;
     }
-  
+
   
   @Override
   public String toString(){

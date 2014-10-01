@@ -5,8 +5,8 @@
  */
 package fr.symadrem.sirs.component;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setLibelle("une digue");
 
-        digue.setDate_maj(new Date());
+        digue.setDate_maj(Instant.now());
         
         List<String> set = new ArrayList<>();
         {

@@ -23,18 +23,16 @@ public class FrancBord  extends Structure  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public float getLargeur(){
     	return this.largeur.get();
     }
     
     public void setLargeur(float largeur){
     	this.largeur.set(largeur);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

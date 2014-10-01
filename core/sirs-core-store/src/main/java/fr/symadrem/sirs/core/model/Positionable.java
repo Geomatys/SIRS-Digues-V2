@@ -129,90 +129,88 @@ public class Positionable  extends CouchDbDocument  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public int getBorne_debut(){
     	return this.borne_debut.get();
     }
     
     public void setBorne_debut(int borne_debut){
     	this.borne_debut.set(borne_debut);
-    }
-        
+    }    
+    
     public boolean getBorne_debut_aval(){
     	return this.borne_debut_aval.get();
     }
     
     public void setBorne_debut_aval(boolean borne_debut_aval){
     	this.borne_debut_aval.set(borne_debut_aval);
-    }
-        
+    }    
+    
     public float getBorne_debut_distance(){
     	return this.borne_debut_distance.get();
     }
     
     public void setBorne_debut_distance(float borne_debut_distance){
     	this.borne_debut_distance.set(borne_debut_distance);
-    }
-        
+    }    
+    
     public int getBorne_fin(){
     	return this.borne_fin.get();
     }
     
     public void setBorne_fin(int borne_fin){
     	this.borne_fin.set(borne_fin);
-    }
-        
+    }    
+    
     public boolean getBorne_fin_aval(){
     	return this.borne_fin_aval.get();
     }
     
     public void setBorne_fin_aval(boolean borne_fin_aval){
     	this.borne_fin_aval.set(borne_fin_aval);
-    }
-        
+    }    
+    
     public float getBorne_fin_distance(){
     	return this.borne_fin_distance.get();
     }
     
     public void setBorne_fin_distance(float borne_fin_distance){
     	this.borne_fin_distance.set(borne_fin_distance);
-    }
-        
+    }    
+    
     public String getPosition(){
     	return this.position.get();
     }
     
     public void setPosition(String position){
     	this.position.set(position);
-    }
-        
+    }    
+    
     public float getPR_debut(){
     	return this.PR_debut.get();
     }
     
     public void setPR_debut(float PR_debut){
     	this.PR_debut.set(PR_debut);
-    }
-        
+    }    
+    
     public float getPR_fin(){
     	return this.PR_fin.get();
     }
     
     public void setPR_fin(float PR_fin){
     	this.PR_fin.set(PR_fin);
-    }
-        
+    }    
+    
     public int getSysteme_rep_id(){
     	return this.systeme_rep_id.get();
     }
     
     public void setSysteme_rep_id(int systeme_rep_id){
     	this.systeme_rep_id.set(systeme_rep_id);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

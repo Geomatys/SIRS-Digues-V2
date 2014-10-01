@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
@@ -10,6 +12,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -109,120 +113,122 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     // References
     // 
     private String laissecrueId;
-     
+ 
     private List<String> evenements_meteoIds;
-     
+ 
     private String monteeeauxId;
-     
+ 
     private String ligneeauId;
+ 
+
     
-      
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getType_evenement(){
     	return this.type_evenement.get();
     }
     
     public void setType_evenement(String type_evenement){
     	this.type_evenement.set(type_evenement);
-    }
-        
+    }    
+    
     public String getFrequence(){
     	return this.frequence.get();
     }
     
     public void setFrequence(String frequence){
     	this.frequence.set(frequence);
-    }
-        
+    }    
+    
     public String getModeleur_hydraulique(){
     	return this.modeleur_hydraulique.get();
     }
     
     public void setModeleur_hydraulique(String modeleur_hydraulique){
     	this.modeleur_hydraulique.set(modeleur_hydraulique);
-    }
-        
+    }    
+    
     public float getVitesse_moy(){
     	return this.vitesse_moy.get();
     }
     
     public void setVitesse_moy(float vitesse_moy){
     	this.vitesse_moy.set(vitesse_moy);
-    }
-        
+    }    
+    
     public float getDebit_moy(){
     	return this.debit_moy.get();
     }
     
     public void setDebit_moy(float debit_moy){
     	this.debit_moy.set(debit_moy);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_debut(){
     	return this.date_debut.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_fin(){
     	return this.date_fin.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
-    }
-    
+    }     
 
-  
-  
     
     public String getLaissecrue(){
     	return this.laissecrueId;
     }
-    
+
     public void setLaissecrue(String laissecrueId){
     	this.laissecrueId = laissecrueId;
     }
-   
-  
+ 
+
     
     public List<String> getEvenements_meteoIds(){
     	return this.evenements_meteoIds;
     }
-    
+
     public void setEvenements_meteoIds(List<String> evenements_meteoIds){
     	this.evenements_meteoIds = evenements_meteoIds;
     }
-   
-  
+ 
+
     
     public String getMonteeeaux(){
     	return this.monteeeauxId;
     }
-    
+
     public void setMonteeeaux(String monteeeauxId){
     	this.monteeeauxId = monteeeauxId;
     }
-   
-  
+ 
+
     
     public String getLigneeau(){
     	return this.ligneeauId;
     }
-    
+
     public void setLigneeau(String ligneeauId){
     	this.ligneeauId = ligneeauId;
     }
-  
+
   
   @Override
   public String toString(){

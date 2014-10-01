@@ -82,58 +82,56 @@ public class VoieAcces  extends StructureAvecContacts  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public float getLargeur(){
     	return this.largeur.get();
     }
     
     public void setLargeur(float largeur){
     	this.largeur.set(largeur);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-        
+    }    
+    
     public String getNature(){
     	return this.nature.get();
     }
     
     public void setNature(String nature){
     	this.nature.set(nature);
-    }
-        
+    }    
+    
     public String getUsage(){
     	return this.usage.get();
     }
     
     public void setUsage(String usage){
     	this.usage.set(usage);
-    }
-        
+    }    
+    
     public int getNuméro_secteur(){
     	return this.numéro_secteur.get();
     }
     
     public void setNuméro_secteur(int numéro_secteur){
     	this.numéro_secteur.set(numéro_secteur);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

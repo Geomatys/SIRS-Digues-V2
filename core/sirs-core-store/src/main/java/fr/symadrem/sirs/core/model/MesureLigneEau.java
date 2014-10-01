@@ -23,18 +23,16 @@ public class MesureLigneEau  extends Positionable  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public float getHauteur(){
     	return this.hauteur.get();
     }
     
     public void setHauteur(float hauteur){
     	this.hauteur.set(hauteur);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

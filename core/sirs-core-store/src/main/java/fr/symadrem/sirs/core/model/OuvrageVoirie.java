@@ -45,34 +45,32 @@ public class OuvrageVoirie  extends StructureAvecContacts  {
     }
     //
     // References
-    //
-      
+    // 
+
+    
     public String getNom(){
     	return this.nom.get();
     }
     
     public void setNom(String nom){
     	this.nom.set(nom);
-    }
-        
+    }    
+    
     public String getType_ouvrage(){
     	return this.type_ouvrage.get();
     }
     
     public void setType_ouvrage(String type_ouvrage){
     	this.type_ouvrage.set(type_ouvrage);
-    }
-        
+    }    
+    
     public String getPosition_structure(){
     	return this.position_structure.get();
     }
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }
-    
-
- 
+    }    
   
   @Override
   public String toString(){

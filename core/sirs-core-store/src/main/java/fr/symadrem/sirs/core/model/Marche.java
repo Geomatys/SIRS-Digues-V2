@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.InstantDeserializer;
+import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
@@ -12,6 +14,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Marche  extends Document  {
@@ -77,72 +81,74 @@ public class Marche  extends Document  {
     // References
     // 
     private List<String> maitre_oeuvreIds;
-     
+ 
     private List<String> financeurIds;
+ 
+
     
-      
     public String getMaitre_ouvrage(){
     	return this.maitre_ouvrage.get();
     }
     
     public void setMaitre_ouvrage(String maitre_ouvrage){
     	this.maitre_ouvrage.set(maitre_ouvrage);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_debut(){
     	return this.date_debut.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
-    }
-        
+    }    
+
+    @JsonSerialize(using=InstantSerializer.class)    
     public Instant getDate_fin(){
     	return this.date_fin.get();
     }
-    
+
+    @JsonDeserialize(using=InstantDeserializer.class)    
     public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
-    }
-        
+    }    
+    
     public float getMontant(){
     	return this.montant.get();
     }
     
     public void setMontant(float montant){
     	this.montant.set(montant);
-    }
-        
+    }    
+    
     public int getNum_operation(){
     	return this.num_operation.get();
     }
     
     public void setNum_operation(int num_operation){
     	this.num_operation.set(num_operation);
-    }
-    
+    }     
 
-  
-  
     
     public List<String> getMaitre_oeuvreIds(){
     	return this.maitre_oeuvreIds;
     }
-    
+
     public void setMaitre_oeuvreIds(List<String> maitre_oeuvreIds){
     	this.maitre_oeuvreIds = maitre_oeuvreIds;
     }
-   
-  
+ 
+
     
     public List<String> getFinanceurIds(){
     	return this.financeurIds;
     }
-    
+
     public void setFinanceurIds(List<String> financeurIds){
     	this.financeurIds = financeurIds;
     }
-  
+
   
   @Override
   public String toString(){
