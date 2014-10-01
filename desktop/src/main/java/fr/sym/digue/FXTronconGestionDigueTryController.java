@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -30,6 +31,7 @@ public class FXTronconGestionDigueTryController {
     
     @FXML
     ToggleButton editionButton;
+    
     
     @FXML
     public void enableFields(ActionEvent event){

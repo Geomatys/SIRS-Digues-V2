@@ -15,12 +15,30 @@
   <packaging>jar</packaging>
   <name>Desktop</name>
   <description>Desktop</description>
+  
+  <properties>
+    <spring.version>4.1.0.RELEASE</spring.version>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>fr.symadrem.sirs.core</groupId>
       <artifactId>sirs-core-store</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
+      <scope>test</scope>
     </dependency>
     
     <dependency>

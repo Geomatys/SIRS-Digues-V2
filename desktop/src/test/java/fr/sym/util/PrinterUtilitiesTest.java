@@ -1,7 +1,9 @@
 package fr.sym.util;
 
 import static fr.sym.util.PrinterUtilities.print;
-import fr.symadrem.sirs.model.*;
+import fr.symadrem.sirs.core.model.BorneDigue;
+import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Calendar;
@@ -70,13 +72,12 @@ public class PrinterUtilitiesTest {
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
         final Digue digue = new Digue();
-        digue.setIdDigue(0);
-        digue.setLibelleDigue("Grande Digue");
-        digue.setCommentaireDigue("Cette digue est en mauvais état et présente "
+        digue.setLibelle("Grande Digue");
+        digue.setCommentaire("Cette digue est en mauvais état et présente "
                  + "des signes évidents de vétusté et de délabrement avancé. Des"
                  + "travaux urgents s'imposent faute de quoi d'importants riques"
                  + "de rupture sont à prévoir.");
-        digue.setDateDerniereMaj(Calendar.getInstance());
+        //digue.setDate_maj(Calendar.getInstance());
         
         print(digue);    
     }
@@ -88,20 +89,20 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
-        final TronconGestionDigue tronconGestionDigue = new TronconGestionDigue();
-        tronconGestionDigue.setIdDigue(Long.valueOf(0));
-        tronconGestionDigue.setCommentaireTroncon("Ceci est un tronçon de la digue.");
-        tronconGestionDigue.setDateDebutValGestionnaireD(Calendar.getInstance());
-        tronconGestionDigue.setDateDebutValTroncon(Calendar.getInstance());
-        tronconGestionDigue.setDateDerniereMaj(Calendar.getInstance());
-        tronconGestionDigue.setDateFinValGestionnaireD(Calendar.getInstance());
-        tronconGestionDigue.setDateFinValTroncon(Calendar.getInstance());
-        tronconGestionDigue.setIdOrgGestionnaire(null);
-        tronconGestionDigue.setIdSystemeRepDefaut(null);
-        tronconGestionDigue.setIdTronconGestion(null);
-        tronconGestionDigue.setIdTypeRive(0);
-        tronconGestionDigue.setLibelleTronconGestion("Tronçon principal de la Grande Digue");
-        tronconGestionDigue.setNomTronconGestion("Tronçon du moulin");
+        final TronconDigue tronconGestionDigue = new TronconDigue();
+        //tronconGestionDigue.setDigue(Long.valueOf(0));
+        tronconGestionDigue.setCommentaire("Ceci est un tronçon de la digue.");
+        //tronconGestionDigue.setDateDebutValGestionnaireD(Calendar.getInstance());
+        //tronconGestionDigue.setDateDebutValTroncon(Calendar.getInstance());
+        //tronconGestionDigue.setDateDerniereMaj(Calendar.getInstance());
+        //tronconGestionDigue.setDateFinValGestionnaireD(Calendar.getInstance());
+        //tronconGestionDigue.setDateFinValTroncon(Calendar.getInstance());
+        //tronconGestionDigue.setIdOrgGestionnaire(null);
+        //tronconGestionDigue.setIdSystemeRepDefaut(null);
+        //tronconGestionDigue.setIdTronconGestion(null);
+        //tronconGestionDigue.setIdTypeRive(0);
+        tronconGestionDigue.setLibelle("Tronçon principal de la Grande Digue");
+        //tronconGestionDigue.setNomTronconGestion("Tronçon du moulin");
          
         print(tronconGestionDigue); 
     }
@@ -114,19 +115,19 @@ public class PrinterUtilitiesTest {
     public void testPrintBorneDigue() throws Exception {
         System.out.println("Test print BorneDigue.");
         final BorneDigue borneDigue = new BorneDigue();
-        borneDigue.setIdBorne(1);
-        borneDigue.setCommentaireBorne("Cette borne n'est pas une borne fictive.");
-        borneDigue.setDateDebutVal(Calendar.getInstance());
-        borneDigue.setDateFinVal(Calendar.getInstance());
-        borneDigue.setDateDerniereMaj(Calendar.getInstance());
+        //borneDigue.setIdBorne(1);
+        borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
+        //borneDigue.setDateDebutVal(Calendar.getInstance());
+        //borneDigue.setDateFinVal(Calendar.getInstance());
+        //borneDigue.setDateDerniereMaj(Calendar.getInstance());
         borneDigue.setFictive(false);
-        borneDigue.setIdTronconGestion(2);
-        borneDigue.setNomBorne("Borne principale");
-        borneDigue.setXPoint(1.3);
-        borneDigue.setYPoint(1.4);
-        borneDigue.setZPoint(1.5);
-        borneDigue.setXPointOrigine(1.6);
-        borneDigue.setYPointOrigine(1.7);
+        //borneDigue.setIdTronconGestion(2);
+        borneDigue.setNom("Borne principale");
+        //borneDigue.setXPoint(1.3);
+        //borneDigue.setYPoint(1.4);
+        //borneDigue.setZPoint(1.5);
+        //borneDigue.setXPointOrigine(1.6);
+        //borneDigue.setYPointOrigine(1.7);
          
         print(borneDigue); 
     }

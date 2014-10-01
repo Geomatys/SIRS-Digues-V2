@@ -19,6 +19,10 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 
 public class FXDiguesTryController {
 
@@ -30,6 +34,10 @@ public class FXDiguesTryController {
     @FXML
     private TreeView uiTree;
 
+     @Autowired
+    private Session session;
+
+    
     private void init(){
         
         final TreeItem root = new TreeItem("root");
@@ -39,7 +47,7 @@ public class FXDiguesTryController {
             root.getChildren().add(new WrapTreeItem(ds));
         }*/
         
-        for(Digue ds : Session.getInstance().getDigues()){
+        for(Digue ds : session.getDigues()){
             root.getChildren().add(new WrapTreeItem(ds));
         }
         
@@ -84,6 +92,9 @@ public class FXDiguesTryController {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
         final FXDiguesTryController controller = loader.getController();
+        
+        Injector.injectDependencies(controller);
+        
         controller.root = root;
         controller.init();
         return controller;

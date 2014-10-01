@@ -3,6 +3,7 @@ package fr.sym.map;
 
 import fr.sym.Session;
 import fr.sym.Symadrem;
+import fr.sym.digue.Injector;
 import java.util.logging.Level;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SeparatorMenuItem;
@@ -24,6 +25,7 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -38,8 +40,13 @@ public class FXMapPane extends BorderPane {
     private final FXCoordinateBar uiCoordBar;
     private final FXMapContextTree uiTree;
 
+    @Autowired
+    private Session session;
+    
     public FXMapPane() {
-        context = Session.getInstance().getMapContext();
+        Injector.injectDependencies(this);
+        
+        context = session.getMapContext();
         
         uiMap = new FXMap(false);
         uiMap.getContainer().setContext(context);

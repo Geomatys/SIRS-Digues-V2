@@ -5,6 +5,7 @@ package fr.sym.util;
 import fr.sym.Plugins;
 import fr.sym.Session;
 import fr.sym.Theme;
+import fr.sym.digue.Injector;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -24,12 +26,16 @@ public class WrapTreeItem extends TreeItem {
     
     public WrapTreeItem(Object candidate) {
         super(candidate);
+        Injector.injectDependencies(this);
     }
 
     @Override
     public boolean isLeaf() {
         return getValue() instanceof Theme;
     }
+    
+    @Autowired
+    private Session session;
 
     @Override
     public synchronized ObservableList getChildren() {
@@ -39,14 +45,14 @@ public class WrapTreeItem extends TreeItem {
             List candidates = new ArrayList();
             
             if(obj instanceof Digue){
-                candidates = Session.getInstance().getChildren((Digue)obj);
+                candidates = session.getChildren((Digue)obj);
             }else
             
             
             if(obj instanceof DamSystem){
-                candidates = Session.getInstance().getChildren((DamSystem)obj);
+                candidates = session.getChildren((DamSystem)obj);
             }else if(obj instanceof Dam){
-                candidates = Session.getInstance().getChildren((Dam)obj);
+                candidates = session.getChildren((Dam)obj);
             }else if(obj instanceof Section){
                 final Theme[] themes = Plugins.getThemes();
                 for(Theme theme : themes){
@@ -54,9 +60,9 @@ public class WrapTreeItem extends TreeItem {
                 }
             }
             
-            for(Object candidate : candidates){
+/*            for(Object candidate : candidates){
                 super.getChildren().add(new WrapTreeItem(candidate));
-            }
+            }*/
         }
         
         return super.getChildren();

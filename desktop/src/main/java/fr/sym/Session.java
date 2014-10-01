@@ -5,6 +5,7 @@ package fr.sym;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
+import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.net.URL;
@@ -25,18 +26,24 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.style.DefaultDescription;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import sun.misc.Contended;
 
 /**
  *
  * @author Johann Sorel
  */
+
+@Component
 public class Session {
     
-    private static final Session INSTANCE = new Session();
-
     private final MapContext mapContext = MapBuilder.createContext(CommonCRS.WGS84.normalizedGeographic());
     
-    private Session(){
+    @Autowired
+    private DigueRepository digueRepository;
+    
+    public Session(){
         mapContext.setName("Carte");
 
         //Fond de plan
@@ -61,9 +68,7 @@ public class Session {
         }
     }
     
-    public static Session getInstance() {
-        return INSTANCE;
-    }
+    
     
     /**
      * MapContext affiché pour toute l'application.
@@ -88,6 +93,8 @@ public class Session {
     
     private List<Digue> digues = null;
     public List<Digue> getDigues(){
+        
+        //this.digues = this.digueRepository.getAll();
         //TODO database binding
         int nbDigues = 10;
         if(this.digues == null){

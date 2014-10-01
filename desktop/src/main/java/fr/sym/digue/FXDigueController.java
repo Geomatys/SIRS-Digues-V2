@@ -17,6 +17,10 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 
 public class FXDigueController {
 
@@ -27,13 +31,16 @@ public class FXDigueController {
     
     @FXML
     private TreeView uiTree;
+    
+    @Autowired
+    private Session session;
 
     private void init(){
         
         final TreeItem root = new TreeItem("root");
         
         //build the tree
-        for(DamSystem ds : Session.getInstance().getDamSystems()){
+        for(DamSystem ds : session.getDamSystems()){
             root.getChildren().add(new WrapTreeItem(ds));
         }
         
@@ -78,6 +85,9 @@ public class FXDigueController {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
         final FXDigueController controller = loader.getController();
+        
+        Injector.injectDependencies(controller);
+        
         controller.root = root;
         controller.init();
         return controller;

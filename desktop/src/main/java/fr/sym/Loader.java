@@ -32,6 +32,7 @@ import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.opengis.util.FactoryException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -119,12 +120,15 @@ public class Loader extends Application {
      * Display the main frame.
      */
     private void showMainStage() throws IOException {
-        try {
-            final MainFrameController controller = MainFrameController.create();
+        
+            ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/application-context.xml");
+            
+            
+            final MainFrameController controller = applicationContext.getBean(MainFrameController.class);
+           
             controller.show();
-        } catch (IOException ex) {
-            Symadrem.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-        }
+            
+        
 
     }
 

@@ -99,7 +99,7 @@ public class PrinterUtilities {
                 } else {
                     throw new Exception("This is an original getter.");
                 }
-                
+                System.out.println("Propritete : [["+fieldName+"]]");
                 feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
             }
         }
@@ -125,6 +125,10 @@ public class PrinterUtilities {
                 || method.getName().startsWith("is"))
                 && method.getParameterTypes().length == 0
                 && !method.getName().equals("getClass")
+                && !method.getName().equals("isNew")//Bub methods from CouchDbDocument
+                && !method.getName().equals("getAttachments")
+                && !method.getName().equals("getRevisions")
+                && !method.getName().equals("getConflicts")
                 && !void.class.equals(method.getReturnType()))
             return true;
         else return false;
