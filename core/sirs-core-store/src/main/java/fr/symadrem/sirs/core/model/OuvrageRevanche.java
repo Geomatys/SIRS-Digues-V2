@@ -1,12 +1,15 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
@@ -31,7 +34,7 @@ public class OuvrageRevanche  extends Structure  {
     //
     // References
     //
-    private String ouverture_batardableId;
+    private List<String> ouverture_batardableIds;
     
   
   
@@ -80,12 +83,12 @@ public class OuvrageRevanche  extends Structure  {
   
   
     
-    public String getOuverture_batardable(){
-    	return this.ouverture_batardableId;
+    public List<String> getOuverture_batardableIds(){
+    	return this.ouverture_batardableIds;
     }
     
-    public void setOuverture_batardable(String ouverture_batardableId){
-    	this.ouverture_batardableId = ouverture_batardableId;
+    public void setOuverture_batardableIds(List<String> ouverture_batardableIds){
+    	this.ouverture_batardableIds = ouverture_batardableIds;
     }
   
   

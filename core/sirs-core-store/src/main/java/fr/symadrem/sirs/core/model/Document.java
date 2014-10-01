@@ -1,15 +1,12 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
@@ -49,16 +46,6 @@ public class Document  extends Positionable  {
     // References
     //
     private String structureId;
-     
-    //
-    // References
-    //
-    private List<String> maitre_oeuvreIds;
-     
-    //
-    // References
-    //
-    private List<String> financeurIds;
     
   
   
@@ -149,26 +136,6 @@ public class Document  extends Positionable  {
     
     public void setStructure(String structureId){
     	this.structureId = structureId;
-    }
-   
-  
-    
-    public List<String> getMaitre_oeuvreIds(){
-    	return this.maitre_oeuvreIds;
-    }
-    
-    public void setMaitre_oeuvreIds(List<String> maitre_oeuvreIds){
-    	this.maitre_oeuvreIds = maitre_oeuvreIds;
-    }
-   
-  
-    
-    public List<String> getFinanceurIds(){
-    	return this.financeurIds;
-    }
-    
-    public void setFinanceurIds(List<String> financeurIds){
-    	this.financeurIds = financeurIds;
     }
   
   

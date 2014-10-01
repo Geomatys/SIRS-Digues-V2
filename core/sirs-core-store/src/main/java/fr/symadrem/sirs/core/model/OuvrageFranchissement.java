@@ -1,12 +1,15 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
@@ -33,7 +36,12 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
         
     public StringProperty  orientation = new SimpleStringProperty();
     
-
+ 
+    //
+    // References
+    //
+    private List<String> crue_submersionIds;
+    
   
   
       
@@ -102,7 +110,17 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
     }
     
 
- 
+  
+  
+    
+    public List<String> getCrue_submersionIds(){
+    	return this.crue_submersionIds;
+    }
+    
+    public void setCrue_submersionIds(List<String> crue_submersionIds){
+    	this.crue_submersionIds = crue_submersionIds;
+    }
+  
   
   @Override
   public String toString(){
