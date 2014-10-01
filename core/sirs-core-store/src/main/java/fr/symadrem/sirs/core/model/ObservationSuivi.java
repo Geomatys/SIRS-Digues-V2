@@ -1,44 +1,87 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class ObservationSuivi  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public ObjectProperty<Date>  date_observation = new SimpleObjectProperty<Date>();
-        
-    public IntegerProperty  nombre_desordres = new SimpleIntegerProperty();
-        
-    public StringProperty  urgence = new SimpleStringProperty();
-        
-    public StringProperty  evolution = new SimpleStringProperty();
-        
-    public StringProperty  suite = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for date_observation.
+    */
+    private ObjectProperty<Instant>  date_observation = new SimpleObjectProperty<Instant>();
     
+    /**
+    * Getter for JavaFX property on date_observation.
+    */
+    public  ObjectProperty<Instant> date_observationProperty() {
+       return date_observation;
+    }
+    /**
+    * JavaFX property for nombre_desordres.
+    */
+    private IntegerProperty  nombre_desordres = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on nombre_desordres.
+    */
+    public  IntegerProperty nombre_desordresProperty() {
+       return nombre_desordres;
+    }
+    /**
+    * JavaFX property for urgence.
+    */
+    private StringProperty  urgence = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on urgence.
+    */
+    public  StringProperty urgenceProperty() {
+       return urgence;
+    }
+    /**
+    * JavaFX property for evolution.
+    */
+    private StringProperty  evolution = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on evolution.
+    */
+    public  StringProperty evolutionProperty() {
+       return evolution;
+    }
+    /**
+    * JavaFX property for suite.
+    */
+    private StringProperty  suite = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on suite.
+    */
+    public  StringProperty suiteProperty() {
+       return suite;
+    }
     //
     // References
     // 
     private String observateurId;
     
       
-    public Date getDate_observation(){
+    public Instant getDate_observation(){
     	return this.date_observation.get();
     }
     
-    public void setDate_observation(Date date_observation){
+    public void setDate_observation(Instant date_observation){
     	this.date_observation.set(date_observation);
     }
         

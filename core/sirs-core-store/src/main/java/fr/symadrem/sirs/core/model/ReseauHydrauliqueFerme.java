@@ -7,31 +7,101 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_reseau = new SimpleStringProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
-        
-    public StringProperty  utilisation = new SimpleStringProperty();
-        
-    public StringProperty  implatation = new SimpleStringProperty();
-        
-    public StringProperty  ecoulement = new SimpleStringProperty();
-        
-    public BooleanProperty  autorise = new SimpleBooleanProperty();
-        
-    public FloatProperty  diametre = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_reseau.
+    */
+    private StringProperty  type_reseau = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_reseau.
+    */
+    public  StringProperty type_reseauProperty() {
+       return type_reseau;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
+    /**
+    * JavaFX property for utilisation.
+    */
+    private StringProperty  utilisation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on utilisation.
+    */
+    public  StringProperty utilisationProperty() {
+       return utilisation;
+    }
+    /**
+    * JavaFX property for implatation.
+    */
+    private StringProperty  implatation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on implatation.
+    */
+    public  StringProperty implatationProperty() {
+       return implatation;
+    }
+    /**
+    * JavaFX property for ecoulement.
+    */
+    private StringProperty  ecoulement = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on ecoulement.
+    */
+    public  StringProperty ecoulementProperty() {
+       return ecoulement;
+    }
+    /**
+    * JavaFX property for autorise.
+    */
+    private BooleanProperty  autorise = new SimpleBooleanProperty();
+    
+    /**
+    * Getter for JavaFX property on autorise.
+    */
+    public  BooleanProperty autoriseProperty() {
+       return autorise;
+    }
+    /**
+    * JavaFX property for diametre.
+    */
+    private FloatProperty  diametre = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on diametre.
+    */
+    public  FloatProperty diametreProperty() {
+       return diametre;
+    }
     //
     // References
     // 

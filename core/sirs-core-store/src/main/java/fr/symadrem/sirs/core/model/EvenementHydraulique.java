@@ -1,7 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,32 +9,102 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class EvenementHydraulique  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_evenement = new SimpleStringProperty();
-        
-    public StringProperty  frequence = new SimpleStringProperty();
-        
-    public StringProperty  modeleur_hydraulique = new SimpleStringProperty();
-        
-    public FloatProperty  vitesse_moy = new SimpleFloatProperty();
-        
-    public FloatProperty  debit_moy = new SimpleFloatProperty();
-        
-    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
-        
-    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_evenement.
+    */
+    private StringProperty  type_evenement = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_evenement.
+    */
+    public  StringProperty type_evenementProperty() {
+       return type_evenement;
+    }
+    /**
+    * JavaFX property for frequence.
+    */
+    private StringProperty  frequence = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on frequence.
+    */
+    public  StringProperty frequenceProperty() {
+       return frequence;
+    }
+    /**
+    * JavaFX property for modeleur_hydraulique.
+    */
+    private StringProperty  modeleur_hydraulique = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on modeleur_hydraulique.
+    */
+    public  StringProperty modeleur_hydrauliqueProperty() {
+       return modeleur_hydraulique;
+    }
+    /**
+    * JavaFX property for vitesse_moy.
+    */
+    private FloatProperty  vitesse_moy = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on vitesse_moy.
+    */
+    public  FloatProperty vitesse_moyProperty() {
+       return vitesse_moy;
+    }
+    /**
+    * JavaFX property for debit_moy.
+    */
+    private FloatProperty  debit_moy = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on debit_moy.
+    */
+    public  FloatProperty debit_moyProperty() {
+       return debit_moy;
+    }
+    /**
+    * JavaFX property for date_debut.
+    */
+    private ObjectProperty<Instant>  date_debut = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_debut.
+    */
+    public  ObjectProperty<Instant> date_debutProperty() {
+       return date_debut;
+    }
+    /**
+    * JavaFX property for date_fin.
+    */
+    private ObjectProperty<Instant>  date_fin = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_fin.
+    */
+    public  ObjectProperty<Instant> date_finProperty() {
+       return date_fin;
+    }
     //
     // References
     // 
@@ -95,19 +165,19 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     	this.debit_moy.set(debit_moy);
     }
         
-    public Date getDate_debut(){
+    public Instant getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(Date date_debut){
+    public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public Date getDate_fin(){
+    public Instant getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(Date date_fin){
+    public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
     }
     

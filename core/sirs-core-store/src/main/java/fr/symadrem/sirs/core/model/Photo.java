@@ -6,22 +6,47 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Photo  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public StringProperty  cote = new SimpleStringProperty();
-        
-    public StringProperty  orientation = new SimpleStringProperty();
-        
-    public StringProperty  photographe = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for cote.
+    */
+    private StringProperty  cote = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on cote.
+    */
+    public  StringProperty coteProperty() {
+       return cote;
+    }
+    /**
+    * JavaFX property for orientation.
+    */
+    private StringProperty  orientation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on orientation.
+    */
+    public  StringProperty orientationProperty() {
+       return orientation;
+    }
+    /**
+    * JavaFX property for photographe.
+    */
+    private StringProperty  photographe = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on photographe.
+    */
+    public  StringProperty photographeProperty() {
+       return photographe;
+    }
     //
     // References
     // 

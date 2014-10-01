@@ -7,41 +7,156 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvertureBatardable  extends StructureAvecContacts  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_glissiere = new SimpleStringProperty();
-        
-    public FloatProperty  hauteur = new SimpleFloatProperty();
-        
-    public FloatProperty  largeur = new SimpleFloatProperty();
-        
-    public FloatProperty  z_du_seuil = new SimpleFloatProperty();
-        
-    public StringProperty  type_seuil = new SimpleStringProperty();
-        
-    public StringProperty  nature_batardeaux = new SimpleStringProperty();
-        
-    public IntegerProperty  nombre_batardeaux = new SimpleIntegerProperty();
-        
-    public FloatProperty  poids_unitaires_batardeaux = new SimpleFloatProperty();
-        
-    public StringProperty  moyen_manipulation_batardeaux = new SimpleStringProperty();
-        
-    public StringProperty  organisme_manipulateur_batardeaux = new SimpleStringProperty();
-        
-    public StringProperty  organisme_stockant_batardeaux = new SimpleStringProperty();
-        
-    public StringProperty  intervenant_manipulateur_batardeaux = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_glissiere.
+    */
+    private StringProperty  type_glissiere = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_glissiere.
+    */
+    public  StringProperty type_glissiereProperty() {
+       return type_glissiere;
+    }
+    /**
+    * JavaFX property for hauteur.
+    */
+    private FloatProperty  hauteur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on hauteur.
+    */
+    public  FloatProperty hauteurProperty() {
+       return hauteur;
+    }
+    /**
+    * JavaFX property for largeur.
+    */
+    private FloatProperty  largeur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on largeur.
+    */
+    public  FloatProperty largeurProperty() {
+       return largeur;
+    }
+    /**
+    * JavaFX property for z_du_seuil.
+    */
+    private FloatProperty  z_du_seuil = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on z_du_seuil.
+    */
+    public  FloatProperty z_du_seuilProperty() {
+       return z_du_seuil;
+    }
+    /**
+    * JavaFX property for type_seuil.
+    */
+    private StringProperty  type_seuil = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_seuil.
+    */
+    public  StringProperty type_seuilProperty() {
+       return type_seuil;
+    }
+    /**
+    * JavaFX property for nature_batardeaux.
+    */
+    private StringProperty  nature_batardeaux = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on nature_batardeaux.
+    */
+    public  StringProperty nature_batardeauxProperty() {
+       return nature_batardeaux;
+    }
+    /**
+    * JavaFX property for nombre_batardeaux.
+    */
+    private IntegerProperty  nombre_batardeaux = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on nombre_batardeaux.
+    */
+    public  IntegerProperty nombre_batardeauxProperty() {
+       return nombre_batardeaux;
+    }
+    /**
+    * JavaFX property for poids_unitaires_batardeaux.
+    */
+    private FloatProperty  poids_unitaires_batardeaux = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on poids_unitaires_batardeaux.
+    */
+    public  FloatProperty poids_unitaires_batardeauxProperty() {
+       return poids_unitaires_batardeaux;
+    }
+    /**
+    * JavaFX property for moyen_manipulation_batardeaux.
+    */
+    private StringProperty  moyen_manipulation_batardeaux = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on moyen_manipulation_batardeaux.
+    */
+    public  StringProperty moyen_manipulation_batardeauxProperty() {
+       return moyen_manipulation_batardeaux;
+    }
+    /**
+    * JavaFX property for organisme_manipulateur_batardeaux.
+    */
+    private StringProperty  organisme_manipulateur_batardeaux = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on organisme_manipulateur_batardeaux.
+    */
+    public  StringProperty organisme_manipulateur_batardeauxProperty() {
+       return organisme_manipulateur_batardeaux;
+    }
+    /**
+    * JavaFX property for organisme_stockant_batardeaux.
+    */
+    private StringProperty  organisme_stockant_batardeaux = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on organisme_stockant_batardeaux.
+    */
+    public  StringProperty organisme_stockant_batardeauxProperty() {
+       return organisme_stockant_batardeaux;
+    }
+    /**
+    * JavaFX property for intervenant_manipulateur_batardeaux.
+    */
+    private StringProperty  intervenant_manipulateur_batardeaux = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on intervenant_manipulateur_batardeaux.
+    */
+    public  StringProperty intervenant_manipulateur_batardeauxProperty() {
+       return intervenant_manipulateur_batardeaux;
+    }
     //
     // References
     // 

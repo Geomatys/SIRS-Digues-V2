@@ -5,24 +5,58 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Pompe  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public StringProperty  marque = new SimpleStringProperty();
-        
-    public FloatProperty  puissance = new SimpleFloatProperty();
-        
-    public FloatProperty  debit = new SimpleFloatProperty();
-        
-    public FloatProperty  hauteur_refoulement = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for marque.
+    */
+    private StringProperty  marque = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on marque.
+    */
+    public  StringProperty marqueProperty() {
+       return marque;
+    }
+    /**
+    * JavaFX property for puissance.
+    */
+    private FloatProperty  puissance = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on puissance.
+    */
+    public  FloatProperty puissanceProperty() {
+       return puissance;
+    }
+    /**
+    * JavaFX property for debit.
+    */
+    private FloatProperty  debit = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on debit.
+    */
+    public  FloatProperty debitProperty() {
+       return debit;
+    }
+    /**
+    * JavaFX property for hauteur_refoulement.
+    */
+    private FloatProperty  hauteur_refoulement = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on hauteur_refoulement.
+    */
+    public  FloatProperty hauteur_refoulementProperty() {
+       return hauteur_refoulement;
+    }
     //
     // References
     //

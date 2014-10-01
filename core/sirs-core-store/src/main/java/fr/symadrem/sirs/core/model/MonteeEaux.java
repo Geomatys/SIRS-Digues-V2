@@ -4,17 +4,24 @@ package fr.symadrem.sirs.core.model;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class MonteeEaux  extends Structure  {
     //
     // Attributes.
-    //      
-    public StringProperty  echelle_limnimetrique = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for echelle_limnimetrique.
+    */
+    private StringProperty  echelle_limnimetrique = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on echelle_limnimetrique.
+    */
+    public  StringProperty echelle_limnimetriqueProperty() {
+       return echelle_limnimetrique;
+    }
     //
     // References
     // 

@@ -3,36 +3,124 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Contact  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public StringProperty  adresse = new SimpleStringProperty();
-        
-    public StringProperty  code_postal = new SimpleStringProperty();
-        
-    public StringProperty  email = new SimpleStringProperty();
-        
-    public StringProperty  fax = new SimpleStringProperty();
-        
-    public StringProperty  localite = new SimpleStringProperty();
-        
-    public StringProperty  mobile = new SimpleStringProperty();
-        
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  pays = new SimpleStringProperty();
-        
-    public StringProperty  prenom = new SimpleStringProperty();
-        
-    public StringProperty  telephone = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for adresse.
+    */
+    private StringProperty  adresse = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on adresse.
+    */
+    public  StringProperty adresseProperty() {
+       return adresse;
+    }
+    /**
+    * JavaFX property for code_postal.
+    */
+    private StringProperty  code_postal = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on code_postal.
+    */
+    public  StringProperty code_postalProperty() {
+       return code_postal;
+    }
+    /**
+    * JavaFX property for email.
+    */
+    private StringProperty  email = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on email.
+    */
+    public  StringProperty emailProperty() {
+       return email;
+    }
+    /**
+    * JavaFX property for fax.
+    */
+    private StringProperty  fax = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on fax.
+    */
+    public  StringProperty faxProperty() {
+       return fax;
+    }
+    /**
+    * JavaFX property for localite.
+    */
+    private StringProperty  localite = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on localite.
+    */
+    public  StringProperty localiteProperty() {
+       return localite;
+    }
+    /**
+    * JavaFX property for mobile.
+    */
+    private StringProperty  mobile = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on mobile.
+    */
+    public  StringProperty mobileProperty() {
+       return mobile;
+    }
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for pays.
+    */
+    private StringProperty  pays = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on pays.
+    */
+    public  StringProperty paysProperty() {
+       return pays;
+    }
+    /**
+    * JavaFX property for prenom.
+    */
+    private StringProperty  prenom = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on prenom.
+    */
+    public  StringProperty prenomProperty() {
+       return prenom;
+    }
+    /**
+    * JavaFX property for telephone.
+    */
+    private StringProperty  telephone = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on telephone.
+    */
+    public  StringProperty telephoneProperty() {
+       return telephone;
+    }
     //
     // References
     // 

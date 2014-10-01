@@ -7,23 +7,57 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Crete  extends Structure  {
     //
     // Attributes.
-    //      
-    public FloatProperty  epaisseur = new SimpleFloatProperty();
-        
-    public StringProperty  fonction = new SimpleStringProperty();
-        
-    public StringProperty  materiau = new SimpleStringProperty();
-        
-    public IntegerProperty  num_couche = new SimpleIntegerProperty();
+    //  
+    /**
+    * JavaFX property for epaisseur.
+    */
+    private FloatProperty  epaisseur = new SimpleFloatProperty();
     
+    /**
+    * Getter for JavaFX property on epaisseur.
+    */
+    public  FloatProperty epaisseurProperty() {
+       return epaisseur;
+    }
+    /**
+    * JavaFX property for fonction.
+    */
+    private StringProperty  fonction = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on fonction.
+    */
+    public  StringProperty fonctionProperty() {
+       return fonction;
+    }
+    /**
+    * JavaFX property for materiau.
+    */
+    private StringProperty  materiau = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on materiau.
+    */
+    public  StringProperty materiauProperty() {
+       return materiau;
+    }
+    /**
+    * JavaFX property for num_couche.
+    */
+    private IntegerProperty  num_couche = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on num_couche.
+    */
+    public  IntegerProperty num_coucheProperty() {
+       return num_couche;
+    }
     //
     // References
     //

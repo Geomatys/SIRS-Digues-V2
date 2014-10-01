@@ -1,28 +1,53 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Digue  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public StringProperty  libelle = new SimpleStringProperty();
-        
-    public StringProperty  commentaire = new SimpleStringProperty();
-        
-    public ObjectProperty<Date>  date_maj = new SimpleObjectProperty<Date>();
+    //  
+    /**
+    * JavaFX property for libelle.
+    */
+    private StringProperty  libelle = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on libelle.
+    */
+    public  StringProperty libelleProperty() {
+       return libelle;
+    }
+    /**
+    * JavaFX property for commentaire.
+    */
+    private StringProperty  commentaire = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on commentaire.
+    */
+    public  StringProperty commentaireProperty() {
+       return commentaire;
+    }
+    /**
+    * JavaFX property for date_maj.
+    */
+    private ObjectProperty<Instant>  date_maj = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_maj.
+    */
+    public  ObjectProperty<Instant> date_majProperty() {
+       return date_maj;
+    }
     //
     // References
     // 
@@ -47,11 +72,11 @@ public class Digue  extends CouchDbDocument  {
     	this.commentaire.set(commentaire);
     }
         
-    public Date getDate_maj(){
+    public Instant getDate_maj(){
     	return this.date_maj.get();
     }
     
-    public void setDate_maj(Date date_maj){
+    public void setDate_maj(Instant date_maj){
     	this.date_maj.set(date_maj);
     }
     

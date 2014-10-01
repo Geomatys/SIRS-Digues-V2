@@ -6,29 +6,90 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class VoieDigue  extends StructureAvecContacts  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_voie = new SimpleStringProperty();
-        
-    public FloatProperty  largeur = new SimpleFloatProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
-        
-    public StringProperty  revetement = new SimpleStringProperty();
-        
-    public StringProperty  usage = new SimpleStringProperty();
-        
-    public StringProperty  orientation = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_voie.
+    */
+    private StringProperty  type_voie = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_voie.
+    */
+    public  StringProperty type_voieProperty() {
+       return type_voie;
+    }
+    /**
+    * JavaFX property for largeur.
+    */
+    private FloatProperty  largeur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on largeur.
+    */
+    public  FloatProperty largeurProperty() {
+       return largeur;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
+    /**
+    * JavaFX property for revetement.
+    */
+    private StringProperty  revetement = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on revetement.
+    */
+    public  StringProperty revetementProperty() {
+       return revetement;
+    }
+    /**
+    * JavaFX property for usage.
+    */
+    private StringProperty  usage = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on usage.
+    */
+    public  StringProperty usageProperty() {
+       return usage;
+    }
+    /**
+    * JavaFX property for orientation.
+    */
+    private StringProperty  orientation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on orientation.
+    */
+    public  StringProperty orientationProperty() {
+       return orientation;
+    }
     //
     // References
     // 

@@ -1,7 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
@@ -11,25 +11,68 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Marche  extends Document  {
     //
     // Attributes.
-    //      
-    public StringProperty  maitre_ouvrage = new SimpleStringProperty();
-        
-    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
-        
-    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
-        
-    public FloatProperty  montant = new SimpleFloatProperty();
-        
-    public IntegerProperty  num_operation = new SimpleIntegerProperty();
+    //  
+    /**
+    * JavaFX property for maitre_ouvrage.
+    */
+    private StringProperty  maitre_ouvrage = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on maitre_ouvrage.
+    */
+    public  StringProperty maitre_ouvrageProperty() {
+       return maitre_ouvrage;
+    }
+    /**
+    * JavaFX property for date_debut.
+    */
+    private ObjectProperty<Instant>  date_debut = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_debut.
+    */
+    public  ObjectProperty<Instant> date_debutProperty() {
+       return date_debut;
+    }
+    /**
+    * JavaFX property for date_fin.
+    */
+    private ObjectProperty<Instant>  date_fin = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_fin.
+    */
+    public  ObjectProperty<Instant> date_finProperty() {
+       return date_fin;
+    }
+    /**
+    * JavaFX property for montant.
+    */
+    private FloatProperty  montant = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on montant.
+    */
+    public  FloatProperty montantProperty() {
+       return montant;
+    }
+    /**
+    * JavaFX property for num_operation.
+    */
+    private IntegerProperty  num_operation = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on num_operation.
+    */
+    public  IntegerProperty num_operationProperty() {
+       return num_operation;
+    }
     //
     // References
     // 
@@ -46,19 +89,19 @@ public class Marche  extends Document  {
     	this.maitre_ouvrage.set(maitre_ouvrage);
     }
         
-    public Date getDate_debut(){
+    public Instant getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(Date date_debut){
+    public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public Date getDate_fin(){
+    public Instant getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(Date date_fin){
+    public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
     }
         

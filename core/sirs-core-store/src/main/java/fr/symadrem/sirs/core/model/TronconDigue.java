@@ -1,7 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,29 +9,90 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class TronconDigue  extends Positionable  {
     //
     // Attributes.
-    //      
-    public StringProperty  libelle = new SimpleStringProperty();
-        
-    public StringProperty  commentaire = new SimpleStringProperty();
-        
-    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
-        
-    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
-        
-    public ObjectProperty<Date>  date_maj = new SimpleObjectProperty<Date>();
-        
-    public StringProperty  rive = new SimpleStringProperty();
-        
-    public StringProperty  systeme_reperage_defaut = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for libelle.
+    */
+    private StringProperty  libelle = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on libelle.
+    */
+    public  StringProperty libelleProperty() {
+       return libelle;
+    }
+    /**
+    * JavaFX property for commentaire.
+    */
+    private StringProperty  commentaire = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on commentaire.
+    */
+    public  StringProperty commentaireProperty() {
+       return commentaire;
+    }
+    /**
+    * JavaFX property for date_debut.
+    */
+    private ObjectProperty<Instant>  date_debut = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_debut.
+    */
+    public  ObjectProperty<Instant> date_debutProperty() {
+       return date_debut;
+    }
+    /**
+    * JavaFX property for date_fin.
+    */
+    private ObjectProperty<Instant>  date_fin = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_fin.
+    */
+    public  ObjectProperty<Instant> date_finProperty() {
+       return date_fin;
+    }
+    /**
+    * JavaFX property for date_maj.
+    */
+    private ObjectProperty<Instant>  date_maj = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_maj.
+    */
+    public  ObjectProperty<Instant> date_majProperty() {
+       return date_maj;
+    }
+    /**
+    * JavaFX property for rive.
+    */
+    private StringProperty  rive = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on rive.
+    */
+    public  StringProperty riveProperty() {
+       return rive;
+    }
+    /**
+    * JavaFX property for systeme_reperage_defaut.
+    */
+    private StringProperty  systeme_reperage_defaut = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on systeme_reperage_defaut.
+    */
+    public  StringProperty systeme_reperage_defautProperty() {
+       return systeme_reperage_defaut;
+    }
     //
     // References
     // 
@@ -63,27 +124,27 @@ public class TronconDigue  extends Positionable  {
     	this.commentaire.set(commentaire);
     }
         
-    public Date getDate_debut(){
+    public Instant getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(Date date_debut){
+    public void setDate_debut(Instant date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public Date getDate_fin(){
+    public Instant getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(Date date_fin){
+    public void setDate_fin(Instant date_fin){
     	this.date_fin.set(date_fin);
     }
         
-    public Date getDate_maj(){
+    public Instant getDate_maj(){
     	return this.date_maj.get();
     }
     
-    public void setDate_maj(Date date_maj){
+    public void setDate_maj(Instant date_maj){
     	this.date_maj.set(date_maj);
     }
         

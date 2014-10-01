@@ -5,25 +5,68 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class ReseauTelecomEnergie  extends StructureAvecContacts  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_reseau = new SimpleStringProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
-        
-    public StringProperty  implantation = new SimpleStringProperty();
-        
-    public FloatProperty  hauteur = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_reseau.
+    */
+    private StringProperty  type_reseau = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_reseau.
+    */
+    public  StringProperty type_reseauProperty() {
+       return type_reseau;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
+    /**
+    * JavaFX property for implantation.
+    */
+    private StringProperty  implantation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on implantation.
+    */
+    public  StringProperty implantationProperty() {
+       return implantation;
+    }
+    /**
+    * JavaFX property for hauteur.
+    */
+    private FloatProperty  hauteur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on hauteur.
+    */
+    public  FloatProperty hauteurProperty() {
+       return hauteur;
+    }
     //
     // References
     // 

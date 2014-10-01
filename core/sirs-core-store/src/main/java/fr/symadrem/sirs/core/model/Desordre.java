@@ -8,27 +8,79 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Desordre  extends Structure  {
     //
     // Attributes.
-    //      
-    public StringProperty  intitule = new SimpleStringProperty();
-        
-    public StringProperty  type_prestation = new SimpleStringProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
-        
-    public BooleanProperty  realisation_interne = new SimpleBooleanProperty();
-        
-    public FloatProperty  cout_metre = new SimpleFloatProperty();
-        
-    public FloatProperty  cout_global = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for intitule.
+    */
+    private StringProperty  intitule = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on intitule.
+    */
+    public  StringProperty intituleProperty() {
+       return intitule;
+    }
+    /**
+    * JavaFX property for type_prestation.
+    */
+    private StringProperty  type_prestation = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_prestation.
+    */
+    public  StringProperty type_prestationProperty() {
+       return type_prestation;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
+    /**
+    * JavaFX property for realisation_interne.
+    */
+    private BooleanProperty  realisation_interne = new SimpleBooleanProperty();
+    
+    /**
+    * Getter for JavaFX property on realisation_interne.
+    */
+    public  BooleanProperty realisation_interneProperty() {
+       return realisation_interne;
+    }
+    /**
+    * JavaFX property for cout_metre.
+    */
+    private FloatProperty  cout_metre = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on cout_metre.
+    */
+    public  FloatProperty cout_metreProperty() {
+       return cout_metre;
+    }
+    /**
+    * JavaFX property for cout_global.
+    */
+    private FloatProperty  cout_global = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on cout_global.
+    */
+    public  FloatProperty cout_globalProperty() {
+       return cout_global;
+    }
     //
     // References
     // 

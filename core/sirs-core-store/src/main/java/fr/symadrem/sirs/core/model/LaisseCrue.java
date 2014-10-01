@@ -6,21 +6,46 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class LaisseCrue  extends Structure  {
     //
     // Attributes.
-    //      
-    public FloatProperty  hauteur = new SimpleFloatProperty();
-        
-    public StringProperty  reference_hauteur = new SimpleStringProperty();
-        
-    public StringProperty  position_laisse = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for hauteur.
+    */
+    private FloatProperty  hauteur = new SimpleFloatProperty();
     
+    /**
+    * Getter for JavaFX property on hauteur.
+    */
+    public  FloatProperty hauteurProperty() {
+       return hauteur;
+    }
+    /**
+    * JavaFX property for reference_hauteur.
+    */
+    private StringProperty  reference_hauteur = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_hauteur.
+    */
+    public  StringProperty reference_hauteurProperty() {
+       return reference_hauteur;
+    }
+    /**
+    * JavaFX property for position_laisse.
+    */
+    private StringProperty  position_laisse = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_laisse.
+    */
+    public  StringProperty position_laisseProperty() {
+       return position_laisse;
+    }
     //
     // References
     // 

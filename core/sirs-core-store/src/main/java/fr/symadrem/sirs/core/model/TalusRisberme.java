@@ -7,33 +7,112 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class TalusRisberme  extends Structure  {
     //
     // Attributes.
-    //      
-    public IntegerProperty  num_couche = new SimpleIntegerProperty();
-        
-    public StringProperty  fonction_haut = new SimpleStringProperty();
-        
-    public StringProperty  fonction_bas = new SimpleStringProperty();
-        
-    public StringProperty  materiau_haut = new SimpleStringProperty();
-        
-    public StringProperty  materiau_bas = new SimpleStringProperty();
-        
-    public FloatProperty  epaisseur_sommet = new SimpleFloatProperty();
-        
-    public FloatProperty  longueur_rampart_haut = new SimpleFloatProperty();
-        
-    public FloatProperty  longueur_rampart_bas = new SimpleFloatProperty();
-        
-    public FloatProperty  pente_interieur = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for num_couche.
+    */
+    private IntegerProperty  num_couche = new SimpleIntegerProperty();
     
+    /**
+    * Getter for JavaFX property on num_couche.
+    */
+    public  IntegerProperty num_coucheProperty() {
+       return num_couche;
+    }
+    /**
+    * JavaFX property for fonction_haut.
+    */
+    private StringProperty  fonction_haut = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on fonction_haut.
+    */
+    public  StringProperty fonction_hautProperty() {
+       return fonction_haut;
+    }
+    /**
+    * JavaFX property for fonction_bas.
+    */
+    private StringProperty  fonction_bas = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on fonction_bas.
+    */
+    public  StringProperty fonction_basProperty() {
+       return fonction_bas;
+    }
+    /**
+    * JavaFX property for materiau_haut.
+    */
+    private StringProperty  materiau_haut = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on materiau_haut.
+    */
+    public  StringProperty materiau_hautProperty() {
+       return materiau_haut;
+    }
+    /**
+    * JavaFX property for materiau_bas.
+    */
+    private StringProperty  materiau_bas = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on materiau_bas.
+    */
+    public  StringProperty materiau_basProperty() {
+       return materiau_bas;
+    }
+    /**
+    * JavaFX property for epaisseur_sommet.
+    */
+    private FloatProperty  epaisseur_sommet = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on epaisseur_sommet.
+    */
+    public  FloatProperty epaisseur_sommetProperty() {
+       return epaisseur_sommet;
+    }
+    /**
+    * JavaFX property for longueur_rampart_haut.
+    */
+    private FloatProperty  longueur_rampart_haut = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on longueur_rampart_haut.
+    */
+    public  FloatProperty longueur_rampart_hautProperty() {
+       return longueur_rampart_haut;
+    }
+    /**
+    * JavaFX property for longueur_rampart_bas.
+    */
+    private FloatProperty  longueur_rampart_bas = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on longueur_rampart_bas.
+    */
+    public  FloatProperty longueur_rampart_basProperty() {
+       return longueur_rampart_bas;
+    }
+    /**
+    * JavaFX property for pente_interieur.
+    */
+    private FloatProperty  pente_interieur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on pente_interieur.
+    */
+    public  FloatProperty pente_interieurProperty() {
+       return pente_interieur;
+    }
     //
     // References
     //

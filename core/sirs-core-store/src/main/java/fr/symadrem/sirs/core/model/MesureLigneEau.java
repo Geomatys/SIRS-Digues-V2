@@ -3,17 +3,24 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class MesureLigneEau  extends Positionable  {
     //
     // Attributes.
-    //      
-    public FloatProperty  hauteur = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for hauteur.
+    */
+    private FloatProperty  hauteur = new SimpleFloatProperty();
     
+    /**
+    * Getter for JavaFX property on hauteur.
+    */
+    public  FloatProperty hauteurProperty() {
+       return hauteur;
+    }
     //
     // References
     //

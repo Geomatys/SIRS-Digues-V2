@@ -3,23 +3,57 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class RapportEtude  extends Document  {
     //
     // Attributes.
-    //      
-    public StringProperty  auteur = new SimpleStringProperty();
-        
-    public StringProperty  type_rapport = new SimpleStringProperty();
-        
-    public StringProperty  reference_numerique = new SimpleStringProperty();
-        
-    public StringProperty  reference_papier = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for auteur.
+    */
+    private StringProperty  auteur = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on auteur.
+    */
+    public  StringProperty auteurProperty() {
+       return auteur;
+    }
+    /**
+    * JavaFX property for type_rapport.
+    */
+    private StringProperty  type_rapport = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_rapport.
+    */
+    public  StringProperty type_rapportProperty() {
+       return type_rapport;
+    }
+    /**
+    * JavaFX property for reference_numerique.
+    */
+    private StringProperty  reference_numerique = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_numerique.
+    */
+    public  StringProperty reference_numeriqueProperty() {
+       return reference_numerique;
+    }
+    /**
+    * JavaFX property for reference_papier.
+    */
+    private StringProperty  reference_papier = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_papier.
+    */
+    public  StringProperty reference_papierProperty() {
+       return reference_papier;
+    }
     //
     // References
     // 

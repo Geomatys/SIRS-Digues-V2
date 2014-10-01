@@ -9,36 +9,124 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Positionable  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public IntegerProperty  borne_debut = new SimpleIntegerProperty();
-        
-    public BooleanProperty  borne_debut_aval = new SimpleBooleanProperty();
-        
-    public FloatProperty  borne_debut_distance = new SimpleFloatProperty();
-        
-    public IntegerProperty  borne_fin = new SimpleIntegerProperty();
-        
-    public BooleanProperty  borne_fin_aval = new SimpleBooleanProperty();
-        
-    public FloatProperty  borne_fin_distance = new SimpleFloatProperty();
-        
-    public StringProperty  position = new SimpleStringProperty();
-        
-    public FloatProperty  PR_debut = new SimpleFloatProperty();
-        
-    public FloatProperty  PR_fin = new SimpleFloatProperty();
-        
-    public IntegerProperty  systeme_rep_id = new SimpleIntegerProperty();
+    //  
+    /**
+    * JavaFX property for borne_debut.
+    */
+    private IntegerProperty  borne_debut = new SimpleIntegerProperty();
     
+    /**
+    * Getter for JavaFX property on borne_debut.
+    */
+    public  IntegerProperty borne_debutProperty() {
+       return borne_debut;
+    }
+    /**
+    * JavaFX property for borne_debut_aval.
+    */
+    private BooleanProperty  borne_debut_aval = new SimpleBooleanProperty();
+    
+    /**
+    * Getter for JavaFX property on borne_debut_aval.
+    */
+    public  BooleanProperty borne_debut_avalProperty() {
+       return borne_debut_aval;
+    }
+    /**
+    * JavaFX property for borne_debut_distance.
+    */
+    private FloatProperty  borne_debut_distance = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on borne_debut_distance.
+    */
+    public  FloatProperty borne_debut_distanceProperty() {
+       return borne_debut_distance;
+    }
+    /**
+    * JavaFX property for borne_fin.
+    */
+    private IntegerProperty  borne_fin = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on borne_fin.
+    */
+    public  IntegerProperty borne_finProperty() {
+       return borne_fin;
+    }
+    /**
+    * JavaFX property for borne_fin_aval.
+    */
+    private BooleanProperty  borne_fin_aval = new SimpleBooleanProperty();
+    
+    /**
+    * Getter for JavaFX property on borne_fin_aval.
+    */
+    public  BooleanProperty borne_fin_avalProperty() {
+       return borne_fin_aval;
+    }
+    /**
+    * JavaFX property for borne_fin_distance.
+    */
+    private FloatProperty  borne_fin_distance = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on borne_fin_distance.
+    */
+    public  FloatProperty borne_fin_distanceProperty() {
+       return borne_fin_distance;
+    }
+    /**
+    * JavaFX property for position.
+    */
+    private StringProperty  position = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position.
+    */
+    public  StringProperty positionProperty() {
+       return position;
+    }
+    /**
+    * JavaFX property for PR_debut.
+    */
+    private FloatProperty  PR_debut = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on PR_debut.
+    */
+    public  FloatProperty PR_debutProperty() {
+       return PR_debut;
+    }
+    /**
+    * JavaFX property for PR_fin.
+    */
+    private FloatProperty  PR_fin = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on PR_fin.
+    */
+    public  FloatProperty PR_finProperty() {
+       return PR_fin;
+    }
+    /**
+    * JavaFX property for systeme_rep_id.
+    */
+    private IntegerProperty  systeme_rep_id = new SimpleIntegerProperty();
+    
+    /**
+    * Getter for JavaFX property on systeme_rep_id.
+    */
+    public  IntegerProperty systeme_rep_idProperty() {
+       return systeme_rep_id;
+    }
     //
     // References
     //

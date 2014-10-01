@@ -3,23 +3,57 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class DocumentGrandeEchelle  extends Document  {
     //
     // Attributes.
-    //      
-    public StringProperty  type_documentGE = new SimpleStringProperty();
-        
-    public StringProperty  reference_numerique = new SimpleStringProperty();
-        
-    public StringProperty  reference_papier = new SimpleStringProperty();
-        
-    public StringProperty  reference_calque = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for type_documentGE.
+    */
+    private StringProperty  type_documentGE = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on type_documentGE.
+    */
+    public  StringProperty type_documentGEProperty() {
+       return type_documentGE;
+    }
+    /**
+    * JavaFX property for reference_numerique.
+    */
+    private StringProperty  reference_numerique = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_numerique.
+    */
+    public  StringProperty reference_numeriqueProperty() {
+       return reference_numerique;
+    }
+    /**
+    * JavaFX property for reference_papier.
+    */
+    private StringProperty  reference_papier = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_papier.
+    */
+    public  StringProperty reference_papierProperty() {
+       return reference_papier;
+    }
+    /**
+    * JavaFX property for reference_calque.
+    */
+    private StringProperty  reference_calque = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_calque.
+    */
+    public  StringProperty reference_calqueProperty() {
+       return reference_calque;
+    }
     //
     // References
     // 

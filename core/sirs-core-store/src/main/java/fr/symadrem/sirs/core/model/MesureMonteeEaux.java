@@ -1,42 +1,76 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class MesureMonteeEaux  extends CouchDbDocument  {
     //
     // Attributes.
-    //      
-    public ObjectProperty<Date>  date = new SimpleObjectProperty<Date>();
-        
-    public StringProperty  reference_hauteur = new SimpleStringProperty();
-        
-    public FloatProperty  hauteur = new SimpleFloatProperty();
-        
-    public FloatProperty  debit_max = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for date.
+    */
+    private ObjectProperty<Instant>  date = new SimpleObjectProperty<Instant>();
     
+    /**
+    * Getter for JavaFX property on date.
+    */
+    public  ObjectProperty<Instant> dateProperty() {
+       return date;
+    }
+    /**
+    * JavaFX property for reference_hauteur.
+    */
+    private StringProperty  reference_hauteur = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on reference_hauteur.
+    */
+    public  StringProperty reference_hauteurProperty() {
+       return reference_hauteur;
+    }
+    /**
+    * JavaFX property for hauteur.
+    */
+    private FloatProperty  hauteur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on hauteur.
+    */
+    public  FloatProperty hauteurProperty() {
+       return hauteur;
+    }
+    /**
+    * JavaFX property for debit_max.
+    */
+    private FloatProperty  debit_max = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on debit_max.
+    */
+    public  FloatProperty debit_maxProperty() {
+       return debit_max;
+    }
     //
     // References
     // 
     private String observateursId;
     
       
-    public Date getDate(){
+    public Instant getDate(){
     	return this.date.get();
     }
     
-    public void setDate(Date date){
+    public void setDate(Instant date){
     	this.date.set(date);
     }
         

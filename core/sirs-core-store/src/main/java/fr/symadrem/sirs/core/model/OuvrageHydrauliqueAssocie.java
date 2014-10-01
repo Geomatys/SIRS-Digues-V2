@@ -3,21 +3,46 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvrageHydrauliqueAssocie  extends StructureAvecContacts  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public StringProperty  type_ouvrage = new SimpleStringProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for type_ouvrage.
+    */
+    private StringProperty  type_ouvrage = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type_ouvrage.
+    */
+    public  StringProperty type_ouvrageProperty() {
+       return type_ouvrage;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
     //
     // References
     // 

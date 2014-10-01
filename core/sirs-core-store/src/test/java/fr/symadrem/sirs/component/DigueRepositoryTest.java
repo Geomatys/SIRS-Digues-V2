@@ -6,6 +6,7 @@
 package fr.symadrem.sirs.component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -45,6 +46,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         }
         
         
+        
         //assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to
         // fail.
@@ -53,6 +55,8 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setLibelle("une digue");
 
+        digue.setDate_maj(new Date());
+        
         List<String> set = new ArrayList<>();
         {
             TronconDigue troncon = new TronconDigue();

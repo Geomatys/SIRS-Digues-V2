@@ -3,17 +3,24 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class FrancBord  extends Structure  {
     //
     // Attributes.
-    //      
-    public FloatProperty  largeur = new SimpleFloatProperty();
+    //  
+    /**
+    * JavaFX property for largeur.
+    */
+    private FloatProperty  largeur = new SimpleFloatProperty();
     
+    /**
+    * Getter for JavaFX property on largeur.
+    */
+    public  FloatProperty largeurProperty() {
+       return largeur;
+    }
     //
     // References
     //

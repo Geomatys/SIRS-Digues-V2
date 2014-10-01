@@ -2,10 +2,8 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class StructureAvecContacts  extends Structure  {
     //

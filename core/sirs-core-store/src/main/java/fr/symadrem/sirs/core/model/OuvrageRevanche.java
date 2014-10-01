@@ -6,25 +6,68 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvrageRevanche  extends Structure  {
     //
     // Attributes.
-    //      
-    public FloatProperty  hauteur_murette = new SimpleFloatProperty();
-        
-    public FloatProperty  largeur = new SimpleFloatProperty();
-        
-    public StringProperty  materiau_bas = new SimpleStringProperty();
-        
-    public StringProperty  materiau_haut = new SimpleStringProperty();
-        
-    public StringProperty  position_structure = new SimpleStringProperty();
+    //  
+    /**
+    * JavaFX property for hauteur_murette.
+    */
+    private FloatProperty  hauteur_murette = new SimpleFloatProperty();
     
+    /**
+    * Getter for JavaFX property on hauteur_murette.
+    */
+    public  FloatProperty hauteur_muretteProperty() {
+       return hauteur_murette;
+    }
+    /**
+    * JavaFX property for largeur.
+    */
+    private FloatProperty  largeur = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on largeur.
+    */
+    public  FloatProperty largeurProperty() {
+       return largeur;
+    }
+    /**
+    * JavaFX property for materiau_bas.
+    */
+    private StringProperty  materiau_bas = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on materiau_bas.
+    */
+    public  StringProperty materiau_basProperty() {
+       return materiau_bas;
+    }
+    /**
+    * JavaFX property for materiau_haut.
+    */
+    private StringProperty  materiau_haut = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on materiau_haut.
+    */
+    public  StringProperty materiau_hautProperty() {
+       return materiau_haut;
+    }
+    /**
+    * JavaFX property for position_structure.
+    */
+    private StringProperty  position_structure = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on position_structure.
+    */
+    public  StringProperty position_structureProperty() {
+       return position_structure;
+    }
     //
     // References
     // 

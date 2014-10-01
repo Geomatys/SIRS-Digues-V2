@@ -1,36 +1,97 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.Date;
+import java.time.Instant;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
-@JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Document  extends Positionable  {
     //
     // Attributes.
-    //      
-    public StringProperty  nom = new SimpleStringProperty();
-        
-    public FloatProperty  taille = new SimpleFloatProperty();
-        
-    public StringProperty  description = new SimpleStringProperty();
-        
-    public StringProperty  type = new SimpleStringProperty();
-        
-    public StringProperty  chemin = new SimpleStringProperty();
-        
-    public StringProperty  contenu = new SimpleStringProperty();
-        
-    public ObjectProperty<Date>  date_document = new SimpleObjectProperty<Date>();
+    //  
+    /**
+    * JavaFX property for nom.
+    */
+    private StringProperty  nom = new SimpleStringProperty();
     
+    /**
+    * Getter for JavaFX property on nom.
+    */
+    public  StringProperty nomProperty() {
+       return nom;
+    }
+    /**
+    * JavaFX property for taille.
+    */
+    private FloatProperty  taille = new SimpleFloatProperty();
+    
+    /**
+    * Getter for JavaFX property on taille.
+    */
+    public  FloatProperty tailleProperty() {
+       return taille;
+    }
+    /**
+    * JavaFX property for description.
+    */
+    private StringProperty  description = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on description.
+    */
+    public  StringProperty descriptionProperty() {
+       return description;
+    }
+    /**
+    * JavaFX property for type.
+    */
+    private StringProperty  type = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on type.
+    */
+    public  StringProperty typeProperty() {
+       return type;
+    }
+    /**
+    * JavaFX property for chemin.
+    */
+    private StringProperty  chemin = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on chemin.
+    */
+    public  StringProperty cheminProperty() {
+       return chemin;
+    }
+    /**
+    * JavaFX property for contenu.
+    */
+    private StringProperty  contenu = new SimpleStringProperty();
+    
+    /**
+    * Getter for JavaFX property on contenu.
+    */
+    public  StringProperty contenuProperty() {
+       return contenu;
+    }
+    /**
+    * JavaFX property for date_document.
+    */
+    private ObjectProperty<Instant>  date_document = new SimpleObjectProperty<Instant>();
+    
+    /**
+    * Getter for JavaFX property on date_document.
+    */
+    public  ObjectProperty<Instant> date_documentProperty() {
+       return date_document;
+    }
     //
     // References
     // 
@@ -89,11 +150,11 @@ public class Document  extends Positionable  {
     	this.contenu.set(contenu);
     }
         
-    public Date getDate_document(){
+    public Instant getDate_document(){
     	return this.date_document.get();
     }
     
-    public void setDate_document(Date date_document){
+    public void setDate_document(Instant date_document){
     	this.date_document.set(date_document);
     }
     
