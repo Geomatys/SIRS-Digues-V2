@@ -507,6 +507,9 @@
         eOpposite="#//Prestation/documentgrandeechelle"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Visite" eSuperTypes="#//Positionable">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
