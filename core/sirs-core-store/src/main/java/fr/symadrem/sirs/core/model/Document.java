@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -13,10 +14,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Document  extends Positionable  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public FloatProperty  taille = new SimpleFloatProperty();
@@ -29,26 +29,17 @@ public class Document  extends Positionable  {
         
     public StringProperty  contenu = new SimpleStringProperty();
         
-    public ObjectProperty<java.util.Date>  date_document = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_document = new SimpleObjectProperty<Date>();
     
- 
     //
     // References
-    //
+    // 
     private String digueId;
      
-    //
-    // References
-    //
     private String troncon_digueId;
      
-    //
-    // References
-    //
     private String structureId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();
@@ -98,11 +89,11 @@ public class Document  extends Positionable  {
     	this.contenu.set(contenu);
     }
         
-    public java.util.Date getDate_document(){
+    public Date getDate_document(){
     	return this.date_document.get();
     }
     
-    public void setDate_document(java.util.Date date_document){
+    public void setDate_document(Date date_document){
     	this.date_document.set(date_document);
     }
     

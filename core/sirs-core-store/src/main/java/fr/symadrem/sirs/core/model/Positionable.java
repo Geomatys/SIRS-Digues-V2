@@ -4,11 +4,9 @@ package fr.symadrem.sirs.core.model;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -18,10 +16,9 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Positionable  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public IntegerProperty  borne_debut = new SimpleIntegerProperty();
         
     public BooleanProperty  borne_debut_aval = new SimpleBooleanProperty();
@@ -42,9 +39,9 @@ public class Positionable  extends CouchDbDocument  {
         
     public IntegerProperty  systeme_rep_id = new SimpleIntegerProperty();
     
-
-  
-  
+    //
+    // References
+    //
       
     public int getBorne_debut(){
     	return this.borne_debut.get();

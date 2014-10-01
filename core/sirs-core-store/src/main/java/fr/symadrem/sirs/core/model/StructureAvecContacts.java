@@ -2,43 +2,26 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class StructureAvecContacts  extends Structure  {
-
-
-   
-    
- 
+    //
+    // Attributes.
+    //  
     //
     // References
-    //
+    // 
     private List<String> proprietairesIds;
      
-    //
-    // References
-    //
     private String gestionnairesId;
      
-    //
-    // References
-    //
     private String gardiensId;
      
-    //
-    // References
-    //
     private List<String> conventionsIds;
     
-  
-  
   
 
   

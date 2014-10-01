@@ -4,24 +4,19 @@ package fr.symadrem.sirs.core.model;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Desordre  extends Structure  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  intitule = new SimpleStringProperty();
         
     public StringProperty  type_prestation = new SimpleStringProperty();
@@ -34,29 +29,17 @@ public class Desordre  extends Structure  {
         
     public FloatProperty  cout_global = new SimpleFloatProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> articles_journauxIds;
      
-    //
-    // References
-    //
     private String prestationId;
      
-    //
-    // References
-    //
     private List<String> observationsIds;
      
-    //
-    // References
-    //
     private String evenement_hydraulique_origineId;
     
-  
-  
       
     public String getIntitule(){
     	return this.intitule.get();

@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -14,11 +15,10 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class MesureMonteeEaux  extends CouchDbDocument  {
-
-
-   
-        
-    public ObjectProperty<java.util.Date>  date = new SimpleObjectProperty<java.util.Date>();
+    //
+    // Attributes.
+    //      
+    public ObjectProperty<Date>  date = new SimpleObjectProperty<Date>();
         
     public StringProperty  reference_hauteur = new SimpleStringProperty();
         
@@ -26,20 +26,17 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
         
     public FloatProperty  debit_max = new SimpleFloatProperty();
     
- 
     //
     // References
-    //
+    // 
     private String observateursId;
     
-  
-  
       
-    public java.util.Date getDate(){
+    public Date getDate(){
     	return this.date.get();
     }
     
-    public void setDate(java.util.Date date){
+    public void setDate(Date date){
     	this.date.set(date);
     }
         

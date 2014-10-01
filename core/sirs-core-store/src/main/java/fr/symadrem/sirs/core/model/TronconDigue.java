@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -14,50 +15,37 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class TronconDigue  extends Positionable  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  libelle = new SimpleStringProperty();
         
     public StringProperty  commentaire = new SimpleStringProperty();
         
-    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_maj = new SimpleObjectProperty<Date>();
         
     public StringProperty  rive = new SimpleStringProperty();
         
     public StringProperty  systeme_reperage_defaut = new SimpleStringProperty();
     
- 
-    public ObservableList<Structure>  stuctures =  FXCollections.observableArrayList() ; 
     //
     // References
-    //
+    // 
+    public ObservableList<Structure>  stuctures =  FXCollections.observableArrayList() ; 
     private String digueId;
      
-    //
-    // References
-    //
     private List<String> systeme_reperageIds;
      
     public ObjectProperty<SystemeReperage>  systeme_rep_defaut = new SimpleObjectProperty<>() ; 
-    //
-    // References
-    //
     private String contactId;
      
     public ObservableList<BorneDigue>  bornes =  FXCollections.observableArrayList() ; 
-    //
-    // References
-    //
     private String documentId;
     
-  
-  
       
     public String getLibelle(){
     	return this.libelle.get();
@@ -75,27 +63,27 @@ public class TronconDigue  extends Positionable  {
     	this.commentaire.set(commentaire);
     }
         
-    public java.util.Date getDate_debut(){
+    public Date getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(java.util.Date date_debut){
+    public void setDate_debut(Date date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public java.util.Date getDate_fin(){
+    public Date getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(java.util.Date date_fin){
+    public void setDate_fin(Date date_fin){
     	this.date_fin.set(date_fin);
     }
         
-    public java.util.Date getDate_maj(){
+    public Date getDate_maj(){
     	return this.date_maj.get();
     }
     
-    public void setDate_maj(java.util.Date date_maj){
+    public void setDate_maj(Date date_maj){
     	this.date_maj.set(date_maj);
     }
         

@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -14,11 +15,10 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class ObservationSuivi  extends CouchDbDocument  {
-
-
-   
-        
-    public ObjectProperty<java.util.Date>  date_observation = new SimpleObjectProperty<java.util.Date>();
+    //
+    // Attributes.
+    //      
+    public ObjectProperty<Date>  date_observation = new SimpleObjectProperty<Date>();
         
     public IntegerProperty  nombre_desordres = new SimpleIntegerProperty();
         
@@ -28,20 +28,17 @@ public class ObservationSuivi  extends CouchDbDocument  {
         
     public StringProperty  suite = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String observateurId;
     
-  
-  
       
-    public java.util.Date getDate_observation(){
+    public Date getDate_observation(){
     	return this.date_observation.get();
     }
     
-    public void setDate_observation(java.util.Date date_observation){
+    public void setDate_observation(Date date_observation){
     	this.date_observation.set(date_observation);
     }
         

@@ -1,8 +1,6 @@
 
 package fr.symadrem.sirs.core.model;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -11,10 +9,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class DocumentGrandeEchelle  extends Document  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  type_documentGE = new SimpleStringProperty();
         
     public StringProperty  reference_numerique = new SimpleStringProperty();
@@ -23,14 +20,11 @@ public class DocumentGrandeEchelle  extends Document  {
         
     public StringProperty  reference_calque = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String prestationId;
     
-  
-  
       
     public String getType_documentGE(){
     	return this.type_documentGE.get();

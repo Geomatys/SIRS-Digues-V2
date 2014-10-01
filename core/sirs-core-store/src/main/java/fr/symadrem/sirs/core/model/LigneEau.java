@@ -2,42 +2,28 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class LigneEau  extends Structure  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  reference_hauteur = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> articles_journauxIds;
      
-    //
-    // References
-    //
     private String evenementhydrauliqueId;
      
-    //
-    // References
-    //
     private List<String> mesuresIds;
     
-  
-  
       
     public String getReference_hauteur(){
     	return this.reference_hauteur.get();

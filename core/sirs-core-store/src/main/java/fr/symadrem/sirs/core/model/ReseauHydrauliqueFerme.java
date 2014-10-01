@@ -3,10 +3,8 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -15,10 +13,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  type_reseau = new SimpleStringProperty();
@@ -35,24 +32,15 @@ public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
         
     public FloatProperty  diametre = new SimpleFloatProperty();
     
- 
     //
     // References
-    //
+    // 
     private String station_pompageId;
      
-    //
-    // References
-    //
     private String ouvrage_hydraulique_associeId;
      
-    //
-    // References
-    //
     private String reseau_hydro_ciel_ouvertId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();

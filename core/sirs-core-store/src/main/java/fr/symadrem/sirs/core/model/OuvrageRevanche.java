@@ -3,23 +3,18 @@ package fr.symadrem.sirs.core.model;
 
 import java.util.List;
 import javafx.beans.property.FloatProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvrageRevanche  extends Structure  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public FloatProperty  hauteur_murette = new SimpleFloatProperty();
         
     public FloatProperty  largeur = new SimpleFloatProperty();
@@ -30,14 +25,11 @@ public class OuvrageRevanche  extends Structure  {
         
     public StringProperty  position_structure = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> ouverture_batardableIds;
     
-  
-  
       
     public float getHauteur_murette(){
     	return this.hauteur_murette.get();

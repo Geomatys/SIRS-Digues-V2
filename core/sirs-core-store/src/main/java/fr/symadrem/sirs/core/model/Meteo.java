@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -14,13 +15,12 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Meteo  extends CouchDbDocument  {
-
-
-   
+    //
+    // Attributes.
+    //      
+    public ObjectProperty<Date>  data_debut = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  data_debut = new SimpleObjectProperty<java.util.Date>();
-        
-    public ObjectProperty<java.util.Date>  data_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  data_fin = new SimpleObjectProperty<Date>();
         
     public FloatProperty  vitesse_vent = new SimpleFloatProperty();
         
@@ -28,23 +28,23 @@ public class Meteo  extends CouchDbDocument  {
         
     public FloatProperty  pression = new SimpleFloatProperty();
     
-
-  
-  
+    //
+    // References
+    //
       
-    public java.util.Date getData_debut(){
+    public Date getData_debut(){
     	return this.data_debut.get();
     }
     
-    public void setData_debut(java.util.Date data_debut){
+    public void setData_debut(Date data_debut){
     	this.data_debut.set(data_debut);
     }
         
-    public java.util.Date getData_fin(){
+    public Date getData_fin(){
     	return this.data_fin.get();
     }
     
-    public void setData_fin(java.util.Date data_fin){
+    public void setData_fin(Date data_fin){
     	this.data_fin.set(data_fin);
     }
         

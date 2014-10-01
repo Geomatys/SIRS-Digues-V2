@@ -3,10 +3,8 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -15,10 +13,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class VoieAcces  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public FloatProperty  largeur = new SimpleFloatProperty();
@@ -31,9 +28,9 @@ public class VoieAcces  extends StructureAvecContacts  {
         
     public IntegerProperty  numéro_secteur = new SimpleIntegerProperty();
     
-
-  
-  
+    //
+    // References
+    //
       
     public String getNom(){
     	return this.nom.get();

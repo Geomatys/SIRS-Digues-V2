@@ -1,8 +1,6 @@
 
 package fr.symadrem.sirs.core.model;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -11,10 +9,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class RapportEtude  extends Document  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  auteur = new SimpleStringProperty();
         
     public StringProperty  type_rapport = new SimpleStringProperty();
@@ -23,14 +20,11 @@ public class RapportEtude  extends Document  {
         
     public StringProperty  reference_papier = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String prestationId;
     
-  
-  
       
     public String getAuteur(){
     	return this.auteur.get();

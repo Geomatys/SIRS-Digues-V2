@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,40 +13,36 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class SystemeReperage  extends CouchDbDocument  {
-
-
-   
+    //
+    // Attributes.
+    //      
+    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
-        
-    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
         
     public StringProperty  lineaire = new SimpleStringProperty();
         
     public StringProperty  nom = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String troncon_digueId;
     
-  
-  
       
-    public java.util.Date getDate_debut(){
+    public Date getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(java.util.Date date_debut){
+    public void setDate_debut(Date date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public java.util.Date getDate_fin(){
+    public Date getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(java.util.Date date_fin){
+    public void setDate_fin(Date date_fin){
     	this.date_fin.set(date_fin);
     }
         

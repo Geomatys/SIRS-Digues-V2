@@ -1,13 +1,12 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
@@ -15,17 +14,16 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Organisme  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  adresse = new SimpleStringProperty();
         
     public StringProperty  code_postal = new SimpleStringProperty();
         
-    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
         
     public StringProperty  email = new SimpleStringProperty();
         
@@ -43,14 +41,11 @@ public class Organisme  extends CouchDbDocument  {
         
     public StringProperty  telephone = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> contactIds;
     
-  
-  
       
     public String getAdresse(){
     	return this.adresse.get();
@@ -68,19 +63,19 @@ public class Organisme  extends CouchDbDocument  {
     	this.code_postal.set(code_postal);
     }
         
-    public java.util.Date getDate_debut(){
+    public Date getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(java.util.Date date_debut){
+    public void setDate_debut(Date date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public java.util.Date getDate_fin(){
+    public Date getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(java.util.Date date_fin){
+    public void setDate_fin(Date date_fin){
     	this.date_fin.set(date_fin);
     }
         

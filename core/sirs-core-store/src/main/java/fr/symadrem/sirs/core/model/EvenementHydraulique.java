@@ -1,6 +1,7 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
@@ -8,8 +9,6 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
@@ -17,10 +16,9 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class EvenementHydraulique  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  type_evenement = new SimpleStringProperty();
@@ -33,33 +31,21 @@ public class EvenementHydraulique  extends CouchDbDocument  {
         
     public FloatProperty  debit_moy = new SimpleFloatProperty();
         
-    public ObjectProperty<java.util.Date>  date_debut = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_debut = new SimpleObjectProperty<Date>();
         
-    public ObjectProperty<java.util.Date>  date_fin = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_fin = new SimpleObjectProperty<Date>();
     
- 
     //
     // References
-    //
+    // 
     private String laissecrueId;
      
-    //
-    // References
-    //
     private List<String> evenements_meteoIds;
      
-    //
-    // References
-    //
     private String monteeeauxId;
      
-    //
-    // References
-    //
     private String ligneeauId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();
@@ -109,19 +95,19 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     	this.debit_moy.set(debit_moy);
     }
         
-    public java.util.Date getDate_debut(){
+    public Date getDate_debut(){
     	return this.date_debut.get();
     }
     
-    public void setDate_debut(java.util.Date date_debut){
+    public void setDate_debut(Date date_debut){
     	this.date_debut.set(date_debut);
     }
         
-    public java.util.Date getDate_fin(){
+    public Date getDate_fin(){
     	return this.date_fin.get();
     }
     
-    public void setDate_fin(java.util.Date date_fin){
+    public void setDate_fin(Date date_fin){
     	this.date_fin.set(date_fin);
     }
     

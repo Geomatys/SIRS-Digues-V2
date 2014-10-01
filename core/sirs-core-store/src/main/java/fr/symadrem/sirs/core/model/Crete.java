@@ -3,10 +3,8 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -15,10 +13,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Crete  extends Structure  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public FloatProperty  epaisseur = new SimpleFloatProperty();
         
     public StringProperty  fonction = new SimpleStringProperty();
@@ -27,9 +24,9 @@ public class Crete  extends Structure  {
         
     public IntegerProperty  num_couche = new SimpleIntegerProperty();
     
-
-  
-  
+    //
+    // References
+    //
       
     public float getEpaisseur(){
     	return this.epaisseur.get();

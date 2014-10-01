@@ -3,23 +3,18 @@ package fr.symadrem.sirs.core.model;
 
 import java.util.List;
 import javafx.beans.property.FloatProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class VoieDigue  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  type_voie = new SimpleStringProperty();
@@ -34,14 +29,11 @@ public class VoieDigue  extends StructureAvecContacts  {
         
     public StringProperty  orientation = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> servitudesIds;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();

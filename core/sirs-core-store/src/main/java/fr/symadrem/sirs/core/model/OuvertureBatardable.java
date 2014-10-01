@@ -3,10 +3,8 @@ package fr.symadrem.sirs.core.model;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -15,10 +13,9 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvertureBatardable  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  type_glissiere = new SimpleStringProperty();
@@ -45,29 +42,17 @@ public class OuvertureBatardable  extends StructureAvecContacts  {
         
     public StringProperty  intervenant_manipulateur_batardeaux = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String intervenants_manupulateursId;
      
-    //
-    // References
-    //
     private String organismes_manipulateursId;
      
-    //
-    // References
-    //
     private String organismes_stockantsId;
      
-    //
-    // References
-    //
     private String ouvrage_revancheId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();

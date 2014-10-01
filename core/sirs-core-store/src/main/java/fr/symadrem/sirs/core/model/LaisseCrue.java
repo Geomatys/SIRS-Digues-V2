@@ -3,47 +3,33 @@ package fr.symadrem.sirs.core.model;
 
 import java.util.List;
 import javafx.beans.property.FloatProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class LaisseCrue  extends Structure  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public FloatProperty  hauteur = new SimpleFloatProperty();
         
     public StringProperty  reference_hauteur = new SimpleStringProperty();
         
     public StringProperty  position_laisse = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String evenementhydrauliqueId;
      
-    //
-    // References
-    //
     private String observateurId;
      
-    //
-    // References
-    //
     private List<String> articles_journauxIds;
     
-  
-  
       
     public float getHauteur(){
     	return this.hauteur.get();

@@ -1,8 +1,6 @@
 
 package fr.symadrem.sirs.core.model;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -11,24 +9,20 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class OuvrageTelecomEnergie  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  type_ouvrage = new SimpleStringProperty();
         
     public StringProperty  position_structure = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String reseau_telecom_energieId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();

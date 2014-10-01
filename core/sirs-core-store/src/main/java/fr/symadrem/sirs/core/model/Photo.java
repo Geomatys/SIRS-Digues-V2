@@ -2,8 +2,6 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -15,20 +13,19 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Photo  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  cote = new SimpleStringProperty();
         
     public StringProperty  orientation = new SimpleStringProperty();
         
     public StringProperty  photographe = new SimpleStringProperty();
     
- 
+    //
+    // References
+    // 
     public ObservableList<Document>  photo =  FXCollections.observableArrayList() ;
-  
-  
       
     public String getCote(){
     	return this.cote.get();

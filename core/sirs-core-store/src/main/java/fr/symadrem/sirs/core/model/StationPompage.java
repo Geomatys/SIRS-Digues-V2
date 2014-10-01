@@ -2,39 +2,28 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class StationPompage  extends StructureAvecContacts  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  nom = new SimpleStringProperty();
         
     public StringProperty  position_structure = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private List<String> pompesIds;
      
-    //
-    // References
-    //
     private String reseau_hydraulique_fermeId;
     
-  
-  
       
     public String getNom(){
     	return this.nom.get();

@@ -1,8 +1,6 @@
 
 package fr.symadrem.sirs.core.model;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -12,10 +10,9 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Contact  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  adresse = new SimpleStringProperty();
         
     public StringProperty  code_postal = new SimpleStringProperty();
@@ -36,14 +33,11 @@ public class Contact  extends CouchDbDocument  {
         
     public StringProperty  telephone = new SimpleStringProperty();
     
- 
     //
     // References
-    //
+    // 
     private String organismeId;
     
-  
-  
       
     public String getAdresse(){
     	return this.adresse.get();

@@ -1,13 +1,12 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.Date;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.ektorp.support.CouchDbDocument;
@@ -15,29 +14,22 @@ import org.ektorp.support.CouchDbDocument;
 @JsonIgnoreProperties
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Digue  extends CouchDbDocument  {
-
-
-   
-        
+    //
+    // Attributes.
+    //      
     public StringProperty  libelle = new SimpleStringProperty();
         
     public StringProperty  commentaire = new SimpleStringProperty();
         
-    public ObjectProperty<java.util.Date>  date_maj = new SimpleObjectProperty<java.util.Date>();
+    public ObjectProperty<Date>  date_maj = new SimpleObjectProperty<Date>();
     
- 
     //
     // References
-    //
+    // 
     private List<String> tronconsIds;
      
-    //
-    // References
-    //
     private String documentId;
     
-  
-  
       
     public String getLibelle(){
     	return this.libelle.get();
@@ -55,11 +47,11 @@ public class Digue  extends CouchDbDocument  {
     	this.commentaire.set(commentaire);
     }
         
-    public java.util.Date getDate_maj(){
+    public Date getDate_maj(){
     	return this.date_maj.get();
     }
     
-    public void setDate_maj(java.util.Date date_maj){
+    public void setDate_maj(Date date_maj){
     	this.date_maj.set(date_maj);
     }
     
