@@ -19,8 +19,10 @@ import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
+import org.geotoolkit.gui.javafx.render2d.FXGeoToolBar;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
@@ -37,6 +39,7 @@ public class FXMapPane extends BorderPane {
     private final FXMap uiMap;
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
+    private final FXGeoToolBar uiToolBar;
     private final FXCoordinateBar uiCoordBar;
     private final FXMapContextTree uiTree;
 
@@ -52,6 +55,7 @@ public class FXMapPane extends BorderPane {
         uiMap.getContainer().setContext(context);
         uiAddBar = new FXAddDataBar(uiMap);
         uiNavBar = new FXNavigationBar(uiMap);
+        uiToolBar = new FXGeoToolBar(uiMap);
         uiCoordBar = new FXCoordinateBar(uiMap);
         uiTree = new FXMapContextTree(context);
         uiTree.getTreetable().setShowRoot(false);
@@ -71,15 +75,19 @@ public class FXMapPane extends BorderPane {
         final GridPane topgrid = new GridPane();
         uiAddBar.setMaxHeight(Double.MAX_VALUE);
         uiNavBar.setMaxHeight(Double.MAX_VALUE);
-        topgrid.add(uiAddBar, 0, 0);
-        topgrid.add(uiNavBar, 1, 0);
+        uiToolBar.setMaxHeight(Double.MAX_VALUE);
+        topgrid.add(uiAddBar,  0, 0);
+        topgrid.add(uiNavBar,  1, 0);
+        topgrid.add(uiToolBar, 2, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
-        col1.setHgrow(Priority.ALWAYS);
+        final ColumnConstraints col2 = new ColumnConstraints();
+        final ColumnConstraints col3 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
         final RowConstraints row0 = new RowConstraints();
         row0.setVgrow(Priority.ALWAYS);
-        topgrid.getColumnConstraints().addAll(col0,col1);
+        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3);
         topgrid.getRowConstraints().addAll(row0);
         
         
@@ -96,6 +104,7 @@ public class FXMapPane extends BorderPane {
         
         setCenter(split);
         
+        uiMap.setHandler(new FXPanHandler(uiMap, false));
     }
 
     public MapContext getMapContext() {
