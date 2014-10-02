@@ -19,18 +19,18 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FXDiguesTryController {
+public class DiguesController {
 
     public Parent root;
 
-    @FXML
-    private BorderPane uiRight;
+    @Autowired
+    private Session session;
 
     @FXML
     private TreeView uiTree;
 
-    @Autowired
-    private Session session;
+    @FXML
+    private BorderPane uiRight;
 
     @FXML
     void openSearchPopup(ActionEvent event) {
@@ -39,36 +39,38 @@ public class FXDiguesTryController {
 
     private void init() {
 
-        final TreeItem root = new TreeItem("root");
+        final TreeItem treeRoot = new TreeItem("root");
 
         // Build the tree-------------------------------------------------------
         session.getDigues().stream().forEach((digue) -> {
-            root.getChildren().add(new WrapTreeItem(digue));
+            treeRoot.getChildren().add(new WrapTreeItem(digue));
         });
 
-        uiTree.setRoot(root);
+        uiTree.setRoot(treeRoot);
         uiTree.setShowRoot(false);
         uiTree.setCellFactory((Object param) -> new TC());
 
-        uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> {
+        uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> 
+        {
             Object obj = uiTree.getSelectionModel().getSelectedItem();
             if (obj instanceof TreeItem) {
                 obj = ((TreeItem) obj).getValue();
             }
 
             if (obj instanceof Digue) {
-                final FXDigueTryController ctrl = FXDigueTryController.create((Digue) obj);
-                uiRight.setCenter(ctrl.root);
+                final DigueController digueController = DigueController.create((Digue) obj);
+                uiRight.setCenter(digueController.root);
             } else if (obj instanceof TronconDigue) {
-                final TronconDigueController ctrl = TronconDigueController.create((TronconDigue) obj);
-                uiRight.setCenter(ctrl.root);
+                final TronconDigueController tronconDigueController = TronconDigueController.create((TronconDigue) obj);
+                uiRight.setCenter(tronconDigueController.root);
             }
         });
     }
 
-    public static FXDiguesTryController create() {
+    public static DiguesController create() {
 
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource("/fr/sym/digue/diguesTryDisplay.fxml"));
+        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
+                "/fr/sym/digue/diguesDisplay.fxml"));
         final Parent root;
 
         try {
@@ -77,7 +79,7 @@ public class FXDiguesTryController {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
 
-        final FXDiguesTryController controller = loader.getController();
+        final DiguesController controller = loader.getController();
         Injector.injectDependencies(controller);
         controller.root = root;
         controller.init();
@@ -98,7 +100,10 @@ public class FXDiguesTryController {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-            } else if (obj instanceof DamSystem) {
+            } 
+            
+            // ==> Deprecated lines ?
+            else if (obj instanceof DamSystem) {
                 setText(((DamSystem) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
             } else if (obj instanceof Dam) {
                 setText(((Dam) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");

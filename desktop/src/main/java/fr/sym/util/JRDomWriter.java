@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,7 +51,7 @@ public class JRDomWriter {
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
     private static final int FIELDS_HEIGHT = 16;
-    private static final String DATE_PATTERN = "dd/MM/yyyy à hh:mm:ss";
+    //private static final String DATE_PATTERN = "dd/MM/yyyy à hh:mm:ss";
     private static final int INDENT_LABEL = 10;
     private static final int LABEL_WIDTH = 140;
     private static final int PAGE_WIDTH = 595;
@@ -439,8 +438,8 @@ public class JRDomWriter {
         
         // Sets the field.------------------------------------------------------
         final Element textField = this.document.createElement(TAG_TEXT_FIELD);
-        if (c==Calendar.class)
-            textField.setAttribute(TAG_PATTERN, DATE_PATTERN);
+        //if (c==Instant.class)
+        //    textField.setAttribute(TAG_PATTERN, DATE_PATTERN);
         
         final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
         reportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
@@ -459,9 +458,9 @@ public class JRDomWriter {
         
         // The content of the field is specific in case of Calendar field.------
         final CDATASection valueField;
-        if (c==Calendar.class) 
-            valueField = this.document.createCDATASection("$F{"+field+"}.getTime()");
-        else 
+        //if (c==Instant.class) 
+        //    valueField = this.document.createCDATASection("$F{"+field+"}");
+        //else 
             valueField = this.document.createCDATASection("$F{"+field+"}");
         
         // Builds the DOM tree.-------------------------------------------------

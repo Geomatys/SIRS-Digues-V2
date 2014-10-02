@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -17,11 +16,8 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import java.time.Instant;
 
-/**
- *
- * @author samuel
- */
 import org.ektorp.CouchDbConnector;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
@@ -30,17 +26,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+/**
+ *
+ * @author Samuel Andrés (Geomatys)
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/spring/test-context.xml")
-public class DigueRepositoryTest {
+public class RepositoriesTest {
 
     @Autowired
     @Qualifier("symadremChouchDB")
     private CouchDbConnector connector;
-
-    public void test() {
-        System.out.println(connector.getAllDocIds());
-    }
 
     @Autowired
     private DigueRepository digueRepository;
@@ -48,6 +44,10 @@ public class DigueRepositoryTest {
     @Autowired
     private TronconDigueRepository tronconRepository;
 
+    public void test() {
+        System.out.println(connector.getAllDocIds());
+    }
+    
     public void removeDigues() {
         List<Digue> digues = digueRepository.getAll();
         for(Digue digue : digues) digueRepository.remove(digue);
@@ -83,6 +83,7 @@ public class DigueRepositoryTest {
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.");
             digue.setTronconsIds(new ArrayList<>());
+            digue.setDate_maj(Instant.now());
             digueRepository.add(digue);
         }
     }
@@ -93,11 +94,6 @@ public class DigueRepositoryTest {
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
             tron.setLibelle("Le tronçon " + i);
-            /*System.out.println("Jojo : "+tron.getJojo());
-             if(i%2==0)
-             tron.setJojo(Troncon.jojoenum.oui);
-             else 
-             tron.setJojo((Troncon.jojoenum.bof));*/
             tron.setCommentaire("Tronçon " + i + " : Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. Sed non risus. Suspendisse lectus "
                     + "tortor, dignissim sit amet, adipiscing nec, ultricies "
@@ -115,17 +111,10 @@ public class DigueRepositoryTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.");
-
-        // Linking troncons to digues
-        /*Digue digue = digs.get(i%nbDigues);
-
-             tron.setDigue(String.valueOf(i%nbDigues));
-             List<String> tronconsIds = digue.getTronconsIds();
-             tronconsIds.add(String.valueOf(i));
-             //digue.setTronconsIds(tronconsIds);*/
+            tron.setDate_debut(Instant.now());
+            tron.setDate_fin(Instant.now());
+            tron.setDate_maj(Instant.now());
             tronconRepository.add(tron);
-            //digueRepository.update(digue);
-
         }
     }
     
@@ -137,7 +126,6 @@ public class DigueRepositoryTest {
         int i=0;
         for(final TronconDigue troncon : troncons){
             final Digue digue = digues.get(i);
-            System.out.println("digue : "+digue.getId()+"  ;  troncon : "+troncon.getId());
             troncon.setDigue(digue.getId());
             List<String> tronconsIds = digue.getTronconsIds();
             tronconsIds.add(troncon.getId());

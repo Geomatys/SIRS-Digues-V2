@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="756.0" prefWidth="1024.0" stylesheets="@digueTryDisplay.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXDigueTryController">
+<BorderPane prefHeight="756.0" prefWidth="1024.0" stylesheets="@digueTryDisplay.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.DigueController">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <children>
@@ -20,24 +20,26 @@
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Label text="Commentaire" textFill="WHITE" GridPane.rowIndex="2" GridPane.valignment="TOP" />
-                                <TextArea fx:id="commentaireDigueTextField" prefHeight="73.0" prefWidth="456.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="2" />
-                                <TextField fx:id="libelleDigueTextField" onAction="#change" prefHeight="26.0" prefWidth="85.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="1" />
-                                <Label text="Nom" textFill="WHITE" GridPane.rowIndex="1" />
-                                <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
-                                <Label fx:id="idDigueTextField" prefHeight="16.0" prefWidth="81.0" textFill="WHITE" GridPane.columnIndex="4" />
+                                <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
+                                <Label fx:id="id" prefHeight="16.0" prefWidth="292.0" textFill="WHITE" GridPane.columnIndex="3" />
+                                <Label text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.halignment="RIGHT" />
+                                <Label fx:id="date_maj" prefHeight="16.0" prefWidth="292.0" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                <TextField fx:id="libelle" onAction="#change" prefHeight="26.0" prefWidth="85.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                <Label text="Nom" textFill="WHITE" GridPane.rowIndex="2" />
+                                <Label text="Commentaire" textFill="WHITE" GridPane.rowIndex="3" GridPane.valignment="TOP" />
+                                <TextArea fx:id="commentaire" prefHeight="73.0" prefWidth="456.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="3" /> 
                             </children>
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="73.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="332.0" minWidth="0.0" prefWidth="221.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="38.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="344.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="90.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="332.0" minWidth="0.0" prefWidth="144.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="106.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="422.0" minWidth="10.0" prefWidth="362.0" />
                             </columnConstraints>
                             <padding>
                                 <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
                             </padding>
                             <rowConstraints>
+                                <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
                                 <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
                                 <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
                                 <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="75.0" vgrow="SOMETIMES" />
@@ -49,7 +51,7 @@
                             <children>
                                 <Pane prefHeight="90.0" prefWidth="227.0" style="-fx-background-color: rgb(74,123,165); -fx-background-radius: 0 0 0 5;" styleClass="object-mode">
                                     <children>
-                                        <GridPane prefHeight="128.0" prefWidth="227.0" vgap="13.0">
+                                        <GridPane prefHeight="90.0" prefWidth="227.0" vgap="13.0">
                                             <children>
                                                 <Label text="Mode" textFill="WHITE">
                                                     <font>
@@ -74,7 +76,6 @@
                                             </padding>
                                             <rowConstraints>
                                                 <RowConstraints maxHeight="19.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
-                                                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                 <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                         </GridPane>
@@ -177,9 +178,9 @@
                     <content>
                         <TableView fx:id="tronconsTable" BorderPane.alignment="CENTER">
                             <columns>
-                                <TableColumn prefWidth="82.0" text="Identifiant" />
-                                <TableColumn prefWidth="277.0" text="Nom" />
-                                <TableColumn prefWidth="128.0" text="Début de validité" />
+                                <TableColumn prefWidth="50.0" text="Id" />
+                                <TableColumn prefWidth="271.0" text="Libellé" />
+                                <TableColumn prefWidth="166.0" text="Début de validité" />
                                 <TableColumn prefWidth="128.0" text="Fin de validité" />
                                 <TableColumn prefWidth="128.0" text="SR par défaut" />
                             </columns>

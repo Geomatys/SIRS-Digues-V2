@@ -6,7 +6,7 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.After;
@@ -77,7 +77,7 @@ public class PrinterUtilitiesTest {
                  + "des signes évidents de vétusté et de délabrement avancé. Des"
                  + "travaux urgents s'imposent faute de quoi d'importants riques"
                  + "de rupture sont à prévoir.");
-        //digue.setDate_maj(Calendar.getInstance());
+        digue.setDate_maj(Instant.now());
         
         print(digue);    
     }
@@ -92,11 +92,9 @@ public class PrinterUtilitiesTest {
         final TronconDigue tronconGestionDigue = new TronconDigue();
         //tronconGestionDigue.setDigue(Long.valueOf(0));
         tronconGestionDigue.setCommentaire("Ceci est un tronçon de la digue.");
-        //tronconGestionDigue.setDateDebutValGestionnaireD(Calendar.getInstance());
-        //tronconGestionDigue.setDateDebutValTroncon(Calendar.getInstance());
-        //tronconGestionDigue.setDateDerniereMaj(Calendar.getInstance());
-        //tronconGestionDigue.setDateFinValGestionnaireD(Calendar.getInstance());
-        //tronconGestionDigue.setDateFinValTroncon(Calendar.getInstance());
+        tronconGestionDigue.setDate_debut(Instant.now());
+        tronconGestionDigue.setDate_fin(Instant.now());
+        tronconGestionDigue.setDate_maj(Instant.now());
         //tronconGestionDigue.setIdOrgGestionnaire(null);
         //tronconGestionDigue.setIdSystemeRepDefaut(null);
         //tronconGestionDigue.setIdTronconGestion(null);
@@ -117,9 +115,8 @@ public class PrinterUtilitiesTest {
         final BorneDigue borneDigue = new BorneDigue();
         //borneDigue.setIdBorne(1);
         borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
-        //borneDigue.setDateDebutVal(Calendar.getInstance());
-        //borneDigue.setDateFinVal(Calendar.getInstance());
-        //borneDigue.setDateDerniereMaj(Calendar.getInstance());
+        borneDigue.setDate_debut(Instant.now());
+        borneDigue.setDate_fin(Instant.now());
         borneDigue.setFictive(false);
         //borneDigue.setIdTronconGestion(2);
         borneDigue.setNom("Borne principale");

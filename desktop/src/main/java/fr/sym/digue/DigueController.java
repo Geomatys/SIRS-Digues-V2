@@ -5,6 +5,7 @@ import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,6 +25,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -33,34 +35,48 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXDigueTryController {
+public class DigueController {
     
     public Parent root;
-    public Digue digue;
+    private Digue digue;
+    
+    @Autowired
+    private Session session;
 
     @FXML
-    private TextField libelleDigueTextField;
+    private TextField libelle;
+    
+    @FXML
+    private Label id;
+    
+    @FXML
+    private Label date_maj;
+    
+    @FXML
+    private Label mode_label_consultation;
+    
+    @FXML
+    private Label mode_label_saisie;
 
     @FXML
-    private TextArea commentaireDigueTextField;
+    private TextArea commentaire;
 
     @FXML
     private TableView<TronconDigue> tronconsTable;
 
     @FXML
     private ToggleButton editionButton;
-    
-    @Autowired
-    private Session session;
 
     public void init(Digue digue) {
 
@@ -68,21 +84,61 @@ public class FXDigueTryController {
         this.digue = digue;
         
         // Binding levee's name.------------------------------------------------
-        this.libelleDigueTextField.textProperty().bindBidirectional(digue.libelleProperty());
-        this.libelleDigueTextField.setEditable(true);
+        this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
+        this.libelle.setEditable(false);
+        
+        // Display levee's id.--------------------------------------------------
+        this.id.setText(this.digue.getId());
+        
+        // Display levee's update date.-----------------------------------------
+        this.date_maj.setText(this.digue.getDate_maj().toString());
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaireDigueTextField.textProperty().bindBidirectional(digue.commentaireProperty());
-        this.commentaireDigueTextField.setWrapText(true);
-        this.commentaireDigueTextField.setEditable(true);
+        this.commentaire.textProperty().bindBidirectional(digue.commentaireProperty());
+        this.commentaire.setWrapText(true);
+        this.commentaire.setEditable(false);
 
         // Configuring table for levee's sections.------------------------------
+        final TableColumn idName = this.tronconsTable.getColumns().get(0);
+        idName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
+        idName.setEditable(true);
+        idName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedTableCell>() {
+
+            @Override
+            public CustomizedTableCell call(TableColumn<TronconDigue, String> param) {
+                return new CustomizedTableCell();
+            }
+        });
+
         final TableColumn colName = this.tronconsTable.getColumns().get(1);
         colName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
         colName.setEditable(true);
+        colName.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        /*colName.setCellFactory(TextFieldTableCell.forTableColumn());
-         colName.setOnEditCommit(
+        final TableColumn colDateDebut = this.tronconsTable.getColumns().get(2);
+        colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
+        colDateDebut.setEditable(true);
+        
+        StringConverter<Instant> instantStringConverter = new StringConverter<Instant>() {
+        @Override
+        public String toString(Instant object) {return object.toString();}
+
+        @Override
+        public Instant fromString(String string) {return Instant.parse(string);}
+        };
+        colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
+        
+        final TableColumn colDateFin = this.tronconsTable.getColumns().get(3);
+        colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
+        colDateFin.setEditable(true);
+        colDateFin.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
+        
+        
+        
+        
+        
+        
+        /*colName.setOnEditCommit(
          new EventHandler<TableColumn.CellEditEvent<Troncon, String>>() {
         
          @Override
@@ -94,13 +150,7 @@ public class FXDigueTryController {
          );*/
         /* 
          final TableColumn<FieldValue, Field> valueColumn = new TableColumn<>("Value");*/
-        colName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedTableCell>() {
-
-            @Override
-            public CustomizedTableCell call(TableColumn<TronconDigue, String> param) {
-                return new CustomizedTableCell();
-            }
-        });
+        
 
         /*final TableColumn colJojo = this.tronconsTable.getColumns().get(0);
          colJojo.setCellValueFactory(new PropertyValueFactory<>("jojo"));
@@ -145,13 +195,18 @@ public class FXDigueTryController {
             tronconsObservables.add(troncon);
         });
         this.tronconsTable.setItems(tronconsObservables);
-        this.tronconsTable.setEditable(true);
+        this.tronconsTable.setEditable(false);
 
         /*
         PropertyValueFactory<TronconDigue, String> pvf = new PropertyValueFactory<>("libelle");
         TableColumn.CellDataFeatures<TronconDigue, String> cdf = 
                 new TableColumn.CellDataFeatures<TronconDigue, String>(tronconsTable, colName, null);*/
     }
+
+    /*@Override
+    public void initialize(URL location, ResourceBundle resources) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }*/
 
     // FocusTransverse ?
     class CustomizedTableCell extends TableCell<TronconDigue, String> {
@@ -160,7 +215,7 @@ public class FXDigueTryController {
         protected void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
             final Button button = new Button();
-            button.setText((String) item);
+            button.setText("ID");
             setGraphic(button);
             button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
             button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
@@ -169,25 +224,16 @@ public class FXDigueTryController {
                 
                 final Stage dialog = new Stage();
                 
-                final Label label = new Label(troncon.getLibelle());
-                final TextField editableLabel = new TextField(troncon.getLibelle());
-                troncon.libelleProperty().bindBidirectional(editableLabel.textProperty());
-                ((Button)event.getSource()).textProperty().bindBidirectional(editableLabel.textProperty());
-
+                final Label libelle = new Label(troncon.getLibelle());
+                final Label id = new Label(troncon.getId());
                 final Button ok = new Button("Ok");
                 ok.setOnAction((ActionEvent event1) -> {
                     dialog.hide();
                 });
-                final Button cancel = new Button("Cancel");
-                cancel.setOnAction((ActionEvent event1) -> {
-                    button.setText(label.getText());
-                    dialog.hide();
-                });
                 final VBox popUpVBox = new VBox();
-                popUpVBox.getChildren().add(label);
-                popUpVBox.getChildren().add(editableLabel);
+                popUpVBox.getChildren().add(libelle);
+                popUpVBox.getChildren().add(id);
                 popUpVBox.getChildren().add(ok);
-                popUpVBox.getChildren().add(cancel);
 
                 final Scene dialogScene = new Scene(popUpVBox, 300, 200);
 
@@ -208,19 +254,25 @@ public class FXDigueTryController {
     @FXML
     public void enableFields(ActionEvent event) {
         if (this.editionButton.isSelected()) {
-            this.libelleDigueTextField.setEditable(false);
-            this.commentaireDigueTextField.setEditable(false);
-            this.tronconsTable.setEditable(false);
-        } else {
-            this.libelleDigueTextField.setEditable(true);
-            this.commentaireDigueTextField.setEditable(true);
+            this.libelle.setEditable(true);
+            this.commentaire.setEditable(true);
             this.tronconsTable.setEditable(true);
+        } else {
+            this.libelle.setEditable(false);
+            this.commentaire.setEditable(false);
+            this.tronconsTable.setEditable(false);
         }
+        
+        // Switch Label's text color.-------------------------------------------
+        final Paint paint = this.mode_label_consultation.getTextFill();
+        this.mode_label_consultation.setTextFill(this.mode_label_saisie.getTextFill());
+        this.mode_label_saisie.setTextFill(paint);
     }
 
-    public static FXDigueTryController create(Digue digue) {
+    public static DigueController create(Digue digue) {
 
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource("/fr/sym/digue/digueTryDisplay.fxml"));
+        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
+                "/fr/sym/digue/digueDisplay.fxml"));
         final Parent root;
 
         try {
@@ -229,7 +281,7 @@ public class FXDigueTryController {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
 
-        final FXDigueTryController controller = loader.getController();
+        final DigueController controller = loader.getController();
         Injector.injectDependencies(controller);
         controller.root = root;
         controller.init(digue);
