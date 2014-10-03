@@ -1,6 +1,7 @@
 
 package fr.sym.map;
 
+import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
@@ -16,6 +17,7 @@ import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
+import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
@@ -57,12 +59,16 @@ public class FXMapPane extends BorderPane {
         uiNavBar = new FXNavigationBar(uiMap);
         uiToolBar = new FXGeoToolBar(uiMap);
         uiCoordBar = new FXCoordinateBar(uiMap);
+        uiCoordBar.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree(context);
         uiTree.getTreetable().setShowRoot(false);
+        uiTree.getMenuItems().add(new OpacityItem());
+        uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap));
         uiTree.getMenuItems().add(new DeleteItem());
+        uiTree.getTreetable().getColumns().add(new MapItemSelectableColumn());
         
         try {
             uiMap.getCanvas().setObjectiveCRS(CRS.decode("EPSG:3857"));
