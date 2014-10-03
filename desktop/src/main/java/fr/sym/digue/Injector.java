@@ -10,6 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import fr.sym.Session;
+
 /**
  *
  * @author Olivier Nouguier (Géomatys)
@@ -28,5 +30,11 @@ public class Injector implements ApplicationContextAware {
 
     public static void injectDependencies(Object o) {
         applicationContext.getAutowireCapableBeanFactory().autowireBean(o);
+    }
+
+
+    public static <T> T getBean(Class<T> clazz) {
+        return applicationContext.getBean(clazz);
+        
     }
 }
