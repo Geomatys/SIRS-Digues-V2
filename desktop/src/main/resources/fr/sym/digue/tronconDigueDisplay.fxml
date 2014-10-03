@@ -24,8 +24,8 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="mode_label_consultation1" text="Consultation" textFill="WHITE" GridPane.rowIndex="1" />
-                                    <Label fx:id="mode_label_saisie1" text="Saisie" textFill="#6c95b8" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <Label fx:id="mode_label_consultation" text="Consultation" textFill="WHITE" GridPane.rowIndex="1" />
+                                    <Label fx:id="mode_label_saisie" text="Saisie" textFill="#6c95b8" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets left="7.0" />
                                        </GridPane.margin>
@@ -157,7 +157,7 @@
                                           <Insets top="10.0" />
                                        </padding>
                                     </Label>
-                                    <WebView fx:id="commentaireTronconTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+                                    <WebView fx:id="commentaire" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                                  </children>
                                  <padding>
                                     <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />

@@ -88,6 +88,10 @@ public class Session {
     public List<Digue> getDigues() {
         return this.digueRepository.getAll();
     }
+    
+    public Digue getDigueById(final String digueId){
+        return this.digueRepository.get(digueId);
+    }
 
     public List<TronconDigue> getTroncons() {
         return this.tronconDigueRepository.getAll();

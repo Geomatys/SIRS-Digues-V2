@@ -10,6 +10,7 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -33,9 +34,11 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -79,6 +82,35 @@ public class DigueController {
     @FXML
     private ToggleButton editionButton;
 
+    /*@Override
+    public void initialize(URL location, ResourceBundle resources) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }*/
+
+    @FXML
+    public void change(ActionEvent event) {
+        System.out.println(digue.libelleProperty());
+    }
+
+    @FXML
+    public void enableFields(ActionEvent event) {
+        
+        if (this.editionButton.isSelected()) {
+            this.libelle.setEditable(true);
+            this.tronconsTable.setEditable(true);
+            this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
+        } else {
+            this.libelle.setEditable(false);
+            this.tronconsTable.setEditable(false);
+            this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
+        }
+        
+        // Switch Label's text color.-------------------------------------------
+        final Paint paint = this.mode_label_consultation.getTextFill();
+        this.mode_label_consultation.setTextFill(this.mode_label_saisie.getTextFill());
+        this.mode_label_saisie.setTextFill(paint);
+    }
+
     public void init(Digue digue) {
 
         // Set the levee for the controller.------------------------------------
@@ -95,20 +127,13 @@ public class DigueController {
         this.date_maj.setText(this.digue.getDate_maj().toString());
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaire.getEngine().loadContent(digue.getCommentaire());//textProperty().bindBidirectional(digue.commentaireProperty());
-        //this.commentaire.setWrapText(true);
-        //this.commentaire.setEditable(false);
-        this.commentaire.setOnMouseClicked((MouseEvent event) -> {
-            //TODO : ouvrir un HTML Editor si on est en mode saisie!
-            System.out.println("Souris cliquée ! ");
-        });
+        this.commentaire.getEngine().loadContent(digue.getCommentaire());
 
         // Configuring table for levee's sections.------------------------------
         final TableColumn idName = this.tronconsTable.getColumns().get(0);
         idName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
         idName.setEditable(true);
         idName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedTableCell>() {
-
             @Override
             public CustomizedTableCell call(TableColumn<TronconDigue, String> param) {
                 return new CustomizedTableCell();
@@ -124,12 +149,12 @@ public class DigueController {
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
         colDateDebut.setEditable(true);
         
-        StringConverter<Instant> instantStringConverter = new StringConverter<Instant>() {
-        @Override
-        public String toString(Instant object) {return object.toString();}
+        final StringConverter<Instant> instantStringConverter = new StringConverter<Instant>() {
+            @Override
+            public String toString(Instant object) {return object.toString();}
 
-        @Override
-        public Instant fromString(String string) {return Instant.parse(string);}
+            @Override
+            public Instant fromString(String string) {return Instant.parse(string);}
         };
         colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
         
@@ -137,9 +162,6 @@ public class DigueController {
         colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
         colDateFin.setEditable(true);
         colDateFin.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
-        
-        
-        
         
         
         
@@ -153,36 +175,9 @@ public class DigueController {
          }
          }
          );*/
-        /* 
-         final TableColumn<FieldValue, Field> valueColumn = new TableColumn<>("Value");*/
         
 
-        /*final TableColumn colJojo = this.tronconsTable.getColumns().get(0);
-         colJojo.setCellValueFactory(new PropertyValueFactory<>("jojo"));
-         colJojo.setEditable(true);
-         StringConverter<Troncon.jojoenum> sc = new StringConverter<Troncon.jojoenum>() {
-            
-         @Override
-         public String toString(Troncon.jojoenum object) {
-            
-         String result;
-         switch(object){
-         case oui: result = "je vaux oui"; break;
-         case non: result = "je vaux non"; break;
-         case bof:
-         default: result = "je vaux bof";
-         }
-         return result;
-            
-         }
-
-         @Override
-         public Troncon.jojoenum fromString(String string) {
-                
-         return Troncon.jojoenum.bof;
-         }
-         };
-         colJojo.setCellFactory(TextFieldTableCell.forTableColumn(sc));
+        /*
          colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
 
          @Override
@@ -208,68 +203,6 @@ public class DigueController {
                 new TableColumn.CellDataFeatures<TronconDigue, String>(tronconsTable, colName, null);*/
     }
 
-    /*@Override
-    public void initialize(URL location, ResourceBundle resources) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }*/
-
-    // FocusTransverse ?
-    class CustomizedTableCell extends TableCell<TronconDigue, String> {
-
-        @Override
-        protected void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            final Button button = new Button();
-            button.setText("ID");
-            setGraphic(button);
-            button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
-            button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
-            button.setOnAction((ActionEvent event) -> {
-                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedTableCell.this.getParent()).getItem();
-                final Stage dialog = new Stage();
-                final Label libelle1 = new Label(troncon.getLibelle());
-                final Label id1 = new Label(troncon.getId());
-                final Button ok = new Button("Ok");
-                ok.setOnAction((ActionEvent event1) -> {
-                    dialog.hide();
-                });
-                final VBox popUpVBox = new VBox();
-                popUpVBox.getChildren().add(libelle1);
-                popUpVBox.getChildren().add(id1);
-                popUpVBox.getChildren().add(ok);
-                final Scene dialogScene = new Scene(popUpVBox, 300, 200);
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(root.getScene().getWindow());
-                dialog.setScene(dialogScene);
-                dialog.show();
-            });
-                
-        }
-    }
-
-    @FXML
-    public void change(ActionEvent event) {
-        System.out.println(digue.libelleProperty());
-    }
-
-    @FXML
-    public void enableFields(ActionEvent event) {
-        if (this.editionButton.isSelected()) {
-            this.libelle.setEditable(true);
-            //this.commentaire.setEditable(true);
-            this.tronconsTable.setEditable(true);
-        } else {
-            this.libelle.setEditable(false);
-            //this.commentaire.setEditable(false);
-            this.tronconsTable.setEditable(false);
-        }
-        
-        // Switch Label's text color.-------------------------------------------
-        final Paint paint = this.mode_label_consultation.getTextFill();
-        this.mode_label_consultation.setTextFill(this.mode_label_saisie.getTextFill());
-        this.mode_label_saisie.setTextFill(paint);
-    }
-
     public static DigueController create(Digue digue) {
 
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
@@ -289,4 +222,86 @@ public class DigueController {
         return controller;
     }
 
+    // FocusTransverse ?
+    /**
+     * Defines the customized table cell for displaying id of each levee's section.
+     */
+    private class CustomizedTableCell extends TableCell<TronconDigue, String> {
+        
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            
+            super.updateItem(item, empty);
+            
+            final Button button = new Button();
+            button.setText("ID");
+            setGraphic(button);
+            button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
+            button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
+            button.setOnAction((ActionEvent event) -> {
+                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedTableCell.this.getParent()).getItem();
+                final Stage dialog = new Stage();
+                final Label libelle1 = new Label(troncon.getLibelle());
+                final Label id1 = new Label(troncon.getId());
+                final Button ok = new Button("Ok");
+                ok.setOnAction((ActionEvent event1) -> {
+                    dialog.hide();
+                });
+                
+                final VBox popUpVBox = new VBox();
+                popUpVBox.getChildren().add(libelle1);
+                popUpVBox.getChildren().add(id1);
+                popUpVBox.getChildren().add(ok);
+                
+                final Scene dialogScene = new Scene(popUpVBox, 300, 200);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(root.getScene().getWindow());
+                dialog.setScene(dialogScene);
+                dialog.show();
+            });
+        }
+    }
+    
+    /**
+     * Defines the OpenHtmlEditorEventHandler for editing comment field.
+     */
+    private class OpenHtmlEditorEventHandler implements EventHandler<MouseEvent> {
+
+        @Override
+        public void handle(MouseEvent event) {
+            
+                final Stage dialog = new Stage();
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(root.getScene().getWindow());
+                
+                final VBox vbox = new VBox();
+
+                final HTMLEditor htmlEditor = new HTMLEditor();
+                htmlEditor.setHtmlText(digue.getCommentaire());
+                
+                final HBox hbox = new HBox();
+                
+                final Button valider = new Button("Valider");
+                valider.setOnAction((ActionEvent event1) -> {
+                    digue.setCommentaire(htmlEditor.getHtmlText());
+                    commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
+                    dialog.hide();
+                });
+                
+                final Button annuler = new Button("Annuler");
+                annuler.setOnAction((ActionEvent event1) -> {
+                    dialog.hide();
+                });
+                
+                hbox.getChildren().add(valider);
+                hbox.getChildren().add(annuler);
+                
+                vbox.getChildren().add(htmlEditor);
+                vbox.getChildren().add(hbox);
+                
+                final Scene dialogScene = new Scene(vbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+        }
+    }
 }
