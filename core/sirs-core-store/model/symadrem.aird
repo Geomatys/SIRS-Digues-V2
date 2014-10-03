@@ -1353,7 +1353,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_pIV_YUfmEeSoXJiONqf-1A" routing="Rectilinear" jumpLinkStatus="Above" lineColor="8905185"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_pIV_YkfmEeSoXJiONqf-1A" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pIV_Y0fmEeSoXJiONqf-1A" points="[-139, -75, 583, -147]$[-191, -75, 531, -147]$[-191, 162, 531, 90]$[-636, 162, 86, 90]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pIV_Y0fmEeSoXJiONqf-1A" points="[-139, -75, 639, -147]$[-228, -75, 550, -147]$[-228, 170, 550, 98]$[-692, 170, 86, 98]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_pIWmdkfmEeSoXJiONqf-1A" id="(0.592436974789916,0.808695652173913)"/>
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_tGSFgEfvEeSoXJiONqf-1A" type="4001" element="_tGLX0EfvEeSoXJiONqf-1A" source="_uINoIEflEeSoXJiONqf-1A" target="_DPFN0EfeEeSoXJiONqf-1A">
@@ -1534,7 +1534,7 @@
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_UNEq0EigEeSShKVOxlfrCQ" type="4001" element="_UMc_wEigEeSShKVOxlfrCQ" source="_Ip3tYEigEeSShKVOxlfrCQ" target="_QtCgYEfhEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_UNEq1EigEeSShKVOxlfrCQ" type="6001">
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_UNEq1UigEeSShKVOxlfrCQ" y="-10"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_UNEq1UigEeSShKVOxlfrCQ" x="-30" y="-9"/>
             </children>
             <children xmi:type="notation:Node" xmi:id="_UNEq1kigEeSShKVOxlfrCQ" type="6002">
               <layoutConstraint xmi:type="notation:Bounds" xmi:id="_UNEq10igEeSShKVOxlfrCQ" y="10"/>
@@ -1549,7 +1549,7 @@
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_XfmLgEigEeSShKVOxlfrCQ" type="4001" element="_Xe_HgEigEeSShKVOxlfrCQ" source="_Ip3tYEigEeSShKVOxlfrCQ" target="_QtCgYEfhEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_XfmLhEigEeSShKVOxlfrCQ" type="6001">
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_XfmLhUigEeSShKVOxlfrCQ" y="-10"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_XfmLhUigEeSShKVOxlfrCQ" x="34"/>
             </children>
             <children xmi:type="notation:Node" xmi:id="_XfmLhkigEeSShKVOxlfrCQ" type="6002">
               <layoutConstraint xmi:type="notation:Bounds" xmi:id="_XfmLh0igEeSShKVOxlfrCQ" y="10"/>
@@ -2250,7 +2250,7 @@
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_E3U8wEr5EeSShKVOxlfrCQ" type="4001" element="_E2hrgEr5EeSShKVOxlfrCQ" source="_DC1hkEfeEeSoXJiONqf-1A" target="_DerJAEfeEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_E3Vj00r5EeSShKVOxlfrCQ" type="6001">
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E3Vj1Er5EeSShKVOxlfrCQ" y="-10"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E3Vj1Er5EeSShKVOxlfrCQ" x="-11" y="-15"/>
             </children>
             <children xmi:type="notation:Node" xmi:id="_E3Vj1Ur5EeSShKVOxlfrCQ" type="6002">
               <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E3Vj1kr5EeSShKVOxlfrCQ" y="10"/>
@@ -2566,7 +2566,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_PuZ_0EffEeSoXJiONqf-1A">
-              <key xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photo"/>
+              <key xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photoIds"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_PuZ_0UffEeSoXJiONqf-1A" key="_PuZYwEffEeSoXJiONqf-1A">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_PuZ_1UffEeSoXJiONqf-1A" value="_PuZ_0kffEeSoXJiONqf-1A">
                   <key xmi:type="ecore:EPackage" href="symadrem.ecore#/"/>
@@ -2574,7 +2574,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_UkU-MUflEeSoXJiONqf-1A">
-              <key xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/bornes"/>
+              <key xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/borneIds"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_UkU-MkflEeSoXJiONqf-1A" key="_UkU-MEflEeSoXJiONqf-1A">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_UkU-NkflEeSoXJiONqf-1A" value="_UkU-M0flEeSoXJiONqf-1A">
                   <key xmi:type="ecore:EPackage" href="symadrem.ecore#/"/>
@@ -2676,7 +2676,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Xt2hMErVEeSShKVOxlfrCQ" name="geometry : Geometry" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@be118a1{platform:/resource/sirs-core-store/model/symadrem.ecore#//Troncon_Digue/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Xt2hMErVEeSShKVOxlfrCQ" name="geometry : Geometry" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Troncon_Digue/geometry"/>
           <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Troncon_Digue/geometry"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_90Zz8Er1EeSShKVOxlfrCQ" labelAlignment="LEFT">
@@ -3201,9 +3201,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PuZYwEffEeSoXJiONqf-1A" name="[0..*] photo" sourceNode="_NDoboEffEeSoXJiONqf-1A" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photo"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photo"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PuZYwEffEeSoXJiONqf-1A" name="[0..*] photoIds" sourceNode="_NDoboEffEeSoXJiONqf-1A" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photoIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Photo/photoIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_PuZ_1kffEeSoXJiONqf-1A" description="_PuZ_0kffEeSoXJiONqf-1A" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_PuZ_10ffEeSoXJiONqf-1A"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_PuZ_2EffEeSoXJiONqf-1A" showIcon="false">
@@ -3491,9 +3491,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_mO77kEfhEeSoXJiONqf-1A" name="[0..1] contact" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/contact"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/contact"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_mO77kEfhEeSoXJiONqf-1A" name="[0..1] contactId" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/contactId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/contactId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_mO77kUfhEeSoXJiONqf-1A" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_mO77kkfhEeSoXJiONqf-1A"/>
@@ -3609,7 +3609,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_YwD3MEr4EeSShKVOxlfrCQ" name="positionBorne : Point" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@f905eb6{platform:/resource/sirs-core-store/model/symadrem.ecore#//Borne_digue/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_YwD3MEr4EeSShKVOxlfrCQ" name="positionBorne : Point" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Borne_digue/positionBorne"/>
           <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Borne_digue/positionBorne"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_b0i74Er4EeSShKVOxlfrCQ" labelAlignment="LEFT">
@@ -3637,9 +3637,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_UkU-MEflEeSoXJiONqf-1A" name="[0..*] bornes" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_AcklwEflEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/bornes"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/bornes"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_UkU-MEflEeSoXJiONqf-1A" name="[0..*] borneIds" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_AcklwEflEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/borneIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/borneIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_UkU-N0flEeSoXJiONqf-1A" description="_UkU-M0flEeSoXJiONqf-1A" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_UkU-OEflEeSoXJiONqf-1A"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_UkU-OUflEeSoXJiONqf-1A" showIcon="false">
@@ -3959,9 +3959,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_WbTRcEfmEeSoXJiONqf-1A" name="[0..1] intervenants_manupulateurs" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/intervenants_manupulateurs"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/intervenants_manupulateurs"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_WbTRcEfmEeSoXJiONqf-1A" name="[0..1] intervenantManupulateurId" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/intervenantManupulateurId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/intervenantManupulateurId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WbT4gEfmEeSoXJiONqf-1A" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -3977,9 +3977,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_lmpaQEfmEeSoXJiONqf-1A" name="[0..1] organismes_manipulateurs" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismes_manipulateurs"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismes_manipulateurs"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_lmpaQEfmEeSoXJiONqf-1A" name="[0..1] organismesManipulateursId" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismesManipulateursId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismesManipulateursId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_lmpaQUfmEeSoXJiONqf-1A" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -3995,9 +3995,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_pIFgsEfmEeSoXJiONqf-1A" name="[0..1] organismes_stockants" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismes_stockants"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismes_stockants"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_pIFgsEfmEeSoXJiONqf-1A" name="[0..1] organismesStockantsId" sourceNode="_Kgu84EfmEeSoXJiONqf-1A" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismesStockantsId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouverture_batardable/organismesStockantsId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_pIGHwEfmEeSoXJiONqf-1A" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -4029,9 +4029,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_VkXccEh1EeSShKVOxlfrCQ" name="[0..*] maitre_oeuvre" sourceNode="_nJ0C0Ei6EeSShKVOxlfrCQ" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/maitre_oeuvre"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/maitre_oeuvre"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_VkXccEh1EeSShKVOxlfrCQ" name="[0..*] maitreOeuvreIds" sourceNode="_nJ0C0Ei6EeSShKVOxlfrCQ" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/maitreOeuvreIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/maitreOeuvreIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_VkXccUh1EeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -4047,9 +4047,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Zn5jUEh1EeSShKVOxlfrCQ" name="[0..*] financeur" sourceNode="_nJ0C0Ei6EeSShKVOxlfrCQ" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/financeur"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/financeur"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Zn5jUEh1EeSShKVOxlfrCQ" name="[0..*] financeurIds" sourceNode="_nJ0C0Ei6EeSShKVOxlfrCQ" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/financeurIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Marche/financeurIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Zn6KYEh1EeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -4941,9 +4941,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_4YsZMEiEEeSShKVOxlfrCQ" name="[0..*] servitudes" sourceNode="_d9zS8Eh9EeSShKVOxlfrCQ" targetNode="_wotOsEiEEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Voie_digue/servitudes"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Voie_digue/servitudes"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_4YsZMEiEEeSShKVOxlfrCQ" name="[0..*] servitudeIds" sourceNode="_d9zS8Eh9EeSShKVOxlfrCQ" targetNode="_wotOsEiEEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Voie_digue/servitudeIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Voie_digue/servitudeIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_4YsZMUiEEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5056,9 +5056,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_c6tSsEiHEeSShKVOxlfrCQ" name="[0..*] pompes" sourceNode="_8CMkkEiGEeSShKVOxlfrCQ" targetNode="_TCtS0EiHEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Station_pompage/pompes"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Station_pompage/pompes"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_c6tSsEiHEeSShKVOxlfrCQ" name="[0..*] pompeIds" sourceNode="_8CMkkEiGEeSShKVOxlfrCQ" targetNode="_TCtS0EiHEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Station_pompage/pompeIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Station_pompage/pompeIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_c6tSsUiHEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_c6tSskiHEeSShKVOxlfrCQ"/>
@@ -5476,9 +5476,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_RVSlYEigEeSShKVOxlfrCQ" name="[0..*] proprietaires" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/proprietaires"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/proprietaires"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_RVSlYEigEeSShKVOxlfrCQ" name="[0..*] proprietaireIds" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/proprietaireIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/proprietaireIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_RVSlYUigEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5494,9 +5494,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_UMc_wEigEeSShKVOxlfrCQ" name="[0..1] gestionnaires" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gestionnaires"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gestionnaires"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_UMc_wEigEeSShKVOxlfrCQ" name="[0..*] gestionnaireIds" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gestionnaireIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gestionnaireIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_UMc_wUigEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5512,9 +5512,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Xe_HgEigEeSShKVOxlfrCQ" name="[0..1] gardiens" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gardiens"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gardiens"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Xe_HgEigEeSShKVOxlfrCQ" name="[0..*] gardienIds" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gardienIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/gardienIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Xe_ukEigEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5610,9 +5610,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_hp7cEEihEeSShKVOxlfrCQ" name="[0..*] conventions" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_QqWzMEi6EeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/conventions"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/conventions"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_hp7cEEihEeSShKVOxlfrCQ" name="[0..*] conventionIds" sourceNode="_IpRQcEigEeSShKVOxlfrCQ" targetNode="_QqWzMEi6EeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/conventionIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Structure_avec_contacts/conventionIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_hp7cEUihEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5838,9 +5838,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_xRVucEikEeSShKVOxlfrCQ" name="[0..*] intervenants" sourceNode="_CtQoMEikEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Prestation/intervenants"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Prestation/intervenants"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_xRVucEikEeSShKVOxlfrCQ" name="[0..*] intervenantIds" sourceNode="_CtQoMEikEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Prestation/intervenantIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Prestation/intervenantIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_xRWVgEikEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -5938,9 +5938,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_7gH2oEikEeSShKVOxlfrCQ" name="[0..*] articles_journaux" sourceNode="_7fxRUEikEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/articles_journaux"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/articles_journaux"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_7gH2oEikEeSShKVOxlfrCQ" name="[0..*] articleIds" sourceNode="_7fxRUEikEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/articleIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/articleIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_7gIdsEikEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6042,9 +6042,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_gCBGQEilEeSShKVOxlfrCQ" name="[0..*] observations" sourceNode="_7fxRUEikEeSShKVOxlfrCQ" targetNode="_PDVXkEilEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/observations"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/observations"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_gCBGQEilEeSShKVOxlfrCQ" name="[0..*] observationIds" sourceNode="_7fxRUEikEeSShKVOxlfrCQ" targetNode="_PDVXkEilEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/observationIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Desordre/observationIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_gCBGQUilEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_gCBGQkilEeSShKVOxlfrCQ"/>
@@ -6059,9 +6059,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_oTdYAEilEeSShKVOxlfrCQ" name="[0..1] observateur" sourceNode="_PDVXkEilEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Observation_suivi/observateur"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Observation_suivi/observateur"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_oTdYAEilEeSShKVOxlfrCQ" name="[0..1] observateurId" sourceNode="_PDVXkEilEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Observation_suivi/observateurId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Observation_suivi/observateurId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_oTdYAUilEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6315,9 +6315,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_rzDDUEiwEeSShKVOxlfrCQ" name="[0..*] evenements_meteo" sourceNode="_FTOHYEiwEeSShKVOxlfrCQ" targetNode="_dwHUEEiwEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//EvenementHydraulique/evenements_meteo"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//EvenementHydraulique/evenements_meteo"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_rzDDUEiwEeSShKVOxlfrCQ" name="[0..*] evenementMeteoIds" sourceNode="_FTOHYEiwEeSShKVOxlfrCQ" targetNode="_dwHUEEiwEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//EvenementHydraulique/evenementMeteoIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//EvenementHydraulique/evenementMeteoIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_rzDDUUiwEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_rzDDUkiwEeSShKVOxlfrCQ"/>
@@ -6332,9 +6332,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_x4q9wEiwEeSShKVOxlfrCQ" name="[0..1] observateur" sourceNode="_2vFvkEivEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/observateur"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/observateur"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_x4q9wEiwEeSShKVOxlfrCQ" name="[0..1] observateurId" sourceNode="_2vFvkEivEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/observateurId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/observateurId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_x4q9wUiwEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6350,9 +6350,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_3J0HQEiwEeSShKVOxlfrCQ" name="[0..*] articles_journaux" sourceNode="_2vFvkEivEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/articles_journaux"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/articles_journaux"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_3J0HQEiwEeSShKVOxlfrCQ" name="[0..*] articleId" sourceNode="_2vFvkEivEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/articleId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LaisseCrue/articleId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_3J0HQUiwEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6395,9 +6395,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BSFXwEixEeSShKVOxlfrCQ" name="[0..1] observateurs" sourceNode="_xtbhoEixEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MesureMonteeEaux/observateurs"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MesureMonteeEaux/observateurs"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BSFXwEixEeSShKVOxlfrCQ" name="[0..1] observateurId" sourceNode="_xtbhoEixEeSShKVOxlfrCQ" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MesureMonteeEaux/observateurId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MesureMonteeEaux/observateurId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_BSFXwUixEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6413,9 +6413,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BSFXx0ixEeSShKVOxlfrCQ" name="[0..*] articles_journaux" sourceNode="_BRrIEEixEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/articles_journaux"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/articles_journaux"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BSFXx0ixEeSShKVOxlfrCQ" name="[0..*] articleIds" sourceNode="_BRrIEEixEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/articleIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/articleIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_BSFXyEixEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6473,9 +6473,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_RwjVV0ixEeSShKVOxlfrCQ" name="[0..*] articles_journaux" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/articles_journaux"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/articles_journaux"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_RwjVV0ixEeSShKVOxlfrCQ" name="[0..*] articleIds" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/articleIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/articleIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_RwjVWEixEeSShKVOxlfrCQ" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
@@ -6566,9 +6566,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_--oR8EixEeSShKVOxlfrCQ" name="[0..*] mesures" sourceNode="_BRrIEEixEeSShKVOxlfrCQ" targetNode="_xtbhoEixEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/mesures"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/mesures"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_--oR8EixEeSShKVOxlfrCQ" name="[0..*] mesureIds" sourceNode="_BRrIEEixEeSShKVOxlfrCQ" targetNode="_xtbhoEixEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/mesureIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//MonteeEaux/mesureIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_--oR8UixEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_--oR8kixEeSShKVOxlfrCQ"/>
@@ -6610,9 +6610,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_FoQRUEiyEeSShKVOxlfrCQ" name="[0..*] mesures" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_B2WF8EiyEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/mesures"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/mesures"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_FoQRUEiyEeSShKVOxlfrCQ" name="[0..*] mesureIds" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_B2WF8EiyEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/mesureIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//LigneEau/mesureIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_FoQ4YEiyEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_FoQ4YUiyEeSShKVOxlfrCQ"/>
@@ -6676,9 +6676,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_mUJqUEizEeSShKVOxlfrCQ" name="[0..*] crue_submersion" sourceNode="_jbJ-YEh7EeSShKVOxlfrCQ" targetNode="_FTOHYEiwEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouvrage_franchissement/crue_submersion"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouvrage_franchissement/crue_submersion"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_mUJqUEizEeSShKVOxlfrCQ" name="[0..*] crueSubmersionIds" sourceNode="_jbJ-YEh7EeSShKVOxlfrCQ" targetNode="_FTOHYEiwEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Ouvrage_franchissement/crueSubmersionIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Ouvrage_franchissement/crueSubmersionIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_mUKRYEizEeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_mUKRYUizEeSShKVOxlfrCQ"/>
@@ -7064,9 +7064,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_5HRPEEr4EeSShKVOxlfrCQ" name="[0..1] digueID" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DeVKwEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Document/digueID"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Document/digueID"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_5HRPEEr4EeSShKVOxlfrCQ" name="[0..1] digueId" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DeVKwEfeEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Document/digueId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Document/digueId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_5HRPEUr4EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_5HRPEkr4EeSShKVOxlfrCQ"/>
@@ -7081,9 +7081,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BuTWUEr5EeSShKVOxlfrCQ" name="[0..1] IDAssocie" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Document/IDAssocie"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Document/IDAssocie"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_BuTWUEr5EeSShKVOxlfrCQ" name="[0..1] tonconId" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Document/tonconId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Document/tonconId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_BuTWUUr5EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_BuTWUkr5EeSShKVOxlfrCQ"/>
@@ -7098,9 +7098,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_E2hrgEr5EeSShKVOxlfrCQ" name="[0..1] digueAssociee" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_DeVKwEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/digueAssociee"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/digueAssociee"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_E2hrgEr5EeSShKVOxlfrCQ" name="[0..1] digueId" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_DeVKwEfeEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/digueId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Troncon_Digue/digueId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_HHRmIEr5EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_HHRmIUr5EeSShKVOxlfrCQ"/>
@@ -7113,9 +7113,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_MVn6UEr5EeSShKVOxlfrCQ" name="[0..1] tronconID" sourceNode="_e0PzAEfeEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Systeme_reperage/tronconID"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Systeme_reperage/tronconID"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_MVn6UEr5EeSShKVOxlfrCQ" name="[0..1] tronconId" sourceNode="_e0PzAEfeEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Systeme_reperage/tronconId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Systeme_reperage/tronconId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_MVohYEr5EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_MVohYUr5EeSShKVOxlfrCQ"/>
@@ -7337,9 +7337,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_IgNdEEr7EeSShKVOxlfrCQ" name="[0..*] reseauId" sourceNode="_iCKCwEiJEeSShKVOxlfrCQ" targetNode="_lEby4EiHEeSShKVOxlfrCQ">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Reseau_hydro_ciel_ouvert/reseauId"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Reseau_hydro_ciel_ouvert/reseauId"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_IgNdEEr7EeSShKVOxlfrCQ" name="[0..*] reseauIds" sourceNode="_iCKCwEiJEeSShKVOxlfrCQ" targetNode="_lEby4EiHEeSShKVOxlfrCQ">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//Reseau_hydro_ciel_ouvert/reseauIds"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//Reseau_hydro_ciel_ouvert/reseauIds"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_IgNdEUr7EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_IgNdEkr7EeSShKVOxlfrCQ"/>
