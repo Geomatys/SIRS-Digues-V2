@@ -146,30 +146,6 @@
                       </manifest>
                   </archive>
               </configuration>
-          </plugin>
-      <plugin>
-        <groupId>com.geomatys.maven</groupId>
-        <artifactId>geomatys-jfxml-plugin</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
-        <dependencies>
-          <dependency>
-            <groupId>fr.symadrem.sirs.core</groupId>
-            <artifactId>sirs-core-store</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <goals>
-              <goal>fxml</goal>
-            </goals>
-            <configuration>
-             <templateFile>${basedir}/src/main/fxml/default.fxml.groovy</templateFile>
-             <pojosFile>/fr/symadrem/sirs/model/pojos.properties</pojosFile>
-             <targetPackage>fr.symadrem.sirs.ui</targetPackage>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
