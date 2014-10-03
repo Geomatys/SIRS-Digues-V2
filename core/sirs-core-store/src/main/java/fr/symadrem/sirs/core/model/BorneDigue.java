@@ -3,6 +3,7 @@ package fr.symadrem.sirs.core.model;
 
 import com.geomatys.json.InstantDeserializer;
 import com.geomatys.json.InstantSerializer;
+import com.vividsolutions.jts.geom.Point;
 import java.time.Instant;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -74,6 +75,17 @@ public class BorneDigue  extends Positionable  {
     public  StringProperty nomProperty() {
        return nom;
     }
+    /**
+    * JavaFX property for positionBorne.
+    */
+    private ObjectProperty<Point>  positionBorne = new SimpleObjectProperty<Point>();
+    
+    /**
+    * Getter for JavaFX property on positionBorne.
+    */
+    public  ObjectProperty<Point> positionBorneProperty() {
+       return positionBorne;
+    }
     //
     // References
     // 
@@ -122,6 +134,14 @@ public class BorneDigue  extends Positionable  {
     public void setNom(String nom){
     	this.nom.set(nom);
     }    
+    
+    public Point getPositionBorne(){
+    	return this.positionBorne.get();
+    }
+    
+    public void setPositionBorne(Point positionBorne){
+    	this.positionBorne.set(positionBorne);
+    }    
   
   @Override
   public String toString(){
@@ -140,6 +160,9 @@ public class BorneDigue  extends Positionable  {
       builder.append(", ");
       builder.append("nom: ");
       builder.append(nom.get());
+      builder.append(", ");
+      builder.append("positionBorne: ");
+      builder.append(positionBorne.get());
       return builder.toString();
   }
 

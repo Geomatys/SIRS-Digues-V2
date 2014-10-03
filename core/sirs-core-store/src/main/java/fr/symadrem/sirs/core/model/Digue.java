@@ -4,7 +4,6 @@ package fr.symadrem.sirs.core.model;
 import com.geomatys.json.InstantDeserializer;
 import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
-import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -66,10 +65,6 @@ public class Digue  extends CouchDbDocument  {
     //
     // References
     // 
-    private List<String> tronconsIds;
- 
-    private String documentId;
- 
 
     
     public String getLibelle(){
@@ -104,27 +99,7 @@ public class Digue  extends CouchDbDocument  {
     
     public void setClassement(String classement){
     	this.classement.set(classement);
-    }     
-
-    
-    public List<String> getTronconsIds(){
-    	return this.tronconsIds;
-    }
-
-    public void setTronconsIds(List<String> tronconsIds){
-    	this.tronconsIds = tronconsIds;
-    }
- 
-
-    
-    public String getDocument(){
-    	return this.documentId;
-    }
-
-    public void setDocument(String documentId){
-    	this.documentId = documentId;
-    }
-
+    }    
   
   @Override
   public String toString(){

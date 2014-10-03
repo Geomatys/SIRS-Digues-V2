@@ -46,7 +46,7 @@ public class OuvrageTelecomEnergie  extends StructureAvecContacts  {
     //
     // References
     // 
-    private String reseau_telecom_energieId;
+    private StringProperty reseauId = new SimpleStringProperty();
  
 
     
@@ -75,12 +75,12 @@ public class OuvrageTelecomEnergie  extends StructureAvecContacts  {
     }     
 
     
-    public String getReseau_telecom_energie(){
-    	return this.reseau_telecom_energieId;
+    public String getReseauId(){
+    	return this.reseauId.get();
     }
 
-    public void setReseau_telecom_energie(String reseau_telecom_energieId){
-    	this.reseau_telecom_energieId = reseau_telecom_energieId;
+    public void setReseauId(String reseauId){
+    	this.reseauId.set( reseauId );
     }
 
   

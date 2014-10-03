@@ -105,12 +105,6 @@ public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
     //
     // References
     // 
-    private String station_pompageId;
- 
-    private String ouvrage_hydraulique_associeId;
- 
-    private String reseau_hydro_ciel_ouvertId;
- 
 
     
     public String getNom(){
@@ -175,37 +169,7 @@ public class ReseauHydrauliqueFerme  extends StructureAvecContacts  {
     
     public void setDiametre(float diametre){
     	this.diametre.set(diametre);
-    }     
-
-    
-    public String getStation_pompage(){
-    	return this.station_pompageId;
-    }
-
-    public void setStation_pompage(String station_pompageId){
-    	this.station_pompageId = station_pompageId;
-    }
- 
-
-    
-    public String getOuvrage_hydraulique_associe(){
-    	return this.ouvrage_hydraulique_associeId;
-    }
-
-    public void setOuvrage_hydraulique_associe(String ouvrage_hydraulique_associeId){
-    	this.ouvrage_hydraulique_associeId = ouvrage_hydraulique_associeId;
-    }
- 
-
-    
-    public String getReseau_hydro_ciel_ouvert(){
-    	return this.reseau_hydro_ciel_ouvertId;
-    }
-
-    public void setReseau_hydro_ciel_ouvert(String reseau_hydro_ciel_ouvertId){
-    	this.reseau_hydro_ciel_ouvertId = reseau_hydro_ciel_ouvertId;
-    }
-
+    }    
   
   @Override
   public String toString(){

@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -84,17 +86,11 @@ public class Prestation  extends Structure  {
     //
     // References
     // 
-    private String marcheId;
+    private ObservableList<String> intervenantsIds = FXCollections.observableArrayList();
  
-    private List<String> intervenantsIds;
+    private StringProperty evenementId = new SimpleStringProperty();
  
-    private String desordreId;
- 
-    private String evenement_hydraulique_associeId;
- 
-    private String rapportetudeId;
- 
-    private String documentgrandeechelleId;
+    private StringProperty desordreId = new SimpleStringProperty();
  
 
     
@@ -147,62 +143,35 @@ public class Prestation  extends Structure  {
     }     
 
     
-    public String getMarche(){
-    	return this.marcheId;
-    }
 
-    public void setMarche(String marcheId){
-    	this.marcheId = marcheId;
-    }
- 
-
-    
     public List<String> getIntervenantsIds(){
     	return this.intervenantsIds;
     }
 
+
     public void setIntervenantsIds(List<String> intervenantsIds){
-    	this.intervenantsIds = intervenantsIds;
+        this.intervenantsIds.clear();
+    	this.intervenantsIds.addAll(intervenantsIds);
     }
  
 
     
-    public String getDesordre(){
-    	return this.desordreId;
+    public String getEvenementId(){
+    	return this.evenementId.get();
     }
 
-    public void setDesordre(String desordreId){
-    	this.desordreId = desordreId;
-    }
- 
-
-    
-    public String getEvenement_hydraulique_associe(){
-    	return this.evenement_hydraulique_associeId;
-    }
-
-    public void setEvenement_hydraulique_associe(String evenement_hydraulique_associeId){
-    	this.evenement_hydraulique_associeId = evenement_hydraulique_associeId;
+    public void setEvenementId(String evenementId){
+    	this.evenementId.set( evenementId );
     }
  
 
     
-    public String getRapportetude(){
-    	return this.rapportetudeId;
+    public String getDesordreId(){
+    	return this.desordreId.get();
     }
 
-    public void setRapportetude(String rapportetudeId){
-    	this.rapportetudeId = rapportetudeId;
-    }
- 
-
-    
-    public String getDocumentgrandeechelle(){
-    	return this.documentgrandeechelleId;
-    }
-
-    public void setDocumentgrandeechelle(String documentgrandeechelleId){
-    	this.documentgrandeechelleId = documentgrandeechelleId;
+    public void setDesordreId(String desordreId){
+    	this.desordreId.set( desordreId );
     }
 
   

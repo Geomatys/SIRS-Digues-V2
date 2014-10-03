@@ -57,12 +57,14 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setDate_maj(Instant.now());
         
-        List<String> set = new ArrayList<>();
+        instance.add(digue);
+        
         {
             TronconDigue troncon = new TronconDigue();
             troncon.setCommentaire("Traoncon1");
+            troncon.setDigueAssociee(digue.getId());
             tronconRepository.add(troncon);
-            set.add(troncon.getId());
+
         }
         {
             TronconDigue troncon = new TronconDigue();
@@ -75,22 +77,22 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setStuctures(stuctures);
             
             troncon.setCommentaire("Traoncon2");
-            
+            troncon.setDigueAssociee(digue.getId());
 
             tronconRepository.add(troncon);
             
-            set.add(troncon.getId());
+
             
             
             
             
         }
         
-        digue.setTronconsIds(set);
+        
         
         
 
-        instance.add(digue);
+        
     }
 
 }

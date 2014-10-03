@@ -84,7 +84,6 @@ public class RepositoriesTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            digue.setTronconsIds(new ArrayList<>());
             digue.setDate_maj(Instant.now());
             digueRepository.add(digue);
         }
@@ -128,10 +127,7 @@ public class RepositoriesTest {
         int i=0;
         for(final TronconDigue troncon : troncons){
             final Digue digue = digues.get(i);
-            troncon.setDigue(digue.getId());
-            List<String> tronconsIds = digue.getTronconsIds();
-            tronconsIds.add(troncon.getId());
-            digue.setTronconsIds(tronconsIds);
+            troncon.setDigueAssociee(digue.getId());
             i++;
             if(i==nbDigues) i=0;
             this.digueRepository.update(digue);
@@ -193,7 +189,6 @@ public class RepositoriesTest {
 
         }
 
-        digue.setTronconsIds(set);
 
         digueRepository.add(digue);
     }

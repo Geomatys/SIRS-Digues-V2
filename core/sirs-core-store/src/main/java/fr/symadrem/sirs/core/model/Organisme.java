@@ -4,7 +4,6 @@ package fr.symadrem.sirs.core.model;
 import com.geomatys.json.InstantDeserializer;
 import com.geomatys.json.InstantSerializer;
 import java.time.Instant;
-import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -154,8 +153,6 @@ public class Organisme  extends CouchDbDocument  {
     //
     // References
     // 
-    private List<String> contactIds;
- 
 
     
     public String getAdresse(){
@@ -256,17 +253,7 @@ public class Organisme  extends CouchDbDocument  {
     
     public void setTelephone(String telephone){
     	this.telephone.set(telephone);
-    }     
-
-    
-    public List<String> getContactIds(){
-    	return this.contactIds;
-    }
-
-    public void setContactIds(List<String> contactIds){
-    	this.contactIds = contactIds;
-    }
-
+    }    
   
   @Override
   public String toString(){

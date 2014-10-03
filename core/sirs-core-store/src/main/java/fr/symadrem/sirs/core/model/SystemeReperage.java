@@ -65,7 +65,7 @@ public class SystemeReperage  extends CouchDbDocument  {
     //
     // References
     // 
-    private String troncon_digueId;
+    private StringProperty tronconID = new SimpleStringProperty();
  
 
 
@@ -106,12 +106,12 @@ public class SystemeReperage  extends CouchDbDocument  {
     }     
 
     
-    public String getTroncon_digue(){
-    	return this.troncon_digueId;
+    public String getTronconID(){
+    	return this.tronconID.get();
     }
 
-    public void setTroncon_digue(String troncon_digueId){
-    	this.troncon_digueId = troncon_digueId;
+    public void setTronconID(String tronconID){
+    	this.tronconID.set( tronconID );
     }
 
   

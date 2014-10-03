@@ -124,7 +124,7 @@ public class Contact  extends CouchDbDocument  {
     //
     // References
     // 
-    private String organismeId;
+    private StringProperty organismeId = new SimpleStringProperty();
  
 
     
@@ -209,12 +209,12 @@ public class Contact  extends CouchDbDocument  {
     }     
 
     
-    public String getOrganisme(){
-    	return this.organismeId;
+    public String getOrganismeId(){
+    	return this.organismeId.get();
     }
 
-    public void setOrganisme(String organismeId){
-    	this.organismeId = organismeId;
+    public void setOrganismeId(String organismeId){
+    	this.organismeId.set( organismeId );
     }
 
   

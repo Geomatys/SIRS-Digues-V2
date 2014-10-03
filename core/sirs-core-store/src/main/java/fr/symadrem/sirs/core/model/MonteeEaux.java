@@ -4,6 +4,8 @@ package fr.symadrem.sirs.core.model;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -25,11 +27,11 @@ public class MonteeEaux  extends Structure  {
     //
     // References
     // 
-    private List<String> articles_journauxIds;
+    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
  
-    private String evenementhydrauliqueId;
+    private ObservableList<String> mesuresIds = FXCollections.observableArrayList();
  
-    private List<String> mesuresIds;
+    private StringProperty evenementId = new SimpleStringProperty();
  
 
     
@@ -42,32 +44,38 @@ public class MonteeEaux  extends Structure  {
     }     
 
     
+
     public List<String> getArticles_journauxIds(){
     	return this.articles_journauxIds;
     }
 
+
     public void setArticles_journauxIds(List<String> articles_journauxIds){
-    	this.articles_journauxIds = articles_journauxIds;
+        this.articles_journauxIds.clear();
+    	this.articles_journauxIds.addAll(articles_journauxIds);
     }
  
 
     
-    public String getEvenementhydraulique(){
-    	return this.evenementhydrauliqueId;
-    }
 
-    public void setEvenementhydraulique(String evenementhydrauliqueId){
-    	this.evenementhydrauliqueId = evenementhydrauliqueId;
-    }
- 
-
-    
     public List<String> getMesuresIds(){
     	return this.mesuresIds;
     }
 
+
     public void setMesuresIds(List<String> mesuresIds){
-    	this.mesuresIds = mesuresIds;
+        this.mesuresIds.clear();
+    	this.mesuresIds.addAll(mesuresIds);
+    }
+ 
+
+    
+    public String getEvenementId(){
+    	return this.evenementId.get();
+    }
+
+    public void setEvenementId(String evenementId){
+    	this.evenementId.set( evenementId );
     }
 
   

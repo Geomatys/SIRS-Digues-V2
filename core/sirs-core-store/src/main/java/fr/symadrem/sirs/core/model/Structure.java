@@ -3,6 +3,7 @@ package fr.symadrem.sirs.core.model;
 
 import com.geomatys.json.InstantDeserializer;
 import com.geomatys.json.InstantSerializer;
+import com.vividsolutions.jts.geom.Geometry;
 import java.time.Instant;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -72,12 +73,21 @@ public abstract class Structure  extends Positionable  {
     public  StringProperty sourceProperty() {
        return source;
     }
+    /**
+    * JavaFX property for geometry.
+    */
+    private ObjectProperty<Geometry>  geometry = new SimpleObjectProperty<Geometry>();
+    
+    /**
+    * Getter for JavaFX property on geometry.
+    */
+    public  ObjectProperty<Geometry> geometryProperty() {
+       return geometry;
+    }
     //
     // References
     // 
-    private String tronconId;
- 
-    private String documentId;
+    private StringProperty troncon = new SimpleStringProperty();
  
 
     
@@ -123,25 +133,23 @@ public abstract class Structure  extends Positionable  {
     
     public void setSource(String source){
     	this.source.set(source);
+    }    
+    
+    public Geometry getGeometry(){
+    	return this.geometry.get();
+    }
+    
+    public void setGeometry(Geometry geometry){
+    	this.geometry.set(geometry);
     }     
 
     
     public String getTroncon(){
-    	return this.tronconId;
+    	return this.troncon.get();
     }
 
-    public void setTroncon(String tronconId){
-    	this.tronconId = tronconId;
-    }
- 
-
-    
-    public String getDocument(){
-    	return this.documentId;
-    }
-
-    public void setDocument(String documentId){
-    	this.documentId = documentId;
+    public void setTroncon(String troncon){
+    	this.troncon.set( troncon );
     }
 
   
@@ -162,6 +170,9 @@ public abstract class Structure  extends Positionable  {
       builder.append(", ");
       builder.append("source: ");
       builder.append(source.get());
+      builder.append(", ");
+      builder.append("geometry: ");
+      builder.append(geometry.get());
       return builder.toString();
   }
 

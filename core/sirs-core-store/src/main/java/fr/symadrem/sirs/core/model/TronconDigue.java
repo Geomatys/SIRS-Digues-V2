@@ -3,6 +3,7 @@ package fr.symadrem.sirs.core.model;
 
 import com.geomatys.json.InstantDeserializer;
 import com.geomatys.json.InstantSerializer;
+import com.vividsolutions.jts.geom.Geometry;
 import java.time.Instant;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -97,19 +98,26 @@ public class TronconDigue  extends Positionable  {
     public  StringProperty systeme_reperage_defautProperty() {
        return systeme_reperage_defaut;
     }
+    /**
+    * JavaFX property for geometry.
+    */
+    private ObjectProperty<Geometry>  geometry = new SimpleObjectProperty<Geometry>();
+    
+    /**
+    * Getter for JavaFX property on geometry.
+    */
+    public  ObjectProperty<Geometry> geometryProperty() {
+       return geometry;
+    }
     //
     // References
     // 
     public ObservableList<Structure>  stuctures =  FXCollections.observableArrayList() ; 
-    private String digueId;
- 
-    private List<String> systeme_reperageIds;
- 
     public ObjectProperty<SystemeReperage>  systeme_rep_defaut = new SimpleObjectProperty<>() ; 
-    private String contactId;
+    private StringProperty contact = new SimpleStringProperty();
  
     public ObservableList<BorneDigue>  bornes =  FXCollections.observableArrayList() ; 
-    private String documentId;
+    private StringProperty digueAssociee = new SimpleStringProperty();
  
 
     
@@ -173,6 +181,14 @@ public class TronconDigue  extends Positionable  {
     
     public void setSysteme_reperage_defaut(String systeme_reperage_defaut){
     	this.systeme_reperage_defaut.set(systeme_reperage_defaut);
+    }    
+    
+    public Geometry getGeometry(){
+    	return this.geometry.get();
+    }
+    
+    public void setGeometry(Geometry geometry){
+    	this.geometry.set(geometry);
     }     
    public List<Structure> getStuctures(){
     	return this.stuctures;
@@ -181,26 +197,6 @@ public class TronconDigue  extends Positionable  {
     public void setStuctures(List<Structure> stuctures){
         this.stuctures.clear();
     	this.stuctures.addAll( stuctures );
-    }
- 
-
-    
-    public String getDigue(){
-    	return this.digueId;
-    }
-
-    public void setDigue(String digueId){
-    	this.digueId = digueId;
-    }
- 
-
-    
-    public List<String> getSysteme_reperageIds(){
-    	return this.systeme_reperageIds;
-    }
-
-    public void setSysteme_reperageIds(List<String> systeme_reperageIds){
-    	this.systeme_reperageIds = systeme_reperageIds;
     }
  
    public SystemeReperage getSysteme_rep_defaut(){
@@ -214,11 +210,11 @@ public class TronconDigue  extends Positionable  {
 
     
     public String getContact(){
-    	return this.contactId;
+    	return this.contact.get();
     }
 
-    public void setContact(String contactId){
-    	this.contactId = contactId;
+    public void setContact(String contact){
+    	this.contact.set( contact );
     }
  
    public List<BorneDigue> getBornes(){
@@ -232,12 +228,12 @@ public class TronconDigue  extends Positionable  {
  
 
     
-    public String getDocument(){
-    	return this.documentId;
+    public String getDigueAssociee(){
+    	return this.digueAssociee.get();
     }
 
-    public void setDocument(String documentId){
-    	this.documentId = documentId;
+    public void setDigueAssociee(String digueAssociee){
+    	this.digueAssociee.set( digueAssociee );
     }
 
   
@@ -264,6 +260,9 @@ public class TronconDigue  extends Positionable  {
       builder.append(", ");
       builder.append("systeme_reperage_defaut: ");
       builder.append(systeme_reperage_defaut.get());
+      builder.append(", ");
+      builder.append("geometry: ");
+      builder.append(geometry.get());
       return builder.toString();
   }
 

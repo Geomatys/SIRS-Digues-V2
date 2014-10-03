@@ -70,8 +70,6 @@ public class ReseauTelecomEnergie  extends StructureAvecContacts  {
     //
     // References
     // 
-    private String ouvrage_telecom_energieId;
- 
 
     
     public String getNom(){
@@ -112,17 +110,7 @@ public class ReseauTelecomEnergie  extends StructureAvecContacts  {
     
     public void setHauteur(float hauteur){
     	this.hauteur.set(hauteur);
-    }     
-
-    
-    public String getOuvrage_telecom_energie(){
-    	return this.ouvrage_telecom_energieId;
-    }
-
-    public void setOuvrage_telecom_energie(String ouvrage_telecom_energieId){
-    	this.ouvrage_telecom_energieId = ouvrage_telecom_energieId;
-    }
-
+    }    
   
   @Override
   public String toString(){

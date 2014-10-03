@@ -57,7 +57,7 @@ public class DocumentGrandeEchelle  extends Document  {
     //
     // References
     // 
-    private String prestationId;
+    private StringProperty prestationId = new SimpleStringProperty();
  
 
     
@@ -94,12 +94,12 @@ public class DocumentGrandeEchelle  extends Document  {
     }     
 
     
-    public String getPrestation(){
-    	return this.prestationId;
+    public String getPrestationId(){
+    	return this.prestationId.get();
     }
 
-    public void setPrestation(String prestationId){
-    	this.prestationId = prestationId;
+    public void setPrestationId(String prestationId){
+    	this.prestationId.set( prestationId );
     }
 
   

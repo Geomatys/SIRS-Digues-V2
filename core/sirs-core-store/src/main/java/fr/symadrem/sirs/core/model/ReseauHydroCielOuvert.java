@@ -1,8 +1,11 @@
 
 package fr.symadrem.sirs.core.model;
 
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -46,7 +49,7 @@ public class ReseauHydroCielOuvert  extends StructureAvecContacts  {
     //
     // References
     // 
-    private String reseau_hydraulique_fermeId;
+    private ObservableList<String> reseauIdIds = FXCollections.observableArrayList();
  
 
     
@@ -75,12 +78,15 @@ public class ReseauHydroCielOuvert  extends StructureAvecContacts  {
     }     
 
     
-    public String getReseau_hydraulique_ferme(){
-    	return this.reseau_hydraulique_fermeId;
+
+    public List<String> getReseauIdIds(){
+    	return this.reseauIdIds;
     }
 
-    public void setReseau_hydraulique_ferme(String reseau_hydraulique_fermeId){
-    	this.reseau_hydraulique_fermeId = reseau_hydraulique_fermeId;
+
+    public void setReseauIdIds(List<String> reseauIdIds){
+        this.reseauIdIds.clear();
+    	this.reseauIdIds.addAll(reseauIdIds);
     }
 
   

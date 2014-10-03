@@ -46,7 +46,7 @@ public class OuvrageHydrauliqueAssocie  extends StructureAvecContacts  {
     //
     // References
     // 
-    private String reseau_hydraulique_fermeId;
+    private StringProperty reseauId = new SimpleStringProperty();
  
 
     
@@ -75,12 +75,12 @@ public class OuvrageHydrauliqueAssocie  extends StructureAvecContacts  {
     }     
 
     
-    public String getReseau_hydraulique_ferme(){
-    	return this.reseau_hydraulique_fermeId;
+    public String getReseauId(){
+    	return this.reseauId.get();
     }
 
-    public void setReseau_hydraulique_ferme(String reseau_hydraulique_fermeId){
-    	this.reseau_hydraulique_fermeId = reseau_hydraulique_fermeId;
+    public void setReseauId(String reseauId){
+    	this.reseauId.set( reseauId );
     }
 
   

@@ -6,6 +6,8 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -93,7 +95,7 @@ public class VoieDigue  extends StructureAvecContacts  {
     //
     // References
     // 
-    private List<String> servitudesIds;
+    private ObservableList<String> servitudesIds = FXCollections.observableArrayList();
  
 
     
@@ -154,12 +156,15 @@ public class VoieDigue  extends StructureAvecContacts  {
     }     
 
     
+
     public List<String> getServitudesIds(){
     	return this.servitudesIds;
     }
 
+
     public void setServitudesIds(List<String> servitudesIds){
-    	this.servitudesIds = servitudesIds;
+        this.servitudesIds.clear();
+    	this.servitudesIds.addAll(servitudesIds);
     }
 
   

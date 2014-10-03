@@ -11,6 +11,8 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -112,13 +114,7 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     //
     // References
     // 
-    private String laissecrueId;
- 
-    private List<String> evenements_meteoIds;
- 
-    private String monteeeauxId;
- 
-    private String ligneeauId;
+    private ObservableList<String> evenements_meteoIds = FXCollections.observableArrayList();
  
 
     
@@ -191,42 +187,15 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     }     
 
     
-    public String getLaissecrue(){
-    	return this.laissecrueId;
-    }
 
-    public void setLaissecrue(String laissecrueId){
-    	this.laissecrueId = laissecrueId;
-    }
- 
-
-    
     public List<String> getEvenements_meteoIds(){
     	return this.evenements_meteoIds;
     }
 
+
     public void setEvenements_meteoIds(List<String> evenements_meteoIds){
-    	this.evenements_meteoIds = evenements_meteoIds;
-    }
- 
-
-    
-    public String getMonteeeaux(){
-    	return this.monteeeauxId;
-    }
-
-    public void setMonteeeaux(String monteeeauxId){
-    	this.monteeeauxId = monteeeauxId;
-    }
- 
-
-    
-    public String getLigneeau(){
-    	return this.ligneeauId;
-    }
-
-    public void setLigneeau(String ligneeauId){
-    	this.ligneeauId = ligneeauId;
+        this.evenements_meteoIds.clear();
+    	this.evenements_meteoIds.addAll(evenements_meteoIds);
     }
 
   

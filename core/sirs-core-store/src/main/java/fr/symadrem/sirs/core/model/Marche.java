@@ -13,6 +13,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -80,9 +82,11 @@ public class Marche  extends Document  {
     //
     // References
     // 
-    private List<String> maitre_oeuvreIds;
+    private ObservableList<String> maitre_oeuvreIds = FXCollections.observableArrayList();
  
-    private List<String> financeurIds;
+    private ObservableList<String> financeurIds = FXCollections.observableArrayList();
+ 
+    private StringProperty prestationId = new SimpleStringProperty();
  
 
     
@@ -131,22 +135,38 @@ public class Marche  extends Document  {
     }     
 
     
+
     public List<String> getMaitre_oeuvreIds(){
     	return this.maitre_oeuvreIds;
     }
 
+
     public void setMaitre_oeuvreIds(List<String> maitre_oeuvreIds){
-    	this.maitre_oeuvreIds = maitre_oeuvreIds;
+        this.maitre_oeuvreIds.clear();
+    	this.maitre_oeuvreIds.addAll(maitre_oeuvreIds);
     }
  
 
     
+
     public List<String> getFinanceurIds(){
     	return this.financeurIds;
     }
 
+
     public void setFinanceurIds(List<String> financeurIds){
-    	this.financeurIds = financeurIds;
+        this.financeurIds.clear();
+    	this.financeurIds.addAll(financeurIds);
+    }
+ 
+
+    
+    public String getPrestationId(){
+    	return this.prestationId.get();
+    }
+
+    public void setPrestationId(String prestationId){
+    	this.prestationId.set( prestationId );
     }
 
   

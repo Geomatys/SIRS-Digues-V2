@@ -99,11 +99,11 @@ public class Document  extends Positionable  {
     //
     // References
     // 
-    private String digueId;
+    private StringProperty digueID = new SimpleStringProperty();
  
-    private String troncon_digueId;
+    private StringProperty IDAssocie = new SimpleStringProperty();
  
-    private String structureId;
+    private StringProperty structureId = new SimpleStringProperty();
  
 
     
@@ -166,32 +166,32 @@ public class Document  extends Positionable  {
     }     
 
     
-    public String getDigue(){
-    	return this.digueId;
+    public String getDigueID(){
+    	return this.digueID.get();
     }
 
-    public void setDigue(String digueId){
-    	this.digueId = digueId;
-    }
- 
-
-    
-    public String getTroncon_digue(){
-    	return this.troncon_digueId;
-    }
-
-    public void setTroncon_digue(String troncon_digueId){
-    	this.troncon_digueId = troncon_digueId;
+    public void setDigueID(String digueID){
+    	this.digueID.set( digueID );
     }
  
 
     
-    public String getStructure(){
-    	return this.structureId;
+    public String getIDAssocie(){
+    	return this.IDAssocie.get();
     }
 
-    public void setStructure(String structureId){
-    	this.structureId = structureId;
+    public void setIDAssocie(String IDAssocie){
+    	this.IDAssocie.set( IDAssocie );
+    }
+ 
+
+    
+    public String getStructureId(){
+    	return this.structureId.get();
+    }
+
+    public void setStructureId(String structureId){
+    	this.structureId.set( structureId );
     }
 
   

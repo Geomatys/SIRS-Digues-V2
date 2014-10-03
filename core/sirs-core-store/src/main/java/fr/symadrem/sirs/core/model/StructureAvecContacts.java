@@ -2,6 +2,10 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -12,53 +16,59 @@ public class StructureAvecContacts  extends Structure  {
     //
     // References
     // 
-    private List<String> proprietairesIds;
+    private ObservableList<String> proprietairesIds = FXCollections.observableArrayList();
  
-    private String gestionnairesId;
+    private StringProperty gestionnaires = new SimpleStringProperty();
  
-    private String gardiensId;
+    private StringProperty gardiens = new SimpleStringProperty();
  
-    private List<String> conventionsIds;
+    private ObservableList<String> conventionsIds = FXCollections.observableArrayList();
  
  
 
     
+
     public List<String> getProprietairesIds(){
     	return this.proprietairesIds;
     }
 
+
     public void setProprietairesIds(List<String> proprietairesIds){
-    	this.proprietairesIds = proprietairesIds;
+        this.proprietairesIds.clear();
+    	this.proprietairesIds.addAll(proprietairesIds);
     }
  
 
     
     public String getGestionnaires(){
-    	return this.gestionnairesId;
+    	return this.gestionnaires.get();
     }
 
-    public void setGestionnaires(String gestionnairesId){
-    	this.gestionnairesId = gestionnairesId;
+    public void setGestionnaires(String gestionnaires){
+    	this.gestionnaires.set( gestionnaires );
     }
  
 
     
     public String getGardiens(){
-    	return this.gardiensId;
+    	return this.gardiens.get();
     }
 
-    public void setGardiens(String gardiensId){
-    	this.gardiensId = gardiensId;
+    public void setGardiens(String gardiens){
+    	this.gardiens.set( gardiens );
     }
  
 
     
+
     public List<String> getConventionsIds(){
     	return this.conventionsIds;
     }
 
+
     public void setConventionsIds(List<String> conventionsIds){
-    	this.conventionsIds = conventionsIds;
+        this.conventionsIds.clear();
+    	this.conventionsIds.addAll(conventionsIds);
     }
 
   

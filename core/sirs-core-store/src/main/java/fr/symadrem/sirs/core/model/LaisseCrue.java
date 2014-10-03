@@ -6,6 +6,8 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -49,11 +51,11 @@ public class LaisseCrue  extends Structure  {
     //
     // References
     // 
-    private String evenementhydrauliqueId;
+    private StringProperty observateur = new SimpleStringProperty();
  
-    private String observateurId;
+    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
  
-    private List<String> articles_journauxIds;
+    private StringProperty evenementId = new SimpleStringProperty();
  
 
     
@@ -82,32 +84,35 @@ public class LaisseCrue  extends Structure  {
     }     
 
     
-    public String getEvenementhydraulique(){
-    	return this.evenementhydrauliqueId;
-    }
-
-    public void setEvenementhydraulique(String evenementhydrauliqueId){
-    	this.evenementhydrauliqueId = evenementhydrauliqueId;
-    }
- 
-
-    
     public String getObservateur(){
-    	return this.observateurId;
+    	return this.observateur.get();
     }
 
-    public void setObservateur(String observateurId){
-    	this.observateurId = observateurId;
+    public void setObservateur(String observateur){
+    	this.observateur.set( observateur );
     }
  
 
     
+
     public List<String> getArticles_journauxIds(){
     	return this.articles_journauxIds;
     }
 
+
     public void setArticles_journauxIds(List<String> articles_journauxIds){
-    	this.articles_journauxIds = articles_journauxIds;
+        this.articles_journauxIds.clear();
+    	this.articles_journauxIds.addAll(articles_journauxIds);
+    }
+ 
+
+    
+    public String getEvenementId(){
+    	return this.evenementId.get();
+    }
+
+    public void setEvenementId(String evenementId){
+    	this.evenementId.set( evenementId );
     }
 
   

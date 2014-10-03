@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -84,13 +86,11 @@ public class Desordre  extends Structure  {
     //
     // References
     // 
-    private List<String> articles_journauxIds;
+    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
  
-    private String prestationId;
+    private ObservableList<String> observationsIds = FXCollections.observableArrayList();
  
-    private List<String> observationsIds;
- 
-    private String evenement_hydraulique_origineId;
+    private StringProperty evenementId = new SimpleStringProperty();
  
 
     
@@ -143,42 +143,38 @@ public class Desordre  extends Structure  {
     }     
 
     
+
     public List<String> getArticles_journauxIds(){
     	return this.articles_journauxIds;
     }
 
+
     public void setArticles_journauxIds(List<String> articles_journauxIds){
-    	this.articles_journauxIds = articles_journauxIds;
+        this.articles_journauxIds.clear();
+    	this.articles_journauxIds.addAll(articles_journauxIds);
     }
  
 
     
-    public String getPrestation(){
-    	return this.prestationId;
-    }
 
-    public void setPrestation(String prestationId){
-    	this.prestationId = prestationId;
-    }
- 
-
-    
     public List<String> getObservationsIds(){
     	return this.observationsIds;
     }
 
+
     public void setObservationsIds(List<String> observationsIds){
-    	this.observationsIds = observationsIds;
+        this.observationsIds.clear();
+    	this.observationsIds.addAll(observationsIds);
     }
  
 
     
-    public String getEvenement_hydraulique_origine(){
-    	return this.evenement_hydraulique_origineId;
+    public String getEvenementId(){
+    	return this.evenementId.get();
     }
 
-    public void setEvenement_hydraulique_origine(String evenement_hydraulique_origineId){
-    	this.evenement_hydraulique_origineId = evenement_hydraulique_origineId;
+    public void setEvenementId(String evenementId){
+    	this.evenementId.set( evenementId );
     }
 
   

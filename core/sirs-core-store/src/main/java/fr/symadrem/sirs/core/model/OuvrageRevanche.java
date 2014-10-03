@@ -1,7 +1,6 @@
 
 package fr.symadrem.sirs.core.model;
 
-import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -71,8 +70,6 @@ public class OuvrageRevanche  extends Structure  {
     //
     // References
     // 
-    private List<String> ouverture_batardableIds;
- 
 
     
     public float getHauteur_murette(){
@@ -113,17 +110,7 @@ public class OuvrageRevanche  extends Structure  {
     
     public void setPosition_structure(String position_structure){
     	this.position_structure.set(position_structure);
-    }     
-
-    
-    public List<String> getOuverture_batardableIds(){
-    	return this.ouverture_batardableIds;
-    }
-
-    public void setOuverture_batardableIds(List<String> ouverture_batardableIds){
-    	this.ouverture_batardableIds = ouverture_batardableIds;
-    }
-
+    }    
   
   @Override
   public String toString(){

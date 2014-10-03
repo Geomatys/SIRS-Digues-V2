@@ -6,6 +6,8 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 @SuppressWarnings("serial")
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -104,7 +106,7 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
     //
     // References
     // 
-    private List<String> crue_submersionIds;
+    private ObservableList<String> crue_submersionIds = FXCollections.observableArrayList();
  
 
     
@@ -173,12 +175,15 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
     }     
 
     
+
     public List<String> getCrue_submersionIds(){
     	return this.crue_submersionIds;
     }
 
+
     public void setCrue_submersionIds(List<String> crue_submersionIds){
-    	this.crue_submersionIds = crue_submersionIds;
+        this.crue_submersionIds.clear();
+    	this.crue_submersionIds.addAll(crue_submersionIds);
     }
 
   
