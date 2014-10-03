@@ -16,7 +16,9 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import org.ektorp.CouchDbConnector;
 import org.junit.Ignore;
@@ -84,7 +86,7 @@ public class RepositoriesTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            digue.setDate_maj(Instant.now());
+            digue.setDate_maj(LocalDateTime.now());
             digueRepository.add(digue);
         }
     }
@@ -112,9 +114,9 @@ public class RepositoriesTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            tron.setDate_debut(Instant.now());
-            tron.setDate_fin(Instant.now());
-            tron.setDate_maj(Instant.now());
+            tron.setDate_debut(LocalDateTime.now());
+            tron.setDate_fin(LocalDateTime.now());
+            tron.setDate_maj(LocalDateTime.now());
             tronconRepository.add(tron);
         }
     }

@@ -6,18 +6,23 @@ import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.ektorp.CouchDbConnector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,8 +121,8 @@ public class PrinterUtilitiesTest {
         final BorneDigue borneDigue = new BorneDigue();
         //borneDigue.setIdBorne(1);
         borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
-        borneDigue.setDate_debut(Instant.now());
-        borneDigue.setDate_fin(Instant.now());
+        borneDigue.setDate_debut(LocalDateTime.now());
+        borneDigue.setDate_fin(LocalDateTime.now());
         borneDigue.setFictive(false);
         //borneDigue.setIdTronconGestion(2);
         borneDigue.setNom("Borne principale");
