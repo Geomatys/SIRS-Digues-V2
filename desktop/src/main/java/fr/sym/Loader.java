@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.logging.Level;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -18,8 +19,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import javax.imageio.ImageIO;
 import javax.sql.DataSource;
+
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.image.io.plugin.WorldFileImageReader;
 import org.geotoolkit.image.io.plugin.WorldFileImageWriter;
@@ -33,6 +36,8 @@ import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.geomatys.json.GeometryDeserializer;
 
 /**
  *
@@ -141,6 +146,7 @@ public class Loader extends Application {
                 final Plugin[] plugins = Plugins.getPlugins();
                 final int total = 6 + plugins.length;
                 
+                GeometryDeserializer.class.newInstance();
                 
                 // IMAGE ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
