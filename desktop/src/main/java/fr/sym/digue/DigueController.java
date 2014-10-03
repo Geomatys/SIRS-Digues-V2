@@ -21,11 +21,11 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -36,6 +36,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -70,7 +71,7 @@ public class DigueController {
     private Label mode_label_saisie;
 
     @FXML
-    private TextArea commentaire;
+    private WebView commentaire;
 
     @FXML
     private TableView<TronconDigue> tronconsTable;
@@ -94,9 +95,13 @@ public class DigueController {
         this.date_maj.setText(this.digue.getDate_maj().toString());
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaire.textProperty().bindBidirectional(digue.commentaireProperty());
-        this.commentaire.setWrapText(true);
-        this.commentaire.setEditable(false);
+        this.commentaire.getEngine().loadContent(digue.getCommentaire());//textProperty().bindBidirectional(digue.commentaireProperty());
+        //this.commentaire.setWrapText(true);
+        //this.commentaire.setEditable(false);
+        this.commentaire.setOnMouseClicked((MouseEvent event) -> {
+            //TODO : ouvrir un HTML Editor si on est en mode saisie!
+            System.out.println("Souris cliquée ! ");
+        });
 
         // Configuring table for levee's sections.------------------------------
         final TableColumn idName = this.tronconsTable.getColumns().get(0);
@@ -220,23 +225,19 @@ public class DigueController {
             button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
             button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
             button.setOnAction((ActionEvent event) -> {
-                final TronconDigue troncon = (TronconDigue) ((TableRow) this.getParent()).getItem();
-                
+                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedTableCell.this.getParent()).getItem();
                 final Stage dialog = new Stage();
-                
-                final Label libelle = new Label(troncon.getLibelle());
-                final Label id = new Label(troncon.getId());
+                final Label libelle1 = new Label(troncon.getLibelle());
+                final Label id1 = new Label(troncon.getId());
                 final Button ok = new Button("Ok");
                 ok.setOnAction((ActionEvent event1) -> {
                     dialog.hide();
                 });
                 final VBox popUpVBox = new VBox();
-                popUpVBox.getChildren().add(libelle);
-                popUpVBox.getChildren().add(id);
+                popUpVBox.getChildren().add(libelle1);
+                popUpVBox.getChildren().add(id1);
                 popUpVBox.getChildren().add(ok);
-
                 final Scene dialogScene = new Scene(popUpVBox, 300, 200);
-
                 dialog.initModality(Modality.APPLICATION_MODAL);
                 dialog.initOwner(root.getScene().getWindow());
                 dialog.setScene(dialogScene);
@@ -255,11 +256,11 @@ public class DigueController {
     public void enableFields(ActionEvent event) {
         if (this.editionButton.isSelected()) {
             this.libelle.setEditable(true);
-            this.commentaire.setEditable(true);
+            //this.commentaire.setEditable(true);
             this.tronconsTable.setEditable(true);
         } else {
             this.libelle.setEditable(false);
-            this.commentaire.setEditable(false);
+            //this.commentaire.setEditable(false);
             this.tronconsTable.setEditable(false);
         }
         

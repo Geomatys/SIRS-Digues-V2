@@ -65,9 +65,9 @@ public class RepositoriesTest {
         for (int i = 0; i < nbDigues; i++) {
             final Digue digue = new Digue();
             digue.setLibelle("La digue " + i);
-            digue.setCommentaire(i + " : Lorem ipsum dolor sit amet, consectetur "
-                    + "adipiscing elit. Sed non risus. Suspendisse lectus "
-                    + "tortor, dignissim sit amet, adipiscing nec, ultricies "
+            digue.setCommentaire("<html><body><u>Digue "+ i + " :</u> Lorem ipsum dolor sit amet, consectetur "
+                    + "adipiscing elit. <b>Sed non risus.</b> Suspendisse <i>lectus</i> "
+                    + "tortor, <span style=\"color: red;\">dignissim sit amet</span>, adipiscing nec, ultricies "
                     + "sed, dolor. Cras elementum ultrices diam. Maecenas "
                     + "ligula massa, varius a, semper congue, euismod non, "
                     + "mi. Proin porttitor, orci nec nonummy molestie, enim "
@@ -81,7 +81,7 @@ public class RepositoriesTest {
                     + "ipsum primis in faucibus orci luctus et ultrices "
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
-                    + "ante non diam sodales hendrerit.");
+                    + "ante non diam sodales hendrerit.</body></html>");
             digue.setTronconsIds(new ArrayList<>());
             digue.setDate_maj(Instant.now());
             digueRepository.add(digue);
@@ -94,7 +94,7 @@ public class RepositoriesTest {
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
             tron.setLibelle("Le tronçon " + i);
-            tron.setCommentaire("Tronçon " + i + " : Lorem ipsum dolor sit amet, consectetur "
+            tron.setCommentaire("<html><body><b>Tronçon " + i + " :</b> Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. Sed non risus. Suspendisse lectus "
                     + "tortor, dignissim sit amet, adipiscing nec, ultricies "
                     + "sed, dolor. Cras elementum ultrices diam. Maecenas "
@@ -110,7 +110,7 @@ public class RepositoriesTest {
                     + "ipsum primis in faucibus orci luctus et ultrices "
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
-                    + "ante non diam sodales hendrerit.");
+                    + "ante non diam sodales hendrerit.</body></html>");
             tron.setDate_debut(Instant.now());
             tron.setDate_fin(Instant.now());
             tron.setDate_maj(Instant.now());

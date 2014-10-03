@@ -18,11 +18,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.web.WebView;
 import javafx.util.StringConverter;
-import jidefx.scene.control.combobox.LocalDateComboBox;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -41,7 +40,7 @@ public class TronconDigueController {
     private TextField section_name;
     
     @FXML
-    private TextArea commentaireTronconTextField;
+    private WebView commentaireTronconTextField;
     
     @FXML
     private ChoiceBox<Digue> digues;
@@ -59,10 +58,10 @@ public class TronconDigueController {
     private void enableFields(ActionEvent event){
         if (this.editionButton.isSelected()) {
             this.section_name.setEditable(false);
-            this.commentaireTronconTextField.setEditable(false);
+            //this.commentaireTronconTextField.setEditable(false);
         } else {
             this.section_name.setEditable(true);
-            this.commentaireTronconTextField.setEditable(true);
+            //this.commentaireTronconTextField.setEditable(true);
         }
     }
     
@@ -72,9 +71,9 @@ public class TronconDigueController {
         this.section_name.setEditable(true);
         this.section_name.textProperty().bindBidirectional(this.troncon.libelleProperty());
         
-        this.commentaireTronconTextField.setEditable(true);
-        this.commentaireTronconTextField.setWrapText(true);
-        this.commentaireTronconTextField.textProperty().bindBidirectional(this.troncon.commentaireProperty());
+        //this.commentaireTronconTextField.setEditable(true);
+        //this.commentaireTronconTextField.setWrapText(true);
+        this.commentaireTronconTextField.getEngine().loadContent(this.troncon.getCommentaire());
         
         //this.digues.
         

@@ -1,6 +1,8 @@
 package fr.sym.util;
 
 import static fr.sym.util.PrinterUtilities.print;
+import fr.symadrem.sirs.core.component.DigueRepository;
+import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -9,6 +11,7 @@ import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.ektorp.CouchDbConnector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,12 +19,29 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/spring/test-context.xml")
 public class PrinterUtilitiesTest {
+
+    @Autowired
+    @Qualifier("symadremChouchDB")
+    private CouchDbConnector connector;
+    
+    @Autowired
+    private DigueRepository digueRepository;
+
+    @Autowired
+    private TronconDigueRepository tronconRepository;
     
     public PrinterUtilitiesTest() {
     }
@@ -71,13 +91,13 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
-        final Digue digue = new Digue();
-        digue.setLibelle("Grande Digue");
+        final Digue digue = digueRepository.getAll().get(0);
+        /*digue.setLibelle("Grande Digue");
         digue.setCommentaire("Cette digue est en mauvais état et présente "
                  + "des signes évidents de vétusté et de délabrement avancé. Des"
                  + "travaux urgents s'imposent faute de quoi d'importants riques"
                  + "de rupture sont à prévoir.");
-        digue.setDate_maj(Instant.now());
+        digue.setDate_maj(Instant.now());*/
         
         print(digue);    
     }

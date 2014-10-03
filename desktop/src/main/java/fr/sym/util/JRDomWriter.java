@@ -122,14 +122,14 @@ public class JRDomWriter {
     private static final String ATT_X = "x";
     private static final String ATT_Y = "y";
     private static final String ATT_WIDTH = "width";
-    private static final String ATT_SPLIT_TYPE = "splitType";
-    private static enum SplitType {
-        STRETCH("Stretch"), PREVENT("Prevent"), IMMEDIATE("Immediate");
-        private final String splitType;
-        private SplitType(String splitType){this.splitType=splitType;}
+    private static final String ATT_MARKUP = "markup";
+    private static enum Markup {
+        NONE("none"), STYLED("styled"), HTML("html"), RTF("rtf");
+        private final String markup;
+        private Markup(String markup){this.markup=markup;}
         
         @Override
-        public String toString(){return splitType;}
+        public String toString(){return markup;}
     }; 
     
     private JRDomWriter(){
@@ -317,10 +317,13 @@ public class JRDomWriter {
                 
                 // Provides a multiplied height for comment and description fields.
                 final int heightMultiplicator;
+                final Markup markup;
                 if (fieldName.contains("escript") || fieldName.contains("omment")){
                     heightMultiplicator=this.height_multiplicator;
+                    markup = Markup.HTML;
                 } else {
                     heightMultiplicator=1;
+                    markup = Markup.NONE;
                 }
                 
                 // Writes a colored band.---------------------------------------
@@ -330,7 +333,7 @@ public class JRDomWriter {
                 this.writeDetailLabel(fieldName, i, heightMultiplicator);
                 
                 // Writes the variable field.-----------------------------------
-                this.writeDetailValue(fieldName, method.getParameterTypes()[0], i, heightMultiplicator);
+                this.writeDetailValue(fieldName, method.getParameterTypes()[0], i, heightMultiplicator, markup);
                 i+=heightMultiplicator;
             }
         }
@@ -431,7 +434,7 @@ public class JRDomWriter {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailValue(final String field, final Class c, final int order, final int heightMultiplicator){
+    private void writeDetailValue(final String field, final Class c, final int order, final int heightMultiplicator, final Markup style){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -450,6 +453,8 @@ public class JRDomWriter {
         final Element textElement = this.document.createElement(TAG_TEXT_ELEMENT);
         textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
         textElement.setAttribute(ATT_TEXT_ALIGNMENT, "Left");
+        if(style!=null && style!=Markup.NONE) 
+            textElement.setAttribute(ATT_MARKUP, style.toString());
         
         final Element font = this.document.createElement(TAG_FONT);
         font.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);

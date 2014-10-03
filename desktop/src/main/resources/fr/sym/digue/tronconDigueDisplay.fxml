@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.web.*?>
 <?import java.net.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
@@ -8,10 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" 
-            xmlns="http://javafx.com/javafx/8" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="fr.sym.digue.TronconDigueController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.TronconDigueController">
 <top>
             <BorderPane minHeight="139.0" prefHeight="139.0" prefWidth="1024.0" styleClass="info-block" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
                <right>
@@ -159,7 +157,7 @@
                                           <Insets top="10.0" />
                                        </padding>
                                     </Label>
-                                    <TextArea fx:id="commentaireTronconTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+                                    <WebView fx:id="commentaireTronconTextField" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                                  </children>
                                  <padding>
                                     <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
