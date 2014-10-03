@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -88,12 +88,12 @@ public class Document  extends Positionable  {
     /**
     * JavaFX property for date_document.
     */
-    private ObjectProperty<Instant>  date_document = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date_document = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date_document.
     */
-    public  ObjectProperty<Instant> date_documentProperty() {
+    public  ObjectProperty<LocalDateTime> date_documentProperty() {
        return date_document;
     }
     //
@@ -155,13 +155,13 @@ public class Document  extends Positionable  {
     	this.contenu.set(contenu);
     }    
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate_document(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate_document(){
     	return this.date_document.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate_document(Instant date_document){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate_document(LocalDateTime date_document){
     	this.date_document.set(date_document);
     }     
 

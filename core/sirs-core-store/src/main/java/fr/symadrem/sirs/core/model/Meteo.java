@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -23,23 +23,23 @@ public class Meteo  extends CouchDbDocument  {
     /**
     * JavaFX property for data_debut.
     */
-    private ObjectProperty<Instant>  data_debut = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  data_debut = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on data_debut.
     */
-    public  ObjectProperty<Instant> data_debutProperty() {
+    public  ObjectProperty<LocalDateTime> data_debutProperty() {
        return data_debut;
     }
     /**
     * JavaFX property for data_fin.
     */
-    private ObjectProperty<Instant>  data_fin = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  data_fin = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on data_fin.
     */
-    public  ObjectProperty<Instant> data_finProperty() {
+    public  ObjectProperty<LocalDateTime> data_finProperty() {
        return data_fin;
     }
     /**
@@ -80,23 +80,23 @@ public class Meteo  extends CouchDbDocument  {
     // 
 
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getData_debut(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getData_debut(){
     	return this.data_debut.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setData_debut(Instant data_debut){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setData_debut(LocalDateTime data_debut){
     	this.data_debut.set(data_debut);
     }    
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getData_fin(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getData_fin(){
     	return this.data_fin.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setData_fin(Instant data_fin){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setData_fin(LocalDateTime data_fin){
     	this.data_fin.set(data_fin);
     }    
     

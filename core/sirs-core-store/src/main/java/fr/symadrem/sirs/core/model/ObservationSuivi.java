@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -23,12 +23,12 @@ public class ObservationSuivi  extends CouchDbDocument  {
     /**
     * JavaFX property for date_observation.
     */
-    private ObjectProperty<Instant>  date_observation = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date_observation = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date_observation.
     */
-    public  ObjectProperty<Instant> date_observationProperty() {
+    public  ObjectProperty<LocalDateTime> date_observationProperty() {
        return date_observation;
     }
     /**
@@ -82,13 +82,13 @@ public class ObservationSuivi  extends CouchDbDocument  {
  
 
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate_observation(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate_observation(){
     	return this.date_observation.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate_observation(Instant date_observation){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate_observation(LocalDateTime date_observation){
     	this.date_observation.set(date_observation);
     }    
     

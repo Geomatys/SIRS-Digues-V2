@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -43,12 +43,12 @@ public class Digue  extends CouchDbDocument  {
     /**
     * JavaFX property for date_maj.
     */
-    private ObjectProperty<Instant>  date_maj = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date_maj = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date_maj.
     */
-    public  ObjectProperty<Instant> date_majProperty() {
+    public  ObjectProperty<LocalDateTime> date_majProperty() {
        return date_maj;
     }
     /**
@@ -83,13 +83,13 @@ public class Digue  extends CouchDbDocument  {
     	this.commentaire.set(commentaire);
     }    
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate_maj(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate_maj(){
     	return this.date_maj.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate_maj(Instant date_maj){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate_maj(LocalDateTime date_maj){
     	this.date_maj.set(date_maj);
     }    
     

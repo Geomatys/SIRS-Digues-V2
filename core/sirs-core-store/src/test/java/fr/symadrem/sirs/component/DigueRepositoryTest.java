@@ -6,6 +6,7 @@
 package fr.symadrem.sirs.component;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setLibelle("une digue");
 
-        digue.setDate_maj(Instant.now());
+        digue.setDate_maj(LocalDateTime.now());
         
         instance.add(digue);
         

@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -23,12 +23,12 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
     /**
     * JavaFX property for date.
     */
-    private ObjectProperty<Instant>  date = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date.
     */
-    public  ObjectProperty<Instant> dateProperty() {
+    public  ObjectProperty<LocalDateTime> dateProperty() {
        return date;
     }
     /**
@@ -71,13 +71,13 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
  
 
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate(){
     	return this.date.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate(Instant date){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate(LocalDateTime date){
     	this.date.set(date);
     }    
     

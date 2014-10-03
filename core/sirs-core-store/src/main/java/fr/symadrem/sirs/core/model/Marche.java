@@ -1,9 +1,9 @@
 
 package fr.symadrem.sirs.core.model;
 
-import com.geomatys.json.InstantDeserializer;
-import com.geomatys.json.InstantSerializer;
-import java.time.Instant;
+import com.geomatys.json.LocalDateTimeDeserializer;
+import com.geomatys.json.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import java.util.List;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
@@ -38,23 +38,23 @@ public class Marche  extends Document  {
     /**
     * JavaFX property for date_debut.
     */
-    private ObjectProperty<Instant>  date_debut = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date_debut = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date_debut.
     */
-    public  ObjectProperty<Instant> date_debutProperty() {
+    public  ObjectProperty<LocalDateTime> date_debutProperty() {
        return date_debut;
     }
     /**
     * JavaFX property for date_fin.
     */
-    private ObjectProperty<Instant>  date_fin = new SimpleObjectProperty<Instant>();
+    private ObjectProperty<LocalDateTime>  date_fin = new SimpleObjectProperty<LocalDateTime>();
     
     /**
     * Getter for JavaFX property on date_fin.
     */
-    public  ObjectProperty<Instant> date_finProperty() {
+    public  ObjectProperty<LocalDateTime> date_finProperty() {
        return date_fin;
     }
     /**
@@ -98,23 +98,23 @@ public class Marche  extends Document  {
     	this.maitre_ouvrage.set(maitre_ouvrage);
     }    
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate_debut(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate_debut(){
     	return this.date_debut.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate_debut(Instant date_debut){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate_debut(LocalDateTime date_debut){
     	this.date_debut.set(date_debut);
     }    
 
-    @JsonSerialize(using=InstantSerializer.class)    
-    public Instant getDate_fin(){
+    @JsonSerialize(using=LocalDateTimeSerializer.class)    
+    public LocalDateTime getDate_fin(){
     	return this.date_fin.get();
     }
 
-    @JsonDeserialize(using=InstantDeserializer.class)    
-    public void setDate_fin(Instant date_fin){
+    @JsonDeserialize(using=LocalDateTimeDeserializer.class)    
+    public void setDate_fin(LocalDateTime date_fin){
     	this.date_fin.set(date_fin);
     }    
     
