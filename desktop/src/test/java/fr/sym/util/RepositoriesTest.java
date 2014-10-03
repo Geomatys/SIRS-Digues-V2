@@ -71,6 +71,8 @@ public class RepositoriesTest {
                     + "sed, dolor. Cras elementum ultrices diam. Maecenas "
                     + "ligula massa, varius a, semper congue, euismod non, "
                     + "mi. Proin porttitor, orci nec nonummy molestie, enim "
+                    + "<ul><li>coco</li><li>jojo</li></ul>"
+                    + "<ol><li>coco</li><li>jojo</li></ol>"
                     + "est eleifend mi, non fermentum diam nisl sit amet "
                     + "erat. Duis semper. Duis arcu massa, scelerisque "
                     + "vitae, consequat in, pretium a, enim. Pellentesque "

@@ -9,6 +9,9 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -58,6 +61,7 @@ public class TronconDigueController {
     
     @FXML
     private DatePicker date_debut;
+    //private T
     
     @FXML
     private DatePicker date_fin;
@@ -122,10 +126,15 @@ public class TronconDigueController {
         
         
         /////////////////////////////////////// A VOIR /////////////////////////
-        this.date_debut.valueProperty();
+        
+        this.date_debut.setValue(LocalDate.from(this.troncon.getDate_debut()));
+        
+        /*LocalDateTime ldt;
+        ldt.
+        
         
         Instant instant = Instant.now();
-        //instant.
+        //instant.*/
         LocalDate date = this.date_debut.getValue();
         
         

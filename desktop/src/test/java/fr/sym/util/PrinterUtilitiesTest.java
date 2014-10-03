@@ -92,13 +92,6 @@ public class PrinterUtilitiesTest {
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
         final Digue digue = digueRepository.getAll().get(0);
-        /*digue.setLibelle("Grande Digue");
-        digue.setCommentaire("Cette digue est en mauvais état et présente "
-                 + "des signes évidents de vétusté et de délabrement avancé. Des"
-                 + "travaux urgents s'imposent faute de quoi d'importants riques"
-                 + "de rupture sont à prévoir.");
-        digue.setDate_maj(Instant.now());*/
-        
         print(digue);    
     }
     
@@ -109,19 +102,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
-        final TronconDigue tronconGestionDigue = new TronconDigue();
-        //tronconGestionDigue.setDigue(Long.valueOf(0));
-        tronconGestionDigue.setCommentaire("Ceci est un tronçon de la digue.");
-        tronconGestionDigue.setDate_debut(Instant.now());
-        tronconGestionDigue.setDate_fin(Instant.now());
-        tronconGestionDigue.setDate_maj(Instant.now());
-        //tronconGestionDigue.setIdOrgGestionnaire(null);
-        //tronconGestionDigue.setIdSystemeRepDefaut(null);
-        //tronconGestionDigue.setIdTronconGestion(null);
-        //tronconGestionDigue.setIdTypeRive(0);
-        tronconGestionDigue.setLibelle("Tronçon principal de la Grande Digue");
-        //tronconGestionDigue.setNomTronconGestion("Tronçon du moulin");
-         
+        final TronconDigue tronconGestionDigue = tronconRepository.getAll().get(0);
         print(tronconGestionDigue); 
     }
     
