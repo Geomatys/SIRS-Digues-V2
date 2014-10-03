@@ -78,7 +78,7 @@ public class ObservationSuivi  extends CouchDbDocument  {
     //
     // References
     // 
-    private StringProperty observateur = new SimpleStringProperty();
+    private StringProperty observateurId = new SimpleStringProperty();
  
 
 
@@ -125,12 +125,12 @@ public class ObservationSuivi  extends CouchDbDocument  {
     }     
 
     
-    public String getObservateur(){
-    	return this.observateur.get();
+    public String getObservateurId(){
+    	return this.observateurId.get();
     }
 
-    public void setObservateur(String observateur){
-    	this.observateur.set( observateur );
+    public void setObservateurId(String observateurId){
+    	this.observateurId.set( observateurId );
     }
 
   

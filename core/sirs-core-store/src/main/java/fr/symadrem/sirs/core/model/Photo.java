@@ -50,7 +50,7 @@ public class Photo  extends CouchDbDocument  {
     //
     // References
     // 
-    public ObservableList<Document>  photo =  FXCollections.observableArrayList() ; 
+    public ObservableList<Document>  photoIds =  FXCollections.observableArrayList() ; 
 
     
     public String getCote(){
@@ -76,13 +76,13 @@ public class Photo  extends CouchDbDocument  {
     public void setPhotographe(String photographe){
     	this.photographe.set(photographe);
     }     
-   public List<Document> getPhoto(){
-    	return this.photo;
+   public List<Document> getPhotoIds(){
+    	return this.photoIds;
     }
 
-    public void setPhoto(List<Document> photo){
-        this.photo.clear();
-    	this.photo.addAll( photo );
+    public void setPhotoIds(List<Document> photoIds){
+        this.photoIds.clear();
+    	this.photoIds.addAll( photoIds );
     }
 
   

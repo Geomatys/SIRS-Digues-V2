@@ -5,13 +5,16 @@
  */
 package fr.symadrem.sirs.component;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.DigueRepository;
@@ -63,12 +66,19 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         {
             TronconDigue troncon = new TronconDigue();
             troncon.setCommentaire("Traoncon1");
-            troncon.setDigueAssociee(digue.getId());
+            troncon.setDigueId(digue.getId());
+            troncon.setGeometry(createPoint());
+            troncon.setDate_maj(LocalDateTime.now());
+            
             tronconRepository.add(troncon);
+            
+            
 
         }
         {
             TronconDigue troncon = new TronconDigue();
+            troncon.setGeometry(createPoint(100, 100));
+            troncon.setDate_maj(LocalDateTime.now());
             
             Fondation ecluse = new Fondation();
             ecluse.setCommentaire("Fondation");
@@ -78,7 +88,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setStuctures(stuctures);
             
             troncon.setCommentaire("Traoncon2");
-            troncon.setDigueAssociee(digue.getId());
+            troncon.setDigueId(digue.getId());
 
             tronconRepository.add(troncon);
             
@@ -94,6 +104,15 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         
 
         
+    }
+
+    private Point createPoint(int i, int j) {
+        // TODO Auto-generated method stub
+        return new GeometryFactory().createPoint(new Coordinate(10, 10));
+    }
+
+    private Point createPoint() {
+        return createPoint(10, 10);
     }
 
 }

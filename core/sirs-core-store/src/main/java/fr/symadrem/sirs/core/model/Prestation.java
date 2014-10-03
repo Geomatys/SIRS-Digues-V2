@@ -86,7 +86,7 @@ public class Prestation  extends Structure  {
     //
     // References
     // 
-    private ObservableList<String> intervenantsIds = FXCollections.observableArrayList();
+    private ObservableList<String> intervenantIds = FXCollections.observableArrayList();
  
     private StringProperty evenementId = new SimpleStringProperty();
  
@@ -144,14 +144,14 @@ public class Prestation  extends Structure  {
 
     
 
-    public List<String> getIntervenantsIds(){
-    	return this.intervenantsIds;
+    public List<String> getIntervenantIds(){
+    	return this.intervenantIds;
     }
 
 
-    public void setIntervenantsIds(List<String> intervenantsIds){
-        this.intervenantsIds.clear();
-    	this.intervenantsIds.addAll(intervenantsIds);
+    public void setIntervenantIds(List<String> intervenantIds){
+        this.intervenantIds.clear();
+    	this.intervenantIds.addAll(intervenantIds);
     }
  
 

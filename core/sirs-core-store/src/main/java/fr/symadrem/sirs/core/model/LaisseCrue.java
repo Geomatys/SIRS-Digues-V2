@@ -51,9 +51,9 @@ public class LaisseCrue  extends Structure  {
     //
     // References
     // 
-    private StringProperty observateur = new SimpleStringProperty();
+    private StringProperty observateurId = new SimpleStringProperty();
  
-    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
+    private ObservableList<String> articleId = FXCollections.observableArrayList();
  
     private StringProperty evenementId = new SimpleStringProperty();
  
@@ -84,25 +84,25 @@ public class LaisseCrue  extends Structure  {
     }     
 
     
-    public String getObservateur(){
-    	return this.observateur.get();
+    public String getObservateurId(){
+    	return this.observateurId.get();
     }
 
-    public void setObservateur(String observateur){
-    	this.observateur.set( observateur );
+    public void setObservateurId(String observateurId){
+    	this.observateurId.set( observateurId );
     }
  
 
     
 
-    public List<String> getArticles_journauxIds(){
-    	return this.articles_journauxIds;
+    public List<String> getArticleId(){
+    	return this.articleId;
     }
 
 
-    public void setArticles_journauxIds(List<String> articles_journauxIds){
-        this.articles_journauxIds.clear();
-    	this.articles_journauxIds.addAll(articles_journauxIds);
+    public void setArticleId(List<String> articleId){
+        this.articleId.clear();
+    	this.articleId.addAll(articleId);
     }
  
 

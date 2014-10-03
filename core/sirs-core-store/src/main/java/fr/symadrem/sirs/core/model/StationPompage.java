@@ -38,7 +38,7 @@ public class StationPompage  extends StructureAvecContacts  {
     //
     // References
     // 
-    private ObservableList<String> pompesIds = FXCollections.observableArrayList();
+    private ObservableList<String> pompeIds = FXCollections.observableArrayList();
  
     private StringProperty reseauID = new SimpleStringProperty();
  
@@ -62,14 +62,14 @@ public class StationPompage  extends StructureAvecContacts  {
 
     
 
-    public List<String> getPompesIds(){
-    	return this.pompesIds;
+    public List<String> getPompeIds(){
+    	return this.pompeIds;
     }
 
 
-    public void setPompesIds(List<String> pompesIds){
-        this.pompesIds.clear();
-    	this.pompesIds.addAll(pompesIds);
+    public void setPompeIds(List<String> pompeIds){
+        this.pompeIds.clear();
+    	this.pompeIds.addAll(pompeIds);
     }
  
 

@@ -86,9 +86,9 @@ public class Desordre  extends Structure  {
     //
     // References
     // 
-    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
+    private ObservableList<String> articleIds = FXCollections.observableArrayList();
  
-    private ObservableList<String> observationsIds = FXCollections.observableArrayList();
+    private ObservableList<String> observationIds = FXCollections.observableArrayList();
  
     private StringProperty evenementId = new SimpleStringProperty();
  
@@ -144,27 +144,27 @@ public class Desordre  extends Structure  {
 
     
 
-    public List<String> getArticles_journauxIds(){
-    	return this.articles_journauxIds;
+    public List<String> getArticleIds(){
+    	return this.articleIds;
     }
 
 
-    public void setArticles_journauxIds(List<String> articles_journauxIds){
-        this.articles_journauxIds.clear();
-    	this.articles_journauxIds.addAll(articles_journauxIds);
+    public void setArticleIds(List<String> articleIds){
+        this.articleIds.clear();
+    	this.articleIds.addAll(articleIds);
     }
  
 
     
 
-    public List<String> getObservationsIds(){
-    	return this.observationsIds;
+    public List<String> getObservationIds(){
+    	return this.observationIds;
     }
 
 
-    public void setObservationsIds(List<String> observationsIds){
-        this.observationsIds.clear();
-    	this.observationsIds.addAll(observationsIds);
+    public void setObservationIds(List<String> observationIds){
+        this.observationIds.clear();
+    	this.observationIds.addAll(observationIds);
     }
  
 

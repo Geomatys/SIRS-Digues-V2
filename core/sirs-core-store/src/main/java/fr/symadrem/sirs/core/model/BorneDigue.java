@@ -1,8 +1,11 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.GeometryDeserializer;
+import com.geomatys.json.GeometrySerializer;
 import com.geomatys.json.LocalDateTimeDeserializer;
 import com.geomatys.json.LocalDateTimeSerializer;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.time.LocalDateTime;
 import javafx.beans.property.BooleanProperty;
@@ -134,11 +137,13 @@ public class BorneDigue  extends Positionable  {
     public void setNom(String nom){
     	this.nom.set(nom);
     }    
-    
+
+    @JsonSerialize(using=GeometrySerializer.class)    
     public Point getPositionBorne(){
     	return this.positionBorne.get();
     }
-    
+
+    @JsonDeserialize(using=GeometryDeserializer.class)    
     public void setPositionBorne(Point positionBorne){
     	this.positionBorne.set(positionBorne);
     }    

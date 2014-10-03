@@ -2,8 +2,6 @@
 package fr.symadrem.sirs.core.model;
 
 import java.util.List;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
@@ -16,59 +14,65 @@ public class StructureAvecContacts  extends Structure  {
     //
     // References
     // 
-    private ObservableList<String> proprietairesIds = FXCollections.observableArrayList();
+    private ObservableList<String> proprietaireIds = FXCollections.observableArrayList();
  
-    private StringProperty gestionnaires = new SimpleStringProperty();
+    private ObservableList<String> gestionnaireIds = FXCollections.observableArrayList();
  
-    private StringProperty gardiens = new SimpleStringProperty();
+    private ObservableList<String> gardienIds = FXCollections.observableArrayList();
  
-    private ObservableList<String> conventionsIds = FXCollections.observableArrayList();
+    private ObservableList<String> conventionIds = FXCollections.observableArrayList();
  
- 
-
-    
-
-    public List<String> getProprietairesIds(){
-    	return this.proprietairesIds;
-    }
-
-
-    public void setProprietairesIds(List<String> proprietairesIds){
-        this.proprietairesIds.clear();
-    	this.proprietairesIds.addAll(proprietairesIds);
-    }
  
 
     
-    public String getGestionnaires(){
-    	return this.gestionnaires.get();
+
+    public List<String> getProprietaireIds(){
+    	return this.proprietaireIds;
     }
 
-    public void setGestionnaires(String gestionnaires){
-    	this.gestionnaires.set( gestionnaires );
-    }
- 
 
-    
-    public String getGardiens(){
-    	return this.gardiens.get();
-    }
-
-    public void setGardiens(String gardiens){
-    	this.gardiens.set( gardiens );
+    public void setProprietaireIds(List<String> proprietaireIds){
+        this.proprietaireIds.clear();
+    	this.proprietaireIds.addAll(proprietaireIds);
     }
  
 
     
 
-    public List<String> getConventionsIds(){
-    	return this.conventionsIds;
+    public List<String> getGestionnaireIds(){
+    	return this.gestionnaireIds;
     }
 
 
-    public void setConventionsIds(List<String> conventionsIds){
-        this.conventionsIds.clear();
-    	this.conventionsIds.addAll(conventionsIds);
+    public void setGestionnaireIds(List<String> gestionnaireIds){
+        this.gestionnaireIds.clear();
+    	this.gestionnaireIds.addAll(gestionnaireIds);
+    }
+ 
+
+    
+
+    public List<String> getGardienIds(){
+    	return this.gardienIds;
+    }
+
+
+    public void setGardienIds(List<String> gardienIds){
+        this.gardienIds.clear();
+    	this.gardienIds.addAll(gardienIds);
+    }
+ 
+
+    
+
+    public List<String> getConventionIds(){
+    	return this.conventionIds;
+    }
+
+
+    public void setConventionIds(List<String> conventionIds){
+        this.conventionIds.clear();
+    	this.conventionIds.addAll(conventionIds);
     }
 
   

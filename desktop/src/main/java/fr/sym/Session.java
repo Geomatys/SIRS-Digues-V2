@@ -103,7 +103,7 @@ public class Session {
         final List<TronconDigue> troncons = this.getTroncons();
         final List<TronconDigue> tronconsDeLaDigue = new ArrayList<>();
         for (final TronconDigue troncon : troncons) {
-            if (troncon.getDigueAssociee().equals(digueId)) {
+            if (troncon.getDigueId().equals(digueId)) {
                 tronconsDeLaDigue.add(troncon);
             }
         }

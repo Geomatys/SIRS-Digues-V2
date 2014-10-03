@@ -114,7 +114,7 @@ public class EvenementHydraulique  extends CouchDbDocument  {
     //
     // References
     // 
-    private ObservableList<String> evenements_meteoIds = FXCollections.observableArrayList();
+    private ObservableList<String> evenementMeteoIds = FXCollections.observableArrayList();
  
 
     
@@ -188,14 +188,14 @@ public class EvenementHydraulique  extends CouchDbDocument  {
 
     
 
-    public List<String> getEvenements_meteoIds(){
-    	return this.evenements_meteoIds;
+    public List<String> getEvenementMeteoIds(){
+    	return this.evenementMeteoIds;
     }
 
 
-    public void setEvenements_meteoIds(List<String> evenements_meteoIds){
-        this.evenements_meteoIds.clear();
-    	this.evenements_meteoIds.addAll(evenements_meteoIds);
+    public void setEvenementMeteoIds(List<String> evenementMeteoIds){
+        this.evenementMeteoIds.clear();
+    	this.evenementMeteoIds.addAll(evenementMeteoIds);
     }
 
   

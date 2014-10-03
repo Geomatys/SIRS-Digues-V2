@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.GeometryDeserializer;
+import com.geomatys.json.GeometrySerializer;
 import com.geomatys.json.LocalDateTimeDeserializer;
 import com.geomatys.json.LocalDateTimeSerializer;
 import com.vividsolutions.jts.geom.Geometry;
@@ -114,10 +116,10 @@ public class TronconDigue  extends Positionable  {
     // 
     public ObservableList<Structure>  stuctures =  FXCollections.observableArrayList() ; 
     public ObjectProperty<SystemeReperage>  systeme_rep_defaut = new SimpleObjectProperty<>() ; 
-    private StringProperty contact = new SimpleStringProperty();
+    private StringProperty contactId = new SimpleStringProperty();
  
-    public ObservableList<BorneDigue>  bornes =  FXCollections.observableArrayList() ; 
-    private StringProperty digueAssociee = new SimpleStringProperty();
+    public ObservableList<BorneDigue>  borneIds =  FXCollections.observableArrayList() ; 
+    private StringProperty digueId = new SimpleStringProperty();
  
 
     
@@ -182,11 +184,13 @@ public class TronconDigue  extends Positionable  {
     public void setSysteme_reperage_defaut(String systeme_reperage_defaut){
     	this.systeme_reperage_defaut.set(systeme_reperage_defaut);
     }    
-    
+
+    @JsonSerialize(using=GeometrySerializer.class)    
     public Geometry getGeometry(){
     	return this.geometry.get();
     }
-    
+
+    @JsonDeserialize(using=GeometryDeserializer.class)    
     public void setGeometry(Geometry geometry){
     	this.geometry.set(geometry);
     }     
@@ -209,31 +213,31 @@ public class TronconDigue  extends Positionable  {
  
 
     
-    public String getContact(){
-    	return this.contact.get();
+    public String getContactId(){
+    	return this.contactId.get();
     }
 
-    public void setContact(String contact){
-    	this.contact.set( contact );
+    public void setContactId(String contactId){
+    	this.contactId.set( contactId );
     }
  
-   public List<BorneDigue> getBornes(){
-    	return this.bornes;
+   public List<BorneDigue> getBorneIds(){
+    	return this.borneIds;
     }
 
-    public void setBornes(List<BorneDigue> bornes){
-        this.bornes.clear();
-    	this.bornes.addAll( bornes );
+    public void setBorneIds(List<BorneDigue> borneIds){
+        this.borneIds.clear();
+    	this.borneIds.addAll( borneIds );
     }
  
 
     
-    public String getDigueAssociee(){
-    	return this.digueAssociee.get();
+    public String getDigueId(){
+    	return this.digueId.get();
     }
 
-    public void setDigueAssociee(String digueAssociee){
-    	this.digueAssociee.set( digueAssociee );
+    public void setDigueId(String digueId){
+    	this.digueId.set( digueId );
     }
 
   

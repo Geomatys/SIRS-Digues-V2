@@ -27,9 +27,9 @@ public class LigneEau  extends Structure  {
     //
     // References
     // 
-    private ObservableList<String> articles_journauxIds = FXCollections.observableArrayList();
+    private ObservableList<String> articleIds = FXCollections.observableArrayList();
  
-    private ObservableList<String> mesuresIds = FXCollections.observableArrayList();
+    private ObservableList<String> mesureIds = FXCollections.observableArrayList();
  
     private StringProperty evenementId = new SimpleStringProperty();
  
@@ -45,27 +45,27 @@ public class LigneEau  extends Structure  {
 
     
 
-    public List<String> getArticles_journauxIds(){
-    	return this.articles_journauxIds;
+    public List<String> getArticleIds(){
+    	return this.articleIds;
     }
 
 
-    public void setArticles_journauxIds(List<String> articles_journauxIds){
-        this.articles_journauxIds.clear();
-    	this.articles_journauxIds.addAll(articles_journauxIds);
+    public void setArticleIds(List<String> articleIds){
+        this.articleIds.clear();
+    	this.articleIds.addAll(articleIds);
     }
  
 
     
 
-    public List<String> getMesuresIds(){
-    	return this.mesuresIds;
+    public List<String> getMesureIds(){
+    	return this.mesureIds;
     }
 
 
-    public void setMesuresIds(List<String> mesuresIds){
-        this.mesuresIds.clear();
-    	this.mesuresIds.addAll(mesuresIds);
+    public void setMesureIds(List<String> mesureIds){
+        this.mesureIds.clear();
+    	this.mesureIds.addAll(mesureIds);
     }
  
 

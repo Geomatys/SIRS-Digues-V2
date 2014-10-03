@@ -49,7 +49,7 @@ public class ReseauHydroCielOuvert  extends StructureAvecContacts  {
     //
     // References
     // 
-    private ObservableList<String> reseauIdIds = FXCollections.observableArrayList();
+    private ObservableList<String> reseauIds = FXCollections.observableArrayList();
  
 
     
@@ -79,14 +79,14 @@ public class ReseauHydroCielOuvert  extends StructureAvecContacts  {
 
     
 
-    public List<String> getReseauIdIds(){
-    	return this.reseauIdIds;
+    public List<String> getReseauIds(){
+    	return this.reseauIds;
     }
 
 
-    public void setReseauIdIds(List<String> reseauIdIds){
-        this.reseauIdIds.clear();
-    	this.reseauIdIds.addAll(reseauIdIds);
+    public void setReseauIds(List<String> reseauIds){
+        this.reseauIds.clear();
+    	this.reseauIds.addAll(reseauIds);
     }
 
   

@@ -82,7 +82,7 @@ public class Marche  extends Document  {
     //
     // References
     // 
-    private ObservableList<String> maitre_oeuvreIds = FXCollections.observableArrayList();
+    private ObservableList<String> maitreOeuvreIds = FXCollections.observableArrayList();
  
     private ObservableList<String> financeurIds = FXCollections.observableArrayList();
  
@@ -136,14 +136,14 @@ public class Marche  extends Document  {
 
     
 
-    public List<String> getMaitre_oeuvreIds(){
-    	return this.maitre_oeuvreIds;
+    public List<String> getMaitreOeuvreIds(){
+    	return this.maitreOeuvreIds;
     }
 
 
-    public void setMaitre_oeuvreIds(List<String> maitre_oeuvreIds){
-        this.maitre_oeuvreIds.clear();
-    	this.maitre_oeuvreIds.addAll(maitre_oeuvreIds);
+    public void setMaitreOeuvreIds(List<String> maitreOeuvreIds){
+        this.maitreOeuvreIds.clear();
+    	this.maitreOeuvreIds.addAll(maitreOeuvreIds);
     }
  
 

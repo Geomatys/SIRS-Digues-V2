@@ -160,11 +160,11 @@ public class OuvertureBatardable  extends StructureAvecContacts  {
     //
     // References
     // 
-    private StringProperty intervenants_manupulateurs = new SimpleStringProperty();
+    private StringProperty intervenantManupulateurId = new SimpleStringProperty();
  
-    private StringProperty organismes_manipulateurs = new SimpleStringProperty();
+    private StringProperty organismesManipulateursId = new SimpleStringProperty();
  
-    private StringProperty organismes_stockants = new SimpleStringProperty();
+    private StringProperty organismesStockantsId = new SimpleStringProperty();
  
     private StringProperty ouvrageRevancheId = new SimpleStringProperty();
  
@@ -275,32 +275,32 @@ public class OuvertureBatardable  extends StructureAvecContacts  {
     }     
 
     
-    public String getIntervenants_manupulateurs(){
-    	return this.intervenants_manupulateurs.get();
+    public String getIntervenantManupulateurId(){
+    	return this.intervenantManupulateurId.get();
     }
 
-    public void setIntervenants_manupulateurs(String intervenants_manupulateurs){
-    	this.intervenants_manupulateurs.set( intervenants_manupulateurs );
-    }
- 
-
-    
-    public String getOrganismes_manipulateurs(){
-    	return this.organismes_manipulateurs.get();
-    }
-
-    public void setOrganismes_manipulateurs(String organismes_manipulateurs){
-    	this.organismes_manipulateurs.set( organismes_manipulateurs );
+    public void setIntervenantManupulateurId(String intervenantManupulateurId){
+    	this.intervenantManupulateurId.set( intervenantManupulateurId );
     }
  
 
     
-    public String getOrganismes_stockants(){
-    	return this.organismes_stockants.get();
+    public String getOrganismesManipulateursId(){
+    	return this.organismesManipulateursId.get();
     }
 
-    public void setOrganismes_stockants(String organismes_stockants){
-    	this.organismes_stockants.set( organismes_stockants );
+    public void setOrganismesManipulateursId(String organismesManipulateursId){
+    	this.organismesManipulateursId.set( organismesManipulateursId );
+    }
+ 
+
+    
+    public String getOrganismesStockantsId(){
+    	return this.organismesStockantsId.get();
+    }
+
+    public void setOrganismesStockantsId(String organismesStockantsId){
+    	this.organismesStockantsId.set( organismesStockantsId );
     }
  
 

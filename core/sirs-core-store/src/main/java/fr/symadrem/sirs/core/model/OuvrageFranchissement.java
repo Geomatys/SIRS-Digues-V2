@@ -106,7 +106,7 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
     //
     // References
     // 
-    private ObservableList<String> crue_submersionIds = FXCollections.observableArrayList();
+    private ObservableList<String> crueSubmersionIds = FXCollections.observableArrayList();
  
 
     
@@ -176,14 +176,14 @@ public class OuvrageFranchissement  extends StructureAvecContacts  {
 
     
 
-    public List<String> getCrue_submersionIds(){
-    	return this.crue_submersionIds;
+    public List<String> getCrueSubmersionIds(){
+    	return this.crueSubmersionIds;
     }
 
 
-    public void setCrue_submersionIds(List<String> crue_submersionIds){
-        this.crue_submersionIds.clear();
-    	this.crue_submersionIds.addAll(crue_submersionIds);
+    public void setCrueSubmersionIds(List<String> crueSubmersionIds){
+        this.crueSubmersionIds.clear();
+    	this.crueSubmersionIds.addAll(crueSubmersionIds);
     }
 
   

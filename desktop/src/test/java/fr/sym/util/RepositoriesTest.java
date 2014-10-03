@@ -129,7 +129,7 @@ public class RepositoriesTest {
         int i=0;
         for(final TronconDigue troncon : troncons){
             final Digue digue = digues.get(i);
-            troncon.setDigueAssociee(digue.getId());
+            troncon.setDigueId(digue.getId());
             i++;
             if(i==nbDigues) i=0;
             this.digueRepository.update(digue);

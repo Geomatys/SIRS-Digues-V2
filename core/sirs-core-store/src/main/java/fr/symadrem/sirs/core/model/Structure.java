@@ -1,6 +1,8 @@
 
 package fr.symadrem.sirs.core.model;
 
+import com.geomatys.json.GeometryDeserializer;
+import com.geomatys.json.GeometrySerializer;
 import com.geomatys.json.LocalDateTimeDeserializer;
 import com.geomatys.json.LocalDateTimeSerializer;
 import com.vividsolutions.jts.geom.Geometry;
@@ -134,11 +136,13 @@ public abstract class Structure  extends Positionable  {
     public void setSource(String source){
     	this.source.set(source);
     }    
-    
+
+    @JsonSerialize(using=GeometrySerializer.class)    
     public Geometry getGeometry(){
     	return this.geometry.get();
     }
-    
+
+    @JsonDeserialize(using=GeometryDeserializer.class)    
     public void setGeometry(Geometry geometry){
     	this.geometry.set(geometry);
     }     

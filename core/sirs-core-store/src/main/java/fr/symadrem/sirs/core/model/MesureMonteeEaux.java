@@ -67,7 +67,7 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
     //
     // References
     // 
-    private StringProperty observateurs = new SimpleStringProperty();
+    private StringProperty observateurId = new SimpleStringProperty();
  
 
 
@@ -106,12 +106,12 @@ public class MesureMonteeEaux  extends CouchDbDocument  {
     }     
 
     
-    public String getObservateurs(){
-    	return this.observateurs.get();
+    public String getObservateurId(){
+    	return this.observateurId.get();
     }
 
-    public void setObservateurs(String observateurs){
-    	this.observateurs.set( observateurs );
+    public void setObservateurId(String observateurId){
+    	this.observateurId.set( observateurId );
     }
 
   

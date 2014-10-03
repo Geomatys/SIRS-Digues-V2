@@ -29,7 +29,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     public void testGetAll() {
         System.out.println("getAll");
         for (TronconDigue digue : tronconRepository.getAll()) {
-            System.out.println(digue.getDate_maj());
+            System.out.println(digue.getGeometry());
         }
         
         

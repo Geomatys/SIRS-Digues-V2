@@ -107,7 +107,7 @@ public class TronconDigueController {
         final ObservableList<Digue> diguesObservables = FXCollections.observableArrayList();
         for (final Digue dig : digs) {
             diguesObservables.add(dig);
-            if(dig.getId().equals(this.troncon.getDigueAssociee())) diguePropre=dig;
+            if(dig.getId().equals(this.troncon.getDigueId())) diguePropre=dig;
         }
         
         this.digues.setItems(diguesObservables);

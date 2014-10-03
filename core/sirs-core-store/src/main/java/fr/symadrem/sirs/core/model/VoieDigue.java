@@ -95,7 +95,7 @@ public class VoieDigue  extends StructureAvecContacts  {
     //
     // References
     // 
-    private ObservableList<String> servitudesIds = FXCollections.observableArrayList();
+    private ObservableList<String> servitudeIds = FXCollections.observableArrayList();
  
 
     
@@ -157,14 +157,14 @@ public class VoieDigue  extends StructureAvecContacts  {
 
     
 
-    public List<String> getServitudesIds(){
-    	return this.servitudesIds;
+    public List<String> getServitudeIds(){
+    	return this.servitudeIds;
     }
 
 
-    public void setServitudesIds(List<String> servitudesIds){
-        this.servitudesIds.clear();
-    	this.servitudesIds.addAll(servitudesIds);
+    public void setServitudeIds(List<String> servitudeIds){
+        this.servitudeIds.clear();
+    	this.servitudeIds.addAll(servitudeIds);
     }
 
   
