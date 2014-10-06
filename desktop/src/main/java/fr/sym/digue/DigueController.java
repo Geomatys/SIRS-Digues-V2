@@ -5,7 +5,7 @@ import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -149,12 +149,12 @@ public class DigueController {
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
         colDateDebut.setEditable(true);
         
-        final StringConverter<Instant> instantStringConverter = new StringConverter<Instant>() {
+        final StringConverter<LocalDateTime> instantStringConverter = new StringConverter<LocalDateTime>() {
             @Override
-            public String toString(Instant object) {return object.toString();}
+            public String toString(LocalDateTime object) {return object.toString();}
 
             @Override
-            public Instant fromString(String string) {return Instant.parse(string);}
+            public LocalDateTime fromString(String string) {return LocalDateTime.parse(string);}
         };
         colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
         
