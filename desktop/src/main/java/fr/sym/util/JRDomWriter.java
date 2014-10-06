@@ -79,6 +79,7 @@ public class JRDomWriter {
     private static final String TAG_BOTTOM_MARGIN = "bottomMargin";
     private static final String TAG_FIELD = "field";
     private static final String TAG_FIELD_DESCRIPTION = "fieldDescription";
+    private static final String TAG_FRAME = "frame";
     private static final String TAG_TITLE = "title";
     private static final String TAG_PAGE_HEADER = "pageHeader";
     private static final String TAG_COLUMN_HEADER = "columnHeader";
@@ -100,11 +101,27 @@ public class JRDomWriter {
     
     // Jasper Reports attributes.
     private static final String ATT_MODE = "mode";
+    private static enum Mode {
+        OPAQUE("Opaque"), TRANSPARENT("Transparent");
+        private final String mode;
+        private Mode(final String mode){this.mode=mode;}
+        
+        @Override
+        public String toString(){return this.mode;}
+    }; 
     private static final String ATT_LINE_WIDTH = "lineWidth";
     private static final String ATT_LINE_COLOR = "lineColor";
     private static final String ATT_BACKCOLOR = "backcolor";
     private static final String ATT_NAME = "name";
     private static final String ATT_TEXT_ALIGNMENT = "textAlignment";
+    private static enum TextAlignment {
+        LEFT("Left"), CENTER("Center"), RIGHT("Right"), JUSTIFIED("Justified");
+        private final String textAlignment;
+        private TextAlignment(final String textAlignment){this.textAlignment=textAlignment;}
+        
+        @Override
+        public String toString(){return this.textAlignment;}
+    }; 
     private static final String ATT_VERTICAL_ALIGNMENT = "verticalAlignment";
     private static final String ATT_FONT_NAME = "fontName";
     private static final String ATT_IS_BOLD = "isBold";
@@ -122,14 +139,33 @@ public class JRDomWriter {
     private static final String ATT_X = "x";
     private static final String ATT_Y = "y";
     private static final String ATT_WIDTH = "width";
+    private static final String ATT_IS_STRETCH_WITH_OVERFLOW = "isStretchWithOverflow";
+    private static final String ATT_POSITION_TYPE = "positionType";
+    private static enum PositionType {
+        FLOAT("Float"), FIX_RELATIVE_TO_TOP("FixRelativeToTop"), FIX_RELATIVE_TO_BOTTOM("FixRelativeToBottom");
+        private final String positionType;
+        private PositionType(final String positionType){this.positionType=positionType;}
+        
+        @Override
+        public String toString(){return this.positionType;}
+    }; 
+    private static final String ATT_STRETCH_TYPE = "stretchType";
+    private static enum StretchType {
+        NO_STRETCH("NoStretch"), RELATIVE_TO_TALLEST_OBJECT("RelativeToTallestObject"), RELATIVE_TO_BAND_HEIGHT("RelativeToBandHeight");
+        private final String stretchType;
+        private StretchType(final String stretchType){this.stretchType=stretchType;}
+        
+        @Override
+        public String toString(){return this.stretchType;}
+    }; 
     private static final String ATT_MARKUP = "markup";
     private static enum Markup {
         NONE("none"), STYLED("styled"), HTML("html"), RTF("rtf");
         private final String markup;
-        private Markup(String markup){this.markup=markup;}
+        private Markup(final String markup){this.markup=markup;}
         
         @Override
-        public String toString(){return markup;}
+        public String toString(){return this.markup;}
     }; 
     
     private JRDomWriter(){
@@ -326,14 +362,8 @@ public class JRDomWriter {
                     markup = Markup.NONE;
                 }
                 
-                // Writes a colored band.---------------------------------------
-                this.writeDetailRow(i, heightMultiplicator);
-                
-                // Writes the label.--------------------------------------------
-                this.writeDetailLabel(fieldName, i, heightMultiplicator);
-                
-                // Writes the variable field.-----------------------------------
-                this.writeDetailValue(fieldName, method.getParameterTypes()[0], i, heightMultiplicator, markup);
+                // Writes the field.--------------------------------------------
+                this.writeDetailField(fieldName, i, heightMultiplicator, markup);
                 i+=heightMultiplicator;
             }
         }
@@ -347,27 +377,30 @@ public class JRDomWriter {
     }
     
     /**
-     * <p>This method writes the backgroud of a row.</p>
+     * <p>This method writes the variable of a given field.</p>
+     * @param field
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailRow(final int order, final int heightMultiplicator){
+    private void writeDetailField(final String field, final int order, final int heightMultiplicator, final Markup style){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
-        final Element staticText = this.document.createElement(TAG_STATIC_TEXT);
         
-        // Sets the field.------------------------------------------------------
-        final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        reportElement.setAttribute(ATT_X, "0");
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
-        reportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
-        reportElement.setAttribute(ATT_MODE, "Opaque");
+        // Sets the frame.------------------------------------------------------
+        final Element frame = this.document.createElement(TAG_FRAME);
+        
+        final Element frameReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
+        frameReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL-INDENT_LABEL));
+        frameReportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
+        frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH));
+        frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        frameReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+        frameReportElement.setAttribute(ATT_MODE, Mode.OPAQUE.toString());
         if(order%2==0)
-            reportElement.setAttribute(ATT_BACKCOLOR, "#F0F0F0");
+            frameReportElement.setAttribute(ATT_BACKCOLOR, "#F0F0F0");
         else
-            reportElement.setAttribute(ATT_BACKCOLOR, "#F5F5F5");
+            frameReportElement.setAttribute(ATT_BACKCOLOR, "#F5F5F5");
         
         final Element box = this.document.createElement(TAG_BOX);
         
@@ -375,89 +408,61 @@ public class JRDomWriter {
         bottomPen.setAttribute(ATT_LINE_WIDTH, "0.25");
         bottomPen.setAttribute(ATT_LINE_COLOR, "#CCCCCC");
         
-        final Element text = this.document.createElement(TAG_TEXT);
-        final CDATASection labelField = this.document.createCDATASection("");
-        
         // Builds the DOM tree.-------------------------------------------------
-        text.appendChild(labelField);
-        staticText.appendChild(reportElement);
         box.appendChild(bottomPen);
-        staticText.appendChild(box);
-        staticText.appendChild(text);
-        band.appendChild(staticText);
-    }
-    
-    /**
-     * <p>This method writes the label of a given field.</p>
-     * @param label
-     * @param order
-     * @param heightMultiplicator 
-     */
-    private void writeDetailLabel(final String label, final int order, final int heightMultiplicator){
+        frame.appendChild(frameReportElement);
+        frame.appendChild(box);
         
-        // Looks for the band element.------------------------------------------
-        final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
-        
-        // Sets the field.------------------------------------------------------
+        // Sets the field's label.----------------------------------------------
         final Element staticText = this.document.createElement(TAG_STATIC_TEXT);
         
-        final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        reportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL));
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
-        reportElement.setAttribute(ATT_WIDTH, String.valueOf(LABEL_WIDTH));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        final Element staticTextReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL-INDENT_LABEL));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(LABEL_WIDTH));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         
-        final Element textElement = this.document.createElement(TAG_TEXT_ELEMENT);
-        textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
-        textElement.setAttribute(ATT_TEXT_ALIGNMENT, "Left");
+        final Element staticTextTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
+        staticTextTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
+        staticTextTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.LEFT.toString());
         
-        final Element font = this.document.createElement(TAG_FONT);
-        font.setAttribute(ATT_IS_BOLD, "true");
-        font.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
+        final Element staticTextFont = this.document.createElement(TAG_FONT);
+        staticTextFont.setAttribute(ATT_IS_BOLD, "true");
+        staticTextFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
         
         final Element text = this.document.createElement(TAG_TEXT);
-        final CDATASection labelField = this.document.createCDATASection(label);
+        final CDATASection labelField = this.document.createCDATASection(field);
         
         // Builds the DOM tree.-------------------------------------------------
         text.appendChild(labelField);
-        staticText.appendChild(reportElement);
-        textElement.appendChild(font);
-        staticText.appendChild(textElement);
+        staticText.appendChild(staticTextReportElement);
+        staticTextTextElement.appendChild(staticTextFont);
+        staticText.appendChild(staticTextTextElement);
         staticText.appendChild(text);
-        band.appendChild(staticText);
-    }
-    
-    /**
-     * <p>This method writes the variable of a given field.</p>
-     * @param field
-     * @param c
-     * @param order
-     * @param heightMultiplicator 
-     */
-    private void writeDetailValue(final String field, final Class c, final int order, final int heightMultiplicator, final Markup style){
-        
-        // Looks for the band element.------------------------------------------
-        final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
+        frame.appendChild(staticText);
         
         // Sets the field.------------------------------------------------------
         final Element textField = this.document.createElement(TAG_TEXT_FIELD);
         //if (c==Instant.class)
         //    textField.setAttribute(TAG_PATTERN, DATE_PATTERN);
+        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
         
-        final Element reportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        reportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
-        reportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        final Element textFieldReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
+        textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
+        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
+        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         
-        final Element textElement = this.document.createElement(TAG_TEXT_ELEMENT);
-        textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
-        textElement.setAttribute(ATT_TEXT_ALIGNMENT, "Left");
+        final Element textFieldTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
+        textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
+        textFieldTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.JUSTIFIED.toString());
         if(style!=null && style!=Markup.NONE) 
-            textElement.setAttribute(ATT_MARKUP, style.toString());
+            textFieldTextElement.setAttribute(ATT_MARKUP, style.toString());
         
-        final Element font = this.document.createElement(TAG_FONT);
-        font.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
+        final Element textFieldFont = this.document.createElement(TAG_FONT);
+        textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
         
         final Element textFieldExpression = this.document.createElement(TAG_TEXT_FIELD_EXPRESSION);
         
@@ -470,10 +475,12 @@ public class JRDomWriter {
         
         // Builds the DOM tree.-------------------------------------------------
         textFieldExpression.appendChild(valueField);
-        textField.appendChild(reportElement);
-        textElement.appendChild(font);
-        textField.appendChild(textElement);
+        textField.appendChild(textFieldReportElement);
+        textFieldTextElement.appendChild(textFieldFont);
+        textField.appendChild(textFieldTextElement);
         textField.appendChild(textFieldExpression);
-        band.appendChild(textField);
+        frame.appendChild(textField);
+        
+        band.appendChild(frame);
     }
 }

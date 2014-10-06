@@ -71,7 +71,7 @@ public class PrinterUtilities {
         final JRDomWriter writer = new JRDomWriter(new FileInputStream(
                 "src/main/resources/fr/sym/jrxml/metaTemplate.jrxml"));
         writer.setFieldsInterline(2);
-        writer.setHeightMultiplicator(8);
+        //writer.setHeightMultiplicator(1);
         final File template = File.createTempFile(objectToPrint.getClass().getSimpleName(), 
                 ".jrxml", new File("src/main/resources/fr/sym/jrxml"));
         template.deleteOnExit();
