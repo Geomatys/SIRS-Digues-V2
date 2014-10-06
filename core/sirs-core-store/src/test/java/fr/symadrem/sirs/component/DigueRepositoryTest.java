@@ -63,7 +63,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         
         instance.add(digue);
         
-        {
+        for(int i=0;i<100;i++){
             TronconDigue troncon = new TronconDigue();
             troncon.setCommentaire("Traoncon1");
             troncon.setDigueId(digue.getId());
@@ -71,33 +71,25 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setDate_maj(LocalDateTime.now());
             
             tronconRepository.add(troncon);
-            
-            
-
         }
-        {
-            TronconDigue troncon = new TronconDigue();
-            troncon.setGeometry(createPoint(100, 100));
-            troncon.setDate_maj(LocalDateTime.now());
-            
-            Fondation ecluse = new Fondation();
-            ecluse.setCommentaire("Fondation");
-            
-            List<Structure> stuctures = new ArrayList<>();
-            stuctures.add(ecluse);
-            troncon.setStuctures(stuctures);
-            
-            troncon.setCommentaire("Traoncon2");
-            troncon.setDigueId(digue.getId());
-
-            tronconRepository.add(troncon);
-            
-
-            
-            
-            
-            
-        }
+        
+//        {
+//            TronconDigue troncon = new TronconDigue();
+//            troncon.setGeometry(createPoint(100, 100));
+//            troncon.setDate_maj(LocalDateTime.now());
+//            
+//            Fondation ecluse = new Fondation();
+//            ecluse.setCommentaire("Fondation");
+//            
+//            List<Structure> stuctures = new ArrayList<>();
+//            stuctures.add(ecluse);
+//            troncon.setStuctures(stuctures);
+//            
+//            troncon.setCommentaire("Traoncon2");
+//            troncon.setDigueId(digue.getId());
+//
+//            tronconRepository.add(troncon);
+//        }
         
         
         
@@ -106,13 +98,17 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         
     }
 
-    private Point createPoint(int i, int j) {
+    private Point createPoint(double i, double j) {
         // TODO Auto-generated method stub
-        return new GeometryFactory().createPoint(new Coordinate(10, 10));
+        Point pt = new GeometryFactory().createPoint(new Coordinate(i, j));
+        return pt;
     }
 
     private Point createPoint() {
-        return createPoint(10, 10);
+        //random coord in france in 2154
+        return createPoint(
+                Math.random()*900000 - 100000, 
+                Math.random()*1000000 + 6100000);
     }
 
 }

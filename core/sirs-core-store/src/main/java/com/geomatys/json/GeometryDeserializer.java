@@ -22,7 +22,7 @@ public class GeometryDeserializer extends JsonDeserializer<Geometry> {
     
     static {
         try {
-            PROJECTION  = CRS.decode("EPSG:2157");
+            PROJECTION  = CRS.decode("EPSG:2154");
         } catch (FactoryException e) {
             throw new IllegalStateException(e);
         }

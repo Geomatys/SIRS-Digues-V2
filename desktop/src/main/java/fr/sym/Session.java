@@ -1,8 +1,10 @@
 package fr.sym;
 
+import com.geomatys.json.GeometryDeserializer;
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
+import fr.sym.store.SymadremStore;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
@@ -14,13 +16,21 @@ import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
+import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
+import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.DefaultDescription;
+import org.geotoolkit.style.MutableStyle;
+import org.geotoolkit.style.RandomStyleBuilder;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +41,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class Session {
 
-    private final MapContext mapContext = MapBuilder.createContext(CommonCRS.WGS84.normalizedGeographic());
+    private final static CoordinateReferenceSystem PROJECTION;
+    
+    static {
+        try {
+            PROJECTION  = CRS.decode("EPSG:2154");
+        } catch (FactoryException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    private MapContext mapContext;
 
     @Autowired
     private DigueRepository digueRepository;
@@ -40,28 +60,7 @@ public class Session {
     private TronconDigueRepository tronconDigueRepository;
 
     public Session() {
-        mapContext.setName("Carte");
-
-        //Fond de plan
-        final MapItem fond = MapBuilder.createItem();
-        fond.setName("Fond de plan");
-        mapContext.items().add(fond);
-        try {
-            final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
-
-            for (Name n : store.getNames()) {
-                final CoverageReference cr = store.getCoverageReference(n);
-                final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-                cml.setName("Open Street Map");
-                cml.setDescription(new DefaultDescription(
-                        new SimpleInternationalString("Open Street Map"),
-                        new SimpleInternationalString("Open Street Map")));
-                fond.items().add(cml);
-            }
-            mapContext.setAreaOfInterest(mapContext.getBounds());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        
     }
 
     /**
@@ -69,7 +68,47 @@ public class Session {
      *
      * @return MapContext
      */
-    public MapContext getMapContext() {
+    public synchronized MapContext getMapContext() {
+        if(mapContext==null){
+            mapContext = MapBuilder.createContext(CommonCRS.WGS84.normalizedGeographic());
+            mapContext.setName("Carte");
+
+            try {
+                //symadrem layers
+                final MapItem symadrem = MapBuilder.createItem();
+                symadrem.setName("Systeme de digue");
+                mapContext.items().add(0,symadrem);
+
+                final SymadremStore symStore = new SymadremStore(this,null,PROJECTION);
+                final org.geotoolkit.data.session.Session symSession = symStore.createSession(false);
+                for(Name name : symStore.getNames()){
+                    final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
+                    final MutableStyle style = RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType());
+                    final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+                    fml.setName(name.getLocalPart());
+                    symadrem.items().add(fml);
+                }
+
+                //Fond de plan
+                final MapItem fond = MapBuilder.createItem();
+                fond.setName("Fond de plan");
+                mapContext.items().add(0,fond);
+                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+
+                for (Name n : store.getNames()) {
+                    final CoverageReference cr = store.getCoverageReference(n);
+                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+                    cml.setName("Open Street Map");
+                    cml.setDescription(new DefaultDescription(
+                            new SimpleInternationalString("Open Street Map"),
+                            new SimpleInternationalString("Open Street Map")));
+                    fond.items().add(cml);
+                }
+                mapContext.setAreaOfInterest(mapContext.getBounds());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         return mapContext;
     }
 
