@@ -5,6 +5,9 @@
  */
 package fr.sym.util;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,8 +120,32 @@ public class RepositoriesTest {
             tron.setDate_debut(LocalDateTime.now());
             tron.setDate_fin(LocalDateTime.now());
             tron.setDate_maj(LocalDateTime.now());
+            
+            tron.setGeometry(createPoint());
+            
+            Fondation ecluse = new Fondation();
+            ecluse.setCommentaire("Fondation");
+            
+            List<Structure> stuctures = new ArrayList<>();
+            stuctures.add(ecluse);
+            tron.setStuctures(stuctures);
             tronconRepository.add(tron);
         }
+        
+        
+    }
+
+    private Point createPoint(double i, double j) {
+        // TODO Auto-generated method stub
+        Point pt = new GeometryFactory().createPoint(new Coordinate(i, j));
+        return pt;
+    }
+
+    private Point createPoint() {
+        //random coord in france in 2154
+        return createPoint(
+                Math.random()*900000 - 100000, 
+                Math.random()*1000000 + 6100000);
     }
     
     public void linkTronconsToDigues(){

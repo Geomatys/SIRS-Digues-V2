@@ -186,6 +186,7 @@
                                 <TableColumn prefWidth="166.0" text="Début de validité" />
                                 <TableColumn prefWidth="128.0" text="Fin de validité" />
                                 <TableColumn prefWidth="128.0" text="SR par défaut" />
+                                <TableColumn prefWidth="128.0" text="Géométrie" />
                             </columns>
                         </TableView>
                     </content>

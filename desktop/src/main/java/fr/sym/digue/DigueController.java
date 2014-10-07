@@ -1,5 +1,6 @@
 package fr.sym.digue;
 
+import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
@@ -14,6 +15,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -134,10 +136,10 @@ public class DigueController {
         final TableColumn idName = this.tronconsTable.getColumns().get(0);
         idName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
         idName.setEditable(true);
-        idName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedTableCell>() {
+        idName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
             @Override
-            public CustomizedTableCell call(TableColumn<TronconDigue, String> param) {
-                return new CustomizedTableCell();
+            public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
+                return new CustomizedIdTableCell();
             }
         });
 
@@ -150,21 +152,42 @@ public class DigueController {
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
         colDateDebut.setEditable(true);
         
-        final StringConverter<LocalDateTime> instantStringConverter = new StringConverter<LocalDateTime>() {
+        final StringConverter<LocalDateTime> localDateTimeStringConverter = new StringConverter<LocalDateTime>() {
             @Override
             public String toString(LocalDateTime object) {return object.toString();}
 
             @Override
             public LocalDateTime fromString(String string) {return LocalDateTime.parse(string);}
         };
-        colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
+        colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(localDateTimeStringConverter));
         
         final TableColumn colDateFin = this.tronconsTable.getColumns().get(3);
         colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
         colDateFin.setEditable(true);
-        colDateFin.setCellFactory(TextFieldTableCell.forTableColumn(instantStringConverter));
+        colDateFin.setCellFactory(TextFieldTableCell.forTableColumn(localDateTimeStringConverter));
         
+        final TableColumn colSR = this.tronconsTable.getColumns().get(4);
+        colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
+        colSR.setEditable(true);
+        colSR.setCellFactory(TextFieldTableCell.forTableColumn());
         
+        final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
+        colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
+        colGeom.setEditable(true);
+//        final StringConverter<Geometry> geometryStringConverter = new StringConverter<Geometry>() {
+//            @Override
+//            public String toString(Geometry object) {return object.getGeometryType();}
+//
+//            @Override
+//            public Geometry fromString(String string) {return null;}
+//        };
+        colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
+            @Override
+            public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
+                return new CustomizedGeometryTableCell();
+            }
+        });
+        //colGeom.setCellFactory(TextFieldTableCell.forTableColumn(geometryStringConverter));
         
         /*colName.setOnEditCommit(
          new EventHandler<TableColumn.CellEditEvent<Troncon, String>>() {
@@ -178,8 +201,7 @@ public class DigueController {
          );*/
         
 
-        /*
-         colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
+        /*colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
 
          @Override
          public void handle(TableColumn.CellEditEvent<Troncon, Troncon.jojoenum> event) {
@@ -227,7 +249,7 @@ public class DigueController {
     /**
      * Defines the customized table cell for displaying id of each levee's section.
      */
-    private class CustomizedTableCell extends TableCell<TronconDigue, String> {
+    private class CustomizedIdTableCell extends TableCell<TronconDigue, String> {
         
         @Override
         protected void updateItem(String item, boolean empty) {
@@ -240,62 +262,68 @@ public class DigueController {
             button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
             button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
             button.setOnAction((ActionEvent event) -> {
-                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedTableCell.this.getParent()).getItem();
+                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedIdTableCell.this.getParent()).getItem();
                 final Stage dialog = new Stage();
-                final Label libelle1 = new Label(troncon.getLibelle());
-                final Label id1 = new Label(troncon.getId());
+                final Label libelle = new Label(troncon.getLibelle());
+                final Label id = new Label(troncon.getId());
                 final Button ok = new Button("Ok");
                 ok.setOnAction((ActionEvent event1) -> {
                     dialog.hide();
                 });
                 
-                final VBox popUpVBox = new VBox();
-                popUpVBox.getChildren().add(libelle1);
-                popUpVBox.getChildren().add(id1);
-                popUpVBox.getChildren().add(ok);
+                final VBox vBox = new VBox();
+                vBox.setAlignment(Pos.CENTER);
+                vBox.getChildren().add(libelle);
+                vBox.getChildren().add(id);
+                vBox.getChildren().add(ok);
                 
-                final LocalDateTimePicker localDateTimePicker = new LocalDateTimePicker();
-                popUpVBox.getChildren().add(localDateTimePicker);
-                
-//                final ColorField colorField = new ColorField();
-//                colorField.setPopupButtonVisible(true);
-//                popUpVBox.getChildren().add(colorField);
-//                
-//                final LocalDateTimeField localDateTimeField = new LocalDateTimeField();
-//                localDateTimeField.setDateTimeFormatter(DateTimeFormatter.ISO_DATE_TIME);
-//                localDateTimeField.setPopupContentFactory(new Callback<LocalDateTime, PopupContent<LocalDateTime>>() {
-//
-//                    @Override
-//                    public PopupContent<LocalDateTime> call(LocalDateTime param) {
-//
-//                        LocalDateTimePopupContent localDateTimePopupContent = new LocalDateTimePopupContent();
-//
-//                        LocalDateTime ldt = LocalDateTime.now();
-//
-//
-//                        localDateTimePopupContent.setChronology(ldt.getChronology());
-//                        return localDateTimePopupContent;
-//                    }
-//
-//                });
-//                localDateTimeField.setPopupButtonVisible(true);
-//                localDateTimeField.setValue(LocalDateTime.now());
-//                
-//                popUpVBox.getChildren().add(localDateTimeField);
-                
-                //final jfxtras.scene.control.LocalDateTimePicker ldtp = new jfxtras.scene.control.LocalDateTimePicker();
-                //popUpVBox.getChildren().add(ldtp);
-                
-                //final LocalDatePicker ldp = new LocalDatePicker();
-                //popUpVBox.getChildren().add(ldp);
-                
-                //final DatePicker dp = new DatePicker();
-                //popUpVBox.getChildren().add(dp);
-                
-                final Scene dialogScene = new Scene(popUpVBox, 300, 200);
+                final Scene dialogScene = new Scene(vBox);
                 dialog.initModality(Modality.APPLICATION_MODAL);
                 dialog.initOwner(root.getScene().getWindow());
                 dialog.setScene(dialogScene);
+                dialog.setTitle("Identifiant de tronçon de digue.");
+                dialog.show();
+            });
+        }
+    }
+    
+    /// FocusTransverse ?
+    /**
+     * Defines the customized table cell for displaying id of each levee's section.
+     */
+    private class CustomizedGeometryTableCell extends TableCell<TronconDigue, Geometry> {
+        
+        @Override
+        protected void updateItem(Geometry item, boolean empty) {
+            
+            super.updateItem(item, empty);
+            
+            final Button button = new Button();
+            button.setText("Géométrie");
+            setGraphic(button);
+            button.setBackground(new Background(new BackgroundFill(Color.LIGHTPINK, new CornerRadii(20), Insets.EMPTY)));
+            button.setBorder(new Border(new BorderStroke(Color.DARKMAGENTA, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
+            button.setOnAction((ActionEvent event) -> {
+                final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedGeometryTableCell.this.getParent()).getItem();
+                final Stage dialog = new Stage();
+                final Label libelle = new Label(troncon.getLibelle());
+                final Label wkt = new Label(troncon.getGeometry().toText());
+                final Button ok = new Button("Ok");
+                ok.setOnAction((ActionEvent event1) -> {
+                    dialog.hide();
+                });
+                
+                final VBox vBox = new VBox();
+                vBox.setAlignment(Pos.CENTER);
+                vBox.getChildren().add(libelle);
+                vBox.getChildren().add(wkt);
+                vBox.getChildren().add(ok);
+                
+                final Scene dialogScene = new Scene(vBox);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(root.getScene().getWindow());
+                dialog.setScene(dialogScene);
+                dialog.setTitle("Géométrie de tronçon de digue.");
                 dialog.show();
             });
         }
