@@ -18,6 +18,30 @@
   </properties>
 
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.geomatys.maven</groupId>
+        <artifactId>maven-fxmodel-plugin</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>fxmodel</id>
+            <goals>
+              <goal>fxmodel</goal>
+            </goals>
+          </execution>
+        </executions>
+            <configuration>
+              <model>model/symadrem.ecore</model>
+              <modelPackage>fr.symadrem.sirs.core.model</modelPackage>
+              <repositoryPackage>fr.symadrem.sirs.core.component</repositoryPackage>
+            </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
   <dependencies>
     <dependency>
       <groupId>org.springframework</groupId>
