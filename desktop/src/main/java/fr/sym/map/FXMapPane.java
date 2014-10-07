@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class FXMapPane extends BorderPane {
     

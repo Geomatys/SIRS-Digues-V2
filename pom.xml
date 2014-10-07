@@ -98,6 +98,14 @@
       </snapshots>
     </repository>
   </repositories>
+  
+  <pluginRepositories>
+      <pluginRepository>
+          <id>geomatys</id>
+          <name>geomatys</name>
+          <url>http://dev.geomatys.com/nexus/content/groups/public/</url>
+      </pluginRepository>
+  </pluginRepositories>
 
     <!--
     Configuration of the compiler and archiver. For each JAR file, an entry "class-path"
