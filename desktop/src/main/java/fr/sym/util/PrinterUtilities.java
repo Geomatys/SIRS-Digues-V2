@@ -63,10 +63,6 @@ public class PrinterUtilities {
      */
     static public void print(final Object objectToPrint) throws Exception {
         
-        // Handles the appropriate template ------------------------------------
-        /*final InputStream template = PrinterUtilities.class.getResourceAsStream(
-                "/fr/sym/jrxml/" + objectToPrint.getClass().getSimpleName() + ".jrxml");*/
-        
         // Creates the Jasper Reports specific template from the generic template.
         final JRDomWriter writer = new JRDomWriter(new FileInputStream(
                 "src/main/resources/fr/sym/jrxml/metaTemplate.jrxml"));

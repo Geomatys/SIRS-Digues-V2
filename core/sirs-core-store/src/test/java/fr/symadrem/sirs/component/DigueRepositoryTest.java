@@ -20,8 +20,6 @@ import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.Fondation;
-import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 
 /**

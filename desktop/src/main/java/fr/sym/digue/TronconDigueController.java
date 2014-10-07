@@ -7,11 +7,6 @@ import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,7 +18,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -36,6 +30,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import jfxtras.scene.control.LocalDateTimeTextField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -60,11 +55,10 @@ public class TronconDigueController {
     private ChoiceBox<Digue> digues;
     
     @FXML
-    private DatePicker date_debut;
-    //private T
+    private LocalDateTimeTextField date_debut;
     
     @FXML
-    private DatePicker date_fin;
+    private LocalDateTimeTextField date_fin;
     
     @FXML
     private ToggleButton editionButton;
@@ -81,10 +75,14 @@ public class TronconDigueController {
             this.section_name.setEditable(true);
             this.commentaire.setOnMouseClicked(new TronconDigueController.OpenHtmlEditorEventHandler());
             this.digues.setDisable(false);
+            this.date_debut.setDisable(false);
+            this.date_fin.setDisable(false);
         } else {
             this.section_name.setEditable(false);
             this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
             this.digues.setDisable(true);
+            this.date_debut.setDisable(true);
+            this.date_fin.setDisable(true);
         }
         
         // Switch Label's text color.-------------------------------------------
@@ -113,32 +111,22 @@ public class TronconDigueController {
         this.digues.setItems(diguesObservables);
         final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
         
-        @Override
-        public String toString(Digue digue) {return digue.getLibelle();}
+            @Override
+            public String toString(Digue digue) {return digue.getLibelle();}
 
-        // TODO ?
-        @Override
-        public Digue fromString(String string) {return null;}
+            // TODO ?
+            @Override
+            public Digue fromString(String string) {return null;}
         };
+        
         this.digues.setConverter(digueStringConverter);
         this.digues.setValue(diguePropre);
         this.digues.setDisable(true);
-        
-        
-        /////////////////////////////////////// A VOIR /////////////////////////
-        
-        this.date_debut.setValue(LocalDate.from(this.troncon.getDate_debut()));
-        
-        /*LocalDateTime ldt;
-        ldt.
-        
-        
-        Instant instant = Instant.now();
-        //instant.*/
-        LocalDate date = this.date_debut.getValue();
-        
-        
-        //LocalDate d = new LocalDate();
+                
+        this.date_debut.localDateTimeProperty().bindBidirectional(this.troncon.date_debutProperty());
+        this.date_debut.setDisable(true);
+        this.date_fin.localDateTimeProperty().bindBidirectional(this.troncon.date_finProperty());
+        this.date_fin.setDisable(true);
     }
     
     public static TronconDigueController create(TronconDigue troncon) {
@@ -166,38 +154,38 @@ public class TronconDigueController {
         @Override
         public void handle(MouseEvent event) {
             
-                final Stage dialog = new Stage();
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(root.getScene().getWindow());
-                
-                final VBox vbox = new VBox();
+            final Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(root.getScene().getWindow());
 
-                final HTMLEditor htmlEditor = new HTMLEditor();
-                htmlEditor.setHtmlText(troncon.getCommentaire());
-                
-                final HBox hbox = new HBox();
-                
-                final Button valider = new Button("Valider");
-                valider.setOnAction((ActionEvent event1) -> {
-                    troncon.setCommentaire(htmlEditor.getHtmlText());
-                    commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
-                    dialog.hide();
-                });
-                
-                final Button annuler = new Button("Annuler");
-                annuler.setOnAction((ActionEvent event1) -> {
-                    dialog.hide();
-                });
-                
-                hbox.getChildren().add(valider);
-                hbox.getChildren().add(annuler);
-                
-                vbox.getChildren().add(htmlEditor);
-                vbox.getChildren().add(hbox);
-                
-                final Scene dialogScene = new Scene(vbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
+            final VBox vbox = new VBox();
+
+            final HTMLEditor htmlEditor = new HTMLEditor();
+            htmlEditor.setHtmlText(troncon.getCommentaire());
+
+            final HBox hbox = new HBox();
+
+            final Button valider = new Button("Valider");
+            valider.setOnAction((ActionEvent event1) -> {
+                troncon.setCommentaire(htmlEditor.getHtmlText());
+                commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
+                dialog.hide();
+            });
+
+            final Button annuler = new Button("Annuler");
+            annuler.setOnAction((ActionEvent event1) -> {
+                dialog.hide();
+            });
+
+            hbox.getChildren().add(valider);
+            hbox.getChildren().add(annuler);
+
+            vbox.getChildren().add(htmlEditor);
+            vbox.getChildren().add(hbox);
+
+            final Scene dialogScene = new Scene(vbox);
+            dialog.setScene(dialogScene);
+            dialog.show();
         }
     }
     

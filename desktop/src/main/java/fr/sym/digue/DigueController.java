@@ -44,6 +44,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import jfxtras.scene.control.LocalDateTimePicker;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -252,6 +253,44 @@ public class DigueController {
                 popUpVBox.getChildren().add(libelle1);
                 popUpVBox.getChildren().add(id1);
                 popUpVBox.getChildren().add(ok);
+                
+                final LocalDateTimePicker localDateTimePicker = new LocalDateTimePicker();
+                popUpVBox.getChildren().add(localDateTimePicker);
+                
+//                final ColorField colorField = new ColorField();
+//                colorField.setPopupButtonVisible(true);
+//                popUpVBox.getChildren().add(colorField);
+//                
+//                final LocalDateTimeField localDateTimeField = new LocalDateTimeField();
+//                localDateTimeField.setDateTimeFormatter(DateTimeFormatter.ISO_DATE_TIME);
+//                localDateTimeField.setPopupContentFactory(new Callback<LocalDateTime, PopupContent<LocalDateTime>>() {
+//
+//                    @Override
+//                    public PopupContent<LocalDateTime> call(LocalDateTime param) {
+//
+//                        LocalDateTimePopupContent localDateTimePopupContent = new LocalDateTimePopupContent();
+//
+//                        LocalDateTime ldt = LocalDateTime.now();
+//
+//
+//                        localDateTimePopupContent.setChronology(ldt.getChronology());
+//                        return localDateTimePopupContent;
+//                    }
+//
+//                });
+//                localDateTimeField.setPopupButtonVisible(true);
+//                localDateTimeField.setValue(LocalDateTime.now());
+//                
+//                popUpVBox.getChildren().add(localDateTimeField);
+                
+                //final jfxtras.scene.control.LocalDateTimePicker ldtp = new jfxtras.scene.control.LocalDateTimePicker();
+                //popUpVBox.getChildren().add(ldtp);
+                
+                //final LocalDatePicker ldp = new LocalDatePicker();
+                //popUpVBox.getChildren().add(ldp);
+                
+                //final DatePicker dp = new DatePicker();
+                //popUpVBox.getChildren().add(dp);
                 
                 final Scene dialogScene = new Scene(popUpVBox, 300, 200);
                 dialog.initModality(Modality.APPLICATION_MODAL);
