@@ -1,17 +1,21 @@
 package fr.sym;
 
 import com.geomatys.json.GeometryDeserializer;
+
 import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
 import fr.sym.store.SymadremStore;
+import fr.symadrem.sirs.core.Repository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.coverage.CoverageReference;
@@ -53,6 +57,10 @@ public class Session {
     
     private MapContext mapContext;
 
+    
+    @Autowired
+    private List<Repository<?>> repositories;
+    
     @Autowired
     private DigueRepository digueRepository;
 
