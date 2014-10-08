@@ -144,7 +144,7 @@ public class Session {
         return this.tronconDigueRepository.getAll();
     }
 
-    public List<TronconDigue> getTronconGestionDigueTrysByDigueTry(final Digue digue) {
+    public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
         //TODO database view ?
         final String digueId = digue.getId();
         final List<TronconDigue> troncons = this.getTroncons();
@@ -164,7 +164,7 @@ public class Session {
      * @return
      */
     public List<?> getChildren(Digue digue) {
-        return this.getTronconGestionDigueTrysByDigueTry(digue);
+        return this.getTronconDigueByDigue(digue);
     }
 
     /**

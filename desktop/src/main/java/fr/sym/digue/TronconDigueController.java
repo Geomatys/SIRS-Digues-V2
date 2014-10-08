@@ -24,7 +24,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.Color;
 import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
@@ -64,10 +64,7 @@ public class TronconDigueController {
     private ToggleButton editionButton;
     
     @FXML
-    private Label mode_label_consultation;
-    
-    @FXML
-    private Label mode_label_saisie;
+    private Label mode;
     
     @FXML
     private void enableFields(ActionEvent event){
@@ -77,18 +74,19 @@ public class TronconDigueController {
             this.digues.setDisable(false);
             this.date_debut.setDisable(false);
             this.date_fin.setDisable(false);
+            this.editionButton.setText("Passer en consultation");
+            this.mode.setText("Mode saisie");
+            this.mode.setTextFill(Color.RED);
         } else {
             this.section_name.setEditable(false);
             this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
             this.digues.setDisable(true);
             this.date_debut.setDisable(true);
             this.date_fin.setDisable(true);
+            this.editionButton.setText("Passer en saisie");
+            this.mode.setText("Mode consultation");
+            this.mode.setTextFill(Color.WHITE);
         }
-        
-        // Switch Label's text color.-------------------------------------------
-        final Paint paint = this.mode_label_consultation.getTextFill();
-        this.mode_label_consultation.setTextFill(this.mode_label_saisie.getTextFill());
-        this.mode_label_saisie.setTextFill(paint);
     }
     
     public void init(TronconDigue troncon){
