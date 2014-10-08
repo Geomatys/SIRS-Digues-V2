@@ -1,25 +1,11 @@
 package fr.sym;
 
-import fr.sym.repo.CustomizedTronconDigueRepository;
-import com.geomatys.json.GeometryDeserializer;
-
-import fr.sym.digue.dto.Dam;
-import fr.sym.digue.dto.DamSystem;
-import fr.sym.digue.dto.Section;
-import fr.sym.store.SymadremStore;
-import fr.symadrem.sirs.core.Repository;
-import fr.symadrem.sirs.core.component.DigueRepository;
-import fr.symadrem.sirs.core.component.TronconDigueRepository;
-import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.TronconDigue;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
-import org.ektorp.Options;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
 import org.geotoolkit.data.FeatureCollection;
@@ -39,6 +25,16 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import fr.sym.digue.dto.Dam;
+import fr.sym.digue.dto.DamSystem;
+import fr.sym.digue.dto.Section;
+import fr.sym.store.SymadremStore;
+import fr.symadrem.sirs.core.Repository;
+import fr.symadrem.sirs.core.component.DigueRepository;
+import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.TronconDigue;
 
 /**
  *
@@ -67,7 +63,7 @@ public class Session {
     private DigueRepository digueRepository;
 
     @Autowired
-    private CustomizedTronconDigueRepository tronconDigueRepository;
+    private TronconDigueRepository tronconDigueRepository;
 
     public Session() {
         

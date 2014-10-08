@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sym.repo;
+package fr.symadrem.sirs.core.component;
 
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
@@ -20,10 +20,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @View(name="byDigueId", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
-public class CustomizedTronconDigueRepository  extends TronconDigueRepository {
+public class TronconDigueRepository  extends TronconDigueRepositoryGen {
 
     @Autowired
-    public CustomizedTronconDigueRepository(CouchDbConnector db) {
+    public TronconDigueRepository(CouchDbConnector db) {
         super(db);
     }
     
