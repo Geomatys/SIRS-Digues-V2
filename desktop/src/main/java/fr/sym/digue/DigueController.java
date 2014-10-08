@@ -91,11 +91,6 @@ public class DigueController {
     }*/
 
     @FXML
-    public void change(ActionEvent event) {
-        System.out.println(digue.libelleProperty());
-    }
-
-    @FXML
     public void enableFields(ActionEvent event) {
         
         if (this.editionButton.isSelected()) {
@@ -124,6 +119,13 @@ public class DigueController {
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
         this.libelle.editableProperty().bindBidirectional(this.editionMode);
+        this.libelle.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                System.out.println("Modification du libelle !");
+            }
+        });
         
         // Display levee's id.--------------------------------------------------
         this.id.setText(this.digue.getId());
@@ -216,7 +218,7 @@ public class DigueController {
         this.tronconsTable.editableProperty().bindBidirectional(this.editionMode);
     }
 
-    public static DigueController create(Digue digue) {
+    public static DigueController create(final Digue digue) {
 
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
                 "/fr/sym/digue/digueDisplay.fxml"));

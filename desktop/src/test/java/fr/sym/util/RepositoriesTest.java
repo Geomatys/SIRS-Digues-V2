@@ -217,9 +217,6 @@ public class RepositoriesTest {
             set.add(troncon.getId());
 
         }
-
-
         digueRepository.add(digue);
     }
-
 }

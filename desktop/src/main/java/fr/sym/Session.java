@@ -1,5 +1,6 @@
 package fr.sym;
 
+import fr.sym.repo.CustomizedTronconDigueRepository;
 import com.geomatys.json.GeometryDeserializer;
 
 import fr.sym.digue.dto.Dam;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.iso.SimpleInternationalString;
+import org.ektorp.Options;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
 import org.geotoolkit.data.FeatureCollection;
@@ -65,7 +67,7 @@ public class Session {
     private DigueRepository digueRepository;
 
     @Autowired
-    private TronconDigueRepository tronconDigueRepository;
+    private CustomizedTronconDigueRepository tronconDigueRepository;
 
     public Session() {
         
@@ -145,16 +147,7 @@ public class Session {
     }
 
     public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
-        //TODO database view ?
-        final String digueId = digue.getId();
-        final List<TronconDigue> troncons = this.getTroncons();
-        final List<TronconDigue> tronconsDeLaDigue = new ArrayList<>();
-        for (final TronconDigue troncon : troncons) {
-            if (troncon.getDigueId().equals(digueId)) {
-                tronconsDeLaDigue.add(troncon);
-            }
-        }
-        return tronconsDeLaDigue;
+        return this.tronconDigueRepository.getByDigue(digue);
     }
 
     /**
