@@ -8,9 +8,12 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +47,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
+import jfxtras.scene.control.LocalDateTimeTextField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -55,6 +58,8 @@ public class DigueController {
     
     public Parent root;
     private Digue digue;
+    private BooleanProperty editionMode;
+    private BooleanProperty consultationMode;
     
     @Autowired
     private Session session;
@@ -94,30 +99,31 @@ public class DigueController {
     public void enableFields(ActionEvent event) {
         
         if (this.editionButton.isSelected()) {
-            this.libelle.setEditable(true);
-            this.tronconsTable.setEditable(true);
             this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
             this.editionButton.setText("Passer en consultation");
             this.mode.setText("Mode saisie");
             this.mode.setTextFill(Color.RED);
         } else {
-            this.libelle.setEditable(false);
-            this.tronconsTable.setEditable(false);
             this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
             this.mode.setTextFill(Color.WHITE);
         }
+        this.consultationMode.set(!this.editionMode.get());
     }
 
     public void init(Digue digue) {
 
+        this.editionMode = new SimpleBooleanProperty(false);
+        this.editionMode.bindBidirectional(this.editionButton.selectedProperty());
+        this.consultationMode = new SimpleBooleanProperty(!this.editionMode.get());
+        
         // Set the levee for the controller.------------------------------------
         this.digue = digue;
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
-        this.libelle.setEditable(false);
+        this.libelle.editableProperty().bindBidirectional(this.editionMode);
         
         // Display levee's id.--------------------------------------------------
         this.id.setText(this.digue.getId());
@@ -131,7 +137,7 @@ public class DigueController {
         // Configuring table for levee's sections.------------------------------
         final TableColumn idName = this.tronconsTable.getColumns().get(0);
         idName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
-        idName.setEditable(true);
+        idName.editableProperty().bindBidirectional(this.editionMode);
         idName.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
             @Override
             public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
@@ -141,64 +147,52 @@ public class DigueController {
 
         final TableColumn colName = this.tronconsTable.getColumns().get(1);
         colName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
-        colName.setEditable(true);
+        colName.editableProperty().bindBidirectional(this.editionMode);
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
+        colName.setOnEditStart((Event event) -> {
+            editionButton.setDisable(true);
+        });
+        colName.setOnEditCancel((Event event) -> {
+            editionButton.setDisable(false);
+        });
+        colName.setOnEditCommit((Event event) -> {
+            editionButton.setDisable(false);
+        });
 
         final TableColumn colDateDebut = this.tronconsTable.getColumns().get(2);
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
-        colDateDebut.setEditable(true);
-        
-        final StringConverter<LocalDateTime> localDateTimeStringConverter = new StringConverter<LocalDateTime>() {
+        colDateDebut.editableProperty().bindBidirectional(this.editionMode);
+        colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
             @Override
-            public String toString(LocalDateTime object) {
-                return (object == null) ? "" : object.toString();
+            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
+                return new CustomizedLocalDateTimeTableCell();
             }
-
-            @Override
-            public LocalDateTime fromString(String string) {return LocalDateTime.parse(string);}
-        };
-        colDateDebut.setCellFactory(TextFieldTableCell.forTableColumn(localDateTimeStringConverter));
+        });
         
         final TableColumn colDateFin = this.tronconsTable.getColumns().get(3);
         colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
-        colDateFin.setEditable(true);
-        colDateFin.setCellFactory(TextFieldTableCell.forTableColumn(localDateTimeStringConverter));
+        colDateFin.editableProperty().bindBidirectional(this.editionMode);
+        colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
+            @Override
+            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
+                return new CustomizedLocalDateTimeTableCell();
+            }
+        });
         
         final TableColumn colSR = this.tronconsTable.getColumns().get(4);
         colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
-        colSR.setEditable(true);
+        colSR.editableProperty().bindBidirectional(this.editionMode);
         colSR.setCellFactory(TextFieldTableCell.forTableColumn());
         
         final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
         colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
-        colGeom.setEditable(true);
-//        final StringConverter<Geometry> geometryStringConverter = new StringConverter<Geometry>() {
-//            @Override
-//            public String toString(Geometry object) {return object.getGeometryType();}
-//
-//            @Override
-//            public Geometry fromString(String string) {return null;}
-//        };
+        colGeom.editableProperty().bindBidirectional(this.editionMode);
         colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
             @Override
             public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
-                CustomizedGeometryTableCell geometryCell = new CustomizedGeometryTableCell();
-                //geometryCell.setItem(((TronconDigue)((TableRow)geometryCell.getParent()).getItem()).getGeometry());
-                return geometryCell;
+                return new CustomizedGeometryTableCell();
             }
         });
-        //colGeom.setCellFactory(TextFieldTableCell.forTableColumn(geometryStringConverter));
-        
-        /*colName.setOnEditCommit(
-         new EventHandler<TableColumn.CellEditEvent<Troncon, String>>() {
-        
-         @Override
-         public void handle(TableColumn.CellEditEvent<Troncon, String> event) {
-         ((Troncon) event.getTableView().getItems().get(
-         event.getTablePosition().getRow())).setName(event.getNewValue());
-         }
-         }
-         );*/
         
 
         /*colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
@@ -219,12 +213,7 @@ public class DigueController {
         });
         System.out.println("Taille de la liste : "+tronconsObservables.size());
         this.tronconsTable.setItems(tronconsObservables);
-        this.tronconsTable.setEditable(false);
-
-        /*
-        PropertyValueFactory<TronconDigue, String> pvf = new PropertyValueFactory<>("libelle");
-        TableColumn.CellDataFeatures<TronconDigue, String> cdf = 
-                new TableColumn.CellDataFeatures<TronconDigue, String>(tronconsTable, colName, null);*/
+        this.tronconsTable.editableProperty().bindBidirectional(this.editionMode);
     }
 
     public static DigueController create(Digue digue) {
@@ -290,9 +279,8 @@ public class DigueController {
         }
     }
     
-    /// FocusTransverse ?
     /**
-     * Defines the customized table cell for displaying id of each levee's section.
+     * Defines the customized table cell for displaying geometry of each levee's section.
      */
     private class CustomizedGeometryTableCell extends TableCell<TronconDigue, Geometry> {
         
@@ -330,6 +318,25 @@ public class DigueController {
                     dialog.setTitle("Géométrie de tronçon de digue.");
                     dialog.show();
                 });
+            }
+        }
+    }
+    
+    
+    /**
+     * Defines the customized table cell for displaying geometry of each levee's section.
+     */
+    private class CustomizedLocalDateTimeTableCell extends TableCell<TronconDigue, LocalDateTime> {
+        
+        @Override
+        protected void updateItem(LocalDateTime item, boolean empty) {
+            
+            super.updateItem(item, empty);
+            
+            if(item != null) {
+                final LocalDateTimeTextField localDateTimeTextField = new LocalDateTimeTextField(item);
+                setGraphic(localDateTimeTextField);
+                localDateTimeTextField.disableProperty().bindBidirectional(consultationMode);
             }
         }
     }

@@ -8,9 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
 /**
- *
+ * @deprecated Switch to DigueController as soon as possible.
  * @author Johann Sorel (Geomatys)
  */
+@Deprecated
 public class FXDamController {
     
     public Parent root;

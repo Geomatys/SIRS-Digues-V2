@@ -109,7 +109,9 @@ public class DiguesController {
                 setText(((Dam) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
             } else if (obj instanceof Section) {
                 setText(((Section) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-            } else if (obj instanceof Theme) {
+            } 
+            
+            else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else {
                 setText(null);

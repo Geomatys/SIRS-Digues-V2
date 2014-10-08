@@ -21,7 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * 
+ * @deprecated Switch to DiguesController as soon as possible.
+ */
+@Deprecated
 public class FXDigueController {
 
     public Parent root;

@@ -8,9 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
 /**
- *
+ * @deprecated Switch to TronconDigueController as soon as possible.
  * @author Johann Sorel (Geomatys)
  */
+@Deprecated
 public class FXSectionController {
     
     public Parent root;
