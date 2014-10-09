@@ -145,6 +145,21 @@ public class Session {
     public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
         return this.tronconDigueRepository.getByDigue(digue);
     }
+    
+    public void update(Digue digue){
+        this.digueRepository.update(digue);
+    }
+    
+    public void update(TronconDigue tronconDigue){
+        this.tronconDigueRepository.update(tronconDigue);
+    }
+    
+    public void update(List<TronconDigue> troncons){
+        troncons.stream().forEach((troncon) -> {
+            System.out.println(troncon);
+            this.update(troncon);
+        });
+    }
 
     /**
      * DamSystem can contain Dams or Sections.
