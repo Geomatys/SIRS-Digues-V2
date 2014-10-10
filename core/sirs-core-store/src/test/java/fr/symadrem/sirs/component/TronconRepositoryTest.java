@@ -11,10 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import org.junit.Ignore;
 
 /**
  *
- * @author samuel
+ * @author Samuel Andrés (Geomatys)
  */
 public class TronconRepositoryTest extends CouchDBTestCase {
 
@@ -23,17 +24,14 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     private TronconDigueRepository tronconRepository;
     
     /**
-     * Test of getAll method, of class DigueRepository.
+     * Test of getAll method, of class TronconDigueRepository.
      */
+    @Ignore
     @Test
     public void testGetAll() {
         System.out.println("getAll");
-        for (TronconDigue digue : tronconRepository.getAll()) {
-            System.out.println(digue.getGeometry());
+        for (TronconDigue troncon : tronconRepository.getAll()) {
+            System.out.println(troncon.getLibelle());
         }
-        
-        
-      
     }
-
 }

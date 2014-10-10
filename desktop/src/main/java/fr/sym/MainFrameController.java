@@ -54,15 +54,17 @@ public class MainFrameController extends Stage {
         tab.setContent(fxmap);
 
         uiTabs.getTabs().add(tab);
-
     }
 
     @FXML
     void openDigueTab(ActionEvent event) {
+        
         final DiguesController digueController = DiguesController.create();
+        
         final Tab tab = new Tab();
         tab.setText("Digues");
         tab.setContent(new BorderPane(digueController.root));
+        
         uiTabs.getTabs().add(tab);
     }
 

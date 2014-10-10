@@ -10,26 +10,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -65,7 +59,6 @@ public class DigueController {
     private Digue digue;
     private ObservableList<TronconDigue> troncons;
     private BooleanProperty editionMode;
-    private BooleanProperty consultationMode;
     
     @Autowired
     private Session session;
@@ -80,7 +73,7 @@ public class DigueController {
     private Label mode;
     
     @FXML
-    private Label date_maj;
+    private LocalDateTimeTextField date_maj;
 
     @FXML
     private WebView commentaire;
@@ -110,13 +103,12 @@ public class DigueController {
             this.mode.setText("Mode consultation");
             this.mode.setTextFill(Color.WHITE);
         }
-        this.consultationMode.set(!this.editionMode.get());
     }
     
     @FXML
     private void save(ActionEvent event){
         this.session.update(this.digue);
-        this.session.update(this.troncons);
+//        this.session.update(this.troncons);
     }
 
     public void init(Digue digue) {
@@ -124,7 +116,6 @@ public class DigueController {
         // Set the edition mode.------------------------------------------------
         this.editionMode = new SimpleBooleanProperty(false);
         this.editionMode.bindBidirectional(this.editionButton.selectedProperty());
-        this.consultationMode = new SimpleBooleanProperty(!this.editionMode.get());
         
         // Set the levee for the controller.------------------------------------
         this.digue = digue;
@@ -137,7 +128,9 @@ public class DigueController {
         this.id.setText(this.digue.getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setText(this.digue.getDate_maj().toString());
+        this.date_maj.setLocalDateTime(this.digue.getDate_maj());
+        this.date_maj.setDisable(true);
+        this.date_maj.localDateTimeProperty().bindBidirectional(this.digue.date_majProperty());
 
         // Binding levee's comment.---------------------------------------------
         this.commentaire.getEngine().loadContent(digue.getCommentaire());
@@ -152,7 +145,7 @@ public class DigueController {
         // Configuring table for levee's sections.------------------------------
         final TableColumn idCol = this.tronconsTable.getColumns().get(0);
         idCol.setCellValueFactory(new PropertyValueFactory<>("libelle"));
-        idCol.editableProperty().bindBidirectional(this.editionMode);
+        idCol.setEditable(false);
         idCol.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
             @Override
             public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
@@ -162,31 +155,12 @@ public class DigueController {
 
         final TableColumn colName = this.tronconsTable.getColumns().get(1);
         colName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
-        colName.editableProperty().bindBidirectional(this.editionMode);
+        colName.setEditable(false);
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
-        colName.setOnEditStart((Event event) -> {
-            this.editionButton.setDisable(true);
-        });
-        colName.setOnEditCancel((Event event) -> {
-            this.editionButton.setDisable(false);
-        });
-        colName.setOnEditCommit(new EventHandler<CellEditEvent<TronconDigue, String>>() {
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, String> t) {
-                DigueController.this.editionButton.setDisable(false);
-                ((TronconDigue) t.getTableView().getItems().get(t.getTablePosition().getRow())).setLibelle(t.getNewValue());
-            }
-        });
 
         final TableColumn colDateDebut = this.tronconsTable.getColumns().get(2);
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
-        colDateDebut.editableProperty().bindBidirectional(this.editionMode);
-        colDateDebut.setOnEditCommit(new EventHandler<CellEditEvent<TronconDigue, LocalDateTime>>() {
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> t) {
-                ((TronconDigue) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDate_debut(t.getNewValue());
-            }
-        });
+        colDateDebut.setEditable(false);
         colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
             @Override
             public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
@@ -195,29 +169,23 @@ public class DigueController {
         });
         
         final TableColumn colDateFin = this.tronconsTable.getColumns().get(3);
-        colDateFin.editableProperty().bindBidirectional(this.editionMode);
+        colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
+        colDateFin.setEditable(false);
         colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
             @Override
             public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
                 return new CustomizedLocalDateTimeTableCell();
             }
         });
-//        colDateFin.setOnEditCommit(new EventHandler<CellEditEvent<TronconDigue, LocalDateTime>>() {
-//            @Override
-//            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> t) {
-//                System.out.println("Mise à jour du champ date_fin !!!!");
-//                ((TronconDigue) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDate_fin(t.getNewValue());
-//            }
-//        });
         
         final TableColumn colSR = this.tronconsTable.getColumns().get(4);
         colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
-        colSR.editableProperty().bindBidirectional(this.editionMode);
+        colSR.setEditable(false);
         colSR.setCellFactory(TextFieldTableCell.forTableColumn());
         
         final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
         colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
-        colGeom.editableProperty().bindBidirectional(this.editionMode);
+        colGeom.setEditable(false);
         colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
             @Override
             public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
@@ -239,7 +207,7 @@ public class DigueController {
         
         
         this.tronconsTable.setItems(this.troncons);
-        this.tronconsTable.editableProperty().bindBidirectional(this.editionMode);
+        this.tronconsTable.setEditable(false);
     }
 
     public static DigueController create(final Digue digue) {
@@ -312,7 +280,7 @@ public class DigueController {
      */
     private class CustomizedGeometryTableCell extends TableCell<TronconDigue, Geometry> {
         
-        private Button button;
+        private Button button = new Button();
                 
         @Override
         protected void updateItem(Geometry item, boolean empty) {
@@ -320,7 +288,6 @@ public class DigueController {
             super.updateItem(item, empty);
             
             if(item != null) {
-                button = new Button();
                 button.setText(item.getGeometryType());
                 setGraphic(button);
                 button.setBackground(new Background(new BackgroundFill(Color.LIGHTPINK, new CornerRadii(20), Insets.EMPTY)));
@@ -362,15 +329,7 @@ public class DigueController {
 
         public CustomizedLocalDateTimeTableCell() {
             super();
-            localDateTimeTextField.disableProperty().bindBidirectional(DigueController.this.consultationMode);
-            localDateTimeTextField.setOnMouseEntered(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    getTableView().edit(getTableRow().getIndex(), getTableColumn());
-                    startEdit();
-                    commitEdit(LocalDateTime.now());
-                }
-            });
+            localDateTimeTextField.setDisable(true);
         }
         
         @Override
@@ -380,6 +339,7 @@ public class DigueController {
             
             if(item != null) {
                 this.localDateTimeTextField.setLocalDateTime(item);
+                this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
                 setGraphic(this.localDateTimeTextField);
             }
         }

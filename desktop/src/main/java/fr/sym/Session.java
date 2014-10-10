@@ -35,6 +35,7 @@ import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -146,15 +147,18 @@ public class Session {
         return this.tronconDigueRepository.getByDigue(digue);
     }
     
-    public void update(Digue digue){
+    public void update(final Digue digue){
+        digue.setDate_maj(LocalDateTime.now());
         this.digueRepository.update(digue);
     }
     
-    public void update(TronconDigue tronconDigue){
+    public void update(final TronconDigue tronconDigue){
+        tronconDigue.setDate_maj(LocalDateTime.now());
+        System.out.println("enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
         this.tronconDigueRepository.update(tronconDigue);
     }
     
-    public void update(List<TronconDigue> troncons){
+    public void update(final List<TronconDigue> troncons){
         troncons.stream().forEach((troncon) -> {
             System.out.println(troncon);
             this.update(troncon);

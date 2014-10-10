@@ -24,13 +24,12 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 
 /**
  *
- * @author samuel
+ * @author Samuel Andrés (Geomatys)
  */
-
 public class DigueRepositoryTest extends CouchDBTestCase {
 
     @Autowired
-    private DigueRepository instance;
+    private DigueRepository digueRepository;
 
     @Autowired
     private TronconDigueRepository tronconRepository;
@@ -42,7 +41,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     public void testGetAll() {
         System.out.println("getAll");
         List<Digue> expResult = new ArrayList<>();
-        List<Digue> result = instance.getAll();
+        List<Digue> result = digueRepository.getAll();
         for (Digue digue : result) {
             System.out.println(digue);
         }
@@ -59,7 +58,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setDate_maj(LocalDateTime.now());
         
-        instance.add(digue);
+        digueRepository.add(digue);
         
         for(int i=0;i<100;i++){
             TronconDigue troncon = new TronconDigue();

@@ -8,12 +8,15 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.util.List;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -89,6 +92,12 @@ public class TronconDigueController {
         }
     }
     
+    @FXML
+    private void save(ActionEvent event){
+        System.out.println("enregistrement");
+        this.session.update(this.troncon);
+    }
+    
     public void init(TronconDigue troncon){
         
         this.troncon = troncon;
@@ -120,6 +129,14 @@ public class TronconDigueController {
         this.digues.setConverter(digueStringConverter);
         this.digues.setValue(diguePropre);
         this.digues.setDisable(true);
+        this.digues.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
+                troncon.setDigueId(newValue.getId());
+            }
+        });
+        this.digues.getValue().getId();
                 
         this.date_debut.localDateTimeProperty().bindBidirectional(this.troncon.date_debutProperty());
         this.date_debut.setDisable(true);
