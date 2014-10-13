@@ -91,11 +91,11 @@
                             <children>
                                 <GridPane prefHeight="30.0" prefWidth="191.0">
                                     <children>
-                                        <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="32.0" style="-fx-background-color: none;" styleClass="btn-without-style">
+                                        <Button fx:id="addTroncon" mnemonicParsing="false" onAction="#addTroncon" prefHeight="26.0" prefWidth="32.0" style="-fx-background-color: none;" styleClass="btn-without-style">
                                             <graphic>
                                                 <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                                     <image>
-                                                        <Image url="@../images/add-icon.png" />
+                                                        <Image url="@../images/add-icon-inactif.png" />
                                                     </image>
                                                 </ImageView>
                                             </graphic>
@@ -109,7 +109,7 @@
                                                 </ImageView>
                                             </graphic>
                                         </Button>
-                                        <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="3">
+                                        <Button fx:id="deleteTroncon" mnemonicParsing="false" onAction="#deleteTroncon" styleClass="btn-without-style" GridPane.columnIndex="3">
                                             <graphic>
                                                 <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                     <image>

@@ -1,9 +1,7 @@
 package fr.sym.digue;
 
 import fr.sym.*;
-import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
-import fr.sym.digue.dto.Section;
 import fr.sym.util.WrapTreeItem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -33,35 +31,43 @@ public class DiguesController {
     private BorderPane uiRight;
 
     @FXML
-    void openSearchPopup(ActionEvent event) {
+    private void openSearchPopup(ActionEvent event) {
         System.out.println("TODO");
+    }
+    
+    private void buildTreeView(final TreeItem treeRootItem){
+        
+        this.session.getDigues().stream().forEach((digue) -> {
+            final TreeItem digueItem = new TreeItem(digue);
+            
+            this.session.getTronconDigueByDigue(digue).stream().forEach((troncon) -> {
+                final TreeItem tronconItem = new TreeItem(troncon);
+                digueItem.getChildren().add(tronconItem);
+            });
+            treeRootItem.getChildren().add(digueItem);
+        });
+        
+        this.uiTree.setRoot(treeRootItem);
     }
 
     private void init() {
 
-        final TreeItem treeRoot = new TreeItem("root");
+        this.buildTreeView(new TreeItem("root"));
+        this.uiTree.setShowRoot(false);
+        this.uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
 
-        // Build the tree-------------------------------------------------------
-        session.getDigues().stream().forEach((digue) -> {
-            treeRoot.getChildren().add(new WrapTreeItem(digue));
-        });
-
-        uiTree.setRoot(treeRoot);
-        uiTree.setShowRoot(false);
-        uiTree.setCellFactory((Object param) -> new TC());
-
-        uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> 
+        this.uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> 
         {
-            Object obj = uiTree.getSelectionModel().getSelectedItem();
+            Object obj = this.uiTree.getSelectionModel().getSelectedItem();
             if (obj instanceof TreeItem) {
                 obj = ((TreeItem) obj).getValue();
             }
 
             if (obj instanceof Digue) {
-                final DigueController digueController = DigueController.create((Digue) obj);
+                final DigueController digueController = DigueController.create(this.uiTree);
                 uiRight.setCenter(digueController.root);
             } else if (obj instanceof TronconDigue) {
-                final TronconDigueController tronconDigueController = TronconDigueController.create((TronconDigue) obj);
+                final TronconDigueController tronconDigueController = TronconDigueController.create(this.uiTree);
                 uiRight.setCenter(tronconDigueController.root);
             }
         });
@@ -86,10 +92,11 @@ public class DiguesController {
         return controller;
     }
 
-    public static class TC extends TreeCell {
+    private static class CustomizedTreeCell extends TreeCell {
 
         @Override
         protected void updateItem(Object obj, boolean empty) {
+            
             super.updateItem(obj, empty);
 
             if (obj instanceof TreeItem) {
@@ -105,10 +112,10 @@ public class DiguesController {
             // ==> Deprecated lines ?
             else if (obj instanceof DamSystem) {
                 setText(((DamSystem) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-            } else if (obj instanceof Dam) {
-                setText(((Dam) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-            } else if (obj instanceof Section) {
-                setText(((Section) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
+//            } else if (obj instanceof Dam) {
+//                setText(((Dam) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
+//            } else if (obj instanceof Section) {
+//                setText(((Section) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
             } 
             
             else if (obj instanceof Theme) {

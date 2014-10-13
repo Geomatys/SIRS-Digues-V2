@@ -8,8 +8,6 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,8 +26,11 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -56,34 +57,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DigueController {
     
     public Parent root;
+    private TreeView uiTree;
     private Digue digue;
     private ObservableList<TronconDigue> troncons;
-    private BooleanProperty editionMode;
+    //private BooleanProperty editionMode;
     
     @Autowired
     private Session session;
 
-    @FXML
-    private TextField libelle;
+    @FXML private TextField libelle;
+    @FXML private Label id;
+    @FXML private Label mode;
+    @FXML private LocalDateTimeTextField date_maj;
+    @FXML private WebView commentaire;
+    @FXML private TableView<TronconDigue> tronconsTable;
+    @FXML private ToggleButton editionButton;
+    @FXML private Button saveButton;
+    @FXML private Button addTroncon;
+    @FXML private Button deleteTroncon;
+
     
-    @FXML
-    private Label id;
-    
-    @FXML
-    private Label mode;
-    
-    @FXML
-    private LocalDateTimeTextField date_maj;
-
-    @FXML
-    private WebView commentaire;
-
-    @FXML
-    private TableView<TronconDigue> tronconsTable;
-
-    @FXML
-    private ToggleButton editionButton;
-
+    private static enum Field {
+        DATE_DEBUT("date_debut"), DATE_FIN("date_fin");
+        private final String field;
+        private Field(final String field){this.field=field;}
+        
+        @Override
+        public String toString(){return this.field;}
+    };
+      
     /*@Override
     public void initialize(URL location, ResourceBundle resources) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -93,15 +95,19 @@ public class DigueController {
     public void enableFields(ActionEvent event) {
         
         if (this.editionButton.isSelected()) {
-            this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
             this.editionButton.setText("Passer en consultation");
             this.mode.setText("Mode saisie");
             this.mode.setTextFill(Color.RED);
+            this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon.png"));
+            this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon.png"));
+            this.saveButton.setDisable(false);
         } else {
-            this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
             this.mode.setTextFill(Color.WHITE);
+            this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon-inactif.png"));
+            this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon-inactif.png"));
+            this.saveButton.setDisable(true);
         }
     }
     
@@ -109,20 +115,136 @@ public class DigueController {
     private void save(ActionEvent event){
         this.session.update(this.digue);
 //        this.session.update(this.troncons);
+        this.editionButton.setSelected(false);
+        this.enableFields(event);
+    }
+    
+    @FXML
+    private void addTroncon(){
+        
+        if (editionButton.isSelected()){
+            
+            final Stage dialog = new Stage();
+            final Label libelle = new Label("Libellé : ");
+            final TextField libelleInput = new TextField();
+            final Button ok = new Button("Ok");
+            ok.setOnAction((ActionEvent event1) -> {
+                TronconDigue tronconDigue = new TronconDigue();
+                tronconDigue.libelleProperty().bindBidirectional(libelleInput.textProperty());
+                tronconDigue.setDigueId(digue.getId());
+                this.loadTronconUI(tronconDigue);
+                this.session.add(tronconDigue);
+                dialog.hide();
+            });
+
+            final VBox vBox = new VBox();
+            vBox.setPadding(new Insets(20));
+            vBox.setAlignment(Pos.CENTER);
+            vBox.getChildren().add(libelle);
+            vBox.getChildren().add(libelleInput);
+            vBox.getChildren().add(ok);
+
+            final Scene dialogScene = new Scene(vBox);
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(root.getScene().getWindow());
+            dialog.setScene(dialogScene);
+            dialog.setTitle("Nouveau tronçon de digue.");
+            dialog.show();
+        }
+    }
+    
+    @FXML
+    private void deleteTroncon(){
+        
+        if (editionButton.isSelected()){
+
+            final TronconDigue tronconDigue = this.tronconsTable.getSelectionModel().getSelectedItem();
+            final Stage dialog = new Stage();
+            final Label libelle = new Label(tronconDigue.getLibelle());
+            final Label id = new Label(tronconDigue.getId());
+            final Label confirmationMsg = new Label("Voulez-vous vraiment supprimer ce tronçon ?");
+            final Button annuler = new Button("Annuler");
+            annuler.setOnAction((ActionEvent event1) -> {
+                dialog.hide();
+            });
+            final Button ok = new Button("Ok");
+            ok.setOnAction((ActionEvent event1) -> {
+                this.session.delete(tronconDigue);
+                this.discardTronconUI(tronconDigue);
+                dialog.hide();
+            });
+            
+            final HBox hBox = new HBox();
+            hBox.setAlignment(Pos.CENTER);
+            hBox.getChildren().add(annuler);
+            hBox.getChildren().add(ok);
+
+            final VBox vBox = new VBox();
+            vBox.setPadding(new Insets(20));
+            vBox.setAlignment(Pos.CENTER);
+            vBox.getChildren().add(libelle);
+            vBox.getChildren().add(id);
+            vBox.getChildren().add(confirmationMsg);
+            vBox.getChildren().add(hBox);
+
+            final Scene dialogScene = new Scene(vBox);
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(root.getScene().getWindow());
+            dialog.setScene(dialogScene);
+            dialog.setTitle("Suppression d'un tronçon de digue.");
+            dialog.show();
+        
+        }
+    }
+    
+    private void loadTroncons(){
+        
+        final List<TreeItem> items = ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getChildren();
+        this.troncons = FXCollections.observableArrayList();
+        items.stream().forEach((item) -> {
+            this.troncons.add((TronconDigue) item.getValue());
+        });
+        this.tronconsTable.setItems(this.troncons);
+    }
+    
+    /**
+     * Update the TreeView and TableView with the new section.
+     * @param tronconDigue 
+     */
+    private void loadTronconUI(final TronconDigue tronconDigue){
+        ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().add(new TreeItem(tronconDigue));
+        this.troncons.add(tronconDigue);
+    }
+    
+    /**
+     * Remove the section from the TreeView and the tableView.
+     * @param tronconDigue 
+     */
+    private void discardTronconUI(final TronconDigue tronconDigue){
+        for (final Object treeItem : ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren()){
+            if(tronconDigue.equals(((TreeItem) treeItem).getValue())){
+                ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().remove(treeItem);
+                this.troncons.remove(tronconDigue);
+                break;
+            }
+        }
     }
 
-    public void init(Digue digue) {
-
-        // Set the edition mode.------------------------------------------------
-        this.editionMode = new SimpleBooleanProperty(false);
-        this.editionMode.bindBidirectional(this.editionButton.selectedProperty());
+    /**
+     * 
+     * @param uiTree 
+     */
+    public void init(final TreeView uiTree) {
+        
+        // Keep the TreeView reference.
+        this.uiTree = uiTree;
         
         // Set the levee for the controller.------------------------------------
-        this.digue = digue;
+        this.digue = (Digue) ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getValue();
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
-        this.libelle.editableProperty().bindBidirectional(this.editionMode);
+        this.libelle.editableProperty().bindBidirectional(this.editionButton.selectedProperty());
         
         // Display levee's id.--------------------------------------------------
         this.id.setText(this.digue.getId());
@@ -134,13 +256,7 @@ public class DigueController {
 
         // Binding levee's comment.---------------------------------------------
         this.commentaire.getEngine().loadContent(digue.getCommentaire());
-
-        // Binding levee's sections.---------------------------------------------
-        List<TronconDigue> troncs = this.session.getTronconDigueByDigue(this.digue);
-        this.troncons = FXCollections.observableArrayList();
-        troncs.stream().forEach((troncon) -> {
-            this.troncons.add(troncon);
-        });
+        this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
         
         // Configuring table for levee's sections.------------------------------
         final TableColumn idCol = this.tronconsTable.getColumns().get(0);
@@ -164,7 +280,7 @@ public class DigueController {
         colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
             @Override
             public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-                return new CustomizedLocalDateTimeTableCell();
+                return new CustomizedLocalDateTimeTableCell(Field.DATE_DEBUT);
             }
         });
         
@@ -174,7 +290,7 @@ public class DigueController {
         colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
             @Override
             public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-                return new CustomizedLocalDateTimeTableCell();
+                return new CustomizedLocalDateTimeTableCell(Field.DATE_FIN);
             }
         });
         
@@ -205,12 +321,12 @@ public class DigueController {
         
          );*/
         
-        
-        this.tronconsTable.setItems(this.troncons);
+        this.loadTroncons();
         this.tronconsTable.setEditable(false);
+        this.saveButton.setDisable(true);
     }
 
-    public static DigueController create(final Digue digue) {
+    public static DigueController create(final TreeView uiTree) {
 
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
                 "/fr/sym/digue/digueDisplay.fxml"));
@@ -225,7 +341,7 @@ public class DigueController {
         final DigueController controller = loader.getController();
         Injector.injectDependencies(controller);
         controller.root = root;
-        controller.init(digue);
+        controller.init(uiTree);
         return controller;
     }
 
@@ -240,9 +356,13 @@ public class DigueController {
         @Override
         protected void updateItem(String item, boolean empty) {
             
+            System.out.println("CELL : "+CustomizedIdTableCell.this);
+            System.out.println("ITEM : "+item);
+            System.out.println("EMPTY : "+empty);
+            
             super.updateItem(item, empty);
             
-            if(item != null) {
+            if(item != null && !empty) {
                 button = new Button();
                 button.setText("ID");
                 setGraphic(button);
@@ -260,6 +380,7 @@ public class DigueController {
 
                     final VBox vBox = new VBox();
                     vBox.setAlignment(Pos.CENTER);
+                    vBox.setPadding(new Insets(20));
                     vBox.getChildren().add(libelle);
                     vBox.getChildren().add(id);
                     vBox.getChildren().add(ok);
@@ -304,6 +425,7 @@ public class DigueController {
 
                     final VBox vBox = new VBox();
                     vBox.setAlignment(Pos.CENTER);
+                    vBox.setPadding(new Insets(20));
                     vBox.getChildren().add(libelle);
                     vBox.getChildren().add(wkt);
                     vBox.getChildren().add(ok);
@@ -319,17 +441,20 @@ public class DigueController {
         }
     }
     
-    
     /**
      * Defines the customized table cell for displaying geometry of each levee's section.
      */
     private class CustomizedLocalDateTimeTableCell extends TableCell<TronconDigue, LocalDateTime> {
         
-        private final LocalDateTimeTextField localDateTimeTextField = new LocalDateTimeTextField();
+        
+        private final LocalDateTimeTextField localDateTimeTextField;
+        private final Field field;
 
-        public CustomizedLocalDateTimeTableCell() {
+        public CustomizedLocalDateTimeTableCell(final Field field) {
             super();
-            localDateTimeTextField.setDisable(true);
+            this.localDateTimeTextField = new LocalDateTimeTextField();
+            this.localDateTimeTextField.setDisable(true);
+            this.field = field;
         }
         
         @Override
@@ -339,7 +464,16 @@ public class DigueController {
             
             if(item != null) {
                 this.localDateTimeTextField.setLocalDateTime(item);
-                this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
+                switch(this.field){
+                    case DATE_DEBUT: 
+                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
+                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
+                        break;
+                    case DATE_FIN: 
+                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
+                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_finProperty());
+                        break;
+                }
                 setGraphic(this.localDateTimeTextField);
             }
         }
@@ -353,6 +487,7 @@ public class DigueController {
         @Override
         public void handle(MouseEvent event) {
             
+            if(editionButton.isSelected()){
                 final Stage dialog = new Stage();
                 dialog.initModality(Modality.APPLICATION_MODAL);
                 dialog.initOwner(root.getScene().getWindow());
@@ -363,6 +498,8 @@ public class DigueController {
                 htmlEditor.setHtmlText(digue.getCommentaire());
                 
                 final HBox hbox = new HBox();
+                hbox.setPadding(new Insets(20));
+                hbox.setAlignment(Pos.CENTER);
                 
                 final Button valider = new Button("Valider");
                 valider.setOnAction((ActionEvent event1) -> {
@@ -385,6 +522,7 @@ public class DigueController {
                 final Scene dialogScene = new Scene(vbox);
                 dialog.setScene(dialogScene);
                 dialog.show();
+            }
         }
     }
 }

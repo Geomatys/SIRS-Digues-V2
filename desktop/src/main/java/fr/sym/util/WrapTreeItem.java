@@ -15,9 +15,11 @@ import javafx.scene.control.TreeItem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * @deprecated : The tree is built in DiguesController to avoid calls to database 
+ * by getChildren() method.
  * @author Johann Sorel (Geomatys)
  */
+@Deprecated
 public class WrapTreeItem extends TreeItem {
 
     private boolean loaded = false;
@@ -44,10 +46,12 @@ public class WrapTreeItem extends TreeItem {
 
             if (obj instanceof Digue) {
                 candidates = session.getChildren((Digue) obj);
-            } else if (obj instanceof DamSystem) {
+            } 
+            
+            else if (obj instanceof DamSystem) {
                 candidates = session.getChildren((DamSystem) obj);
-            } else if (obj instanceof Dam) {
-                candidates = session.getChildren((Dam) obj);
+//            } else if (obj instanceof Dam) {
+//                candidates = session.getChildren((Dam) obj);
             } else if (obj instanceof Section) {
                 final Theme[] themes = Plugins.getThemes();
                 for (Theme theme : themes) {

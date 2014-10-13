@@ -128,13 +128,8 @@ public class Loader extends Application {
         
             ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/application-context.xml");
             
-            
             final MainFrameController controller = applicationContext.getBean(MainFrameController.class);
-           
             controller.show();
-            
-        
-
     }
 
     private final class LoadingTask extends Task {

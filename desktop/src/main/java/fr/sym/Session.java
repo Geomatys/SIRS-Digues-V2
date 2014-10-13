@@ -152,26 +152,50 @@ public class Session {
         this.digueRepository.update(digue);
     }
     
+    /**
+     * Update a section of the database.
+     * @param tronconDigue 
+     */
     public void update(final TronconDigue tronconDigue){
         tronconDigue.setDate_maj(LocalDateTime.now());
         System.out.println("enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
         this.tronconDigueRepository.update(tronconDigue);
     }
     
+    /**
+     * Update a list of sections of the database.
+     * @param troncons 
+     */
     public void update(final List<TronconDigue> troncons){
         troncons.stream().forEach((troncon) -> {
-            System.out.println(troncon);
             this.update(troncon);
         });
     }
+    
+    /**
+     * Add a troncon to the database.
+     * @param tronconDigue 
+     */
+    public void add(final TronconDigue tronconDigue){
+        tronconDigue.setDate_maj(LocalDateTime.now());
+        this.tronconDigueRepository.add(tronconDigue);
+    }
+    
+    /**
+     * Remove a section from the database.
+     * @param tronconDigue 
+     */
+    public void delete(final TronconDigue tronconDigue){
+        this.tronconDigueRepository.remove(tronconDigue);
+    }
 
     /**
-     * DamSystem can contain Dams or Sections.
+     * Levee can contain Sections.
      *
      * @param digue
      * @return
      */
-    public List<?> getChildren(Digue digue) {
+    public List<?> getChildren(final Digue digue) {
         return this.getTronconDigueByDigue(digue);
     }
 
@@ -212,5 +236,4 @@ public class Session {
         }
         return children;
     }
-
 }
