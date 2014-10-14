@@ -239,7 +239,7 @@
               <styles xmi:type="notation:FilteringStyle" xmi:id="_j290E0fgEeSoXJiONqf-1A"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_j29NAUfgEeSoXJiONqf-1A" fontName="Lucida Grande" fontHeight="8" fillColor="8905185"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_j29NAkfgEeSoXJiONqf-1A" x="232" y="768" width="173" height="239"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_j29NAkfgEeSoXJiONqf-1A" x="232" y="772" width="173" height="239"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_QtCgYEfhEeSoXJiONqf-1A" type="2003" element="_Qsz24EfhEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_QtCgY0fhEeSoXJiONqf-1A" type="5007"/>
@@ -4750,9 +4750,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_oBlhgEh8EeSShKVOxlfrCQ" name="numéro_secteur : EInt = 0" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Voie_acces/numéro_secteur"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Voie_acces/numéro_secteur"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_oBlhgEh8EeSShKVOxlfrCQ" name="numero_secteur : EInt = 0" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Voie_acces/numero_secteur"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Voie_acces/numero_secteur"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_qNmGEEh8EeSShKVOxlfrCQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_qNmGEUh8EeSShKVOxlfrCQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
