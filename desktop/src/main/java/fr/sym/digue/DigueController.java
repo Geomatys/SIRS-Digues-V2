@@ -115,6 +115,8 @@ public class DigueController {
     private void save(ActionEvent event){
         this.session.update(this.digue);
 //        this.session.update(this.troncons);
+        
+        // Set the fields no longer editable.-----------------------------------
         this.editionButton.setSelected(false);
         this.enableFields(event);
     }
@@ -125,7 +127,7 @@ public class DigueController {
         if (editionButton.isSelected()){
             
             final Stage dialog = new Stage();
-            final Label libelle = new Label("Libellé : ");
+            final Label label = new Label("Libellé : ");
             final TextField libelleInput = new TextField();
             final Button ok = new Button("Ok");
             ok.setOnAction((ActionEvent event1) -> {
@@ -140,7 +142,7 @@ public class DigueController {
             final VBox vBox = new VBox();
             vBox.setPadding(new Insets(20));
             vBox.setAlignment(Pos.CENTER);
-            vBox.getChildren().add(libelle);
+            vBox.getChildren().add(label);
             vBox.getChildren().add(libelleInput);
             vBox.getChildren().add(ok);
 
@@ -193,7 +195,6 @@ public class DigueController {
             dialog.setScene(dialogScene);
             dialog.setTitle("Suppression d'un tronçon de digue.");
             dialog.show();
-        
         }
     }
     
@@ -323,6 +324,8 @@ public class DigueController {
         
         this.loadTroncons();
         this.tronconsTable.setEditable(false);
+        
+        // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
     }
 

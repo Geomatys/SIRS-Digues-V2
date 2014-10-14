@@ -70,6 +70,7 @@ public class TronconDigueController {
             this.editionButton.setText("Passer en consultation");
             this.mode.setText("Mode saisie");
             this.mode.setTextFill(Color.RED);
+            this.saveButton.setDisable(false);
         } else {
             this.section_name.setEditable(false);
             this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
@@ -79,12 +80,17 @@ public class TronconDigueController {
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
             this.mode.setTextFill(Color.WHITE);
+            this.saveButton.setDisable(true);
         }
     }
     
     @FXML
     private void save(final ActionEvent event){
         this.session.update(this.troncon);
+        
+        // Set the fields no longer editable.-----------------------------------
+        this.editionButton.setSelected(false);
+        this.enableFields(event);
     }
     
     private ObservableList<Digue> getDigues(){
@@ -141,19 +147,61 @@ public class TronconDigueController {
 
             @Override
             public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
-                getDigueItems().stream().forEach((item) -> {
-                    if(((Digue) item.getValue()).equals(oldValue)){
-                        item.getChildren().remove(tronconItem);
-                    }
-                    if(((Digue) item.getValue()).equals(newValue)){
-                        item.getChildren().add(tronconItem);
-                    }
+                
+                /* TODO ?
+                Le changement de digue d'un tronçon a des implication immédiates
+                sur la mise à jour de l'arbre de navigation des entités. Il 
+                entraîne a priori le changement d'élément de l'arbre en cours de
+                sélection et donc le chargement de la vue d'un nouvel élément 
+                avant d'avoir eu la possibilité d'enregistrer les changements
+                apportés au modèle manuellement dans la base.
+                Il y a donc deux possibilités :
+                1- Ouvrir ici une fenêtre d'avertissement expliquant que cette 
+                modification est sauvegardée d'office car elle provoque un 
+                changement de vue de digue. (choix pour le moment).
+                2- Rester sur la vue du bon tronçon en sélectionnant le bon 
+                élément de l'arbre et en contournant le rechargement de la page
+                (plus compliqué mais plus léger pour l'utilisateur).
+                */
+                
+                final Stage dialog = new Stage();
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(root.getScene().getWindow());
+
+                final Label label = new Label("Le changement de digue est enregistré d'office.");
+                final Button ok = new Button("Continuer");
+                ok.setOnAction((ActionEvent event) -> {
+                    getDigueItems().stream().forEach((item) -> {
+                        if(((Digue) item.getValue()).equals(oldValue)){
+                            item.getChildren().remove(tronconItem);
+                        }
+                    });
+
+                    getDigueItems().stream().forEach((item) -> {
+                        if(((Digue) item.getValue()).equals(newValue)){
+                            item.getChildren().add(tronconItem);
+                        }
+                    });
+                    troncon.setDigueId(newValue.getId());
+                    save(null);
+                    dialog.hide();
                 });
-                troncon.setDigueId(newValue.getId());
-                // TODO : DEUX SOLUTIONS : 
-                // 1- Ouvrir ici une fenêtre d'avertissement expliquant que cette modification est sauvegardée d'office car elle provoque un changement de vue de digue.
-                // 2- Switcher de digue en restant sur la vue du bon tronçon.
-                save(null);
+                final Button annuler = new Button("Annuler");
+                annuler.setOnAction((ActionEvent event) -> {
+                    dialog.hide();
+                });
+                
+                final HBox hBox = new HBox();
+                hBox.getChildren().add(ok);
+                hBox.getChildren().add(annuler);
+                
+                final VBox vBox = new VBox();
+                vBox.getChildren().add(label);
+                vBox.getChildren().add(hBox);
+                
+                final Scene dialogScene = new Scene(vBox);
+                dialog.setScene(dialogScene);
+                dialog.show();
             }
         });
         this.digues.getValue().getId();
@@ -162,6 +210,9 @@ public class TronconDigueController {
         this.date_debut.setDisable(true);
         this.date_fin.localDateTimeProperty().bindBidirectional(this.troncon.date_finProperty());
         this.date_fin.setDisable(true);
+        
+        // Disable the save button.---------------------------------------------
+        this.saveButton.setDisable(true);
     }
     
     public static TronconDigueController create(TreeView uiTree) {
@@ -193,12 +244,8 @@ public class TronconDigueController {
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.initOwner(root.getScene().getWindow());
 
-            final VBox vbox = new VBox();
-
             final HTMLEditor htmlEditor = new HTMLEditor();
             htmlEditor.setHtmlText(troncon.getCommentaire());
-
-            final HBox hbox = new HBox();
 
             final Button valider = new Button("Valider");
             valider.setOnAction((ActionEvent event1) -> {
@@ -212,13 +259,15 @@ public class TronconDigueController {
                 dialog.hide();
             });
 
-            hbox.getChildren().add(valider);
-            hbox.getChildren().add(annuler);
+            final HBox hBox = new HBox();
+            hBox.getChildren().add(valider);
+            hBox.getChildren().add(annuler);
 
-            vbox.getChildren().add(htmlEditor);
-            vbox.getChildren().add(hbox);
+            final VBox vBox = new VBox();
+            vBox.getChildren().add(htmlEditor);
+            vBox.getChildren().add(hBox);
 
-            final Scene dialogScene = new Scene(vbox);
+            final Scene dialogScene = new Scene(vBox);
             dialog.setScene(dialogScene);
             dialog.show();
         }
