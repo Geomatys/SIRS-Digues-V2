@@ -164,44 +164,49 @@ public class TronconDigueController {
                 (plus compliqué mais plus léger pour l'utilisateur).
                 */
                 
-                final Stage dialog = new Stage();
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(root.getScene().getWindow());
+                // Do not open dialog if the levee list is reset to the old value.
+                if (!newValue.equals(diguePropre)){
+                    
+                    final Stage dialog = new Stage();
+                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    dialog.initOwner(root.getScene().getWindow());
 
-                final Label label = new Label("Le changement de digue est enregistré d'office.");
-                final Button ok = new Button("Continuer");
-                ok.setOnAction((ActionEvent event) -> {
-                    getDigueItems().stream().forEach((item) -> {
-                        if(((Digue) item.getValue()).equals(oldValue)){
-                            item.getChildren().remove(tronconItem);
-                        }
+                    final Label label = new Label("Le changement de digue est enregistré d'office.");
+                    final Button ok = new Button("Continuer");
+                    ok.setOnAction((ActionEvent event) -> {
+                        getDigueItems().stream().forEach((item) -> {
+                            if(((Digue) item.getValue()).equals(oldValue)){
+                                item.getChildren().remove(tronconItem);
+                            }
+                        });
+
+                        getDigueItems().stream().forEach((item) -> {
+                            if(((Digue) item.getValue()).equals(newValue)){
+                                item.getChildren().add(tronconItem);
+                            }
+                        });
+                        troncon.setDigueId(newValue.getId());
+                        save(null);
+                        dialog.hide();
+                    });
+                    final Button annuler = new Button("Annuler");
+                    annuler.setOnAction((ActionEvent event) -> {
+                        digues.setValue(diguePropre);
+                        dialog.hide();
                     });
 
-                    getDigueItems().stream().forEach((item) -> {
-                        if(((Digue) item.getValue()).equals(newValue)){
-                            item.getChildren().add(tronconItem);
-                        }
-                    });
-                    troncon.setDigueId(newValue.getId());
-                    save(null);
-                    dialog.hide();
-                });
-                final Button annuler = new Button("Annuler");
-                annuler.setOnAction((ActionEvent event) -> {
-                    dialog.hide();
-                });
-                
-                final HBox hBox = new HBox();
-                hBox.getChildren().add(ok);
-                hBox.getChildren().add(annuler);
-                
-                final VBox vBox = new VBox();
-                vBox.getChildren().add(label);
-                vBox.getChildren().add(hBox);
-                
-                final Scene dialogScene = new Scene(vBox);
-                dialog.setScene(dialogScene);
-                dialog.show();
+                    final HBox hBox = new HBox();
+                    hBox.getChildren().add(ok);
+                    hBox.getChildren().add(annuler);
+
+                    final VBox vBox = new VBox();
+                    vBox.getChildren().add(label);
+                    vBox.getChildren().add(hBox);
+
+                    final Scene dialogScene = new Scene(vBox);
+                    dialog.setScene(dialogScene);
+                    dialog.show();
+                }
             }
         });
         this.digues.getValue().getId();
