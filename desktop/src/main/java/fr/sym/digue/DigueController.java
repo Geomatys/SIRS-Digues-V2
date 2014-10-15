@@ -261,7 +261,7 @@ public class DigueController {
         
         // Configuring table for levee's sections.------------------------------
         final TableColumn idCol = this.tronconsTable.getColumns().get(0);
-        idCol.setCellValueFactory(new PropertyValueFactory<>("libelle"));
+        idCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
         idCol.setEditable(false);
         idCol.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
             @Override
@@ -271,7 +271,7 @@ public class DigueController {
         });
 
         final TableColumn colName = this.tronconsTable.getColumns().get(1);
-        colName.setCellValueFactory(new PropertyValueFactory<>("libelle"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("nom"));
         colName.setEditable(false);
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
 
