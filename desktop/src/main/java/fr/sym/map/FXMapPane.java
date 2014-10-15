@@ -26,6 +26,7 @@ import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
+import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
@@ -91,7 +92,8 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
         uiTree.getMenuItems().add(new DeleteItem());
-        uiTree.getTreetable().getColumns().add(new MapItemSelectableColumn());
+        uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
+        uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());
                 
         splitButton.setOnAction((ActionEvent event) -> {
             if(mapsplit.getItems().contains(paneMap2)){
