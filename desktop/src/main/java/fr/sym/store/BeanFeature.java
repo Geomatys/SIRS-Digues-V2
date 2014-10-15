@@ -1,6 +1,7 @@
 
 package fr.sym.store;
 
+import com.vividsolutions.jts.geom.Geometry;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import org.opengis.filter.identity.FeatureId;
 import org.opengis.filter.identity.Identifier;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.Envelope;
-import org.opengis.geometry.Geometry;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
@@ -85,6 +85,7 @@ public class BeanFeature extends AbstractFeature<Collection<Property>>{
                     final Class propClazz = pd.getReadMethod().getReturnType();
                     if(Geometry.class.isAssignableFrom(propClazz)){
                         ftb.add(propName, propClazz, crs);
+                        ftb.setDefaultGeometry(propName);
                     }else{
                         ftb.add(propName, propClazz);
                     }
@@ -93,7 +94,6 @@ public class BeanFeature extends AbstractFeature<Collection<Property>>{
             } catch (IntrospectionException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
-            ftb.setDefaultGeometry("geometry");
             featureType = ftb.buildFeatureType();
         }
         
@@ -150,12 +150,11 @@ public class BeanFeature extends AbstractFeature<Collection<Property>>{
 
         @Override
         public Identifier getIdentifier() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return null;
         }
 
         @Override
         public void validate() {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override

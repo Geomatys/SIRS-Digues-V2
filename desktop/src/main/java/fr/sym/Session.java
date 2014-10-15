@@ -44,7 +44,7 @@ import java.time.LocalDateTime;
 @Component
 public class Session {
 
-    private final static CoordinateReferenceSystem PROJECTION;
+    public static final CoordinateReferenceSystem PROJECTION;
     
     static {
         try {
@@ -55,6 +55,8 @@ public class Session {
     }
     
     private MapContext mapContext;
+    private final MapItem symadremGroup = MapBuilder.createItem();
+    private final MapItem backgroundGroup = MapBuilder.createItem();
 
     
     @Autowired
@@ -77,14 +79,13 @@ public class Session {
      */
     public synchronized MapContext getMapContext() {
         if(mapContext==null){
-            mapContext = MapBuilder.createContext(CommonCRS.WGS84.normalizedGeographic());
+            mapContext = MapBuilder.createContext(PROJECTION);
             mapContext.setName("Carte");
 
             try {
                 //symadrem layers
-                final MapItem symadrem = MapBuilder.createItem();
-                symadrem.setName("Systeme de digue");
-                mapContext.items().add(0,symadrem);
+                symadremGroup.setName("Systeme de digue");
+                mapContext.items().add(0,symadremGroup);
 
                 final SymadremStore symStore = new SymadremStore(this,null,PROJECTION);
                 final org.geotoolkit.data.session.Session symSession = symStore.createSession(false);
@@ -93,13 +94,13 @@ public class Session {
                     final MutableStyle style = RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType());
                     final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
                     fml.setName(name.getLocalPart());
-                    symadrem.items().add(fml);
+                    symadremGroup.items().add(fml);
                 }
+                mapContext.setAreaOfInterest(mapContext.getBounds());
 
                 //Fond de plan
-                final MapItem fond = MapBuilder.createItem();
-                fond.setName("Fond de plan");
-                mapContext.items().add(0,fond);
+                backgroundGroup.setName("Fond de plan");
+                mapContext.items().add(0,backgroundGroup);
                 final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
 
                 for (Name n : store.getNames()) {
@@ -109,9 +110,8 @@ public class Session {
                     cml.setDescription(new DefaultDescription(
                             new SimpleInternationalString("Open Street Map"),
                             new SimpleInternationalString("Open Street Map")));
-                    fond.items().add(cml);
+                    backgroundGroup.items().add(cml);
                 }
-                mapContext.setAreaOfInterest(mapContext.getBounds());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -119,6 +119,23 @@ public class Session {
         return mapContext;
     }
 
+    public synchronized MapItem getSymadremLayerGroup() {
+        getMapContext();
+        return symadremGroup;
+    }
+
+    public synchronized MapItem getBackgroundLayerGroup() {
+        getMapContext();
+        return backgroundGroup;
+    }
+
+    /**
+     * Liste de tout les repositories CouchDB.
+     */
+    public List<Repository<?>> getRepositories() {
+        return repositories;
+    }
+    
     public List<DamSystem> getDamSystems() {
         //TODO database binding
         final List<DamSystem> damSystems = new ArrayList<>();

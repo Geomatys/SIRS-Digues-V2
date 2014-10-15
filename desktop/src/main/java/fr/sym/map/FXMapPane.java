@@ -1,19 +1,30 @@
 
 package fr.sym.map;
 
+import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
+import java.awt.geom.NoninvertibleTransformException;
+import java.util.Date;
 import java.util.logging.Level;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Button;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
@@ -26,9 +37,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.map.MapContext;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -37,13 +46,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class FXMapPane extends BorderPane {
     
+    public static final Image ICON_SPLIT= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COLUMNS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    
     private final MapContext context;
-    private final FXMap uiMap;
+    private final SplitPane mapsplit = new SplitPane();
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
-    private final FXCoordinateBar uiCoordBar;
     private final FXMapContextTree uiTree;
+    private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
+    private final ToolBar uiSplitBar = new ToolBar(splitButton);
+    
+    private final FXMap uiMap1 = new FXMap(false);
+    private final FXMap uiMap2 = new FXMap(false);
+    private final FXCoordinateBar uiCoordBar1 = new FXCoordinateBar(uiMap1);
+    private final FXCoordinateBar uiCoordBar2 = new FXCoordinateBar(uiMap2);
+    private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
+    private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
+    private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
 
     @Autowired
     private Session session;
@@ -53,38 +73,45 @@ public class FXMapPane extends BorderPane {
         
         context = session.getMapContext();
         
-        uiMap = new FXMap(false);
-        uiMap.getContainer().setContext(context);
-        uiAddBar = new FXAddDataBar(uiMap);
-        uiNavBar = new FXNavigationBar(uiMap);
-        uiToolBar = new FXGeoToolBar(uiMap);
-        uiCoordBar = new FXCoordinateBar(uiMap);
-        uiCoordBar.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
+        uiCoordBar2.setCrsButtonVisible(false);
+        uiMap1.getContainer().setContext(context);
+        uiMap2.getContainer().setContext(context);
+        synchronizer.addCanvas(uiMap1.getCanvas(),true,true);
+        synchronizer.addCanvas(uiMap2.getCanvas(),true,true);
+        
+        uiAddBar = new FXAddDataBar(uiMap1);
+        uiNavBar = new FXNavigationBar(uiMap1);
+        uiToolBar = new FXGeoToolBar(uiMap1);
+        uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree(context);
         uiTree.getTreetable().setShowRoot(false);
         uiTree.getMenuItems().add(new OpacityItem());
         uiTree.getMenuItems().add(new SeparatorMenuItem());
-        uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap));
+        uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
-        uiTree.getMenuItems().add(new ZoomToItem(uiMap));
+        uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(new MapItemSelectableColumn());
-        
-        try {
-            uiMap.getCanvas().setObjectiveCRS(CRS.decode("EPSG:3857"));
-        } catch (FactoryException | TransformException ex) {
-            Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-        }
-        
-        final SplitPane split = new SplitPane();
                 
+        splitButton.setOnAction((ActionEvent event) -> {
+            if(mapsplit.getItems().contains(paneMap2)){
+                mapsplit.getItems().remove(paneMap2);
+            }else{
+                mapsplit.setDividerPositions(0.5);
+                mapsplit.getItems().add(paneMap2);
+            }
+        });
+        
+        
         final GridPane topgrid = new GridPane();
         uiAddBar.setMaxHeight(Double.MAX_VALUE);
         uiNavBar.setMaxHeight(Double.MAX_VALUE);
         uiToolBar.setMaxHeight(Double.MAX_VALUE);
+        uiSplitBar.setMaxHeight(Double.MAX_VALUE);
         topgrid.add(uiAddBar,  0, 0);
         topgrid.add(uiNavBar,  1, 0);
         topgrid.add(uiToolBar, 2, 0);
+        topgrid.add(uiSplitBar, 4, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
@@ -96,13 +123,14 @@ public class FXMapPane extends BorderPane {
         topgrid.getColumnConstraints().addAll(col0,col1,col2,col3);
         topgrid.getRowConstraints().addAll(row0);
         
+        mapsplit.getItems().add(paneMap1);
         
         final BorderPane border = new BorderPane();
         border.setTop(topgrid);
-        border.setCenter(uiMap);
-        border.setBottom(uiCoordBar);
+        border.setCenter(mapsplit);
         
         
+        final SplitPane split = new SplitPane();
         split.setOrientation(Orientation.HORIZONTAL);
         split.getItems().add(uiTree);
         split.getItems().add(border);
@@ -110,7 +138,18 @@ public class FXMapPane extends BorderPane {
         
         setCenter(split);
         
-        uiMap.setHandler(new FXPanHandler(uiMap, false));
+        uiMap1.setHandler(new FXPanHandler(uiMap1, false));
+        uiMap2.setHandler(new FXPanHandler(uiMap2, false));
+        
+        //deplacer à la date du jour
+        final Date time = new Date();
+        try {
+            uiMap1.getCanvas().setObjectiveCRS(Session.PROJECTION);
+            uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
+            uiMap1.getCanvas().setTemporalRange(time,time);
+        } catch (NoninvertibleTransformException | TransformException ex) {
+            Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+        }
     }
 
     public MapContext getMapContext() {
@@ -118,7 +157,7 @@ public class FXMapPane extends BorderPane {
     }
 
     public FXMap getUiMap() {
-        return uiMap;
+        return uiMap1;
     }
             
 }

@@ -2,7 +2,7 @@
 package fr.sym.store;
 
 import fr.sym.Session;
-import fr.symadrem.sirs.core.model.TronconDigue;
+import fr.symadrem.sirs.core.Repository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,8 +33,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * @author Johann Sorel (Geomatys)
  */
 public class SymadremStore extends AbstractFeatureStore{
-
-    private static final Class[] BEAN_CLASSES = {TronconDigue.class};
     
     private final Session session;
     
@@ -81,21 +79,32 @@ public class SymadremStore extends AbstractFeatureStore{
         if(types!=null) return;
         
         types = new HashMap<>();
-        for(Class beanClass : BEAN_CLASSES){
-            final BeanFeature.Mapping mapping = new BeanFeature.Mapping(beanClass, getDefaultNamespace(), crs, "id");
-            types.put(mapping.featureType.getName(), mapping);
-        } 
+        
+        for(Repository repo : session.getRepositories()){
+            final Class pojoClass = repo.getModelClass();
+            final BeanFeature.Mapping mapping = new BeanFeature.Mapping(pojoClass, getDefaultNamespace(), crs, "id");
+            if(mapping.featureType.getCoordinateReferenceSystem()!=null){
+                //liste uniquement des données géographique
+                types.put(mapping.featureType.getName(), mapping);
+            }
+        }
     }
     
     @Override
     public FeatureReader getFeatureReader(Query query) throws DataStoreException {
         typeCheck(query.getTypeName());
         
-        final List candidates;
+        List candidates = null;
         final BeanFeature.Mapping mapping = types.get(query.getTypeName());
-        if(query.getTypeName().getLocalPart().equals(TronconDigue.class.getSimpleName())){
-            candidates = session.getTroncons();
-        }else{
+        
+        for(Repository repo : session.getRepositories()){
+            final Class pojoClass = repo.getModelClass();
+            if(query.getTypeName().getLocalPart().equals(pojoClass.getSimpleName())){
+                candidates = repo.getAll();
+            }
+        }
+        
+        if(candidates==null){
             throw new DataStoreException("Unexpected type : "+query.getTypeName());
         }
                 
