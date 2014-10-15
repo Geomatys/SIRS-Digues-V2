@@ -56,7 +56,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
         digue.setLibelle("une digue");
 
-        digue.setDate_maj(LocalDateTime.now());
+        digue.setDateMaj(LocalDateTime.now());
         
         digueRepository.add(digue);
         
@@ -65,7 +65,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setCommentaire("Traoncon1");
             troncon.setDigueId(digue.getId());
             troncon.setGeometry(createPoint());
-            troncon.setDate_maj(LocalDateTime.now());
+            troncon.setDateMaj(LocalDateTime.now());
             
             tronconRepository.add(troncon);
         }

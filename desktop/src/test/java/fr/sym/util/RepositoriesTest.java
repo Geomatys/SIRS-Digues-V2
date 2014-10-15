@@ -89,7 +89,7 @@ public class RepositoriesTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            digue.setDate_maj(LocalDateTime.now());
+            digue.setDateMaj(LocalDateTime.now());
             digueRepository.add(digue);
         }
     }
@@ -99,7 +99,7 @@ public class RepositoriesTest {
         final int nbTroncons = 30;
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
-            tron.setLibelle("Le tronçon " + i);
+            tron.setNom("Le tronçon " + i);
             tron.setCommentaire("<html><body><b>Tronçon " + i + " :</b> Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. Sed non risus. Suspendisse lectus "
                     + "tortor, dignissim sit amet, adipiscing nec, ultricies "
@@ -119,7 +119,7 @@ public class RepositoriesTest {
                     + "ante non diam sodales hendrerit.</body></html>");
             tron.setDate_debut(LocalDateTime.now());
             tron.setDate_fin(LocalDateTime.now());
-            tron.setDate_maj(LocalDateTime.now());
+            tron.setDateMaj(LocalDateTime.now());
             
             tron.setGeometry(createPoint());
             

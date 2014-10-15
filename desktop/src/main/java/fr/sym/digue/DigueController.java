@@ -132,7 +132,7 @@ public class DigueController {
             final Button ok = new Button("Ok");
             ok.setOnAction((ActionEvent event1) -> {
                 TronconDigue tronconDigue = new TronconDigue();
-                tronconDigue.libelleProperty().bindBidirectional(libelleInput.textProperty());
+                tronconDigue.nomProperty().bindBidirectional(libelleInput.textProperty());
                 tronconDigue.setDigueId(digue.getId());
                 this.loadTronconUI(tronconDigue);
                 this.session.add(tronconDigue);
@@ -162,7 +162,7 @@ public class DigueController {
 
             final TronconDigue tronconDigue = this.tronconsTable.getSelectionModel().getSelectedItem();
             final Stage dialog = new Stage();
-            final Label libelle = new Label(tronconDigue.getLibelle());
+            final Label name = new Label(tronconDigue.getNom());
             final Label id = new Label(tronconDigue.getId());
             final Label confirmationMsg = new Label("Voulez-vous vraiment supprimer ce tronçon ?");
             final Button annuler = new Button("Annuler");
@@ -184,7 +184,7 @@ public class DigueController {
             final VBox vBox = new VBox();
             vBox.setPadding(new Insets(20));
             vBox.setAlignment(Pos.CENTER);
-            vBox.getChildren().add(libelle);
+            vBox.getChildren().add(name);
             vBox.getChildren().add(id);
             vBox.getChildren().add(confirmationMsg);
             vBox.getChildren().add(hBox);
@@ -251,9 +251,9 @@ public class DigueController {
         this.id.setText(this.digue.getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setLocalDateTime(this.digue.getDate_maj());
+        this.date_maj.setLocalDateTime(this.digue.getDateMaj());
         this.date_maj.setDisable(true);
-        this.date_maj.localDateTimeProperty().bindBidirectional(this.digue.date_majProperty());
+        this.date_maj.localDateTimeProperty().bindBidirectional(this.digue.dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
         this.commentaire.getEngine().loadContent(digue.getCommentaire());
@@ -374,7 +374,7 @@ public class DigueController {
                 button.setOnAction((ActionEvent event) -> {
                     final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedIdTableCell.this.getParent()).getItem();
                     final Stage dialog = new Stage();
-                    final Label libelle = new Label(troncon.getLibelle());
+                    final Label nom = new Label(troncon.getNom());
                     final Label id = new Label(troncon.getId());
                     final Button ok = new Button("Ok");
                     ok.setOnAction((ActionEvent event1) -> {
@@ -384,7 +384,7 @@ public class DigueController {
                     final VBox vBox = new VBox();
                     vBox.setAlignment(Pos.CENTER);
                     vBox.setPadding(new Insets(20));
-                    vBox.getChildren().add(libelle);
+                    vBox.getChildren().add(nom);
                     vBox.getChildren().add(id);
                     vBox.getChildren().add(ok);
 
@@ -419,7 +419,7 @@ public class DigueController {
                 button.setOnAction((ActionEvent event) -> {
                     final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedGeometryTableCell.this.getParent()).getItem();
                     final Stage dialog = new Stage();
-                    final Label libelle = new Label(troncon.getLibelle());
+                    final Label nom = new Label(troncon.getNom());
                     final Label wkt = new Label(troncon.getGeometry().toText());
                     final Button ok = new Button("Ok");
                     ok.setOnAction((ActionEvent event1) -> {
@@ -429,7 +429,7 @@ public class DigueController {
                     final VBox vBox = new VBox();
                     vBox.setAlignment(Pos.CENTER);
                     vBox.setPadding(new Insets(20));
-                    vBox.getChildren().add(libelle);
+                    vBox.getChildren().add(nom);
                     vBox.getChildren().add(wkt);
                     vBox.getChildren().add(ok);
 

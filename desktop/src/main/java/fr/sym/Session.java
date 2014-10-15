@@ -1,5 +1,6 @@
 package fr.sym;
 
+import fr.sym.digue.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +31,16 @@ import fr.sym.digue.dto.Dam;
 import fr.sym.digue.dto.DamSystem;
 import fr.sym.digue.dto.Section;
 import fr.sym.store.SymadremStore;
+import fr.sym.util.DbMapper;
 import fr.symadrem.sirs.core.Repository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -69,7 +74,6 @@ public class Session {
     private TronconDigueRepository tronconDigueRepository;
 
     public Session() {
-        
     }
 
     /**
@@ -165,7 +169,7 @@ public class Session {
     }
     
     public void update(final Digue digue){
-        digue.setDate_maj(LocalDateTime.now());
+        digue.setDateMaj(LocalDateTime.now());
         this.digueRepository.update(digue);
     }
     
@@ -174,7 +178,7 @@ public class Session {
      * @param tronconDigue 
      */
     public void update(final TronconDigue tronconDigue){
-        tronconDigue.setDate_maj(LocalDateTime.now());
+        tronconDigue.setDateMaj(LocalDateTime.now());
         System.out.println("enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
         this.tronconDigueRepository.update(tronconDigue);
     }
@@ -194,7 +198,7 @@ public class Session {
      * @param tronconDigue 
      */
     public void add(final TronconDigue tronconDigue){
-        tronconDigue.setDate_maj(LocalDateTime.now());
+        tronconDigue.setDateMaj(LocalDateTime.now());
         this.tronconDigueRepository.add(tronconDigue);
     }
     

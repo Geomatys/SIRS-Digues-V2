@@ -31,7 +31,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     public void testGetAll() {
         System.out.println("getAll");
         for (TronconDigue troncon : tronconRepository.getAll()) {
-            System.out.println(troncon.getLibelle());
+            System.out.println(troncon.getNom());
         }
     }
 }

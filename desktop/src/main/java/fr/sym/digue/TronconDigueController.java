@@ -7,7 +7,6 @@ import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
-import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -122,7 +121,7 @@ public class TronconDigueController {
         this.troncon = (TronconDigue) (tronconItem).getValue();
         
         this.section_name.setEditable(false);
-        this.section_name.textProperty().bindBidirectional(this.troncon.libelleProperty());
+        this.section_name.textProperty().bindBidirectional(this.troncon.nomProperty());
         
         this.commentaire.getEngine().loadContent(this.troncon.getCommentaire());
         

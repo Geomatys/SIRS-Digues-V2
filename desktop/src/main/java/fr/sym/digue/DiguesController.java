@@ -2,7 +2,6 @@ package fr.sym.digue;
 
 import fr.sym.*;
 import fr.sym.digue.dto.DamSystem;
-import fr.sym.util.WrapTreeItem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -106,7 +105,7 @@ public class DiguesController {
             if (obj instanceof Digue) {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
             } else if (obj instanceof TronconDigue) {
-                this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
+                this.setText(((TronconDigue) obj).getNom() + " (" + getTreeItem().getChildren().size() + ") ");
             } 
             
             // ==> Deprecated lines ?
