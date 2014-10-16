@@ -4,17 +4,20 @@ import java.io.IOException;
 import java.time.Instant;
 
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 
 
 public class InstantDeserializer extends JsonDeserializer<Instant>{
 
 
-    @Override
-    public Instant deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException, org.codehaus.jackson.JsonProcessingException {
-        return Instant.parse(jp.getText());
-    }
+	@Override
+	public Instant deserialize(com.fasterxml.jackson.core.JsonParser jp,
+			DeserializationContext ctxt) throws IOException,
+			JsonProcessingException {
+		return Instant.parse(jp.getText());
+	}
 
 }

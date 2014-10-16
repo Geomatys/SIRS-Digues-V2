@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Fondation;
+import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import org.junit.Ignore;
 
 /**
@@ -26,12 +29,20 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     /**
      * Test of getAll method, of class TronconDigueRepository.
      */
-    @Ignore
     @Test
     public void testGetAll() {
         System.out.println("getAll");
         for (TronconDigue troncon : tronconRepository.getAll()) {
             System.out.println(troncon.getNom());
+        	for(Structure struct: troncon.getStuctures()) {
+        		System.out.println(struct.getDocumentId());
+        		if (struct instanceof Fondation) {
+					Fondation new_name = (Fondation) struct;
+				}
+        	}
         }
     }
+    
+    
+   
 }
