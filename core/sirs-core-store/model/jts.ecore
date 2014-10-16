@@ -3,4 +3,5 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="jts" nsURI="http://geomatys.com/jts" nsPrefix="jst">
   <eClassifiers xsi:type="ecore:EDataType" name="Geometry" instanceTypeName="Geometry"/>
   <eClassifiers xsi:type="ecore:EDataType" name="Point" instanceTypeName="Point"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="TypeRive"/>
 </ecore:EPackage>
