@@ -15,6 +15,7 @@ import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 
 import org.junit.Ignore;
+import fr.symadrem.sirs.core.model.TypeRive;
 
 /**
  *
@@ -43,6 +44,17 @@ public class TronconRepositoryTest extends CouchDBTestCase {
         }
     }
     
-    
-   
+//    @Test 
+//    public void testRive(){
+//        TronconDigue troncon = new TronconDigue();
+//        troncon.setRive(TypeRive.DROITE);
+//        tronconRepository.add(troncon);
+//        
+//        
+//        TronconDigue troncon2 = tronconRepository.get(troncon.getId());
+//        System.out.println(troncon2==troncon);
+//        System.out.println(troncon2.getRive());
+////        
+////        tronconRepository.remove(troncon);
+//    }
 }

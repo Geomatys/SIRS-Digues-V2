@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import jfxtras.scene.control.LocalDateTimeTextField;
 import org.springframework.beans.factory.annotation.Autowired;
+import fr.symadrem.sirs.core.model.TypeRive;
 
 /**
  *
@@ -57,6 +58,7 @@ public class TronconDigueController {
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
     @FXML private Label mode;
+    @FXML private ChoiceBox<TypeRive> typeRiveChoiceBox;
     
     @FXML
     private void enableFields(final ActionEvent event){
@@ -209,6 +211,20 @@ public class TronconDigueController {
             }
         });
         this.digues.getValue().getId();
+        
+        this.typeRiveChoiceBox.setItems(FXCollections.observableArrayList(TypeRive.getTypes()));
+        final StringConverter<TypeRive> typesRivesStringConverter = new StringConverter<TypeRive>() {
+        
+            @Override
+            public String toString(TypeRive type) {return type.toString();}
+
+            // TODO ?
+            @Override
+            public TypeRive fromString(String string) {return null;}
+        };
+        
+        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
+        this.typeRiveChoiceBox.setValue(TypeRive.toTypeRive(this.troncon.getRive()));
                 
         this.date_debut.localDateTimeProperty().bindBidirectional(this.troncon.date_debutProperty());
         this.date_debut.setDisable(true);

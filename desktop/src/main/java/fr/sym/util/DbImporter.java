@@ -34,16 +34,19 @@ import java.util.logging.Logger;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.data.shapefile.shp.ShapeHandler;
 import org.geotoolkit.data.shapefile.shp.ShapeType;
+import org.geotoolkit.factory.Hints;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.lang.Setup;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
-import types.TypeRive;
+import fr.symadrem.sirs.core.model.TypeRive;
 
 /**
  *
@@ -344,7 +347,7 @@ public class DbImporter {
      TYPE_RESEAU_EAU
      TYPE_RESEAU_TELECOMMUNIC
      TYPE_REVETEMENT
-     = TYPE_RIVE
+     * TYPE_RIVE
      TYPE_SERVITUDE
      TYPE_SEUIL
      TYPE_SIGNATAIRE
@@ -361,6 +364,10 @@ public class DbImporter {
      TYPE_VEGETATION_STRATE_HAUTEUR
      TYPE_VOIE_SUR_DIGUE
      UTILISATION_CONDUITE
+    
+    
+    
+    CARTO=======================================================================
      */
 
     private DbImporter() throws IOException {
@@ -385,7 +392,7 @@ public class DbImporter {
         return this.accessCartoDatabase;
     }
 
-    /*
+    /*==========================================================================
      DIGUE
     ----------------------------------------------------------------------------
      x ID_DIGUE
@@ -444,7 +451,7 @@ public class DbImporter {
         });
     }
 
-    /*
+    /*==========================================================================
      ORGANISME.
     ----------------------------------------------------------------------------
      x ID_ORGANISME
@@ -631,7 +638,7 @@ public class DbImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID.toString())),
-                        TypeRive.valueOf(row.getString(TypeRiveColumns.LIBELLE.toString())));
+                        TypeRive.toTypeRive(row.getString(TypeRiveColumns.LIBELLE.toString())));
         }
         System.out.println("TYPES !!!!");
         System.out.println(typesRive);
@@ -682,19 +689,22 @@ public class DbImporter {
                 final ShapeHandler handler = shapeType.getShapeHandler(false);
                 Geometry geom = (Geometry) handler.read(bb, shapeType);
 
-                //final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27583"), CRS.decode("EPSG:2154"));
-                //geom = JTS.transform(geom, lambertToRGF);
+                
+//                final CoordinateReferenceSystem crsData = CRS.parseWKT("PROJCS[\"NTF_Lambert_Zone_III\",GEOGCS[\"GCS_NTF\",DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_IGN\",6378249.2,293.46602]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Lambert_Conformal_Conic\"],PARAMETER[\"False_Easting\",600000.0],PARAMETER[\"False_Northing\",200000.0],PARAMETER[\"Central_Meridian\",2.3372291667],PARAMETER[\"Standard_Parallel_1\",43.1992913889],PARAMETER[\"Standard_Parallel_2\",44.9960938889],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",44.1],UNIT[\"Meter\",1.0]]");
+                
+                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
+                geom = JTS.transform(geom, lambertToRGF);
 
                 tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID.toString())),
                         geom);
-//            } catch (FactoryException ex) {
-//                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (FactoryException ex) {
+                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
             } catch (DataStoreException ex) {
                 Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
             } catch (MismatchedDimensionException ex) {
                 Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (TransformException ex) {
-//                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformException ex) {
+                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return tronconDigueGeom;
@@ -707,7 +717,7 @@ public class DbImporter {
      x ID_TRONCON_GESTION
      x ID_ORG_GESTIONNAIRE // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
      * ID_DIGUE
-     = ID_TYPE_RIVE // On part a priori sur une enumeration statique.
+     * ID_TYPE_RIVE // On part a priori sur une enumeration statique.
      * DATE_DEBUT_VAL_TRONCON
      * DATE_FIN_VAL_TRONCON
      * NOM_TRONCON_GESTION
@@ -719,7 +729,7 @@ public class DbImporter {
      * DATE_DERNIERE_MAJ
     ----------------------------------------------------------------------------
      * TODO : s'occuper du lien avec les gestionnaires.
-     TODO : s'occuper du lien avec les rives.
+     * TODO : s'occuper du lien avec les rives.
      TODO : s'occuper du lien avec les systèmes de repérage.
      */
     private static enum TronconGestionDigueColumns {
@@ -800,19 +810,12 @@ public class DbImporter {
     }
     
     
-    /*
-    final byte[] bytes = row.getBytes(propName);
-                        final ByteBuffer bb = ByteBuffer.wrap(bytes);
-                        bb.order(ByteOrder.LITTLE_ENDIAN);
-                        final int id = bb.getInt();
-                        final ShapeType shapeType = ShapeType.forID(id);
-                        final ShapeHandler handler = shapeType.getShapeHandler(false);
-                        final Geometry geom = (Geometry) handler.read(bb, shapeType);
-                        next.setPropertyValue(propName, geom);
-    ****************************************************************************
-    */
 
     public static void main(String[] args) {
+                //Geotoolkit startup
+                Setup.initialize(null);
+                //work in lazy mode, do your best for lenient datum shift
+                Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
         try {
             final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/import-context.xml");
             final DbImporter importer = applicationContext.getBean(DbImporter.class);
@@ -831,7 +834,11 @@ public class DbImporter {
             importer.getCartoDatabase().getTable("CARTO_TRONCON_GESTION_DIGUE").getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
-            System.out.println("++++++++++++++++++++");    
+            System.out.println("++++++++++++++++++++");   
+            
+            for(Row r : importer.getCartoDatabase().getTable("GDB_SpatialRefs")){
+                System.out.println(r);
+        }
 
 //            System.out.println("=======================");
 //            importer.getDatabase().getTable("TRONCON_GESTION_DIGUE_GESTIONNAIRE").getColumns().stream().forEach((column) -> {

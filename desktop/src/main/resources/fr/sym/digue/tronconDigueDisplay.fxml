@@ -75,7 +75,7 @@
                         <Label text="Identifiant :" textFill="WHITE" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" />
                         <ChoiceBox fx:id="digues" maxWidth="250.0" minWidth="150.0" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                         <Label text="Rive" textFill="WHITE" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                        <ChoiceBox fx:id="idTypeRiveTextField" prefHeight="26.0" prefWidth="204.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="typeRiveChoiceBox" prefHeight="26.0" prefWidth="204.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                         <Label prefHeight="16.0" prefWidth="143.0" text="SR par défaut :" textFill="WHITE" GridPane.columnIndex="4" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                         <Label fx:id="idTronconGestionTextField" prefHeight="16.0" prefWidth="80.0" textFill="WHITE" GridPane.columnIndex="7" />
                         <Label fx:id="idSystemeRepDefautTextField" prefHeight="16.0" prefWidth="231.0" textFill="WHITE" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="1" />
