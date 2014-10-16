@@ -8,8 +8,8 @@ package fr.sym.util;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import fr.sym.digue.Injector;
+import com.vividsolutions.jts.geom.Geometry;
+import fr.sym.store.SymadremStoreFactory;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -19,9 +19,10 @@ import fr.symadrem.sirs.core.model.Organisme;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,10 +31,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.DateFormatter;
+import org.apache.sis.storage.DataStoreException;
+import org.geotoolkit.data.shapefile.shp.ShapeHandler;
+import org.geotoolkit.data.shapefile.shp.ShapeType;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
+import types.TypeRive;
 
 /**
  *
@@ -46,7 +56,8 @@ public class DbImporter {
     @Autowired private TronconDigueRepository tronconDigueRepository;
     @Autowired private OrganismeRepository organismeRepository;
 
-    private final Database accessDatabase;
+    private Database accessDatabase;
+    private Database accessCartoDatabase;
 
     private final DateTimeFormatter dateTimeFormatter;
     /*
@@ -144,7 +155,7 @@ public class DbImporter {
      MONTEE_DES_EAUX_JOURNAL
      MONTEE_DES_EAUX_MESURES
      observation_urgence_carto
-     = ORGANISME
+     * ORGANISME
      ORGANISME_DISPOSE_INTERVENANT
      ORIENTATION
      PARCELLE_CADASTRE
@@ -333,7 +344,7 @@ public class DbImporter {
      TYPE_RESEAU_EAU
      TYPE_RESEAU_TELECOMMUNIC
      TYPE_REVETEMENT
-     TYPE_RIVE
+     = TYPE_RIVE
      TYPE_SERVITUDE
      TYPE_SEUIL
      TYPE_SIGNATAIRE
@@ -353,20 +364,25 @@ public class DbImporter {
      */
 
     private DbImporter() throws IOException {
-
-        this.accessDatabase = DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb"));
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
     }
 
-    //Thu Feb 03 00:00:00 CET 2005
     public DbImporter(File mdbFile) throws IOException {
-
         this.accessDatabase = DatabaseBuilder.open(mdbFile);
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
+    }
+    
+    public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase){
+        this.accessDatabase=accessDatabase;
+        this.accessCartoDatabase=accessCartoDatabase;
     }
 
     public Database getDatabase() {
         return this.accessDatabase;
+    }
+
+    public Database getCartoDatabase() {
+        return this.accessCartoDatabase;
     }
 
     /*
@@ -434,11 +450,11 @@ public class DbImporter {
      x ID_ORGANISME
      * RAISON_SOCIALE // Nom
      * STATUT_JURIDIQUE
-     = ADRESSE_L1_ORG
-     = ADRESSE_L2_ORG
-     = ADRESSE_L3_ORG
+     * ADRESSE_L1_ORG
+     * ADRESSE_L2_ORG
+     * ADRESSE_L3_ORG
      * ADRESSE_CODE_POSTAL_ORG
-     = ADRESSE_NOM_COMMUNE_ORG
+     * ADRESSE_NOM_COMMUNE_ORG
      * TEL_ORG
      * MAIL_ORG
      * FAX_ORG
@@ -446,9 +462,10 @@ public class DbImporter {
      * DATE_FIN
      x DATE_DERNIERE_MAJ // Pas de date de mise à jour dans le modèle.
     ----------------------------------------------------------------------------
-    adresses 1, 2 et 3, code postal et commune du côté de l'ancienne base
-    adresse, localite, pays et code postal du côté du nouveau modèle
-    => comment faire la correspondance ?
+    Les adresses 1, 2 et 3 sont concaténées.
+    La raison sociale devient le nom.
+    La commune devient la localité.
+    On n'a pas de pays dans la base.
     
     on n'a pas de date de mise à jour : est-ce normal ?
      */
@@ -479,14 +496,15 @@ public class DbImporter {
         
         while (it.hasNext()) {
             final Row row = it.next();
+            System.out.println(row);
             final Organisme organisme = new Organisme();
             organisme.setNom(row.getString(OrganismeColumns.RAISON_SOCIALE.toString()));
             organisme.setStatut_juridique(row.getString(OrganismeColumns.STATUT_JURIDIQUE.toString()));
-//            organisme.setAdresse(row.getString(OrganismeColumns.ADRESSE1.toString()));
-//            organisme.setLocalite(row.getString(OrganismeColumns.ADRESSE2.toString()));
-//            organisme.setPays(row.getString(OrganismeColumns.ADRESSE3.toString()));
+            organisme.setAdresse(row.getString(OrganismeColumns.ADRESSE1.toString())
+            +row.getString(OrganismeColumns.ADRESSE2.toString())
+            +row.getString(OrganismeColumns.ADRESSE3.toString()));
             organisme.setCode_postal(String.valueOf(row.getInt(OrganismeColumns.CODE_POSTAL.toString())));
-            //organisme.setrow.getString(OrganismeColumns.COMMUNE.toString()));
+            organisme.setLocalite(row.getString(OrganismeColumns.COMMUNE.toString()));
             organisme.setTelephone(row.getString(OrganismeColumns.TEL.toString()));
             organisme.setEmail(row.getString(OrganismeColumns.COURRIEL.toString()));
             organisme.setFax(row.getString(OrganismeColumns.FAX.toString()));
@@ -557,7 +575,6 @@ public class DbImporter {
         
         while (it.hasNext()) {
             final Row row = it.next();
-            System.out.println(row);
             final Gestionnaires gestion = new Gestionnaires();
             if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
                 gestion.setDate_debut_gestion(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
@@ -577,6 +594,112 @@ public class DbImporter {
         }
         return gestions;
     }
+    
+    
+
+    /*
+     TYPE_RIVE.
+    ----------------------------------------------------------------------------
+     x ID_TRONCON_GESTION //
+     * ID_ORG_GESTION // L'identifiant de gestionnaire est mappé avec les identifiants des organismes créés dans CouchDb
+     * DATE_DEBUT_GESTION
+     * DATE_FIN_GESTION
+     x DATE_DERNIERE_MAJ // On n'a pas de date de mise à jour : est-ce normal ?
+    ----------------------------------------------------------------------------
+    La classe Gestionnaires est mal nommée ("Gestion" ou "EpisodeGestion" 
+    conviendrait mieux.
+     */
+    private static enum TypeRiveColumns {
+        ID("ID_TYPE_RIVE"), LIBELLE("LIBELLE_TYPE_RIVE"), MAJ("DATE_DERNIERE_MAJ");
+        private final String column;
+
+        private TypeRiveColumns(final String column) {
+            this.column = column;
+        }
+
+        @Override
+        public String toString() {
+            return this.column;
+        }
+    };
+
+    private Map<Integer, TypeRive> getTypeRive() throws IOException {
+
+        final Map<Integer, TypeRive> typesRive = new HashMap<>();
+        final Iterator<Row> it = this.accessDatabase.getTable("TYPE_RIVE").iterator();
+        
+        while (it.hasNext()) {
+            final Row row = it.next();
+            typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID.toString())),
+                        TypeRive.valueOf(row.getString(TypeRiveColumns.LIBELLE.toString())));
+        }
+        System.out.println("TYPES !!!!");
+        System.out.println(typesRive);
+        return typesRive;
+    }
+    
+    /*
+     CARTO_TRONCON_GESTION_DIGUE.
+    ----------------------------------------------------------------------------
+     x OBJECTID
+     * SHAPE
+     x OBJECTID_old
+     x SHAPE_Leng
+     x SHAPE_Length
+     * ID_TRONCON_GESTION
+     x LONGUEUR
+     */
+    private static enum CartoTronconGestionDigueColumns {
+
+        ID("ID_TRONCON_GESTION"), SHAPE("SHAPE");
+        private final String column;
+
+        private CartoTronconGestionDigueColumns(final String column) {
+            this.column = column;
+        }
+
+        @Override
+        public String toString() {
+            return this.column;
+        }
+    };
+
+    private Map<Integer, Geometry> getTronconDigueGeoms() throws IOException {
+        final Map<Integer, Geometry> tronconDigueGeom = new HashMap<>();
+        final Iterator<Row> it = this.accessCartoDatabase.getTable("CARTO_TRONCON_GESTION_DIGUE").iterator();
+
+        while (it.hasNext()) {
+            try {
+                final Row row = it.next();
+                System.out.println(row);
+                final TronconDigue tronconDigue = new TronconDigue();
+
+                final byte[] bytes = row.getBytes(CartoTronconGestionDigueColumns.SHAPE.toString());
+                final ByteBuffer bb = ByteBuffer.wrap(bytes);
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                final int id = bb.getInt();
+                final ShapeType shapeType = ShapeType.forID(id);
+                final ShapeHandler handler = shapeType.getShapeHandler(false);
+                Geometry geom = (Geometry) handler.read(bb, shapeType);
+
+                //final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27583"), CRS.decode("EPSG:2154"));
+                //geom = JTS.transform(geom, lambertToRGF);
+
+                tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID.toString())),
+                        geom);
+//            } catch (FactoryException ex) {
+//                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (DataStoreException ex) {
+                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (MismatchedDimensionException ex) {
+                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (TransformException ex) {
+//                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return tronconDigueGeom;
+    }
+    
 
     /*
      TRONCON_GESTION_DIGUE.
@@ -584,7 +707,7 @@ public class DbImporter {
      x ID_TRONCON_GESTION
      x ID_ORG_GESTIONNAIRE // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
      * ID_DIGUE
-     ID_TYPE_RIVE
+     = ID_TYPE_RIVE // On part a priori sur une enumeration statique.
      * DATE_DEBUT_VAL_TRONCON
      * DATE_FIN_VAL_TRONCON
      * NOM_TRONCON_GESTION
@@ -595,7 +718,7 @@ public class DbImporter {
      x LIBELLE_TRONCON_GESTION // Les libellés sont nulls et sont appelés à dispararaitre de la nouvelle base.
      * DATE_DERNIERE_MAJ
     ----------------------------------------------------------------------------
-     TODO : s'occuper du lien avec les gestionnaires.
+     * TODO : s'occuper du lien avec les gestionnaires.
      TODO : s'occuper du lien avec les rives.
      TODO : s'occuper du lien avec les systèmes de repérage.
      */
@@ -606,7 +729,7 @@ public class DbImporter {
         NOM("NOM_TRONCON_GESTION"), COMMENTAIRE("COMMENTAIRE_TRONCON"),
         DEBUT_VAL_GESTIONNAIRE("DATE_DEBUT_VAL_GESTIONNAIRE_D"), FIN_VAL_GESTIONNAIRE("DATE_FIN_VAL_GESTIONNAIRE_D"), 
         SYSTEME_REP("ID_SYSTEME_REP_DEFAUT"), MAJ("DATE_DERNIERE_MAJ");
-        protected final String column;
+        private final String column;
 
         private TronconGestionDigueColumns(final String column) {
             this.column = column;
@@ -617,6 +740,7 @@ public class DbImporter {
             return this.column;
         }
     };
+    
     private final Map<Integer, TronconDigue> tronconDigueIds = new HashMap<>();
 
     private List<TronconDigue> getTronconsDigues() throws IOException {
@@ -624,8 +748,12 @@ public class DbImporter {
         final List<TronconDigue> tronconsDigues = new ArrayList<>();
         final Iterator<Row> it = this.accessDatabase.getTable("TRONCON_GESTION_DIGUE").iterator();
         
+        final Map<Integer, Geometry> tronconDigueGeoms = getTronconDigueGeoms();
+        final Map<Integer, TypeRive> typesRive = this.getTypeRive();
+        
         while (it.hasNext()) {
             final Row row = it.next();
+            System.out.println(row);
             final TronconDigue tronconDigue = new TronconDigue();
             tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
             tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
@@ -645,9 +773,15 @@ public class DbImporter {
 
             // Set the references.
             tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
+            
             final List<Gestionnaires> gestions = this.getGestionnaires();
             tronconDigue.setGestionnaires(gestions);
+            
+            tronconDigue.setRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
 
+            // Set the geometry
+            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
+            
             tronconsDigues.add(tronconDigue);
         }
         return tronconsDigues;
@@ -667,6 +801,14 @@ public class DbImporter {
     
     
     /*
+    final byte[] bytes = row.getBytes(propName);
+                        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+                        bb.order(ByteOrder.LITTLE_ENDIAN);
+                        final int id = bb.getInt();
+                        final ShapeType shapeType = ShapeType.forID(id);
+                        final ShapeHandler handler = shapeType.getShapeHandler(false);
+                        final Geometry geom = (Geometry) handler.read(bb, shapeType);
+                        next.setPropertyValue(propName, geom);
     ****************************************************************************
     */
 
@@ -674,29 +816,41 @@ public class DbImporter {
         try {
             final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/import-context.xml");
             final DbImporter importer = applicationContext.getBean(DbImporter.class);
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
-            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
+//            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
+//                System.out.println(tableName);
+//            });
+            
+            importer.getCartoDatabase().getTableNames().stream().forEach((tableName) -> {
                 System.out.println(tableName);
             });
-
+            
             System.out.println("=======================");
-            importer.getDatabase().getTable("TRONCON_GESTION_DIGUE_GESTIONNAIRE").getColumns().stream().forEach((column) -> {
+            importer.getCartoDatabase().getTable("CARTO_TRONCON_GESTION_DIGUE").getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
-            System.out.println("++++++++++++++++++++");
+            System.out.println("++++++++++++++++++++");    
 
-            System.out.println("=======================");
-            importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
-            });
-            System.out.println("++++++++++++++++++++");
-
-            System.out.println("=======================");
-            importer.getDatabase().getTable("ORGANISME").getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
-            });
-            System.out.println("++++++++++++++++++++");
-
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("TRONCON_GESTION_DIGUE_GESTIONNAIRE").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
+//
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
+//
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("ORGANISME").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
+//
 //            System.out.println("=======================");
 //            importer.getDatabase().getTable("INTERVENANT").getColumns().stream().forEach((column) -> {
 //                System.out.println(column.getName());
