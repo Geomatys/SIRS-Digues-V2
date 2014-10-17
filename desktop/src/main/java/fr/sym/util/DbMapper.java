@@ -17,10 +17,8 @@ import org.springframework.stereotype.Component;
  *
  * @author Samuel Andrés (Geomatys)
  */
-@Component
 public class DbMapper {
     
-    @Autowired
     private DigueRepository digueRepository;
     
     private DigueDAO digueDAO = DigueDAOPostgres.getInstance();

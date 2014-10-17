@@ -14,8 +14,7 @@ import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 
-import org.junit.Ignore;
-import fr.symadrem.sirs.core.model.TypeRive;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -23,9 +22,8 @@ import fr.symadrem.sirs.core.model.TypeRive;
  */
 public class TronconRepositoryTest extends CouchDBTestCase {
 
-
     @Autowired
-    private TronconDigueRepository tronconRepository;
+    private CouchDbConnector couchDbConnector;
     
     /**
      * Test of getAll method, of class TronconDigueRepository.
@@ -33,6 +31,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAll() {
         System.out.println("getAll");
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(couchDbConnector);
         for (TronconDigue troncon : tronconRepository.getAll()) {
             System.out.println(troncon.getNom());
         	for(Structure struct: troncon.getStuctures()) {
@@ -43,18 +42,4 @@ public class TronconRepositoryTest extends CouchDBTestCase {
         	}
         }
     }
-    
-//    @Test 
-//    public void testRive(){
-//        TronconDigue troncon = new TronconDigue();
-//        troncon.setRive(TypeRive.DROITE);
-//        tronconRepository.add(troncon);
-//        
-//        
-//        TronconDigue troncon2 = tronconRepository.get(troncon.getId());
-//        System.out.println(troncon2==troncon);
-//        System.out.println(troncon2.getRive());
-////        
-////        tronconRepository.remove(troncon);
-//    }
 }

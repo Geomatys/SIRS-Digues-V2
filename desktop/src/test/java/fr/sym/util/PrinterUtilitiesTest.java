@@ -41,12 +41,6 @@ public class PrinterUtilitiesTest {
     @Qualifier("symadremChouchDB")
     private CouchDbConnector connector;
     
-    @Autowired
-    private DigueRepository digueRepository;
-
-    @Autowired
-    private TronconDigueRepository tronconRepository;
-    
     public PrinterUtilitiesTest() {
     }
     
@@ -95,6 +89,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
+        final DigueRepository digueRepository = new DigueRepository(connector);
         final Digue digue = digueRepository.getAll().get(0);
         print(digue);    
     }
@@ -106,6 +101,7 @@ public class PrinterUtilitiesTest {
     @Test
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final TronconDigue tronconGestionDigue = tronconRepository.getAll().get(0);
         print(tronconGestionDigue); 
     }

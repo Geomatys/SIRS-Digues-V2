@@ -43,22 +43,18 @@ public class RepositoriesTest {
     @Qualifier("symadremChouchDB")
     private CouchDbConnector connector;
 
-    @Autowired
-    private DigueRepository digueRepository;
-
-    @Autowired
-    private TronconDigueRepository tronconRepository;
-
     public void test() {
         System.out.println(connector.getAllDocIds());
     }
     
     public void removeDigues() {
+        final DigueRepository digueRepository = new DigueRepository(connector);
         List<Digue> digues = digueRepository.getAll();
         for(Digue digue : digues) digueRepository.remove(digue);
     }
     
     public void removeTronconsDigue() {
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final List<TronconDigue> troncons = tronconRepository.getAll();
         troncons.stream().forEach((troncon) -> {
             tronconRepository.remove(troncon);
@@ -66,6 +62,7 @@ public class RepositoriesTest {
     }
     
     public void insertDigues() {
+        final DigueRepository digueRepository = new DigueRepository(connector);
         final int nbDigues = 10;
         for (int i = 0; i < nbDigues; i++) {
             final Digue digue = new Digue();
@@ -96,6 +93,7 @@ public class RepositoriesTest {
 
     public void insertTronconsDigue() {
         
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final int nbTroncons = 30;
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
@@ -149,8 +147,10 @@ public class RepositoriesTest {
     }
     
     public void linkTronconsToDigues(){
-        final List<Digue> digues = this.digueRepository.getAll();
-        final List<TronconDigue> troncons = this.tronconRepository.getAll();
+        final DigueRepository digueRepository = new DigueRepository(connector);
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
+        final List<Digue> digues = digueRepository.getAll();
+        final List<TronconDigue> troncons = tronconRepository.getAll();
         final int nbDigues = digues.size();
         
         int i=0;
@@ -159,8 +159,8 @@ public class RepositoriesTest {
             troncon.setDigueId(digue.getId());
             i++;
             if(i==nbDigues) i=0;
-            this.digueRepository.update(digue);
-            this.tronconRepository.update(troncon);
+            digueRepository.update(digue);
+            tronconRepository.update(troncon);
         }
     }
     
@@ -180,8 +180,10 @@ public class RepositoriesTest {
     @Test
     public void testGetAll() {
         System.out.println("getAll");
-        List<Digue> expResult = new ArrayList<>();
-        List<Digue> result = digueRepository.getAll();
+        final DigueRepository digueRepository = new DigueRepository(connector);
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
+        final List<Digue> expResult = new ArrayList<>();
+        final List<Digue> result = digueRepository.getAll();
         for (Digue digue : result) {
             System.out.println(digue);
         }
@@ -189,7 +191,7 @@ public class RepositoriesTest {
         //assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to
         // fail.
-        Digue digue = new Digue();
+        final Digue digue = new Digue();
 
         digue.setLibelle("une digue");
 

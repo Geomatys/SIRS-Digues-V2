@@ -41,6 +41,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ektorp.CouchDbConnector;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -67,13 +70,13 @@ public class Session {
     @Autowired
     private List<Repository<?>> repositories;
     
-    @Autowired
     private DigueRepository digueRepository;
-
-    @Autowired
     private TronconDigueRepository tronconDigueRepository;
 
-    public Session() {
+    @Autowired
+    public Session(CouchDbConnector couchDbConnector) {
+        digueRepository = new DigueRepository(couchDbConnector);
+        tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
     }
 
     /**
