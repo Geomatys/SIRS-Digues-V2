@@ -1,7 +1,6 @@
 package fr.sym.digue;
 
 import fr.sym.*;
-import fr.sym.digue.dto.DamSystem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -107,16 +106,7 @@ public class DiguesController {
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getNom() + " (" + getTreeItem().getChildren().size() + ") ");
             } 
-            
-            // ==> Deprecated lines ?
-            else if (obj instanceof DamSystem) {
-                setText(((DamSystem) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-//            } else if (obj instanceof Dam) {
-//                setText(((Dam) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-//            } else if (obj instanceof Section) {
-//                setText(((Section) obj).getName().getValue() + " (" + getTreeItem().getChildren().size() + ")");
-            } 
-            
+                        
             else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else {

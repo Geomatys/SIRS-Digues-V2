@@ -4,10 +4,7 @@ package fr.sym.digue;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -16,7 +13,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 
-import org.geotoolkit.util.FileUtilities;
 import org.h2.jdbcx.JdbcConnectionPool;
 
 import fr.sym.Plugin;
@@ -70,33 +66,7 @@ public class DiguePlugin extends Plugin{
                     e.printStackTrace();
                 }
             
-            
-//                _old(cnx);
         }
     }
 
-    private void _old(final Connection cnx) throws SQLException, IOException {
-        final DatabaseMetaData metadata = cnx.getMetaData();
-        ResultSet rs = metadata.getTables(null, null, "DIGUE", null);
-        final boolean loaded = rs.next();
-        rs.close();
-
-        if(!loaded){
-            //run table creation script
-            final Statement stmt = cnx.createStatement();
-            String script = FileUtilities.getStringFromStream(DiguePlugin.class.getResourceAsStream("/fr/sym/db/ADdbDonnees_create.sql"));
-            //remove comments
-            script = script.replaceAll("--.*\n", "");
-            
-            final String[] parts = script.split(";");
-            for(String str : parts){
-                str = str.trim();
-                if(str.isEmpty()) continue;
-                stmt.executeUpdate(str);
-            }
-            stmt.close();
-            cnx.commit();
-        }
-    }
-    
 }

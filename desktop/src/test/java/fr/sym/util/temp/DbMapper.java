@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sym.util;
+package fr.sym.util.temp;
 
 import fr.sym.digue.Injector;
-import fr.sym.util.dao.DigueDAO;
-import fr.sym.util.dao.postgres.DigueDAOPostgres;
+import fr.sym.util.temp.dao.DigueDAO;
+import fr.sym.util.temp.dao.postgres.DigueDAOPostgres;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;

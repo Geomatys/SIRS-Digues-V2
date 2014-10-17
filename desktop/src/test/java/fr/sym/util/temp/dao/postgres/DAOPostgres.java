@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sym.util.dao.postgres;
+package fr.sym.util.temp.dao.postgres;
 
-import fr.sym.util.dao.DAO;
+import fr.sym.util.temp.dao.DAO;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

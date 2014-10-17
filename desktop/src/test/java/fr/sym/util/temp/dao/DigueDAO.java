@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sym.util.dao;
+package fr.sym.util.temp.dao;
 
 import fr.symadrem.sirs.core.model.Digue;
 import java.sql.SQLException;
