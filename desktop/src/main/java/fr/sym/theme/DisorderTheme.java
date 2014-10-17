@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DisorderTheme extends Theme {
+public class DisorderTheme extends AbstractTronconTheme {
 
     public DisorderTheme() {
         super("Désordres");

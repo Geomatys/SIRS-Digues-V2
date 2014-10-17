@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class PhotosTheme extends Theme {
+public class PhotosTheme extends AbstractTronconTheme {
 
     public PhotosTheme() {
         super("Photos localisées");

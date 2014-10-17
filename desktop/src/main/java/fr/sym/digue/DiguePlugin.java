@@ -17,17 +17,17 @@ import org.h2.jdbcx.JdbcConnectionPool;
 
 import fr.sym.Plugin;
 import fr.sym.Symadrem;
-import fr.sym.digue.theme.DisorderTheme;
-import fr.sym.digue.theme.DocumentsTheme;
-import fr.sym.digue.theme.FreeBordTheme;
-import fr.sym.digue.theme.HydraulicsMesuresTheme;
-import fr.sym.digue.theme.PhotosTheme;
-import fr.sym.digue.theme.PresentationsTheme;
-import fr.sym.digue.theme.RoadNetworkTheme;
-import fr.sym.digue.theme.SeaWorkTheme;
-import fr.sym.digue.theme.StructureTheme;
-import fr.sym.digue.theme.TownAreaTheme;
-import fr.sym.digue.theme.WorksNetwork;
+import fr.sym.theme.DisorderTheme;
+import fr.sym.theme.DocumentsTheme;
+import fr.sym.theme.FreeBordTheme;
+import fr.sym.theme.HydraulicsMesuresTheme;
+import fr.sym.theme.PhotosTheme;
+import fr.sym.theme.PresentationsTheme;
+import fr.sym.theme.RoadNetworkTheme;
+import fr.sym.theme.SeaWorkTheme;
+import fr.sym.theme.StructureTheme;
+import fr.sym.theme.TownAreaTheme;
+import fr.sym.theme.WorksNetwork;
 
 /**
  *

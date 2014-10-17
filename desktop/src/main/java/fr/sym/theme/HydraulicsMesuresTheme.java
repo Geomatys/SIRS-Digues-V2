@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class HydraulicsMesuresTheme extends Theme {
+public class HydraulicsMesuresTheme extends AbstractTronconTheme {
 
     public HydraulicsMesuresTheme() {
         super("Mesures d'évènements hydrauliques");

@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class SeaWorkTheme extends Theme {
+public class SeaWorkTheme extends AbstractTronconTheme {
 
     public SeaWorkTheme() {
         super("Ouvrages à la mer");

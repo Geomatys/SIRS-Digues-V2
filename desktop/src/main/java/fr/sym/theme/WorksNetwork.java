@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class WorksNetwork extends Theme {
+public class WorksNetwork extends AbstractTronconTheme {
 
     public WorksNetwork() {
         super("Réseaux et ouvrages");

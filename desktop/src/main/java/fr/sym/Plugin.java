@@ -1,6 +1,7 @@
 
 package fr.sym;
 
+import fr.sym.theme.Theme;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;

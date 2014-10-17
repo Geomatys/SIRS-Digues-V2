@@ -819,8 +819,8 @@ public class DbImporter {
         try {
             final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/import-context.xml");
             final DbImporter importer = applicationContext.getBean(DbImporter.class);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/media/husky/terra/TRAVAIL/Symadrem/Databases/v1/AD/AD/SIRSDigues_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/media/husky/terra/TRAVAIL/Symadrem/Databases/v1/AD/AD/SIRSDigues_carto.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);

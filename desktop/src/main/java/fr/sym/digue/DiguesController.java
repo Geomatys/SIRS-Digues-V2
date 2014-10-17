@@ -1,5 +1,6 @@
 package fr.sym.digue;
 
+import fr.sym.theme.Theme;
 import fr.sym.*;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;

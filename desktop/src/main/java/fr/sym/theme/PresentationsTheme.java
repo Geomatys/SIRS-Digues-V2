@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class PresentationsTheme extends Theme {
+public class PresentationsTheme extends AbstractTronconTheme {
 
     public PresentationsTheme() {
         super("Prestations");

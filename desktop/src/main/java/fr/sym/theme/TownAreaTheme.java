@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TownAreaTheme extends Theme {
+public class TownAreaTheme extends AbstractTronconTheme {
 
     public TownAreaTheme() {
         super("Emprises communales");

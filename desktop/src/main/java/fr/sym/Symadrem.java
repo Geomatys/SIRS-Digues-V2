@@ -3,7 +3,10 @@
 package fr.sym;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import org.apache.sis.util.logging.Logging;
 import org.h2.jdbcx.JdbcConnectionPool;
 
@@ -16,6 +19,7 @@ public final class Symadrem {
     
     public static final String NAME = "symadrem";
     public static final Logger LOGGER = Logging.getLogger(Symadrem.class);
+    public static final String CSS_PATH = "/fr/sym/theme.css";
     
     private static JdbcConnectionPool CNX_POOL;
     
@@ -46,6 +50,23 @@ public final class Symadrem {
             CNX_POOL = JdbcConnectionPool.create("jdbc:h2:"+dbFile.getPath(), "symadrem", "symadrem");
         }
         return CNX_POOL;
+    }
+    
+    public static void loadJRXML(Parent candidate){
+        final Class cdtClass = candidate.getClass();
+        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
+        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
+        loader.setController(candidate);
+        loader.setRoot(candidate);
+        //in special environement like osgi or other, we must use the proper class loaders
+        //not necessarly the one who loaded the FXMLLoader class
+        loader.setClassLoader(cdtClass.getClassLoader());
+        try {
+            loader.load();
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+        candidate.getStylesheets().add(CSS_PATH);
     }
     
 }

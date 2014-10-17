@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FreeBordTheme extends Theme {
+public class FreeBordTheme extends AbstractTronconTheme {
 
     public FreeBordTheme() {
         super("Franc-bord");

@@ -1,14 +1,13 @@
 
 
-package fr.sym.digue.theme;
+package fr.sym.theme;
 
-import fr.sym.Theme;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class RoadNetworkTheme extends Theme {
+public class RoadNetworkTheme extends AbstractTronconTheme {
 
     public RoadNetworkTheme() {
         super("Réseaux de voirie");
