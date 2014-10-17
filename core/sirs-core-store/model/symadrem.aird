@@ -4286,7 +4286,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_DCZcsEfeEeSoXJiONqf-1A" name="typeRive : TypeRive" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_DCZcsEfeEeSoXJiONqf-1A" name="typeRive : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Troncon_Digue/typeRive"/>
           <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Troncon_Digue/typeRive"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_DCaDwEfeEeSoXJiONqf-1A" labelAlignment="LEFT">
@@ -9788,9 +9788,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_IzrrsFUMEeSyt_5RCl16VA" name="[0..1] documentId" sourceNode="__qboMFULEeSyt_5RCl16VA" targetNode="_LF6KsEffEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="symadrem.ecore#//DocumentPrestation/documentId"/>
-        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//DocumentPrestation/documentId"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_IzrrsFUMEeSyt_5RCl16VA" name="[0..1] documentPrestationId" sourceNode="__qboMFULEeSyt_5RCl16VA" targetNode="_LF6KsEffEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="symadrem.ecore#//DocumentPrestation/documentPrestationId"/>
+        <semanticElements xmi:type="ecore:EReference" href="symadrem.ecore#//DocumentPrestation/documentPrestationId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_IzsSwFUMEeSyt_5RCl16VA" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_IzsSwVUMEeSyt_5RCl16VA"/>
