@@ -224,7 +224,7 @@ public class TronconDigueController {
         };
         
         this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
-        this.typeRiveChoiceBox.setValue(TypeRive.toTypeRive(this.troncon.getRive()));
+        this.typeRiveChoiceBox.setValue(TypeRive.toTypeRive(this.troncon.getTypeRive()));
                 
         this.date_debut.localDateTimeProperty().bindBidirectional(this.troncon.date_debutProperty());
         this.date_debut.setDisable(true);

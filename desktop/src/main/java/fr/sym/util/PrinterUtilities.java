@@ -125,6 +125,7 @@ public class PrinterUtilities {
                 && !method.getName().equals("getAttachments")
                 && !method.getName().equals("getRevisions")
                 && !method.getName().equals("getConflicts")
+                && !method.getName().equals("getDocumentId")
                 && !void.class.equals(method.getReturnType()))
             return true;
         else return false;

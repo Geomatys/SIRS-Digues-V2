@@ -23,6 +23,7 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -30,102 +31,98 @@ import fr.symadrem.sirs.core.model.TronconDigue;
  */
 public class DigueRepositoryTest extends CouchDBTestCase {
 
-	@Autowired
-	private DigueRepository digueRepository;
+    @Autowired
+    private CouchDbConnector couchDbConnector;
 
-	@Autowired
-	private TronconDigueRepository tronconRepository;
+    /**
+     * Test of getAll method, of class DigueRepository.
+     */
+    @Test
+    public void testGetAll() {
+        System.out.println("getAll");
+        DigueRepository digueRepository = new DigueRepository(couchDbConnector);
+        TronconDigueRepository tronconRepository = new TronconDigueRepository(couchDbConnector);
+        List<Digue> expResult = new ArrayList<>();
+        List<Digue> result = digueRepository.getAll();
+        for (Digue digue : result) {
+            System.out.println(digue);
+        }
 
-	/**
-	 * Test of getAll method, of class DigueRepository.
-	 */
-	@Test
-	public void testGetAll() {
-		System.out.println("getAll");
-		List<Digue> expResult = new ArrayList<>();
-		List<Digue> result = digueRepository.getAll();
-		for (Digue digue : result) {
-			System.out.println(digue);
-		}
+        // assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to
+        // fail.
+        Digue digue = new Digue();
 
-		// assertEquals(expResult, result);
-		// TODO review the generated test code and remove the default call to
-		// fail.
+        digue.setLibelle("une digue");
 
-		Digue digue = new Digue();
+        digue.setDateMaj(LocalDateTime.now());
 
-		digue.setLibelle("une digue");
+        digueRepository.add(digue);
 
-		digue.setDateMaj(LocalDateTime.now());
+        for (int i = 0; i < 1; i++) {
+            TronconDigue troncon = new TronconDigue();
+            troncon.setCommentaire("Traoncon1");
+            troncon.setDigueId(digue.getId());
+            troncon.setGeometry(createPoint());
+            troncon.setDateMaj(LocalDateTime.now());
 
-		digueRepository.add(digue);
+            List<Structure> stuctures = new ArrayList<Structure>();
+            Fondation e = new Fondation();
+            // e.setDocument(troncon);
+            stuctures.add(e);
+            troncon.setStuctures(stuctures);
 
-		for (int i = 0; i < 1; i++) {
-			TronconDigue troncon = new TronconDigue();
-			troncon.setCommentaire("Traoncon1");
-			troncon.setDigueId(digue.getId());
-			troncon.setGeometry(createPoint());
-			troncon.setDateMaj(LocalDateTime.now());
+            tronconRepository.add(troncon);
+        }
 
-			List<Structure> stuctures = new ArrayList<Structure>();
-			Fondation e = new Fondation();
-			// e.setDocument(troncon);
-			stuctures.add(e);
-			troncon.setStuctures(stuctures);
+        // {
+        // TronconDigue troncon = new TronconDigue();
+        // troncon.setGeometry(createPoint(100, 100));
+        // troncon.setDate_maj(LocalDateTime.now());
+        //
+        // Fondation ecluse = new Fondation();
+        // ecluse.setCommentaire("Fondation");
+        //
+        // List<Structure> stuctures = new ArrayList<>();
+        // stuctures.add(ecluse);
+        // troncon.setStuctures(stuctures);
+        //
+        // troncon.setCommentaire("Traoncon2");
+        // troncon.setDigueId(digue.getId());
+        //
+        // tronconRepository.add(troncon);
+        // }
+    }
 
-			tronconRepository.add(troncon);
-		}
+    @Test
+    public void failDelete() {
 
-		// {
-		// TronconDigue troncon = new TronconDigue();
-		// troncon.setGeometry(createPoint(100, 100));
-		// troncon.setDate_maj(LocalDateTime.now());
-		//
-		// Fondation ecluse = new Fondation();
-		// ecluse.setCommentaire("Fondation");
-		//
-		// List<Structure> stuctures = new ArrayList<>();
-		// stuctures.add(ecluse);
-		// troncon.setStuctures(stuctures);
-		//
-		// troncon.setCommentaire("Traoncon2");
-		// troncon.setDigueId(digue.getId());
-		//
-		// tronconRepository.add(troncon);
-		// }
+        DigueRepository digueRepository = new DigueRepository(couchDbConnector);
+        Digue digue = new Digue();
+        digue.setLibelle("toDelete");
+        digueRepository.add(digue);
 
-	}
+        {
+            Digue digue2 = digueRepository.get(digue.getId());
+            digue2.setLibelle("StillToDelete");
+            digueRepository.update(digue2);
+        }
 
-	@Test
-	public void failDelete() {
+        digue = digueRepository.get(digue.getId());
+        digueRepository.remove(digue);
 
-		Digue digue = new Digue();
-		digue.setLibelle("toDelete");
-		digueRepository.add(digue);
-		 
-		{
-			Digue digue2 = digueRepository.get(digue.getId());
-			digue2.setLibelle("StillToDelete");
-			digueRepository.update(digue2);
-		}
-		
-        digue = digueRepository.get(digue.getId());		
-		digueRepository.remove(digue);
-		
-		
+    }
 
-	}
+    private Point createPoint(double i, double j) {
+        // TODO Auto-generated method stub
+        Point pt = new GeometryFactory().createPoint(new Coordinate(i, j));
+        return pt;
+    }
 
-	private Point createPoint(double i, double j) {
-		// TODO Auto-generated method stub
-		Point pt = new GeometryFactory().createPoint(new Coordinate(i, j));
-		return pt;
-	}
-
-	private Point createPoint() {
-		// random coord in france in 2154
-		return createPoint(Math.random() * 900000 - 100000,
-				Math.random() * 1000000 + 6100000);
-	}
+    private Point createPoint() {
+        // random coord in france in 2154
+        return createPoint(Math.random() * 900000 - 100000,
+                Math.random() * 1000000 + 6100000);
+    }
 
 }

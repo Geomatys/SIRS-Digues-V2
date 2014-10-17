@@ -31,6 +31,7 @@ import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.time.LocalDateTime;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -57,13 +58,13 @@ public class Session {
     @Autowired
     private List<Repository<?>> repositories;
     
-    @Autowired
     private DigueRepository digueRepository;
-
-    @Autowired
     private TronconDigueRepository tronconDigueRepository;
 
-    public Session() {
+    @Autowired
+    public Session(CouchDbConnector couchDbConnector) {
+        digueRepository = new DigueRepository(couchDbConnector);
+        tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
     }
 
     /**
