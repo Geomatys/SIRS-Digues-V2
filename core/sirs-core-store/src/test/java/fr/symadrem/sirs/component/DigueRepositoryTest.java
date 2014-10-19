@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +25,7 @@ import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -34,23 +37,23 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     @Autowired
     private CouchDbConnector couchDbConnector;
 
+    
+    DigueRepository digueRepository;
+    
+    @Before
+    public void setUp() {
+    	 digueRepository = new DigueRepository(couchDbConnector);
+    }
+    
     /**
      * Test of getAll method, of class DigueRepository.
      */
     @Test
-    public void testGetAll() {
-        System.out.println("getAll");
-        DigueRepository digueRepository = new DigueRepository(couchDbConnector);
+    public void testStoreDigueAndTroncons() {
+        System.out.println("DigueRepositoryTest.testStoreDigueAndTroncons()");
+        
         TronconDigueRepository tronconRepository = new TronconDigueRepository(couchDbConnector);
-        List<Digue> expResult = new ArrayList<>();
-        List<Digue> result = digueRepository.getAll();
-        for (Digue digue : result) {
-            System.out.println(digue);
-        }
-
-        // assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to
-        // fail.
+      
         Digue digue = new Digue();
 
         digue.setLibelle("une digue");
@@ -94,6 +97,16 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         // }
     }
 
+    
+    @Test
+    public void testGetAll() {
+    	  List<Digue> result = digueRepository.getAll();
+          for (Digue digue : result) {
+              System.out.println(digue);
+          }
+
+    }
+    
     @Test
     public void failDelete() {
 

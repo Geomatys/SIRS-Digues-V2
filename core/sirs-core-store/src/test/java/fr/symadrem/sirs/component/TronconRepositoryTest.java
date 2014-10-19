@@ -5,6 +5,8 @@
  */
 package fr.symadrem.sirs.component;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +27,9 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Autowired
     private CouchDbConnector couchDbConnector;
     
+    
+    
+    
     /**
      * Test of getAll method, of class TronconDigueRepository.
      */
@@ -41,5 +46,17 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 				}
         	}
         }
+    }
+    
+    
+    @Test
+    public void listAllFondations() {
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(couchDbConnector);
+        
+        List<Fondation> allFondations = tronconRepository.getAllFondations();
+        for (Fondation fondation : allFondations) {
+			System.out.println(fondation     );
+		}
+        
     }
 }

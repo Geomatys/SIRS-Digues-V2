@@ -7,8 +7,11 @@ package fr.symadrem.sirs.core.component;
 
 import fr.symadrem.sirs.core.Repository;
 import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.TronconDigue;
+
 import java.util.List;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
@@ -20,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés (Geomatys)
  */
 @Views({
-    @View(name="all", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
-    @View(name="byDigueId", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
+    @View(name="all", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}")
+    ,@View(name="byDigueId", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
+    ,@View(name="fondations", map="classpath:/symadrem/couchdb/view/fondation-map.js")
+    
 })
 public class TronconDigueRepository extends CouchDbRepositorySupport<TronconDigue> implements Repository<TronconDigue>{
 
@@ -45,4 +50,9 @@ public class TronconDigueRepository extends CouchDbRepositorySupport<TronconDigu
         return new TronconDigue();
     }
    
+    
+    public List<Fondation> getAllFondations(){
+        return db.queryView(createQuery("fondations"), Fondation.class);
+    }
+    
 }
