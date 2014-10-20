@@ -410,7 +410,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordre" eType="#//RefTypeDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueDesordre" upperBound="-1"
         eType="#//CrueDesordre" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ArticleJournalDesordre"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="articleJournalDesordre"
         upperBound="-1" eType="#//ArticleJournalDesordre" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="elementReseau" upperBound="-1"
         eType="#//ElementReseauDesordre" containment="true"/>
