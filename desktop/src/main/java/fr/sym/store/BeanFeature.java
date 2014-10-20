@@ -4,6 +4,7 @@ package fr.sym.store;
 import com.vividsolutions.jts.geom.Geometry;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,7 +83,10 @@ public class BeanFeature extends AbstractFeature<Collection<Property>>{
                         continue;
                     }
                     
-                    final Class propClazz = pd.getReadMethod().getReturnType();
+                    final Method readMethod = pd.getReadMethod();
+                    if(readMethod==null) continue;
+                    
+                    final Class propClazz = readMethod.getReturnType();
                     if(Geometry.class.isAssignableFrom(propClazz)){
                         ftb.add(propName, propClazz, crs);
                         ftb.setDefaultGeometry(propName);

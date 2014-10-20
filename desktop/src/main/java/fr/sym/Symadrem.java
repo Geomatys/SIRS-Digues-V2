@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import org.apache.sis.util.logging.Logging;
-import org.h2.jdbcx.JdbcConnectionPool;
 
 /**
  * Constants used for project.
@@ -20,9 +19,7 @@ public final class Symadrem {
     public static final String NAME = "symadrem";
     public static final Logger LOGGER = Logging.getLogger(Symadrem.class);
     public static final String CSS_PATH = "/fr/sym/theme.css";
-    
-    private static JdbcConnectionPool CNX_POOL;
-    
+        
     private Symadrem(){};
     
     /**
@@ -43,15 +40,7 @@ public final class Symadrem {
     public static File getDatabaseFolder(){
         return new File(getConfigFolder(), "database");
     }
-    
-    public static synchronized JdbcConnectionPool getConnectionPool(){
-        if(CNX_POOL==null){
-            final File dbFile = new File(getDatabaseFolder(),"database");
-            CNX_POOL = JdbcConnectionPool.create("jdbc:h2:"+dbFile.getPath(), "symadrem", "symadrem");
-        }
-        return CNX_POOL;
-    }
-    
+        
     public static void loadJRXML(Parent candidate){
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";

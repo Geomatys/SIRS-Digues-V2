@@ -6,32 +6,24 @@ import java.util.List;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
-import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
-import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.DefaultDescription;
-import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.style.RandomStyleBuilder;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fr.sym.store.SymadremStore;
-import fr.symadrem.sirs.core.Repository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -56,9 +48,6 @@ public class Session {
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     
-    @Autowired
-    private List<Repository<?>> repositories;
-    
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
 
@@ -66,6 +55,14 @@ public class Session {
     public Session(CouchDbConnector couchDbConnector) {
         digueRepository = new DigueRepository(couchDbConnector);
         tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
+    }
+
+    public DigueRepository getDigueRepository() {
+        return digueRepository;
+    }
+
+    public TronconDigueRepository getTronconDigueRepository() {
+        return tronconDigueRepository;
     }
 
     /**
@@ -117,13 +114,6 @@ public class Session {
     public synchronized MapItem getBackgroundLayerGroup() {
         getMapContext();
         return backgroundGroup;
-    }
-
-    /**
-     * Liste de tout les repositories CouchDB.
-     */
-    public List<Repository<?>> getRepositories() {
-        return repositories;
     }
     
     public List<Digue> getDigues() {

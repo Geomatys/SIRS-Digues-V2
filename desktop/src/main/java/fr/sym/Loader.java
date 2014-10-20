@@ -2,7 +2,6 @@ package fr.sym;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.logging.Level;
 
 import javafx.animation.FadeTransition;
@@ -33,7 +32,6 @@ import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -139,7 +137,7 @@ public class Loader extends Application {
             try {
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 6 + plugins.length;
+                final int total = 5 + plugins.length;
                 
                 GeometryDeserializer.class.newInstance();
                 
@@ -166,8 +164,7 @@ public class Loader extends Application {
                 updateMessage("Chargement des pilotes pour base de données...");
                 //loading drivers, some plugin systems requiere this call , like netbeans RCP
                 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
-                Class.forName("org.postgresql.Driver").newInstance();            
-                Class.forName("org.h2.Driver").newInstance();
+                Class.forName("org.postgresql.Driver").newInstance();           
                 
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
@@ -182,15 +179,7 @@ public class Loader extends Application {
                 createEpsgDB(storageFolder,url);
                 //force loading epsg
                 CRS.decode("EPSG:3395");
-                
-                // LOCAL DATABASE //////////////////////////////////////////////
-                updateProgress(inc++, total);
-                updateMessage("Creation de la base locale...");
-                final JdbcConnectionPool pool = Symadrem.getConnectionPool();
-                //check connection
-                final Connection cnx = pool.getConnection();
-                cnx.close();
-                
+                                
                 // JAXB ////////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des parseurs XML/JSON...");
