@@ -7,9 +7,9 @@ package fr.sym.theme;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FreeBordTheme extends AbstractTronconTheme {
+public class FrancBordTheme extends AbstractTronconTheme {
 
-    public FreeBordTheme() {
+    public FrancBordTheme() {
         super("Franc-bord");
     }
     

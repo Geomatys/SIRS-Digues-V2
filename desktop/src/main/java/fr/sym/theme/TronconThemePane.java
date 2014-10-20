@@ -4,7 +4,10 @@ package fr.sym.theme;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -15,12 +18,31 @@ public class TronconThemePane extends BorderPane {
 
     @FXML
     private BorderPane uiCenter;
-
     @FXML
-    private ChoiceBox<Object> uiTronconChoice;
+    private ChoiceBox<TronconDigue> uiTronconChoice;
     
-    public TronconThemePane() {
+    private AbstractTronconTheme.ThemeGroup[] groups;
+    
+    public TronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
         Symadrem.loadJRXML(this);
+        
+        if(groups.length==1){
+            final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[0]);
+            table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
+            uiCenter.setCenter(table);
+        }else{
+            final TabPane pane = new TabPane();
+            pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+            for(int i=0;i<groups.length;i++){
+                final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[i]);
+                table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
+                final Tab tab = new Tab(groups[i].getName());
+                tab.setContent(table);
+                pane.getTabs().add(tab);
+            }
+            uiCenter.setCenter(pane);
+        }
+        
     }
     
     /**
@@ -29,5 +51,6 @@ public class TronconThemePane extends BorderPane {
     public void initialize(){
         
     }
+    
     
 }

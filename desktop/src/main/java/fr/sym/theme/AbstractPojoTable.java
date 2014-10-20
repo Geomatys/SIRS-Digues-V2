@@ -1,10 +1,10 @@
 
 package fr.sym.theme;
 
-import fr.symadrem.sirs.core.Repository;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -15,14 +15,14 @@ import javafx.util.Callback;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class GenericPojosTablePane extends BorderPane{
+public class AbstractPojoTable extends BorderPane{
     
-    private final TableView uiTable = new TableView();
-    private final ScrollPane uiScroll = new ScrollPane(uiTable);
-    private final Repository repository;
+    protected final TableView uiTable = new TableView();
+    protected final ScrollPane uiScroll = new ScrollPane(uiTable);
+    protected final Class pojoClass;
 
-    public GenericPojosTablePane(Repository repository) {
-        this.repository = repository;
+    public AbstractPojoTable(Class pojoClass) {
+        this.pojoClass = pojoClass;
         
         uiScroll.setFitToHeight(true);
         uiScroll.setFitToWidth(true);
@@ -31,11 +31,11 @@ public class GenericPojosTablePane extends BorderPane{
         
         setCenter(uiScroll);
         
-        uiTable.setItems(FXCollections.observableList(repository.getAll()));
+        //TODO build columns
         uiTable.getColumns().add(new PropertyColumn());
         
     }
-    
+        
     public static class PropertyColumn extends TableColumn<Object,Object>{
 
         public PropertyColumn() {
