@@ -31,6 +31,7 @@ import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -82,14 +83,8 @@ public class Session {
                 symadremGroup.setName("Systeme de digue");
                 mapContext.items().add(0,symadremGroup);
 
-                final SymadremStore symStore = new SymadremStore(this,null,PROJECTION);
-                final org.geotoolkit.data.session.Session symSession = symStore.createSession(false);
-                for(Name name : symStore.getNames()){
-                    final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
-                    final MutableStyle style = RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType());
-                    final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
-                    fml.setName(name.getLocalPart());
-                    symadremGroup.items().add(fml);
+                for(Plugin plugin : Plugins.getPlugins()){
+                    symadremGroup.items().addAll(plugin.getMapItems());
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds());
 

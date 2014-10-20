@@ -4,7 +4,6 @@ package fr.sym.theme;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.fxml.FXML;
-import javafx.geometry.Side;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -49,6 +48,9 @@ public class TronconThemePane extends BorderPane {
      * Called by FXMLLoader after creating controller.
      */
     public void initialize(){
+        
+        //chargement de la liste des troncons
+        
         
     }
     

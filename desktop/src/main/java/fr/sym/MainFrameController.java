@@ -3,7 +3,6 @@ package fr.sym;
 import fr.sym.digue.DiguesController;
 import fr.sym.map.FXMapPane;
 import fr.sym.theme.Theme;
-import fr.sym.theme.TronconThemePane;
 import java.io.IOException;
 import java.util.List;
 import javafx.event.ActionEvent;
@@ -89,8 +88,9 @@ public class MainFrameController extends Stage {
         final Tab tab = new Tab();
         tab.setText("Map");
         tab.setContent(fxmap);
-
+        
         uiTabs.getTabs().add(tab);
+        uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().indexOf(tab));
     }
 
     @FXML
@@ -103,6 +103,7 @@ public class MainFrameController extends Stage {
         tab.setContent(new BorderPane(digueController.root));
         
         uiTabs.getTabs().add(tab);
+        uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().indexOf(tab));
     }
 
     @FXML

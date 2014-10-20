@@ -3,10 +3,12 @@ package fr.sym;
 
 import fr.sym.theme.Theme;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.geotoolkit.map.MapItem;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -18,13 +20,16 @@ public class Plugin {
     
     protected final List<Theme> themes = new ArrayList<>();
     
+    @Autowired
+    protected Session session;
+    
     /**
      * Get the map layers to display in the main application frame.
      * 
-     * @return MapItem or null 
+     * @return MapItem list, never null
      */
-    public MapItem getMapItem(){
-        return null;
+    public List<MapItem> getMapItems(){
+        return Collections.EMPTY_LIST;
     }
     
     /**
