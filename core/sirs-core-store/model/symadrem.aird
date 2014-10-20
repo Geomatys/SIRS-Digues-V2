@@ -1612,18 +1612,6 @@
             <styles xmi:type="notation:ShapeStyle" xmi:id="_KTLIsVUxEeSyt_5RCl16VA" fontName="Lucida Grande" fontHeight="8"/>
             <layoutConstraint xmi:type="notation:Bounds" xmi:id="_KTLIslUxEeSyt_5RCl16VA" x="2392" y="944" height="58"/>
           </children>
-          <children xmi:type="notation:Node" xmi:id="_ddu5EFUxEeSyt_5RCl16VA" type="2003" element="_dcYOMFUxEeSyt_5RCl16VA">
-            <children xmi:type="notation:Node" xmi:id="_ddu5E1UxEeSyt_5RCl16VA" type="5007"/>
-            <children xmi:type="notation:Node" xmi:id="_ddu5FFUxEeSyt_5RCl16VA" type="7004">
-              <children xmi:type="notation:Node" xmi:id="_ddwHMFUxEeSyt_5RCl16VA" type="3010" element="_ddHOAFUxEeSyt_5RCl16VA">
-                <layoutConstraint xmi:type="notation:Location" xmi:id="_ddwHMVUxEeSyt_5RCl16VA"/>
-              </children>
-              <styles xmi:type="notation:SortingStyle" xmi:id="_ddu5FVUxEeSyt_5RCl16VA"/>
-              <styles xmi:type="notation:FilteringStyle" xmi:id="_ddu5FlUxEeSyt_5RCl16VA"/>
-            </children>
-            <styles xmi:type="notation:ShapeStyle" xmi:id="_ddu5EVUxEeSyt_5RCl16VA" fontName="Lucida Grande" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ddu5ElUxEeSyt_5RCl16VA" x="1708" y="932" height="54"/>
-          </children>
           <children xmi:type="notation:Node" xmi:id="_B9aFsFUzEeSyt_5RCl16VA" type="2003" element="_B8Da0FUzEeSyt_5RCl16VA">
             <children xmi:type="notation:Node" xmi:id="_B9aswFUzEeSyt_5RCl16VA" type="5007"/>
             <children xmi:type="notation:Node" xmi:id="_B9aswVUzEeSyt_5RCl16VA" type="7004">
@@ -10434,33 +10422,6 @@
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
-      </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_dcYOMFUxEeSyt_5RCl16VA" name="OuvrageVoirieOuvrageFranchissement" tooltipText="" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="symadrem.ecore#//OuvrageVoirieOuvrageFranchissement"/>
-        <semanticElements xmi:type="ecore:EClass" href="symadrem.ecore#//OuvrageVoirieOuvrageFranchissement"/>
-        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
-        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
-        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
-        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_dcYOMVUxEeSyt_5RCl16VA" backgroundStyle="Liquid">
-          <customFeatures>backgroundColor</customFeatures>
-          <customFeatures>foregroundColor</customFeatures>
-          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_dcYOMlUxEeSyt_5RCl16VA"/>
-          <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
-          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_dcYOM1UxEeSyt_5RCl16VA"/>
-          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_iZqnkFUxEeSyt_5RCl16VA" red="255" green="255" blue="255"/>
-        </ownedStyle>
-        <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_ddHOAFUxEeSyt_5RCl16VA" name="dateMaj : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//OuvrageVoirieOuvrageFranchissement/dateMaj"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//OuvrageVoirieOuvrageFranchissement/dateMaj"/>
-          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_ddHOAVUxEeSyt_5RCl16VA" labelAlignment="LEFT">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_ddHOAlUxEeSyt_5RCl16VA"/>
-            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
-            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_ddHOA1UxEeSyt_5RCl16VA"/>
-            <color xmi:type="viewpoint:RGBValues" xmi:id="_ddHOBFUxEeSyt_5RCl16VA"/>
-          </ownedStyle>
-          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
-        </ownedElements>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_B8Da0FUzEeSyt_5RCl16VA" name="ReaseauHydroFermeReseauHydroCielOuvert" tooltipText="" outgoingEdges="_B9DgYFUzEeSyt_5RCl16VA" incomingEdges="_Gt5ZMFUzEeSyt_5RCl16VA" width="12" height="10">
         <target xmi:type="ecore:EClass" href="symadrem.ecore#//ReaseauHydroFermeReseauHydroCielOuvert"/>

@@ -923,9 +923,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_telecom_energie"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirieOuvrageFranchissement">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReaseauHydroFermeReseauHydroCielOuvert">
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_hydraulique_ferme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
