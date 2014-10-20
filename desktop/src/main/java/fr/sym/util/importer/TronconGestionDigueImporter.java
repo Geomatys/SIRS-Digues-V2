@@ -8,7 +8,17 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
+import fr.sym.util.importer.structure.CreteImporter;
+import fr.sym.util.importer.structure.DesordreImporter;
+import fr.sym.util.importer.structure.PiedDigueImporter;
+import fr.sym.util.importer.structure.StructureImporter;
+import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.Desordre;
+import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.GestionTroncon;
+import fr.symadrem.sirs.core.model.PiedDigue;
+import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import fr.symadrem.sirs.core.model.TypeRive;
@@ -26,32 +36,45 @@ import java.util.Map;
  */
 public class TronconGestionDigueImporter extends GenericImporter {
 
-    private Map<Integer, TronconDigue> tronconDigueIds = null;
+    private Map<Integer, TronconDigue> tronconsDigue = null;
+    private Map<TronconDigue, Integer> tronconsIds = null;
     private TronconDigueGeomImporter tronconDigueGeomImporter;
     private TypeRiveImporter typeRiveImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
     private DigueImporter digueImporter;
+    private TronconDigueRepository tronconDigueRepository;
+    
+    private StructureImporter structureImporter;
+//    
+//    private CreteImporter creteImporter;
+//    private DesordreImporter desordreImporter;
+//    private PiedDigueImporter piedDigueImporter;
     
     private TronconGestionDigueImporter(Database accessDatabase) {
         super(accessDatabase);
     }
     
     public TronconGestionDigueImporter(final Database accessDatabase, 
+            final TronconDigueRepository tronconDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter){
         this(accessDatabase);
+        this.tronconDigueRepository = tronconDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
         this.typeRiveImporter = typeRiveImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
+        
+        this.structureImporter = new StructureImporter(accessDatabase, this);
+//        this.creteImporter = new CreteImporter(accessDatabase, this);
+//        this.desordreImporter = new DesordreImporter(accessDatabase, this);
+//        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, this);
     }
-    
-    
 
     /*==========================================================================
      TRONCON_GESTION_DIGUE.
@@ -73,7 +96,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
      * TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.
      TODO : s'occuper du lien avec les systèmes de repérage.
-    TODO : faire les structures.
+     TODO : faire les structures.
      */
     public static enum TronconGestionDigueColumns {
 
@@ -93,12 +116,18 @@ public class TronconGestionDigueImporter extends GenericImporter {
             return this.column;
         }
     };
-    
 
-    public Map<Integer, TronconDigue> getTronconsDigues() throws IOException {
+    /**
+     * 
+     * @return A map containing all TronconDigue instances accessibles from 
+     * the internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, TronconDigue> getTronconsDigues() throws IOException, AccessDbImporterException {
 
-        if(tronconDigueIds == null){
-            tronconDigueIds = new HashMap<>();
+        if(tronconsDigue == null){
+            tronconsDigue = new HashMap<>();
+            tronconsIds = new HashMap<>();
             final Iterator<Row> it = this.accessDatabase.getTable("TRONCON_GESTION_DIGUE").iterator();
 
             final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
@@ -121,22 +150,52 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 }
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-                tronconDigueIds.put(row.getInt(TronconGestionDigueColumns.ID.toString()), tronconDigue);
+                tronconsDigue.put(row.getInt(TronconGestionDigueColumns.ID.toString()), tronconDigue);
+                tronconsIds.put(tronconDigue, row.getInt(TronconGestionDigueColumns.ID.toString()));
 
-                // Set the references.
-                tronconDigue.setDigueId(digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
-
-                final List<GestionTroncon> gestions = new ArrayList<>();
-                tronconGestionDigueGestionnaireImporter.getGestionnaires().values().stream().forEach((gestion) -> {gestions.add(gestion);});
-                tronconDigue.setGestionnaires(gestions);
+                // Register the troncon to retrieve a CouchDb ID.
+                tronconDigueRepository.add(tronconDigue);
+                
+                // Set simple references.
+                final List<GestionTroncon> gestions = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId().get(row.getInt(TronconGestionDigueColumns.ID.toString()));
+                if(gestions != null) tronconDigue.setGestionnaires(gestions);
 
                 tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
-
+                
+                // Set the references demanding CouchDb identifier.
+                final Digue digue = digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.DIGUE.toString()));
+                if(digue.getId()!=null){
+                    tronconDigue.setDigueId(digue.getId());
+                }else {
+                    throw new AccessDbImporterException("La digue "+digue+" n'a pas encore d'identifiant CouchDb !");
+                }
+                
                 // Set the geometry
                 tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
             }
+            
+            
+            // Set the references using the this very importer (Structures references TronconDigueId).
+            for(final TronconDigue tronconDigue : tronconsDigue.values()){
+                
+                List<Structure> structures = tronconDigue.getStuctures();
+                if(structures==null){
+                    structures = new ArrayList<>();
+                    tronconDigue.setStuctures(structures);
+                }
+                
+                structures.addAll(structureImporter.getStructureList(tronconsIds.get(tronconDigue)));
+//                List<Crete> cretes = creteImporter.getCretesByTronconId().get(tronconsIds.get(tronconDigue));
+//                if(cretes!=null) structures.addAll(cretes);
+//                List<Desordre> desordres = desordreImporter.getDesordresByTronconId().get(tronconsIds.get(tronconDigue));
+//                if(desordres!=null) structures.addAll(desordres);
+//                List<PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId().get(tronconsIds.get(tronconDigue));
+//                if(piedsDigue!=null) structures.addAll(piedsDigue);
+                
+                //Update the repository
+                tronconDigueRepository.update(tronconDigue);
+            }
         }
-            return tronconDigueIds;
+            return tronconsDigue;
     }
 }

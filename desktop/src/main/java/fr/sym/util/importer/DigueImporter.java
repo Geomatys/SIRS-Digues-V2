@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -20,10 +21,16 @@ import java.util.Map;
  */
 public class DigueImporter extends GenericImporter {
 
+    private DigueRepository digueRepository;
     private Map<Integer, Digue> digues = null;
     
-    public DigueImporter(Database accessDatabase) {
+    private DigueImporter(Database accessDatabase) {
         super(accessDatabase);
+    }
+    
+    public DigueImporter(final Database accessDatabase, final DigueRepository digueRepository) {
+        this(accessDatabase);
+        this.digueRepository = digueRepository;
     }
     
 
@@ -50,6 +57,12 @@ public class DigueImporter extends GenericImporter {
         }
     };
     
+    /**
+     * 
+     * @return A map containing all Digue instances accessibles from 
+     * the internal database identifier.
+     * @throws IOException 
+     */
     public Map<Integer, Digue> getDigues() throws IOException {
 
         if(digues==null){
@@ -69,6 +82,9 @@ public class DigueImporter extends GenericImporter {
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 //digue.setId(String.valueOf(row.getInt(DigueColumns.ID.toString())));
                 digues.put(row.getInt(DigueColumns.ID.toString()), digue);
+                
+                // Register the digue to retrieve a CouchDb ID.
+                digueRepository.add(digue);
             }
         }
         return digues;

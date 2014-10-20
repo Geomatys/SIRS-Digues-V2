@@ -8,11 +8,14 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.model.GestionTroncon;
+import fr.symadrem.sirs.core.model.Organisme;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +24,7 @@ import java.util.Map;
  */
 public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
-    private Map<Integer, GestionTroncon> gestionsByTronconId = null;
+    private Map<Integer, List<GestionTroncon>> gestionsByTronconId = null;
     private OrganismeImporter organismeImporter;
 
     private TronconGestionDigueGestionnaireImporter(Database accessDatabase) {
@@ -63,7 +66,14 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         }
     };
 
-    public Map<Integer, GestionTroncon> getGestionnaires() throws IOException {
+    /**
+     *
+     * @return A map containing all GestionTroncon instances accessibles from
+     * the internal database <em>TronconGestion</em> identifier.
+     * @throws IOException
+     * @throws fr.sym.util.importer.AccessDbImporterException
+     */
+    public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
 
         if (gestionsByTronconId == null) {
             gestionsByTronconId = new HashMap<>();
@@ -80,10 +90,21 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
                 }
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), gestion);
+                List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
+                if(listeGestions == null){
+                    listeGestions = new ArrayList<>();
+                    gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
+                }
+                listeGestions.add(gestion);
 
                 // Set the references.
-                gestion.setGestionnaireId(organismeImporter.getOrganismes().get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString())).getId());
+                final Organisme organisme = organismeImporter.getOrganismes().get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
+                if (organisme.getId() != null) {
+                    System.out.println(organisme.getId());
+                    gestion.setGestionnaireId(organisme.getId());
+                } else {
+                    throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
+                }
             }
         }
         return gestionsByTronconId;

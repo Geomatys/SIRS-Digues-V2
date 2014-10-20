@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.model.Organisme;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -22,9 +23,15 @@ import java.util.Map;
 public class OrganismeImporter extends GenericImporter {
 
     private Map<Integer, Organisme> organismes = null;
+    private OrganismeRepository organismeRepository;
 
-    public OrganismeImporter(Database accessDatabase) {
+    private OrganismeImporter(Database accessDatabase) {
         super(accessDatabase);
+    }
+    
+    public OrganismeImporter(final Database accessDatabase, final OrganismeRepository organismeRepository){
+        this(accessDatabase);
+        this.organismeRepository = organismeRepository;
     }
 
     /**
@@ -89,6 +96,9 @@ public class OrganismeImporter extends GenericImporter {
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 organismes.put(row.getInt(OrganismeColumns.ID.toString()), organisme);
+                
+                // Register the organism to retrieve a CouchDb ID.
+                organismeRepository.add(organisme);
             }
         }
         return organismes;

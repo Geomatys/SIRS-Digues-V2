@@ -12,14 +12,14 @@ import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.Desordre;
+import fr.symadrem.sirs.core.model.PiedDigue;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.geotoolkit.factory.Hints;
@@ -196,8 +196,8 @@ public class DbImporter {
      SYS_EVT_CHEMIN_ACCES
      SYS_EVT_CONDUITE_FERMEE
      SYS_EVT_CONVENTION
-     SYS_EVT_CRETE
-     SYS_EVT_DESORDRE
+     = SYS_EVT_CRETE
+     = SYS_EVT_DESORDRE
      SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON
      SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE
      SYS_EVT_DOCUMENT_MARCHE
@@ -410,10 +410,11 @@ public class DbImporter {
         this.typeRiveImporter = new TypeRiveImporter(accessDatabase);
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase);
         this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase);
-        this.organismeImporter = new OrganismeImporter(accessDatabase);
+        this.organismeImporter = new OrganismeImporter(accessDatabase, organismeRepository);
         this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(accessDatabase, this.organismeImporter);
-        this.digueImporter = new DigueImporter(accessDatabase);
-        this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, digueImporter, tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter);
+        this.digueImporter = new DigueImporter(accessDatabase, digueRepository);
+        this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, tronconDigueRepository, digueImporter, tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter);
+        
     }
 
     public Database getDatabase() {
@@ -447,175 +448,6 @@ public class DbImporter {
             organismeRepository.add(organisme);
         });
     }
-    
-    /*==========================================================================
-    SYS_EVT_CRETE
-    ----------------------------------------------------------------------------
-    ID_ELEMENT_STRUCTURE
-    id_nom_element
-    ID_SOUS_GROUPE_DONNEES
-    LIBELLE_TYPE_ELEMENT_STRUCTURE
-    DECALAGE_DEFAUT
-    DECALAGE
-    LIBELLE_SOURCE
-    LIBELLE_TYPE_COTE
-    LIBELLE_SYSTEME_REP
-    NOM_BORNE_DEBUT
-    NOM_BORNE_FIN
-    LIBELLE_TYPE_MATERIAU
-    LIBELLE_TYPE_NATURE
-    LIBELLE_TYPE_FONCTION
-    LIBELLE_TYPE_NATURE_HAUT
-    LIBELLE_TYPE_MATERIAU_HAUT
-    LIBELLE_TYPE_NATURE_BAS
-    LIBELLE_TYPE_MATERIAU_BAS
-    LIBELLE_TYPE_OUVRAGE_PARTICULIER
-    LIBELLE_TYPE_POSITION
-    RAISON_SOCIALE_ORG_PROPRIO
-    RAISON_SOCIALE_ORG_GESTION
-    INTERV_PROPRIO
-    INTERV_GARDIEN
-    LIBELLE_TYPE_COMPOSITION
-    LIBELLE_TYPE_VEGETATION
-    ID_TYPE_ELEMENT_STRUCTURE
-    ID_TYPE_COTE
-    ID_SOURCE
-    ID_TRONCON_GESTION
-    DATE_DEBUT_VAL
-    DATE_FIN_VAL
-    PR_DEBUT_CALCULE
-    PR_FIN_CALCULE
-    X_DEBUT
-    Y_DEBUT
-    X_FIN
-    Y_FIN
-    ID_SYSTEME_REP
-    ID_BORNEREF_DEBUT
-    AMONT_AVAL_DEBUT
-    DIST_BORNEREF_DEBUT
-    ID_BORNEREF_FIN
-    AMONT_AVAL_FIN
-    DIST_BORNEREF_FIN
-    COMMENTAIRE
-    N_COUCHE
-    ID_TYPE_MATERIAU
-    ID_TYPE_NATURE
-    ID_TYPE_FONCTION
-    EPAISSEUR
-    TALUS_INTERCEPTE_CRETE
-    ID_TYPE_NATURE_HAUT
-    ID_TYPE_MATERIAU_HAUT
-    ID_TYPE_MATERIAU_BAS
-    ID_TYPE_NATURE_BAS
-    LONG_RAMP_HAUT
-    LONG_RAMP_BAS
-    PENTE_INTERIEURE
-    ID_TYPE_OUVRAGE_PARTICULIER
-    ID_TYPE_POSITION
-    ID_ORG_PROPRIO
-    ID_ORG_GESTION
-    ID_INTERV_PROPRIO
-    ID_INTERV_GARDIEN
-    DATE_DEBUT_ORGPROPRIO
-    DATE_FIN_ORGPROPRIO
-    DATE_DEBUT_GESTION
-    DATE_FIN_GESTION
-    DATE_DEBUT_INTERVPROPRIO
-    DATE_FIN_INTERVPROPRIO
-    ID_TYPE_COMPOSITION
-    DISTANCE_TRONCON
-    LONGUEUR
-    DATE_DEBUT_GARDIEN
-    DATE_FIN_GARDIEN
-    LONGUEUR_PERPENDICULAIRE
-    LONGUEUR_PARALLELE
-    COTE_AXE
-    ID_TYPE_VEGETATION
-    HAUTEUR
-    DIAMETRE
-    DENSITE
-    EPAISSEUR_Y11
-    EPAISSEUR_Y12
-    EPAISSEUR_Y21
-    EPAISSEUR_Y22
-    ID_AUTO
-    */
-    
-    private Map<Integer, Crete> sysEvtCreteByTronconId = null;
-    private List<Crete> getCretes() throws IOException{
-        
-        final List<Crete> cretes = new ArrayList<>();
-        final Iterator<Row> it = this.accessDatabase.getTable("SYS_EVT_CRETE").iterator();
-        
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Crete crete = new Crete();
-//            crete.setBorne_debut(borne_debut);
-//            crete.setBorne_debut_aval(true);
-//            crete.setBorne_debut_distance(borne_debut_distance);
-//            crete.setBorne_fin(borne_debut);
-//            crete.setBorne_fin_aval(true);
-//            crete.setBorne_fin_distance(borne_debut_distance);
-//            crete.setCommentaire(null);
-//            crete.setContactStructure(null);
-//            crete.setConventionIds(null);
-//            crete.setCote(null);
-//            crete.setDateMaj(LocalDateTime.MIN);
-//            crete.setDate_debut(LocalDateTime.MIN);
-//            crete.setDate_fin(LocalDateTime.MIN);
-//            crete.setEpaisseur(epaisseur);
-//            crete.setFonction(null);
-//            crete.setGeometry(null);
-//            crete.setListeCote(null);
-//            crete.setListeFonction(null);
-//            crete.setListeMateriau(null);
-//            crete.setListeSource(null);
-//            crete.setMateriau(null);
-//            crete.setNum_couche(num_couche);
-//            crete.setOrganismeStructure(null);
-//            crete.setPR_debut(PR_debut);
-//            crete.setPR_fin(PR_fin);
-//            crete.setParent(crete);
-//            crete.setPosition(null);
-//            crete.setPosition_structure(null);
-//            crete.setSource(null);
-//            crete.setSysteme_rep_id(systeme_rep_id);
-//            crete.setTroncon(null);
-            
-            
-            
-//            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
-//            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
-//            if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {
-//                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
-//            }
-//            if (row.getDate(TronconGestionDigueColumns.DEBUT_VAL_TRONCON.toString()) != null) {
-//                tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
-//            }
-//            if (row.getDate(TronconGestionDigueColumns.FIN_VAL_TRONCON.toString()) != null) {
-//                tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
-//            }
-//
-//            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-//            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-//            tronconDigueIds.put(row.getInt(TronconGestionDigueColumns.ID.toString()), tronconDigue);
-//
-//            // Set the references.
-//            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
-//            
-//            final List<GestionTroncon> gestions = new ArrayList<>();
-//            this.getGestionnaires().stream().forEach((gestion) -> {gestions.add(gestion);});
-//            tronconDigue.setGestionnaires(gestions);
-//            
-//            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
-//
-//            // Set the geometry
-//            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
-//            
-//            tronconsDigues.add(tronconDigue);
-        }
-        return cretes;
-    }
 
     public void removeTronconsDigues() {
         tronconDigueRepository.getAll().stream().forEach((tronconDigue) -> {
@@ -623,16 +455,18 @@ public class DbImporter {
         });
     }
 
-    public void importTronconsDigues() throws IOException {
+    public void importTronconsDigues() throws IOException, AccessDbImporterException {
         tronconGestionDigueImporter.getTronconsDigues().values().stream().forEach((tronconDigue) -> {
             tronconDigueRepository.add(tronconDigue);
             //System.out.println(tronconDigue.getGeometry().toText());
         });
     }
     
-    
+    public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{
+        return this.tronconGestionDigueImporter.getTronconsDigues().values();
+    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws AccessDbImporterException {
                 //Geotoolkit startup
                 Setup.initialize(null);
                 //work in lazy mode, do your best for lenient datum shift
@@ -661,22 +495,39 @@ public class DbImporter {
 //            for(Row r : importer.getCartoDatabase().getTable("GDB_SpatialRefs")){
 //                System.out.println(r);
 //        }
-//SYS_EVT_CRETE
+//SYS_EVT_PIED_DE_DIGUE
 //            System.out.println("=======================");
-//            importer.getDatabase().getTable("SYS_EVT_CRETE").getColumns().stream().forEach((column) -> {
+//            importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getColumns().stream().forEach((column) -> {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
 
+//            for(Row row : importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE")){
+//                System.out.println(row);
+//            }
             
-            importer.removeDigues();
-            importer.importDigues();
-            
-            importer.removeOrganismes();
-            importer.importOrganismes();
-
             importer.removeTronconsDigues();
-            importer.importTronconsDigues();
+            importer.removeDigues();
+            importer.removeOrganismes();
+            
+            importer.importation().stream().forEach((troncon) -> {
+                //System.out.println(troncon);
+                troncon.getStuctures().stream().forEach((structure) -> {
+                
+                    if(structure instanceof Crete){
+                        System.out.println("======>CRETE<====== : "+(Crete) structure);
+                    }
+                    if(structure instanceof Desordre){
+                        System.out.println("======>DESORDRE<====== : "+(Desordre) structure);
+                    }
+                    if(structure instanceof PiedDigue){
+                        System.out.println("======>PIEDDIGUE<====== : "+(PiedDigue) structure);
+                    }
+                    
+                });
+                
+            });
+            
 
         } catch (IOException ex) {
             Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
