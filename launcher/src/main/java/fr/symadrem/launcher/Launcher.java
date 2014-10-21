@@ -23,5 +23,4 @@ public class Launcher extends Application {
         primaryStage.setTitle("Symadrem");
         primaryStage.show();
     }
-    
 }

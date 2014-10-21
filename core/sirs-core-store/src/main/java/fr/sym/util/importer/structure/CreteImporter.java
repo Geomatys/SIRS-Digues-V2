@@ -154,7 +154,6 @@ class CreteImporter extends GenericImporter {
             this.cretesByTronconId = new HashMap<>();
             while (it.hasNext()) {
                 final Row row = it.next();
-                System.out.println(row);
                 final Crete crete = new Crete();
 //            crete.setBorne_debut(borne_debut);
 //            crete.setBorne_debut_aval(true);

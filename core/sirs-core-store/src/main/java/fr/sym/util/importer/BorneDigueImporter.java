@@ -76,6 +76,7 @@ public class BorneDigueImporter extends GenericImporter {
             while (it.hasNext()) {
                 final Row row = it.next();
                 final BorneDigue borne = new BorneDigue();
+                
                 borne.setNom(row.getString(BorneDigueColumns.NOM.toString()));
                 borne.setCommentaire(row.getString(BorneDigueColumns.COMMENTAIRE.toString()));
                 if (row.getDate(BorneDigueColumns.MAJ.toString()) != null) {

@@ -99,7 +99,6 @@ class DesordreImporter extends GenericImporter {
             this.desordresByTronconId = new HashMap<>();
             while (it.hasNext()) {
                 final Row row = it.next();
-                System.out.println(row);
                 final Desordre desordre = new Desordre();
 //            crete.setBorne_debut(borne_debut);
 //            crete.setBorne_debut_aval(true);

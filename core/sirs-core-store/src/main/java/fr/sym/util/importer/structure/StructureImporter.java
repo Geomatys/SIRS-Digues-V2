@@ -44,46 +44,31 @@ public class StructureImporter extends GenericImporter {
     public Map<Integer, List<Structure>> getStructuresByTronconId() throws IOException, AccessDbImporterException{
         if(structures == null){
             structures = new HashMap<>();
+            
             final Map<Integer, List<Crete>> cretes = creteImporter.getCretesByTronconId();
-            for(final Integer key : cretes.keySet()){
+            cretes.keySet().stream().map((key) -> {
                 if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                return key;
+            }).forEach((key) -> {
                 structures.get(key).addAll(cretes.get(key));
-            }
+            });
             
             final Map<Integer, List<Desordre>> desordres = desordreImporter.getDesordresByTronconId();
-            for(final Integer key : desordres.keySet()){
+            desordres.keySet().stream().map((key) -> {
                 if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                return key;
+            }).forEach((key) -> {
                 structures.get(key).addAll(desordres.get(key));
-            }
+            });
             
             final Map<Integer, List<PiedDigue>> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId();
-            for(final Integer key : piedsDigue.keySet()){
+            piedsDigue.keySet().stream().map((key) -> {
                 if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                return key;
+            }).forEach((key) -> {
                 structures.get(key).addAll(piedsDigue.get(key));
-            }
+            });
         }
         return structures;
     }
-
-//    public List<Structure> getStructureList(final Integer accessTronconId) throws IOException, AccessDbImporterException {
-//
-//        if (structures == null) {
-//            structures = new ArrayList<>();
-//        }
-//        List<Crete> cretes = creteImporter.getCretesByTronconId().get(accessTronconId);
-//        if (cretes != null) {
-//            structures.addAll(cretes);
-//            System.out.println(structures);
-//        }
-//        List<Desordre> desordres = desordreImporter.getDesordresByTronconId().get(accessTronconId);
-//        if (desordres != null) {
-//            structures.addAll(desordres);
-//        }
-//        List<PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId().get(accessTronconId);
-//        if (piedsDigue != null) {
-//            structures.addAll(piedsDigue);
-//        }
-//        return structures;
-//    }
-
 }

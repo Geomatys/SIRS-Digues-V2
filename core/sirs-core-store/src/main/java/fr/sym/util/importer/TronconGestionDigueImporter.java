@@ -43,11 +43,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
     
     private TronconDigueRepository tronconDigueRepository;
     
-//    
-//    private CreteImporter creteImporter;
-//    private DesordreImporter desordreImporter;
-//    private PiedDigueImporter piedDigueImporter;
-    
     private TronconGestionDigueImporter(Database accessDatabase) {
         super(accessDatabase);
     }
@@ -135,6 +130,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             while (it.hasNext()) {
                 final Row row = it.next();
                 final TronconDigue tronconDigue = new TronconDigue();
+                
                 tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
                 tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
                 if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {

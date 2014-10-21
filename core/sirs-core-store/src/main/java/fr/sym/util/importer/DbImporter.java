@@ -383,7 +383,7 @@ public class DbImporter {
     x Selections
      */
 
-    private DbImporter(CouchDbConnector couchDbConnector) throws IOException {
+    public DbImporter(CouchDbConnector couchDbConnector) throws IOException {
         this.digueRepository = new DigueRepository(couchDbConnector);
         this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
@@ -432,6 +432,12 @@ public class DbImporter {
         });
     }
     
+    public void cleanDb(){
+        this.removeTronconsDigues();
+        this.removeDigues();
+        this.removeOrganismes();
+    }
+    
     public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{
         return this.tronconGestionDigueImporter.getTronconsDigues().values();
     }
@@ -466,22 +472,19 @@ public class DbImporter {
 //                System.out.println(r);
 //        }
 //SYS_EVT_PIED_DE_DIGUE
-            System.out.println("=======================");
-            importer.getDatabase().getTable("BORNE_DIGUE").getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
-            });
-            System.out.println("++++++++++++++++++++");
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("BORNE_DIGUE").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
 
             for(Row row : importer.getDatabase().getTable("BORNE_DIGUE")){
-                System.out.println(row);
+                //System.out.println(row);
             }
-            
-            importer.removeTronconsDigues();
-            importer.removeDigues();
-            importer.removeOrganismes();
+            importer.cleanDb();
             
             importer.importation().stream().forEach((troncon) -> {
-                System.out.println(troncon);
+            //    System.out.println(troncon);
 //                troncon.getStuctures().stream().forEach((structure) -> {
 //                
 //                    if(structure instanceof Crete){
@@ -495,9 +498,9 @@ public class DbImporter {
 //                    }
 //                    
 //                });
-                troncon.getBorneIds().stream().forEach((borne) -> {
-                    System.out.println(borne);
-                });
+//                troncon.getBorneIds().stream().forEach((borne) -> {
+//                    System.out.println(borne);
+//                });
             });
             
 

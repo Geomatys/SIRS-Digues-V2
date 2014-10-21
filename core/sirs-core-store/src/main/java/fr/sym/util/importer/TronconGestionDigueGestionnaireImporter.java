@@ -81,6 +81,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             while (it.hasNext()) {
                 final Row row = it.next();
                 final GestionTroncon gestion = new GestionTroncon();
+                
                 if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
                     gestion.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
                 }

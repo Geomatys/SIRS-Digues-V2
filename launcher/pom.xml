@@ -15,5 +15,12 @@
   <packaging>jar</packaging>
   <name>Launcher</name>
   <description>Launcher</description>
-    
+    <dependencies>
+        <dependency>
+            <groupId>fr.symadrem.sirs.core</groupId>
+            <artifactId>sirs-core-store</artifactId>
+            <version>1.x-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>
