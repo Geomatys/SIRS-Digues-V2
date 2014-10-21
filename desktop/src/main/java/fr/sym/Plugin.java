@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.MenuItem;
 import org.geotoolkit.map.MapItem;
 
 /**
@@ -47,6 +48,13 @@ public class Plugin {
      */
     public List<Theme> getThemes(){
         return themes;
+    }
+    
+    /**
+     * Recupere les actions disponibles pour un object selectionné sur la carte.
+     */
+    public List<MenuItem> getMapActions(Object candidate) {
+        return Collections.EMPTY_LIST;
     }
     
     /**

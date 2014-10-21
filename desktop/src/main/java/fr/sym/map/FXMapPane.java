@@ -18,6 +18,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -84,6 +85,7 @@ public class FXMapPane extends BorderPane {
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
         uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
+        uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree(context);
         uiTree.getTreetable().setShowRoot(false);
         uiTree.getMenuItems().add(new OpacityItem());
@@ -152,6 +154,10 @@ public class FXMapPane extends BorderPane {
         } catch (NoninvertibleTransformException | TransformException ex) {
             Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
         }
+        
+        //ajout des ecouteurs souris sur click droit
+        uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
+        uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
     }
 
     public MapContext getMapContext() {
