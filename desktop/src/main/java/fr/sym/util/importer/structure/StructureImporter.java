@@ -15,7 +15,9 @@ import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.Structure;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -23,6 +25,7 @@ import java.util.List;
  */
 public class StructureImporter extends GenericImporter {
 
+    private Map<Integer, List<Structure>> structures = null;
     private CreteImporter creteImporter;
     private DesordreImporter desordreImporter;
     private PiedDigueImporter piedDigueImporter;
@@ -37,23 +40,50 @@ public class StructureImporter extends GenericImporter {
         this.desordreImporter = new DesordreImporter(accessDatabase, tronconGestionDigueImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, tronconGestionDigueImporter);
     }
-
-    public List<Structure> getStructureList(final Integer accessTronconId) throws IOException, AccessDbImporterException {
-        List<Structure> structures = new ArrayList<>();
-
-        List<Crete> cretes = creteImporter.getCretesByTronconId().get(accessTronconId);
-        if (cretes != null) {
-            structures.addAll(cretes);
-        }
-        List<Desordre> desordres = desordreImporter.getDesordresByTronconId().get(accessTronconId);
-        if (desordres != null) {
-            structures.addAll(desordres);
-        }
-        List<PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId().get(accessTronconId);
-        if (piedsDigue != null) {
-            structures.addAll(piedsDigue);
+    
+    public Map<Integer, List<Structure>> getStructuresByTronconId() throws IOException, AccessDbImporterException{
+        if(structures == null){
+            structures = new HashMap<>();
+            final Map<Integer, List<Crete>> cretes = creteImporter.getCretesByTronconId();
+            for(final Integer key : cretes.keySet()){
+                if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                structures.get(key).addAll(cretes.get(key));
+            }
+            
+            final Map<Integer, List<Desordre>> desordres = desordreImporter.getDesordresByTronconId();
+            for(final Integer key : desordres.keySet()){
+                if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                structures.get(key).addAll(desordres.get(key));
+            }
+            
+            final Map<Integer, List<PiedDigue>> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId();
+            for(final Integer key : piedsDigue.keySet()){
+                if(structures.get(key)==null)structures.put(key, new ArrayList<>());
+                structures.get(key).addAll(piedsDigue.get(key));
+            }
         }
         return structures;
     }
+
+//    public List<Structure> getStructureList(final Integer accessTronconId) throws IOException, AccessDbImporterException {
+//
+//        if (structures == null) {
+//            structures = new ArrayList<>();
+//        }
+//        List<Crete> cretes = creteImporter.getCretesByTronconId().get(accessTronconId);
+//        if (cretes != null) {
+//            structures.addAll(cretes);
+//            System.out.println(structures);
+//        }
+//        List<Desordre> desordres = desordreImporter.getDesordresByTronconId().get(accessTronconId);
+//        if (desordres != null) {
+//            structures.addAll(desordres);
+//        }
+//        List<PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId().get(accessTronconId);
+//        if (piedsDigue != null) {
+//            structures.addAll(piedsDigue);
+//        }
+//        return structures;
+//    }
 
 }

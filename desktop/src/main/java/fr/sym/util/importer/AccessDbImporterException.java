@@ -7,7 +7,7 @@ package fr.sym.util.importer;
 
 /**
  *
- * @author Samuel Andrés
+ * @author Samuel Andrés (Geomatys)
  */
 public class AccessDbImporterException extends Exception {
     

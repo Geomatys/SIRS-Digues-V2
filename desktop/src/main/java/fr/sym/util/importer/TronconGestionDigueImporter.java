@@ -8,16 +8,10 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
-import fr.sym.util.importer.structure.CreteImporter;
-import fr.sym.util.importer.structure.DesordreImporter;
-import fr.sym.util.importer.structure.PiedDigueImporter;
 import fr.sym.util.importer.structure.StructureImporter;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
-import fr.symadrem.sirs.core.model.Crete;
-import fr.symadrem.sirs.core.model.Desordre;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.GestionTroncon;
-import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -71,9 +65,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
         
         this.structureImporter = new StructureImporter(accessDatabase, this);
-//        this.creteImporter = new CreteImporter(accessDatabase, this);
-//        this.desordreImporter = new DesordreImporter(accessDatabase, this);
-//        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, this);
     }
 
     /*==========================================================================
@@ -122,6 +113,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
      * @return A map containing all TronconDigue instances accessibles from 
      * the internal database identifier.
      * @throws IOException 
+     * @throws fr.sym.util.importer.AccessDbImporterException 
      */
     public Map<Integer, TronconDigue> getTronconsDigues() throws IOException, AccessDbImporterException {
 
@@ -184,13 +176,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
                     tronconDigue.setStuctures(structures);
                 }
                 
-                structures.addAll(structureImporter.getStructureList(tronconsIds.get(tronconDigue)));
-//                List<Crete> cretes = creteImporter.getCretesByTronconId().get(tronconsIds.get(tronconDigue));
-//                if(cretes!=null) structures.addAll(cretes);
-//                List<Desordre> desordres = desordreImporter.getDesordresByTronconId().get(tronconsIds.get(tronconDigue));
-//                if(desordres!=null) structures.addAll(desordres);
-//                List<PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId().get(tronconsIds.get(tronconDigue));
-//                if(piedsDigue!=null) structures.addAll(piedsDigue);
+                if(structureImporter.getStructuresByTronconId().get(tronconsIds.get(tronconDigue))!=null)
+                    structures.addAll(structureImporter.getStructuresByTronconId().get(tronconsIds.get(tronconDigue)));
                 
                 //Update the repository
                 tronconDigueRepository.update(tronconDigue);

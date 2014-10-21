@@ -9,7 +9,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import fr.symadrem.sirs.core.model.TypeRive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

@@ -7,7 +7,6 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -220,7 +219,7 @@ public class DbImporter {
      SYS_EVT_OUVRAGE_TELECOMMUNICATION
      SYS_EVT_OUVRAGE_VOIRIE
      SYS_EVT_PHOTO_LOCALISEE_EN_PR
-     SYS_EVT_PIED_DE_DIGUE
+     = SYS_EVT_PIED_DE_DIGUE
      SYS_EVT_PIED_FRONT_FRANC_BORD
      SYS_EVT_PLAN_TOPO
      SYS_EVT_POINT_ACCES
@@ -430,37 +429,37 @@ public class DbImporter {
             digueRepository.remove(digue);
         });
     }
-
-    public void importDigues() throws IOException {
-        digueImporter.getDigues().values().stream().forEach((digue) -> {
-            digueRepository.add(digue);
-        });
-    }
-
+//
+//    public void importDigues() throws IOException {
+//        digueImporter.getDigues().values().stream().forEach((digue) -> {
+//            digueRepository.add(digue);
+//        });
+//    }
+//
     public void removeOrganismes() {
         organismeRepository.getAll().stream().forEach((organisme) -> {
             organismeRepository.remove(organisme);
         });
     }
-
-    public void importOrganismes() throws IOException {
-        organismeImporter.getOrganismes().values().stream().forEach((organisme) -> {
-            organismeRepository.add(organisme);
-        });
-    }
-
+//
+//    public void importOrganismes() throws IOException {
+//        organismeImporter.getOrganismes().values().stream().forEach((organisme) -> {
+//            organismeRepository.add(organisme);
+//        });
+//    }
+//
     public void removeTronconsDigues() {
         tronconDigueRepository.getAll().stream().forEach((tronconDigue) -> {
             tronconDigueRepository.remove(tronconDigue);
         });
     }
-
-    public void importTronconsDigues() throws IOException, AccessDbImporterException {
-        tronconGestionDigueImporter.getTronconsDigues().values().stream().forEach((tronconDigue) -> {
-            tronconDigueRepository.add(tronconDigue);
-            //System.out.println(tronconDigue.getGeometry().toText());
-        });
-    }
+//
+//    public void importTronconsDigues() throws IOException, AccessDbImporterException {
+//        tronconGestionDigueImporter.getTronconsDigues().values().stream().forEach((tronconDigue) -> {
+//            tronconDigueRepository.add(tronconDigue);
+//            //System.out.println(tronconDigue.getGeometry().toText());
+//        });
+//    }
     
     public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{
         return this.tronconGestionDigueImporter.getTronconsDigues().values();
@@ -511,7 +510,7 @@ public class DbImporter {
             importer.removeOrganismes();
             
             importer.importation().stream().forEach((troncon) -> {
-                //System.out.println(troncon);
+                System.out.println(troncon);
                 troncon.getStuctures().stream().forEach((structure) -> {
                 
                     if(structure instanceof Crete){

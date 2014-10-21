@@ -7,7 +7,6 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Geometry;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -17,7 +16,7 @@ import java.util.Map;
 
 /**
  *
- * @author Samuel Andrés
+ * @author Samuel Andrés (Geomatys)
  */
 public class SystemeReperageImporter extends GenericImporter {
 
