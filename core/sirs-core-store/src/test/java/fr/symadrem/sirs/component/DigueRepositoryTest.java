@@ -21,6 +21,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.symadrem.sirs.core.CouchDBTestCase;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
@@ -73,6 +74,11 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             Fondation e = new Fondation();
             // e.setDocument(troncon);
             stuctures.add(e);
+            Crete crete = new Crete();
+            crete.setBorne_debut(8);
+            crete.setCommentaire("Belle crete");
+            stuctures.add(crete);
+            
             troncon.setStuctures(stuctures);
 
             tronconRepository.add(troncon);
@@ -124,6 +130,11 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         digue = digueRepository.get(digue.getId());
         digueRepository.remove(digue);
 
+    }
+    
+    @Test
+    public void uuid() {
+    	
     }
 
     private Point createPoint(double i, double j) {
