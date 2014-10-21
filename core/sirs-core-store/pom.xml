@@ -102,6 +102,24 @@
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>com.healthmarketscience.jackcess</groupId>
+      <artifactId>jackcess</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+    
+    <!-- format -->
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-feature-shapefile</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-epsg-javadb</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
 
   </dependencies>
 

@@ -48,21 +48,11 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-epsg-javadb</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-jasperreport</artifactId>
       <version>4.x-SNAPSHOT</version>
     </dependency>
     
     <!-- format -->
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-shapefile</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-gpx</artifactId>
@@ -108,12 +98,6 @@
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.healthmarketscience.jackcess</groupId>
-      <artifactId>jackcess</artifactId>
-      <version>2.0.6</version>
     </dependency>
   </dependencies>
 
