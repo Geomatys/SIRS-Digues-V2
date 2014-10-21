@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -46,10 +47,10 @@ public class DbImporter {
     private OrganismeImporter organismeImporter;
     private TronconGestionDigueImporter tronconGestionDigueImporter;
     private DigueImporter digueImporter;
+    private BorneDigueImporter borneDigueImporter;
 
-    private final DateTimeFormatter dateTimeFormatter;
     /*
-     BORNE_DIGUE
+     = BORNE_DIGUE
      BORNE_PAR_SYSTEME_REP
      COMMUNE
      CONVENTION
@@ -388,20 +389,10 @@ public class DbImporter {
      */
 
     private DbImporter(CouchDbConnector couchDbConnector) throws IOException {
-        this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
         this.digueRepository = new DigueRepository(couchDbConnector);
         this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
-        
     }
-
-//    public DbImporter(CouchDbConnector couchDbConnector, File mdbFile) throws IOException {
-//        this.accessDatabase = DatabaseBuilder.open(mdbFile);
-//        this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
-//        this.digueRepository = new DigueRepository(couchDbConnector);
-//        this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
-//        this.organismeRepository = new OrganismeRepository(couchDbConnector);
-//    }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
         this.accessDatabase=accessDatabase;
@@ -410,10 +401,14 @@ public class DbImporter {
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase);
         this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase);
         this.organismeImporter = new OrganismeImporter(accessDatabase, organismeRepository);
-        this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(accessDatabase, this.organismeImporter);
+        this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
+                accessDatabase, this.organismeImporter);
         this.digueImporter = new DigueImporter(accessDatabase, digueRepository);
-        this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, tronconDigueRepository, digueImporter, tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter);
-        
+        this.borneDigueImporter = new BorneDigueImporter(accessDatabase);
+        this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
+                tronconDigueRepository, digueImporter, tronconDigueGeomImporter, 
+                typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter,
+                borneDigueImporter);
     }
 
     public Database getDatabase() {
@@ -429,37 +424,18 @@ public class DbImporter {
             digueRepository.remove(digue);
         });
     }
-//
-//    public void importDigues() throws IOException {
-//        digueImporter.getDigues().values().stream().forEach((digue) -> {
-//            digueRepository.add(digue);
-//        });
-//    }
-//
+    
     public void removeOrganismes() {
         organismeRepository.getAll().stream().forEach((organisme) -> {
             organismeRepository.remove(organisme);
         });
     }
-//
-//    public void importOrganismes() throws IOException {
-//        organismeImporter.getOrganismes().values().stream().forEach((organisme) -> {
-//            organismeRepository.add(organisme);
-//        });
-//    }
-//
+    
     public void removeTronconsDigues() {
         tronconDigueRepository.getAll().stream().forEach((tronconDigue) -> {
             tronconDigueRepository.remove(tronconDigue);
         });
     }
-//
-//    public void importTronconsDigues() throws IOException, AccessDbImporterException {
-//        tronconGestionDigueImporter.getTronconsDigues().values().stream().forEach((tronconDigue) -> {
-//            tronconDigueRepository.add(tronconDigue);
-//            //System.out.println(tronconDigue.getGeometry().toText());
-//        });
-//    }
     
     public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{
         return this.tronconGestionDigueImporter.getTronconsDigues().values();
@@ -495,15 +471,15 @@ public class DbImporter {
 //                System.out.println(r);
 //        }
 //SYS_EVT_PIED_DE_DIGUE
-//            System.out.println("=======================");
-//            importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getColumns().stream().forEach((column) -> {
-//                System.out.println(column.getName());
-//            });
-//            System.out.println("++++++++++++++++++++");
+            System.out.println("=======================");
+            importer.getDatabase().getTable("BORNE_DIGUE").getColumns().stream().forEach((column) -> {
+                System.out.println(column.getName());
+            });
+            System.out.println("++++++++++++++++++++");
 
-//            for(Row row : importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE")){
-//                System.out.println(row);
-//            }
+            for(Row row : importer.getDatabase().getTable("BORNE_DIGUE")){
+                System.out.println(row);
+            }
             
             importer.removeTronconsDigues();
             importer.removeDigues();
@@ -511,20 +487,22 @@ public class DbImporter {
             
             importer.importation().stream().forEach((troncon) -> {
                 System.out.println(troncon);
-                troncon.getStuctures().stream().forEach((structure) -> {
-                
-                    if(structure instanceof Crete){
-                        System.out.println("======>CRETE<====== : "+(Crete) structure);
-                    }
-                    if(structure instanceof Desordre){
-                        System.out.println("======>DESORDRE<====== : "+(Desordre) structure);
-                    }
-                    if(structure instanceof PiedDigue){
-                        System.out.println("======>PIEDDIGUE<====== : "+(PiedDigue) structure);
-                    }
-                    
+//                troncon.getStuctures().stream().forEach((structure) -> {
+//                
+//                    if(structure instanceof Crete){
+//                        System.out.println("======>CRETE<====== : "+(Crete) structure);
+//                    }
+//                    if(structure instanceof Desordre){
+//                        System.out.println("======>DESORDRE<====== : "+(Desordre) structure);
+//                    }
+//                    if(structure instanceof PiedDigue){
+//                        System.out.println("======>PIEDDIGUE<====== : "+(PiedDigue) structure);
+//                    }
+//                    
+//                });
+                troncon.getBorneIds().stream().forEach((borne) -> {
+                    System.out.println(borne);
                 });
-                
             });
             
 

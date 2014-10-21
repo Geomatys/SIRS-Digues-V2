@@ -178,7 +178,7 @@ class CreteImporter extends GenericImporter {
 //            crete.setListeFonction(null);
 //            crete.setListeMateriau(null);
 //            crete.setListeSource(null);
-//            crete.setMateriau(null);N_COUCHE
+//            crete.setMateriau(null);
                 crete.setNum_couche(row.getInt("N_COUCHE"));
 //            crete.setOrganismeStructure(null);
 //            crete.setPR_debut(PR_debut);

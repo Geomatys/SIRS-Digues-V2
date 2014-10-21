@@ -10,6 +10,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.util.importer.structure.StructureImporter;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.GestionTroncon;
 import fr.symadrem.sirs.core.model.Structure;
@@ -37,9 +38,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
     private DigueImporter digueImporter;
+    private BorneDigueImporter borneDigueImporter;
+    private StructureImporter structureImporter;
+    
     private TronconDigueRepository tronconDigueRepository;
     
-    private StructureImporter structureImporter;
 //    
 //    private CreteImporter creteImporter;
 //    private DesordreImporter desordreImporter;
@@ -55,7 +58,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
-            final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter){
+            final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
+            final BorneDigueImporter borneDigueImporter){
         this(accessDatabase);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueImporter = digueImporter;
@@ -63,6 +67,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.typeRiveImporter = typeRiveImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
+        this.borneDigueImporter = borneDigueImporter;
         
         this.structureImporter = new StructureImporter(accessDatabase, this);
     }
@@ -80,14 +85,15 @@ public class TronconGestionDigueImporter extends GenericImporter {
      * COMMENTAIRE_TRONCON
      x DATE_DEBUT_VAL_GESTIONNAIRE_D // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
      x DATE_FIN_VAL_GESTIONNAIRE_D // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
-     ID_SYSTEME_REP_DEFAUT
+     = ID_SYSTEME_REP_DEFAUT
      x LIBELLE_TRONCON_GESTION // Les libellés sont nulls et sont appelés à dispararaitre de la nouvelle base.
      * DATE_DERNIERE_MAJ
     ----------------------------------------------------------------------------
      * TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.
-     TODO : s'occuper du lien avec les systèmes de repérage.
-     TODO : faire les structures.
+     = TODO : s'occuper du lien avec les systèmes de repérage.
+     = TODO : faire les structures.
+     = TODO : s'occuper des bornes.
      */
     public static enum TronconGestionDigueColumns {
 
@@ -151,6 +157,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 // Set simple references.
                 final List<GestionTroncon> gestions = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId().get(row.getInt(TronconGestionDigueColumns.ID.toString()));
                 if(gestions != null) tronconDigue.setGestionnaires(gestions);
+                
+                
+                final List<BorneDigue> bornes = borneDigueImporter.getBorneDigueByTronconId().get(row.getInt(TronconGestionDigueColumns.ID.toString()));
+                if(bornes != null) tronconDigue.setBorneIds(bornes);
 
                 tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
                 
