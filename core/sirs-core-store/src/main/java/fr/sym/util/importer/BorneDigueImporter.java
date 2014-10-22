@@ -20,6 +20,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -93,19 +101,26 @@ public class BorneDigueImporter extends GenericImporter {
                 }
                 borne.setFictive(row.getBoolean(BorneDigueColumns.FICTIVE.toString()));
                 GeometryFactory geometryFactory = new GeometryFactory();
-                if (row.getDouble(BorneDigueColumns.Z.toString()) != null) {
-                    borne.setPositionBorne(
-                            geometryFactory.createPoint(new Coordinate(
-                                            row.getDouble(BorneDigueColumns.X.toString()),
-                                            row.getDouble(BorneDigueColumns.Y.toString()),
-                                            row.getDouble(BorneDigueColumns.Z.toString()))));
-                } else {
-                    borne.setPositionBorne(
-                            geometryFactory.createPoint(new Coordinate(
-                                            row.getDouble(BorneDigueColumns.X.toString()),
-                                            row.getDouble(BorneDigueColumns.Y.toString()))));
-                }
                 
+                try {
+                    final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+
+                    final Point point;
+                    if (row.getDouble(BorneDigueColumns.Z.toString()) != null) {
+                        point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(BorneDigueColumns.X.toString()),
+                                row.getDouble(BorneDigueColumns.Y.toString()),
+                                row.getDouble(BorneDigueColumns.Z.toString()))), lambertToRGF);
+                    } else {
+                        point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(BorneDigueColumns.X.toString()),
+                                row.getDouble(BorneDigueColumns.Y.toString()))), lambertToRGF);
+                    }
+                    borne.setPositionBorne(point);
+                } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                        
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 bornesDigue.put(row.getInt(BorneDigueColumns.ID.toString()), borne);
                 
