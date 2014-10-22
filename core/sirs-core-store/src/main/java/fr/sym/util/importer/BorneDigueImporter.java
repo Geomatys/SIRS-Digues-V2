@@ -7,6 +7,9 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.SystemeReperage;
@@ -89,6 +92,19 @@ public class BorneDigueImporter extends GenericImporter {
                     borne.setDate_fin(LocalDateTime.parse(row.getDate(BorneDigueColumns.FIN.toString()).toString(), dateTimeFormatter));
                 }
                 borne.setFictive(row.getBoolean(BorneDigueColumns.FICTIVE.toString()));
+                GeometryFactory geometryFactory = new GeometryFactory();
+                if (row.getDouble(BorneDigueColumns.Z.toString()) != null) {
+                    borne.setPositionBorne(
+                            geometryFactory.createPoint(new Coordinate(
+                                            row.getDouble(BorneDigueColumns.X.toString()),
+                                            row.getDouble(BorneDigueColumns.Y.toString()),
+                                            row.getDouble(BorneDigueColumns.Z.toString()))));
+                } else {
+                    borne.setPositionBorne(
+                            geometryFactory.createPoint(new Coordinate(
+                                            row.getDouble(BorneDigueColumns.X.toString()),
+                                            row.getDouble(BorneDigueColumns.Y.toString()))));
+                }
                 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 bornesDigue.put(row.getInt(BorneDigueColumns.ID.toString()), borne);
