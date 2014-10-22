@@ -11,8 +11,10 @@ import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,14 +35,27 @@ public class DigueImporter extends GenericImporter {
         this.digueRepository = digueRepository;
     }
     
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for(DigueColumns c : DigueColumns.values())
+            columns.add(c.toString());
+        return columns;
+    }
 
-    /***************************************************************************
+    @Override
+    public String getTableName() {
+        return "DIGUE";
+    }
+    
+
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      DIGUE
     ----------------------------------------------------------------------------
      x ID_DIGUE
-     * LIBELLE_DIGUE
-     * COMMENTAIRE_DIGUE
-     * DATE_DERNIERE_MAJ
+     % LIBELLE_DIGUE
+     % COMMENTAIRE_DIGUE
+     % DATE_DERNIERE_MAJ
      */
     public static enum DigueColumns {
 
@@ -67,7 +82,7 @@ public class DigueImporter extends GenericImporter {
 
         if(digues==null){
             digues = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("DIGUE").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 final Row row = it.next();

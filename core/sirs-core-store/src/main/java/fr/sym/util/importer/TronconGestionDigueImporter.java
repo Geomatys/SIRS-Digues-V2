@@ -67,22 +67,36 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.structureImporter = new StructureImporter(accessDatabase, this);
     }
 
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (TronconGestionDigueColumns c : TronconGestionDigueColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "TRONCON_GESTION_DIGUE";
+    }
+
     /*==========================================================================
      TRONCON_GESTION_DIGUE.
     ----------------------------------------------------------------------------
      x ID_TRONCON_GESTION
      x ID_ORG_GESTIONNAIRE // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
-     * ID_DIGUE
-     * ID_TYPE_RIVE // On part a priori sur une enumeration statique.
-     * DATE_DEBUT_VAL_TRONCON
-     * DATE_FIN_VAL_TRONCON
-     * NOM_TRONCON_GESTION
-     * COMMENTAIRE_TRONCON
+     % ID_DIGUE
+     % ID_TYPE_RIVE // On part a priori sur une enumeration statique.
+     % DATE_DEBUT_VAL_TRONCON
+     % DATE_FIN_VAL_TRONCON
+     % NOM_TRONCON_GESTION
+     % COMMENTAIRE_TRONCON
      x DATE_DEBUT_VAL_GESTIONNAIRE_D // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
      x DATE_FIN_VAL_GESTIONNAIRE_D // Dans la table TRONCON_GESTION_DIGUE_GESTIONNAIRE qui contient l'historique des gestionnaires.
      = ID_SYSTEME_REP_DEFAUT
      x LIBELLE_TRONCON_GESTION // Les libellés sont nulls et sont appelés à dispararaitre de la nouvelle base.
-     * DATE_DERNIERE_MAJ
+     % DATE_DERNIERE_MAJ
     ----------------------------------------------------------------------------
      * TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.
@@ -121,7 +135,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         if(tronconsDigue == null){
             tronconsDigue = new HashMap<>();
             tronconsIds = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("TRONCON_GESTION_DIGUE").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
             final Map<Integer, TypeRive> typesRive = typeRiveImporter.getTypeRive();

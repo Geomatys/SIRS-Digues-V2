@@ -9,8 +9,10 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.model.TypeRive;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,15 +26,28 @@ public class TypeRiveImporter extends GenericImporter {
     public TypeRiveImporter(Database accessDatabase) {
         super(accessDatabase);
     }
+
+
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (TypeRiveColumns c : TypeRiveColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "TYPE_RIVE";
+    }
     
-    /***************************************************************************
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     TYPE_RIVE.
     ----------------------------------------------------------------------------
-    x ID_TRONCON_GESTION //
-     * ID_ORG_GESTION // L'identifiant de gestionnaire est mappé avec les identifiants des organismes créés dans CouchDb
-     * DATE_DEBUT_GESTION
-     * DATE_FIN_GESTION
-    x DATE_DERNIERE_MAJ // On n'a pas de date de mise à jour : est-ce normal ?
+    x ID_TYPE_RIVE
+    x LIBELLE_TYPE_RIVE
+    x DATE_DERNIERE_MAJ
     ----------------------------------------------------------------------------
     Le type de rive est représenté par une énumération.
      */
@@ -55,7 +70,7 @@ public class TypeRiveImporter extends GenericImporter {
 
         if(typesRive == null){
             typesRive = new HashMap<>();
-            final Iterator<Row> it = accessDatabase.getTable("TYPE_RIVE").iterator();
+            final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 final Row row = it.next();

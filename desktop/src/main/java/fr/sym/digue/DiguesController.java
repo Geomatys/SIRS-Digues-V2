@@ -63,11 +63,9 @@ public class DiguesController {
             }
 
             if (obj instanceof Digue) {
-                final DigueController digueController = DigueController.create(this.uiTree);
-                uiRight.setCenter(digueController.root);
+                uiRight.setCenter(DigueController.create(this.uiTree));
             } else if (obj instanceof TronconDigue) {
-                final TronconDigueController tronconDigueController = TronconDigueController.create(this.uiTree);
-                uiRight.setCenter(tronconDigueController.root);
+                uiRight.setCenter(TronconDigueController.create(this.uiTree));
             }
         });
     }

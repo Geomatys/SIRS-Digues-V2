@@ -44,7 +44,6 @@ import fr.symadrem.sirs.core.model.TypeRive;
 public class TronconDigueController {
     
     private TreeView uiTree;
-    public Parent root;
     private TronconDigue troncon;
     
     @Autowired
@@ -170,7 +169,7 @@ public class TronconDigueController {
                     
                     final Stage dialog = new Stage();
                     dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(root.getScene().getWindow());
+                    dialog.initOwner(digues.getScene().getWindow());
 
                     final Label label = new Label("Le changement de digue est enregistré d'office.");
                     final Button ok = new Button("Continuer");
@@ -235,7 +234,7 @@ public class TronconDigueController {
         this.saveButton.setDisable(true);
     }
     
-    public static TronconDigueController create(TreeView uiTree) {
+    public static Parent create(TreeView uiTree) {
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
                 "/fr/sym/digue/tronconDigueDisplay.fxml"));
         final Parent root;
@@ -247,9 +246,8 @@ public class TronconDigueController {
         
         final TronconDigueController controller = loader.getController();
         Injector.injectDependencies(controller);
-        controller.root = root;
         controller.init(uiTree);
-        return controller;
+        return root;
     }
     
     /**
@@ -260,37 +258,38 @@ public class TronconDigueController {
         @Override
         public void handle(MouseEvent event) {
             
-            final Stage dialog = new Stage();
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(root.getScene().getWindow());
+            if(editionButton.isSelected()){
+                final Stage dialog = new Stage();
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(editionButton.getScene().getWindow());
 
-            final HTMLEditor htmlEditor = new HTMLEditor();
-            htmlEditor.setHtmlText(troncon.getCommentaire());
+                final HTMLEditor htmlEditor = new HTMLEditor();
+                htmlEditor.setHtmlText(troncon.getCommentaire());
 
-            final Button valider = new Button("Valider");
-            valider.setOnAction((ActionEvent event1) -> {
-                troncon.setCommentaire(htmlEditor.getHtmlText());
-                commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
-                dialog.hide();
-            });
+                final Button valider = new Button("Valider");
+                valider.setOnAction((ActionEvent event1) -> {
+                    troncon.setCommentaire(htmlEditor.getHtmlText());
+                    commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
+                    dialog.hide();
+                });
 
-            final Button annuler = new Button("Annuler");
-            annuler.setOnAction((ActionEvent event1) -> {
-                dialog.hide();
-            });
+                final Button annuler = new Button("Annuler");
+                annuler.setOnAction((ActionEvent event1) -> {
+                    dialog.hide();
+                });
 
-            final HBox hBox = new HBox();
-            hBox.getChildren().add(valider);
-            hBox.getChildren().add(annuler);
+                final HBox hBox = new HBox();
+                hBox.getChildren().add(valider);
+                hBox.getChildren().add(annuler);
 
-            final VBox vBox = new VBox();
-            vBox.getChildren().add(htmlEditor);
-            vBox.getChildren().add(hBox);
+                final VBox vBox = new VBox();
+                vBox.getChildren().add(htmlEditor);
+                vBox.getChildren().add(hBox);
 
-            final Scene dialogScene = new Scene(vBox);
-            dialog.setScene(dialogScene);
-            dialog.show();
+                final Scene dialogScene = new Scene(vBox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
         }
-    }
-    
+    } 
 }

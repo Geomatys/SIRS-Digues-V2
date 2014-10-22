@@ -83,6 +83,38 @@ class DesordreImporter extends GenericImporter {
      DESCRIPTION_DESORDRE
      ID_AUTO
      */
+
+    @Override
+    public String getTableName() {
+        return "SYS_EVT_DESORDRE";
+    }
+    
+    
+        public static enum DesordreColumns {
+
+        ID("");
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        DEBUT_VAL_TRONCON("DATE_DEBUT_VAL_TRONCON"), FIN_VAL_TRONCON("DATE_FIN_VAL_TRONCON"),
+//        NOM("NOM_TRONCON_GESTION"), COMMENTAIRE("COMMENTAIRE_TRONCON"),
+//        DEBUT_VAL_GESTIONNAIRE("DATE_DEBUT_VAL_GESTIONNAIRE_D"), FIN_VAL_GESTIONNAIRE("DATE_FIN_VAL_GESTIONNAIRE_D"), 
+//        SYSTEME_REP("ID_SYSTEME_REP_DEFAUT"), MAJ("DATE_DERNIERE_MAJ");
+        private final String column;
+
+        private DesordreColumns(final String column) {
+            this.column = column;
+        }
+
+        @Override
+        public String toString() {
+            return this.column;
+        }
+    };
+    
     /**
      *
      * @return A map containing all TronconDigue instances accessibles from the
@@ -92,7 +124,7 @@ class DesordreImporter extends GenericImporter {
      */
     public Map<Integer, Desordre> getDesordres() throws IOException, AccessDbImporterException {
 
-        final Iterator<Row> it = this.accessDatabase.getTable("SYS_EVT_DESORDRE").iterator();
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
         if (this.desordres == null) {
             this.desordres = new HashMap<>();
@@ -193,5 +225,13 @@ class DesordreImporter extends GenericImporter {
             this.getDesordres();
         }
         return this.desordresByTronconId;
+    }
+
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for(DesordreColumns c : DesordreColumns.values())
+            columns.add(c.toString());
+        return columns;
     }
 }

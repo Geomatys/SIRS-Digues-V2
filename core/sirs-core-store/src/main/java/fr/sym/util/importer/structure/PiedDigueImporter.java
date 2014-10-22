@@ -38,6 +38,19 @@ class PiedDigueImporter extends GenericImporter {
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
     }
 
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for(PiedDigueColumns c : PiedDigueColumns.values())
+            columns.add(c.toString());
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "SYS_EVT_PIED_DE_DIGUE";
+    }
+
     /*==========================================================================
      SYS_EVT_PIED_DE_DIGUE
      ----------------------------------------------------------------------------
@@ -130,6 +143,32 @@ class PiedDigueImporter extends GenericImporter {
      EPAISSEUR_Y22
      ID_AUTO
      */
+    
+        public static enum PiedDigueColumns {
+
+        ID("");
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
+//        DEBUT_VAL_TRONCON("DATE_DEBUT_VAL_TRONCON"), FIN_VAL_TRONCON("DATE_FIN_VAL_TRONCON"),
+//        NOM("NOM_TRONCON_GESTION"), COMMENTAIRE("COMMENTAIRE_TRONCON"),
+//        DEBUT_VAL_GESTIONNAIRE("DATE_DEBUT_VAL_GESTIONNAIRE_D"), FIN_VAL_GESTIONNAIRE("DATE_FIN_VAL_GESTIONNAIRE_D"), 
+//        SYSTEME_REP("ID_SYSTEME_REP_DEFAUT"), MAJ("DATE_DERNIERE_MAJ");
+        private final String column;
+
+        private PiedDigueColumns(final String column) {
+            this.column = column;
+        }
+
+        @Override
+        public String toString() {
+            return this.column;
+        }
+    };
+        
     /**
      *
      * @return A map containing all TronconDigue instances accessibles from the
@@ -139,7 +178,7 @@ class PiedDigueImporter extends GenericImporter {
      */
     public Map<Integer, PiedDigue> getPiedsDigue() throws IOException, AccessDbImporterException {
 
-        final Iterator<Row> it = this.accessDatabase.getTable("SYS_EVT_PIED_DE_DIGUE").iterator();
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
         if (this.piedsDigue == null) {
             this.piedsDigue = new HashMap<>();

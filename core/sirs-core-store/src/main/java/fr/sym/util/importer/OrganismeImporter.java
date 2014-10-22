@@ -11,8 +11,10 @@ import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.model.Organisme;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,25 +29,48 @@ public class OrganismeImporter extends GenericImporter {
     private OrganismeImporter(Database accessDatabase) {
         super(accessDatabase);
     }
-    
-    public OrganismeImporter(final Database accessDatabase, final OrganismeRepository organismeRepository){
+
+    public OrganismeImporter(final Database accessDatabase, final OrganismeRepository organismeRepository) {
         this(accessDatabase);
         this.organismeRepository = organismeRepository;
     }
 
-    /**
-     * *************************************************************************
-     * ORGANISME.
-     * ----------------------------------------------------------------------------
-     * x ID_ORGANISME RAISON_SOCIALE // Nom STATUT_JURIDIQUE ADRESSE_L1_ORG
-     * ADRESSE_L2_ORG ADRESSE_L3_ORG ADRESSE_CODE_POSTAL_ORG
-     * ADRESSE_NOM_COMMUNE_ORG TEL_ORG MAIL_ORG FAX_ORG DATE_DEBUT DATE_FIN x
-     * DATE_DERNIERE_MAJ // Pas de date de mise à jour dans le modèle.
-     * ----------------------------------------------------------------------------
-     * Les adresses 1, 2 et 3 sont concaténées. La raison sociale devient le
-     * nom. La commune devient la localité. On n'a pas de pays dans la base.
-     *
-     * on n'a pas de date de mise à jour : est-ce normal ?
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (OrganismeColumns c : OrganismeColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "ORGANISME";
+    }
+
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     ORGANISME.
+     ----------------------------------------------------------------------------
+     x ID_ORGANISME 
+     % RAISON_SOCIALE // Nom 
+     % STATUT_JURIDIQUE 
+     % ADRESSE_L1_ORG
+     % ADRESSE_L2_ORG 
+     % ADRESSE_L3_ORG 
+     % ADRESSE_CODE_POSTAL_ORG
+     % ADRESSE_NOM_COMMUNE_ORG 
+     % TEL_ORG 
+     % MAIL_ORG 
+     % FAX_ORG 
+     % DATE_DEBUT 
+     % DATE_FIN 
+     x DATE_DERNIERE_MAJ // Pas de date de mise à jour dans le modèle.
+     ----------------------------------------------------------------------------
+     Les adresses 1, 2 et 3 sont concaténées. La raison sociale devient le
+     nom. La commune devient la localité. On n'a pas de pays dans la base.
+     
+     on n'a pas de date de mise à jour : est-ce normal ?
      */
     public static enum OrganismeColumns {
 
@@ -70,7 +95,7 @@ public class OrganismeImporter extends GenericImporter {
 
         if (organismes == null) {
             organismes = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("ORGANISME").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 final Row row = it.next();
@@ -95,7 +120,7 @@ public class OrganismeImporter extends GenericImporter {
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 organismes.put(row.getInt(OrganismeColumns.ID.toString()), organisme);
-                
+
                 // Register the organism to retrieve a CouchDb ID.
                 organismeRepository.add(organisme);
             }

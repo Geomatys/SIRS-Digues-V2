@@ -6,14 +6,20 @@ import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -54,13 +60,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DigueController {
+public class DigueController implements Initializable {
     
-    public Parent root;
     private TreeView uiTree;
     private Digue digue;
     private ObservableList<TronconDigue> troncons;
-    //private BooleanProperty editionMode;
     
     @Autowired
     private Session session;
@@ -86,10 +90,10 @@ public class DigueController {
         public String toString(){return this.field;}
     };
       
-    /*@Override
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }*/
+        System.out.println(resources);
+    }
 
     @FXML
     public void enableFields(ActionEvent event) {
@@ -148,7 +152,7 @@ public class DigueController {
 
             final Scene dialogScene = new Scene(vBox);
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(root.getScene().getWindow());
+            dialog.initOwner(editionButton.getScene().getWindow());
             dialog.setScene(dialogScene);
             dialog.setTitle("Nouveau tronçon de digue.");
             dialog.show();
@@ -191,7 +195,7 @@ public class DigueController {
 
             final Scene dialogScene = new Scene(vBox);
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(root.getScene().getWindow());
+            dialog.initOwner(editionButton.getScene().getWindow());
             dialog.setScene(dialogScene);
             dialog.setTitle("Suppression d'un tronçon de digue.");
             dialog.show();
@@ -329,10 +333,11 @@ public class DigueController {
         this.saveButton.setDisable(true);
     }
 
-    public static DigueController create(final TreeView uiTree) {
+    public static Parent create(final TreeView uiTree) {
 
         final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
                 "/fr/sym/digue/digueDisplay.fxml"));
+        
         final Parent root;
 
         try {
@@ -343,9 +348,8 @@ public class DigueController {
 
         final DigueController controller = loader.getController();
         Injector.injectDependencies(controller);
-        controller.root = root;
         controller.init(uiTree);
-        return controller;
+        return root;
     }
 
     // FocusTransverse ?
@@ -358,10 +362,6 @@ public class DigueController {
         
         @Override
         protected void updateItem(String item, boolean empty) {
-            
-            System.out.println("CELL : "+CustomizedIdTableCell.this);
-            System.out.println("ITEM : "+item);
-            System.out.println("EMPTY : "+empty);
             
             super.updateItem(item, empty);
             
@@ -390,7 +390,7 @@ public class DigueController {
 
                     final Scene dialogScene = new Scene(vBox);
                     dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(root.getScene().getWindow());
+                    dialog.initOwner(button.getScene().getWindow());
                     dialog.setScene(dialogScene);
                     dialog.setTitle("Identifiant de tronçon de digue.");
                     dialog.show();
@@ -435,7 +435,7 @@ public class DigueController {
 
                     final Scene dialogScene = new Scene(vBox);
                     dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(root.getScene().getWindow());
+                    dialog.initOwner(button.getScene().getWindow());
                     dialog.setScene(dialogScene);
                     dialog.setTitle("Géométrie de tronçon de digue.");
                     dialog.show();
@@ -493,7 +493,7 @@ public class DigueController {
             if(editionButton.isSelected()){
                 final Stage dialog = new Stage();
                 dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(root.getScene().getWindow());
+                dialog.initOwner(editionButton.getScene().getWindow());
                 
                 final VBox vbox = new VBox();
 

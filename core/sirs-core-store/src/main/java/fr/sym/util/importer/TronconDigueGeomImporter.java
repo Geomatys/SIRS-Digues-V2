@@ -12,8 +12,10 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,16 +40,31 @@ public class TronconDigueGeomImporter extends GenericImporter {
     public TronconDigueGeomImporter(Database accessDatabase) {
         super(accessDatabase);
     }
+
+
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (CartoTronconGestionDigueColumns c : CartoTronconGestionDigueColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "CARTO_TRONCON_GESTION_DIGUE";
+    }
   
     /*==========================================================================
      CARTO_TRONCON_GESTION_DIGUE.
     ----------------------------------------------------------------------------
      x OBJECTID
-     * SHAPE
+     % SHAPE
      x OBJECTID_old
      x SHAPE_Leng
      x SHAPE_Length
-     * ID_TRONCON_GESTION
+     % ID_TRONCON_GESTION
      x LONGUEUR
      */
     public static enum CartoTronconGestionDigueColumns {
@@ -69,7 +86,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
         
         if(tronconDigueGeom==null){
             tronconDigueGeom = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("CARTO_TRONCON_GESTION_DIGUE").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 try {

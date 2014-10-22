@@ -74,7 +74,11 @@ public class CreateBasePaneController implements Initializable {
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        
+        
         System.out.println("Initialise !");
+        System.out.println(resources);
+        
         
         
     }

@@ -11,8 +11,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.symadrem.sirs.core.model.BorneDigue;
-import fr.symadrem.sirs.core.model.Crete;
-import fr.symadrem.sirs.core.model.SystemeReperage;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,22 +40,35 @@ public class BorneDigueImporter extends GenericImporter {
         super(accessDatabase);
     }
 
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for(BorneDigueColumns c : BorneDigueColumns.values())
+            columns.add(c.toString());
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "BORNE_DIGUE";
+    }
+
     /*==========================================================================
      BORNE_DIGUE
      ----------------------------------------------------------------------------
     x ID_BORNE
     x ID_TRONCON_GESTION
-    * NOM_BORNE
-    X_POINT
-    Y_POINT
-    Z_POINT
-    * DATE_DEBUT_VAL
-    * DATE_FIN_VAL
-    * COMMENTAIRE_BORNE
-    * FICTIVE
-    X_POINT_ORIGINE
-    Y_POINT_ORIGINE
-    * DATE_DERNIERE_MAJ
+    % NOM_BORNE
+    % X_POINT
+    % Y_POINT
+    % Z_POINT
+    % DATE_DEBUT_VAL
+    % DATE_FIN_VAL
+    % COMMENTAIRE_BORNE
+    % FICTIVE
+    ? X_POINT_ORIGINE
+    ? Y_POINT_ORIGINE
+    % DATE_DERNIERE_MAJ
      */
     public static enum BorneDigueColumns {
 
@@ -82,7 +93,7 @@ public class BorneDigueImporter extends GenericImporter {
         if (bornesDigue == null) {
             bornesDigue = new HashMap<>();
             bornesDigueByTronconId = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("BORNE_DIGUE").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 final Row row = it.next();

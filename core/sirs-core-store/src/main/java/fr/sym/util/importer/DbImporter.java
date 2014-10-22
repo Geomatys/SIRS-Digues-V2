@@ -478,16 +478,23 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
 
-            System.out.println(importer.getDatabase().getTable("ILE_TRONCON").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable("SYSTEME_REP_LINEAIRE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable("ILE_TRONCON").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable("SYSTEME_REP_LINEAIRE").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
+//            
+//            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
+//            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            
-            for(Row row : importer.getDatabase().getTable("BORNE_DIGUE")){
-                System.out.println(row);
-            }
+//            for(Row row : importer.getDatabase().getTable("ELEMENT_STRUCTURE")){
+//                System.out.println(row);
+//            }
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("TYPE_RIVE").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
             
             importer.importation().stream().forEach((troncon) -> {
@@ -505,9 +512,9 @@ public class DbImporter {
 //                    }
 //                    
 //                });
-                troncon.getBorneIds().stream().forEach((borne) -> {
-                    System.out.println(borne.getPositionBorne().toText());
-                });
+//                troncon.getBorneIds().stream().forEach((borne) -> {
+//                    System.out.println(borne.getPositionBorne().toText());
+//                });
             });
             
 

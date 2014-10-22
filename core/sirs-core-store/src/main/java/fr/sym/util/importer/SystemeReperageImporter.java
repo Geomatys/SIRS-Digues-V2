@@ -10,8 +10,10 @@ import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,13 +28,28 @@ public class SystemeReperageImporter extends GenericImporter {
         super(accessDatabase);
     }
 
+
+    @Override
+    public List<String> getColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (SystemeRepLineaireColumns c : SystemeRepLineaireColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return "SYSTEME_REP_LINEAIRE";
+    }
+
     /*==========================================================================
      SYSTEME_REP_LINEAIRE
      ----------------------------------------------------------------------------
      x ID_SYSTEME_REP
      x ID_TRONCON_GESTION
-     * LIBELLE_SYSTEME_REP
-     * COMMENTAIRE_SYSTEME_REP
+     % LIBELLE_SYSTEME_REP
+     % COMMENTAIRE_SYSTEME_REP
      DATE_DERNIERE_MAJ
      ----------------------------------------------------------------------------
      Remarque : pas de date de mise à jour dans le modèle mais des dates de début
@@ -58,7 +75,7 @@ public class SystemeReperageImporter extends GenericImporter {
 
         if (systemesReperage == null) {
             systemesReperage = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable("SYSTEME_REP_LINEAIRE").iterator();
+            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             while (it.hasNext()) {
                 final Row row = it.next();
