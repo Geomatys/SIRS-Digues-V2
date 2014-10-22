@@ -55,6 +55,7 @@ public class FXMapPane extends BorderPane {
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
+    private final TronconEditBar uiEditBar;
     private final FXMapContextTree uiTree;
     private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
@@ -84,6 +85,7 @@ public class FXMapPane extends BorderPane {
         uiAddBar = new FXAddDataBar(uiMap1);
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
+        uiEditBar = new TronconEditBar(uiMap1);
         uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree(context);
@@ -111,20 +113,24 @@ public class FXMapPane extends BorderPane {
         uiAddBar.setMaxHeight(Double.MAX_VALUE);
         uiNavBar.setMaxHeight(Double.MAX_VALUE);
         uiToolBar.setMaxHeight(Double.MAX_VALUE);
+        uiEditBar.setMaxHeight(Double.MAX_VALUE);
         uiSplitBar.setMaxHeight(Double.MAX_VALUE);
         topgrid.add(uiAddBar,  0, 0);
         topgrid.add(uiNavBar,  1, 0);
         topgrid.add(uiToolBar, 2, 0);
-        topgrid.add(uiSplitBar, 4, 0);
+        topgrid.add(uiEditBar, 3, 0);
+        topgrid.add(uiSplitBar, 5, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
         final ColumnConstraints col2 = new ColumnConstraints();
         final ColumnConstraints col3 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
+        final ColumnConstraints col4 = new ColumnConstraints();
+        final ColumnConstraints col5 = new ColumnConstraints();
+        col3.setHgrow(Priority.ALWAYS);
         final RowConstraints row0 = new RowConstraints();
         row0.setVgrow(Priority.ALWAYS);
-        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3);
+        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3,col4,col5);
         topgrid.getRowConstraints().addAll(row0);
         
         mapsplit.getItems().add(paneMap1);

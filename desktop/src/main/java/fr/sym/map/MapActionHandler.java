@@ -15,7 +15,11 @@ import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.primitive.ProjectedCoverage;
 import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
+import org.geotoolkit.gui.javafx.render2d.FXCanvasHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXZoomInHandler;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXZoomOutHandler;
 
 /**
  * Ce Handler est utilisé sur un control FXMap.
@@ -36,8 +40,14 @@ final class MapActionHandler implements EventHandler<MouseEvent>{
     
     @Override
     public void handle(final MouseEvent event) {
-        if(event.getButton()!=MouseButton.SECONDARY) return;
+        if(event.getButton()!=MouseButton.SECONDARY || map == null) return;
 
+        final FXCanvasHandler handler = map.getHandler();
+        //handle event only if it's a navigation handler
+        if(!(handler instanceof FXZoomInHandler || handler instanceof FXZoomOutHandler || handler instanceof FXPanHandler)){
+            return;
+        }
+        
         menu.hide();
         menu.getItems().clear();
         
