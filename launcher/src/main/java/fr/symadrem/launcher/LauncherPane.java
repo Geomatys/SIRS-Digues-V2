@@ -4,6 +4,7 @@ package fr.symadrem.launcher;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.sym.util.importer.AccessDbImporterException;
 import fr.sym.util.importer.DbImporter;
+import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -16,7 +17,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableView;
@@ -83,7 +83,6 @@ public class LauncherPane extends BorderPane {
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
     }
     
-    
     @FXML
     void connectLocal(ActionEvent event) {
 
@@ -96,6 +95,11 @@ public class LauncherPane extends BorderPane {
 
     @FXML
     void createEmpty(ActionEvent event) {
+        if(uiNewName.getText().trim().isEmpty()){
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            return;
+        }
+        
         uiCreateButton.setDisable(true);
         new Thread(new Runnable() {
             @Override
@@ -106,7 +110,7 @@ public class LauncherPane extends BorderPane {
                     LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                     new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.CLOSE).showAndWait();
                 }finally{
-                  uiCreateButton.setDisable(false);
+                    Platform.runLater(() -> {uiCreateButton.setDisable(false);});
                 }
             }
         }).start();
@@ -114,6 +118,11 @@ public class LauncherPane extends BorderPane {
 
     @FXML
     void createFromAccess(ActionEvent event) {
+        if(uiImportName.getText().trim().isEmpty()){
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            return;
+        }
+        
         uiImportButton.setDisable(true);
         new Thread(new Runnable() {
             @Override
@@ -121,7 +130,9 @@ public class LauncherPane extends BorderPane {
                 try{
                     final File mainDbFile = new File(uiImportDBData.getText());
                     final File cartoDbFile = new File(uiImportDBCarto.getText());
-                    final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/import-context.xml");
+                    
+                    final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
+                            "http://geouser:geopw@localhost:5984", uiImportName.getText().trim(), "classpath:/symadrem/spring/couchdb-context.xml");
                     final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
                     DbImporter importer = new DbImporter(couchDbConnector);
                     importer.setDatabase(DatabaseBuilder.open(mainDbFile),

@@ -18,7 +18,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 
@@ -36,6 +35,7 @@ import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.geomatys.json.GeometryDeserializer;
+import fr.symadrem.sirs.core.CouchDBInit;
 
 /**
  *
@@ -43,6 +43,9 @@ import com.geomatys.json.GeometryDeserializer;
  */
 public class Loader extends Application {
 
+    public static String DATABASE_URL = "http://geouser:geopw@localhost:5984";
+    public static String DATABASE_NAME = "symadrem";
+    
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be
@@ -52,6 +55,10 @@ public class Loader extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        if(args.length>0) DATABASE_URL = args[0];
+        if(args.length>1) DATABASE_NAME = args[1];
+        
         launch(args);
     }
 
@@ -123,11 +130,10 @@ public class Loader extends Application {
      * Display the main frame.
      */
     private void showMainStage() throws IOException {
+        final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
+                "classpath:/symadrem/spring/application-context.xml");
         
-            ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/application-context.xml");
-            
-            final MainFrameController controller = applicationContext.getBean(MainFrameController.class);
-            controller.show();
+        context.getBean(MainFrameController.class).show();
     }
 
     private final class LoadingTask extends Task {

@@ -8,6 +8,7 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
+import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -442,13 +443,15 @@ public class DbImporter {
         return this.tronconGestionDigueImporter.getTronconsDigues().values();
     }
 
+    //TODO remove when import finished
     public static void main(String[] args) throws AccessDbImporterException {
                 //Geotoolkit startup
                 Setup.initialize(null);
                 //work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
         try {
-            final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/symadrem/spring/import-context.xml");
+            final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
+                            "http://geouser:geopw@localhost:5984", "symadrem", "classpath:/symadrem/spring/couchdb-context.xml");
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
