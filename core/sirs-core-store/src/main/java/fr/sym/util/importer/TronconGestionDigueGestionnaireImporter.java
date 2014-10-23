@@ -30,14 +30,14 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         super(accessDatabase);
     }
 
-    public TronconGestionDigueGestionnaireImporter(final Database accessDatabase, final OrganismeImporter organismeImporter) {
+    TronconGestionDigueGestionnaireImporter(final Database accessDatabase, final OrganismeImporter organismeImporter) {
         this(accessDatabase);
         this.organismeImporter = organismeImporter;
     }
 
 
     @Override
-    public List<String> getColumns() {
+    public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (TronconGestionDigueGestionnaireColumns c : TronconGestionDigueGestionnaireColumns.values()) {
             columns.add(c.toString());
@@ -50,32 +50,12 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         return "TRONCON_GESTION_DIGUE_GESTIONNAIRE";
     }
 
-    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     TRONCON_GESTION_DIGUE_GESTIONNAIRE.
-    ----------------------------------------------------------------------------
-    x ID_TRONCON_GESTION // 
-    x ID_ORG_GESTION // L'identifiant de gestionnaire
-    est mappé avec les identifiants des organismes créés dans CouchDb
-    % DATE_DEBUT_GESTION 
-    % DATE_FIN_GESTION 
-    x DATE_DERNIERE_MAJ // On n'a pas de date de mise à jour : est-ce normal ?
-     */
-    public static enum TronconGestionDigueGestionnaireColumns {
-
-        ID_TRONCON_GESTION("ID_TRONCON_GESTION"),
-        ID_ORG_GESTION("ID_ORG_GESTION"),
-        DATE_DEBUT_GESTION("DATE_DEBUT_GESTION"), DATE_FIN_GESTION("DATE_FIN_GESTION"),
-        MAJ("DATE_DERNIERE_MAJ");
-        private final String column;
-
-        private TronconGestionDigueGestionnaireColumns(final String column) {
-            this.column = column;
-        }
-
-        @Override
-        public String toString() {
-            return this.column;
-        }
+    private enum TronconGestionDigueGestionnaireColumns {
+        ID_TRONCON_GESTION,
+        ID_ORG_GESTION,
+        DATE_DEBUT_GESTION, 
+        DATE_FIN_GESTION,
+        DATE_DERNIERE_MAJ
     };
 
     /**
@@ -101,8 +81,8 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
                 if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()) != null) {
                     gestion.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
                 }
-                if (row.getDate(TronconGestionDigueGestionnaireColumns.MAJ.toString()) != null) {
-                    gestion.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.MAJ.toString()).toString(), dateTimeFormatter));
+                if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    gestion.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

@@ -38,52 +38,6 @@ class DesordreImporter extends GenericImporter {
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
     }
 
-    /*==========================================================================
-     SYS_EVT_DESORDRE
-     ----------------------------------------------------------------------------
-     x ID_DESORDRE
-     id_nom_element
-     ID_SOUS_GROUPE_DONNEES
-     LIBELLE_SOUS_GROUPE_DONNEES
-     ID_TYPE_DESORDRE
-     LIBELLE_TYPE_DESORDRE
-     DECALAGE_DEFAUT
-     DECALAGE
-     LIBELLE_SOURCE
-     LIBELLE_TYPE_COTE
-     LIBELLE_SYSTEME_REP
-     NOM_BORNE_DEBUT
-     NOM_BORNE_FIN
-     ID_PRESTATION
-     LIBELLE_PRESTATION
-     DISPARU_OUI_NON
-     DEJA_OBSERVE_OUI_NON
-     LIBELLE_TYPE_POSITION
-     ID_TYPE_COTE
-     ID_TYPE_POSITION
-     ID_TRONCON_GESTION
-     ID_SOURCE
-     DATE_DEBUT_VAL
-     DATE_FIN_VAL
-     PR_DEBUT_CALCULE
-     PR_FIN_CALCULE
-     X_DEBUT
-     Y_DEBUT
-     X_FIN
-     Y_FIN
-     ID_SYSTEME_REP
-     ID_BORNEREF_DEBUT
-     AMONT_AVAL_DEBUT
-     DIST_BORNEREF_DEBUT
-     ID_BORNEREF_FIN
-     AMONT_AVAL_FIN
-     DIST_BORNEREF_FIN
-     COMMENTAIRE
-     LIEU_DIT_DESORDRE
-     DESCRIPTION_DESORDRE
-     ID_AUTO
-     */
-
     @Override
     public String getTableName() {
         return "SYS_EVT_DESORDRE";
@@ -91,28 +45,47 @@ class DesordreImporter extends GenericImporter {
     
     
         public static enum DesordreColumns {
-
-        ID("");
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        , GESTIONNAIRE("ID_ORG_GESTIONNAIRE"), DIGUE("ID_DIGUE"), TYPE_RIVE("ID_TYPE_RIVE"),
-//        DEBUT_VAL_TRONCON("DATE_DEBUT_VAL_TRONCON"), FIN_VAL_TRONCON("DATE_FIN_VAL_TRONCON"),
-//        NOM("NOM_TRONCON_GESTION"), COMMENTAIRE("COMMENTAIRE_TRONCON"),
-//        DEBUT_VAL_GESTIONNAIRE("DATE_DEBUT_VAL_GESTIONNAIRE_D"), FIN_VAL_GESTIONNAIRE("DATE_FIN_VAL_GESTIONNAIRE_D"), 
-//        SYSTEME_REP("ID_SYSTEME_REP_DEFAUT"), MAJ("DATE_DERNIERE_MAJ");
-        private final String column;
-
-        private DesordreColumns(final String column) {
-            this.column = column;
-        }
-
-        @Override
-        public String toString() {
-            return this.column;
-        }
+ ID_DESORDRE,
+     id_nom_element,
+     ID_SOUS_GROUPE_DONNEES,
+     LIBELLE_SOUS_GROUPE_DONNEES,
+     ID_TYPE_DESORDRE,
+     LIBELLE_TYPE_DESORDRE,
+     DECALAGE_DEFAUT,
+     DECALAGE,
+     LIBELLE_SOURCE,
+     LIBELLE_TYPE_COTE,
+     LIBELLE_SYSTEME_REP,
+     NOM_BORNE_DEBUT,
+     NOM_BORNE_FIN,
+//     ID_PRESTATION,
+//     LIBELLE_PRESTATION,
+     DISPARU_OUI_NON,
+     DEJA_OBSERVE_OUI_NON,
+     LIBELLE_TYPE_POSITION,
+     ID_TYPE_COTE,
+     ID_TYPE_POSITION,
+     ID_TRONCON_GESTION,
+     ID_SOURCE,
+     DATE_DEBUT_VAL,
+     DATE_FIN_VAL,
+     PR_DEBUT_CALCULE,
+     PR_FIN_CALCULE,
+//     X_DEBUT,
+//     Y_DEBUT,
+//     X_FIN,
+//     Y_FIN,
+     ID_SYSTEME_REP,
+     ID_BORNEREF_DEBUT,
+     AMONT_AVAL_DEBUT,
+     DIST_BORNEREF_DEBUT,
+     ID_BORNEREF_FIN,
+     AMONT_AVAL_FIN,
+     DIST_BORNEREF_FIN,
+//     COMMENTAIRE,
+     LIEU_DIT_DESORDRE,
+     DESCRIPTION_DESORDRE,
+     ID_AUTO
     };
     
     /**
@@ -228,7 +201,7 @@ class DesordreImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getColumns() {
+    public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for(DesordreColumns c : DesordreColumns.values())
             columns.add(c.toString());

@@ -23,13 +23,12 @@ public class TypeRiveImporter extends GenericImporter {
 
     private Map<Integer, TypeRive> typesRive = null;
 
-    public TypeRiveImporter(Database accessDatabase) {
+    TypeRiveImporter(Database accessDatabase) {
         super(accessDatabase);
     }
 
-
     @Override
-    public List<String> getColumns() {
+    public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (TypeRiveColumns c : TypeRiveColumns.values()) {
             columns.add(c.toString());
@@ -42,30 +41,18 @@ public class TypeRiveImporter extends GenericImporter {
         return "TYPE_RIVE";
     }
     
-    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    TYPE_RIVE.
-    ----------------------------------------------------------------------------
-    x ID_TYPE_RIVE
-    x LIBELLE_TYPE_RIVE
-    x DATE_DERNIERE_MAJ
-    ----------------------------------------------------------------------------
-    Le type de rive est représenté par une énumération.
-     */
-    
-    public static enum TypeRiveColumns {
-        ID("ID_TYPE_RIVE"), LIBELLE("LIBELLE_TYPE_RIVE"), MAJ("DATE_DERNIERE_MAJ");
-        private final String column;
-
-        private TypeRiveColumns(final String column) {
-            this.column = column;
-        }
-
-        @Override
-        public String toString() {
-            return this.column;
-        }
+    private enum TypeRiveColumns {
+        ID_TYPE_RIVE, 
+        LIBELLE_TYPE_RIVE, 
+        //DATE_DERNIERE_MAJ
     };
 
+    /**
+     * 
+     * @return A map containing all the database TypeRive referenced by their
+     * internal ID.
+     * @throws IOException 
+     */
     public Map<Integer, TypeRive> getTypeRive() throws IOException {
 
         if(typesRive == null){
@@ -74,11 +61,10 @@ public class TypeRiveImporter extends GenericImporter {
 
             while (it.hasNext()) {
                 final Row row = it.next();
-                typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID.toString())),
-                            TypeRive.toTypeRive(row.getString(TypeRiveColumns.LIBELLE.toString())));
+                typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID_TYPE_RIVE.toString())),
+                            TypeRive.toTypeRive(row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString())));
             }
         }
         return typesRive;
     }
-    
 }

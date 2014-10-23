@@ -30,13 +30,13 @@ public class DigueImporter extends GenericImporter {
         super(accessDatabase);
     }
     
-    public DigueImporter(final Database accessDatabase, final DigueRepository digueRepository) {
+    DigueImporter(final Database accessDatabase, final DigueRepository digueRepository) {
         this(accessDatabase);
         this.digueRepository = digueRepository;
     }
     
     @Override
-    public List<String> getColumns() {
+    public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for(DigueColumns c : DigueColumns.values())
             columns.add(c.toString());
@@ -48,28 +48,11 @@ public class DigueImporter extends GenericImporter {
         return "DIGUE";
     }
     
-
-    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     DIGUE
-    ----------------------------------------------------------------------------
-     x ID_DIGUE
-     % LIBELLE_DIGUE
-     % COMMENTAIRE_DIGUE
-     % DATE_DERNIERE_MAJ
-     */
-    public static enum DigueColumns {
-
-        ID("ID_DIGUE"), LIBELLE("LIBELLE_DIGUE"), COMMENTAIRE("COMMENTAIRE_DIGUE"), MAJ("DATE_DERNIERE_MAJ");
-        private final String column;
-
-        private DigueColumns(final String column) {
-            this.column = column;
-        }
-
-        @Override
-        public String toString() {
-            return this.column;
-        }
+    private enum DigueColumns {
+        ID_DIGUE, 
+        LIBELLE_DIGUE, 
+        COMMENTAIRE_DIGUE, 
+        DATE_DERNIERE_MAJ
     };
     
     /**
@@ -88,15 +71,15 @@ public class DigueImporter extends GenericImporter {
                 final Row row = it.next();
                 final Digue digue = new Digue();
                 
-                digue.setLibelle(row.getString(DigueColumns.LIBELLE.toString()));
-                digue.setCommentaire(row.getString(DigueColumns.COMMENTAIRE.toString()));
-                if (row.getDate(DigueColumns.MAJ.toString()) != null) {
-                    digue.setDateMaj(LocalDateTime.parse(row.getDate(DigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
+                digue.setLibelle(row.getString(DigueColumns.LIBELLE_DIGUE.toString()));
+                digue.setCommentaire(row.getString(DigueColumns.COMMENTAIRE_DIGUE.toString()));
+                if (row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    digue.setDateMaj(LocalDateTime.parse(row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 //digue.setId(String.valueOf(row.getInt(DigueColumns.ID.toString())));
-                digues.put(row.getInt(DigueColumns.ID.toString()), digue);
+                digues.put(row.getInt(DigueColumns.ID_DIGUE.toString()), digue);
                 
                 // Register the digue to retrieve a CouchDb ID.
                 digueRepository.add(digue);

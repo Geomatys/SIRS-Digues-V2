@@ -37,13 +37,12 @@ public class TronconDigueGeomImporter extends GenericImporter {
     
     private Map<Integer, Geometry> tronconDigueGeom = null;
 
-    public TronconDigueGeomImporter(Database accessDatabase) {
+    TronconDigueGeomImporter(Database accessDatabase) {
         super(accessDatabase);
     }
 
-
     @Override
-    public List<String> getColumns() {
+    public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (CartoTronconGestionDigueColumns c : CartoTronconGestionDigueColumns.values()) {
             columns.add(c.toString());
@@ -55,33 +54,21 @@ public class TronconDigueGeomImporter extends GenericImporter {
     public String getTableName() {
         return "CARTO_TRONCON_GESTION_DIGUE";
     }
-  
-    /*==========================================================================
-     CARTO_TRONCON_GESTION_DIGUE.
-    ----------------------------------------------------------------------------
-     x OBJECTID
-     % SHAPE
-     x OBJECTID_old
-     x SHAPE_Leng
-     x SHAPE_Length
-     % ID_TRONCON_GESTION
-     x LONGUEUR
-     */
-    public static enum CartoTronconGestionDigueColumns {
-
-        ID("ID_TRONCON_GESTION"), SHAPE("SHAPE");
-        private final String column;
-
-        private CartoTronconGestionDigueColumns(final String column) {
-            this.column = column;
-        }
-
-        @Override
-        public String toString() {
-            return this.column;
-        }
+    
+    private enum CartoTronconGestionDigueColumns {
+        ID_TRONCON_GESTION, 
+        SHAPE,
+//        OBJECTID,
+//        SHAPE_Length,
+//        LONGUEUR
     };
 
+    /**
+     * 
+     * @return A map containing all the geometries referenced by their internal 
+     * troncon ID.
+     * @throws IOException 
+     */
     public Map<Integer, Geometry> getTronconDigueGeoms() throws IOException {
         
         if(tronconDigueGeom==null){
@@ -104,7 +91,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
                     final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
                     geom = JTS.transform(geom, lambertToRGF);
 
-                    tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID.toString())),
+                    tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID_TRONCON_GESTION.toString())),
                             geom);
                 } catch (FactoryException | DataStoreException | MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
