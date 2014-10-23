@@ -292,7 +292,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="usage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numero_secteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRevetement" eType="#//RefRevetement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeUsage" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeNature" eType="#//RefNature"/>
   </eClassifiers>
@@ -307,6 +306,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeUsage" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeOrientationOuvrageFranchissement"
         eType="#//RefOrientationOuvrageFranchissement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRevetement" eType="#//RefRevetement"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_voirie" eSuperTypes="#//Structure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
