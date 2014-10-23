@@ -935,4 +935,16 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="elementId" eType="#//Structure"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Deversoire" eSuperTypes="#//Structure">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteSurverse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSecurite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeAlimentation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PistePiedDigue" eSuperTypes="#//Structure">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
+  </eClassifiers>
 </ecore:EPackage>
