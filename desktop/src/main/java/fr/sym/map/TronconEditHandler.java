@@ -3,36 +3,33 @@ package fr.sym.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import fr.sym.Plugin;
-import fr.sym.Plugins;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Polygon;
+import fr.sym.Session;
+import fr.sym.digue.Injector;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
+import javafx.event.ActionEvent;
+import javafx.geometry.Side;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import org.apache.sis.internal.referencing.j2d.AffineTransform2D;
-import org.controlsfx.dialog.Dialogs;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import org.geotoolkit.data.bean.BeanFeature;
-import org.geotoolkit.display.VisitFilter;
-import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
-import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.container.ContextContainer2D;
-import org.geotoolkit.display2d.primitive.ProjectedCoverage;
-import org.geotoolkit.display2d.primitive.ProjectedFeature;
-import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
-import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
-import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
@@ -43,21 +40,30 @@ import org.geotoolkit.map.MapLayer;
  */
 public class TronconEditHandler extends FXAbstractNavigationHandler {
 
+    private static final int CROSS_SIZE = 5;
     
-    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     private final MouseListen mouseInputListener = new MouseListen();
-    private final FXGeometryLayer geomlayer= new FXGeometryLayer();
+    private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
+        @Override
+        protected Node createVerticeNode(Coordinate c){
+            final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
+            final Line v = new Line(c.x, c.y-CROSS_SIZE, c.x, c.y+CROSS_SIZE);
+            h.setStroke(Color.RED);
+            v.setStroke(Color.RED);
+            return new Group(h,v);
+        }
+    };
     private final double zoomFactor = 2;
     
+    //edition variables
     private FeatureMapLayer tronconLayer = null;
     private TronconDigue troncon = null;
-    
-    private final List<Coordinate> coords = new ArrayList<>();
-    
+    private EditionHelper helper;
+    private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
+        
     
     public TronconEditHandler(final FXMap map) {
         super(map);
-        
     }
 
     /**
@@ -83,6 +89,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                 layer.setSelectable(true);
             }
         }
+        
+        helper = new EditionHelper(map, tronconLayer);
+        helper.setMousePointerSize(6);
     }
 
     /**
@@ -98,91 +107,186 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
     }
     
     private void updateGeometry(){
-        final List<Geometry> geoms = new ArrayList<>();
-        if(coords.size() == 1){
-            //single point
-            final Geometry geom = GEOMETRY_FACTORY.createPoint(coords.get(0));
-            JTS.setCRS(geom, map.getCanvas().getObjectiveCRS2D());
-            geoms.add(geom);
-        }else if(coords.size() > 1){
-            //line
-            final Geometry geom = GEOMETRY_FACTORY.createLineString(coords.toArray(new Coordinate[coords.size()]));
-            JTS.setCRS(geom, map.getCanvas().getObjectiveCRS2D());
-            geoms.add(geom);
+        if(editGeometry.geometry==null){
+            geomlayer.getGeometries().clear();
+        }else{
+            geomlayer.getGeometries().setAll(editGeometry.geometry);
         }
-        geomlayer.getGeometries().setAll(geoms);
     }
-    
     
     private class MouseListen extends AbstractMouseHandler {
 
+        private final ContextMenu popup = new ContextMenu();
         private double startX;
         private double startY;
+        private double diffX;
+        private double diffY;
         private MouseButton mousebutton;
 
+        public MouseListen() {
+            popup.setAutoHide(true);
+        }
+        
+        private double getMouseX(MouseEvent event){
+            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
+            return event.getScreenX()- pt.getX();
+        }
+        
+        private double getMouseY(MouseEvent event){
+            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
+            return event.getScreenY() - pt.getY();
+        }
+        
         @Override
-        public void mouseClicked(final MouseEvent e) {
-            startX = e.getX();
-            startY = e.getY();
+        public void mouseClicked(final MouseEvent e) {            
+            if(tronconLayer==null) return;
+            
+            startX = getMouseX(e);
+            startY = getMouseY(e);
             mousebutton = e.getButton();
+                        
+            if(troncon==null){
+                //actions en l'absence de troncon
+                
+                if(mousebutton == MouseButton.PRIMARY){
+                    //selection d'un troncon
+                    final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
+                    if(feature !=null){
+                        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
+                        if(bean instanceof TronconDigue){
+                            troncon = (TronconDigue) bean;
+                        }
+                    }
+
+                    if(troncon!=null){
+                        editGeometry.reset();
+                        editGeometry.geometry = troncon.getGeometry();
+                        updateGeometry();
+                    }
+                }else if(mousebutton == MouseButton.PRIMARY){
+                    
+                }
+                
+            }else{
+                //actions sur troncon
+                
+                if(mousebutton == MouseButton.PRIMARY && e.getClickCount()>=2){
+                    //ajout d'un noeud
+                    
+                    final Geometry result;
+                    if(editGeometry.geometry instanceof LineString){
+                        result = helper.insertNode((LineString)editGeometry.geometry, startX, startY);
+                    }else if(editGeometry.geometry instanceof Polygon){
+                        result = helper.insertNode((Polygon)editGeometry.geometry, startX, startY);
+                    }else if(editGeometry.geometry instanceof GeometryCollection){
+                        result = helper.insertNode((GeometryCollection)editGeometry.geometry, startX, startY);
+                    }else{
+                        result = editGeometry.geometry;
+                    }
+                    editGeometry.geometry = result;
+                    updateGeometry();
+                }else if(mousebutton == MouseButton.SECONDARY){
+                    // popup : 
+                    // -suppression d'un noeud
+                    // -terminer édition
+                    // -annuler édition
+                    popup.getItems().clear();
+                    
+                    helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);                    
+                    if(editGeometry.selectedNode[0]>=0){
+                        final MenuItem item = new MenuItem("Supprimer noeud");
+                        item.setOnAction((ActionEvent event) -> {
+                            editGeometry.deleteSelectedNode(); 
+                            updateGeometry();
+                        });
+                        popup.getItems().add(item);
+                    }
+                    
+                    final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
+                    saveItem.setOnAction((ActionEvent event) -> {
+                        troncon.setGeometry(editGeometry.geometry);
+                        final Session session = Injector.getBean(Session.class);
+                        session.getTronconDigueRepository().update(troncon);
+                        
+                        troncon = null;
+                        editGeometry.reset();
+                        updateGeometry();
+                    });
+                    popup.getItems().add(saveItem);
+                    final MenuItem cancelItem = new MenuItem("Annuler les modifications");
+                    cancelItem.setOnAction((ActionEvent event) -> {
+                        troncon = null;
+                        editGeometry.reset();
+                        updateGeometry();
+                    });
+                    popup.getItems().add(cancelItem);
+
+                    popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
+                }
+            }
+            
+            if(troncon==null && mousebutton == MouseButton.PRIMARY){
+                
+            }else if(troncon!=null && mousebutton == MouseButton.PRIMARY && e.getClickCount()>=2){
+                //ajout d'un noeud
+                final Geometry result;
+                if(editGeometry.geometry instanceof LineString){
+                    result = helper.insertNode((LineString)editGeometry.geometry, startX, startY);
+                }else if(editGeometry.geometry instanceof Polygon){
+                    result = helper.insertNode((Polygon)editGeometry.geometry, startX, startY);
+                }else if(editGeometry.geometry instanceof GeometryCollection){
+                    result = helper.insertNode((GeometryCollection)editGeometry.geometry, startX, startY);
+                }else{
+                    result = editGeometry.geometry;
+                }
+                editGeometry.geometry = result;
+                updateGeometry();
+            }else if(troncon!=null && mousebutton == MouseButton.SECONDARY && e.getClickCount()>=2){
+                
+            }
         }
 
         @Override
-        public void mousePressed(final MouseEvent e) {
-            if(tronconLayer==null) return;
+        public void mousePressed(final MouseEvent e) {            
+            if(troncon==null) return;
             
-            if(troncon==null){
-                
-                //recherche du troncon
-                final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
-                map.getCanvas().getGraphicsIn(clickArea, 
-                        new AbstractGraphicVisitor() {
-
-                    @Override
-                    public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
-                        
-                    }
-
-                    @Override
-                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
-
-                    @Override
-                    public void endVisit() {
-                        super.endVisit();
-                        if(troncon == null){
-                        }
-                    }
-                    
-                    
-                    
-                },VisitFilter.INTERSECTS);
-                
-            }
-            
-            
-            startX = e.getX();
-            startY = e.getY();
-
+            startX = getMouseX(e);
+            startY = getMouseY(e);
             mousebutton = e.getButton();
-            if (mousebutton == MouseButton.PRIMARY) {
-                //add a coordinate
-                try {
-                    final AffineTransform2D dispToObj = map.getCanvas().getDisplayToObjective();
-                    final double[] crds = new double[]{e.getX(),e.getY()};
-                    dispToObj.transform(crds, 0, crds, 0, 1);
-                    coords.add(new Coordinate(crds[0], crds[1]));
-                    updateGeometry();
-                } catch (NoninvertibleTransformException ex) {
-                    Loggers.JAVAFX.log(Level.WARNING, null, ex);
-                }
+            
+            if(editGeometry.geometry!=null && mousebutton == MouseButton.PRIMARY){
+                //selection d'un noeud
+                helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+            }
+        }
 
-            } else if (mousebutton == MouseButton.SECONDARY) {
-                //erase coordiantes
-                coords.clear();
+        @Override
+        public void mouseDragged(MouseEvent me) {
+            //do not use getX/getY to calculate difference
+            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
+            
+            //calcul du deplacement
+            diffX = getMouseX(me)-startX;
+            diffY = getMouseY(me)-startY;
+            startX = getMouseX(me);
+            startY = getMouseY(me);
+                        
+            if(editGeometry.selectedNode[0] != -1){
+                //deplacement d'un noeud
+                editGeometry.moveSelectedNode(helper.toCoord(startX,startY));
+                updateGeometry();
+            }else if(editGeometry.numSubGeom != -1){
+                //deplacement de la geometry
+                helper.moveGeometry(editGeometry.geometry, diffX, diffY);
                 updateGeometry();
             }
         }
 
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            super.mouseReleased(me);
+        }
+        
         @Override
         public void mouseExited(final MouseEvent e) {
             decorationPane.setFill(false);
@@ -191,8 +295,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
 
         @Override
         public void mouseMoved(final MouseEvent e){
-            startX = e.getX();
-            startY = e.getY();
+            startX = getMouseX(e);
+            startY = getMouseY(e);
         }
         
         @Override
@@ -207,6 +311,5 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
 
         }
     }
-    
     
 }

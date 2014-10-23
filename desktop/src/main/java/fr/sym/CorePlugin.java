@@ -19,6 +19,7 @@ import fr.sym.theme.ProfilsEnTraversTheme;
 import fr.sym.theme.ReseauxDeVoirieTheme;
 import fr.sym.theme.ReseauxEtOuvragesTheme;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -29,6 +30,7 @@ import javafx.scene.control.MenuItem;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -54,10 +56,19 @@ public class CorePlugin extends Plugin{
         final TronconDigueRepository repo = getSession().getTronconDigueRepository();
         
         try{
+            
+            //todo : rendre dynamique
+            final List<BorneDigue> bornes = new ArrayList<>();
+            for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
+                bornes.addAll(td.getBorneIds());
+            }
+            
             final BeanStore store = new BeanStore(
-                    new BeanStore.BeanType(TronconDigue.class, "id", null, PROJECTION, ()-> repo.getAll()),
-                    new BeanStore.BeanType(Fondation.class, "id", null, PROJECTION, ()-> repo.getAllFondations())
+                    new BeanFeatureSupplier(TronconDigue.class, "id", null, PROJECTION, ()-> repo.getAll()),
+                    new BeanFeatureSupplier(Fondation.class, "id", null, PROJECTION, ()-> repo.getAllFondations()),
+                    new BeanFeatureSupplier(BorneDigue.class, "id", null, PROJECTION, ()-> bornes)
             );
+                    
                          
             items.addAll(buildLayers(store));
             

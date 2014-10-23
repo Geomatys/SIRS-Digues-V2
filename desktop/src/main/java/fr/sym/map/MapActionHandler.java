@@ -36,6 +36,7 @@ final class MapActionHandler implements EventHandler<MouseEvent>{
     
     MapActionHandler(FXMap map){
         this.map = map;
+        menu.setAutoHide(true);
     }
     
     @Override
