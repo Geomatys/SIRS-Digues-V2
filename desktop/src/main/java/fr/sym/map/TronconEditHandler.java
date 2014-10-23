@@ -7,32 +7,47 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sym.Session;
+import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
+import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.awt.geom.Point2D;
+import java.util.List;
+import java.util.logging.Level;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
+import org.geotoolkit.gui.javafx.util.FXOptionDialog;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -163,8 +178,55 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         editGeometry.geometry = troncon.getGeometry();
                         updateGeometry();
                     }
-                }else if(mousebutton == MouseButton.PRIMARY){
+                }else if(mousebutton == MouseButton.SECONDARY){
+                    // popup :
+                    // -commencer un nouveau troncon
+                    popup.getItems().clear();
                     
+                    final MenuItem createItem = new MenuItem("Créer un nouveau tronçon");
+                    createItem.setOnAction((ActionEvent event) -> {
+                        final Session session = Injector.getBean(Session.class);
+                        final List<Digue> digues = session.getDigues();
+                        final ChoiceBox<Digue> choiceBox = new ChoiceBox<>(FXCollections.observableList(digues));
+                        choiceBox.setConverter(new StringConverter<Digue>() {
+                            @Override
+                            public String toString(Digue object) {
+                                return object.getLibelle();
+                            }
+                            @Override
+                            public Digue fromString(String string) {
+                                return null;
+                            }
+                        });
+                        
+                        if(FXOptionDialog.showOkCancel(this, choiceBox, "Choix de la digue", true)){
+                            final Digue digue = choiceBox.getValue();
+                            troncon = new TronconDigue();
+
+                            final Coordinate coord1 = helper.toCoord(e.getX()-20, e.getY());
+                            final Coordinate coord2 = helper.toCoord(e.getX()+20, e.getY());
+                            try{
+                                Geometry geom = EditionHelper.createLine(coord1,coord2);
+                                //convertion from RGF93
+                                geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), Session.PROJECTION, true));
+                                JTS.setCRS(geom, Session.PROJECTION);
+                                troncon.setDigueId(digue.getId());
+                                troncon.setGeometry(geom);
+                                editGeometry.geometry = geom;
+
+                                //save troncon
+                                session.getTronconDigueRepository().add(troncon);
+                                updateGeometry();
+
+                            }catch(TransformException | FactoryException ex){
+                                Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                            }
+                        }
+                        
+                    });
+                    popup.getItems().add(createItem);
+
+                    popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
                 }
                 
             }else{
@@ -190,8 +252,10 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     // -suppression d'un noeud
                     // -terminer édition
                     // -annuler édition
+                    // -annuler édition
                     popup.getItems().clear();
                     
+                    //action : supprission d'un noeud
                     helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);                    
                     if(editGeometry.selectedNode[0]>=0){
                         final MenuItem item = new MenuItem("Supprimer noeud");
@@ -202,6 +266,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         popup.getItems().add(item);
                     }
                     
+                    //action : sauvegarder edition
                     final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                     saveItem.setOnAction((ActionEvent event) -> {
                         troncon.setGeometry(editGeometry.geometry);
@@ -213,6 +278,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         updateGeometry();
                     });
                     popup.getItems().add(saveItem);
+                    
+                    //action : annuler edition
                     final MenuItem cancelItem = new MenuItem("Annuler les modifications");
                     cancelItem.setOnAction((ActionEvent event) -> {
                         troncon = null;
@@ -220,30 +287,23 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         updateGeometry();
                     });
                     popup.getItems().add(cancelItem);
+                    
+                    //action : suppression du troncon
+                    popup.getItems().add(new SeparatorMenuItem());
+                    final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
+                    deleteItem.setOnAction((ActionEvent event) -> {
+                        final Session session = Injector.getBean(Session.class);
+                        session.getTronconDigueRepository().remove(troncon);
+                        troncon = null;
+                        editGeometry.reset();
+                        updateGeometry();
+                    });
+                    popup.getItems().add(deleteItem);
 
                     popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
                 }
             }
             
-            if(troncon==null && mousebutton == MouseButton.PRIMARY){
-                
-            }else if(troncon!=null && mousebutton == MouseButton.PRIMARY && e.getClickCount()>=2){
-                //ajout d'un noeud
-                final Geometry result;
-                if(editGeometry.geometry instanceof LineString){
-                    result = helper.insertNode((LineString)editGeometry.geometry, startX, startY);
-                }else if(editGeometry.geometry instanceof Polygon){
-                    result = helper.insertNode((Polygon)editGeometry.geometry, startX, startY);
-                }else if(editGeometry.geometry instanceof GeometryCollection){
-                    result = helper.insertNode((GeometryCollection)editGeometry.geometry, startX, startY);
-                }else{
-                    result = editGeometry.geometry;
-                }
-                editGeometry.geometry = result;
-                updateGeometry();
-            }else if(troncon!=null && mousebutton == MouseButton.SECONDARY && e.getClickCount()>=2){
-                
-            }
         }
 
         @Override
