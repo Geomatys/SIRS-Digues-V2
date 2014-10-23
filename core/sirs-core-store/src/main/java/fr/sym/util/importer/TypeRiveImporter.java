@@ -7,7 +7,6 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.symadrem.sirs.core.model.TypeRive;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import java.util.Map;
  */
 public class TypeRiveImporter extends GenericImporter {
 
-    private Map<Integer, TypeRive> typesRive = null;
+    private Map<Integer, String> typesRive = null;
 
     TypeRiveImporter(Database accessDatabase) {
         super(accessDatabase);
@@ -38,7 +37,7 @@ public class TypeRiveImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "TYPE_RIVE";
+        return DbImporter.TableName.TYPE_RIVE.toString();
     }
     
     private enum TypeRiveColumns {
@@ -53,7 +52,7 @@ public class TypeRiveImporter extends GenericImporter {
      * internal ID.
      * @throws IOException 
      */
-    public Map<Integer, TypeRive> getTypeRive() throws IOException {
+    public Map<Integer, String> getTypeRive() throws IOException {
 
         if(typesRive == null){
             typesRive = new HashMap<>();
@@ -62,7 +61,7 @@ public class TypeRiveImporter extends GenericImporter {
             while (it.hasNext()) {
                 final Row row = it.next();
                 typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID_TYPE_RIVE.toString())),
-                            TypeRive.toTypeRive(row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString())));
+                        row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString()));
             }
         }
         return typesRive;

@@ -16,7 +16,6 @@ import fr.symadrem.sirs.core.model.GestionTroncon;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import fr.symadrem.sirs.core.model.TypeRive;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "TRONCON_GESTION_DIGUE";
+        return DbImporter.TableName.TRONCON_GESTION_DIGUE.toString();
     }
 
     /* TODO : s'occuper du lien avec les gestionnaires.
@@ -115,10 +114,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
         if(tronconsDigue == null){
             tronconsDigue = new HashMap<>();
             tronconsIds = new HashMap<>();
+            System.out.println("Importation des troncons");
             final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
             final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
-            final Map<Integer, TypeRive> typesRive = typeRiveImporter.getTypeRive();
+            final Map<Integer, String> typesRive = typeRiveImporter.getTypeRive();
             final Map<Integer, SystemeReperage> systemesRep = systemeReperageImporter.getSystemeRepLineaire();
 
             while (it.hasNext()) {
@@ -156,7 +156,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 final List<BorneDigue> bornes = borneDigueImporter.getBorneDigueByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
                 if(bornes != null) tronconDigue.setBorneIds(bornes);
 
-                tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString())).toString());
+                tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString())));
                 
                 // Set the references demanding CouchDb identifier.
                 final Digue digue = digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
@@ -173,7 +173,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             
             // Set the references using the this very importer (Structures references TronconDigueId).
             for(final TronconDigue tronconDigue : tronconsDigue.values()){
-                
+                System.out.println("IMPORTATION des structures");
                 List<Structure> structures = tronconDigue.getStuctures();
                 if(structures==null){
                     structures = new ArrayList<>();

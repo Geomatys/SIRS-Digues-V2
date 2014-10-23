@@ -35,7 +35,7 @@ public abstract class GenericImporter {
         this.accessDatabase = accessDatabase;
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
         this.columnDataFlags = new HashMap<>();
-        this.tableName = this.getTableName();
+        this.tableName = this.getTableName().toString();
         
         // Set the data flags to false for all the columns used by the importer. 
         this.getUsedColumns().stream().forEach((column) -> {this.columnDataFlags.put(column, Boolean.FALSE);});

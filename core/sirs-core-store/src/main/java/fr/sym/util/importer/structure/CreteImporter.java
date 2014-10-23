@@ -8,6 +8,7 @@ package fr.sym.util.importer.structure;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sym.util.importer.AccessDbImporterException;
+import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.GenericImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
 import fr.symadrem.sirs.core.model.Crete;
@@ -34,7 +35,7 @@ class CreteImporter extends GenericImporter {
         super(accessDatabase);
     }
 
-    public CreteImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter) {
+    CreteImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter) {
         this(accessDatabase);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
     }
@@ -42,7 +43,7 @@ class CreteImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "SYS_EVT_CRETE";
+        return DbImporter.TableName.SYS_EVT_CRETE.toString();
     }
     
     
@@ -56,21 +57,45 @@ class CreteImporter extends GenericImporter {
      pas nulls.
      */
     
-    public static enum CreteColumns {
-ID_ELEMENT_STRUCTURE,
-     id_nom_element,
-     ID_SOUS_GROUPE_DONNEES,
-     LIBELLE_TYPE_ELEMENT_STRUCTURE,
-     DECALAGE_DEFAUT,
-     DECALAGE,
-     LIBELLE_SOURCE,
+    private enum CreteColumns {
+        ID_ELEMENT_STRUCTURE,
+//        id_nom_element,
+//        ID_SOUS_GROUPE_DONNEES,
+//        LIBELLE_TYPE_ELEMENT_STRUCTURE,
+//        DECALAGE_DEFAUT,
+//        DECALAGE,
+//        LIBELLE_SOURCE,
+//        LIBELLE_SYSTEME_REP,
+//        NOM_BORNE_DEBUT,
+//        NOM_BORNE_FIN,
+//        LIBELLE_TYPE_MATERIAU,
+//        LIBELLE_TYPE_NATURE,
+//        LIBELLE_TYPE_FONCTION,
+//        ID_TYPE_ELEMENT_STRUCTURE,
+//        ID_SOURCE,
+        ID_TRONCON_GESTION,
+        DATE_DEBUT_VAL,
+        DATE_FIN_VAL,
+//        PR_DEBUT_CALCULE,
+//        PR_FIN_CALCULE,
+//        ID_SYSTEME_REP,
+//        ID_BORNEREF_DEBUT,
+//        AMONT_AVAL_DEBUT,
+//        DIST_BORNEREF_DEBUT,
+//        ID_BORNEREF_FIN,
+//        AMONT_AVAL_FIN,
+//        DIST_BORNEREF_FIN,
+        COMMENTAIRE,
+        N_COUCHE,
+//        ID_TYPE_MATERIAU,
+//        ID_TYPE_NATURE,
+//        ID_TYPE_FONCTION,
+        EPAISSEUR,
+//        TALUS_INTERCEPTE_CRETE,
+//        ID_AUTO
+    
+     // Empty fields
 //     LIBELLE_TYPE_COTE,
-     LIBELLE_SYSTEME_REP,
-     NOM_BORNE_DEBUT,
-     NOM_BORNE_FIN,
-     LIBELLE_TYPE_MATERIAU,
-     LIBELLE_TYPE_NATURE,
-     LIBELLE_TYPE_FONCTION,
 //     LIBELLE_TYPE_NATURE_HAUT,
 //     LIBELLE_TYPE_MATERIAU_HAUT,
 //     LIBELLE_TYPE_NATURE_BAS,
@@ -82,33 +107,12 @@ ID_ELEMENT_STRUCTURE,
 //     INTERV_PROPRIO,
 //     INTERV_GARDIEN,
 //     LIBELLE_TYPE_COMPOSITION,
-//     LIBELLE_TYPE_VEGETATION,
-     ID_TYPE_ELEMENT_STRUCTURE,
+//     LIBELLE_TYPE_VEGETATION, 
 //     ID_TYPE_COTE,
-     ID_SOURCE,
-     ID_TRONCON_GESTION,
-     DATE_DEBUT_VAL,
-     DATE_FIN_VAL,
-     PR_DEBUT_CALCULE,
-     PR_FIN_CALCULE,
 //     X_DEBUT,
 //     Y_DEBUT,
 //     X_FIN,
 //     Y_FIN,
-     ID_SYSTEME_REP,
-     ID_BORNEREF_DEBUT,
-     AMONT_AVAL_DEBUT,
-     DIST_BORNEREF_DEBUT,
-     ID_BORNEREF_FIN,
-     AMONT_AVAL_FIN,
-     DIST_BORNEREF_FIN,
-     COMMENTAIRE,
-     N_COUCHE,
-     ID_TYPE_MATERIAU,
-     ID_TYPE_NATURE,
-     ID_TYPE_FONCTION,
-     EPAISSEUR,
-     TALUS_INTERCEPTE_CRETE,
 //     ID_TYPE_NATURE_HAUT,
 //     ID_TYPE_MATERIAU_HAUT,
 //     ID_TYPE_MATERIAU_BAS,
@@ -144,7 +148,6 @@ ID_ELEMENT_STRUCTURE,
 //     EPAISSEUR_Y12,
 //     EPAISSEUR_Y21,
 //     EPAISSEUR_Y22,
-     ID_AUTO
     };
     
     /**
@@ -170,7 +173,7 @@ ID_ELEMENT_STRUCTURE,
 //            crete.setBorne_fin(borne_debut);
 //            crete.setBorne_fin_aval(true);
 //            crete.setBorne_fin_distance(borne_debut_distance);
-//            crete.setCommentaire(null);
+            crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
 //            crete.setContactStructure(null);
 //            crete.setConventionIds(null);
 //            crete.setCote(row.getString(CreteColumns.COTE_AXE.toString()));

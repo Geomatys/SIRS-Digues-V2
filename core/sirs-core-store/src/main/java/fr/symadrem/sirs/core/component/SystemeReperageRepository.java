@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.symadrem.sirs.core.model.Digue;
 
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.Digue') {emit(doc._id, doc._id)}}")
-public class DigueRepository extends CouchDbRepositorySupport<Digue> implements Repository<Digue>{
+public class SystemeReperageRepository extends CouchDbRepositorySupport<Digue> implements Repository<Digue>{
 
     @Autowired
-    public DigueRepository ( CouchDbConnector db) {
+    public SystemeReperageRepository ( CouchDbConnector db) {
        super(Digue.class, db);
        initStandardDesignDocument();
    }

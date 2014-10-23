@@ -33,7 +33,7 @@ class DesordreImporter extends GenericImporter {
         super(accessDatabase);
     }
 
-    public DesordreImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter) {
+    DesordreImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter) {
         this(accessDatabase);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
     }
@@ -44,48 +44,50 @@ class DesordreImporter extends GenericImporter {
     }
     
     
-        public static enum DesordreColumns {
- ID_DESORDRE,
-     id_nom_element,
-     ID_SOUS_GROUPE_DONNEES,
-     LIBELLE_SOUS_GROUPE_DONNEES,
-     ID_TYPE_DESORDRE,
-     LIBELLE_TYPE_DESORDRE,
-     DECALAGE_DEFAUT,
-     DECALAGE,
-     LIBELLE_SOURCE,
-     LIBELLE_TYPE_COTE,
-     LIBELLE_SYSTEME_REP,
-     NOM_BORNE_DEBUT,
-     NOM_BORNE_FIN,
+    private enum DesordreColumns {
+//            ID_DESORDRE,
+//            id_nom_element,
+//            ID_SOUS_GROUPE_DONNEES,
+//            LIBELLE_SOUS_GROUPE_DONNEES,
+//            ID_TYPE_DESORDRE,
+//            LIBELLE_TYPE_DESORDRE,
+//            DECALAGE_DEFAUT,
+//            DECALAGE,
+//            LIBELLE_SOURCE,
+//            LIBELLE_TYPE_COTE,
+//            LIBELLE_SYSTEME_REP,
+//            NOM_BORNE_DEBUT,
+//            NOM_BORNE_FIN,
+//            DISPARU_OUI_NON,
+//            DEJA_OBSERVE_OUI_NON,
+//            LIBELLE_TYPE_POSITION,
+//            ID_TYPE_COTE,
+//            ID_TYPE_POSITION,
+//            ID_TRONCON_GESTION,
+//            ID_SOURCE,
+//            DATE_DEBUT_VAL,
+//            DATE_FIN_VAL,
+//            PR_DEBUT_CALCULE,
+//            PR_FIN_CALCULE,
+//            ID_SYSTEME_REP,
+//            ID_BORNEREF_DEBUT,
+//            AMONT_AVAL_DEBUT,
+//            DIST_BORNEREF_DEBUT,
+//            ID_BORNEREF_FIN,
+//            AMONT_AVAL_FIN,
+//            DIST_BORNEREF_FIN,
+//            LIEU_DIT_DESORDRE,
+//            DESCRIPTION_DESORDRE,
+//            ID_AUTO
+     
+     //Empty fields
 //     ID_PRESTATION,
 //     LIBELLE_PRESTATION,
-     DISPARU_OUI_NON,
-     DEJA_OBSERVE_OUI_NON,
-     LIBELLE_TYPE_POSITION,
-     ID_TYPE_COTE,
-     ID_TYPE_POSITION,
-     ID_TRONCON_GESTION,
-     ID_SOURCE,
-     DATE_DEBUT_VAL,
-     DATE_FIN_VAL,
-     PR_DEBUT_CALCULE,
-     PR_FIN_CALCULE,
 //     X_DEBUT,
 //     Y_DEBUT,
 //     X_FIN,
 //     Y_FIN,
-     ID_SYSTEME_REP,
-     ID_BORNEREF_DEBUT,
-     AMONT_AVAL_DEBUT,
-     DIST_BORNEREF_DEBUT,
-     ID_BORNEREF_FIN,
-     AMONT_AVAL_FIN,
-     DIST_BORNEREF_FIN,
 //     COMMENTAIRE,
-     LIEU_DIT_DESORDRE,
-     DESCRIPTION_DESORDRE,
-     ID_AUTO
     };
     
     /**
