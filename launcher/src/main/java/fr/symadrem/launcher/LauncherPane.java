@@ -85,7 +85,11 @@ public class LauncherPane extends BorderPane {
     
     @FXML
     void connectLocal(ActionEvent event) {
-
+        try {
+            Runtime.getRuntime().exec("java -jar desktop-1.x-SNAPSHOT.jar");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @FXML
