@@ -4343,7 +4343,7 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_DOmFoEfeEeSoXJiONqf-1A" name="Structure" tooltipText="" outgoingEdges="_yWI2kEfkEeSoXJiONqf-1A _o292cFUWEeSyt_5RCl16VA _3A-wAFUUEeSyt_5RCl16VA _hp7cEEihEeSShKVOxlfrCQ" incomingEdges="_DO61wEfeEeSoXJiONqf-1A _l60v8EflEeSoXJiONqf-1A _tGLX0EfvEeSoXJiONqf-1A _aScDMEh3EeSShKVOxlfrCQ _1jjD8Eh3EeSShKVOxlfrCQ _94lcQEh3EeSShKVOxlfrCQ _GDLfIEh4EeSShKVOxlfrCQ _JjmR4Eh4EeSShKVOxlfrCQ _A5s8gEh7EeSShKVOxlfrCQ _Ct9LwEikEeSShKVOxlfrCQ _7gMIEEikEeSShKVOxlfrCQ _2vgmUEivEeSShKVOxlfrCQ _BSJCIEixEeSShKVOxlfrCQ _yafPMEihEeSShKVOxlfrCQ _Rwm_sEixEeSShKVOxlfrCQ _wX6c0Er5EeSShKVOxlfrCQ _xy4r8FU_EeSyt_5RCl16VA _0NFdgFU_EeSyt_5RCl16VA _2AtXQFU_EeSyt_5RCl16VA _3mC9YFU_EeSyt_5RCl16VA _5gVf0FU_EeSyt_5RCl16VA _8riQgFU_EeSyt_5RCl16VA _-HAwAFU_EeSyt_5RCl16VA __iQmAFU_EeSyt_5RCl16VA _BAjI8FVAEeSyt_5RCl16VA _C-3PwFVAEeSyt_5RCl16VA _EehrsFVAEeSyt_5RCl16VA _eH-vsFXQEeSyt_5RCl16VA _D7Ki4FrFEeS5fNILrts1cg _ZrRjwFrGEeS5fNILrts1cg" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_DOmFoEfeEeSoXJiONqf-1A" name="Structure" tooltipText="" outgoingEdges="_yWI2kEfkEeSoXJiONqf-1A _o292cFUWEeSyt_5RCl16VA _3A-wAFUUEeSyt_5RCl16VA _hp7cEEihEeSShKVOxlfrCQ" incomingEdges="_DO61wEfeEeSoXJiONqf-1A _l60v8EflEeSoXJiONqf-1A _tGLX0EfvEeSoXJiONqf-1A _aScDMEh3EeSShKVOxlfrCQ _1jjD8Eh3EeSShKVOxlfrCQ _94lcQEh3EeSShKVOxlfrCQ _GDLfIEh4EeSShKVOxlfrCQ _JjmR4Eh4EeSShKVOxlfrCQ _A5s8gEh7EeSShKVOxlfrCQ _Ct9LwEikEeSShKVOxlfrCQ _7gMIEEikEeSShKVOxlfrCQ _2vgmUEivEeSShKVOxlfrCQ _yafPMEihEeSShKVOxlfrCQ _BSJCIEixEeSShKVOxlfrCQ _Rwm_sEixEeSShKVOxlfrCQ _wX6c0Er5EeSShKVOxlfrCQ _xy4r8FU_EeSyt_5RCl16VA _0NFdgFU_EeSyt_5RCl16VA _2AtXQFU_EeSyt_5RCl16VA _3mC9YFU_EeSyt_5RCl16VA _5gVf0FU_EeSyt_5RCl16VA _8riQgFU_EeSyt_5RCl16VA _-HAwAFU_EeSyt_5RCl16VA __iQmAFU_EeSyt_5RCl16VA _BAjI8FVAEeSyt_5RCl16VA _C-3PwFVAEeSyt_5RCl16VA _EehrsFVAEeSyt_5RCl16VA _eH-vsFXQEeSyt_5RCl16VA _D7Ki4FrFEeS5fNILrts1cg _ZrRjwFrGEeS5fNILrts1cg" width="12" height="10">
         <target xmi:type="ecore:EClass" href="symadrem.ecore#//Structure"/>
         <semanticElements xmi:type="ecore:EClass" href="symadrem.ecore#//Structure"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -4635,7 +4635,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_lzrbkEfkEeSoXJiONqf-1A" name="systeme_rep_id : EInt = 0" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_lzrbkEfkEeSoXJiONqf-1A" name="systeme_rep_id : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//Positionable/systeme_rep_id"/>
           <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//Positionable/systeme_rep_id"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_qolVAEfkEeSoXJiONqf-1A" labelAlignment="LEFT">
@@ -4889,7 +4889,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_j2vxoEfgEeSoXJiONqf-1A" name="Organisme" tooltipText="" incomingEdges="_lmpaQEfmEeSoXJiONqf-1A _pIFgsEfmEeSoXJiONqf-1A _65C5QEr5EeSShKVOxlfrCQ _W3mDsFROEeSyt_5RCl16VA _coTsAFR4EeSyt_5RCl16VA _8eZCsFRKEeSV8-H6esGTsg _0kuB0FR4EeSyt_5RCl16VA _DMXnsFR5EeSyt_5RCl16VA _lCVuQFUWEeSyt_5RCl16VA" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_j2vxoEfgEeSoXJiONqf-1A" name="Organisme" tooltipText="" incomingEdges="_lmpaQEfmEeSoXJiONqf-1A _pIFgsEfmEeSoXJiONqf-1A _65C5QEr5EeSShKVOxlfrCQ _W3mDsFROEeSyt_5RCl16VA _8eZCsFRKEeSV8-H6esGTsg _coTsAFR4EeSyt_5RCl16VA _0kuB0FR4EeSyt_5RCl16VA _DMXnsFR5EeSyt_5RCl16VA _lCVuQFUWEeSyt_5RCl16VA" width="12" height="10">
         <target xmi:type="ecore:EClass" href="symadrem.ecore#//Organisme"/>
         <semanticElements xmi:type="ecore:EClass" href="symadrem.ecore#//Organisme"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
