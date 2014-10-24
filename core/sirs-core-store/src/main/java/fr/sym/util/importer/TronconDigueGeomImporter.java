@@ -54,6 +54,35 @@ public class TronconDigueGeomImporter extends GenericImporter {
     public String getTableName() {
         return "CARTO_TRONCON_GESTION_DIGUE";
     }
+
+    @Override
+    protected void compute() throws IOException {
+        tronconDigueGeom = new HashMap<>();
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            try {
+                final Row row = it.next();
+                final TronconDigue tronconDigue = new TronconDigue();
+
+                final byte[] bytes = row.getBytes(CartoTronconGestionDigueColumns.SHAPE.toString());
+                final ByteBuffer bb = ByteBuffer.wrap(bytes);
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                final int id = bb.getInt();
+                final ShapeType shapeType = ShapeType.forID(id);
+                final ShapeHandler handler = shapeType.getShapeHandler(false);
+                Geometry geom = (Geometry) handler.read(bb, shapeType);
+
+                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
+                geom = JTS.transform(geom, lambertToRGF);
+
+                tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID_TRONCON_GESTION.toString())),
+                        geom);
+            } catch (FactoryException | DataStoreException | MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     
     private enum CartoTronconGestionDigueColumns {
         ID_TRONCON_GESTION, 
@@ -70,34 +99,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
      * @throws IOException 
      */
     public Map<Integer, Geometry> getTronconDigueGeoms() throws IOException {
-        
-        if(tronconDigueGeom==null){
-            tronconDigueGeom = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                try {
-                    final Row row = it.next();
-                    final TronconDigue tronconDigue = new TronconDigue();
-
-                    final byte[] bytes = row.getBytes(CartoTronconGestionDigueColumns.SHAPE.toString());
-                    final ByteBuffer bb = ByteBuffer.wrap(bytes);
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                    final int id = bb.getInt();
-                    final ShapeType shapeType = ShapeType.forID(id);
-                    final ShapeHandler handler = shapeType.getShapeHandler(false);
-                    Geometry geom = (Geometry) handler.read(bb, shapeType);
-
-                    final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
-                    geom = JTS.transform(geom, lambertToRGF);
-
-                    tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID_TRONCON_GESTION.toString())),
-                            geom);
-                } catch (FactoryException | DataStoreException | MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+        if(tronconDigueGeom==null) compute();
         return tronconDigueGeom;
     }
 }

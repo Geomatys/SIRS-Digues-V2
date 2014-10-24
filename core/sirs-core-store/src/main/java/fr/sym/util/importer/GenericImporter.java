@@ -95,6 +95,13 @@ public abstract class GenericImporter {
      */
     public abstract String getTableName();
     
+    /**
+     * Compute the maps referencing the retrieved objects.
+     * @throws java.io.IOException
+     * @throws fr.sym.util.importer.AccessDbImporterException
+     */
+    protected abstract void compute() throws IOException, AccessDbImporterException;
+    
     
     public List<String> getTableColumns() throws IOException {
         final List<String> names = new ArrayList<>();

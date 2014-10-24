@@ -9,7 +9,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sym.util.importer.AccessDbImporterException;
 import fr.sym.util.importer.DbImporter;
-import fr.sym.util.importer.GenericImporter;
+import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Desordre;
@@ -32,24 +32,20 @@ import java.util.Map;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class StructureImporter extends GenericImporter {
+public class StructureImporter extends GenericStructureImporter {
 
     private Map<Integer, List<Structure>> structuresByTronconId = null;
     private Map<Integer, Structure> structures = null;
-    private CreteImporter creteImporter;
-    private DesordreImporter desordreImporter;
-    private PiedDigueImporter piedDigueImporter;
-    private TypeElementStructureImporter typeElementStructureImporter;
+    private final CreteImporter creteImporter;
+    private final DesordreImporter desordreImporter;
+    private final PiedDigueImporter piedDigueImporter;
+    private final TypeElementStructureImporter typeElementStructureImporter;
 
-    private StructureImporter(Database accessDatabase) {
-        super(accessDatabase);
-    }
-
-    public StructureImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter) {
-        this(accessDatabase);
-        this.creteImporter = new CreteImporter(accessDatabase, tronconGestionDigueImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, tronconGestionDigueImporter);
-        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, tronconGestionDigueImporter);
+    public StructureImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter) {
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
+        this.creteImporter = new CreteImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
+        this.desordreImporter = new DesordreImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
+        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase);
     }
 
@@ -76,8 +72,8 @@ public class StructureImporter extends GenericImporter {
 //        ID_TRONCON_GESTION,
 //        DATE_DEBUT_VAL,
 //        DATE_FIN_VAL,
-//        PR_DEBUT_CALCULE,
-//        PR_FIN_CALCULE,
+        PR_DEBUT_CALCULE,
+        PR_FIN_CALCULE,
 //        X_FIN,
 //        Y_FIN,
 //        ID_SYSTEME_REP,
@@ -173,67 +169,26 @@ public class StructureImporter extends GenericImporter {
      * @throws AccessDbImporterException 
      */
     public Map<Integer, List<Structure>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        this.getStructures();
-        if (structuresByTronconId == null) {
-            structuresByTronconId = new HashMap<>();
-
-            final Map<Integer, List<Crete>> cretes = creteImporter.getCretesByTronconId();
-            cretes.keySet().stream().map((key) -> {
-                if (structuresByTronconId.get(key) == null) {
-                    structuresByTronconId.put(key, new ArrayList<>());
-                }
-                return key;
-            }).forEach((key) -> {
-                structuresByTronconId.get(key).addAll(cretes.get(key));
-            });
-
-            final Map<Integer, List<PiedDigue>> piedsDigue = piedDigueImporter.getPiedsDigueByTronconId();
-            piedsDigue.keySet().stream().map((key) -> {
-                if (structuresByTronconId.get(key) == null) {
-                    structuresByTronconId.put(key, new ArrayList<>());
-                }
-                return key;
-            }).forEach((key) -> {
-                structuresByTronconId.get(key).addAll(piedsDigue.get(key));
-            });
-
-            final Map<Integer, List<Desordre>> desordres = desordreImporter.getDesordresByTronconId();
-            desordres.keySet().stream().map((key) -> {
-                if (structuresByTronconId.get(key) == null) {
-                    structuresByTronconId.put(key, new ArrayList<>());
-                }
-                return key;
-            }).forEach((key) -> {
-                structuresByTronconId.get(key).addAll(desordres.get(key));
-            });
-            
-            ////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////////////////////////////////
-          
-            
-        }
+        if (structuresByTronconId == null)  compute();
         return structuresByTronconId;
     }
     
-    
-    
-    public Map<Integer, Structure> getStructures() throws IOException, AccessDbImporterException{
-        if(structures==null){    
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {    
             structures = new HashMap<>();
             
             final Map<Integer, Crete> cretes = creteImporter.getCretes();
-            for(final Integer key : cretes.keySet()){
+            if(cretes!=null) for(final Integer key : cretes.keySet()){
                 structures.put(key, cretes.get(key));
             }
 
             final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
-            for(final Integer key : piedsDigue.keySet()){
+            if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
                 structures.put(key, piedsDigue.get(key));
             }
 
             final Map<Integer, Desordre> desordres = desordreImporter.getDesordres();
-            for(final Integer key : desordres.keySet()){
+            if(desordres!=null) for(final Integer key : desordres.keySet()){
                 structures.put(key, desordres.get(key));
             }
             
@@ -298,24 +253,81 @@ public class StructureImporter extends GenericImporter {
                 
                 
                 if(structure!=null){
-                    
-                    System.out.println(structure.getBorne_debut_distance()+"  "+structure.getBorne_fin_distance()+(((structure instanceof Crete)||(structure instanceof PiedDigue) ||(structure instanceof Desordre)) ? " "+structure.getClass().getName() :" Autre chose"));
-//                if ( row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-//                    structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-//                }
-//                if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
-//                    structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-//                }
+//                    if ( row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
+//                        structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+//                    }
+//                    if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
+//                        structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
+//                    }
+//                    }
+//                    if ( row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+//                        structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+//                    }
+//                    if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
+//                        structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+//                    }
                 }
-                
-                
-                
-                
-                
-                
-                
             }
-        }
+            
+            
+            
+            
+            
+            
+            
+            structuresByTronconId = new HashMap<>();
+
+            final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getCretesByTronconId();
+            if(cretesByTroncon!=null){
+                cretesByTroncon.keySet().stream().map((key) -> {
+                    if (structuresByTronconId.get(key) == null) {
+                        structuresByTronconId.put(key, new ArrayList<>());
+                    }   return key;
+                }).forEach((key) -> {
+                    if(cretesByTroncon.get(key)!=null)
+                        structuresByTronconId.get(key).addAll(cretesByTroncon.get(key));
+                });
+            }
+
+            final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getPiedsDigueByTronconId();
+            if(piedsDigueByTroncon!=null){
+            piedsDigue.keySet().stream().map((key) -> {
+                if (structuresByTronconId.get(key) == null) {
+                    structuresByTronconId.put(key, new ArrayList<>());
+                }
+                return key;
+            }).forEach((key) -> {
+                if(piedsDigueByTroncon.get(key)!=null)
+                    structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
+            });
+            }
+
+            final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getDesordresByTronconId();
+            if(desordresByTroncon!=null){
+            desordres.keySet().stream().map((key) -> {
+                if (structuresByTronconId.get(key) == null) {
+                    structuresByTronconId.put(key, new ArrayList<>());
+                }
+                return key;
+            }).forEach((key) -> {
+                if(desordresByTroncon.get(key)!=null)
+                    structuresByTronconId.get(key).addAll(desordresByTroncon.get(key));
+            });
+            }
+            
+            ////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////
+          
+            
+            
+            
+            
+            
+    }
+    
+    public Map<Integer, Structure> getStructures() throws IOException, AccessDbImporterException{
+        if(structures==null) compute();
         return structures;
     }
 }

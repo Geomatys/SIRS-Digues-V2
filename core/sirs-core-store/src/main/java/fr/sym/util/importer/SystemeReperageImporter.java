@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -23,9 +24,12 @@ import java.util.Map;
 public class SystemeReperageImporter extends GenericImporter {
 
     private Map<Integer, SystemeReperage> systemesReperage = null;
+    private Map<Integer, List<SystemeReperage>> systemesReperageByTronconId = null;
+    private final SystemeReperageRepository systemeReperageRepository;
 
-    SystemeReperageImporter(Database accessDatabase) {
+    SystemeReperageImporter(final Database accessDatabase, final SystemeReperageRepository systemeReperageRepository) {
         super(accessDatabase);
+        this.systemeReperageRepository = systemeReperageRepository;
     }
 
     @Override
@@ -39,7 +43,7 @@ public class SystemeReperageImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "SYSTEME_REP_LINEAIRE";
+        return DbImporter.TableName.SYSTEME_REP_LINEAIRE.toString();
     }
     
     private enum SystemeRepLineaireColumns {
@@ -49,6 +53,49 @@ public class SystemeReperageImporter extends GenericImporter {
         COMMENTAIRE_SYSTEME_REP, 
         DATE_DERNIERE_MAJ
     };
+    
+    @Override
+    protected void compute() throws IOException{
+        systemesReperage = new HashMap<>();
+        systemesReperageByTronconId = new HashMap<>();
+
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final SystemeReperage systemeReperage = new SystemeReperage();
+            systemeReperage.setNom(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
+            systemeReperage.setCommentaire(row.getString(SystemeRepLineaireColumns.COMMENTAIRE_SYSTEME_REP.toString()));
+            if (row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            systemesReperage.put(row.getInt(SystemeRepLineaireColumns.ID_SYSTEME_REP.toString()), systemeReperage);
+            
+            // Set the list ByTronconId
+            List<SystemeReperage> listByTronconId = systemesReperageByTronconId.get(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(systemeReperage);
+            systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            
+            // Register the systemeReperage to retrieve a CouchDb ID.
+            systemeReperageRepository.add(systemeReperage);
+        }
+    }
+    
+    /**
+     * 
+     * @return A map containing the SystemeRepLineaire instances references by
+     * the tronconDigue internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
+        if(systemesReperageByTronconId==null) compute();
+        return systemesReperageByTronconId;
+    }
 
     /**
      * 
@@ -57,23 +104,7 @@ public class SystemeReperageImporter extends GenericImporter {
      * @throws IOException 
      */
     public Map<Integer, SystemeReperage> getSystemeRepLineaire() throws IOException {
-
-        if (systemesReperage == null) {
-            systemesReperage = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                final Row row = it.next();
-                final SystemeReperage systemeReperage = new SystemeReperage();
-                systemeReperage.setNom(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
-                systemeReperage.setCommentaire(row.getString(SystemeRepLineaireColumns.COMMENTAIRE_SYSTEME_REP.toString()));
-                if (row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                systemesReperage.put(row.getInt(SystemeRepLineaireColumns.ID_SYSTEME_REP.toString()), systemeReperage);
-            }
-        }
+        if(systemesReperage==null) compute();
         return systemesReperage;
     }
 }

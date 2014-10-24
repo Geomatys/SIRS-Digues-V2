@@ -45,7 +45,31 @@ public class DigueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "DIGUE";
+        return DbImporter.TableName.DIGUE.toString();
+    }
+
+    @Override
+    protected void compute() throws IOException {
+        digues = new HashMap<>();
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final Digue digue = new Digue();
+
+            digue.setLibelle(row.getString(DigueColumns.LIBELLE_DIGUE.toString()));
+            digue.setCommentaire(row.getString(DigueColumns.COMMENTAIRE_DIGUE.toString()));
+            if (row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                digue.setDateMaj(LocalDateTime.parse(row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            //digue.setId(String.valueOf(row.getInt(DigueColumns.ID.toString())));
+            digues.put(row.getInt(DigueColumns.ID_DIGUE.toString()), digue);
+
+            // Register the digue to retrieve a CouchDb ID.
+            digueRepository.add(digue);
+        }
     }
     
     private enum DigueColumns {
@@ -63,28 +87,7 @@ public class DigueImporter extends GenericImporter {
      */
     public Map<Integer, Digue> getDigues() throws IOException {
 
-        if(digues==null){
-            digues = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                final Row row = it.next();
-                final Digue digue = new Digue();
-                
-                digue.setLibelle(row.getString(DigueColumns.LIBELLE_DIGUE.toString()));
-                digue.setCommentaire(row.getString(DigueColumns.COMMENTAIRE_DIGUE.toString()));
-                if (row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    digue.setDateMaj(LocalDateTime.parse(row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-
-                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                //digue.setId(String.valueOf(row.getInt(DigueColumns.ID.toString())));
-                digues.put(row.getInt(DigueColumns.ID_DIGUE.toString()), digue);
-                
-                // Register the digue to retrieve a CouchDb ID.
-                digueRepository.add(digue);
-            }
-        }
+        if(digues==null) compute();
         return digues;
     }
 }

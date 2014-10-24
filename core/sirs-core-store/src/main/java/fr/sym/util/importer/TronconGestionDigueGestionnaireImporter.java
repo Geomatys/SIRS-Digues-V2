@@ -50,6 +50,44 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         return "TRONCON_GESTION_DIGUE_GESTIONNAIRE";
     }
 
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
+        gestionsByTronconId = new HashMap<>();
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final GestionTroncon gestion = new GestionTroncon();
+
+            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
+                gestion.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()) != null) {
+                gestion.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                gestion.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
+            if(listeGestions == null){
+                listeGestions = new ArrayList<>();
+                gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
+            }
+            listeGestions.add(gestion);
+
+            // Set the references.
+            final Organisme organisme = organismeImporter.getOrganismes().get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
+            if (organisme.getId() != null) {
+                System.out.println(organisme.getId());
+                gestion.setGestionnaireId(organisme.getId());
+            } else {
+                throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
+            }
+        }
+    }
+
     private enum TronconGestionDigueGestionnaireColumns {
         ID_TRONCON_GESTION,
         ID_ORG_GESTION,
@@ -66,43 +104,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
      * @throws fr.sym.util.importer.AccessDbImporterException
      */
     public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
-
-        if (gestionsByTronconId == null) {
-            gestionsByTronconId = new HashMap<>();
-            final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                final Row row = it.next();
-                final GestionTroncon gestion = new GestionTroncon();
-                
-                if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
-                    gestion.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
-                }
-                if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()) != null) {
-                    gestion.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
-                }
-                if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    gestion.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-
-                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
-                if(listeGestions == null){
-                    listeGestions = new ArrayList<>();
-                    gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
-                }
-                listeGestions.add(gestion);
-
-                // Set the references.
-                final Organisme organisme = organismeImporter.getOrganismes().get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
-                if (organisme.getId() != null) {
-                    System.out.println(organisme.getId());
-                    gestion.setGestionnaireId(organisme.getId());
-                } else {
-                    throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
-                }
-            }
-        }
+        if (gestionsByTronconId == null) compute();
         return gestionsByTronconId;
     }
 }

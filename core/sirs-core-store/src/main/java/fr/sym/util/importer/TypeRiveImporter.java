@@ -39,6 +39,18 @@ public class TypeRiveImporter extends GenericImporter {
     public String getTableName() {
         return DbImporter.TableName.TYPE_RIVE.toString();
     }
+
+    @Override
+    protected void compute() throws IOException {
+        typesRive = new HashMap<>();
+        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID_TYPE_RIVE.toString())),
+                    row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString()));
+        }
+    }
     
     private enum TypeRiveColumns {
         ID_TYPE_RIVE, 
@@ -53,17 +65,7 @@ public class TypeRiveImporter extends GenericImporter {
      * @throws IOException 
      */
     public Map<Integer, String> getTypeRive() throws IOException {
-
-        if(typesRive == null){
-            typesRive = new HashMap<>();
-            final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                final Row row = it.next();
-                typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID_TYPE_RIVE.toString())),
-                        row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString()));
-            }
-        }
+        if(typesRive == null) compute();
         return typesRive;
     }
 }

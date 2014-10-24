@@ -49,6 +49,53 @@ public class TypeElementStructureImporter extends GenericImporter {
     public String getTableName() {
         return "TYPE_ELEMENT_STRUCTURE";
     }
+
+    @Override
+    protected void compute() throws IOException {
+        typesElementStructure = new HashMap<>();
+        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            try{
+            final Class classe;
+            final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeElementStructureColumns.NOM_TABLE_EVT.toString()));
+            switch(table){
+                case SYS_EVT_CRETE:
+                    classe = Crete.class; break;
+                case SYS_EVT_TALUS_DIGUE:
+                    classe = TalusDigue.class; break;
+                case SYS_EVT_SOMMET_RISBERME:
+                    classe = SommetRisberme.class; break;
+                case SYS_EVT_TALUS_RISBERME:
+                    classe = TalusRisberme.class; break;
+                case SYS_EVT_PIED_DE_DIGUE:
+                    classe = PiedDigue.class; break;
+//                    case 6:
+//                        classe = FrancBord.class; break;
+//                    case 7:
+//                        classe = FrancBord.class; break;
+                case SYS_EVT_FONDATION:
+                    classe = Fondation.class; break;
+                case SYS_EVT_OUVRAGE_PARTICULIER:
+                    classe = OuvrageParticulier.class; break;
+//                    case 10:
+//                        classe = BriseLame.class; break;
+//                    case 11:
+//                        classe = Epi.class; break;
+//                    case 12:
+//                        classe = Vegetation.class; break;
+                case SYS_EVT_OUVRAGE_REVANCHE:
+                    classe = OuvrageRevanche.class; break;
+                default:
+                    classe = null;
+            }
+            typesElementStructure.put(row.getInt(String.valueOf(TypeElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
+            }catch (IllegalArgumentException e){
+                System.out.println(e.getMessage());
+            }
+        }
+    }
     
     private enum TypeElementStructureColumns {
         ID_TYPE_ELEMENT_STRUCTURE,
@@ -65,52 +112,7 @@ public class TypeElementStructureImporter extends GenericImporter {
      * @throws IOException 
      */
     public Map<Integer, Class> getTypeElementStructure() throws IOException {
-
-        if(typesElementStructure == null){
-            typesElementStructure = new HashMap<>();
-            final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-
-            while (it.hasNext()) {
-                final Row row = it.next();
-                try{
-                final Class classe;
-                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeElementStructureColumns.NOM_TABLE_EVT.toString()));
-                switch(table){
-                    case SYS_EVT_CRETE:
-                        classe = Crete.class; break;
-                    case SYS_EVT_TALUS_DIGUE:
-                        classe = TalusDigue.class; break;
-                    case SYS_EVT_SOMMET_RISBERME:
-                        classe = SommetRisberme.class; break;
-                    case SYS_EVT_TALUS_RISBERME:
-                        classe = TalusRisberme.class; break;
-                    case SYS_EVT_PIED_DE_DIGUE:
-                        classe = PiedDigue.class; break;
-//                    case 6:
-//                        classe = FrancBord.class; break;
-//                    case 7:
-//                        classe = FrancBord.class; break;
-                    case SYS_EVT_FONDATION:
-                        classe = Fondation.class; break;
-                    case SYS_EVT_OUVRAGE_PARTICULIER:
-                        classe = OuvrageParticulier.class; break;
-//                    case 10:
-//                        classe = BriseLame.class; break;
-//                    case 11:
-//                        classe = Epi.class; break;
-//                    case 12:
-//                        classe = Vegetation.class; break;
-                    case SYS_EVT_OUVRAGE_REVANCHE:
-                        classe = OuvrageRevanche.class; break;
-                    default:
-                        classe = null;
-                }
-                typesElementStructure.put(row.getInt(String.valueOf(TypeElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
-                }catch (IllegalArgumentException e){
-                    System.out.println(e.getMessage());
-                }
-            }
-        }
+        if(typesElementStructure == null) compute();
         return typesElementStructure;
     }
 }

@@ -11,6 +11,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
@@ -32,6 +33,7 @@ public class DbImporter {
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final OrganismeRepository organismeRepository;
+    private final SystemeReperageRepository systemeReperageRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -390,6 +392,7 @@ public class DbImporter {
         this.digueRepository = new DigueRepository(couchDbConnector);
         this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
+        this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -397,7 +400,7 @@ public class DbImporter {
         this.accessCartoDatabase=accessCartoDatabase;
         this.typeRiveImporter = new TypeRiveImporter(accessDatabase);
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase);
-        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase);
+        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, systemeReperageRepository);
         this.organismeImporter = new OrganismeImporter(accessDatabase, organismeRepository);
         this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, this.organismeImporter);
@@ -509,7 +512,7 @@ public class DbImporter {
             importer.cleanDb();
             
             importer.importation().stream().forEach((troncon) -> {
-                System.out.println(troncon);
+                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
 //                
 //                    if(structure instanceof Crete){
