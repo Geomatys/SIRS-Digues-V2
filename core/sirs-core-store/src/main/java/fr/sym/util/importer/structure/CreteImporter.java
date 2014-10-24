@@ -81,10 +81,10 @@ class CreteImporter extends GenericImporter {
 //        ID_SYSTEME_REP,
 //        ID_BORNEREF_DEBUT,
 //        AMONT_AVAL_DEBUT,
-//        DIST_BORNEREF_DEBUT,
+        DIST_BORNEREF_DEBUT,
 //        ID_BORNEREF_FIN,
 //        AMONT_AVAL_FIN,
-//        DIST_BORNEREF_FIN,
+        DIST_BORNEREF_FIN,
         COMMENTAIRE,
         N_COUCHE,
 //        ID_TYPE_MATERIAU,
@@ -168,11 +168,15 @@ class CreteImporter extends GenericImporter {
                 final Row row = it.next();
                 final Crete crete = new Crete();
 //            crete.setBorne_debut(borne_debut);
-//            crete.setBorne_debut_aval(true);
-//            crete.setBorne_debut_distance(borne_debut_distance);
+//            crete.setBorne_debut_aval(true); 
+                if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                    crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                }
 //            crete.setBorne_fin(borne_debut);
 //            crete.setBorne_fin_aval(true);
-//            crete.setBorne_fin_distance(borne_debut_distance);
+             if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                    crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                }
             crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
 //            crete.setContactStructure(null);
 //            crete.setConventionIds(null);

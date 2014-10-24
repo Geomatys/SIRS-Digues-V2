@@ -45,7 +45,7 @@ class DesordreImporter extends GenericImporter {
     
     
     private enum DesordreColumns {
-//            ID_DESORDRE,
+            ID_DESORDRE,
 //            id_nom_element,
 //            ID_SOUS_GROUPE_DONNEES,
 //            LIBELLE_SOUS_GROUPE_DONNEES,
@@ -63,7 +63,7 @@ class DesordreImporter extends GenericImporter {
 //            LIBELLE_TYPE_POSITION,
 //            ID_TYPE_COTE,
 //            ID_TYPE_POSITION,
-//            ID_TRONCON_GESTION,
+            ID_TRONCON_GESTION,
 //            ID_SOURCE,
 //            DATE_DEBUT_VAL,
 //            DATE_FIN_VAL,
@@ -72,10 +72,10 @@ class DesordreImporter extends GenericImporter {
 //            ID_SYSTEME_REP,
 //            ID_BORNEREF_DEBUT,
 //            AMONT_AVAL_DEBUT,
-//            DIST_BORNEREF_DEBUT,
+            DIST_BORNEREF_DEBUT,
 //            ID_BORNEREF_FIN,
 //            AMONT_AVAL_FIN,
-//            DIST_BORNEREF_FIN,
+            DIST_BORNEREF_FIN,
 //            LIEU_DIT_DESORDRE,
 //            DESCRIPTION_DESORDRE,
 //            ID_AUTO
@@ -107,42 +107,21 @@ class DesordreImporter extends GenericImporter {
             while (it.hasNext()) {
                 final Row row = it.next();
                 final Desordre desordre = new Desordre();
-//            crete.setBorne_debut(borne_debut);
-//            crete.setBorne_debut_aval(true);
-//            crete.setBorne_debut_distance(borne_debut_distance);
-//            crete.setBorne_fin(borne_debut);
-//            crete.setBorne_fin_aval(true);
-//            crete.setBorne_fin_distance(borne_debut_distance);
-//            crete.setCommentaire(null);
-//            crete.setContactStructure(null);
-//            crete.setConventionIds(null);
-//            crete.setCote(null);
-//            crete.setDateMaj(LocalDateTime.MIN);
-//            crete.setDate_debut(LocalDateTime.MIN);
-//            crete.setDate_fin(LocalDateTime.MIN);EPAISSEUR
-//            if(row.getDouble("EPAISSEUR")!=null) desordre.setEpaisseur(row.getDouble("EPAISSEUR").floatValue());
-//            crete.setFonction(null);
-//            crete.setGeometry(null);
-//            crete.setListeCote(null);
-//            crete.setListeFonction(null);
-//            crete.setListeMateriau(null);
-//            crete.setListeSource(null);
-//            crete.setMateriau(null);N_COUCHE
-//            desordre.setNum_couche(row.getInt("N_COUCHE"));
-//            crete.setOrganismeStructure(null);
-//            crete.setPR_debut(PR_debut);
-//            crete.setPR_fin(PR_fin);
-//            crete.setParent(crete);
-//            crete.setPosition(null);
-//            crete.setPosition_structure(null);
-//            crete.setSource(null);
-//            crete.setSysteme_rep_id(systeme_rep_id);
-                final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt("ID_TRONCON_GESTION"));
+                
+                
+                if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                    desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                }
+             if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                    desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                }
+                
+                final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
                 if (troncon.getId() != null) {
                     desordre.setTroncon(troncon.getId());
                 } else {
                     throw new AccessDbImporterException("Le tronçon "
-                            + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt("ID_TRONCON_GESTION")) + " n'a pas encore d'identifiant CouchDb !");
+                            + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
                 }
 
 //            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
@@ -159,16 +138,16 @@ class DesordreImporter extends GenericImporter {
 //
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-                desordres.put(row.getInt("ID_DESORDRE"), desordre);
+                desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
 
                 // Set the list ByTronconId
-                List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt("ID_TRONCON_GESTION"));
+                List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    desordresByTronconId.put(row.getInt("ID_TRONCON_GESTION"), listByTronconId);
+                    desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(desordre);
-                desordresByTronconId.put(row.getInt("ID_TRONCON_GESTION"), listByTronconId);
+                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
 //
 //            // Set the references.
 //            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());

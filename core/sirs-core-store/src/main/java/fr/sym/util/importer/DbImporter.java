@@ -495,11 +495,17 @@ public class DbImporter {
 //            for(Row row : importer.getDatabase().getTable("ELEMENT_STRUCTURE")){
 //                System.out.println(row);
 //            }
-//            System.out.println("=======================");
-//            importer.getDatabase().getTable("TYPE_ELEMENT_STRUCTURE").getColumns().stream().forEach((column) -> {
-//                System.out.println(column.getName());
-//            });
-//            System.out.println("++++++++++++++++++++");
+            System.out.println("=======================");
+            importer.getDatabase().getTable("SYS_EVT_DESORDRE").getColumns().stream().forEach((column) -> {
+                System.out.println(column.getName());
+            });
+            System.out.println("++++++++++++++++++++");
+            importer.cleanDb();
+            System.out.println("=======================");
+            importer.getDatabase().getTable("DESORDRE").getColumns().stream().forEach((column) -> {
+                System.out.println(column.getName());
+            });
+            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
             
             importer.importation().stream().forEach((troncon) -> {
