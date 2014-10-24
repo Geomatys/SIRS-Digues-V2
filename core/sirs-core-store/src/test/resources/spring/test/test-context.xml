@@ -9,5 +9,8 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd">
 
   <import resource="classpath:/symadrem/spring/couchdb-context.xml" />
+  
+  
+  <bean class="fr.symadrem.sirs.core.component.DigueRepository" />
 
 </beans>

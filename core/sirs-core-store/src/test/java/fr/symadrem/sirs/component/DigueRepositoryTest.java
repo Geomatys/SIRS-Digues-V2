@@ -35,15 +35,13 @@ import org.ektorp.CouchDbConnector;
  */
 public class DigueRepositoryTest extends CouchDBTestCase {
 
-    @Autowired
-    private CouchDbConnector couchDbConnector;
-
+    
     
     DigueRepository digueRepository;
     
     @Before
     public void setUp() {
-    	 digueRepository = new DigueRepository(couchDbConnector);
+    	 digueRepository = new DigueRepository(connector);
     }
     
     /**
@@ -53,7 +51,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     public void testStoreDigueAndTroncons() {
         System.out.println("DigueRepositoryTest.testStoreDigueAndTroncons()");
         
-        TronconDigueRepository tronconRepository = new TronconDigueRepository(couchDbConnector);
+        TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
       
         Digue digue = new Digue();
 
@@ -116,7 +114,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     @Test
     public void failDelete() {
 
-        DigueRepository digueRepository = new DigueRepository(couchDbConnector);
+        DigueRepository digueRepository = new DigueRepository(connector);
         Digue digue = new Digue();
         digue.setLibelle("toDelete");
         digueRepository.add(digue);

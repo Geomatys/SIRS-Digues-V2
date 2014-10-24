@@ -17,7 +17,7 @@ public abstract class CouchDBTestCase {
 
     @Autowired
     @Qualifier("symadremChouchDB")
-    private CouchDbConnector connector;
+    protected CouchDbConnector connector;
 
 
     public void test() {
