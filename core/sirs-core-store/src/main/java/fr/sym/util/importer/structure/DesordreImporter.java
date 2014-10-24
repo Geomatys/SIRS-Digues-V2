@@ -14,6 +14,7 @@ import fr.sym.util.importer.TronconGestionDigueImporter;
 import fr.symadrem.sirs.core.model.Desordre;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,7 +71,14 @@ class DesordreImporter extends GenericStructureImporter {
             if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
                 desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
+            desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
 
+            if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
+                desordre.setDate_debut(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
+                desordre.setDate_fin(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
@@ -108,11 +116,11 @@ class DesordreImporter extends GenericStructureImporter {
         //            ID_TYPE_POSITION,
         ID_TRONCON_GESTION,
         //            ID_SOURCE,
-        //            DATE_DEBUT_VAL,
-        //            DATE_FIN_VAL,
+                    DATE_DEBUT_VAL,
+                    DATE_FIN_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
-        //            ID_SYSTEME_REP,
+                    ID_SYSTEME_REP,
         //            ID_BORNEREF_DEBUT,
         //            AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,

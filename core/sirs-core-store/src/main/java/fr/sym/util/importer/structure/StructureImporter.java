@@ -76,7 +76,7 @@ public class StructureImporter extends GenericStructureImporter {
         PR_FIN_CALCULE,
 //        X_FIN,
 //        Y_FIN,
-//        ID_SYSTEME_REP,
+        ID_SYSTEME_REP,
 //        ID_BORNEREF_DEBUT,
 //        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
@@ -208,7 +208,6 @@ public class StructureImporter extends GenericStructureImporter {
                 
                 if(typeStructure==null){
                     System.out.println("Type de structure non pris en charge !");
-                    System.out.println(row);
                     structure = null;
                 }
                 else if(typeStructure == Crete.class){
@@ -247,12 +246,12 @@ public class StructureImporter extends GenericStructureImporter {
                     
                 } else {
                     System.out.println("Type de structure inconnu !");
-                    System.out.println(row);
                     structure = null;
                 }
                 
                 
                 if(structure!=null){
+//        structure.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
 //                    if ( row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
 //                        structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
 //                    }

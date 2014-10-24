@@ -14,6 +14,7 @@ import fr.sym.util.importer.TronconGestionDigueImporter;
 import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -82,19 +83,17 @@ class PiedDigueImporter extends GenericStructureImporter {
                 throw new AccessDbImporterException("Le tronçon "
                         + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
+        piedDigue.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
 
-//            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
-//            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
-//            if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {
-//                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
-//            }
-//            if (row.getDate(TronconGestionDigueColumns.DEBUT_VAL_TRONCON.toString()) != null) {
-//                tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
-//            }
-//            if (row.getDate(TronconGestionDigueColumns.FIN_VAL_TRONCON.toString()) != null) {
-//                tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
-//            }
-//
+        
+            if (row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
+                piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {
+                piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
+//            piedDigue.setNum_couche(row.getInt(PiedDigueColumns.N_COUCHE.toString()));
+
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             piedsDigue.put(row.getInt(PiedDigueColumns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);
@@ -144,10 +143,10 @@ class PiedDigueImporter extends GenericStructureImporter {
         //        ID_TYPE_COTE,
         //        ID_SOURCE,
         ID_TRONCON_GESTION,
-        //        DATE_DEBUT_VAL,
+                DATE_DEBUT_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
-        //        ID_SYSTEME_REP,
+                ID_SYSTEME_REP,
         //        ID_BORNEREF_DEBUT,
         //        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
@@ -174,7 +173,7 @@ class PiedDigueImporter extends GenericStructureImporter {
 //     INTERV_GARDIEN,
 //     LIBELLE_TYPE_COMPOSITION,
 //     LIBELLE_TYPE_VEGETATION,
-        //     DATE_FIN_VAL,
+             DATE_FIN_VAL,
         //     X_DEBUT,
         //     Y_DEBUT,
         //     X_FIN,

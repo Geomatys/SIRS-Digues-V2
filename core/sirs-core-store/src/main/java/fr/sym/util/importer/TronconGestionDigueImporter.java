@@ -153,7 +153,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
         // Set the references using the this very importer (Structures references TronconDigueId).
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
-            System.out.println("IMPORTATION des structures");
             List<Structure> structures = tronconDigue.getStuctures();
             if(structures==null){
                 structures = new ArrayList<>();

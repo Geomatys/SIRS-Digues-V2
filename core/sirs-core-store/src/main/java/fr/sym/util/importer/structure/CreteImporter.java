@@ -59,7 +59,7 @@ class CreteImporter extends GenericStructureImporter {
                 crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
         crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
-        //crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
+        crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
 //            crete.setContactStructure(null);
 //            crete.setConventionIds(null);
 //            crete.setCote(row.getString(CreteColumns.COTE_AXE.toString()));
@@ -80,11 +80,11 @@ class CreteImporter extends GenericStructureImporter {
 //            crete.setOrganismeStructure(null);
             
             if(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString())!=null)
-            crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
             
             
             if(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString())!=null)
-            crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
+                crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
 //            crete.setParent(crete);
 //            crete.setPosition(null);
 //            crete.setPosition_structure(null);

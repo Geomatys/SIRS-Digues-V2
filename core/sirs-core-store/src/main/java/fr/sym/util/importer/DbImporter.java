@@ -7,12 +7,14 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.Desordre;
+import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.io.IOException;
@@ -511,26 +513,26 @@ public class DbImporter {
             System.out.println("++++++++++++++++++++");
             importer.cleanDb();
             
-            importer.importation().stream().forEach((troncon) -> {
+            for(final TronconDigue troncon : importer.importation()){
                 System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
 //                
 //                    if(structure instanceof Crete){
-//                        System.out.println("======>CRETE<====== : "+(Crete) structure);
+//                        System.out.println("======>CRETE<====== : "+structure.getSysteme_rep_id());
 //                    }
 //                    if(structure instanceof Desordre){
-//                        System.out.println("======>DESORDRE<====== : "+(Desordre) structure);
+//                        System.out.println("======>DESORDRE<====== : "+ structure.getSysteme_rep_id());
 //                    }
 //                    if(structure instanceof PiedDigue){
-//                        System.out.println("======>PIEDDIGUE<====== : "+(PiedDigue) structure);
+//                        System.out.println("======>PIEDDIGUE<====== : "+structure.getSysteme_rep_id());
 //                    }
 //                    
 //                });
 //                troncon.getBorneIds().stream().forEach((borne) -> {
 //                    System.out.println(borne.getPositionBorne().toText());
 //                });
-            });
-            
+            }
+            System.out.println("fin de l'importation !");
 
         } catch (IOException ex) {
             Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
