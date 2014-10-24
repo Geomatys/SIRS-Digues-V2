@@ -31,6 +31,36 @@ public class SystemeReperageImporter extends GenericImporter {
         super(accessDatabase);
         this.systemeReperageRepository = systemeReperageRepository;
     }
+    
+    private enum SystemeRepLineaireColumns {
+        ID_SYSTEME_REP, 
+        ID_TRONCON_GESTION, 
+        LIBELLE_SYSTEME_REP,
+        COMMENTAIRE_SYSTEME_REP, 
+        DATE_DERNIERE_MAJ
+    };
+    
+    /**
+     * 
+     * @return A map containing the SystemeRepLineaire instances references by
+     * the tronconDigue internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
+        if(systemesReperageByTronconId==null) compute();
+        return systemesReperageByTronconId;
+    }
+
+    /**
+     * 
+     * @return A map containing the SystemeRepLineaire instances references by
+     * their internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, SystemeReperage> getSystemeRepLineaire() throws IOException {
+        if(systemesReperage==null) compute();
+        return systemesReperage;
+    }
 
     @Override
     public List<String> getUsedColumns() {
@@ -45,14 +75,6 @@ public class SystemeReperageImporter extends GenericImporter {
     public String getTableName() {
         return DbImporter.TableName.SYSTEME_REP_LINEAIRE.toString();
     }
-    
-    private enum SystemeRepLineaireColumns {
-        ID_SYSTEME_REP, 
-        ID_TRONCON_GESTION, 
-        LIBELLE_SYSTEME_REP,
-        COMMENTAIRE_SYSTEME_REP, 
-        DATE_DERNIERE_MAJ
-    };
     
     @Override
     protected void compute() throws IOException{
@@ -84,27 +106,5 @@ public class SystemeReperageImporter extends GenericImporter {
             // Register the systemeReperage to retrieve a CouchDb ID.
             systemeReperageRepository.add(systemeReperage);
         }
-    }
-    
-    /**
-     * 
-     * @return A map containing the SystemeRepLineaire instances references by
-     * the tronconDigue internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
-        if(systemesReperageByTronconId==null) compute();
-        return systemesReperageByTronconId;
-    }
-
-    /**
-     * 
-     * @return A map containing the SystemeRepLineaire instances references by
-     * their internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, SystemeReperage> getSystemeRepLineaire() throws IOException {
-        if(systemesReperage==null) compute();
-        return systemesReperage;
     }
 }

@@ -8,6 +8,7 @@ package fr.sym.util.importer.structure;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sym.util.importer.AccessDbImporterException;
+import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
@@ -30,68 +31,8 @@ class DesordreImporter extends GenericStructureImporter {
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
 
-    DesordreImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
-    }
-
-    @Override
-    public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_DESORDRE.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-        this.desordres = new HashMap<>();
-        this.desordresByTronconId = new HashMap<>();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Desordre desordre = new Desordre();
-
-            if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-
-            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                desordre.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
-
-            if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                desordre.setPR_debut(row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-
-            if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
-                desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
-
-            if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
-                desordre.setDate_debut(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
-                desordre.setDate_fin(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
-
-            // Set the list ByTronconId
-            List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(desordre);
-            desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
+    DesordreImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter, final SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     private enum DesordreColumns {
@@ -167,6 +108,66 @@ class DesordreImporter extends GenericStructureImporter {
             compute();
         }
         return this.desordresByTronconId;
+    }
+
+    @Override
+    public String getTableName() {
+        return DbImporter.TableName.SYS_EVT_DESORDRE.toString();
+    }
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        this.desordres = new HashMap<>();
+        this.desordresByTronconId = new HashMap<>();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final Desordre desordre = new Desordre();
+
+            if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+            if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            }
+
+            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                desordre.setTroncon(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            }
+
+            if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                desordre.setPR_debut(row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
+
+            if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
+                desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
+            }
+            desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
+
+            if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
+                desordre.setDate_debut(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
+                desordre.setDate_fin(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
+            desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
+
+            // Set the list ByTronconId
+            List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(desordre);
+            desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+        }
     }
 
     @Override

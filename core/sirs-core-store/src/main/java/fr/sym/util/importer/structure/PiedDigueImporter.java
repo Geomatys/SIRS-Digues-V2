@@ -8,6 +8,7 @@ package fr.sym.util.importer.structure;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sym.util.importer.AccessDbImporterException;
+import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
@@ -30,97 +31,11 @@ class PiedDigueImporter extends GenericStructureImporter {
     private Map<Integer, PiedDigue> piedsDigue = null;
     private Map<Integer, List<PiedDigue>> piedsDigueByTronconId = null;
 
-    PiedDigueImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
-    }
-
-    @Override
-    public List<String> getUsedColumns() {
-        final List<String> columns = new ArrayList<>();
-        for (PiedDigueColumns c : PiedDigueColumns.values()) {
-            columns.add(c.toString());
-        }
-        return columns;
-    }
-
-    @Override
-    public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PIED_DE_DIGUE.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-        this.piedsDigue = new HashMap<>();
-        this.piedsDigueByTronconId = new HashMap<>();
-
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final PiedDigue piedDigue = new PiedDigue();
-
-            if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                piedDigue.setBorne_debut_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                piedDigue.setBorne_fin_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            piedDigue.setCommentaire(PiedDigueColumns.COMMENTAIRE.toString());
-
-            if (row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                piedDigue.setPR_debut(row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-
-            if (row.getDouble(PiedDigueColumns.PR_FIN_CALCULE.toString()) != null) {
-                piedDigue.setPR_fin(row.getDouble(PiedDigueColumns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-
-            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                piedDigue.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
-        piedDigue.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
-
-        
-            if (row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
-                piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {
-                piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-//            piedDigue.setNum_couche(row.getInt(PiedDigueColumns.N_COUCHE.toString()));
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            piedsDigue.put(row.getInt(PiedDigueColumns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);
-
-            // Set the list ByTronconId
-            List<PiedDigue> listByTronconId = piedsDigueByTronconId.get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(piedDigue);
-            piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-//
-//            // Set the references.
-//            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
-//            
-//            final List<GestionTroncon> gestions = new ArrayList<>();
-//            this.getGestionnaires().stream().forEach((gestion) -> {gestions.add(gestion);});
-//            tronconDigue.setGestionnaires(gestions);
-//            
-//            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
-//
-//            // Set the geometry
-//            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
-//            
-//            tronconsDigues.add(tronconDigue);
-        }
+    PiedDigueImporter(final Database accessDatabase, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter, 
+            final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     private enum PiedDigueColumns {
@@ -243,5 +158,94 @@ class PiedDigueImporter extends GenericStructureImporter {
             compute();
         }
         return this.piedsDigueByTronconId;
+    }
+
+    @Override
+    public List<String> getUsedColumns() {
+        final List<String> columns = new ArrayList<>();
+        for (PiedDigueColumns c : PiedDigueColumns.values()) {
+            columns.add(c.toString());
+        }
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return DbImporter.TableName.SYS_EVT_PIED_DE_DIGUE.toString();
+    }
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
+
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        this.piedsDigue = new HashMap<>();
+        this.piedsDigueByTronconId = new HashMap<>();
+
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final PiedDigue piedDigue = new PiedDigue();
+
+            if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                piedDigue.setBorne_debut_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+            if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                piedDigue.setBorne_fin_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            }
+            piedDigue.setCommentaire(PiedDigueColumns.COMMENTAIRE.toString());
+
+            if (row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                piedDigue.setPR_debut(row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
+
+            if (row.getDouble(PiedDigueColumns.PR_FIN_CALCULE.toString()) != null) {
+                piedDigue.setPR_fin(row.getDouble(PiedDigueColumns.PR_FIN_CALCULE.toString()).floatValue());
+            }
+
+            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                piedDigue.setTroncon(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            }
+        piedDigue.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
+
+        
+            if (row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
+                piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {
+                piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
+//            piedDigue.setNum_couche(row.getInt(PiedDigueColumns.N_COUCHE.toString()));
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
+            piedsDigue.put(row.getInt(PiedDigueColumns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);
+
+            // Set the list ByTronconId
+            List<PiedDigue> listByTronconId = piedsDigueByTronconId.get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(piedDigue);
+            piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+//
+//            // Set the references.
+//            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
+//            
+//            final List<GestionTroncon> gestions = new ArrayList<>();
+//            this.getGestionnaires().stream().forEach((gestion) -> {gestions.add(gestion);});
+//            tronconDigue.setGestionnaires(gestions);
+//            
+//            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
+//
+//            // Set the geometry
+//            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
+//            
+//            tronconsDigues.add(tronconDigue);
+        }
     }
 }

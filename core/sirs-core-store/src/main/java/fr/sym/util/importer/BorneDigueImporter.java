@@ -10,6 +10,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -35,22 +36,15 @@ public class BorneDigueImporter extends GenericImporter {
 
     private Map<Integer, BorneDigue> bornesDigue = null;
     private Map<Integer, List<BorneDigue>> bornesDigueByTronconId = null;
+    private BorneDigueRepository borneDigueRepository;
 
-    BorneDigueImporter(Database accessDatabase) {
+    private BorneDigueImporter(Database accessDatabase) {
         super(accessDatabase);
     }
-
-    @Override
-    public List<String> getUsedColumns() {
-        final List<String> columns = new ArrayList<>();
-        for(BorneDigueColumns c : BorneDigueColumns.values())
-            columns.add(c.toString());
-        return columns;
-    }
-
-    @Override
-    public String getTableName() {
-        return "BORNE_DIGUE";
+    
+    BorneDigueImporter(final Database accessDatabase, final BorneDigueRepository borneDigueRepository) {
+        super(accessDatabase);
+        this.borneDigueRepository = borneDigueRepository;
     }
     
     private enum BorneDigueColumns {
@@ -68,6 +62,41 @@ public class BorneDigueImporter extends GenericImporter {
         COMMENTAIRE_BORNE, 
         DATE_DERNIERE_MAJ
     };
+
+    /**
+     * 
+     * @return A map containing all the BorneDigue instances referenced by their
+     * internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, BorneDigue> getBorneDigue() throws IOException {
+        if (bornesDigue == null) compute();
+        return bornesDigue;
+    }
+    
+    /**
+     * 
+     * @return A map containing the BorneDigue lists referenced by the internal 
+     * database TronconDigue idenfifier.
+     * @throws IOException 
+     */
+    public Map<Integer, List<BorneDigue>> getBorneDigueByTronconId() throws IOException{
+        if(bornesDigueByTronconId==null) compute();
+        return bornesDigueByTronconId;
+    }
+
+    @Override
+    public List<String> getUsedColumns() {
+        final List<String> columns = new ArrayList<>();
+        for(BorneDigueColumns c : BorneDigueColumns.values())
+            columns.add(c.toString());
+        return columns;
+    }
+
+    @Override
+    public String getTableName() {
+        return DbImporter.TableName.BORNE_DIGUE.toString();
+    }
     
     @Override
     protected void compute() throws IOException{
@@ -114,6 +143,7 @@ public class BorneDigueImporter extends GenericImporter {
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(BorneDigueColumns.ID_BORNE.toString()), borne);
+            borneDigueRepository.add(borne);
 
             // Set the list ByTronconId
             List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()));
@@ -124,28 +154,5 @@ public class BorneDigueImporter extends GenericImporter {
             listByTronconId.add(borne);
             bornesDigueByTronconId.put(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
-    }
-
-    /**
-     * 
-     * @return A map containing all the BorneDigue instances referenced by their
-     * internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, BorneDigue> getBorneDigue() throws IOException {
-
-        if (bornesDigue == null) compute();
-        return bornesDigue;
-    }
-    
-    /**
-     * 
-     * @return A map containing the BorneDigue lists referenced by the internal 
-     * database TronconDigue idenfifier.
-     * @throws IOException 
-     */
-    public Map<Integer, List<BorneDigue>> getBorneDigueByTronconId() throws IOException{
-        if(bornesDigueByTronconId==null) compute();
-        return bornesDigueByTronconId;
     }
 }

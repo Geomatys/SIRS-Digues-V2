@@ -40,7 +40,6 @@ public abstract class GenericImporter {
         // Set the data flags to false for all the columns used by the importer. 
         this.getUsedColumns().stream().forEach((column) -> {this.columnDataFlags.put(column, Boolean.FALSE);});
         
-        
         System.out.println("=================================================");
         System.out.println("======== IMPORTER CHECK for table : "+tableName+"====");
         try {

@@ -35,6 +35,25 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         this.organismeImporter = organismeImporter;
     }
 
+    private enum TronconGestionDigueGestionnaireColumns {
+        ID_TRONCON_GESTION,
+        ID_ORG_GESTION,
+        DATE_DEBUT_GESTION, 
+        DATE_FIN_GESTION,
+        DATE_DERNIERE_MAJ
+    };
+
+    /**
+     *
+     * @return A map containing all GestionTroncon instances accessibles from
+     * the internal database <em>TronconGestion</em> identifier.
+     * @throws IOException
+     * @throws fr.sym.util.importer.AccessDbImporterException
+     */
+    public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
+        if (gestionsByTronconId == null) compute();
+        return gestionsByTronconId;
+    }
 
     @Override
     public List<String> getUsedColumns() {
@@ -47,7 +66,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "TRONCON_GESTION_DIGUE_GESTIONNAIRE";
+        return DbImporter.TableName.TRONCON_GESTION_DIGUE_GESTIONNAIRE.toString();
     }
 
     @Override
@@ -86,25 +105,5 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
                 throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
             }
         }
-    }
-
-    private enum TronconGestionDigueGestionnaireColumns {
-        ID_TRONCON_GESTION,
-        ID_ORG_GESTION,
-        DATE_DEBUT_GESTION, 
-        DATE_FIN_GESTION,
-        DATE_DERNIERE_MAJ
-    };
-
-    /**
-     *
-     * @return A map containing all GestionTroncon instances accessibles from
-     * the internal database <em>TronconGestion</em> identifier.
-     * @throws IOException
-     * @throws fr.sym.util.importer.AccessDbImporterException
-     */
-    public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
-        if (gestionsByTronconId == null) compute();
-        return gestionsByTronconId;
     }
 }

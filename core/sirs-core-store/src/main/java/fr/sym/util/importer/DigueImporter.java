@@ -35,6 +35,24 @@ public class DigueImporter extends GenericImporter {
         this.digueRepository = digueRepository;
     }
     
+    private enum DigueColumns {
+        ID_DIGUE, 
+        LIBELLE_DIGUE, 
+        COMMENTAIRE_DIGUE, 
+        DATE_DERNIERE_MAJ
+    };
+    
+    /**
+     * 
+     * @return A map containing all Digue instances accessibles from 
+     * the internal database identifier.
+     * @throws IOException 
+     */
+    public Map<Integer, Digue> getDigues() throws IOException {
+        if(digues==null) compute();
+        return digues;
+    }
+    
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -70,24 +88,5 @@ public class DigueImporter extends GenericImporter {
             // Register the digue to retrieve a CouchDb ID.
             digueRepository.add(digue);
         }
-    }
-    
-    private enum DigueColumns {
-        ID_DIGUE, 
-        LIBELLE_DIGUE, 
-        COMMENTAIRE_DIGUE, 
-        DATE_DERNIERE_MAJ
-    };
-    
-    /**
-     * 
-     * @return A map containing all Digue instances accessibles from 
-     * the internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, Digue> getDigues() throws IOException {
-
-        if(digues==null) compute();
-        return digues;
     }
 }

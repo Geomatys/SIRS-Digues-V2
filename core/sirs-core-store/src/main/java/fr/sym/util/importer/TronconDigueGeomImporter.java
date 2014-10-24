@@ -49,10 +49,29 @@ public class TronconDigueGeomImporter extends GenericImporter {
         }
         return columns;
     }
+    
+    private enum CartoTronconGestionDigueColumns {
+        ID_TRONCON_GESTION, 
+        SHAPE,
+//        OBJECTID,
+//        SHAPE_Length,
+//        LONGUEUR
+    };
+
+    /**
+     * 
+     * @return A map containing all the geometries referenced by their internal 
+     * troncon ID.
+     * @throws IOException 
+     */
+    public Map<Integer, Geometry> getTronconDigueGeoms() throws IOException {
+        if(tronconDigueGeom==null) compute();
+        return tronconDigueGeom;
+    }
 
     @Override
     public String getTableName() {
-        return "CARTO_TRONCON_GESTION_DIGUE";
+        return DbImporter.TableName.CARTO_TRONCON_GESTION_DIGUE.toString();
     }
 
     @Override
@@ -82,24 +101,5 @@ public class TronconDigueGeomImporter extends GenericImporter {
                 Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-    
-    private enum CartoTronconGestionDigueColumns {
-        ID_TRONCON_GESTION, 
-        SHAPE,
-//        OBJECTID,
-//        SHAPE_Length,
-//        LONGUEUR
-    };
-
-    /**
-     * 
-     * @return A map containing all the geometries referenced by their internal 
-     * troncon ID.
-     * @throws IOException 
-     */
-    public Map<Integer, Geometry> getTronconDigueGeoms() throws IOException {
-        if(tronconDigueGeom==null) compute();
-        return tronconDigueGeom;
     }
 }

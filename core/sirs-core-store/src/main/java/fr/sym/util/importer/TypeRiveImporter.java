@@ -25,6 +25,23 @@ public class TypeRiveImporter extends GenericImporter {
     TypeRiveImporter(Database accessDatabase) {
         super(accessDatabase);
     }
+    
+    private enum TypeRiveColumns {
+        ID_TYPE_RIVE, 
+        LIBELLE_TYPE_RIVE, 
+        //DATE_DERNIERE_MAJ
+    };
+
+    /**
+     * 
+     * @return A map containing all the database TypeRive referenced by their
+     * internal ID.
+     * @throws IOException 
+     */
+    public Map<Integer, String> getTypeRive() throws IOException {
+        if(typesRive == null) compute();
+        return typesRive;
+    }
 
     @Override
     public List<String> getUsedColumns() {
@@ -50,22 +67,5 @@ public class TypeRiveImporter extends GenericImporter {
             typesRive.put(row.getInt(String.valueOf(TypeRiveColumns.ID_TYPE_RIVE.toString())),
                     row.getString(TypeRiveColumns.LIBELLE_TYPE_RIVE.toString()));
         }
-    }
-    
-    private enum TypeRiveColumns {
-        ID_TYPE_RIVE, 
-        LIBELLE_TYPE_RIVE, 
-        //DATE_DERNIERE_MAJ
-    };
-
-    /**
-     * 
-     * @return A map containing all the database TypeRive referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, String> getTypeRive() throws IOException {
-        if(typesRive == null) compute();
-        return typesRive;
     }
 }

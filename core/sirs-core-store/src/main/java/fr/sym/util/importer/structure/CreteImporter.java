@@ -8,6 +8,7 @@ package fr.sym.util.importer.structure;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sym.util.importer.AccessDbImporterException;
+import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
@@ -30,120 +31,9 @@ class CreteImporter extends GenericStructureImporter {
     private Map<Integer, Crete> cretes = null;
     private Map<Integer, List<Crete>> cretesByTronconId = null;
 
-    CreteImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter);
+    CreteImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
-
-    @Override
-    public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_CRETE.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
-        this.cretes = new HashMap<>();
-        this.cretesByTronconId = new HashMap<>();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Crete crete = new Crete();
-//            crete.setBorne_debut(borne_debut);
-//            crete.setBorne_debut_aval(true); 
-            if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-//            crete.setBorne_fin(borne_debut);
-//            crete.setBorne_fin_aval(true);
-         if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-        crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
-        crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
-//            crete.setContactStructure(null);
-//            crete.setConventionIds(null);
-//            crete.setCote(row.getString(CreteColumns.COTE_AXE.toString()));
-//            crete.setDateMaj(LocalDateTime.MIN);
-//            crete.setDate_debut(LocalDateTime.MIN);
-//            crete.setDate_fin(LocalDateTime.MIN);EPAISSEUR
-            if (row.getDouble(CreteColumns.EPAISSEUR.toString()) != null) {
-                crete.setEpaisseur(row.getDouble(CreteColumns.EPAISSEUR.toString()).floatValue());
-            }
-//            crete.setFonction(null);
-//            crete.setGeometry(null);
-//            crete.setListeCote(null);
-//            crete.setListeFonction(null);
-//            crete.setListeMateriau(null);
-//            crete.setListeSource(null);
-//            crete.setMateriau(null);
-            crete.setNum_couche(row.getInt(CreteColumns.N_COUCHE.toString()));
-//            crete.setOrganismeStructure(null);
-            
-            if(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString())!=null)
-                crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-            
-            
-            if(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString())!=null)
-                crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
-//            crete.setParent(crete);
-//            crete.setPosition(null);
-//            crete.setPosition_structure(null);
-//            crete.setSource(null);
-            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                crete.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
-
-//            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
-//            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
-//            if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {
-//                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
-//            }
-        if (row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()) != null) {
-            crete.setDate_debut(LocalDateTime.parse(row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-        }
-        if (row.getDate(CreteColumns.DATE_FIN_VAL.toString()) != null) {
-            crete.setDate_fin(LocalDateTime.parse(row.getDate(CreteColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-        }
-
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            cretes.put(row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString()), crete);
-
-            // Set the list ByTronconId
-            List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(crete);
-            cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-
-
-
-
-//              crete.setSysteme_rep_id(systeme_rep_id);
-//
-//            // Set the references.
-//            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
-//            
-//            final List<GestionTroncon> gestions = new ArrayList<>();
-//            this.getGestionnaires().stream().forEach((gestion) -> {gestions.add(gestion);});
-//            tronconDigue.setGestionnaires(gestions);
-//            
-//            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
-//
-//            // Set the geometry
-//            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
-//            
-//            tronconsDigues.add(tronconDigue);
-        }
-    }
-    
     
     /*
      ----------------------------------------------------------------------------
@@ -256,7 +146,6 @@ class CreteImporter extends GenericStructureImporter {
      * @throws AccessDbImporterException
      */
     public Map<Integer, Crete> getCretes() throws IOException, AccessDbImporterException {
-
         if (this.cretes == null)  compute();
         return cretes;
     }
@@ -271,6 +160,116 @@ class CreteImporter extends GenericStructureImporter {
     public Map<Integer, List<Crete>> getCretesByTronconId() throws IOException, AccessDbImporterException {
         if (this.cretesByTronconId == null)  compute();
         return this.cretesByTronconId;
+    }
+
+    @Override
+    public String getTableName() {
+        return DbImporter.TableName.SYS_EVT_CRETE.toString();
+    }
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        this.cretes = new HashMap<>();
+        this.cretesByTronconId = new HashMap<>();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final Crete crete = new Crete();
+//            crete.setBorne_debut(borne_debut);
+//            crete.setBorne_debut_aval(true); 
+            if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+//            crete.setBorne_fin(borne_debut);
+//            crete.setBorne_fin_aval(true);
+         if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            }
+        crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
+        crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
+//            crete.setContactStructure(null);
+//            crete.setConventionIds(null);
+//            crete.setCote(row.getString(CreteColumns.COTE_AXE.toString()));
+//            crete.setDateMaj(LocalDateTime.MIN);
+//            crete.setDate_debut(LocalDateTime.MIN);
+//            crete.setDate_fin(LocalDateTime.MIN);EPAISSEUR
+            if (row.getDouble(CreteColumns.EPAISSEUR.toString()) != null) {
+                crete.setEpaisseur(row.getDouble(CreteColumns.EPAISSEUR.toString()).floatValue());
+            }
+//            crete.setFonction(null);
+//            crete.setGeometry(null);
+//            crete.setListeCote(null);
+//            crete.setListeFonction(null);
+//            crete.setListeMateriau(null);
+//            crete.setListeSource(null);
+//            crete.setMateriau(null);
+            crete.setNum_couche(row.getInt(CreteColumns.N_COUCHE.toString()));
+//            crete.setOrganismeStructure(null);
+            
+            if(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString())!=null)
+                crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            
+            
+            if(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString())!=null)
+                crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
+//            crete.setParent(crete);
+//            crete.setPosition(null);
+//            crete.setPosition_structure(null);
+//            crete.setSource(null);
+            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                crete.setTroncon(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            }
+
+//            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
+//            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
+//            if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {
+//                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
+//            }
+        if (row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()) != null) {
+            crete.setDate_debut(LocalDateTime.parse(row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+        if (row.getDate(CreteColumns.DATE_FIN_VAL.toString()) != null) {
+            crete.setDate_fin(LocalDateTime.parse(row.getDate(CreteColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
+            cretes.put(row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString()), crete);
+
+            // Set the list ByTronconId
+            List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(crete);
+            cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+
+
+
+
+//              crete.setSysteme_rep_id(systeme_rep_id);
+//
+//            // Set the references.
+//            tronconDigue.setDigueId(digueIds.get(row.getInt(TronconGestionDigueColumns.DIGUE.toString())).getId());
+//            
+//            final List<GestionTroncon> gestions = new ArrayList<>();
+//            this.getGestionnaires().stream().forEach((gestion) -> {gestions.add(gestion);});
+//            tronconDigue.setGestionnaires(gestions);
+//            
+//            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.TYPE_RIVE.toString())).toString());
+//
+//            // Set the geometry
+//            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID.toString())));
+//            
+//            tronconsDigues.add(tronconDigue);
+        }
     }
 
     @Override

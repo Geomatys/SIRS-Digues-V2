@@ -35,6 +35,28 @@ public class OrganismeImporter extends GenericImporter {
         this.organismeRepository = organismeRepository;
     }
 
+    private enum OrganismeColumns {
+        ID_ORGANISME, 
+        RAISON_SOCIALE, 
+        STATUT_JURIDIQUE,
+        ADRESSE_L1_ORG, 
+        ADRESSE_L2_ORG, 
+        ADRESSE_L3_ORG,
+        ADRESSE_CODE_POSTAL_ORG, 
+        ADRESSE_NOM_COMMUNE_ORG,
+        TEL_ORG, 
+        MAIL_ORG, 
+        FAX_ORG,
+        DATE_DEBUT, 
+        DATE_FIN, 
+        DATE_DERNIERE_MAJ
+    };
+
+    public Map<Integer, Organisme> getOrganismes() throws IOException {
+        if (organismes == null) compute();
+        return organismes;
+    }
+
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -81,29 +103,5 @@ public class OrganismeImporter extends GenericImporter {
             // Register the organism to retrieve a CouchDb ID.
             organismeRepository.add(organisme);
         }
-    }
-
-
-    private enum OrganismeColumns {
-        ID_ORGANISME, 
-        RAISON_SOCIALE, 
-        STATUT_JURIDIQUE,
-        ADRESSE_L1_ORG, 
-        ADRESSE_L2_ORG, 
-        ADRESSE_L3_ORG,
-        ADRESSE_CODE_POSTAL_ORG, 
-        ADRESSE_NOM_COMMUNE_ORG,
-        TEL_ORG, 
-        MAIL_ORG, 
-        FAX_ORG,
-        DATE_DEBUT, 
-        DATE_FIN, 
-        DATE_DERNIERE_MAJ
-    };
-
-    public Map<Integer, Organisme> getOrganismes() throws IOException {
-
-        if (organismes == null) compute();
-        return organismes;
     }
 }

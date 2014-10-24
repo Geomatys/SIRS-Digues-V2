@@ -63,7 +63,41 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
         this.borneDigueImporter = borneDigueImporter;
         
-        this.structureImporter = new StructureImporter(accessDatabase, this, systemeReperageImporter);
+        this.structureImporter = new StructureImporter(accessDatabase, this, systemeReperageImporter, borneDigueImporter);
+    }
+
+    /* TODO : s'occuper du lien avec les gestionnaires.
+     * TODO : s'occuper du lien avec les rives.
+     = TODO : s'occuper du lien avec les systèmes de repérage.
+     = TODO : faire les structures.
+     = TODO : s'occuper des bornes.
+     */
+    private enum TronconGestionDigueColumns {
+
+        ID_TRONCON_GESTION, 
+//        ID_ORG_GESTIONNAIRE, //Dans les gestions ?
+        ID_DIGUE, 
+        ID_TYPE_RIVE,
+        DATE_DEBUT_VAL_TRONCON, 
+        DATE_FIN_VAL_TRONCON,
+        NOM_TRONCON_GESTION, 
+        COMMENTAIRE_TRONCON,
+//        DATE_DEBUT_VAL_GESTIONNAIRE_D, //Dans les gestions ? 
+//        DATE_FIN_VAL_GESTIONNAIRE_D, //Dans les gestions ?
+        ID_SYSTEME_REP_DEFAUT, 
+        DATE_DERNIERE_MAJ
+    };
+
+    /**
+     * 
+     * @return A map containing all TronconDigue instances accessibles from 
+     * the internal database identifier.
+     * @throws IOException 
+     * @throws fr.sym.util.importer.AccessDbImporterException 
+     */
+    public Map<Integer, TronconDigue> getTronconsDigues() throws IOException, AccessDbImporterException {
+        if(tronconsDigue == null) compute();
+        return tronconsDigue;
     }
 
     @Override
@@ -123,7 +157,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
 
             final List<BorneDigue> bornes = borneDigueImporter.getBorneDigueByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
-            if(bornes != null) tronconDigue.setBorneIds(bornes);
+            if(bornes != null){
+                tronconDigue.setBorneIds(bornes);
+            }
 
             final List<SystemeReperage> systemesRep = systemeReperageImporter.getSystemeRepLineaireByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
             if(systemesRep!=null){
@@ -165,39 +201,5 @@ public class TronconGestionDigueImporter extends GenericImporter {
             //Update the repository
             tronconDigueRepository.update(tronconDigue);
         }
-    }
-
-    /* TODO : s'occuper du lien avec les gestionnaires.
-     * TODO : s'occuper du lien avec les rives.
-     = TODO : s'occuper du lien avec les systèmes de repérage.
-     = TODO : faire les structures.
-     = TODO : s'occuper des bornes.
-     */
-    private enum TronconGestionDigueColumns {
-
-        ID_TRONCON_GESTION, 
-//        ID_ORG_GESTIONNAIRE, //Dans les gestions ?
-        ID_DIGUE, 
-        ID_TYPE_RIVE,
-        DATE_DEBUT_VAL_TRONCON, 
-        DATE_FIN_VAL_TRONCON,
-        NOM_TRONCON_GESTION, 
-        COMMENTAIRE_TRONCON,
-//        DATE_DEBUT_VAL_GESTIONNAIRE_D, //Dans les gestions ? 
-//        DATE_FIN_VAL_GESTIONNAIRE_D, //Dans les gestions ?
-        ID_SYSTEME_REP_DEFAUT, 
-        DATE_DERNIERE_MAJ
-    };
-
-    /**
-     * 
-     * @return A map containing all TronconDigue instances accessibles from 
-     * the internal database identifier.
-     * @throws IOException 
-     * @throws fr.sym.util.importer.AccessDbImporterException 
-     */
-    public Map<Integer, TronconDigue> getTronconsDigues() throws IOException, AccessDbImporterException {
-        if(tronconsDigue == null) compute();
-        return tronconsDigue;
     }
 }

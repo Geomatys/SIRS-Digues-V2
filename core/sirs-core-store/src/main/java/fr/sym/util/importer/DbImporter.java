@@ -8,13 +8,11 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.symadrem.sirs.core.CouchDBInit;
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
-import fr.symadrem.sirs.core.model.Crete;
-import fr.symadrem.sirs.core.model.Desordre;
-import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +34,7 @@ public class DbImporter {
     private final TronconDigueRepository tronconDigueRepository;
     private final OrganismeRepository organismeRepository;
     private final SystemeReperageRepository systemeReperageRepository;
+    private final BorneDigueRepository borneDigueRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -395,6 +394,7 @@ public class DbImporter {
         this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
         this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
+        this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -407,7 +407,7 @@ public class DbImporter {
         this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, this.organismeImporter);
         this.digueImporter = new DigueImporter(accessDatabase, digueRepository);
-        this.borneDigueImporter = new BorneDigueImporter(accessDatabase);
+        this.borneDigueImporter = new BorneDigueImporter(accessDatabase, borneDigueRepository);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
                 tronconDigueRepository, digueImporter, tronconDigueGeomImporter, 
                 typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter,
@@ -440,10 +440,24 @@ public class DbImporter {
         });
     }
     
+    public void removeSystemesReperage() {
+        systemeReperageRepository.getAll().stream().forEach((tronconDigue) -> {
+            systemeReperageRepository.remove(tronconDigue);
+        });
+    }
+    
+    public void removeBornes() {
+        borneDigueRepository.getAll().stream().forEach((tronconDigue) -> {
+            borneDigueRepository.remove(tronconDigue);
+        });
+    }
+    
     public void cleanDb(){
         this.removeTronconsDigues();
         this.removeDigues();
         this.removeOrganismes();
+        this.removeSystemesReperage();
+        this.removeBornes();
     }
     
     public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{

@@ -35,6 +35,25 @@ public class TypeElementStructureImporter extends GenericImporter {
     TypeElementStructureImporter(Database accessDatabase) {
         super(accessDatabase);
     }
+    
+    private enum TypeElementStructureColumns {
+        ID_TYPE_ELEMENT_STRUCTURE,
+        LIBELLE_TYPE_ELEMENT_STRUCTURE,
+        NOM_TABLE_EVT,
+        ID_TYPE_OBJET_CARTO,
+        DATE_DERNIERE_MAJ
+    };
+
+    /**
+     * 
+     * @return A map containing all the database types of Structure elements (classes) referenced by their
+     * internal ID.
+     * @throws IOException 
+     */
+    public Map<Integer, Class> getTypeElementStructure() throws IOException {
+        if(typesElementStructure == null) compute();
+        return typesElementStructure;
+    }
 
     @Override
     public List<String> getUsedColumns() {
@@ -47,7 +66,7 @@ public class TypeElementStructureImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return "TYPE_ELEMENT_STRUCTURE";
+        return DbImporter.TableName.TYPE_ELEMENT_STRUCTURE.toString();
     }
 
     @Override
@@ -95,24 +114,5 @@ public class TypeElementStructureImporter extends GenericImporter {
                 System.out.println(e.getMessage());
             }
         }
-    }
-    
-    private enum TypeElementStructureColumns {
-        ID_TYPE_ELEMENT_STRUCTURE,
-        LIBELLE_TYPE_ELEMENT_STRUCTURE,
-        NOM_TABLE_EVT,
-        ID_TYPE_OBJET_CARTO,
-        DATE_DERNIERE_MAJ
-    };
-
-    /**
-     * 
-     * @return A map containing all the database types of Structure elements (classes) referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, Class> getTypeElementStructure() throws IOException {
-        if(typesElementStructure == null) compute();
-        return typesElementStructure;
     }
 }

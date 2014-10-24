@@ -6,6 +6,7 @@
 package fr.sym.util.importer.structure;
 
 import com.healthmarketscience.jackcess.Database;
+import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.GenericImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
@@ -18,14 +19,16 @@ abstract class GenericStructureImporter extends GenericImporter {
 
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
+    protected BorneDigueImporter borneDigueImporter;
     
     private GenericStructureImporter(Database accessDatabase) {
         super(accessDatabase);
     }
     
-    public GenericStructureImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter, final SystemeReperageImporter systemeReperageImporter) {
+    public GenericStructureImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter, final SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
         this(accessDatabase);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
+        this.borneDigueImporter = borneDigueImporter;
     }
 }
