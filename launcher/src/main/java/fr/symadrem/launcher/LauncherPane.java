@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -157,15 +158,29 @@ public class LauncherPane extends BorderPane {
     @FXML
     void chooseMainDb(ActionEvent event) {
         final FileChooser fileChooser = new FileChooser();
+        final File prevPath = getPreviousPath();
+        if (prevPath != null) {
+            fileChooser.setInitialDirectory(prevPath);
+        }
         final File file = fileChooser.showOpenDialog(getScene().getWindow());
-        uiImportDBData.setText(file.getAbsolutePath());
+        if(file!=null){
+            setPreviousPath(file.getParentFile());
+            uiImportDBData.setText(file.getAbsolutePath());
+        }
     }
 
     @FXML
     void chooseCartoDb(ActionEvent event) {
         final FileChooser fileChooser = new FileChooser();
+        final File prevPath = getPreviousPath();
+        if (prevPath != null) {
+            fileChooser.setInitialDirectory(prevPath);
+        }
         final File file = fileChooser.showOpenDialog(getScene().getWindow());
-        uiImportDBCarto.setText(file.getAbsolutePath());
+        if(file!=null){
+            setPreviousPath(file.getParentFile());
+            uiImportDBCarto.setText(file.getAbsolutePath());
+        }
     }
 
     @FXML
@@ -173,4 +188,22 @@ public class LauncherPane extends BorderPane {
 
     }
         
+    
+    public static File getPreviousPath() {
+        final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
+        final String str = prefs.get("path", null);
+        if(str!=null){
+            final File file = new File(str);
+            if(file.isDirectory()){
+                return file;
+            }
+        }
+        return null;
+    }
+
+    public static void setPreviousPath(final File path) {
+        final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
+        prefs.put("path", path.getAbsolutePath());
+    }
+    
 }

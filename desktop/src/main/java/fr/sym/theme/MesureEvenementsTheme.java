@@ -15,9 +15,15 @@ import fr.symadrem.sirs.core.model.LaisseCrue;
  */
 public class MesureEvenementsTheme extends AbstractTronconTheme {
 
-    private static final ThemeGroup GROUP1 = new ThemeGroup("Laisse de crue",               LaisseCrue.class,(TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof LaisseCrue));
-    private static final ThemeGroup GROUP2 = new ThemeGroup("Montée des eaux(hydrogramme)", MonteeEaux.class,(TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof MonteeEaux));
-    private static final ThemeGroup GROUP3 = new ThemeGroup("Ligne d'eau",                  LigneEau.class,  (TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof LigneEau));
+    private static final ThemeGroup GROUP1 = new ThemeGroup("Laisse de crue",               LaisseCrue.class,
+            (TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof LaisseCrue), 
+            (TronconDigue t, Object c) -> t.stuctures.remove(c));
+    private static final ThemeGroup GROUP2 = new ThemeGroup("Montée des eaux(hydrogramme)", MonteeEaux.class,
+            (TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof MonteeEaux),
+            (TronconDigue t, Object c) -> t.stuctures.remove(c));
+    private static final ThemeGroup GROUP3 = new ThemeGroup("Ligne d'eau",                  LigneEau.class,  
+            (TronconDigue t) -> t.stuctures.filtered((Structure t1) -> t1 instanceof LigneEau),
+            (TronconDigue t, Object c) -> t.stuctures.remove(c));
     
     public MesureEvenementsTheme() {
         super("Mesures d'événements", GROUP1,GROUP2,GROUP3);

@@ -18,6 +18,7 @@ import fr.sym.theme.PrestationsTheme;
 import fr.sym.theme.ProfilsEnTraversTheme;
 import fr.sym.theme.ReseauxDeVoirieTheme;
 import fr.sym.theme.ReseauxEtOuvragesTheme;
+import fr.sym.theme.StructuresTheme;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Fondation;
@@ -114,6 +115,7 @@ public class CorePlugin extends Plugin{
     
     @Override
     public void load() throws SQLException, IOException {
+        themes.add(new StructuresTheme());
         themes.add(new FrancBordTheme());
         themes.add(new ReseauxDeVoirieTheme());
         themes.add(new ReseauxEtOuvragesTheme());

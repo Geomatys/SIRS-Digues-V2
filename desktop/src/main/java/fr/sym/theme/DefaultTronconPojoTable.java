@@ -1,11 +1,13 @@
 
 package fr.sym.theme;
 
+import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 
 /**
  *
@@ -34,10 +36,20 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     private void updateTable(){
         final TronconDigue trc = troncon.get();
         if(trc==null || group==null){
-            //empty table todo
+            uiTable.setItems(FXCollections.emptyObservableList());
         }else{
             uiTable.setItems(group.getExtractor().apply(trc));
         }
+    }
+
+    @Override
+    protected void deletePojo(Element pojo) {
+        group.getDeletor().delete(troncon.get(), pojo);
+    }
+
+    @Override
+    protected void editPojo(Element pojo) {
+        
     }
     
 }

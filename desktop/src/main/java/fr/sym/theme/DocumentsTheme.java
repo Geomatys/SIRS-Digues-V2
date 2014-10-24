@@ -5,6 +5,7 @@ package fr.sym.theme;
 import fr.symadrem.sirs.core.model.ArticleJournal;
 import fr.symadrem.sirs.core.model.Convention;
 import fr.symadrem.sirs.core.model.DocumentGrandeEchelle;
+import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.Marche;
 import fr.symadrem.sirs.core.model.Photo;
 import fr.symadrem.sirs.core.model.RapportEtude;
@@ -29,12 +30,12 @@ public class DocumentsTheme extends Theme {
         final BorderPane uiCenter = new BorderPane();
         final TabPane tabPane = new TabPane();
         
-        final AbstractPojoTable tablePhotos = new AbstractPojoTable(Photo.class);
-        final AbstractPojoTable tableConventions = new AbstractPojoTable(Convention.class);
-        final AbstractPojoTable tableJournal = new AbstractPojoTable(ArticleJournal.class);
-        final AbstractPojoTable tableMarches = new AbstractPojoTable(Marche.class);
-        final AbstractPojoTable tableRapport = new AbstractPojoTable(RapportEtude.class);
-        final AbstractPojoTable tableDocGrandeEchelle = new AbstractPojoTable(DocumentGrandeEchelle.class);
+        final AbstractPojoTable tablePhotos = new PhotoTable(Photo.class);
+        final AbstractPojoTable tableConventions = new ConventionTable(Convention.class);
+        final AbstractPojoTable tableJournal = new JournalTable(ArticleJournal.class);
+        final AbstractPojoTable tableMarches = new MarcheTable(Marche.class);
+        final AbstractPojoTable tableRapport = new RapportTable(RapportEtude.class);
+        final AbstractPojoTable tableDocGrandeEchelle = new DocGrandeEchelleTable(DocumentGrandeEchelle.class);
         
         final Tab tabPhoto = new Tab("Photo");
         tabPhoto.setContent(tablePhotos);
@@ -58,6 +59,108 @@ public class DocumentsTheme extends Theme {
         
         uiCenter.setCenter(tabPane);
         return tabPane;
+    }
+
+    private static class PhotoTable extends AbstractPojoTable {
+
+        public PhotoTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            
+        }
+    }
+
+    private static class ConventionTable extends AbstractPojoTable {
+
+        public ConventionTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    private static class JournalTable extends AbstractPojoTable {
+
+        public JournalTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    private static class MarcheTable extends AbstractPojoTable {
+
+        public MarcheTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    private static class RapportTable extends AbstractPojoTable {
+
+        public RapportTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    private static class DocGrandeEchelleTable extends AbstractPojoTable {
+
+        public DocGrandeEchelleTable(Class pojoClass) {
+            super(pojoClass);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
     
 }
