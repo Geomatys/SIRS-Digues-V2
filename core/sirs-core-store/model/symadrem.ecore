@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="model" nsURI="http://fr.symadrem.sirs/digues/1" nsPrefix="sirs">
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="SrIds" nsURI="http://fr.symadrem.sirs/digues/1" nsPrefix="sirs">
   <eClassifiers xsi:type="ecore:EClass" name="Troncon_Digue" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
@@ -15,8 +15,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeRive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="systeme_reperage_defaut"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systeme_rep_defaut" lowerBound="1"
-        eType="#//Systeme_reperage" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//Borne_digue" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
@@ -29,6 +27,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
         eType="#//CommuneTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeRive" eType="#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageIds" upperBound="-1"
+        eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/tronconId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Structure" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -77,9 +77,10 @@
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
+        eOpposite="#//Troncon_Digue/systemeReperageIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Document" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
