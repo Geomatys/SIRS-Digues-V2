@@ -8688,7 +8688,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_i-eTwFQ_EeSV8-H6esGTsg" name="valeurPR : EString" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_i-eTwFQ_EeSV8-H6esGTsg" name="valeurPR : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="symadrem.ecore#//SystemeReperageBorne/valeurPR"/>
           <semanticElements xmi:type="ecore:EAttribute" href="symadrem.ecore#//SystemeReperageBorne/valeurPR"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_i-e60FQ_EeSV8-H6esGTsg" labelAlignment="LEFT">
