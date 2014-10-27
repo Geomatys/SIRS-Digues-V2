@@ -132,14 +132,8 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             systemesReperage.put(systemeReperage, systemeReperageBorne);
             
             systemesReperageBorne.add(systemeReperageBorne);
-//            systemeReperageBorneRepository.add(systemeReperageBorne);
-//            borne.setSystemereperageborne(systemeReperageBorne.getId());
-//            systemeReperage.setSystemereperageborne(systemeReperageBorne.getId());
-            
-            
         }
         couchDbConnector.executeBulk(systemesReperageBorne);
-        
         
         bornes.keySet().stream().forEach((borne) -> { 
             borne.setSystemereperageborne(bornes.get(borne).getId());

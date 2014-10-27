@@ -8,10 +8,7 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -53,7 +50,9 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import jfxtras.scene.control.LocalDateTimeTextField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
+//import jfxtras.scene.control.LocalDateTimeTextField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -72,7 +71,7 @@ public class DigueController implements Initializable {
     @FXML private TextField libelle;
     @FXML private Label id;
     @FXML private Label mode;
-    @FXML private LocalDateTimeTextField date_maj;
+    @FXML private FXDateField date_maj;
     @FXML private WebView commentaire;
     @FXML private TableView<TronconDigue> tronconsTable;
     @FXML private ToggleButton editionButton;
@@ -255,9 +254,9 @@ public class DigueController implements Initializable {
         this.id.setText(this.digue.getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setLocalDateTime(this.digue.getDateMaj());
+        this.date_maj.setValue(this.digue.getDateMaj());
         this.date_maj.setDisable(true);
-        this.date_maj.localDateTimeProperty().bindBidirectional(this.digue.dateMajProperty());
+        this.date_maj.valueProperty().bindBidirectional(this.digue.dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
         this.commentaire.getEngine().loadContent(digue.getCommentaire());
@@ -279,25 +278,28 @@ public class DigueController implements Initializable {
         colName.setEditable(false);
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        final TableColumn colDateDebut = this.tronconsTable.getColumns().get(2);
+        final TableColumn<TronconDigue, LocalDateTime> colDateDebut = (TableColumn<TronconDigue, LocalDateTime>) this.tronconsTable.getColumns().get(2);
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
         colDateDebut.setEditable(false);
-        colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
-            @Override
-            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-                return new CustomizedLocalDateTimeTableCell(Field.DATE_DEBUT);
-            }
-        });
+//        colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
+//            @Override
+//            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
+//                return new CustomizedLocalDateTimeTableCell(Field.DATE_DEBUT);
+//            }
+//        });
+        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new FXLocalDateTimeCell());
         
-        final TableColumn colDateFin = this.tronconsTable.getColumns().get(3);
+        
+        final TableColumn<TronconDigue, LocalDateTime> colDateFin = (TableColumn<TronconDigue, LocalDateTime>)this.tronconsTable.getColumns().get(3);
         colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
         colDateFin.setEditable(false);
-        colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
-            @Override
-            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-                return new CustomizedLocalDateTimeTableCell(Field.DATE_FIN);
-            }
-        });
+//        colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
+//            @Override
+//            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
+//                return new CustomizedLocalDateTimeTableCell(Field.DATE_FIN);
+//            }
+//        });
+        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new FXLocalDateTimeCell());
         
         final TableColumn colSR = this.tronconsTable.getColumns().get(4);
         colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
@@ -444,43 +446,43 @@ public class DigueController implements Initializable {
         }
     }
     
-    /**
-     * Defines the customized table cell for displaying geometry of each levee's section.
-     */
-    private class CustomizedLocalDateTimeTableCell extends TableCell<TronconDigue, LocalDateTime> {
-        
-        
-        private final LocalDateTimeTextField localDateTimeTextField;
-        private final Field field;
-
-        public CustomizedLocalDateTimeTableCell(final Field field) {
-            super();
-            this.localDateTimeTextField = new LocalDateTimeTextField();
-            this.localDateTimeTextField.setDisable(true);
-            this.field = field;
-        }
-        
-        @Override
-        protected void updateItem(LocalDateTime item, boolean empty) {
-            
-            super.updateItem(item, empty);
-            
-            if(item != null) {
-                this.localDateTimeTextField.setLocalDateTime(item);
-                switch(this.field){
-                    case DATE_DEBUT: 
-                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
-                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
-                        break;
-                    case DATE_FIN: 
-                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
-                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_finProperty());
-                        break;
-                }
-                setGraphic(this.localDateTimeTextField);
-            }
-        }
-    }
+//    /**
+//     * Defines the customized table cell for displaying geometry of each levee's section.
+//     */
+//    private class CustomizedLocalDateTimeTableCell extends TableCell<TronconDigue, LocalDateTime> {
+//        
+//        
+//        private final LocalDateTimeTextField localDateTimeTextField;
+//        private final Field field;
+//
+//        public CustomizedLocalDateTimeTableCell(final Field field) {
+//            super();
+//            this.localDateTimeTextField = new LocalDateTimeTextField();
+//            this.localDateTimeTextField.setDisable(true);
+//            this.field = field;
+//        }
+//        
+//        @Override
+//        protected void updateItem(LocalDateTime item, boolean empty) {
+//            
+//            super.updateItem(item, empty);
+//            
+//            if(item != null) {
+//                this.localDateTimeTextField.setLocalDateTime(item);
+//                switch(this.field){
+//                    case DATE_DEBUT: 
+//                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
+//                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
+//                        break;
+//                    case DATE_FIN: 
+//                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
+//                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_finProperty());
+//                        break;
+//                }
+//                setGraphic(this.localDateTimeTextField);
+//            }
+//        }
+//    }
     
     /**
      * Defines the OpenHtmlEditorEventHandler for editing comment field.

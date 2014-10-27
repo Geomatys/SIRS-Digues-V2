@@ -63,6 +63,7 @@ public class AbstractTronconTheme extends Theme {
         
     }
     
+    @Override
     public Parent createPane(){
         return new TronconThemePane(groups);
     }

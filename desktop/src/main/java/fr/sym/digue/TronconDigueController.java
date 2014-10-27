@@ -33,7 +33,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import jfxtras.scene.control.LocalDateTimeTextField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
+//import jfxtras.scene.control.LocalDateTimeTextField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -51,8 +52,8 @@ public class TronconDigueController {
     @FXML private TextField section_name;
     @FXML private WebView commentaire;
     @FXML private ChoiceBox<Digue> digues;
-    @FXML private LocalDateTimeTextField date_debut;
-    @FXML private LocalDateTimeTextField date_fin;
+    @FXML private FXDateField date_debut;
+    @FXML private FXDateField date_fin;
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
     @FXML private Label mode;
@@ -224,9 +225,9 @@ public class TronconDigueController {
 //        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
         this.typeRiveChoiceBox.setValue(this.troncon.getTypeRive());
                 
-        this.date_debut.localDateTimeProperty().bindBidirectional(this.troncon.date_debutProperty());
+        this.date_debut.valueProperty().bindBidirectional(this.troncon.date_debutProperty());
         this.date_debut.setDisable(true);
-        this.date_fin.localDateTimeProperty().bindBidirectional(this.troncon.date_finProperty());
+        this.date_fin.valueProperty().bindBidirectional(this.troncon.date_finProperty());
         this.date_fin.setDisable(true);
         
         // Disable the save button.---------------------------------------------
