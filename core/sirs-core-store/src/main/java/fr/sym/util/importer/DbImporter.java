@@ -11,6 +11,7 @@ import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
+import fr.symadrem.sirs.core.component.SystemeReperageBorneRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
@@ -41,6 +42,7 @@ public class DbImporter {
     private final OrganismeRepository organismeRepository;
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
+    private final SystemeReperageBorneRepository systemeReperageBorneRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -53,6 +55,7 @@ public class DbImporter {
     private TronconGestionDigueImporter tronconGestionDigueImporter;
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
+    private SystemeReperageBorneImporter systemeReperageBorneImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -402,6 +405,7 @@ public class DbImporter {
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
         this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
         this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
+        this.systemeReperageBorneRepository = new SystemeReperageBorneRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -419,6 +423,8 @@ public class DbImporter {
                 couchDbConnector, tronconDigueRepository, digueImporter, 
                 tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
+        this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
+                couchDbConnector, systemeReperageBorneRepository, systemeReperageImporter, borneDigueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -457,6 +463,14 @@ public class DbImporter {
         couchDbConnector.executeBulk(troncons);
     }
     
+    public void removeSystemesReperageBorne() {
+        final List<Object> systemesReperageBorne = new ArrayList<>();
+        systemeReperageBorneRepository.getAll().stream().forEach((systemeReperageBorne) -> {
+            systemesReperageBorne.add(BulkDeleteDocument.of(systemeReperageBorne));
+        });
+        couchDbConnector.executeBulk(systemesReperageBorne);
+    }
+    
     public void removeSystemesReperage() {
         final List<Object> systemesReperage = new ArrayList<>();
         systemeReperageRepository.getAll().stream().forEach((systemeReperage) -> {
@@ -479,10 +493,22 @@ public class DbImporter {
         this.removeOrganismes();
         this.removeSystemesReperage();
         this.removeBornes();
+        this.removeSystemesReperageBorne();
     }
     
-    public Collection<TronconDigue> importation() throws IOException, AccessDbImporterException{
-        return this.tronconGestionDigueImporter.getTronconsDigues().values();
+    public void importation() throws IOException, AccessDbImporterException{
+/*
+        => troncons
+            => digues
+            => bornes
+            => systemes rep
+            => structures
+            => organismes
+            => geometries
+        => systeme rep / borne
+*/
+        this.tronconGestionDigueImporter.getTronconsDigues();
+        this.systemeReperageBorneImporter.getByBorneId();
     }
 
     //TODO remove when import finished
@@ -536,19 +562,13 @@ public class DbImporter {
 //                System.out.println(row);
 //            }
             System.out.println("=======================");
-            importer.getDatabase().getTable("SYS_EVT_DESORDRE").getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-            System.out.println("=======================");
-            importer.getDatabase().getTable("DESORDRE").getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
-            });
-            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            
-            for(final TronconDigue troncon : importer.importation()){
+            importer.importation();
+//            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
 //                
@@ -566,7 +586,7 @@ public class DbImporter {
 //                troncon.getBorneIds().stream().forEach((borne) -> {
 //                    System.out.println(borne.getPositionBorne().toText());
 //                });
-            }
+//            }
             System.out.println("fin de l'importation !");
 
         } catch (IOException ex) {
