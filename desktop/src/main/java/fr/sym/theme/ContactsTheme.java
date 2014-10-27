@@ -8,6 +8,7 @@ import fr.symadrem.sirs.core.model.Organisme;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 
 
@@ -56,6 +57,10 @@ public class ContactsTheme extends Theme {
         protected void editPojo(Element pojo) {
             
         }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
     }
 
     private static class OrgnismeTable extends AbstractPojoTable {
@@ -72,6 +77,10 @@ public class ContactsTheme extends Theme {
         @Override
         protected void editPojo(Element pojo) {
             
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
     }
     

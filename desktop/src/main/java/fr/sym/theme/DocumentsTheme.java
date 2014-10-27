@@ -12,6 +12,7 @@ import fr.symadrem.sirs.core.model.RapportEtude;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 
 
@@ -76,6 +77,10 @@ public class DocumentsTheme extends Theme {
         protected void editPojo(Element pojo) {
             
         }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
     }
 
     private static class ConventionTable extends AbstractPojoTable {
@@ -92,6 +97,10 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
     }
 
@@ -110,6 +119,10 @@ public class DocumentsTheme extends Theme {
         protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
     }
 
     private static class MarcheTable extends AbstractPojoTable {
@@ -126,6 +139,10 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
     }
 
@@ -144,6 +161,10 @@ public class DocumentsTheme extends Theme {
         protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
     }
 
     private static class DocGrandeEchelleTable extends AbstractPojoTable {
@@ -160,6 +181,10 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
     }
     
