@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ektorp.CouchDbConnector;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An importer is suposed to retrive data from one and only one table of the given database.
@@ -26,13 +28,16 @@ import java.util.logging.Logger;
  */
 public abstract class GenericImporter {
     
+    protected CouchDbConnector couchDbConnector;
+    
     private final String tableName;
     protected Database accessDatabase;
     protected final DateTimeFormatter dateTimeFormatter;
     private Map<String, Boolean> columnDataFlags;
 
-    public GenericImporter(Database accessDatabase) {
+    public GenericImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         this.accessDatabase = accessDatabase;
+        this.couchDbConnector = couchDbConnector;
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
         this.columnDataFlags = new HashMap<>();
         this.tableName = this.getTableName().toString();

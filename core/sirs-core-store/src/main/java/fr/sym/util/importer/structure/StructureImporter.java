@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -42,12 +43,16 @@ public class StructureImporter extends GenericStructureImporter {
     private final PiedDigueImporter piedDigueImporter;
     private final TypeElementStructureImporter typeElementStructureImporter;
 
-    public StructureImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.creteImporter = new CreteImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase);
+    public StructureImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter, 
+            final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase, couchDbConnector);
     }
 
     private enum ElementStructureColumns {

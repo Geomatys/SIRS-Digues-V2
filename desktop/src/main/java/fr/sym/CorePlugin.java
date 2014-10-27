@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.logging.Level;
 import javafx.scene.control.MenuItem;
 import org.apache.sis.storage.DataStoreException;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
@@ -41,6 +43,7 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.RandomStyleBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -48,6 +51,9 @@ import org.geotoolkit.style.RandomStyleBuilder;
  */
 public class CorePlugin extends Plugin{
 
+    @Autowired
+    CouchDbConnector connector;
+    
     public CorePlugin() {
     }
 
@@ -69,9 +75,17 @@ public class CorePlugin extends Plugin{
             // navigation vers les tronçons, ce qui n'est pas le cas actuellement.
             final List<BorneDigue> bornes = new ArrayList<>();
             for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
-                td.getBorneIds().stream().forEach((id) -> {
-                    bornes.add(bornesRepo.get(id));
-                });
+                // SOLUTION 1 (brutale)
+//                td.getBorneIds().stream().forEach((id) -> {
+//                    bornes.add(bornesRepo.get(id));
+//                });
+                
+                // SOLUTION 2 (ektorp bulk)
+                ViewQuery vq = new ViewQuery()
+                      .allDocs()
+                      .includeDocs(true)
+                      .keys(td.getBorneIds());
+                bornes.addAll(connector.queryView(vq, BorneDigue.class));
             }
             
             final BeanStore store = new BeanStore(

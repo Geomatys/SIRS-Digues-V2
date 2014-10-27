@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -42,11 +43,13 @@ public class TronconGestionDigueImporter extends GenericImporter {
     
     private TronconDigueRepository tronconDigueRepository;
     
-    private TronconGestionDigueImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private TronconGestionDigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
-    TronconGestionDigueImporter(final Database accessDatabase, 
+    TronconGestionDigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
             final TronconDigueRepository tronconDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
@@ -54,7 +57,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
             final BorneDigueImporter borneDigueImporter){
-        this(accessDatabase);
+        this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
@@ -63,7 +66,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
         this.borneDigueImporter = borneDigueImporter;
         
-        this.structureImporter = new StructureImporter(accessDatabase, this, systemeReperageImporter, borneDigueImporter);
+        this.structureImporter = new StructureImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter);
     }
 
     /* TODO : s'occuper du lien avec les gestionnaires.

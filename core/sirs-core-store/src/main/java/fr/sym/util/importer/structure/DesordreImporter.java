@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -31,8 +32,12 @@ class DesordreImporter extends GenericStructureImporter {
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
 
-    DesordreImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter, final SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+    DesordreImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter, 
+            final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     private enum DesordreColumns {

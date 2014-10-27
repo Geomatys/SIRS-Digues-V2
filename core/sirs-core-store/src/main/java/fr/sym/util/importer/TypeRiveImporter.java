@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -22,8 +23,9 @@ public class TypeRiveImporter extends GenericImporter {
 
     private Map<Integer, String> typesRive = null;
 
-    TypeRiveImporter(Database accessDatabase) {
-        super(accessDatabase);
+    TypeRiveImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
     private enum TypeRiveColumns {

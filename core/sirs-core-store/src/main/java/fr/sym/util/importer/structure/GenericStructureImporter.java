@@ -10,6 +10,7 @@ import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.GenericImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -21,12 +22,16 @@ abstract class GenericStructureImporter extends GenericImporter {
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     
-    private GenericStructureImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private GenericStructureImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
-    public GenericStructureImporter(final Database accessDatabase, final TronconGestionDigueImporter tronconGestionDigueImporter, final SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
-        this(accessDatabase);
+    public GenericStructureImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter, 
+            final BorneDigueImporter borneDigueImporter) {
+        this(accessDatabase, couchDbConnector);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;

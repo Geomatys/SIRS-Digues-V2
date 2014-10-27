@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -32,8 +33,9 @@ public class TypeElementStructureImporter extends GenericImporter {
 
     private Map<Integer, Class> typesElementStructure = null;
 
-    TypeElementStructureImporter(Database accessDatabase) {
-        super(accessDatabase);
+    TypeElementStructureImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
     private enum TypeElementStructureColumns {

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -31,8 +32,12 @@ class CreteImporter extends GenericStructureImporter {
     private Map<Integer, Crete> cretes = null;
     private Map<Integer, List<Crete>> cretesByTronconId = null;
 
-    CreteImporter(Database accessDatabase, TronconGestionDigueImporter tronconGestionDigueImporter, SystemeReperageImporter systemeReperageImporter, final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+    CreteImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter, 
+            final BorneDigueImporter borneDigueImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
     
     /*

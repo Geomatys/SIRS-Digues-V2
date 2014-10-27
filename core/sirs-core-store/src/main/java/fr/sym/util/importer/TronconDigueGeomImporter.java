@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sis.storage.DataStoreException;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.data.shapefile.shp.ShapeHandler;
 import org.geotoolkit.data.shapefile.shp.ShapeType;
 import org.geotoolkit.geometry.jts.JTS;
@@ -37,8 +38,9 @@ public class TronconDigueGeomImporter extends GenericImporter {
     
     private Map<Integer, Geometry> tronconDigueGeom = null;
 
-    TronconDigueGeomImporter(Database accessDatabase) {
-        super(accessDatabase);
+    TronconDigueGeomImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
     @Override

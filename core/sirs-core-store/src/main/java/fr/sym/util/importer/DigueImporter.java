@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -26,12 +27,15 @@ public class DigueImporter extends GenericImporter {
     private DigueRepository digueRepository;
     private Map<Integer, Digue> digues = null;
     
-    private DigueImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private DigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
-    DigueImporter(final Database accessDatabase, final DigueRepository digueRepository) {
-        this(accessDatabase);
+    DigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final DigueRepository digueRepository) {
+        this(accessDatabase, couchDbConnector);
         this.digueRepository = digueRepository;
     }
     

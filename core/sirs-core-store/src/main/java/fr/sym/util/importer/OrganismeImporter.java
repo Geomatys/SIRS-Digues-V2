@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -26,12 +27,15 @@ public class OrganismeImporter extends GenericImporter {
     private Map<Integer, Organisme> organismes = null;
     private OrganismeRepository organismeRepository;
 
-    private OrganismeImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private OrganismeImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
-    OrganismeImporter(final Database accessDatabase, final OrganismeRepository organismeRepository) {
-        this(accessDatabase);
+    OrganismeImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final OrganismeRepository organismeRepository) {
+        this(accessDatabase, couchDbConnector);
         this.organismeRepository = organismeRepository;
     }
 

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -38,12 +39,14 @@ public class BorneDigueImporter extends GenericImporter {
     private Map<Integer, List<BorneDigue>> bornesDigueByTronconId = null;
     private BorneDigueRepository borneDigueRepository;
 
-    private BorneDigueImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private BorneDigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
     
-    BorneDigueImporter(final Database accessDatabase, final BorneDigueRepository borneDigueRepository) {
-        super(accessDatabase);
+    BorneDigueImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, final BorneDigueRepository borneDigueRepository) {
+        super(accessDatabase, couchDbConnector);
         this.borneDigueRepository = borneDigueRepository;
     }
     
@@ -103,6 +106,7 @@ public class BorneDigueImporter extends GenericImporter {
         bornesDigue = new HashMap<>();
         bornesDigueByTronconId = new HashMap<>();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final List<BorneDigue> bornes = new ArrayList<>();
 
         while (it.hasNext()) {
             final Row row = it.next();
@@ -143,7 +147,7 @@ public class BorneDigueImporter extends GenericImporter {
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(BorneDigueColumns.ID_BORNE.toString()), borne);
-            borneDigueRepository.add(borne);
+            bornes.add(borne);
 
             // Set the list ByTronconId
             List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()));
@@ -154,5 +158,6 @@ public class BorneDigueImporter extends GenericImporter {
             listByTronconId.add(borne);
             bornesDigueByTronconId.put(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
+        couchDbConnector.executeBulk(bornes);
     }
 }

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -27,8 +28,10 @@ public class SystemeReperageImporter extends GenericImporter {
     private Map<Integer, List<SystemeReperage>> systemesReperageByTronconId = null;
     private final SystemeReperageRepository systemeReperageRepository;
 
-    SystemeReperageImporter(final Database accessDatabase, final SystemeReperageRepository systemeReperageRepository) {
-        super(accessDatabase);
+    SystemeReperageImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final SystemeReperageRepository systemeReperageRepository) {
+        super(accessDatabase, couchDbConnector);
         this.systemeReperageRepository = systemeReperageRepository;
     }
     
@@ -82,7 +85,8 @@ public class SystemeReperageImporter extends GenericImporter {
         systemesReperageByTronconId = new HashMap<>();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
+        final List<SystemeReperage> systemes = new ArrayList<>();
+        
         while (it.hasNext()) {
             final Row row = it.next();
             final SystemeReperage systemeReperage = new SystemeReperage();
@@ -104,7 +108,8 @@ public class SystemeReperageImporter extends GenericImporter {
             systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             
             // Register the systemeReperage to retrieve a CouchDb ID.
-            systemeReperageRepository.add(systemeReperage);
+            systemes.add(systemeReperage);
         }
+        couchDbConnector.executeBulk(systemes);
     }
 }

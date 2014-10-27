@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -32,10 +33,11 @@ class PiedDigueImporter extends GenericStructureImporter {
     private Map<Integer, List<PiedDigue>> piedsDigueByTronconId = null;
 
     PiedDigueImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     private enum PiedDigueColumns {

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -26,12 +27,15 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
     private Map<Integer, List<GestionTroncon>> gestionsByTronconId = null;
     private OrganismeImporter organismeImporter;
 
-    private TronconGestionDigueGestionnaireImporter(Database accessDatabase) {
-        super(accessDatabase);
+    private TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
-    TronconGestionDigueGestionnaireImporter(final Database accessDatabase, final OrganismeImporter organismeImporter) {
-        this(accessDatabase);
+    TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector, 
+            final OrganismeImporter organismeImporter) {
+        this(accessDatabase, couchDbConnector);
         this.organismeImporter = organismeImporter;
     }
 

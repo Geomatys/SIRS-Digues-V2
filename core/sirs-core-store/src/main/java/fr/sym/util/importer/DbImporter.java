@@ -13,12 +13,16 @@ import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
+import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ektorp.BulkDeleteDocument;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.lang.Setup;
 import org.ektorp.CouchDbConnector;
@@ -29,6 +33,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Samuel Andrés (Geomatys)
  */
 public class DbImporter {
+    
+    private final CouchDbConnector couchDbConnector;
 
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
@@ -390,6 +396,7 @@ public class DbImporter {
     }
 
     public DbImporter(CouchDbConnector couchDbConnector) throws IOException {
+        this.couchDbConnector = couchDbConnector;
         this.digueRepository = new DigueRepository(couchDbConnector);
         this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
@@ -400,18 +407,22 @@ public class DbImporter {
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
-        this.typeRiveImporter = new TypeRiveImporter(accessDatabase);
-        this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase);
-        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, systemeReperageRepository);
-        this.organismeImporter = new OrganismeImporter(accessDatabase, organismeRepository);
+        this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector);
+        this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
+        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
+        this.organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
         this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
-                accessDatabase, this.organismeImporter);
-        this.digueImporter = new DigueImporter(accessDatabase, digueRepository);
-        this.borneDigueImporter = new BorneDigueImporter(accessDatabase, borneDigueRepository);
+                accessDatabase, couchDbConnector, this.organismeImporter);
+        this.digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
+        this.borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
-                tronconDigueRepository, digueImporter, tronconDigueGeomImporter, 
-                typeRiveImporter, systemeReperageImporter, tronconGestionDigueGestionnaireImporter,
-                borneDigueImporter);
+                couchDbConnector, tronconDigueRepository, digueImporter, 
+                tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, 
+                tronconGestionDigueGestionnaireImporter, borneDigueImporter);
+    }
+    
+    public CouchDbConnector getCouchDbConnector(){
+        return this.couchDbConnector;
     }
 
     public Database getDatabase() {
@@ -423,33 +434,43 @@ public class DbImporter {
     }
 
     public void removeDigues() {
+        final List<Object> digues = new ArrayList<>();
         digueRepository.getAll().stream().forEach((digue) -> {
-            digueRepository.remove(digue);
+            digues.add(BulkDeleteDocument.of(digue));
         });
+        couchDbConnector.executeBulk(digues);
     }
     
     public void removeOrganismes() {
+        final List<Object> organismes = new ArrayList<>();
         organismeRepository.getAll().stream().forEach((organisme) -> {
-            organismeRepository.remove(organisme);
+            organismes.add(BulkDeleteDocument.of(organisme));
         });
+        couchDbConnector.executeBulk(organismes);
     }
     
     public void removeTronconsDigues() {
+        final List<Object> troncons = new ArrayList<>();
         tronconDigueRepository.getAll().stream().forEach((tronconDigue) -> {
-            tronconDigueRepository.remove(tronconDigue);
+            troncons.add(BulkDeleteDocument.of(tronconDigue));
         });
+        couchDbConnector.executeBulk(troncons);
     }
     
     public void removeSystemesReperage() {
-        systemeReperageRepository.getAll().stream().forEach((tronconDigue) -> {
-            systemeReperageRepository.remove(tronconDigue);
+        final List<Object> systemesReperage = new ArrayList<>();
+        systemeReperageRepository.getAll().stream().forEach((systemeReperage) -> {
+            systemesReperage.add(BulkDeleteDocument.of(systemeReperage));
         });
+        couchDbConnector.executeBulk(systemesReperage);
     }
     
     public void removeBornes() {
-        borneDigueRepository.getAll().stream().forEach((tronconDigue) -> {
-            borneDigueRepository.remove(tronconDigue);
+        final List<Object> bornes = new ArrayList<>();
+        borneDigueRepository.getAll().stream().forEach((borne) -> {
+            bornes.add(BulkDeleteDocument.of(borne));
         });
+        couchDbConnector.executeBulk(bornes);
     }
     
     public void cleanDb(){
