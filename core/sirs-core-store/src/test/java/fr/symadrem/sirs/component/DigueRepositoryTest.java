@@ -28,14 +28,13 @@ import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 
 import org.ektorp.CouchDbConnector;
+import org.junit.Ignore;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class DigueRepositoryTest extends CouchDBTestCase {
-
-    
     
     DigueRepository digueRepository;
     
@@ -73,7 +72,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             // e.setDocument(troncon);
             stuctures.add(e);
             Crete crete = new Crete();
-            crete.setBorne_debut(8);
+            crete.setBorne_debut("8");
             crete.setCommentaire("Belle crete");
             stuctures.add(crete);
             
@@ -81,27 +80,8 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
             tronconRepository.add(troncon);
         }
-
-        // {
-        // TronconDigue troncon = new TronconDigue();
-        // troncon.setGeometry(createPoint(100, 100));
-        // troncon.setDate_maj(LocalDateTime.now());
-        //
-        // Fondation ecluse = new Fondation();
-        // ecluse.setCommentaire("Fondation");
-        //
-        // List<Structure> stuctures = new ArrayList<>();
-        // stuctures.add(ecluse);
-        // troncon.setStuctures(stuctures);
-        //
-        // troncon.setCommentaire("Traoncon2");
-        // troncon.setDigueId(digue.getId());
-        //
-        // tronconRepository.add(troncon);
-        // }
     }
 
-    
     @Test
     public void testGetAll() {
     	  List<Digue> result = digueRepository.getAll();
@@ -130,6 +110,31 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
     }
     
+    @Ignore
+    @Test
+    public void testInstances(){
+        DigueRepository digueRepository = new DigueRepository(connector);
+        Digue digue = new Digue();
+        digue.setLibelle("coucou");
+        digueRepository.add(digue);
+        
+        System.out.println(digue.getLibelle());
+        System.out.println(digue.getId());
+        
+        Digue digue1 = digueRepository.get(digue.getId());
+        Digue digue2 = digueRepository.get(digue.getId());
+        
+        System.out.println(digue.hashCode());
+        System.out.println(digue1.hashCode());
+        System.out.println(digue2.hashCode());
+        
+        
+        assert(digue==digue1);
+        
+        assert(digue==digue2);
+    }
+    
+    @Ignore
     @Test
     public void uuid() {
     	

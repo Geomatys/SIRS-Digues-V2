@@ -1,5 +1,6 @@
 package fr.sym;
 
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import java.net.URL;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class Session {
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
+    private BorneDigueRepository borneDigueRepository;
 
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
@@ -63,6 +65,10 @@ public class Session {
 
     public TronconDigueRepository getTronconDigueRepository() {
         return tronconDigueRepository;
+    }
+    
+    public BorneDigueRepository getBorneDigueRepository(){
+        return borneDigueRepository;
     }
 
     /**

@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public abstract class CouchDBTestCase {
 
     @Autowired
-    @Qualifier("symadremChouchDB")
     protected CouchDbConnector connector;
 
 

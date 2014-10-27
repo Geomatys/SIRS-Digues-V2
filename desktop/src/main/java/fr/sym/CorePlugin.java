@@ -19,6 +19,7 @@ import fr.sym.theme.ProfilsEnTraversTheme;
 import fr.sym.theme.ReseauxDeVoirieTheme;
 import fr.sym.theme.ReseauxEtOuvragesTheme;
 import fr.sym.theme.StructuresTheme;
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Fondation;
@@ -55,13 +56,22 @@ public class CorePlugin extends Plugin{
         final List<MapItem> items = new ArrayList<>();
         
         final TronconDigueRepository repo = getSession().getTronconDigueRepository();
+        final BorneDigueRepository bornesRepo = getSession().getBorneDigueRepository();
         
         try{
             
             //todo : rendre dynamique
+            // Nécessité de l'utilisation d'un dépôt de bornes depuis que les 
+            // tronçons ne référencent plus directement les bornes mais leurs ID
+            // Du coup il est probable que ceci devienne très lent. Cela pourrait
+            // peut-être être amélioré par un map/reduce du côté serveur couchDb
+            // mais il faudrait pour cela que les bornes contiennent un id de 
+            // navigation vers les tronçons, ce qui n'est pas le cas actuellement.
             final List<BorneDigue> bornes = new ArrayList<>();
             for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
-                bornes.addAll(td.getBorneIds());
+                td.getBorneIds().stream().forEach((id) -> {
+                    bornes.add(bornesRepo.get(id));
+                });
             }
             
             final BeanStore store = new BeanStore(

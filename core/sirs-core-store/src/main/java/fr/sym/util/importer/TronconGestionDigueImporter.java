@@ -158,17 +158,21 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
             final List<BorneDigue> bornes = borneDigueImporter.getBorneDigueByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
             if(bornes != null){
-                tronconDigue.setBorneIds(bornes);
+                final List<String> bornesIds = new ArrayList<>();
+                bornes.stream().forEach((borne) -> {
+                    bornesIds.add(borne.getId());
+                });
+                tronconDigue.setBorneIds(bornesIds);
             }
 
             final List<SystemeReperage> systemesRep = systemeReperageImporter.getSystemeRepLineaireByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
             if(systemesRep!=null){
-                final List<String> systemesRepId = new ArrayList<>();
+                final List<String> systemesRepIds = new ArrayList<>();
                 systemesRep.stream().forEach((systemeRep) -> {
-                    systemesRepId.add(systemeRep.getId());
+                    systemesRepIds.add(systemeRep.getId());
                     systemeRep.setTronconId(tronconDigue.getId());
                     });
-                tronconDigue.setSystemeReperageIds(systemesRepId);
+                tronconDigue.setSystemeReperageIds(systemesRepIds);
                 tronconDigue.setSysteme_reperage_defaut(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
 
