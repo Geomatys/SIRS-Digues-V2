@@ -16,6 +16,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class CouchDBInit {
     
+    public static final String DB_CONNECTOR = "connector";
+    
     public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, String configFile) throws MalformedURLException {
         
         final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
@@ -24,7 +26,7 @@ public class CouchDBInit {
         
         final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
         applicationContextParent.refresh();
-        applicationContextParent.getBeanFactory().registerSingleton("connector", connector);
+        applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
 
         final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
             configFile}, applicationContextParent);

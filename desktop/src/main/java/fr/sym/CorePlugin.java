@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static fr.sym.Session.PROJECTION;
+import fr.sym.digue.Injector;
 import org.geotoolkit.data.bean.BeanStore;
 import fr.sym.theme.ContactsTheme;
 import fr.sym.theme.DesordreTheme;
@@ -50,9 +51,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Johann Sorel (Geomatys)
  */
 public class CorePlugin extends Plugin{
-
-    @Autowired
-    CouchDbConnector connector;
     
     public CorePlugin() {
     }
@@ -65,6 +63,8 @@ public class CorePlugin extends Plugin{
         final BorneDigueRepository bornesRepo = getSession().getBorneDigueRepository();
         
         try{
+            
+            final CouchDbConnector connector = Injector.getBean(CouchDbConnector.class);
             
             //todo : rendre dynamique
             // Nécessité de l'utilisation d'un dépôt de bornes depuis que les 

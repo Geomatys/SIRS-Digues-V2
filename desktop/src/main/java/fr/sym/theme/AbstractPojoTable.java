@@ -1,6 +1,10 @@
 
 package fr.sym.theme;
 
+import org.geotoolkit.gui.javafx.util.FXNumberCell;
+import org.geotoolkit.gui.javafx.util.FXStringCell;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
+import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.geomatys.property.Internal;
 import com.sun.javafx.property.PropertyReference;
 import fr.sym.Session;
@@ -15,30 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.geotoolkit.font.FontAwesomeIcons;
-import org.geotoolkit.font.IconBuilder;
+import jidefx.scene.control.field.NumberField;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.gui.javafx.util.FXDateField;
-import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -101,7 +93,7 @@ public abstract class AbstractPojoTable extends BorderPane{
             setEditable(true);
             setSortable(true);
             
-            setCellValueFactory(new PropertyValueFactory<Element,Object>(desc.getName()));
+            setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
             
             addEventHandler(TableColumn.editCommitEvent(), (CellEditEvent<Object, Object> event) -> {
                 final Object rowElement = event.getRowValue();
@@ -110,15 +102,17 @@ public abstract class AbstractPojoTable extends BorderPane{
             
             //choix de l'editeur en fonction du type de données
             final Class type = desc.getReadMethod().getReturnType();            
-            if(LocalDateTime.class.isAssignableFrom(type)){
-                setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
-                    @Override
-                    public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
-                        return new DateCell();
-                    }
-                });
+            if(Boolean.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
+            }else if(String.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+            }else if(Integer.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
+            }else if(Float.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+            }else if(LocalDateTime.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
             }
-            
             
         }  
     }
@@ -201,80 +195,6 @@ public abstract class AbstractPojoTable extends BorderPane{
             throw new RuntimeException(e.getMessage(), e);
         }
         return properties;
-    }
-    
-    
-    private static class DateCell extends FXTableCell<Element,Object> {
-    
-        public static final Image ICON_REMOVE  = SwingFXUtils.toFXImage(IconBuilder.createImage(
-                FontAwesomeIcons.ICON_TIMES_CIRCLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
-    
-        private final Button del = new Button(null, new ImageView(ICON_REMOVE));
-        private final FXDateField field = new FXDateField();
-        private final BorderPane pane = new BorderPane(field, null, del, null, null);
-
-        public DateCell(){
-            tableViewProperty().addListener(new ChangeListener<TableView<Element>>() {
-                @Override
-                public void changed(ObservableValue<? extends TableView<Element>> observable, TableView<Element> oldValue, TableView<Element> newValue) {
-                    
-                }
-            });
-            
-            setGraphic(field);
-            setAlignment(Pos.CENTER);
-            setContentDisplay(ContentDisplay.CENTER);
-            del.setPrefSize(16,16);
-            del.setFocusTraversable(false);
-            del.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if(isEditing()){
-                        commitEdit(null);
-                    }
-                }
-            });
-            del.setStyle("-fx-background-color:transparent; -fx-focus-color: transparent;");
-        }
-
-        @Override
-        public void terminateEdit(){
-            commitEdit(field.getValue());
-        }
-        
-        @Override
-        public void startEdit() {
-            LocalDateTime time = (LocalDateTime)getItem();
-            if(time==null) time = LocalDateTime.now();
-            field.setValue(time);
-            super.startEdit();
-            setText(null);
-            setGraphic(pane);
-            field.getField().requestFocus();
-        }
-
-        @Override
-        public void commitEdit(Object newValue) {
-            itemProperty().set(newValue);
-            super.commitEdit(newValue);
-            updateItem(newValue, false);
-        }
-
-        @Override
-        public void cancelEdit() {
-            super.cancelEdit();
-            updateItem(getItem(), false);
-        }
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            setText(null);
-            setGraphic(null);
-            if(item!=null){
-                setText(((LocalDateTime)item).toString());
-            }
-        }
     }
     
 }

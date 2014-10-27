@@ -62,7 +62,6 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
 
     @Override
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        System.out.println("COMMIT");
         final TronconDigue obj = troncon.get();
         final Session session = Injector.getBean(Session.class);
         session.getTronconDigueRepository().update(obj);
