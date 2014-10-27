@@ -69,13 +69,13 @@ public class StructureImporter extends GenericStructureImporter {
 //        X_FIN,
 //        Y_FIN,
         ID_SYSTEME_REP,
-//        ID_BORNEREF_DEBUT,
-//        AMONT_AVAL_DEBUT,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-//        ID_BORNEREF_FIN,
-//        AMONT_AVAL_FIN,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-//        COMMENTAIRE,
+        COMMENTAIRE,
 //        N_COUCHE,
 //        ID_TYPE_MATERIAU,
 //        ID_TYPE_NATURE,
@@ -225,7 +225,7 @@ public class StructureImporter extends GenericStructureImporter {
             final Structure structure;
 
             if(typeStructure==null){
-                System.out.println("Type de structure non pris en charge !");
+//                System.out.println("Type de structure non pris en charge !");
                 structure = null;
             }
             else if(typeStructure == Crete.class){
@@ -263,26 +263,36 @@ public class StructureImporter extends GenericStructureImporter {
                 structure = null;
 
             } else {
-                System.out.println("Type de structure inconnu !");
+//                System.out.println("Type de structure inconnu !");
                 structure = null;
             }
 
 
-            if(structure!=null){
-//        structure.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
-//                    if ( row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
-//                        structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-//                    }
-//                    if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
-//                        structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
-//                    }
-//                    }
-//                    if ( row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-//                        structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-//                    }
-//                    if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
-//                        structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-//                    }
+            if (false && structure != null) {
+                structure.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
+                
+                structure.setBorne_debut_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_DEBUT.toString())); 
+                structure.setBorne_fin_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_FIN.toString()));
+                structure.setCommentaire(row.getString(ElementStructureColumns.COMMENTAIRE.toString()));
+                
+                if (row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                    structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                }
+                if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
+                    structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
+                }
+                if (row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                    structure.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                }
+                if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                    structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                }
+                if (row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()) != null) {
+                    structure.setBorne_fin(borneDigueImporter.getBorneDigue().get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                }
+                if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                    structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                }
             }
         }
 

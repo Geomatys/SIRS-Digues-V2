@@ -72,11 +72,11 @@ class CreteImporter extends GenericStructureImporter {
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         ID_SYSTEME_REP,
-//        ID_BORNEREF_DEBUT,
-//        AMONT_AVAL_DEBUT,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-//        ID_BORNEREF_FIN,
-//        AMONT_AVAL_FIN,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
         N_COUCHE,
@@ -181,18 +181,23 @@ class CreteImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final Crete crete = new Crete();
-//            crete.setBorne_debut(borne_debut);
-//            crete.setBorne_debut_aval(true); 
+            if(row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString())!=null){
+                crete.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            }
+            crete.setBorne_debut_aval(row.getBoolean(CreteColumns.AMONT_AVAL_DEBUT.toString())); 
+            crete.setBorne_fin_aval(row.getBoolean(CreteColumns.AMONT_AVAL_FIN.toString()));
             if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
-//            crete.setBorne_fin(borne_debut);
-//            crete.setBorne_fin_aval(true);
-         if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
+            
+            if(row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString())!=null){
+                crete.setBorne_fin(borneDigueImporter.getBorneDigue().get((int) row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            }
+            if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
-        crete.setCommentaire(CreteColumns.COMMENTAIRE.toString());
-        crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
+            crete.setCommentaire(row.getString(CreteColumns.COMMENTAIRE.toString()));
+            crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
 //            crete.setContactStructure(null);
 //            crete.setConventionIds(null);
 //            crete.setCote(row.getString(CreteColumns.COTE_AXE.toString()));

@@ -12,6 +12,7 @@ import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
+import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Desordre;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -67,11 +68,11 @@ class DesordreImporter extends GenericStructureImporter {
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
                     ID_SYSTEME_REP,
-        //            ID_BORNEREF_DEBUT,
-        //            AMONT_AVAL_DEBUT,
+                    ID_BORNEREF_DEBUT,
+                    AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-        //            ID_BORNEREF_FIN,
-        //            AMONT_AVAL_FIN,
+                    ID_BORNEREF_FIN,
+                    AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
 //            LIEU_DIT_DESORDRE,
 //            DESCRIPTION_DESORDRE,
@@ -129,14 +130,23 @@ class DesordreImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre desordre = new Desordre();
-
+            if (row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                desordre.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+            
+            if (row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()) != null) {
+                BorneDigue b = borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
+                if (b!=null) desordre.setBorne_fin(b.getId());
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
 
+            desordre.setBorne_debut_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString())); 
+            desordre.setBorne_fin_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString()));
             final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 desordre.setTroncon(troncon.getId());

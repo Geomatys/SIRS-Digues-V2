@@ -549,7 +549,7 @@ public class DbImporter {
             importer.cleanDb();
             
             for(final TronconDigue troncon : importer.importation()){
-                System.out.println(troncon.getSysteme_reperage_defaut());
+//                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
 //                
 //                    if(structure instanceof Crete){

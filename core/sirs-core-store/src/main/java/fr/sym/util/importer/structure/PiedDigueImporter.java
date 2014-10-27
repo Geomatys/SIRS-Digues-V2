@@ -12,6 +12,7 @@ import fr.sym.util.importer.BorneDigueImporter;
 import fr.sym.util.importer.DbImporter;
 import fr.sym.util.importer.SystemeReperageImporter;
 import fr.sym.util.importer.TronconGestionDigueImporter;
+import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.PiedDigue;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -64,11 +65,11 @@ class PiedDigueImporter extends GenericStructureImporter {
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
                 ID_SYSTEME_REP,
-        //        ID_BORNEREF_DEBUT,
-        //        AMONT_AVAL_DEBUT,
+                ID_BORNEREF_DEBUT,
+                AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-        //        ID_BORNEREF_FIN,
-        //        AMONT_AVAL_FIN,
+                ID_BORNEREF_FIN,
+                AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
 //        N_COUCHE,
@@ -187,14 +188,23 @@ class PiedDigueImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final PiedDigue piedDigue = new PiedDigue();
-
+            if (row.getDouble(PiedDigueColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                piedDigue.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(PiedDigueColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            }
             if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 piedDigue.setBorne_debut_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+            if (row.getDouble(PiedDigueColumns.ID_BORNEREF_FIN.toString()) != null) {
+                BorneDigue b = borneDigueImporter.getBorneDigue().get((int) row.getDouble(PiedDigueColumns.ID_BORNEREF_FIN.toString()).doubleValue());
+                if (b!=null) piedDigue.setBorne_fin(b.getId());
             }
             if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 piedDigue.setBorne_fin_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
-            piedDigue.setCommentaire(PiedDigueColumns.COMMENTAIRE.toString());
+            
+            piedDigue.setBorne_debut_aval(row.getBoolean(PiedDigueColumns.AMONT_AVAL_DEBUT.toString())); 
+            piedDigue.setBorne_fin_aval(row.getBoolean(PiedDigueColumns.AMONT_AVAL_FIN.toString()));
+            piedDigue.setCommentaire(row.getString(PiedDigueColumns.COMMENTAIRE.toString()));
 
             if (row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()) != null) {
                 piedDigue.setPR_debut(row.getDouble(PiedDigueColumns.PR_DEBUT_CALCULE.toString()).floatValue());
