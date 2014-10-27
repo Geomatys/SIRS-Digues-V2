@@ -32,12 +32,12 @@
             </goals>
           </execution>
         </executions>
-            <configuration>
-              <model>model/symadrem.ecore</model>
-              <modelPackage>fr.symadrem.sirs.core.model</modelPackage>
-              <repositoryPackage>fr.symadrem.sirs.core.component</repositoryPackage>
-              <repositoryInterface>fr.symadrem.sirs.core.Repository</repositoryInterface>
-            </configuration>
+        <configuration>
+          <model>model/symadrem.ecore</model>
+          <modelPackage>fr.symadrem.sirs.core.model</modelPackage>
+          <repositoryPackage>fr.symadrem.sirs.core.component</repositoryPackage>
+          <repositoryInterface>fr.symadrem.sirs.core.Repository</repositoryInterface>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -66,13 +66,12 @@
       <artifactId>org.ektorp.spring</artifactId>
       <version>${ektorp.version}</version>
     </dependency>
-
+   <!-- RDBMS deps -->
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
       <version>${liquidbase.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>jooq</artifactId>
@@ -88,27 +87,23 @@
       <artifactId>jooq-codegen</artifactId>
       <version>3.3.2</version>
     </dependency>
-
-
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-store</artifactId>
       <version>4.x-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
-    
     <dependency>
       <groupId>com.healthmarketscience.jackcess</groupId>
       <artifactId>jackcess</artifactId>
       <version>2.0.6</version>
     </dependency>
-    
+
     <!-- format -->
     <dependency>
       <groupId>org.geotoolkit</groupId>
@@ -121,9 +116,16 @@
       <version>${geotoolkit.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>9.3-1101-jdbc41</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
 
- 
+
 
 </project>
