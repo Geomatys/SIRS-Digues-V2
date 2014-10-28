@@ -2,6 +2,7 @@ package fr.symadrem.sirs.core;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.ektorp.CouchDbConnector;
 import org.junit.runner.RunWith;
@@ -32,4 +33,9 @@ public abstract class CouchDBTestCase {
     	}
     }
 
+    
+    protected void log(String message) {
+    	SymadremCore.LOGGER.log(Level.INFO, message);
+    }
+    
 }
