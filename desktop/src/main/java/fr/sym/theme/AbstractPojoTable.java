@@ -16,6 +16,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
@@ -40,11 +41,39 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public abstract class AbstractPojoTable extends BorderPane{
     
+    private static final Comparator COMPARATOR = new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if(o1==null && o2==null) return 0;
+                if(o1==null) return -1;
+                if(o2==null) return +1;
+
+                if(o1 instanceof Boolean){
+                    return Boolean.compare((Boolean)o1, (Boolean)o2);
+                }else if(o1 instanceof Number){
+                    final double d1 = ((Number)o1).doubleValue();
+                    final double d2 = ((Number)o2).doubleValue();
+                    return Double.compare(d1, d2);
+                }else if(o1 instanceof String){
+                    return ((String)o1).compareToIgnoreCase((String)o2);
+                }else if(o1 instanceof LocalDateTime){
+                    return ((LocalDateTime)o1).compareTo((LocalDateTime)o2);
+                }else {
+                    return 0;
+                }
+            }
+        };
+    
     private static final Class[] SUPPORTED_TYPES = new Class[]{
         Boolean.class,
         String.class,
         Integer.class,
         Float.class,
+        Double.class,
+        boolean.class,
+        int.class,
+        float.class,
+        double.class,
         LocalDateTime.class
     };
     
@@ -59,7 +88,7 @@ public abstract class AbstractPojoTable extends BorderPane{
         uiScroll.setFitToHeight(true);
         uiScroll.setFitToWidth(true);
         uiTable.setEditable(true);
-        
+                
         setCenter(uiScroll);
         
         //contruction des colonnes editable
@@ -91,7 +120,6 @@ public abstract class AbstractPojoTable extends BorderPane{
             super(desc.getDisplayName());
             this.desc = desc;
             setEditable(true);
-            setSortable(true);
             
             setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
             
@@ -102,17 +130,20 @@ public abstract class AbstractPojoTable extends BorderPane{
             
             //choix de l'editeur en fonction du type de données
             final Class type = desc.getReadMethod().getReturnType();            
-            if(Boolean.class.isAssignableFrom(type)){
+            if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
                 setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
             }else if(String.class.isAssignableFrom(type)){
                 setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
-            }else if(Integer.class.isAssignableFrom(type)){
+            }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
                 setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
-            }else if(Float.class.isAssignableFrom(type)){
+            }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
+                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+            }else if(Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)){
                 setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
             }else if(LocalDateTime.class.isAssignableFrom(type)){
                 setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
             }
+            setComparator(COMPARATOR);
             
         }  
     }

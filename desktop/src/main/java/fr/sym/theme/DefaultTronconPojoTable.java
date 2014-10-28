@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -41,7 +42,12 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
         if(trc==null || group==null){
             uiTable.setItems(FXCollections.emptyObservableList());
         }else{
-            uiTable.setItems(group.getExtractor().apply(trc));
+            //JavaFX bug : sortable is not possible on filtered list
+            // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
+            // https://javafx-jira.kenai.com/browse/RT-32091
+            final SortedList sortedList = new SortedList(group.getExtractor().apply(trc));
+            uiTable.setItems(sortedList);
+            sortedList.comparatorProperty().bind(uiTable.comparatorProperty());
         }
     }
 

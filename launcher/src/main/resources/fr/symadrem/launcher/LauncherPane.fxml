@@ -17,9 +17,9 @@
       </ImageView>
    </left>
    <center>
-      <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
-          <Tab text="Base locale">
+          <Tab fx:id="uiLocalDbTab" text="Base locale">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
@@ -30,13 +30,10 @@
                       <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                      <children>
-                        <Button mnemonicParsing="false" onAction="#connectLocal" text="Connection" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                        <Button fx:id="uiConnectButton" mnemonicParsing="false" onAction="#connectLocal" text="Connection" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                         <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
                            <content>
                               <TableView fx:id="uiLocalBaseTable" prefHeight="200.0" prefWidth="200.0">
-                                <columns>
-                                  <TableColumn prefWidth="75.0" text="Bases disponibles" />
-                                </columns>
                                  <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                  </columnResizePolicy>

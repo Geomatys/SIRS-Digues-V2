@@ -7,10 +7,15 @@ import fr.sym.util.importer.DbImporter;
 import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +25,10 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -47,7 +56,7 @@ public class LauncherPane extends BorderPane {
     @FXML
     private TextField uiImportDBCarto;
     @FXML
-    private TableView<?> uiLocalBaseTable;
+    private TableView<String> uiLocalBaseTable;
     @FXML
     private TextField uiDistantUrl;
     @FXML
@@ -61,9 +70,15 @@ public class LauncherPane extends BorderPane {
     @FXML
     private Button uiImportButton;
     @FXML
+    private Button uiConnectButton;
+    @FXML
     private ProgressBar uiProgressCreate;    
     @FXML
     private ProgressBar uiProgressImport;
+    @FXML
+    private TabPane uiTabPane;
+    @FXML
+    private Tab uiLocalDbTab;
     
     public LauncherPane() {
         final Class cdtClass = getClass();
@@ -82,20 +97,39 @@ public class LauncherPane extends BorderPane {
         
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
+        
+        final TableColumn<String,String> column = new TableColumn<>("Base de données");
+        column.setCellValueFactory((TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()));
+        
+        uiLocalBaseTable.getColumns().clear();
+        uiLocalBaseTable.getColumns().add(column);
+        uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        
+        updateLocalDbList();
+        
+    }
+    
+    private void updateLocalDbList(){
+        final ObservableList<String> names = FXCollections.observableList(listLocalDatabase());
+        uiLocalBaseTable.setItems(names);
+        if(!names.isEmpty()){
+            uiLocalBaseTable.getSelectionModel().select(0);
+        }
+        uiConnectButton.setDisable(names.isEmpty());
     }
     
     @FXML
     void connectLocal(ActionEvent event) {
-        try {
-            Runtime.getRuntime().exec("java -jar desktop-1.x-SNAPSHOT.jar");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
+        runDesktop("http://geouser:geopw@localhost:5984", db);
     }
 
     @FXML
     void connectDistant(ActionEvent event) {
-
+        //TODO : login/password
+        //TODO : import
+        runDesktop(uiDistantUrl.getText(), uiDistantLogin.getText());
     }
 
     @FXML
@@ -110,6 +144,12 @@ public class LauncherPane extends BorderPane {
             @Override
             public void run() {
                 try{
+                   
+                    //aller au panneau principale
+                    Platform.runLater(() -> {
+                        uiTabPane.getSelectionModel().clearAndSelect(0);
+                        updateLocalDbList();
+                    });
                     
                 }catch(Exception ex){
                     LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -144,6 +184,13 @@ public class LauncherPane extends BorderPane {
                             DatabaseBuilder.open(cartoDbFile));
                     importer.cleanDb();
                     importer.importation();
+                    
+                    //aller au panneau principale
+                    Platform.runLater(() -> {
+                        uiTabPane.getSelectionModel().clearAndSelect(0);
+                        updateLocalDbList();
+                    });
+                    
                 }catch(IOException | AccessDbImporterException ex){
                     LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                     new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.CLOSE).showAndWait();
@@ -188,8 +235,27 @@ public class LauncherPane extends BorderPane {
 
     }
         
+    private static void runDesktop(String serverUrl, String database){
+        final File folder = new File(".");
+        final File[] sub = folder.listFiles();
+        String name = "";
+        for(File f : sub){
+            if(f.getName().toLowerCase().startsWith("desktop")){
+                name = f.getName();
+            }
+        }
+        
+        try {
+            new Alert(Alert.AlertType.ERROR, "java -jar "+name+" \""+serverUrl+"\" \""+database+"\"").showAndWait();
+            Runtime.getRuntime().exec("java -jar "+name+" "+serverUrl+" "+database);
+            //Runtime.getRuntime().exec(new String[]{"java","-jar",name,serverUrl,database});
+        } catch (IOException ex) {
+            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            ex.printStackTrace();
+        }
+    }
     
-    public static File getPreviousPath() {
+    private static File getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
         final String str = prefs.get("path", null);
         if(str!=null){
@@ -201,9 +267,16 @@ public class LauncherPane extends BorderPane {
         return null;
     }
 
-    public static void setPreviousPath(final File path) {
+    private static void setPreviousPath(final File path) {
         final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
         prefs.put("path", path.getAbsolutePath());
+    }
+ 
+    private static List<String> listLocalDatabase(){
+        //TODO
+        final List<String> dbs = new ArrayList<>();
+        dbs.add("symadrem");
+        return dbs;
     }
     
 }

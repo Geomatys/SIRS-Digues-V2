@@ -23,13 +23,17 @@ import fr.sym.theme.StructuresTheme;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
+import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.scene.control.MenuItem;
+import javax.imageio.ImageIO;
 import org.apache.sis.storage.DataStoreException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
@@ -91,7 +95,8 @@ public class CorePlugin extends Plugin{
             final BeanStore store = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", null, PROJECTION, ()-> repo.getAll()),
                     new BeanFeatureSupplier(Fondation.class, "id", null, PROJECTION, ()-> repo.getAllFondations()),
-                    new BeanFeatureSupplier(BorneDigue.class, "id", null, PROJECTION, ()-> bornes)
+                    new BeanFeatureSupplier(BorneDigue.class, "id", null, PROJECTION, ()-> bornes),
+                    new BeanFeatureSupplier(Crete.class, "id", null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete))
             );
                     
                          
@@ -104,6 +109,41 @@ public class CorePlugin extends Plugin{
         return items;
     }
 
+    private class StructSupplier implements BeanStore.FeatureSupplier{
+
+        private final Predicate predicate;
+        
+        public StructSupplier(Predicate predicate) {
+            this.predicate = predicate;
+        }
+        
+        @Override
+        public Iterable get() {
+            return new SubIterable(predicate);
+        }
+        
+    }
+    
+    private class SubIterable implements Iterable{
+
+        private final Predicate predicate;
+
+        public SubIterable(Predicate predicate) {
+            this.predicate = predicate;
+        }
+        
+        public Iterator iterator() {
+            final TronconDigueRepository repo = getSession().getTronconDigueRepository();
+            final List<TronconDigue> troncons = repo.getAll();
+            final List col = new ArrayList();
+            for(TronconDigue td : troncons){
+                col.addAll(td.stuctures.filtered(predicate));
+            }
+            return col.iterator();
+        }
+        
+    }
+    
     private List<MapLayer> buildLayers(FeatureStore store) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);

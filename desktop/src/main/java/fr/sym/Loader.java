@@ -36,6 +36,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.geomatys.json.GeometryDeserializer;
 import fr.symadrem.sirs.core.CouchDBInit;
+import java.util.Arrays;
 
 /**
  *
@@ -55,7 +56,7 @@ public class Loader extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
+        System.out.println("Starting application with : "+Arrays.toString(args));
         if(args.length>0) DATABASE_URL = args[0];
         if(args.length>1) DATABASE_NAME = args[1];
         
