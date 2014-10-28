@@ -52,6 +52,8 @@ public class Plugin {
     
     /**
      * Recupere les actions disponibles pour un object selectionné sur la carte.
+     * @param candidate
+     * @return 
      */
     public List<MenuItem> getMapActions(Object candidate) {
         return Collections.EMPTY_LIST;
@@ -59,6 +61,7 @@ public class Plugin {
     
     /**
      * Load the plugin.
+     * @throws java.lang.Exception
      */
     public void load() throws Exception {
         
