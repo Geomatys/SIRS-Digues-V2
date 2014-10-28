@@ -9,8 +9,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.component.SystemeReperageBorneRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
-import fr.symadrem.sirs.core.model.GestionTroncon;
-import fr.symadrem.sirs.core.model.Organisme;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.SystemeReperageBorne;
 import java.io.IOException;
@@ -113,7 +111,10 @@ public class SystemeReperageBorneImporter extends GenericImporter {
                 systemeReperageBorne.setDateMaj(LocalDateTime.parse(row.getDate(SystemeReperageBorneColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-//            systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()));
+            if (row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString())!=null){
+                System.out.println(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()));
+                systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()).floatValue());
+            }
             
             final BorneDigue borne = borneDigueImporter.getBorneDigue().get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
             systemeReperageBorne.setBorne_digue(borne.getId());
