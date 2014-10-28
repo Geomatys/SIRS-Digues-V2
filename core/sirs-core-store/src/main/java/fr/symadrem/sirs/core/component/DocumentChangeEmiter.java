@@ -179,14 +179,9 @@ public class DocumentChangeEmiter {
 
 			} else {
 				if (change.getRevision().startsWith("1")) {
-					System.out
-							.println("DocumentChangeEmiter.handlerChanges() CREATE");
 					getElement(change.getId(), Optional.empty()).map(
 							element -> listener.documentCreated(element));
 				} else {
-					System.out
-							.println("DocumentChangeEmiter.handlerChanges() UPDATE");
-
 					getElement(change.getId(), Optional.empty()).map(
 							element -> listener.documentChanged(element));
 				}
