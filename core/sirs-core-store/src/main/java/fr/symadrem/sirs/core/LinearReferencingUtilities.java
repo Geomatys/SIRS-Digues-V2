@@ -1,16 +1,30 @@
 
-package fr.sym.util;
+package fr.symadrem.sirs.core;
 
+import com.geomatys.json.GeometryDeserializer;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
+import fr.symadrem.sirs.core.model.BorneDigue;
+import fr.symadrem.sirs.core.model.Structure;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import javax.vecmath.Vector2d;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.Static;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
+import org.geotoolkit.display2d.style.j2d.PathWalker;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.math.XMath;
 
 /**
  * Methodes de calculs utilitaire pour le référencement linéaire.
@@ -213,6 +227,104 @@ public final class LinearReferencingUtilities extends Static{
     private static double lineSide(SegmentInfo segment, Coordinate c) {
         return (segment.segmentCoords[1].x-segment.segmentCoords[0].x) * (c.y-segment.segmentCoords[0].y) - 
                (c.x-segment.segmentCoords[0].x) * (segment.segmentCoords[1].y-segment.segmentCoords[0].y);
+    }
+    
+    public static LineString buildGeometry(Geometry tronconGeom, Structure structure, BorneDigueRepository repo){
+        
+        final LineString troncon = asLineString(tronconGeom);        
+        
+        if(structure.getPositionDebut()!=null){
+            //reconstruction a partir de 2 points géographique
+            //TODO
+        }else{
+            //reconstruction a partir de bornes et de distances
+            BorneDigue borneDebut = (structure.getBorne_debut()!=null) ? repo.get(structure.getBorne_debut()) : null;
+            BorneDigue borneFin = (structure.getBorne_fin()!=null) ? repo.get(structure.getBorne_fin()) : null;
+            if(borneDebut==null && borneFin==null){
+                //aucune borne définie, on ne peut pas calculer la géométrie
+                return null;
+            }
+            
+            //il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel
+            if(borneDebut==null) borneDebut = borneFin;
+            if(borneFin==null) borneFin = borneDebut;
+            
+            double distanceDebut = structure.getBorne_debut_distance();
+            double distanceFin = structure.getBorne_fin_distance();
+            //on considére que les troncons sont numérisé dans le sens amont vers aval.
+            if(!structure.getBorne_debut_aval()) distanceDebut *= -1.0;
+            if(!structure.getBorne_fin_aval()) distanceFin *= -1.0;
+            
+            //calculate de la distance des bornes
+            final Point borneDebutGeom = borneDebut.getPositionBorne();
+            final Point borneFinGeom = borneFin.getPositionBorne();
+            
+            final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
+            final double borneDebutDistance = calculateRelative(troncon, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
+            final double borneFinDistance = calculateRelative(troncon, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
+            
+            //conversion des distances au borne en distance par rapport au debut du troncon
+            distanceDebut += borneDebutDistance;
+            distanceFin += borneFinDistance;
+            
+            //on s'assure de l'ordre croissant des positions
+            if(distanceDebut>distanceFin){
+                double temp = distanceDebut;
+                distanceDebut = distanceFin;
+                distanceFin = temp;
+            }
+            
+            //on s"assure de ne pas sortir du troncon
+            final double tronconLength = troncon.getLength();
+            distanceDebut = XMath.clamp(distanceDebut, 0, tronconLength);
+            distanceFin = XMath.clamp(distanceFin, 0, tronconLength);
+            
+            //create du tracé de la structure le long du troncon
+            final PathIterator ite = new JTSLineIterator(troncon, null);
+            final PathWalker walker = new PathWalker(ite);
+            walker.walk((float)distanceDebut);
+            float remain = (float) (distanceFin-distanceDebut);
+            
+            final List<Coordinate> structureCoords = new ArrayList<>();
+            Point2D point = walker.getPosition(null);
+            structureCoords.add(new Coordinate(point.getX(), point.getY()));
+            
+            while(!walker.isFinished() && remain>0){
+                final float advance = Math.min(walker.getSegmentLengthRemaining(), remain);
+                remain -= advance;
+                walker.walk(advance);
+                point = walker.getPosition(point);
+                structureCoords.add(new Coordinate(point.getX(), point.getY()));
+            }
+            
+            if(structureCoords.size()==1){
+                //point unique, on le duplique pour obtenir on moins un segment
+                structureCoords.add(new Coordinate(structureCoords.get(0)));
+            }
+            
+            final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));
+            JTS.setCRS(geom, GeometryDeserializer.PROJECTION);
+            
+            return geom;
+        }
+        
+        return null;
+    }
+    
+    private static LineString asLineString(Geometry tronconGeom) {
+        final LineString troncon;
+        if (tronconGeom instanceof LineString) {
+            troncon = (LineString) tronconGeom;
+        } else if (tronconGeom instanceof MultiLineString) {
+            final MultiLineString mls = (MultiLineString) tronconGeom;
+            if (mls.getNumGeometries() != 1) {
+                throw new IllegalArgumentException("Geometry must be a LineString or a MultilineString with 1 sub-geometry.");
+            }
+            troncon = (LineString) mls.getGeometryN(0);
+        } else {
+            throw new IllegalArgumentException("Geometry must be a LineString or a MultilineString with 1 sub-geometry.");
+        }
+        return troncon;
     }
     
 }

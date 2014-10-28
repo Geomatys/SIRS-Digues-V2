@@ -8,7 +8,10 @@ package fr.sym.util.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import fr.sym.util.importer.structure.StructureImporter;
+import fr.symadrem.sirs.core.LinearReferencingUtilities;
+import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
@@ -42,6 +45,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private StructureImporter structureImporter;
     
     private TronconDigueRepository tronconDigueRepository;
+    private BorneDigueRepository borneDigueRepository;
     
     private TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -51,6 +55,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconDigueRepository tronconDigueRepository,
+            final BorneDigueRepository borneDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final TypeRiveImporter typeRiveImporter, 
@@ -59,6 +64,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final BorneDigueImporter borneDigueImporter){
         this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
+        this.borneDigueRepository = borneDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
         this.typeRiveImporter = typeRiveImporter;
@@ -208,5 +214,21 @@ public class TronconGestionDigueImporter extends GenericImporter {
             //Update the repository
             tronconDigueRepository.update(tronconDigue);
         }
+        
+        
+        
+        //reconstruction des geometries des structures
+        for(Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
+            final TronconDigue troncon = entry.getValue();
+            final Geometry tronconGeom = (Geometry) troncon.getGeometry();
+            for(Structure str : troncon.getStuctures()){
+                final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
+                str.setGeometry(structGeom);
+            }
+            
+            //Update the repository
+            tronconDigueRepository.update(troncon);
+        }
+        
     }
 }

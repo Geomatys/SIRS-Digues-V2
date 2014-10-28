@@ -417,7 +417,7 @@ public class DbImporter {
         this.digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
         this.borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
-                couchDbConnector, tronconDigueRepository, digueImporter, 
+                couchDbConnector, tronconDigueRepository, borneDigueRepository, digueImporter, 
                 tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 

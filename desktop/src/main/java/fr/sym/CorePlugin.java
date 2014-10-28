@@ -93,10 +93,10 @@ public class CorePlugin extends Plugin{
             }
             
             final BeanStore store = new BeanStore(
-                    new BeanFeatureSupplier(TronconDigue.class, "id", null, PROJECTION, ()-> repo.getAll()),
-                    new BeanFeatureSupplier(Fondation.class, "id", null, PROJECTION, ()-> repo.getAllFondations()),
-                    new BeanFeatureSupplier(BorneDigue.class, "id", null, PROJECTION, ()-> bornes),
-                    new BeanFeatureSupplier(Crete.class, "id", null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete))
+                    new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", null, PROJECTION, ()-> repo.getAll()),
+                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", null, PROJECTION, ()-> repo.getAllFondations()),
+                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", null, PROJECTION, ()-> bornes),
+                    new BeanFeatureSupplier(Crete.class, "id", "geometry", null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete))
             );
                     
                          

@@ -16,7 +16,7 @@ import org.opengis.util.FactoryException;
 
 public class GeometryDeserializer extends JsonDeserializer<Geometry> {
 
-    private static CoordinateReferenceSystem PROJECTION;
+    public static CoordinateReferenceSystem PROJECTION;
     
     static {
         try {
@@ -28,6 +28,7 @@ public class GeometryDeserializer extends JsonDeserializer<Geometry> {
     
     @Override
     public Geometry deserialize(JsonParser parser, DeserializationContext arg1) throws IOException, JsonProcessingException {
+        if(parser.getText()==null || parser.getText().isEmpty()) return null;
         try {
             Geometry poly = (Geometry) new WKTReader().read(parser.getText());
             JTS.setCRS(poly, PROJECTION);

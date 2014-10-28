@@ -1,5 +1,6 @@
 package fr.sym;
 
+import com.geomatys.json.GeometryDeserializer;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import java.net.URL;
 import java.util.List;
@@ -13,10 +14,8 @@ import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.DefaultDescription;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,15 +33,7 @@ import org.ektorp.CouchDbConnector;
 @Component
 public class Session {
 
-    public static final CoordinateReferenceSystem PROJECTION;
-    
-    static {
-        try {
-            PROJECTION  = CRS.decode("EPSG:2154");
-        } catch (FactoryException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    public static final CoordinateReferenceSystem PROJECTION = GeometryDeserializer.PROJECTION;
     
     private MapContext mapContext;
     private final MapItem symadremGroup = MapBuilder.createItem();
