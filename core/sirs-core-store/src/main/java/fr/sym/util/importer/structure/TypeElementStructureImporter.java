@@ -10,7 +10,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Fondation;
-import fr.symadrem.sirs.core.model.FrancBord;
+import fr.symadrem.sirs.core.model.LargeurFrancBord;
 import fr.symadrem.sirs.core.model.OuvrageParticulier;
 import fr.symadrem.sirs.core.model.OuvrageRevanche;
 import fr.symadrem.sirs.core.model.PiedDigue;
@@ -93,9 +93,9 @@ public class TypeElementStructureImporter extends GenericImporter {
                 case SYS_EVT_PIED_DE_DIGUE:
                     classe = PiedDigue.class; break;
 //                    case 6:
-//                        classe = FrancBord.class; break;
+//                        classe = LargeurFrancBord.class; break;
 //                    case 7:
-//                        classe = FrancBord.class; break;
+//                        classe = LargeurFrancBord.class; break;
                 case SYS_EVT_FONDATION:
                     classe = Fondation.class; break;
                 case SYS_EVT_OUVRAGE_PARTICULIER:
