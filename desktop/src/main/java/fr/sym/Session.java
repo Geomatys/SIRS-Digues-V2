@@ -90,6 +90,7 @@ public class Session {
                 for (Name n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+                    cml.setOpacity(0.4);
                     cml.setName("Open Street Map");
                     cml.setDescription(new DefaultDescription(
                             new SimpleInternationalString("Open Street Map"),

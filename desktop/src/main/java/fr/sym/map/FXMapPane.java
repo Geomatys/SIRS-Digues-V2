@@ -6,11 +6,13 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
+import java.awt.Color;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.Date;
 import java.util.logging.Level;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.SeparatorMenuItem;
@@ -19,11 +21,15 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
@@ -33,6 +39,7 @@ import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
+import org.geotoolkit.gui.javafx.render2d.FXColorDecoration;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
 import org.geotoolkit.gui.javafx.render2d.FXGeoToolBar;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -72,13 +79,14 @@ public class FXMapPane extends BorderPane {
     private Session session;
     
     public FXMapPane() {
-        Injector.injectDependencies(this);
-        
+        Injector.injectDependencies(this);        
         context = session.getMapContext();
         
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getContainer().setContext(context);
         uiMap2.getContainer().setContext(context);
+        uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
+        uiMap2.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         synchronizer.addCanvas(uiMap1.getCanvas(),true,true);
         synchronizer.addCanvas(uiMap2.getCanvas(),true,true);
         
