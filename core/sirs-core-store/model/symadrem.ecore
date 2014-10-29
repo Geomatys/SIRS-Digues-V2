@@ -102,7 +102,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocument" eType="#//RefTypeDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Photo">
+  <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="photoIds" upperBound="-1"
         eType="#//Document" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -268,10 +268,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Franc_bord" eSuperTypes="#//Structure">
+  <eClassifiers xsi:type="ecore:EClass" name="LargeurFrancBord" eSuperTypes="#//Structure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBord" eType="#//RefProfilFrancBord"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_profil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeLargeurFrancBord"
         eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
@@ -1197,5 +1195,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
         eType="#//EvenementHydraulique"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilFrontFrancBord" eSuperTypes="#//Structure">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBord" eType="#//RefProfilFrancBord"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_profil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listeLargeurFrancBord"
+        eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
 </ecore:EPackage>
