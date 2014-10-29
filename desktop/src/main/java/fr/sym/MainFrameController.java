@@ -43,12 +43,13 @@ public class MainFrameController extends Stage {
     private void init() {
         setTitle("Symadrem");
         
-        //load themes
+        // Load themes
         final Theme[] themes = Plugins.getThemes();
-        for(Theme theme : themes){
+        for(final Theme theme : themes){
             if(theme.getType().equals(Theme.Type.STANDARD)){
                 uiThemes.getItems().add(toMenuItem(theme));
-            }else{
+            }
+            else{
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
         }
@@ -63,14 +64,17 @@ public class MainFrameController extends Stage {
     }
     
     private MenuItem toMenuItem(final Theme theme){
+        
         final List<Theme> subs = theme.getSubThemes();
         final MenuItem item;
+        
         if(subs.isEmpty()){
             item = new MenuItem(theme.getName());
-        }else{
+        }
+        else{
             item = new Menu(theme.getName());
-            for(Theme sub : subs){
-                ((Menu)item).getItems().add(toMenuItem(sub));
+            for(final Theme sub : subs){
+                ((Menu) item).getItems().add(toMenuItem(sub));
             }
         }
         
@@ -87,8 +91,7 @@ public class MainFrameController extends Stage {
         
         return item;
     }
-    
-
+  
     @FXML
     void openMap(ActionEvent event) {
 
@@ -134,5 +137,4 @@ public class MainFrameController extends Stage {
         controller.setScene(scene);
         return controller;
     }
-
 }

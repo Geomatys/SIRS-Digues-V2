@@ -196,8 +196,6 @@ public abstract class GenericImporter {
             // For eache table column
             this.getTableColumns().stream().forEach((column) -> {
                 
-                
-                
                     if(potentialForgottenFields.contains(column)  && row.get(column)!=null){
                         forgottenFields.add(column);
                         potentialForgottenFields.remove(column);

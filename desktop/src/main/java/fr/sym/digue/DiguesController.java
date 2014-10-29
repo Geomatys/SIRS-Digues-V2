@@ -17,7 +17,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,11 +27,8 @@ public class DiguesController {
     @Autowired
     private Session session;
 
-    @FXML
-    private TreeView uiTree;
-
-    @FXML
-    private BorderPane uiRight;
+    @FXML private TreeView uiTree;
+    @FXML private BorderPane uiRight;
 
     @FXML
     private void openSearchPopup(ActionEvent event) {
@@ -41,10 +37,10 @@ public class DiguesController {
 
     private void buildTreeView(final TreeItem treeRootItem) {
 
-        SystemeEndiguementProvisoire systemeEndiguement = new SystemeEndiguementProvisoire();
+        final SystemeEndiguementProvisoire systemeEndiguement = new SystemeEndiguementProvisoire();
         systemeEndiguement.nom = "Un systeme d'endiguement";
         
-        TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
+        final TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
         treeRootItem.getChildren().add(systemeEndiguementItem);
         
         this.session.getDigues().stream().forEach((digue) -> {
@@ -79,13 +75,13 @@ public class DiguesController {
             }
         });
 
-        this.uiTree.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.println(event.getButton().toString());
-            }
-        });
+//        this.uiTree.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//
+//            @Override
+//            public void handle(MouseEvent event) {
+//                System.out.println(event.getButton().toString());
+//            }
+//        });
     }
 
     public static DiguesController create() {
@@ -109,25 +105,10 @@ public class DiguesController {
 
     private class CustomizedTreeCell extends TreeCell {
 
-        private ContextMenu addTronconMenu = new ContextMenu();
-//        private Object currentObject;
+        private final ContextMenu addTronconMenu;
 
         public CustomizedTreeCell() {
-
-//            MenuItem addTronconMenuItem = new MenuItem("Nouveau tronçon");
-//            addTronconMenu.getItems().add(addTronconMenuItem);
-//            addTronconMenuItem.setOnAction(new EventHandler() {
-//                public void handle(Event t) {
-//                    TronconDigue toto = new TronconDigue();
-//                    toto.setNom("Tronçon toto");
-//                    toto.setDigueId(((Digue) currentObject).getId());
-//                    DiguesController.this.session.getTronconDigueRepository().add(toto);
-//                    TreeItem newTroncon = new TreeItem<TronconDigue>(toto);
-//                    getTreeItem().getChildren().add(newTroncon);
-//                }
-//            });
-            
-            
+            addTronconMenu = new ContextMenu();
         }
 
         @Override
@@ -146,7 +127,6 @@ public class DiguesController {
                 setContextMenu(addTronconMenu);
             } else if (obj instanceof Digue) {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-//                this.currentObject = obj;
                 addTronconMenu.getItems().clear();
                 addTronconMenu.getItems().add(new NouveauTronconMenuItem((Digue) obj));
                 setContextMenu(addTronconMenu);
@@ -163,40 +143,33 @@ public class DiguesController {
         private class NouveauTronconMenuItem extends MenuItem {
 
             public NouveauTronconMenuItem(final Digue digue) {
-                super("Nouveau tronçon !");
+                super("Nouveau tronçon ?");
 
-                this.setOnAction(new EventHandler() {
-                    public void handle(Event t) {
-                        TronconDigue toto = new TronconDigue();
-                        toto.setNom("Tronçon toto");
-                        toto.setDigueId(digue.getId());
-                        DiguesController.this.session.getTronconDigueRepository().add(toto);
-                        TreeItem newTroncon = new TreeItem<TronconDigue>(toto);
-                        getTreeItem().getChildren().add(newTroncon);
-                    }
+                this.setOnAction((ActionEvent t) -> {
+                    final TronconDigue troncon = new TronconDigue();
+                    troncon.setNom("Tronçon vide");
+                    troncon.setDigueId(digue.getId());
+                    DiguesController.this.session.getTronconDigueRepository().add(troncon);
+                    final TreeItem newTroncon = new TreeItem<>(troncon);
+                    getTreeItem().getChildren().add(newTroncon);
                 });
-
             }
         }
 
         private class NouvelleDigueMenuItem extends MenuItem {
 
             public NouvelleDigueMenuItem() {
-                super("Nouvelle digue !");
+                super("Nouvelle digue ?");
 
-                this.setOnAction(new EventHandler() {
-                    public void handle(Event t) {
-                        Digue toto = new Digue();
-                        toto.setLibelle("Digue toto");
-                        DiguesController.this.session.getDigueRepository().add(toto);
-                        TreeItem newDigue = new TreeItem<Digue>(toto);
-                        getTreeItem().getChildren().add(newDigue);
-                    }
+                this.setOnAction((ActionEvent t) -> {
+                    final Digue digue = new Digue();
+                    digue.setLibelle("Digue vide");
+                    DiguesController.this.session.getDigueRepository().add(digue);
+                    final TreeItem newDigue = new TreeItem<>(digue);
+                    getTreeItem().getChildren().add(newDigue);
                 });
-
             }
         }
-
     }
     
     

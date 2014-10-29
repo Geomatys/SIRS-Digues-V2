@@ -10,9 +10,12 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +25,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -33,11 +37,13 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
@@ -50,9 +56,13 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import jidefx.scene.control.decoration.DecorationPane;
+import jidefx.scene.control.field.LocalDateTimeField;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXDateField;
-//import jfxtras.scene.control.LocalDateTimeTextField;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
+//import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
+import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -91,7 +101,7 @@ public class DigueController implements Initializable {
       
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println(resources);
+        System.out.println("Méthode initialize DigueController");
     }
 
     @FXML
@@ -104,6 +114,8 @@ public class DigueController implements Initializable {
             this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon.png"));
             this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon.png"));
             this.saveButton.setDisable(false);
+            this.tronconsTable.setEditable(true);
+            this.tronconsTable.getColumns().stream().forEach((column) -> {column.setEditable(true);});
         } else {
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
@@ -111,6 +123,8 @@ public class DigueController implements Initializable {
             this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon-inactif.png"));
             this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon-inactif.png"));
             this.saveButton.setDisable(true);
+            this.tronconsTable.setEditable(false);
+            this.tronconsTable.getColumns().stream().forEach((column) -> {column.setEditable(false);});
         }
     }
     
@@ -281,25 +295,32 @@ public class DigueController implements Initializable {
         final TableColumn<TronconDigue, LocalDateTime> colDateDebut = (TableColumn<TronconDigue, LocalDateTime>) this.tronconsTable.getColumns().get(2);
         colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
         colDateDebut.setEditable(false);
-//        colDateDebut.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
-//            @Override
-//            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-//                return new CustomizedLocalDateTimeTableCell(Field.DATE_DEBUT);
-//            }
-//        });
-        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new FXLocalDateTimeCell());
-        
+        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
+        colDateDebut.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
+
+            @Override
+            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
+                final Object troncon = event.getRowValue();
+                if(troncon!=null){
+                    ((TronconDigue) troncon).setDate_debut(event.getNewValue());
+                }
+            }
+        });
         
         final TableColumn<TronconDigue, LocalDateTime> colDateFin = (TableColumn<TronconDigue, LocalDateTime>)this.tronconsTable.getColumns().get(3);
         colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
         colDateFin.setEditable(false);
-//        colDateFin.setCellFactory(new Callback<TableColumn<TronconDigue, LocalDateTime>, CustomizedLocalDateTimeTableCell>() {
-//            @Override
-//            public CustomizedLocalDateTimeTableCell call(TableColumn<TronconDigue, LocalDateTime> param) {
-//                return new CustomizedLocalDateTimeTableCell(Field.DATE_FIN);
-//            }
-//        });
-        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new FXLocalDateTimeCell());
+        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
+        colDateFin.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
+
+            @Override
+            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
+                final Object troncon = event.getRowValue();
+                if(troncon!=null){
+                    ((TronconDigue) troncon).setDate_fin(event.getNewValue());
+                }
+            }
+        });
         
         final TableColumn colSR = this.tronconsTable.getColumns().get(4);
         colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
@@ -446,44 +467,6 @@ public class DigueController implements Initializable {
         }
     }
     
-//    /**
-//     * Defines the customized table cell for displaying geometry of each levee's section.
-//     */
-//    private class CustomizedLocalDateTimeTableCell extends TableCell<TronconDigue, LocalDateTime> {
-//        
-//        
-//        private final LocalDateTimeTextField localDateTimeTextField;
-//        private final Field field;
-//
-//        public CustomizedLocalDateTimeTableCell(final Field field) {
-//            super();
-//            this.localDateTimeTextField = new LocalDateTimeTextField();
-//            this.localDateTimeTextField.setDisable(true);
-//            this.field = field;
-//        }
-//        
-//        @Override
-//        protected void updateItem(LocalDateTime item, boolean empty) {
-//            
-//            super.updateItem(item, empty);
-//            
-//            if(item != null) {
-//                this.localDateTimeTextField.setLocalDateTime(item);
-//                switch(this.field){
-//                    case DATE_DEBUT: 
-//                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
-//                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_debutProperty());
-//                        break;
-//                    case DATE_FIN: 
-//                        this.localDateTimeTextField.localDateTimeProperty().bindBidirectional(
-//                                ((TronconDigue) CustomizedLocalDateTimeTableCell.this.getTableRow().getItem()).date_finProperty());
-//                        break;
-//                }
-//                setGraphic(this.localDateTimeTextField);
-//            }
-//        }
-//    }
-    
     /**
      * Defines the OpenHtmlEditorEventHandler for editing comment field.
      */
@@ -528,6 +511,103 @@ public class DigueController implements Initializable {
                 dialog.setScene(dialogScene);
                 dialog.show();
             }
+        }
+    }
+
+    public static class CustomizedFXLocalDateTimeCell<S> extends TableCell<S, Object> {
+
+        private final CustomizedFXDateField field = new CustomizedFXDateField();
+        private boolean secondAction;
+
+        public CustomizedFXLocalDateTimeCell() {
+            setGraphic(field);
+            setAlignment(Pos.CENTER);
+            setContentDisplay(ContentDisplay.CENTER);
+
+            this.secondAction = false;
+
+            field.setOnAction((ActionEvent event) -> {
+                if (secondAction) {
+                    commitEdit(field.getValue());
+                } 
+                secondAction = !secondAction;
+            });
+        }
+
+        @Override
+        public void startEdit() {
+            LocalDateTime time = (LocalDateTime) getItem();
+            if (time == null) {
+                time = LocalDateTime.now();
+            }
+            field.setValue(time);
+            super.startEdit();
+            setText(null);
+            setGraphic(field);
+            field.requestFocus();
+        }
+
+        @Override
+        protected void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(null);
+            setGraphic(null);
+            if (item != null) {
+                setText(((LocalDateTime) item).toString());
+            }
+        }
+    }
+
+    public static class CustomizedFXDateField extends LocalDateTimeField {
+
+        private boolean getValueFirstCall = true;
+
+        public CustomizedFXDateField() {
+
+            super("yyyy-MM-dd HH:mm:ss");
+
+            this.setAutoAdvance(false);
+            this.setAutoReformat(false);
+            this.setAutoSelectAll(true);
+            this.setPopupButtonVisible(true);
+
+        }
+
+        /**
+         * Overriden to support null values.
+         *
+         * @return
+         */
+        @Override
+        public LocalDateTime getValue() {
+            String text = getText();
+            LocalDateTime value = super.getValue();
+
+            if ("-- ::".equals(text)) {
+                if (value == null && getValueFirstCall) {
+                    super.setValue(LocalDateTime.now());
+                } else {
+                    super.setValue(null);
+                }
+            }
+
+            getValueFirstCall = false;
+
+            return super.getValue();
+        }
+
+        @Override
+        public void replaceText(int start, int end, String text) {
+            if (text.length() >= 1) {
+                // Change behavior, avoid erasing all text when replacing a full group
+                String existingText = getText();
+                int newEnd = Math.max(0, Math.min(end, existingText.length()));
+                String deletedText = existingText.substring(start, newEnd);
+                if (deletedText.length() > text.length()) {
+                    end = start + text.length();
+                }
+            }
+            super.replaceText(start, end, text);
         }
     }
 }
