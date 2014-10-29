@@ -189,11 +189,14 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
             // Set the references demanding CouchDb identifier.
             final Digue digue = digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
-            if(digue.getId()!=null){
+//            System.out.println("Le tronçon : "+row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+"|| la digue : "+row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
+            if(digue!=null){
+                if(digue.getId()!=null){
                 tronconDigue.setDigueId(digue.getId());
             }else {
                 throw new AccessDbImporterException("La digue "+digue+" n'a pas encore d'identifiant CouchDb !");
             }
+        }
 
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())));

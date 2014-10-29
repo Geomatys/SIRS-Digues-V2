@@ -131,7 +131,8 @@ class DesordreImporter extends GenericStructureImporter {
             final Row row = it.next();
             final Desordre desordre = new Desordre();
             if (row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                desordre.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                final BorneDigue b = borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue());
+                if(b!=null) desordre.setBorne_debut(b.getId());
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
@@ -162,8 +163,11 @@ class DesordreImporter extends GenericStructureImporter {
             if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
                 desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
-            desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
-
+            
+            if(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())!=null){
+                desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
+            }
+            
             if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
                 desordre.setDate_debut(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }

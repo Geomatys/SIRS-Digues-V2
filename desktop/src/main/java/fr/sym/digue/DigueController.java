@@ -3,7 +3,9 @@ package fr.sym.digue;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
+import fr.sym.theme.AbstractPojoTable;
 import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.net.URL;
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -27,6 +30,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -69,10 +73,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DigueController implements Initializable {
+public class DigueController extends BorderPane {
     
     private TreeView uiTree;
-    private Digue digue;
+    private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
     
     @Autowired
@@ -83,6 +87,7 @@ public class DigueController implements Initializable {
     @FXML private Label mode;
     @FXML private FXDateField date_maj;
     @FXML private WebView commentaire;
+    @FXML private ScrollPane scroll;
     @FXML private TableView<TronconDigue> tronconsTable;
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
@@ -99,10 +104,31 @@ public class DigueController implements Initializable {
         public String toString(){return this.field;}
     };
       
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("Méthode initialize DigueController");
+    public DigueController(){
+        
+        final Class cdtClass = getClass();
+//        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
+//        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
+        
+        
+        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
+                "/fr/sym/digue/tronconDigueDisplay.fxml"));
+//        loader.setController(this);
+//        loader.setRoot(this);
+        //in special environement like osgi or other, we must use the proper class loaders
+        //not necessarly the one who loaded the FXMLLoader class
+        loader.setClassLoader(cdtClass.getClassLoader());
+        try {
+            loader.load();
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+        
+        
+        
     }
+    
+    
 
     @FXML
     public void enableFields(ActionEvent event) {
@@ -130,7 +156,7 @@ public class DigueController implements Initializable {
     
     @FXML
     private void save(ActionEvent event){
-        this.session.update(this.digue);
+        this.session.update(this.digueProperty.get());
 //        this.session.update(this.troncons);
         
         // Set the fields no longer editable.-----------------------------------
@@ -150,7 +176,7 @@ public class DigueController implements Initializable {
             ok.setOnAction((ActionEvent event1) -> {
                 TronconDigue tronconDigue = new TronconDigue();
                 tronconDigue.nomProperty().bindBidirectional(libelleInput.textProperty());
-                tronconDigue.setDigueId(digue.getId());
+                tronconDigue.setDigueId(digueProperty.get().getId());
                 this.loadTronconUI(tronconDigue);
                 this.session.add(tronconDigue);
                 dialog.hide();
@@ -247,132 +273,51 @@ public class DigueController implements Initializable {
             }
         }
     }
+    
+    public void setDigue(final Digue digue){
+        this.digueProperty.set(digue);
+        this.init();
+    }
+    
+    public Digue getDigue(){return this.digueProperty.get();}
 
     /**
      * 
      * @param uiTree 
      */
-    public void init(final TreeView uiTree) {
+    public void init() {
         
         // Keep the TreeView reference.
         this.uiTree = uiTree;
         
         // Set the levee for the controller.------------------------------------
-        this.digue = (Digue) ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getValue();
+        Digue digue = this.digueProperty.get();
         
         // Binding levee's name.------------------------------------------------
+        System.out.println(digue);
+        System.out.println(this.libelle);
         this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
         this.libelle.editableProperty().bindBidirectional(this.editionButton.selectedProperty());
         
         // Display levee's id.--------------------------------------------------
-        this.id.setText(this.digue.getId());
+        this.id.setText(digue.getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setValue(this.digue.getDateMaj());
+        this.date_maj.setValue(digue.getDateMaj());
         this.date_maj.setDisable(true);
-        this.date_maj.valueProperty().bindBidirectional(this.digue.dateMajProperty());
+        this.date_maj.valueProperty().bindBidirectional(digue.dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
         this.commentaire.getEngine().loadContent(digue.getCommentaire());
         this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
         
-        // Configuring table for levee's sections.------------------------------
-        final TableColumn idCol = this.tronconsTable.getColumns().get(0);
-        idCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        idCol.setEditable(false);
-        idCol.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
-            @Override
-            public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
-                return new CustomizedIdTableCell();
-            }
-        });
-
-        final TableColumn colName = this.tronconsTable.getColumns().get(1);
-        colName.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colName.setEditable(false);
-        colName.setCellFactory(TextFieldTableCell.forTableColumn());
-
-        final TableColumn<TronconDigue, LocalDateTime> colDateDebut = (TableColumn<TronconDigue, LocalDateTime>) this.tronconsTable.getColumns().get(2);
-        colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
-        colDateDebut.setEditable(false);
-        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
-        colDateDebut.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
-
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
-                final Object troncon = event.getRowValue();
-                if(troncon!=null){
-                    ((TronconDigue) troncon).setDate_debut(event.getNewValue());
-                }
-            }
-        });
-        
-        final TableColumn<TronconDigue, LocalDateTime> colDateFin = (TableColumn<TronconDigue, LocalDateTime>)this.tronconsTable.getColumns().get(3);
-        colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
-        colDateFin.setEditable(false);
-        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
-        colDateFin.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
-
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
-                final Object troncon = event.getRowValue();
-                if(troncon!=null){
-                    ((TronconDigue) troncon).setDate_fin(event.getNewValue());
-                }
-            }
-        });
-        
-        final TableColumn colSR = this.tronconsTable.getColumns().get(4);
-        colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
-        colSR.setEditable(false);
-        colSR.setCellFactory(TextFieldTableCell.forTableColumn());
-        
-        final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
-        colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
-        colGeom.setEditable(false);
-        colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
-            @Override
-            public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
-                return new CustomizedGeometryTableCell();
-            }
-        });
-        
-
-        /*colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
-
-         @Override
-         public void handle(TableColumn.CellEditEvent<Troncon, Troncon.jojoenum> event) {
-         ((Troncon) event.getTableView().getItems().get(
-         event.getTablePosition().getRow())).setJojo(Troncon.jojoenum.non);  
-         }
-         }
-        
-         );*/
+      
         
         this.loadTroncons();
         this.tronconsTable.setEditable(false);
         
         // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
-    }
-
-    public static Parent create(final TreeView uiTree) {
-
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
-                "/fr/sym/digue/digueDisplay.fxml"));
-        
-        final Parent root;
-
-        try {
-            root = loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
-
-        final DigueController controller = loader.getController();
-        Injector.injectDependencies(controller);
-        controller.init(uiTree);
-        return root;
     }
 
     // FocusTransverse ?
@@ -483,7 +428,7 @@ public class DigueController implements Initializable {
                 final VBox vbox = new VBox();
 
                 final HTMLEditor htmlEditor = new HTMLEditor();
-                htmlEditor.setHtmlText(digue.getCommentaire());
+                htmlEditor.setHtmlText(digueProperty.get().getCommentaire());
                 
                 final HBox hbox = new HBox();
                 hbox.setPadding(new Insets(20));
@@ -491,7 +436,7 @@ public class DigueController implements Initializable {
                 
                 final Button valider = new Button("Valider");
                 valider.setOnAction((ActionEvent event1) -> {
-                    digue.setCommentaire(htmlEditor.getHtmlText());
+                    digueProperty.get().setCommentaire(htmlEditor.getHtmlText());
                     commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
                     dialog.hide();
                 });
@@ -608,6 +553,34 @@ public class DigueController implements Initializable {
                 }
             }
             super.replaceText(start, end, text);
+        }
+    }
+    
+    
+    
+    private static class TronconPojoTable extends AbstractPojoTable {
+
+        private TronconPojoTable(Class pojoClass) {
+            super(pojoClass);
+        }
+        
+        public TronconPojoTable(){
+            this(TronconDigue.class);
+        }
+
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 }

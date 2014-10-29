@@ -221,8 +221,10 @@ class PiedDigueImporter extends GenericStructureImporter {
                 throw new AccessDbImporterException("Le tronçon "
                         + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
-        piedDigue.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
-
+            
+            if(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())!=null){
+                piedDigue.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
+            }
         
             if (row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
                 piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));

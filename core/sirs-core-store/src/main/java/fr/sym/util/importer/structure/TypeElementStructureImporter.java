@@ -10,7 +10,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Fondation;
-import fr.symadrem.sirs.core.model.LargeurFrancBord;
 import fr.symadrem.sirs.core.model.OuvrageParticulier;
 import fr.symadrem.sirs.core.model.OuvrageRevanche;
 import fr.symadrem.sirs.core.model.PiedDigue;

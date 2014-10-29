@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Row;
 import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.DigueRepository;
@@ -17,6 +18,7 @@ import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -530,11 +532,16 @@ public class DbImporter {
 //                System.out.println(tableName);
 //            });
 //            
-//            System.out.println("=======================");
-//            importer.getCartoDatabase().getTable("CARTO_TRONCON_GESTION_DIGUE").getColumns().stream().forEach((column) -> {
-//                System.out.println(column.getName());
-//            });
-//            System.out.println("++++++++++++++++++++");   
+            System.out.println("=======================");
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE.toString()).iterator();
+            
+//            while(it.hasNext()){
+//                Row row = it.next();
+//                System.out.println(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+//                System.out.println(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_DIGUE.toString()));
+//            }
+            
+            System.out.println("++++++++++++++++++++");   
 //            
 //            for(Row r : importer.getCartoDatabase().getTable("GDB_SpatialRefs")){
 //                System.out.println(r);

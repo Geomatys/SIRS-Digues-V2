@@ -69,7 +69,9 @@ public class DiguesController {
             }
 
             if (obj instanceof Digue) {
-                uiRight.setCenter(DigueController.create(this.uiTree));
+                DigueController digueController = new DigueController();
+                digueController.setDigue((Digue) obj);
+                uiRight.setCenter(digueController);
             } else if (obj instanceof TronconDigue) {
                 uiRight.setCenter(TronconDigueController.create(this.uiTree));
             }
