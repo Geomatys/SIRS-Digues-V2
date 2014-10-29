@@ -19,6 +19,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class MainFrameController extends Stage {
 
@@ -51,6 +52,14 @@ public class MainFrameController extends Stage {
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
         }
+        
+        setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+            @Override
+            public void handle(WindowEvent event) {
+                System.exit(0);
+            }
+        });
     }
     
     private MenuItem toMenuItem(final Theme theme){

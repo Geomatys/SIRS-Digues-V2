@@ -36,7 +36,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.geomatys.json.GeometryDeserializer;
 import fr.symadrem.sirs.core.CouchDBInit;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -56,9 +61,31 @@ public class Loader extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        if(args.length==0){
+             try{
+                final File propFile = new File("params.run");
+                final Properties prop = new Properties();
+                prop.load(new FileInputStream(propFile));
+                args = new String[]{
+                    prop.getProperty("url"),
+                    prop.getProperty("database")
+                };
+            }catch(IOException ex){
+                ex.printStackTrace();
+            }
+        }
+        
+        try {
+            //wait a little in case the launcher is a bit long to close and release the derby database
+            Thread.sleep(1500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         System.out.println("Starting application with : "+Arrays.toString(args));
-        if(args.length>0) DATABASE_URL = args[0];
-        if(args.length>1) DATABASE_NAME = args[1];
+        if(args.length>0 && args[0]!=null) DATABASE_URL = args[0];
+        if(args.length>1 && args[1]!=null) DATABASE_NAME = args[1];
         
         launch(args);
     }

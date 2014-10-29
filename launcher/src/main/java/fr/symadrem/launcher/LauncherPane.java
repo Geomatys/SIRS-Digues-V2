@@ -5,10 +5,17 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.sym.util.importer.AccessDbImporterException;
 import fr.sym.util.importer.DbImporter;
 import fr.symadrem.sirs.core.CouchDBInit;
+import static fr.symadrem.sirs.core.CouchDBInit.DB_CONNECTOR;
+import fr.symadrem.sirs.core.component.DatabaseRegistry;
+import java.awt.Desktop;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -35,6 +42,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.impl.StdCouchDbInstance;
+import org.geotoolkit.internal.io.IOUtilities;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -44,6 +56,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class LauncherPane extends BorderPane {
 
     private static final Logger LOGGER = Logging.getLogger(LauncherPane.class);
+    private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
     @FXML
     private TextField uiDistantLogin;
@@ -122,7 +135,7 @@ public class LauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        runDesktop("http://geouser:geopw@localhost:5984", db);
+        runDesktop(URL_LOCAL, db);
     }
 
     @FXML
@@ -145,6 +158,19 @@ public class LauncherPane extends BorderPane {
             public void run() {
                 try{
                    
+                    final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
+                    final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
+                    final CouchDbConnector connector = couchsb.createConnector(uiNewName.getText(),true);
+
+                    final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
+                    applicationContextParent.refresh();
+                    applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
+
+                    final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
+                        "classpath:/symadrem/spring/couchdb-context.xml"}, applicationContextParent);
+                    
+                    applicationContext.close();
+                    
                     //aller au panneau principale
                     Platform.runLater(() -> {
                         uiTabPane.getSelectionModel().clearAndSelect(0);
@@ -177,7 +203,7 @@ public class LauncherPane extends BorderPane {
                     final File cartoDbFile = new File(uiImportDBCarto.getText());
                     
                     final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
-                            "http://geouser:geopw@localhost:5984", uiImportName.getText().trim(), "classpath:/symadrem/spring/couchdb-context.xml");
+                            URL_LOCAL, uiImportName.getText().trim(), "classpath:/symadrem/spring/couchdb-context.xml");
                     final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
                     DbImporter importer = new DbImporter(couchDbConnector);
                     importer.setDatabase(DatabaseBuilder.open(mainDbFile),
@@ -235,24 +261,43 @@ public class LauncherPane extends BorderPane {
 
     }
         
-    private static void runDesktop(String serverUrl, String database){
-        final File folder = new File(".");
-        final File[] sub = folder.listFiles();
-        String name = "";
-        for(File f : sub){
-            if(f.getName().toLowerCase().startsWith("desktop")){
-                name = f.getName();
+    private static void runDesktop(final String serverUrl, final String database){
+        new Thread(){
+            @Override
+            public void run() {
+                final File folder = new File(".");
+                final File[] sub = folder.listFiles();
+                File desktopFile = null;
+                String name = "";
+                for(File f : sub){
+                    if(f.getName().toLowerCase().startsWith("desktop")){
+                        desktopFile = f;
+                        name = f.getName();
+                    }
+                }
+
+                try {
+                    final Properties prop = new Properties();
+                    prop.setProperty("url", serverUrl);
+                    prop.setProperty("database", database);
+                    prop.store(new FileOutputStream(new File("params.run")), "");
+                    Desktop.getDesktop().open(desktopFile);
+                    System.exit(0);
+                    
+                    //new Alert(Alert.AlertType.ERROR, "java -jar "+name+" \""+serverUrl+"\" \""+database+"\"").showAndWait();
+                    //Runtime.getRuntime().exec("java -jar "+desktopFile.getAbsolutePath()+" "+serverUrl+" "+database);
+                    //Runtime.getRuntime().exec(new String[]{"java","-jar",name,serverUrl,database});
+                    //ProcessBuilder pb = new ProcessBuilder("java","-jar",desktopFile.getAbsolutePath(), serverUrl, database);
+                    //pb.start();
+                    
+                } catch (IOException ex) {
+                    new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+                    ex.printStackTrace();
+                }
             }
-        }
+            
+        }.start();
         
-        try {
-            new Alert(Alert.AlertType.ERROR, "java -jar "+name+" \""+serverUrl+"\" \""+database+"\"").showAndWait();
-            Runtime.getRuntime().exec("java -jar "+name+" "+serverUrl+" "+database);
-            //Runtime.getRuntime().exec(new String[]{"java","-jar",name,serverUrl,database});
-        } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
-            ex.printStackTrace();
-        }
     }
     
     private static File getPreviousPath() {
@@ -273,9 +318,14 @@ public class LauncherPane extends BorderPane {
     }
  
     private static List<String> listLocalDatabase(){
-        //TODO
-        final List<String> dbs = new ArrayList<>();
-        dbs.add("symadrem");
+        List<String> dbs = new ArrayList<>();
+        
+        try {
+            dbs = new DatabaseRegistry().listSirsDatabase(new URL(URL_LOCAL));
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(LauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         return dbs;
     }
     
