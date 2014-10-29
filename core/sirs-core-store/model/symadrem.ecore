@@ -1085,6 +1085,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers" eSuperTypes="#//Document">
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveeIds" upperBound="-1"
         eType="#//LeveeProfilTravers"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" eType="#//ProfilTraversTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LeveeProfilTravers">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1100,6 +1101,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="origineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversEvenementHydraulique"
+        eType="#//ProfilTraversEvenementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrigineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1139,5 +1144,58 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTraversTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteRivierePiedDigue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteRiviereSommetRisberme"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteTerreSommetRisberme"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteTterrePiedDigue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilTraversEvenementHydraulique">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="debitPointe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="vitessePointe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
+        eType="#//EvenementHydraulique"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//Document">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSystemeReleve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleve" eType="#//RefSystemeReleveProfil"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrigineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="origineProfilLong" eType="#//RefOrigineProfilLong"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilLongEvenementHydraulique"
+        eType="#//ProfilLongEvenementHydraulique"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLongEvenementHydraulique">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="PrDebut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="PrFin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="DebitPremerDebordement"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
+        eType="#//EvenementHydraulique"/>
   </eClassifiers>
 </ecore:EPackage>
