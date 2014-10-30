@@ -2,11 +2,13 @@
 package fr.symadrem.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+
 import fr.sym.util.importer.AccessDbImporterException;
 import fr.sym.util.importer.DbImporter;
 import fr.symadrem.sirs.core.CouchDBInit;
+import fr.symadrem.sirs.core.DatabaseRegistry;
 import static fr.symadrem.sirs.core.CouchDBInit.DB_CONNECTOR;
-import fr.symadrem.sirs.core.component.DatabaseRegistry;
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +21,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -40,6 +43,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -321,7 +325,7 @@ public class LauncherPane extends BorderPane {
         List<String> dbs = new ArrayList<>();
         
         try {
-            dbs = new DatabaseRegistry().listSirsDatabase(new URL(URL_LOCAL));
+            dbs = DatabaseRegistry.listSirsDatabase(new URL(URL_LOCAL));
         } catch (MalformedURLException ex) {
             Logger.getLogger(LauncherPane.class.getName()).log(Level.SEVERE, null, ex);
         }
