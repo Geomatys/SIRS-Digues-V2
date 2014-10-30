@@ -1,6 +1,5 @@
 package fr.sym.digue;
 
-import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.theme.AbstractPojoTable;
@@ -9,6 +8,7 @@ import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.time.LocalDateTime;
 import java.util.List;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -17,35 +17,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebView;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import jidefx.scene.control.field.LocalDateTimeField;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,11 +50,11 @@ public class DigueController extends BorderPane {
     @FXML private BorderPane borderPaneTables;
     @FXML private TextField libelle;
     @FXML private Label id;
-    @FXML private Label mode;
     @FXML private FXDateField date_maj;
-    @FXML private WebView commentaire;
-    @FXML private ToggleButton editionButton;
-    @FXML private Button saveButton;
+    @FXML private HTMLEditor uiComment;
+    @FXML private ToggleButton uiEdit;
+    @FXML private ToggleButton uiConsult;
+    @FXML private Button uiSave;
 
     private final TronconPojoTable table = new TronconPojoTable();
 
@@ -77,8 +62,21 @@ public class DigueController extends BorderPane {
         Symadrem.loadFXML(this);
         Injector.injectDependencies(this);
         
+        //mode edition
+        final BooleanBinding editBind = uiEdit.selectedProperty().not();
+        uiSave.disableProperty().bind(editBind);
+        libelle.disableProperty().bind(editBind);
+        uiComment.disableProperty().bind(editBind);
+        
         digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
+        });
+        
+        final ToggleGroup group = new ToggleGroup();
+        uiConsult.setToggleGroup(group);
+        uiEdit.setToggleGroup(group);
+        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
+            if(newValue==null) group.selectToggle(uiConsult);
         });
     }
     
@@ -94,31 +92,28 @@ public class DigueController extends BorderPane {
         this.digueProperty.set(digue);
         initFields();
     }
-
-    @FXML
-    public void enableFields(ActionEvent event) {
-        
-        if (this.editionButton.isSelected()) {
-            this.editionButton.setText("Passer en consultation");
-            this.mode.setText("Mode saisie");
-            this.mode.setTextFill(Color.RED);
-            this.saveButton.setDisable(false);
-        } else {
-            this.editionButton.setText("Passer en saisie");
-            this.mode.setText("Mode consultation");
-            this.mode.setTextFill(Color.WHITE);
-            this.saveButton.setDisable(true);
-        }
-    }
+//
+//    @FXML
+//    public void enableFields(ActionEvent event) {
+//        
+//        if (this.uiEdit.isSelected()) {
+//            this.uiEdit.setText("Passer en consultation");
+//            this.mode.setText("Mode saisie");
+//            this.mode.setTextFill(Color.RED);
+//            this.uiSave.setDisable(false);
+//        } else {
+//            this.uiEdit.setText("Passer en saisie");
+//            this.mode.setText("Mode consultation");
+//            this.mode.setTextFill(Color.WHITE);
+//            this.uiSave.setDisable(true);
+//        }
+//    }
     
     @FXML
     private void save(ActionEvent event){
+        digueProperty.get().setCommentaire(uiComment.getHtmlText());
         this.session.update(this.digueProperty.get());
         this.session.update(this.troncons);
-        
-        // Set the fields no longer editable.-----------------------------------
-        this.editionButton.setSelected(false);
-        this.enableFields(event);
     }
     
     private void reloadTroncons(){
@@ -132,14 +127,13 @@ public class DigueController extends BorderPane {
 
     /**
      * 
-     * @param uiTree 
      */
     public void initFields() {
         borderPaneTables.setCenter(table);
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
-        this.libelle.editableProperty().bindBidirectional(this.editionButton.selectedProperty());
+        this.libelle.editableProperty().bindBidirectional(this.uiEdit.selectedProperty());
         
         // Display levee's id.--------------------------------------------------
         this.id.setText(this.digueProperty.get().getId());
@@ -150,153 +144,66 @@ public class DigueController extends BorderPane {
         this.date_maj.valueProperty().bindBidirectional(this.digueProperty.get().dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaire.getEngine().loadContent(digueProperty.get().getCommentaire());
-        this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
+        this.uiComment.setHtmlText(digueProperty.get().getCommentaire());
         
         table.updateTable();
         
-        // Disable the save button.---------------------------------------------
-        this.saveButton.setDisable(true);
     }
+    
+    private class TronconPojoTable extends AbstractPojoTable {
+    
+            public TronconPojoTable() {
+            super(TronconDigue.class,"Liste des tronçons");
 
-    // FocusTransverse ?
-    /**
-     * Defines the customized table cell for displaying id of each levee's section.
-     */
-    private class CustomizedIdTableCell extends TableCell<TronconDigue, String> {
-        
-        private Button button;
-        
-        @Override
-        protected void updateItem(String item, boolean empty) {
-            
-            super.updateItem(item, empty);
-            
-            if(item != null && !empty) {
-                button = new Button();
-                button.setText("ID");
-                setGraphic(button);
-                button.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, new CornerRadii(20), Insets.EMPTY)));
-                button.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
-                button.setOnAction((ActionEvent event) -> {
-                    final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedIdTableCell.this.getParent()).getItem();
-                    final Stage dialog = new Stage();
-                    final Label nom = new Label(troncon.getNom());
-                    final Label id = new Label(troncon.getId());
-                    final Button ok = new Button("Ok");
-                    ok.setOnAction((ActionEvent event1) -> {
-                        dialog.hide();
-                    });
+            final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
+                updateTable();
+            };
 
-                    final VBox vBox = new VBox();
-                    vBox.setAlignment(Pos.CENTER);
-                    vBox.setPadding(new Insets(20));
-                    vBox.getChildren().add(nom);
-                    vBox.getChildren().add(id);
-                    vBox.getChildren().add(ok);
+            digueProperty.addListener(listener);
+        }
 
-                    final Scene dialogScene = new Scene(vBox);
-                    dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(button.getScene().getWindow());
-                    dialog.setScene(dialogScene);
-                    dialog.setTitle("Identifiant de tronçon de digue.");
-                    dialog.show();
-                });
+        private void updateTable() {
+            reloadTroncons();
+            if (troncons == null) {
+                uiTable.setItems(FXCollections.emptyObservableList());
+            } else {
+            //JavaFX bug : sortable is not possible on filtered list
+                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
+                // https://javafx-jira.kenai.com/browse/RT-32091
+                final SortedList sortedList = new SortedList(troncons);
+                uiTable.setItems(sortedList);
+                sortedList.comparatorProperty().bind(uiTable.comparatorProperty());
             }
+        }
+    
+        @Override
+        protected void deletePojos(Element ... pojos) {
+            for(Element pojo : pojos){
+                session.delete(((TronconDigue) pojo));
+            }
+            updateTable();
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            session.update((TronconDigue) pojo);
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            session.update((TronconDigue) event.getRowValue());
+        }
+
+        @Override
+        protected void createPojo() {
+            
         }
     }
     
-    /**
-     * Defines the customized table cell for displaying geometry of each levee's section.
-     */
-    private class CustomizedGeometryTableCell extends TableCell<TronconDigue, Geometry> {
-        
-        private Button button = new Button();
-                
-        @Override
-        protected void updateItem(Geometry item, boolean empty) {
-            
-            super.updateItem(item, empty);
-            
-            if(item != null) {
-                button.setText(item.getGeometryType());
-                setGraphic(button);
-                button.setBackground(new Background(new BackgroundFill(Color.LIGHTPINK, new CornerRadii(20), Insets.EMPTY)));
-                button.setBorder(new Border(new BorderStroke(Color.DARKMAGENTA, BorderStrokeStyle.SOLID, new CornerRadii(20), BorderWidths.DEFAULT)));
-                button.setOnAction((ActionEvent event) -> {
-                    final TronconDigue troncon = (TronconDigue) ((TableRow) CustomizedGeometryTableCell.this.getParent()).getItem();
-                    final Stage dialog = new Stage();
-                    final Label nom = new Label(troncon.getNom());
-                    final Label wkt = new Label(troncon.getGeometry().toText());
-                    final Button ok = new Button("Ok");
-                    ok.setOnAction((ActionEvent event1) -> {
-                        dialog.hide();
-                    });
-
-                    final VBox vBox = new VBox();
-                    vBox.setAlignment(Pos.CENTER);
-                    vBox.setPadding(new Insets(20));
-                    vBox.getChildren().add(nom);
-                    vBox.getChildren().add(wkt);
-                    vBox.getChildren().add(ok);
-
-                    final Scene dialogScene = new Scene(vBox);
-                    dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(button.getScene().getWindow());
-                    dialog.setScene(dialogScene);
-                    dialog.setTitle("Géométrie de tronçon de digue.");
-                    dialog.show();
-                });
-            }
-        }
-    }
     
-    /**
-     * Defines the OpenHtmlEditorEventHandler for editing comment field.
-     */
-    private class OpenHtmlEditorEventHandler implements EventHandler<MouseEvent> {
-
-        @Override
-        public void handle(MouseEvent event) {
-            
-            if(editionButton.isSelected()){
-                final Stage dialog = new Stage();
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(editionButton.getScene().getWindow());
-                
-                final VBox vbox = new VBox();
-
-                final HTMLEditor htmlEditor = new HTMLEditor();
-                htmlEditor.setHtmlText(digueProperty.get().getCommentaire());
-                
-                final HBox hbox = new HBox();
-                hbox.setPadding(new Insets(20));
-                hbox.setAlignment(Pos.CENTER);
-                
-                final Button valider = new Button("Valider");
-                valider.setOnAction((ActionEvent event1) -> {
-                    digueProperty.get().setCommentaire(htmlEditor.getHtmlText());
-                    commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
-                    dialog.hide();
-                });
-                
-                final Button annuler = new Button("Annuler");
-                annuler.setOnAction((ActionEvent event1) -> {
-                    dialog.hide();
-                });
-                
-                hbox.getChildren().add(valider);
-                hbox.getChildren().add(annuler);
-                
-                vbox.getChildren().add(htmlEditor);
-                vbox.getChildren().add(hbox);
-                
-                final Scene dialogScene = new Scene(vbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        }
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
 
     public static class CustomizedFXLocalDateTimeCell<S> extends TableCell<S, Object> {
 
@@ -393,58 +300,5 @@ public class DigueController extends BorderPane {
             }
             super.replaceText(start, end, text);
         }
-    }
-    
-    
-    
-    
-    private class TronconPojoTable extends AbstractPojoTable {
-    
-            public TronconPojoTable() {
-            super(TronconDigue.class,"Liste des tronçons");
-
-            final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
-                updateTable();
-            };
-
-            digueProperty.addListener(listener);
-        }
-
-        private void updateTable() {
-            reloadTroncons();
-            if (troncons == null) {
-                uiTable.setItems(FXCollections.emptyObservableList());
-            } else {
-            //JavaFX bug : sortable is not possible on filtered list
-                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
-                // https://javafx-jira.kenai.com/browse/RT-32091
-                final SortedList sortedList = new SortedList(troncons);
-                uiTable.setItems(sortedList);
-                sortedList.comparatorProperty().bind(uiTable.comparatorProperty());
-            }
-        }
-    
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            for(Element ele : pojo){
-                session.delete(((TronconDigue) ele));
-            }
-            updateTable();
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
-            session.update((TronconDigue) pojo);
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            session.update((TronconDigue) event.getRowValue());
-        }
-        
-        @Override
-        protected void createPojo() {
-        }
-        
     }
 }
