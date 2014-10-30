@@ -176,7 +176,20 @@
     <center>
         <BorderPane prefHeight="535.0" prefWidth="1024.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
             <center>
-                <ScrollPane fx:id="scroll" fitToHeight="true" fitToWidth="true" prefViewportHeight="534.0" prefViewportWidth="1024.0" />
+                <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="534.0" prefViewportWidth="1024.0">
+                    <content>
+                        <TableView fx:id="tronconsTable" BorderPane.alignment="CENTER">
+                            <columns>
+                                <TableColumn prefWidth="50.0" text="Id" />
+                                <TableColumn prefWidth="250.0" text="Libellé" />
+                                <TableColumn prefWidth="150.0" text="Début de validité" />
+                                <TableColumn prefWidth="150.0" text="Fin de validité" />
+                                <TableColumn prefWidth="100.0" text="SR par défaut" />
+                                <TableColumn prefWidth="130.0" text="Géométrie" />
+                            </columns>
+                        </TableView>
+                    </content>
+                </ScrollPane>
             </center>
         </BorderPane>
     </center>

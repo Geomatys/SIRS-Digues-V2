@@ -3,9 +3,7 @@ package fr.sym.digue;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
-import fr.sym.theme.AbstractPojoTable;
 import fr.symadrem.sirs.core.model.Digue;
-import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.net.URL;
@@ -14,11 +12,10 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -41,7 +37,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
@@ -60,13 +55,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import jidefx.scene.control.decoration.DecorationPane;
 import jidefx.scene.control.field.LocalDateTimeField;
-import org.geotoolkit.font.FontAwesomeIcons;
-import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXDateField;
-//import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
-import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -75,7 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DigueController extends BorderPane {
     
-    private TreeView uiTree;
+//    private TreeView uiTree;
     private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
     
@@ -87,13 +77,35 @@ public class DigueController extends BorderPane {
     @FXML private Label mode;
     @FXML private FXDateField date_maj;
     @FXML private WebView commentaire;
-    @FXML private ScrollPane scroll;
     @FXML private TableView<TronconDigue> tronconsTable;
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
     @FXML private Button addTroncon;
     @FXML private Button deleteTroncon;
 
+    
+    public DigueController() {
+        Symadrem.loadFXML(this);
+        Injector.injectDependencies(this);
+        
+        digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
+            initFields();
+        });
+        
+    }
+    
+    public ObjectProperty<Digue> tronconProperty(){
+        return digueProperty;
+    }
+    
+    public Digue getDigue(){
+        return digueProperty.get();
+    }
+    
+    public void setDigue(Digue digue){
+        this.digueProperty.set(digue);
+        initFields();
+    }
     
     private static enum Field {
         DATE_DEBUT("date_debut"), DATE_FIN("date_fin");
@@ -103,32 +115,6 @@ public class DigueController extends BorderPane {
         @Override
         public String toString(){return this.field;}
     };
-      
-    public DigueController(){
-        
-        final Class cdtClass = getClass();
-//        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-//        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
-        
-        
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
-                "/fr/sym/digue/tronconDigueDisplay.fxml"));
-//        loader.setController(this);
-//        loader.setRoot(this);
-        //in special environement like osgi or other, we must use the proper class loaders
-        //not necessarly the one who loaded the FXMLLoader class
-        loader.setClassLoader(cdtClass.getClassLoader());
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
-        
-        
-        
-    }
-    
-    
 
     @FXML
     public void enableFields(ActionEvent event) {
@@ -157,7 +143,7 @@ public class DigueController extends BorderPane {
     @FXML
     private void save(ActionEvent event){
         this.session.update(this.digueProperty.get());
-//        this.session.update(this.troncons);
+        this.session.update(this.troncons);
         
         // Set the fields no longer editable.-----------------------------------
         this.editionButton.setSelected(false);
@@ -243,10 +229,11 @@ public class DigueController extends BorderPane {
     
     private void loadTroncons(){
         
-        final List<TreeItem> items = ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getChildren();
+//        final List<TreeItem> items = ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getChildren();
+        final List<TronconDigue> items = session.getTronconDigueByDigue(digueProperty.get());
         this.troncons = FXCollections.observableArrayList();
         items.stream().forEach((item) -> {
-            this.troncons.add((TronconDigue) item.getValue());
+            this.troncons.add(item);
         });
         this.tronconsTable.setItems(this.troncons);
     }
@@ -256,7 +243,7 @@ public class DigueController extends BorderPane {
      * @param tronconDigue 
      */
     private void loadTronconUI(final TronconDigue tronconDigue){
-        ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().add(new TreeItem(tronconDigue));
+//        ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().add(new TreeItem(tronconDigue));
         this.troncons.add(tronconDigue);
     }
     
@@ -265,53 +252,115 @@ public class DigueController extends BorderPane {
      * @param tronconDigue 
      */
     private void discardTronconUI(final TronconDigue tronconDigue){
-        for (final Object treeItem : ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren()){
-            if(tronconDigue.equals(((TreeItem) treeItem).getValue())){
-                ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().remove(treeItem);
-                this.troncons.remove(tronconDigue);
-                break;
-            }
-        }
+//        for (final Object treeItem : ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren()){
+//            if(tronconDigue.equals(((TreeItem) treeItem).getValue())){
+//                ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().remove(treeItem);
+//                this.troncons.remove(tronconDigue);
+//                break;
+//            }
+//        }
     }
-    
-    public void setDigue(final Digue digue){
-        this.digueProperty.set(digue);
-        this.init();
-    }
-    
-    public Digue getDigue(){return this.digueProperty.get();}
 
     /**
      * 
      * @param uiTree 
      */
-    public void init() {
+    public void initFields() {
         
         // Keep the TreeView reference.
-        this.uiTree = uiTree;
+//        this.uiTree = uiTree;
         
         // Set the levee for the controller.------------------------------------
-        Digue digue = this.digueProperty.get();
+//        this.digueProperty.set((Digue) ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getValue());
         
         // Binding levee's name.------------------------------------------------
-        System.out.println(digue);
-        System.out.println(this.libelle);
-        this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
+        this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
         this.libelle.editableProperty().bindBidirectional(this.editionButton.selectedProperty());
         
         // Display levee's id.--------------------------------------------------
-        this.id.setText(digue.getId());
+        this.id.setText(this.digueProperty.get().getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setValue(digue.getDateMaj());
+        this.date_maj.setValue(this.digueProperty.get().getDateMaj());
         this.date_maj.setDisable(true);
-        this.date_maj.valueProperty().bindBidirectional(digue.dateMajProperty());
+        this.date_maj.valueProperty().bindBidirectional(this.digueProperty.get().dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
-        this.commentaire.getEngine().loadContent(digue.getCommentaire());
+        this.commentaire.getEngine().loadContent(digueProperty.get().getCommentaire());
         this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
         
-      
+        // Configuring table for levee's sections.------------------------------
+        final TableColumn idCol = this.tronconsTable.getColumns().get(0);
+        idCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        idCol.setEditable(false);
+        idCol.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
+            @Override
+            public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
+                return new CustomizedIdTableCell();
+            }
+        });
+
+        final TableColumn colName = this.tronconsTable.getColumns().get(1);
+        colName.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        colName.setEditable(false);
+        colName.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        final TableColumn<TronconDigue, LocalDateTime> colDateDebut = (TableColumn<TronconDigue, LocalDateTime>) this.tronconsTable.getColumns().get(2);
+        colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
+        colDateDebut.setEditable(false);
+        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
+        colDateDebut.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
+
+            @Override
+            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
+                final Object troncon = event.getRowValue();
+                if(troncon!=null){
+                    ((TronconDigue) troncon).setDate_debut(event.getNewValue());
+                }
+            }
+        });
+        
+        final TableColumn<TronconDigue, LocalDateTime> colDateFin = (TableColumn<TronconDigue, LocalDateTime>)this.tronconsTable.getColumns().get(3);
+        colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
+        colDateFin.setEditable(false);
+        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
+        colDateFin.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
+
+            @Override
+            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
+                final Object troncon = event.getRowValue();
+                if(troncon!=null){
+                    ((TronconDigue) troncon).setDate_fin(event.getNewValue());
+                }
+            }
+        });
+        
+        final TableColumn colSR = this.tronconsTable.getColumns().get(4);
+        colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
+        colSR.setEditable(false);
+        colSR.setCellFactory(TextFieldTableCell.forTableColumn());
+        
+        final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
+        colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
+        colGeom.setEditable(false);
+        colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
+            @Override
+            public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
+                return new CustomizedGeometryTableCell();
+            }
+        });
+        
+
+        /*colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
+
+         @Override
+         public void handle(TableColumn.CellEditEvent<Troncon, Troncon.jojoenum> event) {
+         ((Troncon) event.getTableView().getItems().get(
+         event.getTablePosition().getRow())).setJojo(Troncon.jojoenum.non);  
+         }
+         }
+        
+         );*/
         
         this.loadTroncons();
         this.tronconsTable.setEditable(false);
@@ -319,6 +368,25 @@ public class DigueController extends BorderPane {
         // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
     }
+
+//    public static Parent create(final TreeView uiTree) {
+//
+//        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
+//                "/fr/sym/digue/digueDisplay.fxml"));
+//        
+//        final Parent root;
+//
+//        try {
+//            root = loader.load();
+//        } catch (IOException ex) {
+//            throw new IllegalArgumentException(ex.getMessage(), ex);
+//        }
+//
+//        final DigueController controller = loader.getController();
+//        Injector.injectDependencies(controller);
+//        controller.init(uiTree);
+//        return root;
+//    }
 
     // FocusTransverse ?
     /**
@@ -553,34 +621,6 @@ public class DigueController extends BorderPane {
                 }
             }
             super.replaceText(start, end, text);
-        }
-    }
-    
-    
-    
-    private static class TronconPojoTable extends AbstractPojoTable {
-
-        private TronconPojoTable(Class pojoClass) {
-            super(pojoClass);
-        }
-        
-        public TronconPojoTable(){
-            this(TronconDigue.class);
-        }
-
-        @Override
-        protected void deletePojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 }
