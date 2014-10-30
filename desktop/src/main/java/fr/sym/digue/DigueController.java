@@ -4,8 +4,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.theme.AbstractPojoTable;
-import fr.sym.theme.AbstractTronconTheme;
-import fr.sym.theme.DefaultTronconPojoTable;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -30,12 +28,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -52,7 +46,6 @@ import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import jidefx.scene.control.field.LocalDateTimeField;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DigueController extends BorderPane {
     
-//    private TreeView uiTree;
     private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
     
@@ -76,11 +68,8 @@ public class DigueController extends BorderPane {
     @FXML private Label mode;
     @FXML private FXDateField date_maj;
     @FXML private WebView commentaire;
-//    @FXML private TableView<TronconDigue> tronconsTable;
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
-    @FXML private Button addTroncon;
-    @FXML private Button deleteTroncon;
 
     private final TronconPojoTable table = new TronconPojoTable();
 
@@ -103,7 +92,6 @@ public class DigueController extends BorderPane {
     
     public void setDigue(Digue digue){
         this.digueProperty.set(digue);
-//            table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
         initFields();
     }
 
@@ -114,15 +102,11 @@ public class DigueController extends BorderPane {
             this.editionButton.setText("Passer en consultation");
             this.mode.setText("Mode saisie");
             this.mode.setTextFill(Color.RED);
-            this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon.png"));
-            this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon.png"));
             this.saveButton.setDisable(false);
         } else {
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
             this.mode.setTextFill(Color.WHITE);
-            this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon-inactif.png"));
-            this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon-inactif.png"));
             this.saveButton.setDisable(true);
         }
     }
@@ -137,114 +121,13 @@ public class DigueController extends BorderPane {
         this.enableFields(event);
     }
     
-    @FXML
-    private void addTroncon(){
-        
-        if (editionButton.isSelected()){
-            
-            final Stage dialog = new Stage();
-            final Label label = new Label("Libellé : ");
-            final TextField libelleInput = new TextField();
-            final Button ok = new Button("Ok");
-            ok.setOnAction((ActionEvent event1) -> {
-                TronconDigue tronconDigue = new TronconDigue();
-                tronconDigue.nomProperty().bindBidirectional(libelleInput.textProperty());
-                tronconDigue.setDigueId(digueProperty.get().getId());
-                this.loadTronconUI(tronconDigue);
-                this.session.add(tronconDigue);
-                dialog.hide();
-            });
-
-            final VBox vBox = new VBox();
-            vBox.setPadding(new Insets(20));
-            vBox.setAlignment(Pos.CENTER);
-            vBox.getChildren().add(label);
-            vBox.getChildren().add(libelleInput);
-            vBox.getChildren().add(ok);
-
-            final Scene dialogScene = new Scene(vBox);
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(editionButton.getScene().getWindow());
-            dialog.setScene(dialogScene);
-            dialog.setTitle("Nouveau tronçon de digue.");
-            dialog.show();
-        }
-    }
-    
-    @FXML
-    private void deleteTroncon(){
-        
-//        if (editionButton.isSelected()){
-//
-//            final TronconDigue tronconDigue = this.tronconsTable.getSelectionModel().getSelectedItem();
-//            final Stage dialog = new Stage();
-//            final Label name = new Label(tronconDigue.getNom());
-//            final Label id = new Label(tronconDigue.getId());
-//            final Label confirmationMsg = new Label("Voulez-vous vraiment supprimer ce tronçon ?");
-//            final Button annuler = new Button("Annuler");
-//            annuler.setOnAction((ActionEvent event1) -> {
-//                dialog.hide();
-//            });
-//            final Button ok = new Button("Ok");
-//            ok.setOnAction((ActionEvent event1) -> {
-//                this.session.delete(tronconDigue);
-//                this.discardTronconUI(tronconDigue);
-//                dialog.hide();
-//            });
-//            
-//            final HBox hBox = new HBox();
-//            hBox.setAlignment(Pos.CENTER);
-//            hBox.getChildren().add(annuler);
-//            hBox.getChildren().add(ok);
-//
-//            final VBox vBox = new VBox();
-//            vBox.setPadding(new Insets(20));
-//            vBox.setAlignment(Pos.CENTER);
-//            vBox.getChildren().add(name);
-//            vBox.getChildren().add(id);
-//            vBox.getChildren().add(confirmationMsg);
-//            vBox.getChildren().add(hBox);
-//
-//            final Scene dialogScene = new Scene(vBox);
-//            dialog.initModality(Modality.APPLICATION_MODAL);
-//            dialog.initOwner(editionButton.getScene().getWindow());
-//            dialog.setScene(dialogScene);
-//            dialog.setTitle("Suppression d'un tronçon de digue.");
-//            dialog.show();
-//        }
-    }
-    
-    private void loadTroncons(){
+    private void reloadTroncons(){
         
         final List<TronconDigue> items = session.getTronconDigueByDigue(digueProperty.get());
         this.troncons = FXCollections.observableArrayList();
         items.stream().forEach((item) -> {
             this.troncons.add(item);
         });
-        this.table.updateTable();
-    }
-    
-    /**
-     * Update the TreeView and TableView with the new section.
-     * @param tronconDigue 
-     */
-    private void loadTronconUI(final TronconDigue tronconDigue){
-//        ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().add(new TreeItem(tronconDigue));
-        this.troncons.add(tronconDigue);
-    }
-    
-    /**
-     * Remove the section from the TreeView and the tableView.
-     * @param tronconDigue 
-     */
-    private void discardTronconUI(final TronconDigue tronconDigue){
-//        for (final Object treeItem : ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren()){
-//            if(tronconDigue.equals(((TreeItem) treeItem).getValue())){
-//                ((TreeItem) this.uiTree.getSelectionModel().getSelectedItem()).getChildren().remove(treeItem);
-//                this.troncons.remove(tronconDigue);
-//                break;
-//            }
-//        }
     }
 
     /**
@@ -270,7 +153,7 @@ public class DigueController extends BorderPane {
         this.commentaire.getEngine().loadContent(digueProperty.get().getCommentaire());
         this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
         
-        this.loadTroncons();
+        table.updateTable();
         
         // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
@@ -528,8 +411,8 @@ public class DigueController extends BorderPane {
         }
 
         private void updateTable() {
-            final Digue dig = digueProperty.get();
-            if (dig == null || troncons == null) {
+            reloadTroncons();
+            if (troncons == null) {
                 uiTable.setItems(FXCollections.emptyObservableList());
             } else {
             //JavaFX bug : sortable is not possible on filtered list
@@ -543,17 +426,18 @@ public class DigueController extends BorderPane {
     
         @Override
         protected void deletePojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            session.delete(((TronconDigue) pojo));
+            updateTable();
         }
 
         @Override
         protected void editPojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            session.update((TronconDigue) pojo);
         }
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            session.update((TronconDigue) event.getRowValue());
         }
         
 }
