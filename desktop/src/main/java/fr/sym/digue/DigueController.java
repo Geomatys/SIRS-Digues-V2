@@ -401,7 +401,7 @@ public class DigueController extends BorderPane {
     private class TronconPojoTable extends AbstractPojoTable {
     
             public TronconPojoTable() {
-            super(TronconDigue.class);
+            super(TronconDigue.class,"Liste des tronçons");
 
             final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
                 updateTable();
@@ -425,8 +425,10 @@ public class DigueController extends BorderPane {
         }
     
         @Override
-        protected void deletePojo(Element pojo) {
-            session.delete(((TronconDigue) pojo));
+        protected void deletePojos(Element ... pojo) {
+            for(Element ele : pojo){
+                session.delete(((TronconDigue) ele));
+            }
             updateTable();
         }
 
@@ -440,5 +442,9 @@ public class DigueController extends BorderPane {
             session.update((TronconDigue) event.getRowValue());
         }
         
-}
+        @Override
+        protected void createPojo() {
+        }
+        
+    }
 }

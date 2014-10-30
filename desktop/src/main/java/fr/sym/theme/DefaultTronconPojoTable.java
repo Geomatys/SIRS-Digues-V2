@@ -23,7 +23,7 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     private final AbstractTronconTheme.ThemeGroup group;
 
     public DefaultTronconPojoTable(AbstractTronconTheme.ThemeGroup group) {
-        super(group.getDataClass());
+        super(group.getDataClass(),group.getTableTitle());
         this.group = group;
         
         final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
@@ -52,13 +52,15 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     }
 
     @Override
-    protected void deletePojo(Element pojo) {
-        final TronconDigue trc = troncon.get();
-        if(trc==null) return;
-        group.getDeletor().delete(trc, pojo);
-        //sauvegarde des modifications du troncon
-        final Session session = Injector.getBean(Session.class);
-        session.getTronconDigueRepository().update(trc);
+    protected void deletePojos(Element ... pojos) {
+        for(Element pojo : pojos){
+            final TronconDigue trc = troncon.get();
+            if(trc==null) return;
+            group.getDeletor().delete(trc, pojo);
+            //sauvegarde des modifications du troncon
+            final Session session = Injector.getBean(Session.class);
+            session.getTronconDigueRepository().update(trc);
+        }
     }
 
     @Override
@@ -71,6 +73,11 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
         final TronconDigue obj = troncon.get();
         final Session session = Injector.getBean(Session.class);
         session.getTronconDigueRepository().update(obj);
+    }
+    
+
+    @Override
+    protected void createPojo() {
     }
     
 }

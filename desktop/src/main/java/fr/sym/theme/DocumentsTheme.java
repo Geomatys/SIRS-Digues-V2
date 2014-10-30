@@ -65,11 +65,11 @@ public class DocumentsTheme extends Theme {
     private static class PhotoTable extends AbstractPojoTable {
 
         public PhotoTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des photos");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             
         }
 
@@ -80,17 +80,21 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class ConventionTable extends AbstractPojoTable {
 
         public ConventionTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des conventions");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -101,17 +105,21 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class JournalTable extends AbstractPojoTable {
 
         public JournalTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des journaux");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -122,17 +130,21 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class MarcheTable extends AbstractPojoTable {
 
         public MarcheTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des Marchés");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -143,17 +155,21 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class RapportTable extends AbstractPojoTable {
 
         public RapportTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des rapports");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -164,17 +180,21 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class DocGrandeEchelleTable extends AbstractPojoTable {
 
         public DocGrandeEchelleTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des documents");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -185,6 +205,10 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
     

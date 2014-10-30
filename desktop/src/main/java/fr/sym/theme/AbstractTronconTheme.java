@@ -19,12 +19,18 @@ public class AbstractTronconTheme extends Theme {
     
     public static class ThemeGroup{
         private final String name;
+        private final String tableTitle;
         private final Class dataClass;
         private final Function<TronconDigue,ObservableList> extractor;
         private final Deletor deletor;
 
         public ThemeGroup(String name, Class dataClass, Function<TronconDigue,ObservableList> extractor, Deletor deletor) {
+            this(name,null,dataClass,extractor,deletor);
+        }
+        
+        public ThemeGroup(String name, String tableTitle, Class dataClass, Function<TronconDigue,ObservableList> extractor, Deletor deletor) {
             this.name = name;
+            this.tableTitle = tableTitle;
             this.dataClass = dataClass;
             this.extractor = extractor;
             this.deletor = deletor;
@@ -34,6 +40,10 @@ public class AbstractTronconTheme extends Theme {
             return name;
         }
 
+        public String getTableTitle() {
+            return tableTitle;
+        }
+        
         public Class getDataClass() {
             return dataClass;
         }

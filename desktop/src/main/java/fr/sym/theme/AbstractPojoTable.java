@@ -8,6 +8,7 @@ import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.geomatys.property.Internal;
 import com.sun.javafx.property.PropertyReference;
 import fr.sym.Session;
+import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
 import fr.symadrem.sirs.core.model.Element;
 import java.beans.IntrospectionException;
@@ -21,14 +22,21 @@ import java.util.List;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
@@ -82,12 +90,14 @@ public abstract class AbstractPojoTable extends BorderPane{
     protected final Class pojoClass;
     protected final Session session = Injector.getBean(Session.class);
     
-    public AbstractPojoTable(Class pojoClass) {
+    public AbstractPojoTable(Class pojoClass, String title) {
+        getStylesheets().add(Symadrem.CSS_PATH);
         this.pojoClass = pojoClass;
         
         uiScroll.setFitToHeight(true);
         uiScroll.setFitToWidth(true);
         uiTable.setEditable(true);
+        uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                 
         setCenter(uiScroll);
         
@@ -104,13 +114,51 @@ public abstract class AbstractPojoTable extends BorderPane{
              });
         }
         
+        
+        //barre d'outils
+        final Button uiAdd = new Button(null, new ImageView(Symadrem.ICON_ADD));
+        uiAdd.getStyleClass().add("btn-without-style");
+        uiAdd.setOnAction((ActionEvent event) -> {createPojo();});
+        
+        final Button uiDelete = new Button(null, new ImageView(Symadrem.ICON_TRASH));
+        uiDelete.getStyleClass().add("btn-without-style");
+        uiDelete.setOnAction((ActionEvent event) -> {
+            final Element[] elements = ((List<Element>)uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
+            if(elements.length>0){
+                final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
+                        ButtonType.NO, ButtonType.YES).showAndWait().get();
+                if(ButtonType.YES == res){
+                    deletePojos(elements);
+                }
+                
+            }
+        });
+        
+        final Button uiSearch = new Button(null, new ImageView(Symadrem.ICON_SEARCH));
+        uiSearch.getStyleClass().add("btn-without-style");        
+        uiSearch.setOnAction((ActionEvent event) -> {/*TODO*/});
+        
+        final Label uiTitle = new Label(title);
+        uiTitle.getStyleClass().add("pojotable-header");   
+        uiTitle.setAlignment(Pos.CENTER);
+        
+        
+        uiAdd.visibleProperty().bind(this.disableProperty().not());
+        uiDelete.visibleProperty().bind(this.disableProperty().not());
+        final HBox toolbar = new HBox(uiAdd,uiDelete,uiSearch);     
+        toolbar.getStyleClass().add("buttonbar");
+        final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
+        setTop(top);
     }
         
-    protected abstract void deletePojo(Element pojo);
+    protected abstract void deletePojos(Element ... pojos);
     
     protected abstract void editPojo(Element pojo);
     
     protected abstract void elementEdited(TableColumn.CellEditEvent<Element, Object> event);
+    
+    protected abstract void createPojo();
+    
     
     public static class PropertyColumn extends TableColumn<Element,Object>{
 
@@ -172,7 +220,7 @@ public abstract class AbstractPojoTable extends BorderPane{
                     final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
                             ButtonType.NO, ButtonType.YES).showAndWait().get();
                     if(ButtonType.YES == res){
-                        deletePojo(t);
+                        deletePojos(t);
                     }
                     return null;
                 }

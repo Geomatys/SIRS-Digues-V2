@@ -4,7 +4,10 @@ package fr.sym.digue;
 
 import fr.sym.Session;
 import fr.sym.Symadrem;
+import fr.sym.theme.AbstractPojoTable;
+import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -14,26 +17,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebView;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +56,10 @@ public class TronconDigueController extends BorderPane{
     @FXML private ToggleButton uiConsult;
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
+    @FXML private BorderPane uiSrTab;
 
+    private final BorneTable borneTable = new BorneTable();
+    
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
     
@@ -89,6 +88,8 @@ public class TronconDigueController extends BorderPane{
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(newValue==null) group.selectToggle(uiConsult);
         });
+        
+        uiSrTab.setCenter(borneTable);
         
     }
     
@@ -199,47 +200,34 @@ public class TronconDigueController extends BorderPane{
                 
         initializing = false;
     }
+    
+    
+    private class BorneTable extends AbstractPojoTable{
+
+        public BorneTable() {
+            super(BorneDigue.class, "Liste des bornes");
+        }
+
+        @Override
+        protected void deletePojos(Element... pojos) {
+            
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            
+        }
+
+        @Override
+        protected void createPojo() {
+            
+        }
         
-    /**
-     * Defines the OpenHtmlEditorEventHandler for editing comment field.
-     */
-//    private class OpenHtmlEditorEventHandler implements EventHandler<MouseEvent> {
-//
-//        @Override
-//        public void handle(MouseEvent event) {
-//            
-//            if(uiEdit.isSelected()){
-//                final Stage dialog = new Stage();
-//                dialog.initModality(Modality.APPLICATION_MODAL);
-//                dialog.initOwner(uiEdit.getScene().getWindow());
-//
-//                final HTMLEditor htmlEditor = new HTMLEditor();
-//                htmlEditor.setHtmlText(tronconProperty.get().getCommentaire());
-//
-//                final Button valider = new Button("Valider");
-//                valider.setOnAction((ActionEvent event1) -> {
-//                    tronconProperty.get().setCommentaire(htmlEditor.getHtmlText());
-//                    uiComment.getEngine().loadContent(htmlEditor.getHtmlText());
-//                    dialog.hide();
-//                });
-//
-//                final Button annuler = new Button("Annuler");
-//                annuler.setOnAction((ActionEvent event1) -> {
-//                    dialog.hide();
-//                });
-//
-//                final HBox hBox = new HBox();
-//                hBox.getChildren().add(valider);
-//                hBox.getChildren().add(annuler);
-//
-//                final VBox vBox = new VBox();
-//                vBox.getChildren().add(htmlEditor);
-//                vBox.getChildren().add(hBox);
-//
-//                final Scene dialogScene = new Scene(vBox);
-//                dialog.setScene(dialogScene);
-//                dialog.show();
-//            }
-//        }
-//    } 
+    }
+    
 }

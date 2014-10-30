@@ -45,11 +45,11 @@ public class ContactsTheme extends Theme {
     private static class IntervenantTable extends AbstractPojoTable {
 
         public IntervenantTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des intervenants");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             
         }
 
@@ -60,17 +60,21 @@ public class ContactsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+
+        @Override
+        protected void createPojo() {
         }
     }
 
     private static class OrgnismeTable extends AbstractPojoTable {
 
         public OrgnismeTable(Class pojoClass) {
-            super(pojoClass);
+            super(pojoClass,"Liste des organismes");
         }
 
         @Override
-        protected void deletePojo(Element pojo) {
+        protected void deletePojos(Element ... pojo) {
             
         }
 
@@ -81,6 +85,10 @@ public class ContactsTheme extends Theme {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+        }
+        
+        @Override
+        protected void createPojo() {
         }
     }
     
