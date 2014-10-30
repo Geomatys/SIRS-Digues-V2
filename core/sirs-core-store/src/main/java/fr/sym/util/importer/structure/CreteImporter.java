@@ -198,7 +198,7 @@ class CreteImporter extends GenericStructureImporter {
             }
             crete.setCommentaire(row.getString(CreteColumns.COMMENTAIRE.toString()));
             
-            System.out.println("La crete : "+row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString())+"|| le SR : "+row.getInt(CreteColumns.ID_SYSTEME_REP.toString()));
+//            System.out.println("La crete : "+row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString())+"|| le SR : "+row.getInt(CreteColumns.ID_SYSTEME_REP.toString()));
             if(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())!=null){
                 crete.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
             }

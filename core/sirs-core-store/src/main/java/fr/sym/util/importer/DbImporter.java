@@ -419,8 +419,9 @@ public class DbImporter {
         this.digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
         this.borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
-                couchDbConnector, tronconDigueRepository, borneDigueRepository, digueImporter, 
-                tronconDigueGeomImporter, typeRiveImporter, systemeReperageImporter, 
+                couchDbConnector, tronconDigueRepository, digueRepository, 
+                borneDigueRepository, digueImporter, tronconDigueGeomImporter, 
+                typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
                 couchDbConnector, systemeReperageBorneRepository, systemeReperageImporter, borneDigueImporter);
@@ -537,8 +538,9 @@ public class DbImporter {
             
 //            while(it.hasNext()){
 //                Row row = it.next();
-//                System.out.println(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
-//                System.out.println(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_DIGUE.toString()));
+//                System.out.print(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+" || ");
+//                System.out.print(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_DIGUE.toString())+" || ");
+//                System.out.println(row.getString(TronconGestionDigueImporter.TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString()));
 //            }
             
             System.out.println("++++++++++++++++++++");   

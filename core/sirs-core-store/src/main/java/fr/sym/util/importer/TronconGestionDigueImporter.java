@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.LineString;
 import fr.sym.util.importer.structure.StructureImporter;
 import fr.symadrem.sirs.core.LinearReferencingUtilities;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
+import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
@@ -44,6 +45,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private BorneDigueImporter borneDigueImporter;
     private StructureImporter structureImporter;
     
+    private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
     private BorneDigueRepository borneDigueRepository;
     
@@ -55,6 +57,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconDigueRepository tronconDigueRepository,
+            final DigueRepository digueRepository,
             final BorneDigueRepository borneDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
@@ -64,6 +67,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final BorneDigueImporter borneDigueImporter){
         this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
+        this.digueRepository = digueRepository;
         this.borneDigueRepository = borneDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
@@ -149,10 +153,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
 
-            // nécessite que les systèmes de repérage aient été enregistrés comme des documents
-            //SystemeReperage systemeReperageDefaut = systemesRep.get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString()));
-            //tronconDigue.setSysteme_reperage_defaut(systemeReperageDefaut.getId());
-
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             tronconsDigue.put(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()), tronconDigue);
             tronconsIds.put(tronconDigue, row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
@@ -189,14 +189,18 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
             // Set the references demanding CouchDb identifier.
             final Digue digue = digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
-//            System.out.println("Le tronçon : "+row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+"|| la digue : "+row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
-            if(digue!=null){
-                if(digue.getId()!=null){
-                tronconDigue.setDigueId(digue.getId());
-            }else {
-                throw new AccessDbImporterException("La digue "+digue+" n'a pas encore d'identifiant CouchDb !");
+//            System.out.println("Le tronçon : "+row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+"|| "+row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString())+"|| la digue : "+row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
+            if (digue != null) {
+                if (digue.getId() != null) {
+                    tronconDigue.setDigueId(digue.getId());
+                } else {
+                    throw new AccessDbImporterException("La digue " + digue + " n'a pas encore d'identifiant CouchDb !");
+                }
+            } else {
+                final Digue d = new Digue();
+                digueRepository.add(d);
+                tronconDigue.setDigueId(d.getId());
             }
-        }
 
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())));

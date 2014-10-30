@@ -112,7 +112,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             }
             
             if (row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString())!=null){
-                System.out.println(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()));
+//                System.out.println(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()));
                 systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()).floatValue());
             }
             
