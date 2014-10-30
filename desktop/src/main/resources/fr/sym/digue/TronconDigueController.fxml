@@ -17,7 +17,7 @@
             <right>
                 <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="blue-dark" BorderPane.alignment="CENTER">
                     <children>
-                                <Label fx:id="mode" alignment="CENTER" styleClass="label-header" text="Mode consultation">
+                                <Label fx:id="mode" alignment="CENTER" styleClass="label-header" text="Mode">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
@@ -25,11 +25,12 @@
                                         <Insets />
                                     </VBox.margin>
                                 </Label>
-                                <ToggleButton fx:id="editionButton" ellipsisString="" mnemonicParsing="false" onAction="#enableFields" text="Passer en saisie" textOverrun="WORD_ELLIPSIS">
-                                    <VBox.margin>
-                                        <Insets />
-                                    </VBox.margin>
-                                </ToggleButton>
+                  <HBox>
+                     <children>
+                                      <ToggleButton fx:id="uiConsult" ellipsisString="" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" selected="true" styleClass="state-button-left" text="Consultation" textOverrun="WORD_ELLIPSIS" />
+                        <ToggleButton fx:id="uiEdit" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" styleClass="state-button-right" text="Edition" />
+                     </children>
+                  </HBox>
                                 <Label fx:id="mode1" alignment="CENTER" styleClass="label-header" text="Sauvegarde">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
@@ -38,7 +39,7 @@
                                         <Insets />
                                     </VBox.margin>
                                 </Label>
-                                <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" text="Enregistrer">
+                                <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" text="Enregistrer">
                                     <VBox.margin>
                                         <Insets />
                                     </VBox.margin>
@@ -57,19 +58,22 @@
                     <children>
                         <Label styleClass="label-header" text="Informations sur le tronçon" GridPane.columnSpan="2" />
                         <Label styleClass="label-header" text="Digue :" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                        <TextField fx:id="section_name" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="uiName" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label styleClass="label-header" text="Nom :" GridPane.rowIndex="1" />
                         <Label styleClass="label-header" text="Identifiant :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
-                        <ChoiceBox fx:id="digues" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="uiDigue" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label styleClass="label-header" text="Rive :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <ChoiceBox fx:id="typeRiveChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="uiRive" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                         <Label styleClass="label-header" text="SR par défaut :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                  <ChoiceBox fx:id="uiSrDefault" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <Label fx:id="uiId" styleClass="label-header" GridPane.columnIndex="3" GridPane.columnSpan="2" />
                     </children>
                     <columnConstraints>
                         <ColumnConstraints fillWidth="false" hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
                         <ColumnConstraints fillWidth="false" hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
                     </columnConstraints>
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -108,8 +112,8 @@
                                                       </GridPane.margin>
                                                   </Label>
                                                   <Label text="Fin" GridPane.columnIndex="3" />
-                                    <FXDateField fx:id="date_debut" GridPane.columnIndex="2" />
-                                    <FXDateField fx:id="date_fin" GridPane.columnIndex="4" />
+                                    <FXDateField fx:id="uiDateStart" GridPane.columnIndex="2" />
+                                    <FXDateField fx:id="uiDateEnd" GridPane.columnIndex="4" />
                                               </children>
                                               <columnConstraints>
                                                   <ColumnConstraints hgrow="NEVER" />
@@ -139,7 +143,7 @@
                                                         <Insets top="10.0" />
                                                     </padding>
                                                 </Label>
-                                                <WebView fx:id="commentaire" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+                                    <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="300.0" GridPane.columnIndex="1" />
                                             </children>
                                  <padding>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -158,67 +162,54 @@
                                     <children>
                                         <GridPane prefHeight="30.0" prefWidth="1018.0">
                                             <children>
-                                                <Pane maxWidth="179.0" minWidth="116.0" prefHeight="30.0" prefWidth="122.0" styleClass="button-list-objects" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
-                                                    <children>
-                                                        <GridPane alignment="TOP_RIGHT" prefHeight="30.0" prefWidth="116.0">
-                                                            <children>
-                                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="49.0" style="-fx-background-color: none;" styleClass="btn-without-style" GridPane.halignment="LEFT">
-                                                                    <graphic>
-                                                                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                                            <image>
-                                                                                <Image url="@../images/add-icon.png" />
-                                                                            </image>
-                                                                        </ImageView>
-                                                                    </graphic>
-                                                                </Button>
-                                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
-                                                                    <graphic>
-                                                                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                            <image>
-                                                                                <Image url="@../images/delete-icon.png" />
-                                                                            </image>
-                                                                        </ImageView>
-                                                                    </graphic>
-                                                                </Button>
-                                                                <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
-                                                                    <graphic>
-                                                                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                            <image>
-                                                                                <Image url="@../images/search-icon-white.png" />
-                                                                            </image>
-                                                                        </ImageView>
-                                                                    </graphic>
-                                                                </Button>
-                                                            </children>
-                                                            <columnConstraints>
-                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                            </columnConstraints>
-                                                            <padding>
-                                                                <Insets right="5.0" />
-                                                            </padding>
-                                                            <rowConstraints>
-                                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                            </rowConstraints>
-                                                        </GridPane>
-                                                    </children>
-                                                    <opaqueInsets>
-                                                        <Insets />
-                                                    </opaqueInsets>
-                                                    <padding>
-                                                        <Insets right="5.0" />
-                                                    </padding>
-                                                </Pane>
                                                 <Label text="Liste des systèmes de repérages">
                                                     <font>
                                                         <Font name="System Bold" size="13.0" />
                                                     </font>
                                                 </Label>
+                                                  <GridPane alignment="TOP_RIGHT" styleClass="buttonbar" GridPane.columnIndex="1">
+                                                      <children>
+                                                          <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="49.0" style="-fx-background-color: none;" styleClass="btn-without-style" GridPane.halignment="LEFT">
+                                                              <graphic>
+                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
+                                                                      <image>
+                                                                          <Image url="@../images/add-icon.png" />
+                                                                      </image>
+                                                                  </ImageView>
+                                                              </graphic>
+                                                          </Button>
+                                                          <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="1">
+                                                              <graphic>
+                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
+                                                                      <image>
+                                                                          <Image url="@../images/delete-icon.png" />
+                                                                      </image>
+                                                                  </ImageView>
+                                                              </graphic>
+                                                          </Button>
+                                                          <Button mnemonicParsing="false" styleClass="btn-without-style" GridPane.columnIndex="2">
+                                                              <graphic>
+                                                                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                                      <image>
+                                                                          <Image url="@../images/search-icon-white.png" />
+                                                                      </image>
+                                                                  </ImageView>
+                                                              </graphic>
+                                                          </Button>
+                                                      </children>
+                                                      <columnConstraints>
+                                                          <ColumnConstraints hgrow="NEVER" />
+                                                          <ColumnConstraints hgrow="NEVER" />
+                                                          <ColumnConstraints hgrow="NEVER" />
+                                                      </columnConstraints>
+                                                      <rowConstraints>
+                                                          <RowConstraints vgrow="NEVER" />
+                                                      </rowConstraints>
+                                                  </GridPane>
                                             </children>
                                             <columnConstraints>
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="880.0" minWidth="10.0" prefWidth="878.0" />
-                                                <ColumnConstraints hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="116.0" />
+                                                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                                                <ColumnConstraints hgrow="NEVER" />
                                             </columnConstraints>
                                             <rowConstraints>
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />

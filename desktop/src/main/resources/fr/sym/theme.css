@@ -54,3 +54,34 @@
     -fx-background-color: rgb(220,220,220);
     -fx-background-radius: 5 5 5 5;
 }
+
+.state-button-left {
+    -fx-focus-color: transparent;
+    -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
+    -fx-background-radius: 10 0 0 10;
+    -fx-border: 0px solid; 
+    -fx-border-color: rgba(0,0,0,0); 
+    -fx-border-radius: 10 0 0 10;
+}
+
+.state-button-left:selected {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #d4d4d4);
+}
+
+.state-button-right {
+    -fx-focus-color: transparent;
+    -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
+    -fx-background-radius: 0 10 10 0;
+    -fx-border: 0px solid; 
+    -fx-border-color: rgba(0,0,0,0); 
+    -fx-border-radius: 0 10 10 0;
+}
+
+.state-button-right:selected {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #d4d4d4);
+}
+
+.buttonbar{
+    -fx-background-color: rgb(74,123,165);
+    -fx-background-radius: 5 0 0 0;
+}

@@ -6,6 +6,7 @@ import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -22,12 +23,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
@@ -47,15 +49,17 @@ public class TronconDigueController extends BorderPane{
     @Autowired
     private Session session;
     
-    @FXML private TextField section_name;
-    @FXML private WebView commentaire;
-    @FXML private ChoiceBox<Digue> digues;
-    @FXML private FXDateField date_debut;
-    @FXML private FXDateField date_fin;
-    @FXML private ToggleButton editionButton;
-    @FXML private Button saveButton;
-    @FXML private Label mode;
-    @FXML private ChoiceBox<String> typeRiveChoiceBox;
+    @FXML private Label uiId;
+    @FXML private TextField uiName;
+    @FXML private HTMLEditor uiComment;
+    @FXML private ChoiceBox<Digue> uiDigue;
+    @FXML private ChoiceBox<Digue> uiSrDefault;
+    @FXML private ChoiceBox<String> uiRive;
+    @FXML private FXDateField uiDateStart;
+    @FXML private FXDateField uiDateEnd;
+    @FXML private ToggleButton uiConsult;
+    @FXML private ToggleButton uiEdit;
+    @FXML private Button uiSave;
 
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
@@ -64,8 +68,26 @@ public class TronconDigueController extends BorderPane{
         Symadrem.loadFXML(this);
         Injector.injectDependencies(this);
         
+        //mode edition
+        final BooleanBinding editBind = uiEdit.selectedProperty().not();
+        uiSave.disableProperty().bind(editBind);
+        uiName.disableProperty().bind(editBind);
+        uiDigue.disableProperty().bind(editBind);
+        uiSrDefault.disableProperty().bind(editBind);
+        uiRive.disableProperty().bind(editBind);
+        uiDateStart.disableProperty().bind(editBind);
+        uiDateEnd.disableProperty().bind(editBind);
+        uiComment.disableProperty().bind(editBind);
+        
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
+        });
+        
+        final ToggleGroup group = new ToggleGroup();
+        uiConsult.setToggleGroup(group);
+        uiEdit.setToggleGroup(group);
+        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
+            if(newValue==null) group.selectToggle(uiConsult);
         });
         
     }
@@ -80,41 +102,12 @@ public class TronconDigueController extends BorderPane{
     
     public void setTroncon(TronconDigue troncon){
         this.tronconProperty.set(troncon);
-        initFields();
     }
-    
-    @FXML
-    private void enableFields(final ActionEvent event){
-        if (this.editionButton.isSelected()) {
-            this.section_name.setEditable(true);
-            this.commentaire.setOnMouseClicked(new TronconDigueController.OpenHtmlEditorEventHandler());
-            this.digues.setDisable(false);
-            this.date_debut.setDisable(false);
-            this.date_fin.setDisable(false);
-            this.editionButton.setText("Passer en consultation");
-            this.mode.setText("Mode saisie");
-            this.mode.setTextFill(Color.RED);
-            this.saveButton.setDisable(false);
-        } else {
-            this.section_name.setEditable(false);
-            this.commentaire.setOnMouseClicked((MouseEvent event1) -> {});
-            this.digues.setDisable(true);
-            this.date_debut.setDisable(true);
-            this.date_fin.setDisable(true);
-            this.editionButton.setText("Passer en saisie");
-            this.mode.setText("Mode consultation");
-            this.mode.setTextFill(Color.WHITE);
-            this.saveButton.setDisable(true);
-        }
-    }
-    
+        
     @FXML
     private void save(final ActionEvent event){
+        tronconProperty.get().setCommentaire(uiComment.getHtmlText());
         this.session.update(getTroncon());
-        
-        // Set the fields no longer editable.-----------------------------------
-        this.editionButton.setSelected(false);
-        this.enableFields(event);
     }
     
     private void initFields(){
@@ -124,11 +117,11 @@ public class TronconDigueController extends BorderPane{
         final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
         final Digue digue = session.getDigueById(troncon.getDigueId());
         
-        this.section_name.setEditable(false);
-        this.section_name.textProperty().bindBidirectional(troncon.nomProperty());
-        this.commentaire.getEngine().loadContent(troncon.getCommentaire());
+        this.uiId.setText(troncon.getId());
+        this.uiName.textProperty().bindBidirectional(troncon.nomProperty());
+        this.uiComment.setHtmlText(troncon.getCommentaire());
                 
-        this.digues.setItems(allDigues);
+        this.uiDigue.setItems(allDigues);
         final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
             @Override
             public String toString(Digue digue) {return digue.getLibelle();}
@@ -136,10 +129,9 @@ public class TronconDigueController extends BorderPane{
             public Digue fromString(String string) {return null;}
         };
         
-        this.digues.setConverter(digueStringConverter);
-        this.digues.setValue(digue);
-        this.digues.setDisable(true);
-        this.digues.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
+        this.uiDigue.setConverter(digueStringConverter);
+        this.uiDigue.setValue(digue);
+        this.uiDigue.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
 
             @Override
             public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
@@ -186,7 +178,7 @@ public class TronconDigueController extends BorderPane{
                 }
             }
         });
-        this.digues.getValue().getId();
+        this.uiDigue.getValue().getId();
 //        
 //        this.typeRiveChoiceBox.setItems(FXCollections.observableArrayList(TypeRive.getTypes()));
 //        final StringConverter<String> typesRivesStringConverter = new StringConverter<TypeRive>() {
@@ -200,59 +192,54 @@ public class TronconDigueController extends BorderPane{
 //        };
 //        
 //        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
-        this.typeRiveChoiceBox.setValue(troncon.getTypeRive());
+        this.uiRive.setValue(troncon.getTypeRive());
                 
-        this.date_debut.valueProperty().bindBidirectional(troncon.date_debutProperty());
-        this.date_debut.setDisable(true);
-        this.date_fin.valueProperty().bindBidirectional(troncon.date_finProperty());
-        this.date_fin.setDisable(true);
-        
-        // Disable the save button.---------------------------------------------
-        this.saveButton.setDisable(true);
-        
+        this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
+        this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
+                
         initializing = false;
     }
         
     /**
      * Defines the OpenHtmlEditorEventHandler for editing comment field.
      */
-    private class OpenHtmlEditorEventHandler implements EventHandler<MouseEvent> {
-
-        @Override
-        public void handle(MouseEvent event) {
-            
-            if(editionButton.isSelected()){
-                final Stage dialog = new Stage();
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(editionButton.getScene().getWindow());
-
-                final HTMLEditor htmlEditor = new HTMLEditor();
-                htmlEditor.setHtmlText(tronconProperty.get().getCommentaire());
-
-                final Button valider = new Button("Valider");
-                valider.setOnAction((ActionEvent event1) -> {
-                    tronconProperty.get().setCommentaire(htmlEditor.getHtmlText());
-                    commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
-                    dialog.hide();
-                });
-
-                final Button annuler = new Button("Annuler");
-                annuler.setOnAction((ActionEvent event1) -> {
-                    dialog.hide();
-                });
-
-                final HBox hBox = new HBox();
-                hBox.getChildren().add(valider);
-                hBox.getChildren().add(annuler);
-
-                final VBox vBox = new VBox();
-                vBox.getChildren().add(htmlEditor);
-                vBox.getChildren().add(hBox);
-
-                final Scene dialogScene = new Scene(vBox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        }
-    } 
+//    private class OpenHtmlEditorEventHandler implements EventHandler<MouseEvent> {
+//
+//        @Override
+//        public void handle(MouseEvent event) {
+//            
+//            if(uiEdit.isSelected()){
+//                final Stage dialog = new Stage();
+//                dialog.initModality(Modality.APPLICATION_MODAL);
+//                dialog.initOwner(uiEdit.getScene().getWindow());
+//
+//                final HTMLEditor htmlEditor = new HTMLEditor();
+//                htmlEditor.setHtmlText(tronconProperty.get().getCommentaire());
+//
+//                final Button valider = new Button("Valider");
+//                valider.setOnAction((ActionEvent event1) -> {
+//                    tronconProperty.get().setCommentaire(htmlEditor.getHtmlText());
+//                    uiComment.getEngine().loadContent(htmlEditor.getHtmlText());
+//                    dialog.hide();
+//                });
+//
+//                final Button annuler = new Button("Annuler");
+//                annuler.setOnAction((ActionEvent event1) -> {
+//                    dialog.hide();
+//                });
+//
+//                final HBox hBox = new HBox();
+//                hBox.getChildren().add(valider);
+//                hBox.getChildren().add(annuler);
+//
+//                final VBox vBox = new VBox();
+//                vBox.getChildren().add(htmlEditor);
+//                vBox.getChildren().add(hBox);
+//
+//                final Scene dialogScene = new Scene(vBox);
+//                dialog.setScene(dialogScene);
+//                dialog.show();
+//            }
+//        }
+//    } 
 }
