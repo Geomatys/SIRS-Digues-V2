@@ -28,7 +28,7 @@ public class TronconThemePane extends BorderPane {
     private AbstractTronconTheme.ThemeGroup[] groups;
     
     public TronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
-        Symadrem.loadJRXML(this);
+        Symadrem.loadFXML(this);
         
         if(groups.length==1){
             final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[0]);

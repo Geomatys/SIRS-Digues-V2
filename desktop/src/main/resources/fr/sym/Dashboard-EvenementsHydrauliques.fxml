@@ -77,10 +77,6 @@
          </center>
       </BorderPane>
    </top>
-   <stylesheets>
-      <URL value="@diguesGestion.css" />
-      <URL value="@digue/diguesGestion.css" />
-   </stylesheets>
    <center>
       <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <center>

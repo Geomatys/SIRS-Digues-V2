@@ -6,7 +6,8 @@ import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import java.io.IOException;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -14,17 +15,16 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -40,10 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconDigueController {
+public class TronconDigueController extends BorderPane{
     
-    private TreeView uiTree;
-    private TronconDigue troncon;
+    private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     
     @Autowired
     private Session session;
@@ -57,6 +56,32 @@ public class TronconDigueController {
     @FXML private Button saveButton;
     @FXML private Label mode;
     @FXML private ChoiceBox<String> typeRiveChoiceBox;
+
+    //flag afin de ne pas faire de traitement lors de l'initialisation
+    private boolean initializing = false;
+    
+    public TronconDigueController() {
+        Symadrem.loadFXML(this);
+        Injector.injectDependencies(this);
+        
+        tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
+            initFields();
+        });
+        
+    }
+    
+    public ObjectProperty<TronconDigue> tronconProperty(){
+        return tronconProperty;
+    }
+    
+    public TronconDigue getTroncon(){
+        return tronconProperty.get();
+    }
+    
+    public void setTroncon(TronconDigue troncon){
+        this.tronconProperty.set(troncon);
+        initFields();
+    }
     
     @FXML
     private void enableFields(final ActionEvent event){
@@ -85,68 +110,40 @@ public class TronconDigueController {
     
     @FXML
     private void save(final ActionEvent event){
-        this.session.update(this.troncon);
+        this.session.update(getTroncon());
         
         // Set the fields no longer editable.-----------------------------------
         this.editionButton.setSelected(false);
         this.enableFields(event);
     }
     
-    private ObservableList<Digue> getDigues(){
-        ObservableList<Digue> digues = FXCollections.observableArrayList();
-        this.uiTree.getRoot().getChildren().stream().forEach((item) -> {
-            if(((TreeItem) item).getValue() instanceof Digue)
-                digues.add((Digue) ((TreeItem) item).getValue());
-        }
-        );
-        return digues;
-    }
-    
-    private ObservableList<TreeItem> getDigueItems(){
-        ObservableList<TreeItem> digueItems = FXCollections.observableArrayList();
-        this.uiTree.getRoot().getChildren().stream().forEach((item) -> {
-            if(((TreeItem) item).getValue() instanceof Digue)
-                digueItems.add((TreeItem) item);
-        }
-        );
-        return digueItems;
-    }
-    
-    public void init(final TreeView uiTree){
+    private void initFields(){
+        initializing = true;
         
-        // Keep the TreeView reference.
-        this.uiTree = uiTree;
-        
-        TreeItem tronconItem = (TreeItem) uiTree.getSelectionModel().getSelectedItem();
-        this.troncon = (TronconDigue) (tronconItem).getValue();
+        final TronconDigue troncon = tronconProperty.get();
+        final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
+        final Digue digue = session.getDigueById(troncon.getDigueId());
         
         this.section_name.setEditable(false);
-        this.section_name.textProperty().bindBidirectional(this.troncon.nomProperty());
-        
-        this.commentaire.getEngine().loadContent(this.troncon.getCommentaire());
-        
-        final Digue diguePropre = (Digue) ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getParent().getValue();
-        final ObservableList<Digue> diguesObservables = this.getDigues();
-        
-        this.digues.setItems(diguesObservables);
+        this.section_name.textProperty().bindBidirectional(troncon.nomProperty());
+        this.commentaire.getEngine().loadContent(troncon.getCommentaire());
+                
+        this.digues.setItems(allDigues);
         final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
-        
             @Override
             public String toString(Digue digue) {return digue.getLibelle();}
-
-            // TODO ?
             @Override
             public Digue fromString(String string) {return null;}
         };
         
         this.digues.setConverter(digueStringConverter);
-        this.digues.setValue(diguePropre);
+        this.digues.setValue(digue);
         this.digues.setDisable(true);
         this.digues.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
 
             @Override
             public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
-                
+                if(initializing) return;
                 /* TODO ?
                 Le changement de digue d'un tronçon a des implication immédiates
                 sur la mise à jour de l'arbre de navigation des entités. Il 
@@ -164,47 +161,28 @@ public class TronconDigueController {
                 */
                 
                 // Do not open dialog if the levee list is reset to the old value.
-                if (!newValue.equals(diguePropre)){
+                if (!newValue.equals(digue)){
                     
-                    final Stage dialog = new Stage();
-                    dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(digues.getScene().getWindow());
-
-                    final Label label = new Label("Le changement de digue est enregistré d'office.");
-                    final Button ok = new Button("Continuer");
-                    ok.setOnAction((ActionEvent event) -> {
-                        getDigueItems().stream().forEach((item) -> {
-                            if(((Digue) item.getValue()).equals(oldValue)){
-                                item.getChildren().remove(tronconItem);
-                            }
-                        });
-
-                        getDigueItems().stream().forEach((item) -> {
-                            if(((Digue) item.getValue()).equals(newValue)){
-                                item.getChildren().add(tronconItem);
-                            }
-                        });
-                        troncon.setDigueId(newValue.getId());
+                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "Le changement de digue est enregistré d'office.",
+                            ButtonType.OK,ButtonType.CANCEL
+                            );
+                    final ButtonType res = alert.showAndWait().get();
+                    if(res==ButtonType.OK){
+//                        getDigueItems().stream().forEach((item) -> {
+//                            if(((Digue) item.getValue()).equals(oldValue)){
+//                                item.getChildren().remove(troncon);
+//                            }
+//                        });
+//
+//                        getDigueItems().stream().forEach((item) -> {
+//                            if(((Digue) item.getValue()).equals(newValue)){
+//                                item.getChildren().add(troncon);
+//                            }
+//                        });
+                        tronconProperty.get().setDigueId(newValue.getId());
                         save(null);
-                        dialog.hide();
-                    });
-                    final Button annuler = new Button("Annuler");
-                    annuler.setOnAction((ActionEvent event) -> {
-                        digues.setValue(diguePropre);
-                        dialog.hide();
-                    });
-
-                    final HBox hBox = new HBox();
-                    hBox.getChildren().add(ok);
-                    hBox.getChildren().add(annuler);
-
-                    final VBox vBox = new VBox();
-                    vBox.getChildren().add(label);
-                    vBox.getChildren().add(hBox);
-
-                    final Scene dialogScene = new Scene(vBox);
-                    dialog.setScene(dialogScene);
-                    dialog.show();
+                    }
                 }
             }
         });
@@ -222,33 +200,19 @@ public class TronconDigueController {
 //        };
 //        
 //        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
-        this.typeRiveChoiceBox.setValue(this.troncon.getTypeRive());
+        this.typeRiveChoiceBox.setValue(troncon.getTypeRive());
                 
-        this.date_debut.valueProperty().bindBidirectional(this.troncon.date_debutProperty());
+        this.date_debut.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.date_debut.setDisable(true);
-        this.date_fin.valueProperty().bindBidirectional(this.troncon.date_finProperty());
+        this.date_fin.valueProperty().bindBidirectional(troncon.date_finProperty());
         this.date_fin.setDisable(true);
         
         // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
-    }
-    
-    public static Parent create(TreeView uiTree) {
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
-                "/fr/sym/digue/tronconDigueDisplay.fxml"));
-        final Parent root;
-        try {
-            root = loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
         
-        final TronconDigueController controller = loader.getController();
-        Injector.injectDependencies(controller);
-        controller.init(uiTree);
-        return root;
+        initializing = false;
     }
-    
+        
     /**
      * Defines the OpenHtmlEditorEventHandler for editing comment field.
      */
@@ -263,11 +227,11 @@ public class TronconDigueController {
                 dialog.initOwner(editionButton.getScene().getWindow());
 
                 final HTMLEditor htmlEditor = new HTMLEditor();
-                htmlEditor.setHtmlText(troncon.getCommentaire());
+                htmlEditor.setHtmlText(tronconProperty.get().getCommentaire());
 
                 final Button valider = new Button("Valider");
                 valider.setOnAction((ActionEvent event1) -> {
-                    troncon.setCommentaire(htmlEditor.getHtmlText());
+                    tronconProperty.get().setCommentaire(htmlEditor.getHtmlText());
                     commentaire.getEngine().loadContent(htmlEditor.getHtmlText());
                     dialog.hide();
                 });

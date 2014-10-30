@@ -37,6 +37,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.geomatys.json.GeometryDeserializer;
 import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Properties;
@@ -71,6 +72,8 @@ public class Loader extends Application {
                     prop.getProperty("url"),
                     prop.getProperty("database")
                 };
+            }catch(FileNotFoundException ex){
+                 System.out.println(ex.getMessage());
             }catch(IOException ex){
                 ex.printStackTrace();
             }

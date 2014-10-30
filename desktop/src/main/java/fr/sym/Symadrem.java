@@ -41,7 +41,7 @@ public final class Symadrem {
         return new File(getConfigFolder(), "database");
     }
         
-    public static void loadJRXML(Parent candidate){
+    public static void loadFXML(Parent candidate){
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
         final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));

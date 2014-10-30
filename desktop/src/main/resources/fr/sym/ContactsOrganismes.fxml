@@ -73,10 +73,6 @@
          </center>
       </BorderPane>
    </top>
-   <stylesheets>
-      <URL value="@diguesGestion.css" />
-      <URL value="@digue/diguesGestion.css" />
-   </stylesheets>
    <center>
       <TabPane prefHeight="594.0" prefWidth="762.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>

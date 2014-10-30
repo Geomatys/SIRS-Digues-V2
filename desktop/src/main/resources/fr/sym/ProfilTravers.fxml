@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@digue/diguesGestion.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXSectionController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.FXSectionController">
 <top>
             <BorderPane minHeight="109.0" prefHeight="109.0" prefWidth="1024.0" styleClass="info-block" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
                <right>

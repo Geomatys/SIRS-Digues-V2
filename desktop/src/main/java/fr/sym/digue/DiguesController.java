@@ -7,8 +7,6 @@ import fr.symadrem.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -73,7 +71,9 @@ public class DiguesController {
                 digueController.setDigue((Digue) obj);
                 uiRight.setCenter(digueController);
             } else if (obj instanceof TronconDigue) {
-                uiRight.setCenter(TronconDigueController.create(this.uiTree));
+                TronconDigueController ctrl = new TronconDigueController();
+                ctrl.setTroncon((TronconDigue) obj);
+                uiRight.setCenter(ctrl);
             }
         });
 

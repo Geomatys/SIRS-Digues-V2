@@ -4,39 +4,53 @@
 }
 
 .list-header{
-	-fx-border-width: 0 0 1 0;
-	-fx-border-color: rgb(230,230,230);
-	-fx-background-color: rgb(240,240,240);
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: rgb(230,230,230);
+    -fx-background-color: rgb(240,240,240);
 }
 
 .object-mode{
-	-fx-background-color: rgb(74,123,165);
-	-fx-background-radius: 0 0 0 5;
+    -fx-background-color: rgb(74,123,165);
+    -fx-background-radius: 0 0 0 5;
 }
 
 .button-list-objects{
-	-fx-background-color: rgb(74,123,165);
-	-fx-background-radius: 5 0 0 0;
+    -fx-background-color: rgb(74,123,165);
+    -fx-background-radius: 5 0 0 0;
 }
 
 .contact-pane{
-	-fx-background-radius: 0 0 0 5;
+    -fx-background-radius: 0 0 0 5;
 }
 
 .info-block{
-	-fx-background-color: rgb(109,149,182);
-	-fx-background-radius: 5 5 5 5;
+    -fx-background-color: rgb(109,149,182);
 }
 
 .btn-without-style{
-	-fx-background-color:none;
+    -fx-background-color:none;
 }
 
 .item-contact{
-	-fx-background-color: rgb(220,220,220);
+    -fx-background-color: rgb(220,220,220);
 }
 
-.bloc-info{
-	-fx-background-color: rgb(220,220,220);
-	-fx-background-radius: 5 5 5 5;
+
+.blue-light{
+    -fx-background-color: rgb(109,149,182);
+    -fx-background-radius: 0 0 0 0;
+}
+
+.label-header {
+    -fx-text-fill: white;
+}
+
+.blue-dark{
+    -fx-background-color:  rgb(74,123,165);
+    -fx-background-radius:  0 0 0 0;
+}
+
+.gray-light{
+    -fx-background-color: rgb(220,220,220);
+    -fx-background-radius: 5 5 5 5;
 }
