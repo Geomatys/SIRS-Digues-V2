@@ -29,7 +29,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -47,7 +46,7 @@ public class DigueController extends BorderPane {
     @Autowired
     private Session session;
 
-    @FXML private BorderPane borderPaneTables;
+//    @FXML private BorderPane uiBorderPaneTable;
     @FXML private TextField libelle;
     @FXML private Label id;
     @FXML private FXDateField date_maj;
@@ -129,7 +128,7 @@ public class DigueController extends BorderPane {
      * 
      */
     public void initFields() {
-        borderPaneTables.setCenter(table);
+        this.setCenter(table);
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
@@ -196,7 +195,12 @@ public class DigueController extends BorderPane {
 
         @Override
         protected void createPojo() {
-            
+            TronconDigue troncon = new TronconDigue();
+            troncon.setDigueId(digueProperty.get().getId());
+            session.add(troncon);
+            System.out.println("Id du nouveau tronçon : "+troncon.getId());
+            troncons.add(troncon);
+            updateTable();
         }
     }
     

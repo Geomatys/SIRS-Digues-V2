@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<fx:root prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root fx:id="uiBorderPane" prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <children>
@@ -24,18 +24,17 @@
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Label minWidth="-Infinity" text="Identifiant :" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                                <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                                <TextField fx:id="libelle" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                                <Label minWidth="-Infinity" text="Identifiant :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                <TextField fx:id="libelle" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                 <Label text="Nom" textFill="WHITE" GridPane.rowIndex="3" />
-                                 <Label fx:id="id" prefHeight="15.0" prefWidth="395.0" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <FXDateField fx:id="date_maj" GridPane.columnIndex="3" GridPane.rowIndex="2" /> 
+                                 <Label fx:id="id" prefHeight="15.0" prefWidth="395.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <FXDateField fx:id="date_maj" GridPane.columnIndex="1" GridPane.rowIndex="2" /> 
                             </children>
                             <columnConstraints>
                                 <ColumnConstraints hgrow="NEVER" />
-                                <ColumnConstraints hgrow="NEVER" />
+                                <ColumnConstraints hgrow="ALWAYS" />
                                 <ColumnConstraints halignment="LEFT" hgrow="NEVER" />
-                                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
                         <ColumnConstraints />
                             </columnConstraints>
                             <padding>
@@ -113,38 +112,8 @@
                     <padding>
                         <Insets top="10.0" />
                     </padding>
-                    <left>
-                        <Label text="Liste des tronçons" BorderPane.alignment="CENTER">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                            <BorderPane.margin>
-                                <Insets left="10.0" />
-                            </BorderPane.margin>
-                        </Label>
-                    </left>
                 </BorderPane>
             </children>
         </VBox>
     </top>
-    <center>
-        <BorderPane fx:id="borderPaneTables" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
-            <!--bottom>
-                <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="534.0" prefViewportWidth="1024.0">
-                    <content>
-                        <TableView fx:id="tronconsTable" BorderPane.alignment="CENTER">
-                            <columns>
-                                <TableColumn prefWidth="50.0" text="Id" />
-                                <TableColumn prefWidth="250.0" text="Libellé" />
-                                <TableColumn prefWidth="150.0" text="Début de validité" />
-                                <TableColumn prefWidth="150.0" text="Fin de validité" />
-                                <TableColumn prefWidth="100.0" text="SR par défaut" />
-                                <TableColumn prefWidth="130.0" text="Géométrie" />
-                            </columns>
-                        </TableView>
-                    </content>
-                </ScrollPane>
-            </bottom-->
-        </BorderPane>
-    </center>
 </fx:root>
