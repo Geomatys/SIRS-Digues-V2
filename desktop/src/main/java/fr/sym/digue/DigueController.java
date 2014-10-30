@@ -3,26 +3,26 @@ package fr.sym.digue;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sym.Session;
 import fr.sym.Symadrem;
+import fr.sym.theme.AbstractPojoTable;
+import fr.sym.theme.AbstractTronconTheme;
+import fr.sym.theme.DefaultTronconPojoTable;
 import fr.symadrem.sirs.core.model.Digue;
+import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ResourceBundle;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -33,8 +33,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
@@ -72,18 +70,20 @@ public class DigueController extends BorderPane {
     @Autowired
     private Session session;
 
+    @FXML private BorderPane borderPaneTables;
     @FXML private TextField libelle;
     @FXML private Label id;
     @FXML private Label mode;
     @FXML private FXDateField date_maj;
     @FXML private WebView commentaire;
-    @FXML private TableView<TronconDigue> tronconsTable;
+//    @FXML private TableView<TronconDigue> tronconsTable;
     @FXML private ToggleButton editionButton;
     @FXML private Button saveButton;
     @FXML private Button addTroncon;
     @FXML private Button deleteTroncon;
 
-    
+    private final TronconPojoTable table = new TronconPojoTable();
+
     public DigueController() {
         Symadrem.loadFXML(this);
         Injector.injectDependencies(this);
@@ -91,7 +91,6 @@ public class DigueController extends BorderPane {
         digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
         });
-        
     }
     
     public ObjectProperty<Digue> tronconProperty(){
@@ -104,17 +103,9 @@ public class DigueController extends BorderPane {
     
     public void setDigue(Digue digue){
         this.digueProperty.set(digue);
+//            table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
         initFields();
     }
-    
-    private static enum Field {
-        DATE_DEBUT("date_debut"), DATE_FIN("date_fin");
-        private final String field;
-        private Field(final String field){this.field=field;}
-        
-        @Override
-        public String toString(){return this.field;}
-    };
 
     @FXML
     public void enableFields(ActionEvent event) {
@@ -126,8 +117,6 @@ public class DigueController extends BorderPane {
             this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon.png"));
             this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon.png"));
             this.saveButton.setDisable(false);
-            this.tronconsTable.setEditable(true);
-            this.tronconsTable.getColumns().stream().forEach((column) -> {column.setEditable(true);});
         } else {
             this.editionButton.setText("Passer en saisie");
             this.mode.setText("Mode consultation");
@@ -135,8 +124,6 @@ public class DigueController extends BorderPane {
             this.addTroncon.setGraphic(new ImageView("fr/sym/images/add-icon-inactif.png"));
             this.deleteTroncon.setGraphic(new ImageView("fr/sym/images/delete-icon-inactif.png"));
             this.saveButton.setDisable(true);
-            this.tronconsTable.setEditable(false);
-            this.tronconsTable.getColumns().stream().forEach((column) -> {column.setEditable(false);});
         }
     }
     
@@ -187,55 +174,54 @@ public class DigueController extends BorderPane {
     @FXML
     private void deleteTroncon(){
         
-        if (editionButton.isSelected()){
-
-            final TronconDigue tronconDigue = this.tronconsTable.getSelectionModel().getSelectedItem();
-            final Stage dialog = new Stage();
-            final Label name = new Label(tronconDigue.getNom());
-            final Label id = new Label(tronconDigue.getId());
-            final Label confirmationMsg = new Label("Voulez-vous vraiment supprimer ce tronçon ?");
-            final Button annuler = new Button("Annuler");
-            annuler.setOnAction((ActionEvent event1) -> {
-                dialog.hide();
-            });
-            final Button ok = new Button("Ok");
-            ok.setOnAction((ActionEvent event1) -> {
-                this.session.delete(tronconDigue);
-                this.discardTronconUI(tronconDigue);
-                dialog.hide();
-            });
-            
-            final HBox hBox = new HBox();
-            hBox.setAlignment(Pos.CENTER);
-            hBox.getChildren().add(annuler);
-            hBox.getChildren().add(ok);
-
-            final VBox vBox = new VBox();
-            vBox.setPadding(new Insets(20));
-            vBox.setAlignment(Pos.CENTER);
-            vBox.getChildren().add(name);
-            vBox.getChildren().add(id);
-            vBox.getChildren().add(confirmationMsg);
-            vBox.getChildren().add(hBox);
-
-            final Scene dialogScene = new Scene(vBox);
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(editionButton.getScene().getWindow());
-            dialog.setScene(dialogScene);
-            dialog.setTitle("Suppression d'un tronçon de digue.");
-            dialog.show();
-        }
+//        if (editionButton.isSelected()){
+//
+//            final TronconDigue tronconDigue = this.tronconsTable.getSelectionModel().getSelectedItem();
+//            final Stage dialog = new Stage();
+//            final Label name = new Label(tronconDigue.getNom());
+//            final Label id = new Label(tronconDigue.getId());
+//            final Label confirmationMsg = new Label("Voulez-vous vraiment supprimer ce tronçon ?");
+//            final Button annuler = new Button("Annuler");
+//            annuler.setOnAction((ActionEvent event1) -> {
+//                dialog.hide();
+//            });
+//            final Button ok = new Button("Ok");
+//            ok.setOnAction((ActionEvent event1) -> {
+//                this.session.delete(tronconDigue);
+//                this.discardTronconUI(tronconDigue);
+//                dialog.hide();
+//            });
+//            
+//            final HBox hBox = new HBox();
+//            hBox.setAlignment(Pos.CENTER);
+//            hBox.getChildren().add(annuler);
+//            hBox.getChildren().add(ok);
+//
+//            final VBox vBox = new VBox();
+//            vBox.setPadding(new Insets(20));
+//            vBox.setAlignment(Pos.CENTER);
+//            vBox.getChildren().add(name);
+//            vBox.getChildren().add(id);
+//            vBox.getChildren().add(confirmationMsg);
+//            vBox.getChildren().add(hBox);
+//
+//            final Scene dialogScene = new Scene(vBox);
+//            dialog.initModality(Modality.APPLICATION_MODAL);
+//            dialog.initOwner(editionButton.getScene().getWindow());
+//            dialog.setScene(dialogScene);
+//            dialog.setTitle("Suppression d'un tronçon de digue.");
+//            dialog.show();
+//        }
     }
     
     private void loadTroncons(){
         
-//        final List<TreeItem> items = ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getChildren();
         final List<TronconDigue> items = session.getTronconDigueByDigue(digueProperty.get());
         this.troncons = FXCollections.observableArrayList();
         items.stream().forEach((item) -> {
             this.troncons.add(item);
         });
-        this.tronconsTable.setItems(this.troncons);
+        this.table.updateTable();
     }
     
     /**
@@ -266,12 +252,7 @@ public class DigueController extends BorderPane {
      * @param uiTree 
      */
     public void initFields() {
-        
-        // Keep the TreeView reference.
-//        this.uiTree = uiTree;
-        
-        // Set the levee for the controller.------------------------------------
-//        this.digueProperty.set((Digue) ((TreeItem) uiTree.getSelectionModel().getSelectedItem()).getValue());
+        borderPaneTables.setCenter(table);
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
@@ -289,104 +270,11 @@ public class DigueController extends BorderPane {
         this.commentaire.getEngine().loadContent(digueProperty.get().getCommentaire());
         this.commentaire.setOnMouseClicked(new OpenHtmlEditorEventHandler());
         
-        // Configuring table for levee's sections.------------------------------
-        final TableColumn idCol = this.tronconsTable.getColumns().get(0);
-        idCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        idCol.setEditable(false);
-        idCol.setCellFactory(new Callback<TableColumn<TronconDigue, String>, CustomizedIdTableCell>() {
-            @Override
-            public CustomizedIdTableCell call(TableColumn<TronconDigue, String> param) {
-                return new CustomizedIdTableCell();
-            }
-        });
-
-        final TableColumn colName = this.tronconsTable.getColumns().get(1);
-        colName.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colName.setEditable(false);
-        colName.setCellFactory(TextFieldTableCell.forTableColumn());
-
-        final TableColumn<TronconDigue, LocalDateTime> colDateDebut = (TableColumn<TronconDigue, LocalDateTime>) this.tronconsTable.getColumns().get(2);
-        colDateDebut.setCellValueFactory(new PropertyValueFactory<>("date_debut"));
-        colDateDebut.setEditable(false);
-        colDateDebut.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
-        colDateDebut.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
-
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
-                final Object troncon = event.getRowValue();
-                if(troncon!=null){
-                    ((TronconDigue) troncon).setDate_debut(event.getNewValue());
-                }
-            }
-        });
-        
-        final TableColumn<TronconDigue, LocalDateTime> colDateFin = (TableColumn<TronconDigue, LocalDateTime>)this.tronconsTable.getColumns().get(3);
-        colDateFin.setCellValueFactory(new PropertyValueFactory<>("date_fin"));
-        colDateFin.setEditable(false);
-        colDateFin.setCellFactory((TableColumn<TronconDigue, LocalDateTime> param) -> new CustomizedFXLocalDateTimeCell());
-        colDateFin.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<TronconDigue, LocalDateTime>>() {
-
-            @Override
-            public void handle(TableColumn.CellEditEvent<TronconDigue, LocalDateTime> event) {
-                final Object troncon = event.getRowValue();
-                if(troncon!=null){
-                    ((TronconDigue) troncon).setDate_fin(event.getNewValue());
-                }
-            }
-        });
-        
-        final TableColumn colSR = this.tronconsTable.getColumns().get(4);
-        colSR.setCellValueFactory(new PropertyValueFactory<>("systeme_reperage_defaut"));
-        colSR.setEditable(false);
-        colSR.setCellFactory(TextFieldTableCell.forTableColumn());
-        
-        final TableColumn colGeom = this.tronconsTable.getColumns().get(5);
-        colGeom.setCellValueFactory(new PropertyValueFactory<>("geometry"));
-        colGeom.setEditable(false);
-        colGeom.setCellFactory(new Callback<TableColumn<TronconDigue, Geometry>, CustomizedGeometryTableCell>() {
-            @Override
-            public CustomizedGeometryTableCell call(TableColumn<TronconDigue, Geometry> param) {
-                return new CustomizedGeometryTableCell();
-            }
-        });
-        
-
-        /*colJojo.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Troncon, Troncon.jojoenum>>(){
-
-         @Override
-         public void handle(TableColumn.CellEditEvent<Troncon, Troncon.jojoenum> event) {
-         ((Troncon) event.getTableView().getItems().get(
-         event.getTablePosition().getRow())).setJojo(Troncon.jojoenum.non);  
-         }
-         }
-        
-         );*/
-        
         this.loadTroncons();
-        this.tronconsTable.setEditable(false);
         
         // Disable the save button.---------------------------------------------
         this.saveButton.setDisable(true);
     }
-
-//    public static Parent create(final TreeView uiTree) {
-//
-//        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
-//                "/fr/sym/digue/digueDisplay.fxml"));
-//        
-//        final Parent root;
-//
-//        try {
-//            root = loader.load();
-//        } catch (IOException ex) {
-//            throw new IllegalArgumentException(ex.getMessage(), ex);
-//        }
-//
-//        final DigueController controller = loader.getController();
-//        Injector.injectDependencies(controller);
-//        controller.init(uiTree);
-//        return root;
-//    }
 
     // FocusTransverse ?
     /**
@@ -623,4 +511,50 @@ public class DigueController extends BorderPane {
             super.replaceText(start, end, text);
         }
     }
+    
+    
+    
+    
+    private class TronconPojoTable extends AbstractPojoTable {
+    
+            public TronconPojoTable() {
+            super(TronconDigue.class);
+
+            final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
+                updateTable();
+            };
+
+            digueProperty.addListener(listener);
+        }
+
+        private void updateTable() {
+            final Digue dig = digueProperty.get();
+            if (dig == null || troncons == null) {
+                uiTable.setItems(FXCollections.emptyObservableList());
+            } else {
+            //JavaFX bug : sortable is not possible on filtered list
+                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
+                // https://javafx-jira.kenai.com/browse/RT-32091
+                final SortedList sortedList = new SortedList(troncons);
+                uiTable.setItems(sortedList);
+                sortedList.comparatorProperty().bind(uiTable.comparatorProperty());
+            }
+        }
+    
+        @Override
+        protected void deletePojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        protected void editPojo(Element pojo) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+}
 }
