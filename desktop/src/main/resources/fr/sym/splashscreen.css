@@ -4,13 +4,12 @@
 }
 
 .label{
-    -fx-text-fill: rgb(255, 255, 255);
-    -fx-border-width: 2;
-    -fx-border-color: rgba(37, 57, 118, 255);
-    -fx-border-radius: 16;
-    -fx-border-margin: 4 4 4 4;
-    -fx-background-color: rgba(37, 57, 118, 255);
-    -fx-background-radius: 16;
+    -fx-text-fill:#1c3244;
+    -fx-padding: 0 8 0 8;
+}
+
+.label-advanced{
+    -fx-text-fill:#ffffff;
     -fx-padding: 0 8 0 8;
 }
 
@@ -23,4 +22,8 @@
     -fx-background-color: rgba(255, 100, 100, 255);
     -fx-background-radius: 16;
     -fx-padding: 0 8 0 8;
+}
+
+.fond{
+    -fx-background-image:  url('images/splashscreen.png');
 }
