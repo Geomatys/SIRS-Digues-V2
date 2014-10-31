@@ -22,6 +22,7 @@ import fr.sym.theme.ProfilsEnTraversTheme;
 import fr.sym.theme.ReseauxDeVoirieTheme;
 import fr.sym.theme.ReseauxEtOuvragesTheme;
 import fr.sym.theme.StructuresTheme;
+import fr.sym.theme.detail.DetailTronconThemePane;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
@@ -328,15 +329,14 @@ public class CorePlugin extends Plugin{
                 });
             }else if(candidate instanceof Structure){
                 final Structure cdt = (Structure) candidate;
-                final String text = "Objet : "+cdt.getDocumentId();
+                final String text = "Objet "+cdt.getClass().getSimpleName()+" : "+cdt.getId();
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-//                    final TronconDigueController controller = new TronconDigueController();
-//                    controller.setTroncon(cdt);
-//                    final Tab tab = new Tab(text);
-//                    tab.setContent(controller);
-//                    Injector.getBean(Session.class).getFrame().addTab(tab);
+                    final DetailTronconThemePane controller = new DetailTronconThemePane(cdt);
+                    final Tab tab = new Tab(text);
+                    tab.setContent(controller);
+                    Injector.getBean(Session.class).getFrame().addTab(tab);
                 });
             }
             
