@@ -39,10 +39,16 @@ import fr.sym.digue.Injector;
 import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.net.URL;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javafx.stage.WindowEvent;
+import org.geotoolkit.internal.io.IOUtilities;
+import org.geotoolkit.internal.io.Installation;
+import org.geotoolkit.referencing.operation.transform.NTv2Transform;
 
 /**
  *
@@ -210,7 +216,7 @@ public class Loader extends Application {
                 //loading drivers, some plugin systems requiere this call , like netbeans RCP
                 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
                 Class.forName("org.postgresql.Driver").newInstance();           
-                
+                                
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Creation de la base EPSG...");
