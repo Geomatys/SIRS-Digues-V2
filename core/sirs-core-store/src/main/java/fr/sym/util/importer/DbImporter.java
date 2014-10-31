@@ -12,6 +12,7 @@ import fr.symadrem.sirs.core.CouchDBInit;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
+import fr.symadrem.sirs.core.component.RefRiveRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageBorneRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
@@ -42,6 +43,7 @@ public class DbImporter {
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final SystemeReperageBorneRepository systemeReperageBorneRepository;
+    private final RefRiveRepository refRiveRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -405,12 +407,13 @@ public class DbImporter {
         this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
         this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
         this.systemeReperageBorneRepository = new SystemeReperageBorneRepository(couchDbConnector);
+        this.refRiveRepository = new RefRiveRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
-        this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector);
+        this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
         this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
         this.organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
@@ -567,11 +570,11 @@ public class DbImporter {
 //            for(Row row : importer.getDatabase().getTable("ELEMENT_STRUCTURE")){
 //                System.out.println(row);
 //            }
-            System.out.println("=======================");
-            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
-            });
-            System.out.println("++++++++++++++++++++");
+//            System.out.println("=======================");
+//            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
+//                System.out.println(column.getName());
+//            });
+//            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
             importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){

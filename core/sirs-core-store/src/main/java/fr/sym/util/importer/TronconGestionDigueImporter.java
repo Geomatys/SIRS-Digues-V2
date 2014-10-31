@@ -17,6 +17,7 @@ import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.GestionTroncon;
+import fr.symadrem.sirs.core.model.RefRive;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -131,11 +132,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         tronconsDigue = new HashMap<>();
         tronconsIds = new HashMap<>();
-        System.out.println("Importation des troncons");
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
-        final Map<Integer, String> typesRive = typeRiveImporter.getTypeRive();
+        final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeRive();
 
         while (it.hasNext()) {
             final Row row = it.next();
@@ -162,7 +163,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
             // Set simple references.
             final List<GestionTroncon> gestions = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
-            if(gestions != null) tronconDigue.setGestionnaires(gestions);
+            if(gestions != null) {
+                tronconDigue.setGestionnaires(gestions);
+            }
 
 
             final List<BorneDigue> bornes = borneDigueImporter.getBorneDigueByTronconId().get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
@@ -184,8 +187,13 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 tronconDigue.setSystemeReperageIds(systemesRepIds);
                 tronconDigue.setSysteme_reperage_defaut(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
-
-            tronconDigue.setTypeRive(typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString())));
+            
+            if (row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()) != null) {
+                final RefRive typeRive = typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()));
+                if(typeRive!=null){
+                    tronconDigue.setTypeRive(typeRive.getLibelle());
+                }
+            }
 
             // Set the references demanding CouchDb identifier.
             final Digue digue = digueImporter.getDigues().get(row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
@@ -225,10 +233,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
         
         
         //reconstruction des geometries des structures
-        for(Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
+        for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
             final TronconDigue troncon = entry.getValue();
             final Geometry tronconGeom = (Geometry) troncon.getGeometry();
-            for(Structure str : troncon.getStuctures()){
+            for(final Structure str : troncon.getStuctures()){
                 final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                 str.setGeometry(structGeom);
             }
