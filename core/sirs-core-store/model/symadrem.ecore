@@ -12,7 +12,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeRive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="systeme_reperage_defaut"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
@@ -24,7 +23,7 @@
         eType="#//GardienTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
         eType="#//CommuneTroncon" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRive" eType="#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeRive" eType="#//RefRive"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageIds" upperBound="-1"
         eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
