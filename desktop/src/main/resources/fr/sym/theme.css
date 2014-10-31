@@ -35,7 +35,6 @@
     -fx-background-color: rgb(220,220,220);
 }
 
-
 .blue-light{
     -fx-background-color: rgb(109,149,182);
     -fx-background-radius: 0 0 0 0;
@@ -84,6 +83,20 @@
 .buttonbar{
     -fx-background-color: rgb(74,123,165);
     -fx-background-radius: 5 0 0 0;
+}
+
+.buttonbar-button{
+    -fx-background-color:none;
+}
+
+.buttonbar-button:hover{
+    -fx-background-color:rgb(109,149,182);
+    -fx-text-fill: white;
+}
+
+.buttonbar-button:armed{
+    -fx-background-color:rgb(74,123,165);
+    -fx-text-fill: white;
 }
 
 .pojotable-header {

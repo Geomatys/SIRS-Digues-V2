@@ -3,14 +3,10 @@ package fr.sym;
 import fr.sym.digue.DiguesController;
 import fr.sym.map.FXMapPane;
 import fr.sym.theme.Theme;
-import java.io.IOException;
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
@@ -18,10 +14,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-public class MainFrameController extends Stage {
+public class MainFrame extends BorderPane {
 
     @FXML
     private MenuItem uiPref;
@@ -40,8 +34,8 @@ public class MainFrameController extends Stage {
         return uiTabs;
     }
 
-    private void init() {
-        setTitle("Symadrem");
+    public MainFrame() {
+        Symadrem.loadFXML(this);
         
         // Load themes
         final Theme[] themes = Plugins.getThemes();
@@ -53,14 +47,6 @@ public class MainFrameController extends Stage {
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
         }
-        
-        setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-            @Override
-            public void handle(WindowEvent event) {
-                System.exit(0);
-            }
-        });
     }
     
     private MenuItem toMenuItem(final Theme theme){
@@ -108,11 +94,11 @@ public class MainFrameController extends Stage {
     @FXML
     void openDigueTab(ActionEvent event) {
         
-        final DiguesController digueController = DiguesController.create();
+        final DiguesController digueController = new DiguesController();
         
         final Tab tab = new Tab();
         tab.setText("Digues");
-        tab.setContent(new BorderPane(digueController.root));
+        tab.setContent(new BorderPane(digueController));
         
         uiTabs.getTabs().add(tab);
         uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().indexOf(tab));
@@ -128,13 +114,4 @@ public class MainFrameController extends Stage {
         System.exit(0);
     }
 
-    public static MainFrameController create() throws IOException {
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource("/fr/sym/mainframe.fxml"));
-        final Parent root = loader.load();
-        final MainFrameController controller = loader.getController();
-        controller.init();
-        final Scene scene = new Scene(root);
-        controller.setScene(scene);
-        return controller;
-    }
 }

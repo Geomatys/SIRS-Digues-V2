@@ -7,32 +7,29 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<SplitPane dividerPositions="0.29797979797979796" focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.digue.DiguesController">
+<fx:root dividerPositions="0.36716791979949875" focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="800.0" type="SplitPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <items>
         <BorderPane SplitPane.resizableWithParent="false">
             <top>
-                <GridPane BorderPane.alignment="CENTER">
+                <GridPane styleClass="buttonbar" BorderPane.alignment="CENTER">
                     <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" />
                         <ColumnConstraints hgrow="NEVER" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                     <children>
-                        <Button mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="1" GridPane.hgrow="NEVER">
+                        <Button mnemonicParsing="false" onAction="#openSearchPopup" styleClass="btn-without-style" GridPane.columnIndex="1" GridPane.hgrow="NEVER">
                             <graphic>
                                 <ImageView pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1">
                                     <image>
-                                        <Image url="@../images/search-icon.png" />
+                                        <Image url="@../images/search-icon-white.png" />
                                     </image>
                                 </ImageView>
                             </graphic>
                         </Button>
-                        <Label layoutX="10.0" layoutY="14.0" text="Liste des systèmes d'endiguement" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
+                        <Label layoutX="10.0" layoutY="14.0" styleClass="label-header" text="Liste des systèmes d'endiguement" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                      <padding>
                         <Insets left="5.0" right="5.0" />
                      </padding>
@@ -50,4 +47,4 @@
         </BorderPane>
         <BorderPane fx:id="uiRight" />
     </items>
-</SplitPane>
+</fx:root>

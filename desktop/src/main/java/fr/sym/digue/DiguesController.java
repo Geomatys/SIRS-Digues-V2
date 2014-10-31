@@ -4,23 +4,19 @@ import fr.sym.theme.Theme;
 import fr.sym.*;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
-import java.io.IOException;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DiguesController {
-
-    public Parent root;
+public class DiguesController extends SplitPane{
 
     @Autowired
     private Session session;
@@ -28,34 +24,10 @@ public class DiguesController {
     @FXML private TreeView uiTree;
     @FXML private BorderPane uiRight;
 
-    @FXML
-    private void openSearchPopup(ActionEvent event) {
-        System.out.println("TODO");
-    }
-
-    private void buildTreeView(final TreeItem treeRootItem) {
-
-        final SystemeEndiguementProvisoire systemeEndiguement = new SystemeEndiguementProvisoire();
-        systemeEndiguement.nom = "Un systeme d'endiguement";
+    public DiguesController() {
+        Symadrem.loadFXML(this);
+        Injector.injectDependencies(this);
         
-        final TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
-        treeRootItem.getChildren().add(systemeEndiguementItem);
-        
-        this.session.getDigues().stream().forEach((digue) -> {
-            final TreeItem digueItem = new TreeItem(digue);
-
-            this.session.getTronconDigueByDigue(digue).stream().forEach((troncon) -> {
-                final TreeItem tronconItem = new TreeItem(troncon);
-                digueItem.getChildren().add(tronconItem);
-            });
-            systemeEndiguementItem.getChildren().add(digueItem);
-        });
-
-        this.uiTree.setRoot(treeRootItem);
-    }
-
-    private void init() {
-
         this.buildTreeView(new TreeItem("root"));
         this.uiTree.setShowRoot(false);
         this.uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
@@ -85,25 +57,33 @@ public class DiguesController {
 //                System.out.println(event.getButton().toString());
 //            }
 //        });
+        
     }
 
-    public static DiguesController create() {
+    @FXML
+    private void openSearchPopup(ActionEvent event) {
+        System.out.println("TODO");
+    }
 
-        final FXMLLoader loader = new FXMLLoader(Symadrem.class.getResource(
-                "/fr/sym/digue/diguesDisplay.fxml"));
-        final Parent root;
+    private void buildTreeView(final TreeItem treeRootItem) {
 
-        try {
-            root = loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
+        final SystemeEndiguementProvisoire systemeEndiguement = new SystemeEndiguementProvisoire();
+        systemeEndiguement.nom = "Un systeme d'endiguement";
+        
+        final TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
+        treeRootItem.getChildren().add(systemeEndiguementItem);
+        
+        this.session.getDigues().stream().forEach((digue) -> {
+            final TreeItem digueItem = new TreeItem(digue);
 
-        final DiguesController controller = loader.getController();
-        Injector.injectDependencies(controller);
-        controller.root = root;
-        controller.init();
-        return controller;
+            this.session.getTronconDigueByDigue(digue).stream().forEach((troncon) -> {
+                final TreeItem tronconItem = new TreeItem(troncon);
+                digueItem.getChildren().add(tronconItem);
+            });
+            systemeEndiguementItem.getChildren().add(digueItem);
+        });
+
+        this.uiTree.setRoot(treeRootItem);
     }
 
     private class CustomizedTreeCell extends TreeCell {
@@ -146,7 +126,7 @@ public class DiguesController {
         private class NouveauTronconMenuItem extends MenuItem {
 
             public NouveauTronconMenuItem(final Digue digue) {
-                super("Nouveau tronçon ?");
+                super("Créer un nouveau tronçon");
 
                 this.setOnAction((ActionEvent t) -> {
                     final TronconDigue troncon = new TronconDigue();
@@ -162,7 +142,7 @@ public class DiguesController {
         private class NouvelleDigueMenuItem extends MenuItem {
 
             public NouvelleDigueMenuItem() {
-                super("Nouvelle digue ?");
+                super("Créer une nouvelle digue");
 
                 this.setOnAction((ActionEvent t) -> {
                     final Digue digue = new Digue();
@@ -174,17 +154,5 @@ public class DiguesController {
             }
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 }

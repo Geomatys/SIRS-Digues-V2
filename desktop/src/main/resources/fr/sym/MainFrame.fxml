@@ -6,7 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@mainframe.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sym.MainFrameController">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
@@ -35,7 +35,7 @@
                     <center>
                         <ToolBar prefHeight="82.0" prefWidth="436.0" BorderPane.alignment="CENTER">
                             <items>
-                                <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefWidth="145.0" text="Cartographie">
+                                <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" prefWidth="145.0" styleClass="buttonbar-button" text="Cartographie">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -44,7 +44,7 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" prefWidth="145.0" text="Gestion des digues" translateX="5.0">
+                                <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" prefWidth="145.0" styleClass="buttonbar-button" text="Gestion des digues" translateX="5.0">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -55,10 +55,10 @@
                                 </Button>
                                 <VBox translateX="10.0">
                                     <children>
-                                        <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Thèmes" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Thèmes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Autres" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Autres" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
                                     </children>
@@ -69,7 +69,7 @@
                     <right>
                         <ToolBar BorderPane.alignment="CENTER">
                             <items>
-                                <Button contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" text="Outils">
+                                <Button contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" styleClass="buttonbar-button" text="Outils">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -78,7 +78,7 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" text="Impressions">
+                                <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" prefWidth="145.0" styleClass="buttonbar-button" text="Impressions">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -94,4 +94,4 @@
             </top>
         </BorderPane>
     </center>
-</BorderPane>
+</fx:root>

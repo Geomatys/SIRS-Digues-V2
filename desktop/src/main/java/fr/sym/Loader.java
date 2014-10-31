@@ -38,11 +38,10 @@ import com.geomatys.json.GeometryDeserializer;
 import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -162,9 +161,14 @@ public class Loader extends Application {
      */
     private void showMainStage() throws IOException {
         final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
-                "classpath:/symadrem/spring/application-context.xml");
+                "classpath:/fr/sym/spring/application-context.xml");
         
-        context.getBean(MainFrameController.class).show();
+        final MainFrame frame = new MainFrame();
+        final Stage stage = new Stage();
+        stage.setTitle("Symadrem");
+        stage.setScene(new Scene(frame));
+        stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
+        stage.show();
     }
 
     private final class LoadingTask extends Task {
