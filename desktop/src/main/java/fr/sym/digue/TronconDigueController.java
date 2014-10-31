@@ -4,11 +4,16 @@ package fr.sym.digue;
 
 import fr.sym.Session;
 import fr.sym.Symadrem;
+import fr.sym.map.FXMapPane;
+import fr.sym.map.FXMapTab;
 import fr.sym.theme.AbstractPojoTable;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Element;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import java.awt.geom.NoninvertibleTransformException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -31,7 +36,10 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.StringConverter;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.opengis.referencing.operation.TransformException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -105,6 +113,18 @@ public class TronconDigueController extends BorderPane{
         this.tronconProperty.set(troncon);
     }
         
+    @FXML
+    private void showOnMap(){
+        final FXMapTab tab = session.getFrame().getMapTab();
+        tab.show();
+        final FXMap map = tab.getMap().getUiMap();
+        try {
+            map.getCanvas().setVisibleArea(JTS.toEnvelope(tronconProperty.get().getGeometry()));
+        } catch (NoninvertibleTransformException | TransformException ex) {
+            Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+        }
+    }
+    
     @FXML
     private void save(final ActionEvent event){
         tronconProperty.get().setCommentaire(uiComment.getHtmlText());

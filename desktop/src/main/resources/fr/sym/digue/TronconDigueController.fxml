@@ -13,7 +13,7 @@
 
 <fx:root prefHeight="768.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <top>
-        <BorderPane BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
+        <BorderPane styleClass="blue-light" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
             <right>
                 <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="blue-dark" BorderPane.alignment="CENTER">
                     <children>
@@ -54,7 +54,7 @@
                 </VBox>
             </right>
             <center>
-                <GridPane hgap="8.0" styleClass="blue-light" vgap="15.0" BorderPane.alignment="CENTER">
+                <GridPane hgap="8.0" vgap="15.0" BorderPane.alignment="CENTER">
                     <children>
                         <Label styleClass="label-header" text="Informations sur le tronçon" GridPane.columnSpan="2" />
                         <Label styleClass="label-header" text="Digue :" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
@@ -85,6 +85,24 @@
                     </rowConstraints>
                 </GridPane>
             </center>
+         <left>
+            <Button contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#showOnMap" BorderPane.alignment="CENTER">
+               <graphic>
+                  <ImageView pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/menu-carto.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+               <styleClass>
+                  <String fx:value="label-header" />
+                  <String fx:value="blue-dark" />
+               </styleClass>
+            </Button>
+         </left>
         </BorderPane>
     </top>
     <center>

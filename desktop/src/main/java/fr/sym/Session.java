@@ -44,6 +44,8 @@ public class Session {
     private TronconDigueRepository tronconDigueRepository;
     private BorneDigueRepository borneDigueRepository;
 
+    private MainFrame frame = null;
+    
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         digueRepository = new DigueRepository(couchDbConnector);
@@ -60,6 +62,14 @@ public class Session {
     
     public BorneDigueRepository getBorneDigueRepository(){
         return borneDigueRepository;
+    }
+
+    void setFrame(MainFrame frame) {
+        this.frame = frame;
+    }
+
+    public MainFrame getFrame() {
+        return frame;
     }
 
     /**

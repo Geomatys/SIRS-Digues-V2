@@ -35,6 +35,7 @@ import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.geomatys.json.GeometryDeserializer;
+import fr.sym.digue.Injector;
 import fr.symadrem.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -164,6 +165,8 @@ public class Loader extends Application {
                 "classpath:/fr/sym/spring/application-context.xml");
         
         final MainFrame frame = new MainFrame();
+        final Session session = Injector.getBean(Session.class);
+        session.setFrame(frame);
         final Stage stage = new Stage();
         stage.setTitle("Symadrem");
         stage.setScene(new Scene(frame));

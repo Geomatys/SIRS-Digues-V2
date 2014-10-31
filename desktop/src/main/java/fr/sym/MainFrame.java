@@ -1,12 +1,13 @@
 package fr.sym;
 
-import fr.sym.digue.DiguesController;
-import fr.sym.map.FXMapPane;
+import fr.sym.digue.DiguesTab;
+import fr.sym.map.FXMapTab;
 import fr.sym.theme.Theme;
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
@@ -30,9 +31,8 @@ public class MainFrame extends BorderPane {
     @FXML
     private Button uiMapButton;
 
-    public TabPane getUiTabs() {
-        return uiTabs;
-    }
+    private FXMapTab mapTab;
+    private DiguesTab diguesTab;
 
     public MainFrame() {
         Symadrem.loadFXML(this);
@@ -47,6 +47,30 @@ public class MainFrame extends BorderPane {
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
         }
+    }
+    
+    public TabPane getUiTabs() {
+        return uiTabs;
+    }
+
+    public synchronized FXMapTab getMapTab() {
+        if(mapTab==null){
+            mapTab = new FXMapTab(uiTabs);
+        }
+        return mapTab;
+    }
+    
+    public synchronized DiguesTab getDiguesTab() {
+        if(diguesTab==null){
+            diguesTab = new DiguesTab(uiTabs);
+        }
+        return diguesTab;
+    }
+        
+    public synchronized void addTab(Tab tab){
+        uiTabs.getTabs().add(tab);
+        final int index = uiTabs.getTabs().indexOf(tab);
+        uiTabs.getSelectionModel().clearAndSelect(index);
     }
     
     private MenuItem toMenuItem(final Theme theme){
@@ -70,8 +94,7 @@ public class MainFrame extends BorderPane {
                 final Tab tab = new Tab();
                 tab.setText(theme.getName());
                 tab.setContent(theme.createPane());
-                uiTabs.getTabs().add(tab);
-                uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().size()-1);
+                addTab(tab);
             }
         });
         
@@ -80,28 +103,12 @@ public class MainFrame extends BorderPane {
   
     @FXML
     void openMap(ActionEvent event) {
-
-        final FXMapPane fxmap = new FXMapPane();
-
-        final Tab tab = new Tab();
-        tab.setText("Map");
-        tab.setContent(fxmap);
-        
-        uiTabs.getTabs().add(tab);
-        uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().indexOf(tab));
+        getMapTab().show();
     }
 
     @FXML
     void openDigueTab(ActionEvent event) {
-        
-        final DiguesController digueController = new DiguesController();
-        
-        final Tab tab = new Tab();
-        tab.setText("Digues");
-        tab.setContent(new BorderPane(digueController));
-        
-        uiTabs.getTabs().add(tab);
-        uiTabs.getSelectionModel().clearAndSelect(uiTabs.getTabs().indexOf(tab));
+        getDiguesTab().show();
     }
 
     @FXML
