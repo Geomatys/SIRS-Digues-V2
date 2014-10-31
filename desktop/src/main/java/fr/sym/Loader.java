@@ -171,6 +171,7 @@ public class Loader extends Application {
         stage.setTitle("Symadrem");
         stage.setScene(new Scene(frame));
         stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
+        stage.setMaximized(true);
         stage.show();
     }
 

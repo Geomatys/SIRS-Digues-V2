@@ -49,7 +49,7 @@ public class DiguesController extends SplitPane{
                 uiRight.setCenter(ctrl);
             }
         });
-
+        
 //        this.uiTree.setOnMouseClicked(new EventHandler<MouseEvent>() {
 //
 //            @Override

@@ -37,7 +37,7 @@
 
 .blue-light{
     -fx-background-color: rgb(109,149,182);
-    -fx-background-radius: 0 0 0 0;
+    -fx-background-radius: 5 5 5 5;
 }
 
 .label-header {
@@ -46,7 +46,8 @@
 
 .blue-dark{
     -fx-background-color:  rgb(74,123,165);
-    -fx-background-radius:  0 0 0 0;
+    -fx-background-radius:  30 0 0 30;
+    -fx-effect: dropshadow( three-pass-box , black , 10 , 0 , 0 , 0 );
 }
 
 .gray-light{
@@ -81,7 +82,7 @@
 }
 
 .buttonbar{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: rgb(109,149,182);
     -fx-background-radius: 5 0 0 0;
 }
 
@@ -97,6 +98,21 @@
 .buttonbar-button:armed{
     -fx-background-color:rgb(74,123,165);
     -fx-text-fill: white;
+}
+
+.geobutton{
+    -fx-background-color:rgb(74,123,165);
+    -fx-text-fill: white;
+    -fx-background-radius:  0 30 30 0;
+    -fx-effect: dropshadow( three-pass-box , black , 10 , 0 , 0 , 0 );
+}
+
+.geobutton:hover{
+    -fx-background-color:rgb(99,139,172);
+}
+
+.geobutton:armed{
+    -fx-background-color:rgb(109,149,182);
 }
 
 .pojotable-header {

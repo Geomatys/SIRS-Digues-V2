@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static fr.sym.Session.PROJECTION;
+import fr.sym.digue.DigueController;
 import fr.sym.digue.Injector;
+import fr.sym.digue.TronconDigueController;
 import org.geotoolkit.data.bean.BeanStore;
 import fr.sym.theme.ContactsTheme;
 import fr.sym.theme.DesordreTheme;
@@ -24,6 +26,7 @@ import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Fondation;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -33,7 +36,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javax.measure.unit.NonSI;
 import org.apache.sis.storage.DataStoreException;
 import org.ektorp.CouchDbConnector;
@@ -195,16 +200,10 @@ public class CorePlugin extends Plugin{
         final List<MenuItem> lst = new ArrayList<>();
         
         if(obj instanceof TronconDigue){
-            final TronconDigue candidate = (TronconDigue) obj;
-            final String nom = candidate.getNom();
-            lst.add(new MenuItem(nom));            
-            final String docId = candidate.getDocumentId();
+            lst.add(new ViewFormItem(obj));
             
         }else if(obj instanceof Structure){
-            final Structure candidate = (Structure) obj;
-            final String docId = candidate.getDocumentId();
-            lst.add(new MenuItem(docId));
-            
+            lst.add(new ViewFormItem(obj));
         }
         
         return lst;
@@ -244,7 +243,7 @@ public class CorePlugin extends Plugin{
     private static MutableStyle createBorneStyle(){
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(7);
 
-        final List<GraphicalSymbol> symbols = new ArrayList<GraphicalSymbol>();
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
         final Stroke stroke = GO2Utilities.STYLE_FACTORY.stroke(Color.BLACK, 1);
         final Fill fill = GO2Utilities.STYLE_FACTORY.fill(Color.WHITE);
         final Mark mark = GO2Utilities.STYLE_FACTORY.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
@@ -275,7 +274,7 @@ public class CorePlugin extends Plugin{
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(13);
 
-        final List<GraphicalSymbol> symbols = new ArrayList<GraphicalSymbol>();
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
         final Stroke stroke = GO2Utilities.STYLE_FACTORY.stroke(Color.WHITE, 0);
         final Fill fill = GO2Utilities.STYLE_FACTORY.fill(col);
         final Mark mark = GO2Utilities.STYLE_FACTORY.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
@@ -297,6 +296,53 @@ public class CorePlugin extends Plugin{
         final MutableStyle style = GO2Utilities.STYLE_FACTORY.style();
         style.featureTypeStyles().add(fts);
         return style;
+    }
+    
+    private static class ViewFormItem extends MenuItem{
+
+        public ViewFormItem(Object candidate) {
+            if(candidate instanceof Digue){
+                final Digue cdt = (Digue) candidate;
+                final String text = "Digue : "+cdt.getLibelle();
+                setText(text);
+                
+                setOnAction((ActionEvent event) -> {
+                    final DigueController controller = new DigueController();
+                    controller.setDigue(cdt);
+                    final Tab tab = new Tab(text);
+                    tab.setContent(controller);
+                    Injector.getBean(Session.class).getFrame().addTab(tab);
+                });
+                
+            }else if(candidate instanceof TronconDigue){
+                final TronconDigue cdt = (TronconDigue) candidate;
+                final String text = "Tronçon : "+cdt.getNom();
+                setText(text);
+                
+                setOnAction((ActionEvent event) -> {
+                    final TronconDigueController controller = new TronconDigueController();
+                    controller.setTroncon(cdt);
+                    final Tab tab = new Tab(text);
+                    tab.setContent(controller);
+                    Injector.getBean(Session.class).getFrame().addTab(tab);
+                });
+            }else if(candidate instanceof Structure){
+                final Structure cdt = (Structure) candidate;
+                final String text = "Objet : "+cdt.getDocumentId();
+                setText(text);
+                
+                setOnAction((ActionEvent event) -> {
+//                    final TronconDigueController controller = new TronconDigueController();
+//                    controller.setTroncon(cdt);
+//                    final Tab tab = new Tab(text);
+//                    tab.setContent(controller);
+//                    Injector.getBean(Session.class).getFrame().addTab(tab);
+                });
+            }
+            
+            
+        }
+        
     }
     
 }
