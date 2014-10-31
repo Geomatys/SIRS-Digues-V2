@@ -41,6 +41,7 @@ public class TronconThemePane extends BorderPane {
                 final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[i]);
                 table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
                 final Tab tab = new Tab(groups[i].getName());
+                System.out.println("Type de la table : "+table.getClass().getCanonicalName());
                 tab.setContent(table);
                 pane.getTabs().add(tab);
             }
