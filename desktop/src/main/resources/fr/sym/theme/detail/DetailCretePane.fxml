@@ -11,4 +11,54 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<fx:root fx:id="uiBorderPane" prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" />
+<fx:root fx:id="uiBorderPane" prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <GridPane hgap="20.0" vgap="20.0" BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="NEVER" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints valignment="CENTER" />
+          <RowConstraints valignment="CENTER" />
+          <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+          <RowConstraints valignment="CENTER" />
+            <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Épaisseur" GridPane.rowIndex="3" />
+            <FXNumberSpinner fx:id="uiEpaisseur" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Commentaire : " />
+            <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" />
+            <Label text="Début : " GridPane.rowIndex="5" />
+            <Label text="Validation : " GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
+            <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Début : " />
+                  <Label text="Fin : " GridPane.columnIndex="3" />
+                  <FXDateField fx:id="uiFin" GridPane.columnIndex="4" />
+                  <FXDateField fx:id="uiDebut" GridPane.columnIndex="1" />
+               </children>
+            </GridPane>
+            <Label text="Label" GridPane.rowIndex="4" />
+            <Label text="Label" GridPane.rowIndex="2" />
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="20.0" left="50.0" right="50.0" top="20.0" />
+         </BorderPane.margin>
+      </GridPane>
+   </center>
+</fx:root>

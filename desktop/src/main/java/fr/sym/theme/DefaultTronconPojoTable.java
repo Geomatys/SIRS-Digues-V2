@@ -3,7 +3,9 @@ package fr.sym.theme;
 
 import fr.sym.Session;
 import fr.sym.digue.Injector;
+import fr.sym.theme.detail.DetailTronconThemePane;
 import fr.symadrem.sirs.core.model.Element;
+import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -11,6 +13,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -65,7 +68,11 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
 
     @Override
     protected void editPojo(Element pojo) {
-        
+        final Session session = Injector.getBean(Session.class);
+        final Tab tab = new Tab();
+        tab.setContent(new DetailTronconThemePane((Structure) pojo));
+        tab.setText(pojo.getClass().getSimpleName());
+        session.getFrame().addTab(tab);
     }
 
     @Override
