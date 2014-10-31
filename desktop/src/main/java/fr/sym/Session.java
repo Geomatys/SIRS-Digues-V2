@@ -36,7 +36,7 @@ public class Session {
     public static final CoordinateReferenceSystem PROJECTION = GeometryDeserializer.PROJECTION;
     
     private MapContext mapContext;
-    private final MapItem symadremGroup = MapBuilder.createItem();
+    private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     
@@ -83,12 +83,12 @@ public class Session {
             mapContext.setName("Carte");
 
             try {
-                //symadrem layers
-                symadremGroup.setName("Systeme de digue");
-                mapContext.items().add(0,symadremGroup);
+                //sirs layers
+                sirsGroup.setName("Systeme de digue");
+                mapContext.items().add(0,sirsGroup);
 
                 for(Plugin plugin : Plugins.getPlugins()){
-                    symadremGroup.items().addAll(plugin.getMapItems());
+                    sirsGroup.items().addAll(plugin.getMapItems());
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds());
 
@@ -100,7 +100,6 @@ public class Session {
                 for (Name n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-                    cml.setOpacity(0.4);
                     cml.setName("Open Street Map");
                     cml.setDescription(new DefaultDescription(
                             new SimpleInternationalString("Open Street Map"),
@@ -116,7 +115,7 @@ public class Session {
 
     public synchronized MapItem getSymadremLayerGroup() {
         getMapContext();
-        return symadremGroup;
+        return sirsGroup;
     }
 
     public synchronized MapItem getBackgroundLayerGroup() {

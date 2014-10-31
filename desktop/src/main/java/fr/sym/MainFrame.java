@@ -4,20 +4,25 @@ import fr.sym.digue.DiguesTab;
 import fr.sym.map.FXMapTab;
 import fr.sym.theme.Theme;
 import java.util.List;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 
 public class MainFrame extends BorderPane {
 
+    public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    
     @FXML
     private MenuItem uiPref;
     @FXML
@@ -80,24 +85,28 @@ public class MainFrame extends BorderPane {
         
         if(subs.isEmpty()){
             item = new MenuItem(theme.getName());
-        }
-        else{
+            item.setOnAction((ActionEvent event) -> {
+                final Tab tab = new Tab(theme.getName());
+                tab.setContent(theme.createPane());
+                addTab(tab);
+            });
+        } else{
             item = new Menu(theme.getName());
+            //action avec tous les sous panneaux
+            final MenuItem all = new MenuItem("Ouvrir l'ensemble");
+            all.setGraphic(new ImageView(ICON_ALL));
+            all.setOnAction((ActionEvent event) -> {
+                final Tab tab = new Tab(theme.getName());
+                tab.setContent(theme.createPane());
+                addTab(tab);
+            });
+            ((Menu) item).getItems().add(all);
+            
             for(final Theme sub : subs){
                 ((Menu) item).getItems().add(toMenuItem(sub));
             }
         }
-        
-        item.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Tab tab = new Tab();
-                tab.setText(theme.getName());
-                tab.setContent(theme.createPane());
-                addTab(tab);
-            }
-        });
-        
+                
         return item;
     }
   

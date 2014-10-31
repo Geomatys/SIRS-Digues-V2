@@ -63,13 +63,11 @@ public class LauncherPane extends BorderPane {
     private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
     @FXML
-    private TextField uiDistantLogin;
+    private TextField uiDistantName;
     @FXML
     private TextField uiNewName;
     @FXML
     private TextField uiImportDBData;
-    @FXML
-    private PasswordField uiDistantPassword;
     @FXML
     private TextField uiImportDBCarto;
     @FXML
@@ -78,8 +76,6 @@ public class LauncherPane extends BorderPane {
     private TextField uiDistantUrl;
     @FXML
     private CheckBox uiDistantSync;
-    @FXML
-    private TextField uiDistantOauth;
     @FXML
     private TextField uiImportName;           
     @FXML
@@ -144,9 +140,26 @@ public class LauncherPane extends BorderPane {
 
     @FXML
     void connectDistant(ActionEvent event) {
-        //TODO : login/password
-        //TODO : import
-        runDesktop(uiDistantUrl.getText(), uiDistantLogin.getText());
+        if(uiDistantName.getText().trim().isEmpty()){
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            return;
+        }
+        
+        final String distantUrl = uiDistantUrl.getText();
+        final String localUrl = URL_LOCAL+"/"+uiDistantName.getText();
+        
+        try {
+            DatabaseRegistry.newLocalDBFromRemote(distantUrl, localUrl, uiDistantSync.isSelected());
+        } catch (MalformedURLException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.OK).showAndWait();
+        }
+        
+        //aller au panneau principale
+        Platform.runLater(() -> {
+            uiTabPane.getSelectionModel().clearAndSelect(0);
+            updateLocalDbList();
+        });
     }
 
     @FXML

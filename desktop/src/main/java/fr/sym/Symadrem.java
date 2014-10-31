@@ -25,7 +25,7 @@ public final class Symadrem {
     public static final Image ICON_SEARCH = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SEARCH,22,Color.WHITE),null);
     public static final Image ICON_TRASH  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,22,Color.WHITE),null);
     
-    public static final String NAME = "symadrem";
+    public static final String NAME = "sirs";
     public static final Logger LOGGER = Logging.getLogger(Symadrem.class);
     public static final String CSS_PATH = "/fr/sym/theme.css";
         

@@ -122,7 +122,7 @@ public class Loader extends Application {
         scene.getStylesheets().add("/fr/sym/splashscreen.css");
 
         final Stage splashStage = new Stage();
-        splashStage.setTitle("Symadrem");
+        splashStage.setTitle("SIRS-Digues V2");
         splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
         splashStage.show();
@@ -168,7 +168,7 @@ public class Loader extends Application {
         final Session session = Injector.getBean(Session.class);
         session.setFrame(frame);
         final Stage stage = new Stage();
-        stage.setTitle("Symadrem");
+        stage.setTitle("SIRS-Digues V2");
         stage.setScene(new Scene(frame));
         stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
         stage.setMaximized(true);

@@ -7,6 +7,7 @@ import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
 import java.awt.Color;
+import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.Date;
 import java.util.logging.Level;
@@ -25,6 +26,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -76,6 +78,13 @@ public class FXMapPane extends BorderPane {
     public FXMapPane() {
         Injector.injectDependencies(this);        
         context = session.getMapContext();
+        
+        uiMap1.getCanvas().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        uiMap1.getCanvas().setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        uiMap1.getCanvas().setRenderingHint(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
+        uiMap2.getCanvas().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        uiMap2.getCanvas().setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        uiMap2.getCanvas().setRenderingHint(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
         
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getContainer().setContext(context);
