@@ -100,9 +100,6 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         final List<SystemeReperageBorne> systemesReperageBorne = new ArrayList<>();
         
-        final Map<BorneDigue, SystemeReperageBorne> bornes = new HashMap<>();
-        final Map<SystemeReperage, SystemeReperageBorne> systemesReperage = new HashMap<>();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final SystemeReperageBorne systemeReperageBorne = new SystemeReperageBorne();
@@ -117,32 +114,20 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             }
             
             final BorneDigue borne = borneDigueImporter.getBorneDigue().get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
-            systemeReperageBorne.setBorne_digue(borne.getId());
+            systemeReperageBorne.setBorneId(borne.getId());
             final SystemeReperage systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
-            systemeReperageBorne.setSysteme_reperage(systemeReperage.getId());
+            systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             
             if(byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()))==null) byBorneId.put(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()), new ArrayList<>());
             byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString())).add(systemeReperageBorne);
             
             if(bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()))==null) bySystemeReperageId.put(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()), new ArrayList<>());
             bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString())).add(systemeReperageBorne);
-            
-            // Stock bornes and systemes reperage for linking ids after registering 
-            // all the systemeReperageBorne using bulk method (faster)
-            bornes.put(borne, systemeReperageBorne);
-            systemesReperage.put(systemeReperage, systemeReperageBorne);
-            
+                        
             systemesReperageBorne.add(systemeReperageBorne);
         }
+        
         couchDbConnector.executeBulk(systemesReperageBorne);
-        
-        bornes.keySet().stream().forEach((borne) -> { 
-            borne.setSystemereperageborne(bornes.get(borne).getId());
-        });
-        
-        systemesReperage.keySet().stream().forEach((systemeReperage) -> { 
-            systemeReperage.setSystemereperageborne(systemesReperage.get(systemeReperage).getId());
-        });
-        
+                
     }
 }

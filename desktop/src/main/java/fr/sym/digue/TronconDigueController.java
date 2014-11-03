@@ -28,11 +28,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.StringConverter;
@@ -65,6 +67,9 @@ public class TronconDigueController extends BorderPane{
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
     @FXML private BorderPane uiSrTab;
+    @FXML private Button uiSRDelete;
+    @FXML private Button uiSRAdd;
+    @FXML private ListView uiSRList;
 
     private final BorneTable borneTable = new BorneTable();
     
@@ -99,6 +104,9 @@ public class TronconDigueController extends BorderPane{
         
         uiSrTab.setCenter(borneTable);
         
+        uiSRDelete.setGraphic(new ImageView(Symadrem.ICON_TRASH));
+        uiSRAdd.setGraphic(new ImageView(Symadrem.ICON_ADD));
+        
     }
     
     public ObjectProperty<TronconDigue> tronconProperty(){
@@ -113,6 +121,16 @@ public class TronconDigueController extends BorderPane{
         this.tronconProperty.set(troncon);
     }
         
+    @FXML
+    private void srAdd(ActionEvent event) {
+
+    }
+
+    @FXML
+    private void srDelete(ActionEvent event) {
+
+    }
+    
     @FXML
     private void showOnMap(){
         final FXMapTab tab = session.getFrame().getMapTab();
@@ -218,6 +236,9 @@ public class TronconDigueController extends BorderPane{
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
                 
+        
+        //list SR
+        
         initializing = false;
     }
     
