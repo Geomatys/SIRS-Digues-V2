@@ -53,6 +53,7 @@ public class Session {
         digueRepository = new DigueRepository(couchDbConnector);
         tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
+        borneDigueRepository = new BorneDigueRepository(couchDbConnector);
     }
 
     public DigueRepository getDigueRepository() {

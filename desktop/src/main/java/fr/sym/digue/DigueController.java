@@ -46,7 +46,6 @@ public class DigueController extends BorderPane {
     @Autowired
     private Session session;
 
-//    @FXML private BorderPane uiBorderPaneTable;
     @FXML private TextField libelle;
     @FXML private Label id;
     @FXML private FXDateField date_maj;
@@ -91,22 +90,6 @@ public class DigueController extends BorderPane {
         this.digueProperty.set(digue);
         initFields();
     }
-//
-//    @FXML
-//    public void enableFields(ActionEvent event) {
-//        
-//        if (this.uiEdit.isSelected()) {
-//            this.uiEdit.setText("Passer en consultation");
-//            this.mode.setText("Mode saisie");
-//            this.mode.setTextFill(Color.RED);
-//            this.uiSave.setDisable(false);
-//        } else {
-//            this.uiEdit.setText("Passer en saisie");
-//            this.mode.setText("Mode consultation");
-//            this.mode.setTextFill(Color.WHITE);
-//            this.uiSave.setDisable(true);
-//        }
-//    }
     
     @FXML
     private void save(ActionEvent event){

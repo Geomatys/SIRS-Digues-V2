@@ -20,6 +20,12 @@ public interface DetailThemePane {
     BooleanProperty disableFieldsProperty();
     
     /**
+     * Detects if the troncon has changed.
+     * @return 
+     */
+    BooleanProperty tronconChangedProperty();
+    
+    /**
      * Record unbinded fields changes before saving.
      */
     void preSave();

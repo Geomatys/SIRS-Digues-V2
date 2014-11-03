@@ -34,6 +34,8 @@ public class DetailTronconThemePane extends BorderPane {
     
     private Structure structure;
     private Node specificThemePane;
+    private TronconDigue troncon;
+    private TronconDigue newTroncon = null;
     
     @FXML private ScrollPane uiEditDetailTronconTheme;
       
@@ -60,30 +62,57 @@ public class DetailTronconThemePane extends BorderPane {
     @FXML
     void save(ActionEvent event) {
         
+        final Session session = Injector.getBean(Session.class);
+        
         if(specificThemePane instanceof DetailThemePane){
             ((DetailThemePane) specificThemePane).preSave();
+            
+            if(((DetailThemePane) specificThemePane).tronconChangedProperty().get()){
+                ((DetailThemePane) specificThemePane).tronconChangedProperty().set(false);
+                for(final Structure str : troncon.getStuctures()){
+                    if(str.getId().equals(structure.getId())){
+                        troncon.getStuctures().remove(str);
+                        break;
+                    }
+                }
+                newTroncon = session.getTronconDigueRepository().get(structure.getTroncon());
+                newTroncon.getStuctures().add(structure);
+                structure.setDateMaj(LocalDateTime.now());
+                newTroncon.setDateMaj(LocalDateTime.now());
+                session.getTronconDigueRepository().update(newTroncon);
+            } else{
+                for(final Structure str : troncon.getStuctures()){
+                    if(str.getId().equals(structure.getId())){
+                        troncon.getStuctures().set(troncon.getStuctures().indexOf(str), structure);
+                        break;
+                    }
+                }
+            }
+            
+            
+            
+            
+            
         }
         else {
             throw new UnsupportedOperationException("The sub-pane must implement "+DetailThemePane.class.getCanonicalName()+" interface.");
         }
         
-        structure.setDateMaj(LocalDateTime.now());
-        final Session session = Injector.getBean(Session.class);
-        final TronconDigue troncon = session.getTronconDigueRepository().get(structure.getTroncon());
-        for(final Structure str : troncon.getStuctures()){
-            if(str.getId().equals(structure.getId())){
-                troncon.getStuctures().set(troncon.getStuctures().indexOf(str), structure);
-                break;
-            }
-        }
-
+        troncon.setDateMaj(LocalDateTime.now());
         session.getTronconDigueRepository().update(troncon);
+        
+        if(newTroncon!=null){
+            troncon=newTroncon;
+            newTroncon=null;
+        }
     }
     
     
     public DetailTronconThemePane(final Structure structure){
         Symadrem.loadFXML(this);
         this.structure = structure;
+        final Session session = Injector.getBean(Session.class);
+        troncon = session.getTronconDigueRepository().get(structure.getTroncon());
         
         initFields();
         
