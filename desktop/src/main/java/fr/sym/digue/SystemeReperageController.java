@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -29,7 +28,6 @@ public class SystemeReperageController extends BorderPane {
     @FXML private TextField uiNom;
     @FXML private HTMLEditor uiComment;
     @FXML private FXDateField uiDate;
-    @FXML private ScrollPane uiTablePane;
     
     private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();    
     private final BorneTable borneTable = new BorneTable();
@@ -37,8 +35,7 @@ public class SystemeReperageController extends BorderPane {
     public SystemeReperageController(){
         Symadrem.loadFXML(this);
                 
-        uiTablePane.setContent(borneTable);
-        
+        setCenter(borneTable);
         
         srProperty.addListener((ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) -> {
             if(oldValue!=null){

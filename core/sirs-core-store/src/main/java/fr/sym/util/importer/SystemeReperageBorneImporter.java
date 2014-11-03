@@ -7,6 +7,7 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.SystemeReperageBorne;
@@ -14,9 +15,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -29,17 +32,20 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     private Map<Integer, List<SystemeReperageBorne>> bySystemeReperageId = null;
     private SystemeReperageImporter systemeReperageImporter;
     private BorneDigueImporter borneDigueImporter;
+    private SystemeReperageRepository repo;
 
     private SystemeReperageBorneImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
+            final CouchDbConnector couchDbConnector, SystemeReperageRepository repo) {
         super(accessDatabase, couchDbConnector);
+        this.repo = repo;
     }
 
     SystemeReperageBorneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter) {
-        this(accessDatabase, couchDbConnector);
+            final BorneDigueImporter borneDigueImporter,
+            SystemeReperageRepository repo) {
+        this(accessDatabase, couchDbConnector,repo);
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
     }
@@ -94,7 +100,8 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         byBorneId = new HashMap<>();
         bySystemeReperageId = new HashMap<>();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        final List<SystemeReperageBorne> systemesReperageBorne = new ArrayList<>();
+        
+        final Map<Object,SystemeReperage> srs = new HashMap<>();
         
         while (it.hasNext()) {
             final Row row = it.next();
@@ -111,7 +118,12 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             
             final BorneDigue borne = borneDigueImporter.getBorneDigue().get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
-            final SystemeReperage systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
+            final Integer srid = row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString());
+            SystemeReperage systemeReperage = srs.get(srid);
+            if(systemeReperage==null){
+                systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(srid);
+                srs.put(srid,systemeReperage);
+            }
             systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             
             if(byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()))==null) byBorneId.put(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()), new ArrayList<>());
@@ -119,11 +131,13 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             
             if(bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()))==null) bySystemeReperageId.put(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()), new ArrayList<>());
             bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString())).add(systemeReperageBorne);
-                        
-            systemesReperageBorne.add(systemeReperageBorne);
         }
         
-        couchDbConnector.executeBulk(systemesReperageBorne);
+        //sauvegarde des systemes de reperages
+        for(SystemeReperage sr : srs.values()){
+            repo.update(sr);
+        }
+        
                 
     }
 }

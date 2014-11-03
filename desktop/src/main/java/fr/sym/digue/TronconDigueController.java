@@ -90,8 +90,8 @@ public class TronconDigueController extends BorderPane{
         uiDateStart.disableProperty().bind(editBind);
         uiDateEnd.disableProperty().bind(editBind);
         uiComment.disableProperty().bind(editBind);
-        uiSRAdd.visibleProperty().bind(editBind);
-        uiSRDelete.visibleProperty().bind(editBind);
+        uiSRAdd.visibleProperty().bind(uiEdit.selectedProperty());
+        uiSRDelete.visibleProperty().bind(uiEdit.selectedProperty());
         
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
@@ -150,12 +150,36 @@ public class TronconDigueController extends BorderPane{
         
     @FXML
     private void srAdd(ActionEvent event) {
-
+        final SystemeReperageRepository repo = session.getSystemeReperageRepository();
+        
+        final TronconDigue troncon = tronconProperty.get();
+        final SystemeReperage sr = new SystemeReperage();
+        sr.setNom("Nouveau SR");
+        sr.setTronconId(troncon.getId());
+        repo.add(sr);
+        
+        //maj de la liste
+        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
+        uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
 
     @FXML
     private void srDelete(ActionEvent event) {
-
+        final SystemeReperage sr = uiSRList.getSelectionModel().getSelectedItem();
+        if(sr==null) return;
+        
+        final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
+                ButtonType.NO, ButtonType.YES).showAndWait().get();
+        if(ButtonType.YES != res) return;
+        
+        //suppression du SR
+        final SystemeReperageRepository repo = session.getSystemeReperageRepository();
+        repo.remove(sr);
+        
+        //maj de la liste
+        final TronconDigue troncon = tronconProperty.get();
+        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
+        uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
     
     @FXML

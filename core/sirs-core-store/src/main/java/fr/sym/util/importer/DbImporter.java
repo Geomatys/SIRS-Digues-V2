@@ -424,7 +424,7 @@ public class DbImporter {
                 typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, borneDigueImporter);
+                couchDbConnector, systemeReperageImporter, borneDigueImporter,systemeReperageRepository);
     }
     
     public CouchDbConnector getCouchDbConnector(){

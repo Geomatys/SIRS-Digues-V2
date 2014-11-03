@@ -38,7 +38,4 @@
          </padding>
       </GridPane>
    </top>
-   <center>
-      <ScrollPane fx:id="uiTablePane" BorderPane.alignment="CENTER" />
-   </center>
 </fx:root>
