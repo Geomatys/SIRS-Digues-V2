@@ -16,7 +16,9 @@ import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -37,26 +39,14 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  */
 public class DetailCretePane extends BorderPane implements DetailThemePane {
     
-    private Crete crete;
+    private final ObjectProperty<Crete> crete;
     private final BooleanProperty disableFields;
     private final BooleanProperty tronconChanged;
     
-    private final BorneDigueRepository borneDigueRepository;
     private final TronconDigueRepository tronconDigueRepository;
-    private final SystemeReperageRepository systemeReperageRepository;
     
     // Propriétés de Positionnable
-    @FXML ComboBox<BorneDigue> uiBorneDebut;
-    @FXML FXNumberSpinner uiDistanceDebut;
-    @FXML FXNumberSpinner uiPRDebut;
-    @FXML CheckBox uiAmontAvalDebut;
-    
-    @FXML ComboBox<BorneDigue> uiBorneFin;
-    @FXML FXNumberSpinner uiDistanceFin;
-    @FXML FXNumberSpinner uiPRFin;
-    @FXML CheckBox uiAmontAvalFin;
-    
-    @FXML ComboBox<SystemeReperage> uiSR;
+    @FXML DetailPositionnablePane uiPositionnable;
     
     // Propriétés de Structure
     @FXML HTMLEditor uiComment;
@@ -73,14 +63,13 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         disableFields = new SimpleBooleanProperty();
         tronconChanged = new SimpleBooleanProperty(false);
         final Session session = Injector.getBean(Session.class);
-        borneDigueRepository = session.getBorneDigueRepository();
         tronconDigueRepository = session.getTronconDigueRepository();
-        systemeReperageRepository = session.getSystemeReperageRepository();
+        this.crete = new SimpleObjectProperty<>();
     }
     
     public DetailCretePane(final Crete crete){
         this();
-        this.crete = crete;
+        this.crete.set(crete);
         initFields();
     }
     
@@ -112,84 +101,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     private void initFields(){
         
         // Propriétés héritées de Positionnable
-        final StringConverter<BorneDigue> bornesConverter = new StringConverter<BorneDigue>() {
-
-            @Override
-            public String toString(BorneDigue object) {
-                if(object == null) return "Pas de borne.";
-                return object.getNom()+ " ("+object.getId()+ ")";
-            }
-
-            @Override
-            public BorneDigue fromString(String string) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        
-        final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
-        BorneDigue borneDebut=null, borneFin=null;
-        
-        for(final BorneDigue b : borneDigueRepository.getAll()){
-            bornes.add(b);
-            if(b.getId().equals(crete.getBorne_debut())) borneDebut=b;
-            if(b.getId().equals(crete.getBorne_fin())) borneFin=b;
-        }
-        bornes.add(null);
-        
-        uiBorneDebut.setConverter(bornesConverter);
-        uiBorneDebut.setItems(bornes);
-        uiBorneDebut.setValue(borneDebut);
-        uiBorneDebut.disableProperty().bind(disableFields);
-        
-        uiDistanceDebut.valueProperty().bindBidirectional(crete.borne_debut_distanceProperty());
-        uiDistanceDebut.disableProperty().bind(disableFields);
-        
-        uiPRDebut.valueProperty().bindBidirectional(crete.pR_debutProperty());
-        uiPRDebut.disableProperty().bind(disableFields);
-        
-        uiAmontAvalDebut.selectedProperty().bindBidirectional(crete.borne_debut_avalProperty());
-        uiAmontAvalDebut.disableProperty().bind(disableFields);
-        
-        uiBorneFin.setConverter(bornesConverter);
-        uiBorneFin.setItems(bornes);
-        uiBorneFin.setValue(borneFin);
-        uiBorneFin.disableProperty().bind(disableFields);
-        
-        uiDistanceFin.valueProperty().bindBidirectional(crete.borne_fin_distanceProperty());
-        uiDistanceFin.disableProperty().bind(disableFields);
-        
-        uiPRFin.valueProperty().bindBidirectional(crete.pR_finProperty());
-        uiPRFin.disableProperty().bind(disableFields);
-        
-        uiAmontAvalFin.selectedProperty().bindBidirectional(crete.borne_fin_avalProperty());
-        uiAmontAvalFin.disableProperty().bind(disableFields);
-        
-        final StringConverter<SystemeReperage> srConverter = new StringConverter<SystemeReperage>() {
-
-            @Override
-            public String toString(SystemeReperage object) {
-                if(object == null) return "Pas de sr.";
-                return object.getNom()+ " ("+object.getId()+ ")";
-            }
-
-            @Override
-            public SystemeReperage fromString(String string) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        
-        final ObservableList<SystemeReperage> systemesReperage = FXCollections.observableArrayList();
-        SystemeReperage systemeReperage=null;
-        
-        for(final SystemeReperage sr : systemeReperageRepository.getAll()){
-            systemesReperage.add(sr);
-            if(sr.getId().equals(crete.getSysteme_rep_id())) systemeReperage=sr;
-        }
-        systemesReperage.add(null);
-        uiSR.setConverter(srConverter);
-        uiSR.setItems(systemesReperage);
-        uiSR.setValue(systemeReperage);
-        uiSR.disableProperty().bind(disableFields);
+        uiPositionnable.positionableProperty().bindBidirectional(crete);
         
         // Propriétés héritées de Structure
         final StringConverter<TronconDigue> tronconsConverter = new StringConverter<TronconDigue>() {
@@ -211,7 +123,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         
         for(final TronconDigue t : tronconDigueRepository.getAll()){
             troncons.add(t);
-            if(t.getId().equals(crete.getTroncon())) troncon=t;
+            if(t.getId().equals(crete.get().getTroncon())) troncon=t;
         }
         troncons.add(null);
         uiTroncons.setConverter(tronconsConverter);
@@ -226,23 +138,23 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
             }
         });
         
-        uiComment.setHtmlText(crete.getCommentaire());
+        uiComment.setHtmlText(crete.get().getCommentaire());
         uiComment.disableProperty().bind(disableFields);
         
-        uiDebut.valueProperty().bindBidirectional(crete.date_debutProperty());
+        uiDebut.valueProperty().bindBidirectional(crete.get().date_debutProperty());
         uiDebut.disableProperty().bind(disableFields);
         
-        uiFin.valueProperty().bindBidirectional(crete.date_finProperty());
+        uiFin.valueProperty().bindBidirectional(crete.get().date_finProperty());
         uiFin.disableProperty().bind(disableFields);
         
         
         // Propriétés propres à la Crête
-        uiEpaisseur.valueProperty().bindBidirectional(crete.epaisseurProperty());
+        uiEpaisseur.valueProperty().bindBidirectional(crete.get().epaisseurProperty());
         uiEpaisseur.disableProperty().bind(disableFields);
         
         uiCouches.numberTypeProperty().set(NumberField.NumberType.Integer);
         uiCouches.minValueProperty().set(0);
-        uiCouches.valueProperty().bindBidirectional(crete.num_coucheProperty());
+        uiCouches.valueProperty().bindBidirectional(crete.get().num_coucheProperty());
         uiCouches.disableProperty().bind(disableFields);
     }
 
@@ -253,30 +165,12 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
 
     @Override
     public void preSave() {
-        crete.setCommentaire(uiComment.getHtmlText());
-        if(uiBorneDebut.getValue()!=null){
-            crete.setBorne_debut(uiBorneDebut.getValue().getId());
-        }
-        else {
-            crete.setBorne_debut(null);
-        }
-        if(uiBorneFin.getValue()!=null){
-            crete.setBorne_fin(uiBorneFin.getValue().getId());
-        }
-        else {
-            crete.setBorne_fin(null);
-        }
+        crete.get().setCommentaire(uiComment.getHtmlText());
         if(uiTroncons.getValue()!=null){
-            crete.setTroncon(uiTroncons.getValue().getId());
+            crete.get().setTroncon(uiTroncons.getValue().getId());
         }
         else {
-            crete.setTroncon(null);
-        }
-        if (uiSR.getValue()!=null){
-            crete.setSysteme_rep_id(uiSR.getValue().getId());
-        }
-        else {
-            crete.setSysteme_rep_id(null);
+            crete.get().setTroncon(null);
         }
     }
 

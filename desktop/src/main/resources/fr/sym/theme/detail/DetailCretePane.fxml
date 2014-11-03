@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import fr.sym.theme.detail.*?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
 <?import jfxtras.scene.control.*?>
@@ -19,22 +20,22 @@
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
+          <RowConstraints minHeight="15.0" valignment="CENTER" />
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints valignment="CENTER" />
-          <RowConstraints minHeight="15.0" valignment="CENTER" />
           <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" valignment="CENTER" />
           <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" valignment="CENTER" />
-            <RowConstraints minHeight="10.0" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label prefHeight="50.0" text="Épaisseur :" GridPane.rowIndex="3" />
-            <FXNumberSpinner fx:id="uiEpaisseur" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label text="Commentaire : " />
-            <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" />
-            <Label text="Bornes : " GridPane.rowIndex="2" GridPane.valignment="TOP" />
-            <Label text="Validation : " GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-            <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label prefHeight="50.0" text="Épaisseur :" GridPane.rowIndex="4" />
+            <FXNumberSpinner fx:id="uiEpaisseur" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text="Commentaire : " GridPane.rowIndex="2" />
+            <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Position : " GridPane.valignment="TOP" />
+            <Label text="Validation : " GridPane.rowIndex="3" GridPane.vgrow="NEVER" />
+            <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -52,46 +53,11 @@
                   <FXDateField fx:id="uiDebut" GridPane.columnIndex="1" />
                </children>
             </GridPane>
-            <GridPane GridPane.columnIndex="1" GridPane.rowIndex="2">
-              <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label text="Début : " />
-                  <Label text="PR : " GridPane.rowIndex="2" />
-                  <Label text="Distance : " GridPane.rowIndex="1" />
-                  <ComboBox fx:id="uiBorneDebut" prefWidth="150.0" GridPane.columnIndex="1" />
-                  <FXNumberSpinner fx:id="uiDistanceDebut" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <FXNumberSpinner fx:id="uiPRDebut" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <ComboBox fx:id="uiBorneFin" prefWidth="150.0" GridPane.columnIndex="4" />
-                  <FXNumberSpinner fx:id="uiDistanceFin" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                  <FXNumberSpinner fx:id="uiPRFin" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                  <Label text="Fin : " GridPane.columnIndex="3" />
-                  <Label text="Distance : " GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <Label text="PR : " GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <Label text="Amont/aval : " GridPane.rowIndex="3" />
-                  <Label text="Amont/aval : " GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                  <Label text="Système de repérage : " GridPane.rowIndex="4" />
-                  <ComboBox fx:id="uiSR" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="4" />
-                  <CheckBox fx:id="uiAmontAvalDebut" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <CheckBox fx:id="uiAmontAvalFin" mnemonicParsing="false" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-               </children>
-            </GridPane>
-            <Label text="Couches : " GridPane.rowIndex="4" />
-            <FXNumberSpinner fx:id="uiCouches" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label text="Tronçon : " GridPane.rowIndex="5" />
-            <ComboBox fx:id="uiTroncons" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label text="Couches : " GridPane.rowIndex="5" />
+            <FXNumberSpinner fx:id="uiCouches" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label text="Tronçon : " GridPane.rowIndex="1" />
+            <ComboBox fx:id="uiTroncons" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <DetailPositionnablePane fx:id="uiPositionnable" GridPane.columnIndex="1" />
          </children>
          <BorderPane.margin>
             <Insets bottom="20.0" left="50.0" right="50.0" top="20.0" />
