@@ -1,38 +1,51 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package fr.sym.theme.detail;
 
 import java.io.IOException;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
+import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
 /**
  *
- * @author samuel
+ * @author Johann Sorel (Geomatys)
  */
 public class DetailPositionnablePane extends BorderPane {
     
+    @FXML private FXNumberSpinner uiPRDebut;
+    @FXML private FXNumberSpinner uiDistanceFin;
+    @FXML private FXNumberSpinner uiPRFin;
+    @FXML private ComboBox<?> uiBorneFin;
+    @FXML private ComboBox<?> uiBorneDebut;
+    @FXML private FXNumberSpinner uiDistanceDebut;
+    
+    private final ObjectProperty positionableProperty = new SimpleObjectProperty();
+            
     public DetailPositionnablePane(){
-        final Class cdtClass = getClass();
-        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
-        loader.setController(this);
-        loader.setRoot(this);
-        //in special environement like osgi or other, we must use the proper class loaders
-        //not necessarly the one who loaded the FXMLLoader class
-        loader.setClassLoader(cdtClass.getClassLoader());
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
+        try{
+            final Class cdtClass = getClass();
+            final String fxmlpath = "/fr/sym/theme/detail/DetailPositionnablePane.fxml";
+            final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
+            loader.setController(this);
+            loader.setRoot(this);
+            loader.setClassLoader(cdtClass.getClassLoader());
+            try {
+                loader.load();
+            } catch (IOException ex) {
+                throw new IllegalArgumentException(ex.getMessage(), ex);
+            }
+        }catch(Throwable ex){
+            ex.printStackTrace();
         }
     }
     
-    
-    
+    public ObjectProperty positionableProperty(){
+        return positionableProperty;
+    }
     
     
 }
