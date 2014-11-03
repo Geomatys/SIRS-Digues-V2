@@ -81,8 +81,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/systemeReperageIds"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemereperageborne" lowerBound="1"
-        eType="#//SystemeReperageBorne" eOpposite="#//SystemeReperageBorne/systeme_reperage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemereperageborneId"
+        upperBound="-1" eType="#//SystemeReperageBorne" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Document" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
@@ -161,8 +161,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="positionBorne" eType="ecore:EDataType jts.ecore#//Point"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Point"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemereperageborne" lowerBound="1"
-        eType="#//SystemeReperageBorne" eOpposite="#//SystemeReperageBorne/borne_digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Crete" eSuperTypes="#//Structure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -854,10 +852,7 @@
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valeurPR" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="borne_digue" lowerBound="1"
-        eType="#//Borne_digue" eOpposite="#//Borne_digue/systemereperageborne"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systeme_reperage" lowerBound="1"
-        eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/systemereperageborne"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="borneId" eType="#//Borne_digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefEcoulement">
     <eAnnotations source="generation">
