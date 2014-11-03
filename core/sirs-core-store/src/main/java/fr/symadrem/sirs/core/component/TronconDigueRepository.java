@@ -25,9 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés (Geomatys)
  */
 @Views({
-		@View(name = "all", map = "function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
-		@View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
-
+    @View(name = "all",       map = "function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
+    @View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.symadrem.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
 })
 public class TronconDigueRepository extends
 		CouchDbRepositorySupport<TronconDigue> implements

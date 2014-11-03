@@ -7,11 +7,14 @@ import fr.sym.Symadrem;
 import fr.sym.map.FXMapPane;
 import fr.sym.map.FXMapTab;
 import fr.sym.theme.AbstractPojoTable;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Element;
+import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.awt.geom.NoninvertibleTransformException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.binding.BooleanBinding;
@@ -28,7 +31,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
@@ -37,6 +42,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -69,9 +75,9 @@ public class TronconDigueController extends BorderPane{
     @FXML private BorderPane uiSrTab;
     @FXML private Button uiSRDelete;
     @FXML private Button uiSRAdd;
-    @FXML private ListView uiSRList;
-
-    private final BorneTable borneTable = new BorneTable();
+    @FXML private ListView<SystemeReperage> uiSRList;
+    
+    private final SystemeReperageController srController = new SystemeReperageController();
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
@@ -90,6 +96,8 @@ public class TronconDigueController extends BorderPane{
         uiDateStart.disableProperty().bind(editBind);
         uiDateEnd.disableProperty().bind(editBind);
         uiComment.disableProperty().bind(editBind);
+        uiSRAdd.visibleProperty().bind(editBind);
+        uiSRDelete.visibleProperty().bind(editBind);
         
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
@@ -101,11 +109,36 @@ public class TronconDigueController extends BorderPane{
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(newValue==null) group.selectToggle(uiConsult);
         });
-        
-        uiSrTab.setCenter(borneTable);
-        
+           
+        uiSrTab.setCenter(srController);
         uiSRDelete.setGraphic(new ImageView(Symadrem.ICON_TRASH));
         uiSRAdd.setGraphic(new ImageView(Symadrem.ICON_ADD));
+        
+        uiSRList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        uiSRList.setCellFactory(new Callback<ListView<SystemeReperage>, ListCell<SystemeReperage>>() {
+            @Override
+            public ListCell<SystemeReperage> call(ListView<SystemeReperage> param) {
+                return new ListCell(){
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setGraphic(null);
+                        if(!empty && item!=null){
+                            setText(((SystemeReperage)item).getNom());
+                        }else{                            
+                            setText("");
+                        }
+                    }
+                };
+            }
+        });
+        
+        uiSRList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SystemeReperage>() {
+            @Override
+            public void changed(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+                srController.getSystemeReperageProperty().set(newValue);
+            }
+        });
         
     }
     
@@ -146,6 +179,7 @@ public class TronconDigueController extends BorderPane{
     @FXML
     private void save(final ActionEvent event){
         tronconProperty.get().setCommentaire(uiComment.getHtmlText());
+        srController.save();
         this.session.update(getTroncon());
     }
     
@@ -237,38 +271,12 @@ public class TronconDigueController extends BorderPane{
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
                 
         
-        //list SR
+        //liste des systemes de reperage
+        final SystemeReperageRepository repo = session.getSystemeReperageRepository();
+        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
+        uiSRList.setItems(FXCollections.observableArrayList(srs));
         
         initializing = false;
-    }
-    
-    
-    private class BorneTable extends AbstractPojoTable{
-
-        public BorneTable() {
-            super(BorneDigue.class, "Liste des bornes");
-        }
-
-        @Override
-        protected void deletePojos(Element... pojos) {
-            
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
-            
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            
-        }
-
-        @Override
-        protected void createPojo() {
-            
-        }
-        
     }
     
 }

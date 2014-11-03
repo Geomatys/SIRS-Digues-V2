@@ -13,7 +13,6 @@ import fr.symadrem.sirs.core.component.BorneDigueRepository;
 import fr.symadrem.sirs.core.component.DigueRepository;
 import fr.symadrem.sirs.core.component.OrganismeRepository;
 import fr.symadrem.sirs.core.component.RefRiveRepository;
-import fr.symadrem.sirs.core.component.SystemeReperageBorneRepository;
 import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import java.io.File;
@@ -42,7 +41,6 @@ public class DbImporter {
     private final OrganismeRepository organismeRepository;
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
-    private final SystemeReperageBorneRepository systemeReperageBorneRepository;
     private final RefRiveRepository refRiveRepository;
 
     private Database accessDatabase;
@@ -406,7 +404,6 @@ public class DbImporter {
         this.organismeRepository = new OrganismeRepository(couchDbConnector);
         this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
         this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
-        this.systemeReperageBorneRepository = new SystemeReperageBorneRepository(couchDbConnector);
         this.refRiveRepository = new RefRiveRepository(couchDbConnector);
     }
     
@@ -427,7 +424,7 @@ public class DbImporter {
                 typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
-                couchDbConnector, systemeReperageBorneRepository, systemeReperageImporter, borneDigueImporter);
+                couchDbConnector, systemeReperageImporter, borneDigueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -465,15 +462,7 @@ public class DbImporter {
         });
         couchDbConnector.executeBulk(troncons);
     }
-    
-    public void removeSystemesReperageBorne() {
-        final List<Object> systemesReperageBorne = new ArrayList<>();
-        systemeReperageBorneRepository.getAll().stream().forEach((systemeReperageBorne) -> {
-            systemesReperageBorne.add(BulkDeleteDocument.of(systemeReperageBorne));
-        });
-        couchDbConnector.executeBulk(systemesReperageBorne);
-    }
-    
+        
     public void removeSystemesReperage() {
         final List<Object> systemesReperage = new ArrayList<>();
         systemeReperageRepository.getAll().stream().forEach((systemeReperage) -> {
@@ -496,7 +485,6 @@ public class DbImporter {
         this.removeOrganismes();
         this.removeSystemesReperage();
         this.removeBornes();
-        this.removeSystemesReperageBorne();
     }
     
     public void importation() throws IOException, AccessDbImporterException{

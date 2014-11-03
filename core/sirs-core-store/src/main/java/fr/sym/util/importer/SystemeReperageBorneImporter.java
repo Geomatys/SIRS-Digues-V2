@@ -7,7 +7,6 @@ package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.symadrem.sirs.core.component.SystemeReperageBorneRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.SystemeReperageBorne;
@@ -30,7 +29,6 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     private Map<Integer, List<SystemeReperageBorne>> bySystemeReperageId = null;
     private SystemeReperageImporter systemeReperageImporter;
     private BorneDigueImporter borneDigueImporter;
-    private SystemeReperageBorneRepository systemeReperageBorneRepository;
 
     private SystemeReperageBorneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -39,13 +37,11 @@ public class SystemeReperageBorneImporter extends GenericImporter {
 
     SystemeReperageBorneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final SystemeReperageBorneRepository systemeReperageBorneRepository,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter) {
         this(accessDatabase, couchDbConnector);
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
-        this.systemeReperageBorneRepository = systemeReperageBorneRepository;
     }
 
     private enum SystemeReperageBorneColumns {

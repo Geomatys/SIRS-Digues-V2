@@ -150,7 +150,11 @@ public abstract class AbstractPojoTable extends BorderPane{
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
     }
-        
+
+    public TableView getUiTable() {
+        return uiTable;
+    }
+    
     protected abstract void deletePojos(Element ... pojos);
     
     protected abstract void editPojo(Element pojo);

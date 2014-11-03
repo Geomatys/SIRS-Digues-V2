@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.symadrem.sirs.core.component.DigueRepository;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.TronconDigue;
@@ -43,6 +44,7 @@ public class Session {
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
     private BorneDigueRepository borneDigueRepository;
+    private SystemeReperageRepository systemeReperageRepository;
 
     private MainFrame frame = null;
     
@@ -50,6 +52,7 @@ public class Session {
     public Session(CouchDbConnector couchDbConnector) {
         digueRepository = new DigueRepository(couchDbConnector);
         tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
+        systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
     }
 
     public DigueRepository getDigueRepository() {
@@ -64,6 +67,10 @@ public class Session {
         return borneDigueRepository;
     }
 
+    public SystemeReperageRepository getSystemeReperageRepository(){
+        return systemeReperageRepository;
+    }
+    
     void setFrame(MainFrame frame) {
         this.frame = frame;
     }
