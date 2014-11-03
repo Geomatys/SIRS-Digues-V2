@@ -15,78 +15,94 @@
    <center>
         <VBox BorderPane.alignment="CENTER">
             <children>
-                <BorderPane styleClass="info-block" VBox.vgrow="NEVER">
-                    <center>
-                        <GridPane hgap="14.0" vgap="20.0" BorderPane.alignment="CENTER">
-                            <children>
-                                <Label minWidth="-Infinity" text="Informations sur la structure" textFill="WHITE" GridPane.columnSpan="2">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label minWidth="-Infinity" text="Identifiant :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                                <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                                 <Label fx:id="id" prefHeight="15.0" prefWidth="395.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <FXDateField fx:id="date_maj" GridPane.columnIndex="1" GridPane.rowIndex="2" /> 
-                            </children>
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="NEVER" />
-                                <ColumnConstraints hgrow="ALWAYS" />
-                                <ColumnConstraints halignment="LEFT" hgrow="NEVER" />
-                        <ColumnConstraints />
-                            </columnConstraints>
-                            <padding>
-                                <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
-                            </padding>
-                            <rowConstraints>
-                        <RowConstraints vgrow="NEVER" />
-                                <RowConstraints vgrow="NEVER" />
-                                <RowConstraints vgrow="NEVER" />
-                            </rowConstraints>
-                        </GridPane>
-                    </center>
-                    <right>
-                        <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="blue-dark" BorderPane.alignment="CENTER">
-                            <children>
-                                        <Label fx:id="mode" alignment="CENTER" styleClass="label-header" text="Mode">
-                                            <font>
-                                                <Font name="System Bold" size="14.0" />
-                                            </font>
-                                            <VBox.margin>
-                                                <Insets />
-                                            </VBox.margin>
-                                        </Label>
-                          <HBox>
-                             <children>
-                                              <ToggleButton fx:id="uiConsult" ellipsisString="" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" selected="true" styleClass="state-button-left" text="Consultation" textOverrun="WORD_ELLIPSIS" />
-                                <ToggleButton fx:id="uiEdit" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" styleClass="state-button-right" text="Edition" />
-                             </children>
-                          </HBox>
-                                        <Label fx:id="mode1" alignment="CENTER" styleClass="label-header" text="Sauvegarde">
-                                            <font>
-                                                <Font name="System Bold" size="14.0" />
-                                            </font>
-                                            <VBox.margin>
-                                                <Insets />
-                                            </VBox.margin>
-                                        </Label>
-                                        <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" text="Enregistrer">
-                                            <VBox.margin>
-                                                <Insets />
-                                            </VBox.margin>
-                                        </Button>
-                            </children>
-                       <BorderPane.margin>
-                          <Insets />
-                       </BorderPane.margin>
-                       <padding>
-                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                       </padding>
-                        </VBox>
-                    </right>
-                </BorderPane>
             <ScrollPane fx:id="uiEditDetailTronconTheme" />
             </children>
         </VBox>
    </center>
+   <top>
+          <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
+              <left>
+                <Button contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#showOnMap" styleClass="geobutton" BorderPane.alignment="CENTER">
+                   <graphic>
+                      <ImageView pickOnBounds="true" preserveRatio="true">
+                         <image>
+                            <Image url="@../../images/menu-carto.png" />
+                         </image>
+                      </ImageView>
+                   </graphic>
+                   <font>
+                      <Font name="System Bold" size="13.0" />
+                   </font>
+                </Button>
+             </left>
+              <center>
+                  <GridPane hgap="14.0" vgap="20.0" BorderPane.alignment="CENTER">
+                      <children>
+                          <Label minWidth="-Infinity" text="Informations sur la structure" textFill="WHITE" GridPane.columnSpan="2">
+                              <font>
+                                  <Font name="System Bold" size="14.0" />
+                              </font>
+                          </Label>
+                          <Label minWidth="-Infinity" text="Identifiant :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                          <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                           <Label fx:id="id" prefHeight="15.0" prefWidth="395.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <FXDateField fx:id="date_maj" GridPane.columnIndex="1" GridPane.rowIndex="2" /> 
+                      </children>
+                      <columnConstraints>
+                          <ColumnConstraints hgrow="NEVER" />
+                          <ColumnConstraints hgrow="ALWAYS" />
+                          <ColumnConstraints halignment="LEFT" hgrow="NEVER" />
+                  <ColumnConstraints />
+                      </columnConstraints>
+                      <padding>
+                          <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
+                      </padding>
+                      <rowConstraints>
+                  <RowConstraints vgrow="NEVER" />
+                          <RowConstraints vgrow="NEVER" />
+                          <RowConstraints vgrow="NEVER" />
+                      </rowConstraints>
+                  </GridPane>
+              </center>
+              <right>
+                  <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="blue-dark" BorderPane.alignment="CENTER">
+                      <children>
+                                  <Label fx:id="mode" alignment="CENTER" styleClass="label-header" text="Mode">
+                                      <font>
+                                          <Font name="System Bold" size="14.0" />
+                                      </font>
+                                      <VBox.margin>
+                                          <Insets />
+                                      </VBox.margin>
+                                  </Label>
+                    <HBox>
+                       <children>
+                                        <ToggleButton fx:id="uiConsult" ellipsisString="" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" selected="true" styleClass="state-button-left" text="Consultation" textOverrun="WORD_ELLIPSIS" />
+                          <ToggleButton fx:id="uiEdit" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" styleClass="state-button-right" text="Edition" />
+                       </children>
+                    </HBox>
+                                  <Label fx:id="mode1" alignment="CENTER" styleClass="label-header" text="Sauvegarde">
+                                      <font>
+                                          <Font name="System Bold" size="14.0" />
+                                      </font>
+                                      <VBox.margin>
+                                          <Insets />
+                                      </VBox.margin>
+                                  </Label>
+                                  <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" text="Enregistrer">
+                                      <VBox.margin>
+                                          <Insets />
+                                      </VBox.margin>
+                                  </Button>
+                      </children>
+                 <BorderPane.margin>
+                    <Insets />
+                 </BorderPane.margin>
+                 <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                 </padding>
+                  </VBox>
+              </right>
+          </BorderPane>
+   </top>
 </fx:root>

@@ -8,10 +8,13 @@ package fr.sym.theme.detail;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
+import fr.sym.map.FXMapTab;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
+import java.awt.geom.NoninvertibleTransformException;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -24,7 +27,10 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -99,6 +105,19 @@ public class DetailTronconThemePane extends BorderPane {
         if(newTroncon!=null){
             troncon=newTroncon;
             newTroncon=null;
+        }
+    }
+    
+    @FXML
+    private void showOnMap(){
+        final Session session = Injector.getBean(Session.class);
+        final FXMapTab tab = session.getFrame().getMapTab();
+        tab.show();
+        final FXMap map = tab.getMap().getUiMap();
+        try {
+            map.getCanvas().setVisibleArea(JTS.toEnvelope(structure.getGeometry()));
+        } catch (NoninvertibleTransformException | TransformException ex) {
+            Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
         }
     }
     
