@@ -25,7 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DatabaseRegistry {
 
-	private static final String BASE_LOCAL = "http://geouser:geopw@127.0.0.1:5984/";
+	private static final String BASE_LOCAL_HTTP = "http://geouser:geopw@127.0.0.1:5984/";
+	//private static final String BASE_LOCAL_HTTP = "https://geouser:geopw@127.0.0.1:6984/";
 
 	private DatabaseRegistry() {
 	}
@@ -77,15 +78,15 @@ public class DatabaseRegistry {
 			throws MalformedURLException {
 
 		cancelReplication(buildDatabaseLocalURL(database));
-		
+
 		final CouchDbInstance couchsb = buildLocalInstance();
 		couchsb.deleteDatabase(database);
 	}
 
 	private static String buildDatabaseLocalURL(String database) {
-		if(database.matches("https?://"))
+		if (database.matches("https?://"))
 			return database;
-		return BASE_LOCAL + database + "/";
+		return BASE_LOCAL_HTTP + database + "/";
 	}
 
 	public static void newLocalDBFromRemote(String src, String dest,
@@ -95,15 +96,20 @@ public class DatabaseRegistry {
 		ReplicationCommand cmd = new ReplicationCommand.Builder()
 				.continuous(continuous).source(src).target(dest)
 				.createTarget(true).build();
-		ReplicationStatus replicate = couchsb.replicate(cmd);
-		System.out.println(replicate.getId());
+		ReplicationCommand cmdRev = new ReplicationCommand.Builder()
+				.continuous(continuous).source(dest).target(src)
+				.createTarget(true).build();
+
+		couchsb.replicate(cmd);
+		couchsb.replicate(cmdRev);
 
 	}
 
 	private static CouchDbInstance buildLocalInstance() {
 		HttpClient httpClient;
 		try {
-			httpClient = new StdHttpClient.Builder().url(BASE_LOCAL).build();
+			httpClient = new StdHttpClient.Builder().url(BASE_LOCAL_HTTP)
+					.relaxedSSLSettings(true).build();
 		} catch (MalformedURLException e) {
 			throw new SirsCoreRuntimeExecption(e);
 		}
@@ -114,7 +120,7 @@ public class DatabaseRegistry {
 
 		CouchDbInstance buildLocalInstance = buildLocalInstance();
 		DatabaseRegistry
-				.getReplicationTasksByTarget(dst)
+				.getReplicationTasksBySourceOrTarget(dst)
 				.map(t -> t.get("replication_id"))
 				.filter(n -> n != null)
 				.map(t -> t.asText())
@@ -146,12 +152,14 @@ public class DatabaseRegistry {
 
 	}
 
-	public static Stream<JsonNode> getReplicationTasksByTarget(String dst) {
-		return getReplicationTasks().filter(
-				t -> matchTarget(t.get("target"), dst));
+	public static Stream<JsonNode> getReplicationTasksBySourceOrTarget(
+			String dst) {
+		return getReplicationTasks()
+				.filter(t -> match(t.get("target"), dst)
+						|| match(t.get("source"), dst));
 	}
 
-	private static boolean matchTarget(JsonNode jsonNode, String dst) {
+	private static boolean match(JsonNode jsonNode, String dst) {
 		if (jsonNode == null)
 			return false;
 		String dst2 = jsonNode.asText();

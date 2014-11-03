@@ -10,7 +10,7 @@ import org.junit.Test;
 import fr.sirs.core.CouchDBTestCase;
 import fr.sirs.core.DatabaseRegistry;
 
-@Ignore
+//@Ignore
 public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
 	@Test
@@ -49,7 +49,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
 	@Test
 	public void getReplicationTasksByTarget() {
-		DatabaseRegistry.getReplicationTasksByTarget(dst).forEach(
+		DatabaseRegistry.getReplicationTasksBySourceOrTarget(dst).forEach(
 				t -> System.out.println(t.get("replication_id").asText()));
 
 	}
