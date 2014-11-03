@@ -64,6 +64,8 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
                   <Label text="Début : " />
@@ -78,6 +80,12 @@
                   <Label text="Fin : " GridPane.columnIndex="3" />
                   <Label text="Distance : " GridPane.columnIndex="3" GridPane.rowIndex="1" />
                   <Label text="PR : " GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Label text="Amont/aval : " GridPane.rowIndex="3" />
+                  <Label text="Amont/aval : " GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  <Label text="Système de repérage : " GridPane.rowIndex="4" />
+                  <ComboBox fx:id="uiSR" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="4" />
+                  <CheckBox fx:id="uiAmontAvalDebut" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <CheckBox fx:id="uiAmontAvalFin" mnemonicParsing="false" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                </children>
             </GridPane>
             <Label text="Couches : " GridPane.rowIndex="4" />

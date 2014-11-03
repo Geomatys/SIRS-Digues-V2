@@ -88,11 +88,6 @@ public class DetailTronconThemePane extends BorderPane {
                     }
                 }
             }
-            
-            
-            
-            
-            
         }
         else {
             throw new UnsupportedOperationException("The sub-pane must implement "+DetailThemePane.class.getCanonicalName()+" interface.");

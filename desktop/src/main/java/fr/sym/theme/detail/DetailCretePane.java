@@ -9,9 +9,11 @@ import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
 import fr.symadrem.sirs.core.component.BorneDigueRepository;
+import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,7 +22,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
@@ -41,15 +43,20 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     
     private final BorneDigueRepository borneDigueRepository;
     private final TronconDigueRepository tronconDigueRepository;
+    private final SystemeReperageRepository systemeReperageRepository;
     
     // Propriétés de Positionnable
     @FXML ComboBox<BorneDigue> uiBorneDebut;
     @FXML FXNumberSpinner uiDistanceDebut;
     @FXML FXNumberSpinner uiPRDebut;
+    @FXML CheckBox uiAmontAvalDebut;
     
     @FXML ComboBox<BorneDigue> uiBorneFin;
     @FXML FXNumberSpinner uiDistanceFin;
     @FXML FXNumberSpinner uiPRFin;
+    @FXML CheckBox uiAmontAvalFin;
+    
+    @FXML ComboBox<SystemeReperage> uiSR;
     
     // Propriétés de Structure
     @FXML HTMLEditor uiComment;
@@ -68,6 +75,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         final Session session = Injector.getBean(Session.class);
         borneDigueRepository = session.getBorneDigueRepository();
         tronconDigueRepository = session.getTronconDigueRepository();
+        systemeReperageRepository = session.getSystemeReperageRepository();
     }
     
     public DetailCretePane(final Crete crete){
@@ -133,16 +141,19 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         uiBorneDebut.setValue(borneDebut);
         uiBorneDebut.disableProperty().bind(disableFields);
         
-        uiBorneFin.setConverter(bornesConverter);
-        uiBorneFin.setItems(bornes);
-        uiBorneFin.setValue(borneFin);
-        uiBorneFin.disableProperty().bind(disableFields);
-        
         uiDistanceDebut.valueProperty().bindBidirectional(crete.borne_debut_distanceProperty());
         uiDistanceDebut.disableProperty().bind(disableFields);
         
         uiPRDebut.valueProperty().bindBidirectional(crete.pR_debutProperty());
         uiPRDebut.disableProperty().bind(disableFields);
+        
+        uiAmontAvalDebut.selectedProperty().bindBidirectional(crete.borne_debut_avalProperty());
+        uiAmontAvalDebut.disableProperty().bind(disableFields);
+        
+        uiBorneFin.setConverter(bornesConverter);
+        uiBorneFin.setItems(bornes);
+        uiBorneFin.setValue(borneFin);
+        uiBorneFin.disableProperty().bind(disableFields);
         
         uiDistanceFin.valueProperty().bindBidirectional(crete.borne_fin_distanceProperty());
         uiDistanceFin.disableProperty().bind(disableFields);
@@ -150,7 +161,35 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         uiPRFin.valueProperty().bindBidirectional(crete.pR_finProperty());
         uiPRFin.disableProperty().bind(disableFields);
         
+        uiAmontAvalFin.selectedProperty().bindBidirectional(crete.borne_fin_avalProperty());
+        uiAmontAvalFin.disableProperty().bind(disableFields);
         
+        final StringConverter<SystemeReperage> srConverter = new StringConverter<SystemeReperage>() {
+
+            @Override
+            public String toString(SystemeReperage object) {
+                if(object == null) return "Pas de sr.";
+                return object.getNom()+ " ("+object.getId()+ ")";
+            }
+
+            @Override
+            public SystemeReperage fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        
+        final ObservableList<SystemeReperage> systemesReperage = FXCollections.observableArrayList();
+        SystemeReperage systemeReperage=null;
+        
+        for(final SystemeReperage sr : systemeReperageRepository.getAll()){
+            systemesReperage.add(sr);
+            if(sr.getId().equals(crete.getSysteme_rep_id())) systemeReperage=sr;
+        }
+        systemesReperage.add(null);
+        uiSR.setConverter(srConverter);
+        uiSR.setItems(systemesReperage);
+        uiSR.setValue(systemeReperage);
+        uiSR.disableProperty().bind(disableFields);
         
         // Propriétés héritées de Structure
         final StringConverter<TronconDigue> tronconsConverter = new StringConverter<TronconDigue>() {
@@ -232,6 +271,12 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         }
         else {
             crete.setTroncon(null);
+        }
+        if (uiSR.getValue()!=null){
+            crete.setSysteme_rep_id(uiSR.getValue().getId());
+        }
+        else {
+            crete.setSysteme_rep_id(null);
         }
     }
 
