@@ -119,3 +119,13 @@
     -fx-font-weight: bold;
     -fx-font-size: 14;
 }
+
+.pos-top{
+    -fx-background-color: rgb(74,123,165);
+    -fx-background-radius: 10 10 0 0;
+}
+
+.pos-bottom{
+    -fx-background-color: rgb(220,220,220);
+    -fx-background-radius: 0 0 10 10;
+}

@@ -1,9 +1,13 @@
 
 package fr.sym.theme.detail;
 
+import fr.symadrem.sirs.core.model.BorneDigue;
+import fr.symadrem.sirs.core.model.Positionable;
 import java.io.IOException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
@@ -19,11 +23,11 @@ public class DetailPositionnablePane extends BorderPane {
     @FXML private FXNumberSpinner uiPRDebut;
     @FXML private FXNumberSpinner uiDistanceFin;
     @FXML private FXNumberSpinner uiPRFin;
-    @FXML private ComboBox<?> uiBorneFin;
-    @FXML private ComboBox<?> uiBorneDebut;
+    @FXML private ComboBox<BorneDigue> uiBorneFin;
+    @FXML private ComboBox<BorneDigue> uiBorneDebut;
     @FXML private FXNumberSpinner uiDistanceDebut;
     
-    private final ObjectProperty positionableProperty = new SimpleObjectProperty();
+    private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
             
     public DetailPositionnablePane(){
         try{
@@ -41,10 +45,27 @@ public class DetailPositionnablePane extends BorderPane {
         }catch(Throwable ex){
             ex.printStackTrace();
         }
+        
+        positionableProperty.addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                updateField();
+            }
+        });
+        
     }
     
-    public ObjectProperty positionableProperty(){
+    public ObjectProperty<Positionable> positionableProperty(){
         return positionableProperty;
+    }
+    
+    private void updateField(){
+        final Positionable pos = (Positionable) positionableProperty.get();
+        if(pos==null) return;
+        
+        //maj des liste de borne
+        
+        
     }
     
     
