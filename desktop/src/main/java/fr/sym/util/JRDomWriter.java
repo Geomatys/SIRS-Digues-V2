@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -231,10 +233,11 @@ public class JRDomWriter {
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
      * @param classToMap
+     * @param avoidFields field names to avoid.
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final Class classToMap) throws TransformerException, IOException, Exception {
+    public void write(final Class classToMap, final List<String> avoidFields) throws TransformerException, IOException, Exception {
         
         // Remove elements before inserting fields.-----------------------------
         this.root.removeChild(this.title);
@@ -243,7 +246,7 @@ public class JRDomWriter {
         this.root.removeChild(this.detail);
         
         // Modifies the template, based on the given class.---------------------
-        this.writeObject(classToMap);
+        this.writeObject(classToMap, avoidFields);
         
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
@@ -259,15 +262,23 @@ public class JRDomWriter {
     /**
      * <p>This method modifies the body of the DOM.</p>
      * @param classToMap
+     * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final Class classToMap) throws Exception {
+    private void writeObject(final Class classToMap, List<String> avoidFields) throws Exception {
+        
+        if(avoidFields==null) avoidFields=new ArrayList<>();
         
         // Sets the initial fields used by the template.------------------------
         final Method[] methods = classToMap.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
-                this.writeField(method);
+                final String fieldName = method.getName().substring(3, 4).toLowerCase()
+                            + method.getName().substring(4);
+                if(!avoidFields.contains(fieldName)){
+                    System.out.println(fieldName);
+                    this.writeField(method);
+                }
             }
         }
         
@@ -279,7 +290,7 @@ public class JRDomWriter {
         this.writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        this.writeDetail(classToMap);
+        this.writeDetail(classToMap, avoidFields);
     }
         
     /**
@@ -339,7 +350,7 @@ public class JRDomWriter {
      * @param classToMap
      * @throws Exception 
      */
-    private void writeDetail(final Class classToMap) throws Exception{
+    private void writeDetail(final Class classToMap, List<String> avoidFields) throws Exception{
         
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
@@ -363,8 +374,10 @@ public class JRDomWriter {
                 }
                 
                 // Writes the field.--------------------------------------------
-                this.writeDetailField(fieldName, i, heightMultiplicator, markup);
-                i+=heightMultiplicator;
+                if(!avoidFields.contains(fieldName)){
+                    this.writeDetailField(fieldName, i, heightMultiplicator, markup);
+                    i+=heightMultiplicator;
+                }
             }
         }
         

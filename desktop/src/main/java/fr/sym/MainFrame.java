@@ -5,8 +5,10 @@ import fr.sym.digue.Injector;
 import fr.sym.map.FXMapTab;
 import fr.sym.theme.Theme;
 import fr.sym.util.PrinterUtilities;
+import fr.symadrem.sirs.core.model.TronconDigue;
 import java.awt.Desktop;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,8 +145,17 @@ public class MainFrame extends BorderPane {
                 final Session session = Injector.getBean(Session.class);
                 final Object obj = session.getObjectToPrint();
                 final File fileToPrint;
+                final List avoidFields = new ArrayList<>();
+                avoidFields.add("geometry");
+                avoidFields.add("documentId");
+                
+                if(obj instanceof TronconDigue){
+                    avoidFields.add("stuctures");
+                    avoidFields.add("borneIds");
+                }
+                
                 try {
-                    fileToPrint = PrinterUtilities.print(obj);
+                    fileToPrint = PrinterUtilities.print(obj, avoidFields);
                     fileToPrint.deleteOnExit();
 
                     final Desktop desktop = Desktop.getDesktop();

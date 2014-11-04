@@ -1,13 +1,15 @@
 package fr.sym.util;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,6 +35,17 @@ import org.xml.sax.SAXException;
  */
 public class PrinterUtilities {
     
+    private static final List<String> falseGetter = new ArrayList<>();
+    
+    static{
+        falseGetter.add("getClass");
+        falseGetter.add("isNew");
+        falseGetter.add("getAttachments");
+        falseGetter.add("getRevisions");
+        falseGetter.add("getConflicts");
+        falseGetter.add("getDocumentId");
+    }
+    
     /**
      * <p>Generate the specific Jasper Reports template for a given class.
      * This method is based on a meta-template defined in 
@@ -53,28 +66,31 @@ public class PrinterUtilities {
         writer.setHeightMultiplicator(3);
         writer.setOutput(new File("src/main/resources/fr/sym/jrxml/"
                 + classToMap.getSimpleName()+".jrxml"));
-        writer.write(classToMap);
+        writer.write(classToMap, null);
     }
     
     /**
      * <p>Print an object from the model. This method needs the object to have a 
      * corresponding jasper report template ClassNameToPrint.jrxml preexisting
      * at the path : /fr/sym/jrxml/</p>
-     * @param objectToPrint
+     * @param objectToPrint Pojo to print.
+     * @param avoidFields Names of the fields to avoid printing.
+     * @return 
      * @throws Exception 
      */
-    static public File print(final Object objectToPrint) throws Exception {
+    static public File print(final Object objectToPrint, List<String> avoidFields) throws Exception {
+        
+        if(avoidFields==null) avoidFields=new ArrayList<>();
         
         // Creates the Jasper Reports specific template from the generic template.
         final JRDomWriter writer = new JRDomWriter(new FileInputStream(
                 "src/main/resources/fr/sym/jrxml/metaTemplate.jrxml"));
         writer.setFieldsInterline(2);
-        //writer.setHeightMultiplicator(1);
         final File template = File.createTempFile(objectToPrint.getClass().getSimpleName(), 
                 ".jrxml", new File("src/main/resources/fr/sym/jrxml"));
         template.deleteOnExit();
         writer.setOutput(template);
-        writer.write(objectToPrint.getClass());
+        writer.write(objectToPrint.getClass(), avoidFields);
         
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
@@ -86,19 +102,22 @@ public class PrinterUtilities {
         
         final Method[] methods = objectToPrint.getClass().getMethods();
         for(final Method method : methods) {
-            if(isGetter(method)) {
+            if (isGetter(method)) {
                 final String fieldName;
+                
                 if (method.getName().startsWith("is")) {
-                    fieldName = method.getName().substring(2, 3).toLowerCase() 
-                        + method.getName().substring(3);
+                    fieldName = method.getName().substring(2, 3).toLowerCase()
+                            + method.getName().substring(3);
                 } else if (method.getName().startsWith("get")) {
-                    fieldName = method.getName().substring(3, 4).toLowerCase() 
-                        + method.getName().substring(4);
+                    fieldName = method.getName().substring(3, 4).toLowerCase()
+                            + method.getName().substring(4);
                 } else {
-                    throw new Exception("This is an original getter.");
+                    throw new Exception("This is an \"original\" getter.");
                 }
-                System.out.println("Propritete : [["+fieldName+"]]");
-                feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
+                
+                if(!avoidFields.contains(fieldName)){
+                    feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
+                }
             }
         }
         
@@ -106,9 +125,6 @@ public class PrinterUtilities {
         final FeatureCollection<Feature> featureCollection = FeatureStoreUtilities.collection(feature0);
         
         // Generate the report -------------------------------------------------
-//        OutputStream out = new FileOutputStream("src/test/resources/report"
-//                        + objectToPrint.getClass().getSimpleName() + ".pdf");
-//        final File fout = File.createTempFile(objectToPrint.getClass().getSimpleName(), ".pdf");
         final File fout = new File("src/test/resources/report"
                         + objectToPrint.getClass().getSimpleName() + ".pdf");
         OutputStream out = new FileOutputStream(fout);
@@ -124,19 +140,13 @@ public class PrinterUtilities {
      * @return true if the method is a getter.
      */
     static public boolean isGetter(final Method method){
-        if (method == null) return false; 
-        else if ((method.getName().startsWith("get") 
+        if (method == null) 
+            return false; 
+        else 
+            return (method.getName().startsWith("get") 
                 || method.getName().startsWith("is"))
                 && method.getParameterTypes().length == 0
-                && !method.getName().equals("getClass")
-                && !method.getName().equals("isNew")//Bub methods from CouchDbDocument
-                && !method.getName().equals("getAttachments")
-                && !method.getName().equals("getRevisions")
-                && !method.getName().equals("getConflicts")
-                && !method.getName().equals("getDocumentId")
-                && !void.class.equals(method.getReturnType()))
-            return true;
-        else return false;
+                && !falseGetter.contains(method.getName());
     }
 
     /**
@@ -145,15 +155,16 @@ public class PrinterUtilities {
      * @return true if the method is a setter. 
      */
     static public boolean isSetter(final Method method){
-        if (method == null) return false;
-        else if (method.getName().startsWith("set")
+        if (method == null) 
+            return false;
+        else 
+            return method.getName().startsWith("set")
                 && method.getParameterTypes().length == 1
-                && void.class.equals(method.getReturnType())) 
-            return true;
-        else return false;
+                && void.class.equals(method.getReturnType());
     }
     
-    static public void main(String[] arg) throws Exception { 
+    static public void main(String[] arg) throws Exception {
+        
         final File rep = new File("../core/sirs-core-store/target/generated-sources/pojos/fr/symadrem/sirs/model");
         
         final Pattern pattern = Pattern.compile("(.*)\\.java"); 

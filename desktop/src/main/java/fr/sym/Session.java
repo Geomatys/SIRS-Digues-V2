@@ -43,10 +43,10 @@ public class Session {
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     
-    private DigueRepository digueRepository;
-    private TronconDigueRepository tronconDigueRepository;
-    private BorneDigueRepository borneDigueRepository;
-    private SystemeReperageRepository systemeReperageRepository;
+    private final DigueRepository digueRepository;
+    private final TronconDigueRepository tronconDigueRepository;
+    private final BorneDigueRepository borneDigueRepository;
+    private final SystemeReperageRepository systemeReperageRepository;
 
     private MainFrame frame = null;
     
