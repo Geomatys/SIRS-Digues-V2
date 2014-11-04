@@ -3,8 +3,10 @@ package fr.sym.digue;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.theme.AbstractPojoTable;
+import fr.sym.theme.detail.DetailTronconThemePane;
 import fr.symadrem.sirs.core.model.Digue;
 import fr.symadrem.sirs.core.model.Element;
+import fr.symadrem.sirs.core.model.Structure;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,11 +19,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -168,7 +173,23 @@ public class DigueController extends BorderPane {
 
         @Override
         protected void editPojo(Element pojo) {
-            session.update((TronconDigue) pojo);
+            final Session session = Injector.getBean(Session.class);
+//            final Tab tab = new Tab();
+//            final TronconDigueController tronconDigueController = new TronconDigueController();
+//            tronconDigueController.setTroncon((TronconDigue) pojo);
+//            tab.setContent(tronconDigueController);
+//            tab.setText(pojo.getClass().getSimpleName());
+//            tab.setOnSelectionChanged(new EventHandler<Event>() {
+//                @Override
+//                public void handle(Event event) {
+//                    if(tab.isSelected()){
+//                        session.prepareToPrint(pojo);
+//                    }
+//                }
+//            });
+//            session.getFrame().addTab(tab);
+            session.getFrame().getDiguesTab().getDiguesController().displayTronconDigue((TronconDigue) pojo);
+            session.prepareToPrint(pojo);
         }
 
         @Override

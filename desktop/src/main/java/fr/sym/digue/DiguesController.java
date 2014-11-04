@@ -39,25 +39,25 @@ public class DiguesController extends SplitPane{
             }
 
             if (obj instanceof Digue) {
-                DigueController digueController = new DigueController();
-//                uiRight.setCenter(DigueController.create(uiTree));
-                digueController.setDigue((Digue) obj);
-                uiRight.setCenter(digueController);
+                displayDigue((Digue) obj);
             } else if (obj instanceof TronconDigue) {
-                TronconDigueController ctrl = new TronconDigueController();
-                ctrl.setTroncon((TronconDigue) obj);
-                uiRight.setCenter(ctrl);
+                displayTronconDigue((TronconDigue) obj);
             }
         });
-        
-//        this.uiTree.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//
-//            @Override
-//            public void handle(MouseEvent event) {
-//                System.out.println(event.getButton().toString());
-//            }
-//        });
-        
+    }
+    
+    public final void displayTronconDigue(TronconDigue obj){
+        TronconDigueController ctrl = new TronconDigueController();
+        ctrl.setTroncon((TronconDigue) obj);
+        uiRight.setCenter(ctrl);
+        this.session.prepareToPrint(obj);
+    }
+    
+    public final void displayDigue(Digue obj){
+        DigueController digueController = new DigueController();
+        digueController.setDigue((Digue) obj);
+        uiRight.setCenter(digueController);
+        this.session.prepareToPrint(obj);
     }
 
     @FXML

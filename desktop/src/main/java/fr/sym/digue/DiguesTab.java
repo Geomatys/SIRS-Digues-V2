@@ -35,5 +35,5 @@ public class DiguesTab extends Tab {
         tabs.getSelectionModel().clearAndSelect(tabs.getTabs().indexOf(this));
     }
     
-    
+    public synchronized DiguesController getDiguesController(){return this.ctrl;}
 }

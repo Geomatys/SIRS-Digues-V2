@@ -1,11 +1,19 @@
 package fr.sym;
 
 import fr.sym.digue.DiguesTab;
+import fr.sym.digue.Injector;
 import fr.sym.map.FXMapTab;
 import fr.sym.theme.Theme;
+import fr.sym.util.PrinterUtilities;
+import java.awt.Desktop;
+import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -23,18 +31,13 @@ public class MainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
-    @FXML
-    private MenuItem uiPref;
-    @FXML
-    private MenuButton uiThemes;
-    @FXML
-    private MenuButton uiPlugins;
-    @FXML
-    private TabPane uiTabs;
-    @FXML
-    private MenuItem uiExit;
-    @FXML
-    private Button uiMapButton;
+    @FXML private MenuItem uiPref;
+    @FXML private MenuButton uiThemes;
+    @FXML private MenuButton uiPlugins;
+    @FXML private TabPane uiTabs;
+    @FXML private MenuItem uiExit;
+    @FXML private Button uiMapButton;
+    @FXML private Button uiPrintButton;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -128,6 +131,31 @@ public class MainFrame extends BorderPane {
     @FXML
     void exit(ActionEvent event) {
         System.exit(0);
+    }
+    
+    @FXML
+    public void print() throws Exception {
+
+        final Thread t = new Thread() {
+            @Override
+            public void run() {
+
+                final Session session = Injector.getBean(Session.class);
+                final Object obj = session.getObjectToPrint();
+                final File fileToPrint;
+                try {
+                    fileToPrint = PrinterUtilities.print(obj);
+                    fileToPrint.deleteOnExit();
+
+                    final Desktop desktop = Desktop.getDesktop();
+                    desktop.open(fileToPrint);
+                } catch (Exception e) {
+                    System.out.println(e);
+                    Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
+                }
+            }
+        };
+        t.start();
     }
 
 }

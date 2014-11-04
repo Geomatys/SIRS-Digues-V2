@@ -36,6 +36,8 @@ public class Session {
 
     public static final CoordinateReferenceSystem PROJECTION = GeometryDeserializer.PROJECTION;
     
+    private Object objectToPrint = null;
+    
     private MapContext mapContext;
     private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
@@ -199,4 +201,9 @@ public class Session {
         return this.getTronconDigueByDigue(digue);
     }
 
+    public void prepareToPrint(final Object object){
+        objectToPrint=object;
+    }
+    
+    public Object getObjectToPrint(){return objectToPrint;}
 }

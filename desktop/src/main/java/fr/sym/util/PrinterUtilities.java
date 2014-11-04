@@ -1,9 +1,11 @@
 package fr.sym.util;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -61,7 +63,7 @@ public class PrinterUtilities {
      * @param objectToPrint
      * @throws Exception 
      */
-    static public void print(final Object objectToPrint) throws Exception {
+    static public File print(final Object objectToPrint) throws Exception {
         
         // Creates the Jasper Reports specific template from the generic template.
         final JRDomWriter writer = new JRDomWriter(new FileInputStream(
@@ -104,10 +106,16 @@ public class PrinterUtilities {
         final FeatureCollection<Feature> featureCollection = FeatureStoreUtilities.collection(feature0);
         
         // Generate the report -------------------------------------------------
+//        OutputStream out = new FileOutputStream("src/test/resources/report"
+//                        + objectToPrint.getClass().getSimpleName() + ".pdf");
+//        final File fout = File.createTempFile(objectToPrint.getClass().getSimpleName(), ".pdf");
+        final File fout = new File("src/test/resources/report"
+                        + objectToPrint.getClass().getSimpleName() + ".pdf");
+        OutputStream out = new FileOutputStream(fout);
         final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, 
-                new FileOutputStream("src/test/resources/report"
-                        + objectToPrint.getClass().getSimpleName() + ".pdf"));
+                out);
         JasperReportService.generateReport(report, featureCollection, null, output);
+        return fout;
     }
     
     /**

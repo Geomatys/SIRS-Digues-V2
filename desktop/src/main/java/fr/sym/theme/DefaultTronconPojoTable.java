@@ -13,6 +13,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 
@@ -72,6 +74,14 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
         final Tab tab = new Tab();
         tab.setContent(new DetailTronconThemePane((Structure) pojo));
         tab.setText(pojo.getClass().getSimpleName());
+        tab.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if(tab.isSelected()){
+                    session.prepareToPrint(pojo);
+                }
+            }
+        });
         session.getFrame().addTab(tab);
     }
 

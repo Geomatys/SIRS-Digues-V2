@@ -38,7 +38,7 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class DetailTronconThemePane extends BorderPane {
     
-    private Structure structure;
+    private final Structure structure;
     private Node specificThemePane;
     private TronconDigue troncon;
     private TronconDigue newTroncon = null;
