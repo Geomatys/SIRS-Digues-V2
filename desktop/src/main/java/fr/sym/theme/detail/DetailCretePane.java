@@ -13,6 +13,7 @@ import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Crete;
+import fr.symadrem.sirs.core.model.Positionable;
 import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
@@ -39,7 +40,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  */
 public class DetailCretePane extends BorderPane implements DetailThemePane {
     
-    private final ObjectProperty<Crete> crete;
+    private final ObjectProperty<Positionable> cretePotitionable;
     private final BooleanProperty disableFields;
     private final BooleanProperty tronconChanged;
     
@@ -64,19 +65,20 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         tronconChanged = new SimpleBooleanProperty(false);
         final Session session = Injector.getBean(Session.class);
         tronconDigueRepository = session.getTronconDigueRepository();
-        this.crete = new SimpleObjectProperty<>();
+        this.cretePotitionable = new SimpleObjectProperty<>();
     }
     
     public DetailCretePane(final Crete crete){
         this();
-        this.crete.set(crete);
+        this.cretePotitionable.set(crete);
         initFields();
     }       
             
     private void initFields(){
         
         // Propriétés héritées de Positionnable
-        uiPositionnable.positionableProperty().bindBidirectional(crete);
+        uiPositionnable.positionableProperty().bindBidirectional(cretePotitionable);
+        final Crete crete = (Crete) cretePotitionable.get();
         
         // Propriétés héritées de Structure
         final StringConverter<TronconDigue> tronconsConverter = new StringConverter<TronconDigue>() {
@@ -98,7 +100,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         
         for(final TronconDigue t : tronconDigueRepository.getAll()){
             troncons.add(t);
-            if(t.getId().equals(crete.get().getTroncon())) troncon=t;
+            if(t.getId().equals(crete.getTroncon())) troncon=t;
         }
         troncons.add(null);
         uiTroncons.setConverter(tronconsConverter);
@@ -113,23 +115,23 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
             }
         });
         
-        uiComment.setHtmlText(crete.get().getCommentaire());
+        uiComment.setHtmlText(crete.getCommentaire());
         uiComment.disableProperty().bind(disableFields);
         
-        uiDebut.valueProperty().bindBidirectional(crete.get().date_debutProperty());
+        uiDebut.valueProperty().bindBidirectional(crete.date_debutProperty());
         uiDebut.disableProperty().bind(disableFields);
         
-        uiFin.valueProperty().bindBidirectional(crete.get().date_finProperty());
+        uiFin.valueProperty().bindBidirectional(crete.date_finProperty());
         uiFin.disableProperty().bind(disableFields);
         
         
         // Propriétés propres à la Crête
-        uiEpaisseur.valueProperty().bindBidirectional(crete.get().epaisseurProperty());
+        uiEpaisseur.valueProperty().bindBidirectional(crete.epaisseurProperty());
         uiEpaisseur.disableProperty().bind(disableFields);
         
         uiCouches.numberTypeProperty().set(NumberField.NumberType.Integer);
         uiCouches.minValueProperty().set(0);
-        uiCouches.valueProperty().bindBidirectional(crete.get().num_coucheProperty());
+        uiCouches.valueProperty().bindBidirectional(crete.num_coucheProperty());
         uiCouches.disableProperty().bind(disableFields);
     }
 
@@ -140,12 +142,13 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
 
     @Override
     public void preSave() {
-        crete.get().setCommentaire(uiComment.getHtmlText());
+        final Crete crete = (Crete) cretePotitionable.get();
+        crete.setCommentaire(uiComment.getHtmlText());
         if(uiTroncons.getValue()!=null){
-            crete.get().setTroncon(uiTroncons.getValue().getId());
+            crete.setTroncon(uiTroncons.getValue().getId());
         }
         else {
-            crete.get().setTroncon(null);
+            crete.setTroncon(null);
         }
     }
 
