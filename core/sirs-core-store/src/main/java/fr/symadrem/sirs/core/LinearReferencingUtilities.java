@@ -66,18 +66,19 @@ public final class LinearReferencingUtilities extends Static{
     /**
      * Calcul de coordonée en fonction d'une position relative
      * 
-     * @param linear geometrie du tronçon
+     * @param geom geometrie du tronçon
      * @param reference position de la borne
      * @param distanceAlongLinear distance le long du troncon 
      * @param distancePerpendicular distance par rapport au troncon
      * @return position 
      */
-    public static Point calculateCoordinate(LineString linear, Point reference, 
+    public static Point calculateCoordinate(Geometry geom, Point reference, 
             double distanceAlongLinear, double distancePerpendicular){
-        ArgumentChecks.ensureNonNull("linear", linear);
+        ArgumentChecks.ensureNonNull("linear", geom);
         ArgumentChecks.ensureNonNull("reference", reference);
                 
         //project reference 
+        final LineString linear = asLineString(geom);
         final SegmentInfo[] segments = buildSegments(linear);
         final ProjectedReference projection = projectReference(segments, reference);
                 
@@ -91,19 +92,20 @@ public final class LinearReferencingUtilities extends Static{
     
     /**
      * 
-     * @param linear geometrie du tronçon
+     * @param geom geometrie du tronçon
      * @param references position des bornes
      * @param position position géographique
      * @return Entry : index de la reference la plus proche 
      *       double[0] = distance le long du linéaire
      *       double[1] = distance sur le coté du linéaire
      */
-    public static Entry<Integer,double[]> calculateRelative(LineString linear, Point[] references, Point position){
-        ArgumentChecks.ensureNonNull("linear", linear);
+    public static Entry<Integer,double[]> calculateRelative(Geometry geom, Point[] references, Point position){
+        ArgumentChecks.ensureNonNull("linear", geom);
         ArgumentChecks.ensureNonNull("position", position);
         ArgumentChecks.ensureNonNull("references", references);
         ArgumentChecks.ensurePositive("references", references.length);
         
+        final LineString linear = asLineString(geom);
         final SegmentInfo[] segments = buildSegments(linear);
         
         //project target

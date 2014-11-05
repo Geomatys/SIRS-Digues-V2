@@ -2,10 +2,12 @@
 package fr.sym.theme.detail;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
+import fr.symadrem.sirs.core.LinearReferencingUtilities;
 import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Positionable;
 import fr.symadrem.sirs.core.model.SystemeReperage;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -29,11 +32,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
@@ -44,6 +52,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.web.WebView;
 import org.apache.sis.referencing.CommonCRS;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -212,7 +221,129 @@ public class DetailPositionnablePane extends BorderPane {
 
     @FXML
     void viewAllSR(ActionEvent event) {
-
+        final Positionable pos = (Positionable) positionableProperty.get();
+        if(pos==null) return;
+        
+        final Session session = Injector.getBean(Session.class);
+        final TronconDigue troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
+        final Geometry linear = troncon.getGeometry();
+        
+        //calcule de la position geographique
+        Point startPoint = pos.getPositionDebut();
+        Point endPoint = pos.getPositionFin();
+        if(startPoint==null){
+            //calcule a partir des bornes
+            
+            final BorneDigue borneStart = cacheBorneDigue.get(pos.borne_debutProperty().get());
+            final Point borneStartPoint = borneStart.getPositionBorne();
+            double distStart = pos.getBorne_debut_distance();
+            if(pos.getBorne_debut_aval()) distStart -= -1;
+            
+            final BorneDigue borneEnd = cacheBorneDigue.get(pos.borne_finProperty().get());
+            final Point borneEndPoint = borneEnd.getPositionBorne();            
+            double distEnd = pos.getBorne_fin_distance();
+            if(pos.getBorne_fin_aval()) distEnd -= -1;
+            
+            startPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneStartPoint, distStart, 0);
+            endPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneEndPoint, distEnd, 0);
+            
+        }
+        
+        
+        final StringBuilder page = new StringBuilder();
+        page.append("<html><body>");
+        
+        
+        //RGF93 coord
+        page.append("<h2>Projection française (RGF-93, EPSG:2154)</h2>");
+        page.append("<b>Début</b><br/>");
+        page.append("X : ").append(startPoint.getX()).append("<br/>");
+        page.append("Y : ").append(startPoint.getY()).append("<br/>");
+        page.append("<b>Fin</b><br/>");
+        page.append("X : ").append(endPoint.getX()).append("<br/>");
+        page.append("Y : ").append(endPoint.getY()).append("<br/>");
+        page.append("<br/>");
+        
+        
+        //WGS84 coord
+        try {
+            final MathTransform trs = CRS.findMathTransform(CRS_RGF93, CRS_WGS84, true);
+            Point ptStart = (Point) JTS.transform(startPoint, trs);
+            Point ptEnd = (Point) JTS.transform(endPoint, trs);
+            
+            page.append("<h2>Coordonnées géographique (WGS-84, EPSG:4326)</h2>");
+            page.append("<b>Début</b><br/>");
+            page.append("Longitude : ").append(ptStart.getX()).append("<br/>");
+            page.append("Latitude : ").append(ptStart.getY()).append("<br/>");
+            page.append("<b>Fin</b><br/>");
+            page.append("Longitude : ").append(ptEnd.getX()).append("<br/>");
+            page.append("Latitude : ").append(ptEnd.getY()).append("<br/>");
+            page.append("<br/>");
+        } catch (FactoryException | TransformException ex) {
+            Symadrem.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        
+        
+        //pour chaque systeme de reperage
+        for(SystemeReperage sr : cacheSystemeReperage.values()){
+            final List<BorneDigue> bornes = new ArrayList<>();
+            final List<Point> references = new ArrayList<>();
+            for(SystemeReperageBorne srb : sr.systemereperageborneId){
+                final String bid = srb.getBorneId();
+                final BorneDigue bd = session.getBorneDigueRepository().get(bid);
+                if(bd!=null){ 
+                    bornes.add(bd);
+                    references.add(bd.getPositionBorne());
+                }
+            }
+            
+            final Entry<Integer,double[]> startRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), startPoint);
+            final BorneDigue startBorne = bornes.get(startRef.getKey());
+            double distanceStartBorne = startRef.getValue()[0];
+            boolean startAval = false;
+            if(distanceStartBorne<0){
+                distanceStartBorne = -distanceStartBorne;
+                startAval = true;
+            }
+            
+            final Entry<Integer,double[]> endRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), endPoint);
+            final BorneDigue endBorne = bornes.get(endRef.getKey());
+            double distanceEndBorne = endRef.getValue()[0];
+            boolean endAval = false;
+            if(distanceEndBorne<0){
+                distanceEndBorne = -distanceEndBorne;
+                endAval = true;
+            }
+            
+            
+            page.append("<h2>SR : ").append(sr.getNom()).append("</h2>");
+            page.append("<b>Début </b>");
+            page.append(startBorne.getNom()).append(' ');
+            page.append(distanceStartBorne).append("m ");
+            page.append(startAval ? "en amont":"en aval");
+            page.append("<br/>");
+            page.append("<b>Fin </b>");
+            page.append(endBorne.getNom()).append(' ');
+            page.append(distanceEndBorne).append("m ");
+            page.append(endAval ? "en amont":"en aval");
+            page.append("<br/><br/>");
+        }
+        
+        
+        page.append("</html></body>");
+        
+        final WebView view = new WebView();        
+        view.getEngine().loadContent(page.toString());
+        
+        final Dialog dialog = new Dialog();
+        final DialogPane pane = new DialogPane();
+        pane.setContent(view);
+        pane.getButtonTypes().add(ButtonType.CLOSE);
+        dialog.setDialogPane(pane);
+        dialog.setTitle("Position");
+        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
+        dialog.showAndWait();
+        
     }
 
     private void updateGeoCoord() {
@@ -315,12 +446,13 @@ public class DetailPositionnablePane extends BorderPane {
                 //creation de la liste des systemes de reperage
                 updateSRList();
                 uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.keySet()));
-                uiSRs.valueProperty().bindBidirectional(pos.systeme_rep_idProperty());
                 updateBorneList();
+                
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
                         //Bindings
+                        uiSRs.valueProperty().bindBidirectional(pos.systeme_rep_idProperty());
                         uiBorneStart.valueProperty().bindBidirectional(pos.borne_debutProperty());
                         uiBorneEnd.valueProperty().bindBidirectional(pos.borne_finProperty());
                         uiAvalSart.selectedProperty().bindBidirectional(pos.borne_debut_avalProperty());
