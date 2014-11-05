@@ -1,20 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package fr.sym.theme.detail;
 
 import fr.sym.Session;
 import fr.sym.Symadrem;
 import fr.sym.digue.Injector;
-import fr.symadrem.sirs.core.component.BorneDigueRepository;
-import fr.symadrem.sirs.core.component.SystemeReperageRepository;
 import fr.symadrem.sirs.core.component.TronconDigueRepository;
-import fr.symadrem.sirs.core.model.BorneDigue;
 import fr.symadrem.sirs.core.model.Crete;
 import fr.symadrem.sirs.core.model.Positionable;
-import fr.symadrem.sirs.core.model.SystemeReperage;
 import fr.symadrem.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -25,7 +17,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
@@ -40,9 +31,9 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  */
 public class DetailCretePane extends BorderPane implements DetailThemePane {
     
-    private final ObjectProperty<Positionable> cretePotitionable;
-    private final BooleanProperty disableFields;
-    private final BooleanProperty tronconChanged;
+    private final ObjectProperty<Positionable> cretePotitionable = new SimpleObjectProperty<>();
+    private final BooleanProperty disableFields = new SimpleBooleanProperty();
+    private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
     
     private final TronconDigueRepository tronconDigueRepository;
     
@@ -61,17 +52,17 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     
     private DetailCretePane(){
         Symadrem.loadFXML(this);
-        disableFields = new SimpleBooleanProperty();
-        tronconChanged = new SimpleBooleanProperty(false);
         final Session session = Injector.getBean(Session.class);
         tronconDigueRepository = session.getTronconDigueRepository();
-        this.cretePotitionable = new SimpleObjectProperty<>();
+        cretePotitionable.addListener((ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) -> {
+            initFields();
+        });
+        uiPositionnable.disableFieldsProperty().bind(disableFields);
     }
     
     public DetailCretePane(final Crete crete){
         this();
         this.cretePotitionable.set(crete);
-        initFields();
     }       
             
     private void initFields(){
@@ -144,10 +135,10 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     public void preSave() {
         final Crete crete = (Crete) cretePotitionable.get();
         crete.setCommentaire(uiComment.getHtmlText());
+        uiPositionnable.preSave();
         if(uiTroncons.getValue()!=null){
             crete.setTroncon(uiTroncons.getValue().getId());
-        }
-        else {
+        } else {
             crete.setTroncon(null);
         }
     }
