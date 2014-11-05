@@ -37,7 +37,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="source" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeSource" eType="#//RefSource"/>
@@ -70,6 +69,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="PR_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="systeme_rep_id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="positionFin" eType="ecore:EDataType jts.ecore#//Point"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Systeme_reperage">
     <eAnnotations source="generation">
@@ -148,7 +148,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="personnePhysique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Borne_digue" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="Borne_digue">
     <eAnnotations source="generation">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
