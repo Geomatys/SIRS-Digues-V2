@@ -258,8 +258,8 @@ public final class LinearReferencingUtilities extends Static{
             if(!structure.getBorne_fin_aval()) distanceFin *= -1.0;
             
             //calculate de la distance des bornes
-            final Point borneDebutGeom = borneDebut.getPositionBorne();
-            final Point borneFinGeom = borneFin.getPositionBorne();
+            final Point borneDebutGeom = borneDebut.getGeometry();
+            final Point borneFinGeom = borneFin.getGeometry();
             
             final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
             final double borneDebutDistance = calculateRelative(troncon, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];

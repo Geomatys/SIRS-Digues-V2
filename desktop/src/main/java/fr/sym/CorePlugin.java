@@ -124,7 +124,7 @@ public class CorePlugin extends Plugin{
             
             //bornes
             final BeanStore borneStore = new BeanStore(
-                    new BeanFeatureSupplier(BorneDigue.class, "id", "positionBorne", null, PROJECTION, ()-> bornes)
+                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", null, PROJECTION, ()-> bornes)
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),true));
             

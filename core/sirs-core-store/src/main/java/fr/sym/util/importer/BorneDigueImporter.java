@@ -135,7 +135,7 @@ public class BorneDigueImporter extends GenericImporter {
                             row.getDouble(BorneDigueColumns.X_POINT.toString()),
                             row.getDouble(BorneDigueColumns.Y_POINT.toString()))), lambertToRGF);
                 }
-                borne.setPositionBorne(point);
+                borne.setGeometry(point);
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
                 Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }

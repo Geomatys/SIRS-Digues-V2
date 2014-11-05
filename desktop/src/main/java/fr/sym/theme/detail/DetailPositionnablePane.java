@@ -235,12 +235,12 @@ public class DetailPositionnablePane extends BorderPane {
             //calcule a partir des bornes
             
             final BorneDigue borneStart = cacheBorneDigue.get(pos.borne_debutProperty().get());
-            final Point borneStartPoint = borneStart.getPositionBorne();
+            final Point borneStartPoint = borneStart.getGeometry();
             double distStart = pos.getBorne_debut_distance();
             if(pos.getBorne_debut_aval()) distStart -= -1;
             
             final BorneDigue borneEnd = cacheBorneDigue.get(pos.borne_finProperty().get());
-            final Point borneEndPoint = borneEnd.getPositionBorne();            
+            final Point borneEndPoint = borneEnd.getGeometry();            
             double distEnd = pos.getBorne_fin_distance();
             if(pos.getBorne_fin_aval()) distEnd -= -1;
             
@@ -293,7 +293,7 @@ public class DetailPositionnablePane extends BorderPane {
                 final BorneDigue bd = session.getBorneDigueRepository().get(bid);
                 if(bd!=null){ 
                     bornes.add(bd);
-                    references.add(bd.getPositionBorne());
+                    references.add(bd.getGeometry());
                 }
             }
             

@@ -4,6 +4,7 @@ package fr.symadrem.launcher;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -21,6 +22,7 @@ public class Launcher extends Application {
         final Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Symadrem");
+        primaryStage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
         primaryStage.show();
     }
 }
