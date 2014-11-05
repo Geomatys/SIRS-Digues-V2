@@ -212,10 +212,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
         // Set the references using the this very importer (Structures references TronconDigueId).
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
-            List<Structure> structures = tronconDigue.getStuctures();
+            List<Structure> structures = tronconDigue.getStructures();
             if(structures==null){
                 structures = new ArrayList<>();
-                tronconDigue.setStuctures(structures);
+                tronconDigue.setStructures(structures);
             }
 
             if(structureImporter.getStructuresByTronconId().get(tronconsIds.get(tronconDigue))!=null)
@@ -231,7 +231,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
             final TronconDigue troncon = entry.getValue();
             final Geometry tronconGeom = (Geometry) troncon.getGeometry();
-            for(final Structure str : troncon.getStuctures()){
+            for(final Structure str : troncon.getStructures()){
                 final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                 str.setGeometry(structGeom);
             }

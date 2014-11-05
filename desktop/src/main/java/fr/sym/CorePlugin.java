@@ -175,7 +175,7 @@ public class CorePlugin extends Plugin{
             final List<TronconDigue> troncons = repo.getAll();
             final List col = new ArrayList();
             for(TronconDigue td : troncons){
-                col.addAll(td.stuctures.filtered(predicate));
+                col.addAll(td.structures.filtered(predicate));
             }
             return col.iterator();
         }

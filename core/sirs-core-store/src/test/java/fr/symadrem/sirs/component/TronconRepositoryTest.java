@@ -39,7 +39,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 				couchDbConnector);
 		for (TronconDigue troncon : tronconRepository.getAll()) {
 			System.out.println(troncon);
-			for (Structure struct : troncon.getStuctures()) {
+			for (Structure struct : troncon.getStructures()) {
 				System.out.println("DocuumentId: " + struct.getDocumentId());
 				
 			}

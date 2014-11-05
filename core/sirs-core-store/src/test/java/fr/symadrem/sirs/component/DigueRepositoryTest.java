@@ -76,7 +76,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             crete.setCommentaire("Belle crete");
             stuctures.add(crete);
             
-            troncon.setStuctures(stuctures);
+            troncon.setStructures(stuctures);
 
             tronconRepository.add(troncon);
         }

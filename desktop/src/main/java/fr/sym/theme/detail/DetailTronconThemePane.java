@@ -75,21 +75,21 @@ public class DetailTronconThemePane extends BorderPane {
             
             if(((DetailThemePane) specificThemePane).tronconChangedProperty().get()){
                 ((DetailThemePane) specificThemePane).tronconChangedProperty().set(false);
-                for(final Structure str : troncon.getStuctures()){
+                for(final Structure str : troncon.getStructures()){
                     if(str.getId().equals(structure.getId())){
-                        troncon.getStuctures().remove(str);
+                        troncon.getStructures().remove(str);
                         break;
                     }
                 }
                 newTroncon = session.getTronconDigueRepository().get(structure.getTroncon());
-                newTroncon.getStuctures().add(structure);
+                newTroncon.getStructures().add(structure);
                 structure.setDateMaj(LocalDateTime.now());
                 newTroncon.setDateMaj(LocalDateTime.now());
                 session.getTronconDigueRepository().update(newTroncon);
             } else{
-                for(final Structure str : troncon.getStuctures()){
+                for(final Structure str : troncon.getStructures()){
                     if(str.getId().equals(structure.getId())){
-                        troncon.getStuctures().set(troncon.getStuctures().indexOf(str), structure);
+                        troncon.getStructures().set(troncon.getStructures().indexOf(str), structure);
                         break;
                     }
                 }
