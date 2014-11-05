@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Column;
@@ -20,7 +15,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An importer is suposed to retrive data from one and only one table of the given database.
@@ -106,7 +100,11 @@ public abstract class GenericImporter {
      */
     protected abstract void compute() throws IOException, AccessDbImporterException;
     
-    
+    /**
+     * 
+     * @return the list of Access database table names.
+     * @throws IOException 
+     */
     public List<String> getTableColumns() throws IOException {
         final List<String> names = new ArrayList<>();
         this.accessDatabase.getTable(tableName).getColumns().stream().forEach((column) -> {

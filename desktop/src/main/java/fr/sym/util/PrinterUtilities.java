@@ -1,17 +1,20 @@
 package fr.sym.util;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
 import net.sf.jasperreports.engine.JasperReport;
 import org.geotoolkit.data.FeatureCollection;
@@ -130,7 +133,11 @@ public class PrinterUtilities {
         OutputStream out = new FileOutputStream(fout);
         final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, 
                 out);
-        JasperReportService.generateReport(report, featureCollection, null, output);
+        final Map<String, Object> parameters = new HashMap<>();
+        
+        
+        parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sym/images/icon-symadrem.png"));
+        JasperReportService.generateReport(report, featureCollection, parameters, output);
         return fout;
     }
     

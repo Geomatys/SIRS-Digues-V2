@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sym.util.importer;
 
 import com.healthmarketscience.jackcess.Database;
@@ -513,8 +508,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "symadrem", "classpath:/symadrem/spring/couchdb-context.xml");
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -555,16 +550,16 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-//            for(Row row : importer.getDatabase().getTable("ELEMENT_STRUCTURE")){
-//                System.out.println(row);
-//            }
-//            System.out.println("=======================");
+            for(Row row : importer.getDatabase().getTable(TableName.SYS_EVT_CRETE.toString())){
+                System.out.println(row);
+            }
+            System.out.println("=======================");
 //            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
