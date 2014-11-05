@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>fr.symadrem</groupId>
+    <groupId>fr.sirs</groupId>
     <artifactId>sirs</artifactId>
     <version>1.x-SNAPSHOT</version>
   </parent>
 
-  <groupId>fr.symadrem.sirs</groupId>
+  <groupId>fr.sirs</groupId>
   <artifactId>desktop</artifactId>
   <packaging>jar</packaging>
   <name>Desktop</name>
@@ -22,7 +22,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>fr.symadrem.sirs.core</groupId>
+      <groupId>fr.sirs.core</groupId>
       <artifactId>sirs-core-store</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -137,8 +137,8 @@
               <configuration>
                   <archive>
                       <manifest>
-                          <mainClass>fr.sym.Loader</mainClass>
-                          <packageName>fr.sym</packageName>
+                          <mainClass>fr.sirs.Loader</mainClass>
+                          <packageName>fr.sirs</packageName>
                           <addClasspath>true</addClasspath>
                           <addExtensions/>
                           <classpathPrefix>lib_desktop/</classpathPrefix>

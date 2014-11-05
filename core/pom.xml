@@ -11,12 +11,12 @@
     </prerequisites>
  
     <parent>
-      <groupId>fr.symadrem</groupId>
+      <groupId>fr.sirs</groupId>
       <artifactId>sirs</artifactId>
       <version>1.x-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.symadrem.sirs</groupId>
+    <groupId>fr.sirs</groupId>
     <artifactId>core</artifactId>
     <packaging>pom</packaging>
     <name>Core</name>

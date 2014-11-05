@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>fr.symadrem</groupId>
+        <groupId>fr.sirs</groupId>
         <artifactId>sirs</artifactId>
         <version>1.x-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.symadrem.sirs</groupId>
+    <groupId>fr.sirs</groupId>
     <artifactId>launcher</artifactId>
     <packaging>jar</packaging>
     <name>Launcher</name>
@@ -18,7 +18,7 @@
     
     <dependencies>
         <dependency>
-            <groupId>fr.symadrem.sirs.core</groupId>
+            <groupId>fr.sirs.core</groupId>
             <artifactId>sirs-core-store</artifactId>
             <version>1.x-SNAPSHOT</version>
             <type>jar</type>
@@ -71,8 +71,8 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.symadrem.launcher.Launcher</mainClass>
-                            <packageName>fr.symadrem.launcher</packageName>
+                            <mainClass>fr.sirs.launcher.Launcher</mainClass>
+                            <packageName>fr.sirs.launcher</packageName>
                             <addClasspath>true</addClasspath>
                             <addExtensions/>
                             <classpathPrefix>lib_launcher/</classpathPrefix>
