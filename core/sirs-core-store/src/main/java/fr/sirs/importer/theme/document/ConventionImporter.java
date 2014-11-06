@@ -90,7 +90,7 @@ public class ConventionImporter extends GenericImporter {
 
             convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
             convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
-            convention.setType_conventions(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
+            convention.setTypeConventionId(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
             conventionRepository.add(convention);
         }

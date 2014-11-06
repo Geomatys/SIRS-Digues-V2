@@ -438,7 +438,7 @@ public class DbImporter {
                 couchDbConnector, systemeReperageRepository, systemeReperageImporter, borneDigueImporter);
         this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector, refConventionRepository);
         this.conventionImporter = new ConventionImporter(accessDatabase, couchDbConnector, conventionRepository, typeConventionImporter);
-        this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository, conventionImporter, tronconGestionDigueImporter);
+        this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository,borneDigueImporter, systemeReperageImporter, conventionImporter, tronconGestionDigueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -615,7 +615,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

@@ -186,7 +186,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             if (row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()) != null) {
                 final RefRive typeRive = typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()));
                 if(typeRive!=null){
-                    tronconDigue.setTypeRive(typeRive.getId());
+                    tronconDigue.setTypeRiveId(typeRive.getId());
                 }
             }
 

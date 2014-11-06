@@ -283,7 +283,7 @@ public class TronconDigueController extends BorderPane{
 //        };
 //        
 //        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
-        this.uiRive.setValue(troncon.getTypeRive());
+        this.uiRive.setValue(troncon.getTypeRiveId());
                 
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());

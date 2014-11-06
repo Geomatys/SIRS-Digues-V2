@@ -14,8 +14,6 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  */
 public class DocumentConventionImporter extends GenericImporter {
-
-    private Map<Integer, Document> documents = null;
     
     DocumentConventionImporter(Database accessDatabase, CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
