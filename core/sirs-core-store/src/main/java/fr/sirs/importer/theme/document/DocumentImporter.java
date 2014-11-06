@@ -22,12 +22,12 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericImporter {
+public class DocumentImporter extends GenericDocumentImporter {
     
-    private Map<Integer, Document> documents = null;
     private DocumentRepository documentRepository;
     private ConventionImporter conventionImporter;
     private TronconGestionDigueImporter tronconGestionDigueImporter;
+    private TypeDocumentImporter typeDocumentImporter;
 
     private DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -43,12 +43,13 @@ public class DocumentImporter extends GenericImporter {
         this.documentRepository = documentRepository;
         this.conventionImporter = conventionImporter;
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
+        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, couchDbConnector);
     }
     
     private enum DocumentColumns {
         ID_DOC,
         ID_TRONCON_GESTION,
-//        ID_TYPE_DOCUMENT,
+        ID_TYPE_DOCUMENT,
 //        ID_DOSSIER,
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
@@ -114,13 +115,14 @@ public class DocumentImporter extends GenericImporter {
             document.setTronconId(troncons.get(row.getInt(DocumentColumns.ID_TRONCON_GESTION.toString())).getId());
             
             
-            // Pour les conventions !
-            if(row.getInt(DocumentColumns.ID_CONVENTION.toString())!=null){
-                if(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString()))!=null){
-                    document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
-                }
-                else{
-                    System.out.println("Le document "+row.getInt(DocumentColumns.ID_DOC.toString())+" référence la convention "+row.getInt(DocumentColumns.ID_CONVENTION.toString())+" qui n'existe pas !!!");
+            final Class typeDocument = this.typeDocumentImporter.getTypeDocument().get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+            
+            if(typeDocument.equals(Convention.class)){
+                // Pour les conventions !
+                if(row.getInt(DocumentColumns.ID_CONVENTION.toString())!=null){
+                    if(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString()))!=null){
+                        document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
+                    }
                 }
             }
             
@@ -128,17 +130,5 @@ public class DocumentImporter extends GenericImporter {
             
         }
         couchDbConnector.executeBulk(documents.values());
-    }
-    
-    /**
-     *
-     * @return A map containing all Document instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    public Map<Integer, Document> getDocuments() throws IOException, AccessDbImporterException {
-        if (documents == null)  compute();
-        return documents;
     }
 }

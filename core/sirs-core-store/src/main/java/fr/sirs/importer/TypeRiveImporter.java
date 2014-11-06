@@ -1,4 +1,4 @@
-package fr.sirs.importer.type;
+package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -24,7 +24,7 @@ public class TypeRiveImporter extends GenericImporter {
     private Map<Integer, RefRive> typesRive = null;
     private final RefRiveRepository refRiveRepository;
 
-    public TypeRiveImporter(final Database accessDatabase,
+    TypeRiveImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final RefRiveRepository refRiveRepository) {
         super(accessDatabase, couchDbConnector);

@@ -1,6 +1,5 @@
 package fr.sirs.importer;
 
-import fr.sirs.importer.type.TypeRiveImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
@@ -187,7 +186,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             if (row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()) != null) {
                 final RefRive typeRive = typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()));
                 if(typeRive!=null){
-                    tronconDigue.setTypeRive(typeRive.getLibelle());
+                    tronconDigue.setTypeRive(typeRive.getId());
                 }
             }
 

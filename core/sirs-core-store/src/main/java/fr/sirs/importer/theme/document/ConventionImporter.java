@@ -6,7 +6,6 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefConvention;
-import fr.sirs.importer.type.TypeConventionImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -91,7 +90,7 @@ public class ConventionImporter extends GenericImporter {
 
             convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
             convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
-            convention.setType_conventions(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getLibelle());
+            convention.setType_conventions(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
             conventionRepository.add(convention);
         }

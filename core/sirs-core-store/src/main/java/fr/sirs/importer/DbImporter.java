@@ -1,7 +1,6 @@
 
 package fr.sirs.importer;
 
-import fr.sirs.importer.type.TypeRiveImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
@@ -17,7 +16,7 @@ import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.importer.theme.document.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
-import fr.sirs.importer.type.TypeConventionImporter;
+import fr.sirs.importer.theme.document.TypeConventionImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -593,7 +592,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -607,7 +606,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.SYS_EVT_CONVENTION.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.TYPE_DOCUMENT.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -616,7 +615,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-            importer.importation();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
