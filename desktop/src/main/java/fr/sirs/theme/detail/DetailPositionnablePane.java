@@ -13,6 +13,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.SirsListCell;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,8 +72,8 @@ import org.opengis.util.FactoryException;
  */
 public class DetailPositionnablePane extends BorderPane {
     
-    private static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
-    private static final CoordinateReferenceSystem CRS_RGF93 = Session.PROJECTION;
+    public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
+    public static final CoordinateReferenceSystem CRS_RGF93 = Session.PROJECTION;
     
     public static final Image ICON_IMPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
     public static final Image ICON_VIEWOTHER  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
@@ -166,7 +167,7 @@ public class DetailPositionnablePane extends BorderPane {
         
         //binding de l'etat editable
         final BooleanProperty binding = disableFieldsProperty;
-        uiImport.visibleProperty().bind(disableFieldsProperty.not());
+        uiImport.visibleProperty().bind(disableFieldsProperty.not().and(uiTypeCoord.selectedProperty()));
         
         uiSRs.disableProperty().bind(binding);
         uiBorneStart.disableProperty().bind(binding);
@@ -216,7 +217,14 @@ public class DetailPositionnablePane extends BorderPane {
         
     @FXML
     void importCoord(ActionEvent event) {
-
+        final DetailImportCoordinate importCoord = new DetailImportCoordinate(getPositionable());
+        final Dialog dialog = new Dialog();
+        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
+        final DialogPane pane = new DialogPane();
+        pane.setContent(importCoord);
+        dialog.setDialogPane(pane);
+        dialog.setTitle("Import de coordonnée");
+        dialog.show();
     }
 
     @FXML
@@ -536,32 +544,15 @@ public class DetailPositionnablePane extends BorderPane {
         }
     }
     
-    private final class ObjectListCell extends ListCell{
+    private final class ObjectListCell extends SirsListCell{
 
         @Override
         protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            if(empty){
-                setText("");
-                return;
-            }
-            
             if(item instanceof String){
                 if(cacheBorneDigue.containsKey(item)) item = cacheBorneDigue.get(item);
                 if(cacheSystemeReperage.containsKey(item)) item = cacheSystemeReperage.get(item);
             }
-            
-            
-            if(item instanceof CoordinateReferenceSystem){
-                setText(((CoordinateReferenceSystem)item).getName().toString());
-            }else if(item instanceof SystemeReperage){
-                setText(((SystemeReperage)item).getNom());
-            }else if(item instanceof BorneDigue){
-                setText(((BorneDigue)item).getNom());
-            }else{
-                setText("");
-            }
-                        
+            super.updateItem(item, empty);
         }
     
     }

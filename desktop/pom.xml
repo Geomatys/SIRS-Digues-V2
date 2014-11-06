@@ -55,6 +55,11 @@
     <!-- format -->
     <dependency>
       <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-feature-csv</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-gpx</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
