@@ -23,7 +23,7 @@
         eType="#//GardienTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
         eType="#//CommuneTroncon" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeRive" eType="#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeRiveId" eType="#//RefRive"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageIds" upperBound="-1"
         eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
@@ -533,7 +533,7 @@
         eType="#//SignataireOrg" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="signatairesContact" upperBound="-1"
         eType="#//SignataireContact" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConvention" eType="#//RefConvention"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefConvention"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//Document" eOpposite="#//Document/convention"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
