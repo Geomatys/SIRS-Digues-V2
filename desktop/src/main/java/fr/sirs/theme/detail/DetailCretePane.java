@@ -27,7 +27,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
 /**
  *
- * @author Samuel Andrés
+ * @author Samuel Andrés (Geomatys)
  */
 public class DetailCretePane extends BorderPane implements DetailThemePane {
     

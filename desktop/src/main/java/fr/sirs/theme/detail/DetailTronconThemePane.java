@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package fr.sirs.theme.detail;
 
 import fr.sirs.Session;
@@ -34,7 +30,7 @@ import org.opengis.referencing.operation.TransformException;
 
 /**
  *
- * @author Samuel Andrés
+ * @author Samuel Andrés (Geomatys)
  */
 public class DetailTronconThemePane extends BorderPane {
     
