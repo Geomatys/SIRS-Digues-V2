@@ -7,11 +7,17 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.importer.theme.document.ConventionImporter;
+import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.type.TypeConventionImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +45,9 @@ public class DbImporter {
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final RefRiveRepository refRiveRepository;
+    private final DocumentRepository documentRepository;
+    private final ConventionRepository conventionRepository; 
+    private final RefConventionRepository refConventionRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -52,6 +61,9 @@ public class DbImporter {
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
+    private TypeConventionImporter typeConventionImporter;
+    private ConventionImporter conventionImporter;
+    private DocumentImporter documentImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -402,6 +414,9 @@ public class DbImporter {
         this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
         this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
         this.refRiveRepository = new RefRiveRepository(couchDbConnector);
+        this.documentRepository = new DocumentRepository(couchDbConnector);
+        this.conventionRepository = new ConventionRepository(couchDbConnector);
+        this.refConventionRepository = new RefConventionRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -421,7 +436,10 @@ public class DbImporter {
                 typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, borneDigueImporter,systemeReperageRepository);
+                couchDbConnector, systemeReperageRepository, systemeReperageImporter, borneDigueImporter);
+        this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector, refConventionRepository);
+        this.conventionImporter = new ConventionImporter(accessDatabase, couchDbConnector, conventionRepository, typeConventionImporter);
+        this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository, conventionImporter, tronconGestionDigueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -476,12 +494,48 @@ public class DbImporter {
         couchDbConnector.executeBulk(bornes);
     }
     
+    public void removeDocuments() {
+        final List<Object> documents = new ArrayList<>();
+        documentRepository.getAll().stream().forEach((document) -> {
+            documents.add(BulkDeleteDocument.of(document));
+        });
+        couchDbConnector.executeBulk(documents);
+    }
+    
+    public void removeConventions() {
+        final List<Object> conventions = new ArrayList<>();
+        conventionRepository.getAll().stream().forEach((convention) -> {
+            conventions.add(BulkDeleteDocument.of(convention));
+        });
+        couchDbConnector.executeBulk(conventions);
+    }
+    
+    public void removeRefConventions() {
+        final List<Object> refConventions = new ArrayList<>();
+        refConventionRepository.getAll().stream().forEach((refConvention) -> {
+            refConventions.add(BulkDeleteDocument.of(refConvention));
+        });
+        couchDbConnector.executeBulk(refConventions);
+    }
+    
+    public void removeRefRive() {
+        final List<Object> refRives = new ArrayList<>();
+        refRiveRepository.getAll().stream().forEach((refRive) -> {
+            refRives.add(BulkDeleteDocument.of(refRive));
+        });
+        couchDbConnector.executeBulk(refRives);
+    }
+    
     public void cleanDb(){
         this.removeTronconsDigues();
         this.removeDigues();
         this.removeOrganismes();
         this.removeSystemesReperage();
         this.removeBornes();
+        this.removeDocuments();
+        this.removeConventions();
+        this.removeRefConventions();
+        this.removeRefRive();
     }
     
     public void importation() throws IOException, AccessDbImporterException{
@@ -497,6 +551,7 @@ public class DbImporter {
 */
         this.tronconGestionDigueImporter.getTronconsDigues();
         this.systemeReperageBorneImporter.getByBorneId();
+        this.documentImporter.getDocuments();
     }
 
     //TODO remove when import finished
@@ -560,8 +615,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-//            importer.cleanDb();
-//            importer.importation();
+            importer.cleanDb();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

@@ -3,8 +3,8 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.RefConvention;
 import fr.sirs.importer.type.TypeConventionImporter;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
 public class ConventionImporter extends GenericImporter {
 
     private Map<Integer, Convention> conventions = null;
-//    private ConventionRepository conventionRepository;
+    private ConventionRepository conventionRepository;
     private TypeConventionImporter typeConventionImporter;
     
     private ConventionImporter(final Database accessDatabase,
@@ -31,25 +31,25 @@ public class ConventionImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
     
-    ConventionImporter(final Database accessDatabase,
+    public ConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-//            final ConventionRepository conventionRepository,
+            final ConventionRepository conventionRepository,
             final TypeConventionImporter typeConventionImporter) {
         this(accessDatabase, couchDbConnector);
-//        this.conventionRepository = conventionRepository;
+        this.conventionRepository = conventionRepository;
         this.typeConventionImporter = typeConventionImporter;
     }
 
     private enum ConventionColumns {
-        ID_CONVENTION,//
+        ID_CONVENTION,
 //        LIBELLE_CONVENTION,
-        ID_TYPE_CONVENTION,//
-        DATE_DEBUT_CONVENTION,//
-        DATE_FIN_CONVENTION,//
-        REFERENCE_PAPIER,//
-        REFERENCE_NUMERIQUE,//
+        ID_TYPE_CONVENTION,
+        DATE_DEBUT_CONVENTION,
+        DATE_FIN_CONVENTION,
+        REFERENCE_PAPIER,
+        REFERENCE_NUMERIQUE,
 //        COMMENTAIRE,
-        DATE_DERNIERE_MAJ//
+        DATE_DERNIERE_MAJ
     };
     
     
@@ -92,9 +92,8 @@ public class ConventionImporter extends GenericImporter {
             convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
             convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
             convention.setType_conventions(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getLibelle());
-            
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
-//            conventionRepository.add(convention);
+            conventionRepository.add(convention);
         }
     }
     

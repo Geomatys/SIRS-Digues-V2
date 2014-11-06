@@ -10,11 +10,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -27,20 +25,20 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     private Map<Integer, List<SystemeReperageBorne>> bySystemeReperageId = null;
     private SystemeReperageImporter systemeReperageImporter;
     private BorneDigueImporter borneDigueImporter;
-    private SystemeReperageRepository repo;
+    private SystemeReperageRepository systemeReperageRepository;
 
     private SystemeReperageBorneImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, SystemeReperageRepository repo) {
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.repo = repo;
     }
 
     SystemeReperageBorneImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
+            final CouchDbConnector couchDbConnector,
+            final SystemeReperageRepository systemeReperageRepository, 
             final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter,
-            SystemeReperageRepository repo) {
-        this(accessDatabase, couchDbConnector,repo);
+            final BorneDigueImporter borneDigueImporter) {
+        this(accessDatabase, couchDbConnector);
+        this.systemeReperageRepository = systemeReperageRepository;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
     }
@@ -96,7 +94,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         bySystemeReperageId = new HashMap<>();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         
-        final Map<Object,SystemeReperage> srs = new HashMap<>();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
         while (it.hasNext()) {
             final Row row = it.next();
@@ -107,32 +105,28 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             }
             
             if (row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString())!=null){
-//                System.out.println(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()));
                 systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()).floatValue());
             }
             
             final BorneDigue borne = borneDigueImporter.getBorneDigue().get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
-            final Integer srid = row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString());
-            SystemeReperage systemeReperage = srs.get(srid);
-            if(systemeReperage==null){
-                systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(srid);
-                srs.put(srid,systemeReperage);
-            }
-            systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             
-            if(byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()))==null) byBorneId.put(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()), new ArrayList<>());
+            SystemeReperage systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
+            if(systemeReperage!=null){
+                systemeReperage.systemereperageborneId.add(systemeReperageBorne);
+            }
+            
+            if(byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()))==null) {
+                byBorneId.put(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()), new ArrayList<>());
+            }
             byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString())).add(systemeReperageBorne);
             
-            if(bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()))==null) bySystemeReperageId.put(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()), new ArrayList<>());
+            if(bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()))==null) {
+                bySystemeReperageId.put(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()), new ArrayList<>());
+            }
             bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString())).add(systemeReperageBorne);
         }
         
-        //sauvegarde des systemes de reperages
-        for(SystemeReperage sr : srs.values()){
-            repo.update(sr);
-        }
-        
-                
+        couchDbConnector.executeBulk(systemesReperage.values());
     }
 }

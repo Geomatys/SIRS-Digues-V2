@@ -3,10 +3,13 @@ package fr.sirs.importer.theme.document;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +27,7 @@ public class DocumentImporter extends GenericImporter {
     private Map<Integer, Document> documents = null;
     private DocumentRepository documentRepository;
     private ConventionImporter conventionImporter;
+    private TronconGestionDigueImporter tronconGestionDigueImporter;
 
     private DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -33,15 +37,17 @@ public class DocumentImporter extends GenericImporter {
     public DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
-            final ConventionImporter conventionImporter){
+            final ConventionImporter conventionImporter,
+            final TronconGestionDigueImporter tronconGestionDigueImporter){
         this(accessDatabase, couchDbConnector);
         this.documentRepository = documentRepository;
         this.conventionImporter = conventionImporter;
+        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
     }
     
     private enum DocumentColumns {
         ID_DOC,
-//        ID_TRONCON_GESTION,
+        ID_TRONCON_GESTION,
 //        ID_TYPE_DOCUMENT,
 //        ID_DOSSIER,
 //        REFERENCE_PAPIER,
@@ -72,7 +78,7 @@ public class DocumentImporter extends GenericImporter {
 //        ID_PROFIL_EN_TRAVERS,
 //        ID_PROFIL_EN_LONG,
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//        ID_CONVENTION,
+        ID_CONVENTION,
 //        DATE_DERNIERE_MAJ,
 //        AUTEUR_RAPPORT,
 //        ID_RAPPORT_ETUDE
@@ -98,12 +104,25 @@ public class DocumentImporter extends GenericImporter {
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         
+        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        final Map<Integer, Convention> conventions = conventionImporter.getConventions();
+        
         while(it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
             
+            document.setTronconId(troncons.get(row.getInt(DocumentColumns.ID_TRONCON_GESTION.toString())).getId());
             
             
+            // Pour les conventions !
+            if(row.getInt(DocumentColumns.ID_CONVENTION.toString())!=null){
+                if(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString()))!=null){
+                    document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
+                }
+                else{
+                    System.out.println("Le document "+row.getInt(DocumentColumns.ID_DOC.toString())+" référence la convention "+row.getInt(DocumentColumns.ID_CONVENTION.toString())+" qui n'existe pas !!!");
+                }
+            }
             
             documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
             
