@@ -12,7 +12,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -81,8 +80,10 @@ public class DetailImportCoordinate extends BorderPane {
         SIRS.loadFXML(this);
         this.positionable = pos;
         
+        uiCRS.setItems(FXCollections.observableArrayList(DetailPositionnablePane.CRS_RGF93, DetailPositionnablePane.CRS_WGS84));
         uiCRS.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new SirsListCell());
         uiCRS.setButtonCell(new SirsListCell());
+        uiCRS.getSelectionModel().clearAndSelect(0);
         uiAttX.setCellFactory((ListView<PropertyType> param) -> new SirsListCell());
         uiAttX.setButtonCell(new SirsListCell());
         uiAttY.setCellFactory((ListView<PropertyType> param) -> new SirsListCell());
@@ -141,6 +142,11 @@ public class DetailImportCoordinate extends BorderPane {
             final Collection<? extends PropertyType> properties = col.getFeatureType().getProperties(true);
             uiAttX.setItems(FXCollections.observableArrayList(properties));
             uiAttY.setItems(FXCollections.observableArrayList(properties));
+            
+            if(!properties.isEmpty()){
+                uiAttX.getSelectionModel().clearAndSelect(0);
+                uiAttY.getSelectionModel().clearAndSelect(0);
+            }
             
             //on ecoute la selection
             layer.addLayerListener(new LayerListener() {

@@ -219,11 +219,13 @@ public class DetailPositionnablePane extends BorderPane {
     void importCoord(ActionEvent event) {
         final DetailImportCoordinate importCoord = new DetailImportCoordinate(getPositionable());
         final Dialog dialog = new Dialog();
-        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
         final DialogPane pane = new DialogPane();
+        pane.getButtonTypes().add(ButtonType.CLOSE);
         pane.setContent(importCoord);
         dialog.setDialogPane(pane);
+        dialog.setResizable(true);
         dialog.setTitle("Import de coordonnée");
+        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
         dialog.show();
     }
 
@@ -468,21 +470,31 @@ public class DetailPositionnablePane extends BorderPane {
                         uiDistanceStart.valueProperty().bindBidirectional(pos.borne_debut_distanceProperty());
                         uiDistanceEnd.valueProperty().bindBidirectional(pos.borne_fin_distanceProperty());
 
-                        //selectionner RGF93 par defaut
-                        uiCRSs.getSelectionModel().clearAndSelect(1);
+                        //on ecoute les changements de geometrie pour mettre a jour les champs
+                        final ChangeListener cl = new ChangeListener() {
+                            @Override
+                            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                                //selectionner RGF93 par defaut
+                                uiCRSs.getSelectionModel().clearAndSelect(1);
+                                final Point startPos = pos.getPositionDebut();
+                                final Point endPos = pos.getPositionFin();
+                                if(startPos != null){
+                                    uiLongitudeStart.valueProperty().set(startPos.getX());
+                                    uiLatitudeStart.valueProperty().set(startPos.getY());
+                                }
+                                if(endPos != null){
+                                    uiLongitudeEnd.valueProperty().set(endPos.getX());
+                                    uiLatitudeEnd.valueProperty().set(endPos.getY());
+                                }
+                            }
+                        };                        
+                        pos.positionDebutProperty().addListener(cl);
+                        pos.positionFinProperty().addListener(cl);
+                        cl.changed(null, null, null);
+                        
+                        //on active le panneau qui a le positionnement
                         final Point startPos = pos.getPositionDebut();
                         final Point endPos = pos.getPositionFin();
-
-                        if(startPos != null){
-                            uiLongitudeStart.valueProperty().set(startPos.getX());
-                            uiLatitudeStart.valueProperty().set(startPos.getY());
-                        }
-                        if(endPos != null){
-                            uiLongitudeEnd.valueProperty().set(endPos.getX());
-                            uiLatitudeEnd.valueProperty().set(endPos.getY());
-                        }
-
-                        //on active le panneau qui a le positionnement
                         if(startPos!=null || endPos!=null){
                             uiTypeCoord.setSelected(true);
                         }else{
