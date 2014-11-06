@@ -28,6 +28,8 @@
         eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//Borne_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Document"
+        eOpposite="#//Document/tronconId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Structure" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -95,10 +97,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_document" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="digueId" eType="#//Digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tonconId" eType="#//Troncon_Digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Structure"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocument" eType="#//RefTypeDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="convention" eType="#//Convention"
+        eOpposite="#//Convention/document"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
+        eOpposite="#//Troncon_Digue/tronconId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="photoIds" upperBound="-1"
@@ -516,7 +521,10 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//Document">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_conventions" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -527,6 +535,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="signatairesContact" upperBound="-1"
         eType="#//SignataireContact" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeConvention" eType="#//RefConvention"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
+        eType="#//Document" eOpposite="#//Document/convention"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//Document">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="maitre_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
