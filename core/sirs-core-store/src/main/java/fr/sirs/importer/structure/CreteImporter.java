@@ -140,7 +140,7 @@ class CreteImporter extends GenericStructureImporter {
     
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Crete instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
@@ -152,7 +152,7 @@ class CreteImporter extends GenericStructureImporter {
 
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Crete instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException

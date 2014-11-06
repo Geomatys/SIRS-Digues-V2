@@ -101,7 +101,6 @@ public class BorneDigueImporter extends GenericImporter {
         bornesDigue = new HashMap<>();
         bornesDigueByTronconId = new HashMap<>();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        final List<BorneDigue> bornes = new ArrayList<>();
 
         while (it.hasNext()) {
             final Row row = it.next();
@@ -142,7 +141,6 @@ public class BorneDigueImporter extends GenericImporter {
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(BorneDigueColumns.ID_BORNE.toString()), borne);
-            bornes.add(borne);
 
             // Set the list ByTronconId
             List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()));
@@ -153,6 +151,6 @@ public class BorneDigueImporter extends GenericImporter {
             listByTronconId.add(borne);
             bornesDigueByTronconId.put(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
-        couchDbConnector.executeBulk(bornes);
+        couchDbConnector.executeBulk(bornesDigue.values());
     }
 }

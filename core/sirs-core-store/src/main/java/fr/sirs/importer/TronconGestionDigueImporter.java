@@ -1,5 +1,6 @@
 package fr.sirs.importer;
 
+import fr.sirs.importer.type.TypeRiveImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;

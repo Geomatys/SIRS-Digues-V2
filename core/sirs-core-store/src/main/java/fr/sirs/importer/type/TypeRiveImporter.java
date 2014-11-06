@@ -1,9 +1,11 @@
-package fr.sirs.importer;
+package fr.sirs.importer.type;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.model.RefRive;
+import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class TypeRiveImporter extends GenericImporter {
     private Map<Integer, RefRive> typesRive = null;
     private final RefRiveRepository refRiveRepository;
 
-    TypeRiveImporter(final Database accessDatabase,
+    public TypeRiveImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final RefRiveRepository refRiveRepository) {
         super(accessDatabase, couchDbConnector);
