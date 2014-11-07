@@ -34,7 +34,7 @@ import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.geomatys.json.GeometryDeserializer;
+import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

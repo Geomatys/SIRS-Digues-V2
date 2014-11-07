@@ -1,4 +1,4 @@
-package com.geomatys.jooq.converter;
+package fr.sirs.util.jooq.converter;
 
 import java.sql.Timestamp;
 import java.util.Calendar;

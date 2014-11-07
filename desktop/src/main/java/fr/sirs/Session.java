@@ -1,6 +1,6 @@
 package fr.sirs;
 
-import com.geomatys.json.GeometryDeserializer;
+import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.component.BorneDigueRepository;
 import java.net.URL;
 import java.util.List;

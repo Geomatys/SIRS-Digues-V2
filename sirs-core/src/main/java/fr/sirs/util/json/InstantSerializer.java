@@ -1,4 +1,4 @@
-package com.geomatys.json;
+package fr.sirs.util.json;
 
 import java.io.IOException;
 import java.time.Instant;

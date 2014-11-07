@@ -1,4 +1,4 @@
-package com.geomatys.json;
+package fr.sirs.util.json;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,4 +1,4 @@
-package com.geomatys.property;
+package fr.sirs.util.property;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

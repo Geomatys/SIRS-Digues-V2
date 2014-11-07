@@ -5,7 +5,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
 import org.geotoolkit.gui.javafx.util.FXBooleanCell;
-import com.geomatys.property.Internal;
+import fr.sirs.util.property.Internal;
 import com.sun.javafx.property.PropertyReference;
 import fr.sirs.Session;
 import fr.sirs.SIRS;

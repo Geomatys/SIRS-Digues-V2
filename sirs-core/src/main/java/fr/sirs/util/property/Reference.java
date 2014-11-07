@@ -1,4 +1,4 @@
-package com.geomatys.property;
+package fr.sirs.util.property;
 
 
 @Internal
