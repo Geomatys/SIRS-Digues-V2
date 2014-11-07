@@ -18,8 +18,8 @@
     
     <dependencies>
         <dependency>
-            <groupId>fr.sirs.core</groupId>
-            <artifactId>sirs-core-store</artifactId>
+            <groupId>fr.sirs</groupId>
+            <artifactId>sirs-core</artifactId>
             <version>1.x-SNAPSHOT</version>
             <type>jar</type>
         </dependency>

@@ -157,8 +157,8 @@
   </build>
 
   <modules>
+    <module>sirs-core</module>
     <module>desktop</module>
-    <module>core</module>
     <module>launcher</module>
   </modules>
 

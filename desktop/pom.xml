@@ -22,8 +22,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>fr.sirs.core</groupId>
-      <artifactId>sirs-core-store</artifactId>
+      <groupId>fr.sirs</groupId>
+      <artifactId>sirs-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     
