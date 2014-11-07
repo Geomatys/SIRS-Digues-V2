@@ -1,5 +1,5 @@
 
-package fr.sirs.digue;
+package fr.sirs;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

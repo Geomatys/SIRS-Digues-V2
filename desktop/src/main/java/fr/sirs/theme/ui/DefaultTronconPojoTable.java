@@ -1,12 +1,14 @@
 
-package fr.sirs.theme;
+package fr.sirs.theme.ui;
 
+import fr.sirs.theme.ui.AbstractPojoTable;
 import fr.sirs.Session;
-import fr.sirs.digue.Injector;
-import fr.sirs.theme.detail.DetailTronconThemePane;
+import fr.sirs.Injector;
+import fr.sirs.theme.ui.FXStructurePane;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Structure;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.AbstractTronconTheme;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -72,7 +74,7 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     protected void editPojo(Element pojo) {
         final Session session = Injector.getBean(Session.class);
         final Tab tab = new Tab();
-        tab.setContent(new DetailTronconThemePane((Structure) pojo));
+        tab.setContent(new FXStructurePane((Structure) pojo));
         tab.setText(pojo.getClass().getSimpleName());
         tab.setOnSelectionChanged(new EventHandler<Event>() {
             @Override

@@ -35,7 +35,6 @@ import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.geomatys.json.GeometryDeserializer;
-import fr.sirs.digue.Injector;
 import fr.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -110,9 +109,9 @@ public class Loader extends Application {
      */
     private void showLoadingStage(Task task) throws IOException {
 
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/splashscreen.fxml"));
+        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXSplashscreen.fxml"));
         final Parent root = loader.load();
-        final SplashController controller = loader.getController();
+        final FXSplashscreen controller = loader.getController();
         controller.uiCancel.setVisible(false);
         controller.uiProgressLabel.textProperty().bind(task.messageProperty());
         controller.uiProgressBar.progressProperty().bind(task.progressProperty());
@@ -164,7 +163,7 @@ public class Loader extends Application {
         final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
                 "classpath:/fr/sirs/spring/application-context.xml");
         
-        final MainFrame frame = new MainFrame();
+        final FXMainFrame frame = new FXMainFrame();
         final Session session = Injector.getBean(Session.class);
         session.setFrame(frame);
         final Stage stage = new Stage();

@@ -5,7 +5,7 @@
  */
 package fr.sirs.util.temp;
 
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.util.temp.dao.DigueDAO;
 import fr.sirs.util.temp.dao.postgres.DigueDAOPostgres;
 import fr.sirs.core.component.DigueRepository;

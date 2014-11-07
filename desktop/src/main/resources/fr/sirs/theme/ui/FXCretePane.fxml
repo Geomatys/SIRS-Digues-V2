@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import fr.sirs.theme.detail.*?>
+<?import fr.sirs.theme.ui.*?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
 <?import jfxtras.scene.control.*?>
@@ -59,7 +59,7 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </GridPane>
-            <DetailPositionnablePane fx:id="uiPositionnable" />
+            <FXPositionnablePane fx:id="uiPositionnable" />
             <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
          </children>
          <padding>

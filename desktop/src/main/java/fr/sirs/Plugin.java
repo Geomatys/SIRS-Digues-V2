@@ -1,7 +1,6 @@
 
 package fr.sirs;
 
-import fr.sirs.digue.Injector;
 import fr.sirs.theme.Theme;
 import java.util.ArrayList;
 import java.util.Collections;

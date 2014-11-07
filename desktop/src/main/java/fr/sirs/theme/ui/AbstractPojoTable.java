@@ -1,5 +1,5 @@
 
-package fr.sirs.theme;
+package fr.sirs.theme.ui;
 
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXStringCell;
@@ -9,7 +9,7 @@ import com.geomatys.property.Internal;
 import com.sun.javafx.property.PropertyReference;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -23,7 +23,6 @@ import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;

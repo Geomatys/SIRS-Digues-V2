@@ -1,9 +1,9 @@
 
-package fr.sirs.theme.detail;
+package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Structure;
@@ -32,7 +32,7 @@ import org.opengis.referencing.operation.TransformException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DetailTronconThemePane extends BorderPane {
+public class FXStructurePane extends BorderPane {
     
     private final Structure structure;
     private Node specificThemePane;
@@ -61,16 +61,35 @@ public class DetailTronconThemePane extends BorderPane {
     @FXML private Button uiSave;
 
 
+    public FXStructurePane(final Structure structure){
+        SIRS.loadFXML(this);
+        this.structure = structure;
+        final Session session = Injector.getBean(Session.class);
+        troncon = session.getTronconDigueRepository().get(structure.getTroncon());
+        
+        initFields();
+        
+        initSubPane();
+        
+        final ToggleGroup group = new ToggleGroup();
+        uiConsult.setToggleGroup(group);
+        uiEdit.setToggleGroup(group);
+        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
+            if(newValue==null) group.selectToggle(uiConsult);
+        });
+    }
+    
+    
     @FXML
     void save(ActionEvent event) {
         
         final Session session = Injector.getBean(Session.class);
         
-        if(specificThemePane instanceof DetailThemePane){
-            ((DetailThemePane) specificThemePane).preSave();
+        if(specificThemePane instanceof ThemePane){
+            ((ThemePane) specificThemePane).preSave();
             
-            if(((DetailThemePane) specificThemePane).tronconChangedProperty().get()){
-                ((DetailThemePane) specificThemePane).tronconChangedProperty().set(false);
+            if(((ThemePane) specificThemePane).tronconChangedProperty().get()){
+                ((ThemePane) specificThemePane).tronconChangedProperty().set(false);
                 for(final Structure str : troncon.getStructures()){
                     if(str.getId().equals(structure.getId())){
                         troncon.getStructures().remove(str);
@@ -92,7 +111,7 @@ public class DetailTronconThemePane extends BorderPane {
             }
         }
         else {
-            throw new UnsupportedOperationException("The sub-pane must implement "+DetailThemePane.class.getCanonicalName()+" interface.");
+            throw new UnsupportedOperationException("The sub-pane must implement "+ThemePane.class.getCanonicalName()+" interface.");
         }
         
         troncon.setDateMaj(LocalDateTime.now());
@@ -117,26 +136,6 @@ public class DetailTronconThemePane extends BorderPane {
         }
     }
     
-    
-    public DetailTronconThemePane(final Structure structure){
-        SIRS.loadFXML(this);
-        this.structure = structure;
-        final Session session = Injector.getBean(Session.class);
-        troncon = session.getTronconDigueRepository().get(structure.getTroncon());
-        
-        initFields();
-        
-        initSubPane();
-        
-        final ToggleGroup group = new ToggleGroup();
-        uiConsult.setToggleGroup(group);
-        uiEdit.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
-        });
-    }
-    
-    
     private void initFields(){
         id.setText(structure.getId());
         date_maj.valueProperty().bindBidirectional(structure.dateMajProperty());
@@ -147,7 +146,7 @@ public class DetailTronconThemePane extends BorderPane {
         
         // Choose the pane adapted to the specific structure.
         if(structure instanceof Crete) {
-            specificThemePane = new DetailCretePane((Crete) structure);
+            specificThemePane = new FXCretePane((Crete) structure);
         }
         else {
             throw new UnsupportedOperationException("Unknown theme class.");
@@ -159,11 +158,11 @@ public class DetailTronconThemePane extends BorderPane {
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
         
-        if(specificThemePane instanceof DetailThemePane){
-            ((DetailThemePane) specificThemePane).disableFieldsProperty().bind(editBind);
+        if(specificThemePane instanceof ThemePane){
+            ((ThemePane) specificThemePane).disableFieldsProperty().bind(editBind);
         }
         else {
-            throw new UnsupportedOperationException("The sub-pane must implement "+DetailThemePane.class.getCanonicalName()+" interface.");
+            throw new UnsupportedOperationException("The sub-pane must implement "+ThemePane.class.getCanonicalName()+" interface.");
         }
     }
     

@@ -1,7 +1,6 @@
 package fr.sirs;
 
 import fr.sirs.digue.DiguesTab;
-import fr.sirs.digue.Injector;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
@@ -14,8 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -29,7 +26,7 @@ import javafx.scene.layout.BorderPane;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
-public class MainFrame extends BorderPane {
+public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
@@ -44,7 +41,7 @@ public class MainFrame extends BorderPane {
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
 
-    public MainFrame() {
+    public FXMainFrame() {
         SIRS.loadFXML(this);
         
         // Load themes
@@ -162,7 +159,7 @@ public class MainFrame extends BorderPane {
                     desktop.open(fileToPrint);
                 } catch (Exception e) {
                     System.out.println(e);
-                    Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
+                    Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
                 }
             }
         };

@@ -1,6 +1,7 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.theme.Theme.Type;
 import fr.sirs.core.model.TronconDigue;
 import java.util.function.Function;
@@ -75,7 +76,7 @@ public class AbstractTronconTheme extends Theme {
     
     @Override
     public Parent createPane(){
-        return new TronconThemePane(groups);
+        return new FXTronconThemePane(groups);
     }
     
 }

@@ -12,7 +12,7 @@ import javafx.scene.control.ProgressBar;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class SplashController {
+public class FXSplashscreen {
 
     @FXML
     public Label uiProgressLabel;

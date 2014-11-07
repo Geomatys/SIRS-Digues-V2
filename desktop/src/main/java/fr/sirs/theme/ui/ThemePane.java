@@ -1,5 +1,5 @@
 
-package fr.sirs.theme.detail;
+package fr.sirs.theme.ui;
 
 import javafx.beans.property.BooleanProperty;
 
@@ -7,7 +7,7 @@ import javafx.beans.property.BooleanProperty;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public interface DetailThemePane {
+public interface ThemePane {
     
     /**
      * Binds enabling/disabling state of Pane edition elements.

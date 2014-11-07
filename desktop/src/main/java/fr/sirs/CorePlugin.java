@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static fr.sirs.Session.PROJECTION;
-import fr.sirs.digue.DigueController;
-import fr.sirs.digue.Injector;
-import fr.sirs.digue.TronconDigueController;
+import fr.sirs.digue.FXDiguePane;
+import fr.sirs.digue.FXTronconDiguePane;
 import org.geotoolkit.data.bean.BeanStore;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
@@ -22,7 +21,7 @@ import fr.sirs.theme.ProfilsEnTraversTheme;
 import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
-import fr.sirs.theme.detail.DetailTronconThemePane;
+import fr.sirs.theme.ui.FXStructurePane;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -308,7 +307,7 @@ public class CorePlugin extends Plugin{
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-                    final DigueController controller = new DigueController();
+                    final FXDiguePane controller = new FXDiguePane();
                     controller.setDigue(cdt);
                     final Tab tab = new Tab(text);
                     tab.setContent(controller);
@@ -321,7 +320,7 @@ public class CorePlugin extends Plugin{
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-                    final TronconDigueController controller = new TronconDigueController();
+                    final FXTronconDiguePane controller = new FXTronconDiguePane();
                     controller.setTroncon(cdt);
                     final Tab tab = new Tab(text);
                     tab.setContent(controller);
@@ -333,7 +332,7 @@ public class CorePlugin extends Plugin{
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-                    final DetailTronconThemePane controller = new DetailTronconThemePane(cdt);
+                    final FXStructurePane controller = new FXStructurePane(cdt);
                     final Tab tab = new Tab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);

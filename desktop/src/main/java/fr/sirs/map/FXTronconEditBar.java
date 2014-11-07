@@ -10,13 +10,13 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconEditBar extends ToolBar {
+public class FXTronconEditBar extends ToolBar {
 
     private static final String LEFT = "buttongroup-left";
     private static final String CENTER = "buttongroup-center";
     private static final String RIGHT = "buttongroup-right";
 
-    public TronconEditBar(FXMap map) {
+    public FXTronconEditBar(FXMap map) {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
 
         final ToggleButton butEdit = new TronconEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.SHOW);

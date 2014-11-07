@@ -2,6 +2,7 @@
 
 package fr.sirs.digue;
 
+import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.map.FXMapTab;
@@ -48,7 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconDigueController extends BorderPane{
+public class FXTronconDiguePane extends BorderPane{
     
     private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     
@@ -71,12 +72,12 @@ public class TronconDigueController extends BorderPane{
     @FXML private Button uiSRAdd;
     @FXML private ListView<SystemeReperage> uiSRList;
     
-    private final SystemeReperageController srController = new SystemeReperageController();
+    private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
     
-    public TronconDigueController() {
+    public FXTronconDiguePane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         

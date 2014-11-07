@@ -1,12 +1,12 @@
 
-package fr.sirs.theme.detail;
+package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
@@ -70,7 +70,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DetailPositionnablePane extends BorderPane {
+public class FXPositionnablePane extends BorderPane {
     
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
     public static final CoordinateReferenceSystem CRS_RGF93 = Session.PROJECTION;
@@ -110,7 +110,7 @@ public class DetailPositionnablePane extends BorderPane {
     private final Map<String,SystemeReperage> cacheSystemeReperage = new HashMap<>();
     private final Map<String,BorneDigue> cacheBorneDigue = new HashMap<>();
             
-    public DetailPositionnablePane(){
+    public FXPositionnablePane(){
         try{
             final Class cdtClass = getClass();
             final String fxmlpath = "/fr/sirs/theme/detail/DetailPositionnablePane.fxml";
@@ -217,7 +217,7 @@ public class DetailPositionnablePane extends BorderPane {
         
     @FXML
     void importCoord(ActionEvent event) {
-        final DetailImportCoordinate importCoord = new DetailImportCoordinate(getPositionable());
+        final FXImportCoordinate importCoord = new FXImportCoordinate(getPositionable());
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
         pane.getButtonTypes().add(ButtonType.CLOSE);

@@ -1,9 +1,9 @@
 
-package fr.sirs.theme.detail;
+package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Positionable;
@@ -29,7 +29,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DetailCretePane extends BorderPane implements DetailThemePane {
+public class FXCretePane extends BorderPane implements ThemePane {
     
     private final ObjectProperty<Positionable> cretePotitionable = new SimpleObjectProperty<>();
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
@@ -38,7 +38,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     private final TronconDigueRepository tronconDigueRepository;
     
     // Propriétés de Positionnable
-    @FXML DetailPositionnablePane uiPositionnable;
+    @FXML FXPositionnablePane uiPositionnable;
     
     // Propriétés de Structure
     @FXML HTMLEditor uiComment;
@@ -50,7 +50,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
     @FXML FXNumberSpinner uiEpaisseur;
     @FXML FXNumberSpinner uiCouches;
     
-    private DetailCretePane(){
+    private FXCretePane(){
         SIRS.loadFXML(this);
         final Session session = Injector.getBean(Session.class);
         tronconDigueRepository = session.getTronconDigueRepository();
@@ -60,7 +60,7 @@ public class DetailCretePane extends BorderPane implements DetailThemePane {
         uiPositionnable.disableFieldsProperty().bind(disableFields);
     }
     
-    public DetailCretePane(final Crete crete){
+    public FXCretePane(final Crete crete){
         this();
         this.cretePotitionable.set(crete);
     }       

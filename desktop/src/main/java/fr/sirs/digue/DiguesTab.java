@@ -12,11 +12,11 @@ import javafx.scene.control.TabPane;
 public class DiguesTab extends Tab {
     
     private final TabPane tabs;
-    private final DiguesController ctrl;
+    private final FXDiguesPane ctrl;
 
     public DiguesTab(TabPane tabs) {
         this.tabs = tabs;
-        this.ctrl = new DiguesController();
+        this.ctrl = new FXDiguesPane();
         setText("Digues");
         setContent(ctrl);
     }    
@@ -35,5 +35,5 @@ public class DiguesTab extends Tab {
         tabs.getSelectionModel().clearAndSelect(tabs.getTabs().indexOf(this));
     }
     
-    public synchronized DiguesController getDiguesController(){return this.ctrl;}
+    public synchronized FXDiguesPane getDiguesController(){return this.ctrl;}
 }

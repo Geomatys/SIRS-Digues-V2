@@ -33,7 +33,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -50,16 +49,15 @@ import org.ektorp.CouchDbInstance;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
-import org.geotoolkit.internal.io.IOUtilities;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class LauncherPane extends BorderPane {
+public class FXLauncherPane extends BorderPane {
 
-    private static final Logger LOGGER = Logging.getLogger(LauncherPane.class);
+    private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
     private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
     @FXML
@@ -93,7 +91,7 @@ public class LauncherPane extends BorderPane {
     @FXML
     private Tab uiLocalDbTab;
     
-    public LauncherPane() {
+    public FXLauncherPane() {
         final Class cdtClass = getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
         final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
@@ -318,7 +316,7 @@ public class LauncherPane extends BorderPane {
     }
     
     private static File getPreviousPath() {
-        final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXLauncherPane.class);
         final String str = prefs.get("path", null);
         if(str!=null){
             final File file = new File(str);
@@ -330,7 +328,7 @@ public class LauncherPane extends BorderPane {
     }
 
     private static void setPreviousPath(final File path) {
-        final Preferences prefs = Preferences.userNodeForPackage(LauncherPane.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXLauncherPane.class);
         prefs.put("path", path.getAbsolutePath());
     }
  
@@ -340,7 +338,7 @@ public class LauncherPane extends BorderPane {
         try {
             dbs = DatabaseRegistry.listSirsDatabase(new URL(URL_LOCAL));
         } catch (MalformedURLException ex) {
-            Logger.getLogger(LauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return dbs;

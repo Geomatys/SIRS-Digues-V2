@@ -1,5 +1,5 @@
 
-package fr.sirs.theme.detail;
+package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -58,7 +58,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DetailImportCoordinate extends BorderPane {
+public class FXImportCoordinate extends BorderPane {
     
     @FXML private TextField uiPath;
     @FXML private TextField uiSeparator;
@@ -76,11 +76,11 @@ public class DetailImportCoordinate extends BorderPane {
     private final ObjectProperty<Feature> selectionProperty = new SimpleObjectProperty<>();
     private final Positionable positionable;
     
-    public DetailImportCoordinate(Positionable pos) {
+    public FXImportCoordinate(Positionable pos) {
         SIRS.loadFXML(this);
         this.positionable = pos;
         
-        uiCRS.setItems(FXCollections.observableArrayList(DetailPositionnablePane.CRS_RGF93, DetailPositionnablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(FXPositionnablePane.CRS_RGF93, FXPositionnablePane.CRS_WGS84));
         uiCRS.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new SirsListCell());
         uiCRS.setButtonCell(new SirsListCell());
         uiCRS.getSelectionModel().clearAndSelect(0);
@@ -217,9 +217,9 @@ public class DetailImportCoordinate extends BorderPane {
         
         //transform to RGF93 
         try{
-            final MathTransform trs = CRS.findMathTransform(dataCrs, DetailPositionnablePane.CRS_RGF93, true);
+            final MathTransform trs = CRS.findMathTransform(dataCrs, FXPositionnablePane.CRS_RGF93, true);
             geom = (Point) JTS.transform(geom, trs);
-            JTS.setCRS(geom, DetailPositionnablePane.CRS_RGF93);
+            JTS.setCRS(geom, FXPositionnablePane.CRS_RGF93);
 
         }catch(TransformException | FactoryException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -231,7 +231,7 @@ public class DetailImportCoordinate extends BorderPane {
     
     
     private static File getPreviousPath() {
-        final Preferences prefs = Preferences.userNodeForPackage(DetailImportCoordinate.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXImportCoordinate.class);
         final String str = prefs.get("path", null);
         if(str!=null){
             final File file = new File(str);
@@ -243,7 +243,7 @@ public class DetailImportCoordinate extends BorderPane {
     }
 
     private static void setPreviousPath(final File path) {
-        final Preferences prefs = Preferences.userNodeForPackage(DetailImportCoordinate.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXImportCoordinate.class);
         prefs.put("path", path.getAbsolutePath());
     }
     

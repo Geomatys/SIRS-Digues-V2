@@ -2,6 +2,7 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.theme.ui.AbstractPojoTable;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.IntervenantPrestation;
 import fr.sirs.core.model.Organisme;

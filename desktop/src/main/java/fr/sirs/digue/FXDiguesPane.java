@@ -1,5 +1,7 @@
 package fr.sirs.digue;
 
+import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.theme.Theme;
@@ -17,7 +19,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DiguesController extends SplitPane{
+public class FXDiguesPane extends SplitPane{
 
     @Autowired
     private Session session;
@@ -25,7 +27,7 @@ public class DiguesController extends SplitPane{
     @FXML private TreeView uiTree;
     @FXML private BorderPane uiRight;
 
-    public DiguesController() {
+    public FXDiguesPane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         
@@ -48,14 +50,14 @@ public class DiguesController extends SplitPane{
     }
     
     public final void displayTronconDigue(TronconDigue obj){
-        TronconDigueController ctrl = new TronconDigueController();
+        FXTronconDiguePane ctrl = new FXTronconDiguePane();
         ctrl.setTroncon((TronconDigue) obj);
         uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
     }
     
     public final void displayDigue(Digue obj){
-        DigueController digueController = new DigueController();
+        FXDiguePane digueController = new FXDiguePane();
         digueController.setDigue((Digue) obj);
         uiRight.setCenter(digueController);
         this.session.prepareToPrint(obj);
@@ -68,7 +70,7 @@ public class DiguesController extends SplitPane{
 
     private void buildTreeView(final TreeItem treeRootItem) {
 
-        final SystemeEndiguementProvisoire systemeEndiguement = new SystemeEndiguementProvisoire();
+        final SystemeEndiguement systemeEndiguement = new SystemeEndiguement();
         systemeEndiguement.nom = "Un systeme d'endiguement";
         
         final TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
@@ -104,8 +106,8 @@ public class DiguesController extends SplitPane{
                 obj = ((TreeItem) obj).getValue();
             }
 
-            if (obj instanceof SystemeEndiguementProvisoire) {
-                this.setText(((SystemeEndiguementProvisoire) obj).nom + " (" + getTreeItem().getChildren().size() + ") ");
+            if (obj instanceof SystemeEndiguement) {
+                this.setText(((SystemeEndiguement) obj).nom + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
                 addTronconMenu.getItems().add(new NouvelleDigueMenuItem());
                 setContextMenu(addTronconMenu);
@@ -133,7 +135,7 @@ public class DiguesController extends SplitPane{
                     final TronconDigue troncon = new TronconDigue();
                     troncon.setNom("Tronçon vide");
                     troncon.setDigueId(digue.getId());
-                    DiguesController.this.session.getTronconDigueRepository().add(troncon);
+                    FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
                     final TreeItem newTroncon = new TreeItem<>(troncon);
                     getTreeItem().getChildren().add(newTroncon);
                 });
@@ -148,7 +150,7 @@ public class DiguesController extends SplitPane{
                 this.setOnAction((ActionEvent t) -> {
                     final Digue digue = new Digue();
                     digue.setLibelle("Digue vide");
-                    DiguesController.this.session.getDigueRepository().add(digue);
+                    FXDiguesPane.this.session.getDigueRepository().add(digue);
                     final TreeItem newDigue = new TreeItem<>(digue);
                     getTreeItem().getChildren().add(newDigue);
                 });

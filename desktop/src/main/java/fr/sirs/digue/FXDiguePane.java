@@ -1,8 +1,9 @@
 package fr.sirs.digue;
 
+import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.theme.AbstractPojoTable;
+import fr.sirs.theme.ui.AbstractPojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
@@ -38,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DigueController extends BorderPane {
+public class FXDiguePane extends BorderPane {
     
     private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
@@ -56,7 +57,7 @@ public class DigueController extends BorderPane {
 
     private final TronconPojoTable table = new TronconPojoTable();
 
-    public DigueController() {
+    public FXDiguePane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         

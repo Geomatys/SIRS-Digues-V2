@@ -5,7 +5,7 @@ import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
@@ -59,7 +59,7 @@ public class FXMapPane extends BorderPane {
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
-    private final TronconEditBar uiEditBar;
+    private final FXTronconEditBar uiEditBar;
     private final FXMapContextTree uiTree;
     private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
@@ -97,7 +97,7 @@ public class FXMapPane extends BorderPane {
         uiAddBar = new FXAddDataBar(uiMap1);
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
-        uiEditBar = new TronconEditBar(uiMap1);
+        uiEditBar = new FXTronconEditBar(uiMap1);
         uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree(context);

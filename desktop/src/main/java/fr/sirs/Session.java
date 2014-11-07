@@ -48,7 +48,7 @@ public class Session {
     private final BorneDigueRepository borneDigueRepository;
     private final SystemeReperageRepository systemeReperageRepository;
 
-    private MainFrame frame = null;
+    private FXMainFrame frame = null;
     
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
@@ -74,11 +74,11 @@ public class Session {
         return systemeReperageRepository;
     }
     
-    void setFrame(MainFrame frame) {
+    void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }
 
-    public MainFrame getFrame() {
+    public FXMainFrame getFrame() {
         return frame;
     }
 

@@ -1,10 +1,11 @@
 
-package fr.sirs.theme;
+package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.AbstractTronconTheme;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,7 +19,7 @@ import javafx.util.StringConverter;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconThemePane extends BorderPane {
+public class FXTronconThemePane extends BorderPane {
 
     @FXML
     private BorderPane uiCenter;
@@ -27,7 +28,7 @@ public class TronconThemePane extends BorderPane {
     
     private AbstractTronconTheme.ThemeGroup[] groups;
     
-    public TronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
+    public FXTronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
         SIRS.loadFXML(this);
         
         if(groups.length==1){

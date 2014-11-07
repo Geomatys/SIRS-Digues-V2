@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.digue.Injector;
+import fr.sirs.Injector;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.Point2D;

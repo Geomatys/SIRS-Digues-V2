@@ -1,9 +1,10 @@
 
 package fr.sirs.digue;
 
+import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.theme.AbstractPojoTable;
+import fr.sirs.theme.ui.AbstractPojoTable;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
@@ -23,7 +24,7 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class SystemeReperageController extends BorderPane {
+public class FXSystemeReperagePane extends BorderPane {
     
     @FXML private TextField uiNom;
     @FXML private HTMLEditor uiComment;
@@ -32,7 +33,7 @@ public class SystemeReperageController extends BorderPane {
     private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();    
     private final BorneTable borneTable = new BorneTable();
     
-    public SystemeReperageController(){
+    public FXSystemeReperagePane(){
         SIRS.loadFXML(this);
                 
         setCenter(borneTable);

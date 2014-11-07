@@ -2,6 +2,7 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.theme.ui.AbstractPojoTable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
