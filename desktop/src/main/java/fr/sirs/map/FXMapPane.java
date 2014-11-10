@@ -107,6 +107,7 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
+        uiTree.getMenuItems().add(new ExportItem());
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
         uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());

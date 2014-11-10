@@ -11,56 +11,73 @@ import javafx.scene.control.MenuItem;
 import org.geotoolkit.map.MapItem;
 
 /**
- *
+ * Un plugin est un ensemble de thèmes et de couches de données cartographique.
+ * - Les thèmes se retrouvent dans les menus de la bar d'outil principale de l'application.
+ * - Les couches cartographiques seront ajoutées dans la vue cartographique.
+ * 
  * @author Johann Sorel (Geomatys)
  */
 public class Plugin {
     
+    /** Message affiché lors du chargement du plugin */
     protected final SimpleStringProperty loadingMessage = new SimpleStringProperty("");
-    
+    /** Liste des themes géré par le plugin */
     protected final List<Theme> themes = new ArrayList<>();
         
+    /**
+     * Récupérer la session SIRS en cours.
+     * 
+     * @return Session, jamais nulle
+     */
     public Session getSession(){
         return Injector.getBean(Session.class);
     }
     
     /**
-     * Get the map layers to display in the main application frame.
+     * Récupérrer la liste des couches de données à ajouter dans la vue
+     * cartographique.
      * 
-     * @return MapItem list, never null
+     * @return Liste de MapItem, jamais nulle
      */
     public List<MapItem> getMapItems(){
         return Collections.EMPTY_LIST;
     }
     
     /**
-     * Get a property which text is updated in the plugin initialize phase.
-     * @return SimpleStringProperty
+     * Message affiché lors du chargement du plugin.
+     * 
+     * @return SimpleStringProperty, jamais nulle
      */
-    public ReadOnlyStringProperty getLoadingMessage(){
+    public final ReadOnlyStringProperty getLoadingMessage(){
         return loadingMessage;
     }
     
     /**
-     * Get declared themes, themes are attached to sections.
-     * @return 
+     * Liste des themes géré par le plugin.
+     * 
+     * @return Liste de Theme, jamais nulle
      */
     public List<Theme> getThemes(){
         return themes;
     }
     
     /**
-     * Recupere les actions disponibles pour un object selectionné sur la carte.
-     * @param candidate
-     * @return 
+     * Récupère les actions disponibles pour un object selectionné sur la carte.
+     * 
+     * @param candidate objet selectionné
+     * @return Liste d'action possible, jamais nulle
      */
     public List<MenuItem> getMapActions(Object candidate) {
         return Collections.EMPTY_LIST;
     }
     
     /**
-     * Load the plugin.
-     * @throws java.lang.Exception
+     * Chargement du plugin.
+     * Cette méthode est appelée au démarrage de l'application.
+     * Il est recommandé de remplir et de mettre à jour la valeur de 'loadingMessage'
+     * au cours du chargement.
+     * 
+     * @throws java.lang.Exception : en cas d'erreur de chargement du plugin
      */
     public void load() throws Exception {
         

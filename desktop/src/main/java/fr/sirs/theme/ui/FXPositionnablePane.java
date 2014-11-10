@@ -113,7 +113,7 @@ public class FXPositionnablePane extends BorderPane {
     public FXPositionnablePane(){
         try{
             final Class cdtClass = getClass();
-            final String fxmlpath = "/fr/sirs/theme/detail/DetailPositionnablePane.fxml";
+            final String fxmlpath = "/fr/sirs/theme/ui/FXPositionnablePane.fxml";
             final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
             loader.setController(this);
             loader.setRoot(this);

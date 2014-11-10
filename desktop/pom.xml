@@ -60,27 +60,12 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-gpx</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-postgres</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-coverage-geotiff</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-client-wms</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-client-wmts</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
