@@ -2,7 +2,6 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -25,7 +24,6 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     private Map<Integer, List<SystemeReperageBorne>> bySystemeReperageId = null;
     private SystemeReperageImporter systemeReperageImporter;
     private BorneDigueImporter borneDigueImporter;
-    private SystemeReperageRepository systemeReperageRepository;
 
     private SystemeReperageBorneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -34,11 +32,9 @@ public class SystemeReperageBorneImporter extends GenericImporter {
 
     SystemeReperageBorneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final SystemeReperageRepository systemeReperageRepository, 
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter) {
         this(accessDatabase, couchDbConnector);
-        this.systemeReperageRepository = systemeReperageRepository;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
     }
@@ -95,6 +91,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         
         while (it.hasNext()) {
             final Row row = it.next();
@@ -108,10 +105,10 @@ public class SystemeReperageBorneImporter extends GenericImporter {
                 systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()).floatValue());
             }
             
-            final BorneDigue borne = borneDigueImporter.getBorneDigue().get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
+            final BorneDigue borne = bornes.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
             
-            SystemeReperage systemeReperage = systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
+            SystemeReperage systemeReperage = systemesReperage.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){
                 systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             }

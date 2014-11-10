@@ -3,7 +3,6 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
-import fr.sirs.core.model.TronconDigue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -48,11 +47,13 @@ public class TronconDigueGeomImporter extends GenericImporter {
     }
     
     private enum CartoTronconGestionDigueColumns {
-        ID_TRONCON_GESTION, 
+        //OBJECTID,
         SHAPE,
-//        OBJECTID,
-//        SHAPE_Length,
-//        LONGUEUR
+        //OBJECTID_old,
+        //SHAPE_Leng,
+        ID_TRONCON_GESTION,
+        //SHAPE_Length,
+        //LONGUEUR,
     };
 
     /**
@@ -79,7 +80,6 @@ public class TronconDigueGeomImporter extends GenericImporter {
         while (it.hasNext()) {
             try {
                 final Row row = it.next();
-                final TronconDigue tronconDigue = new TronconDigue();
 
                 final byte[] bytes = row.getBytes(CartoTronconGestionDigueColumns.SHAPE.toString());
                 final ByteBuffer bb = ByteBuffer.wrap(bytes);

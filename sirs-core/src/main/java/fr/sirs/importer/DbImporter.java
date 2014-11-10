@@ -423,19 +423,19 @@ public class DbImporter {
         this.accessCartoDatabase=accessCartoDatabase;
         this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
-        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
         this.organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
         this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
-                accessDatabase, couchDbConnector, this.organismeImporter);
+                accessDatabase, couchDbConnector, organismeImporter);
         this.digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
         this.borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
+        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
+        this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
+                couchDbConnector, systemeReperageImporter, borneDigueImporter);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
                 couchDbConnector, tronconDigueRepository, digueRepository, 
                 borneDigueRepository, digueImporter, tronconDigueGeomImporter, 
                 typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter);
-        this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
-                couchDbConnector, systemeReperageRepository, systemeReperageImporter, borneDigueImporter);
         this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector, refConventionRepository);
         this.conventionImporter = new ConventionImporter(accessDatabase, couchDbConnector, conventionRepository, typeConventionImporter);
         this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository,borneDigueImporter, systemeReperageImporter, conventionImporter, tronconGestionDigueImporter);
@@ -546,11 +546,12 @@ public class DbImporter {
             => structures
             => organismes
             => geometries
-        => systeme rep / borne
+        => bornes / systemes de repérage
+        => documents
 */
-        this.tronconGestionDigueImporter.getTronconsDigues();
-        this.systemeReperageBorneImporter.getByBorneId();
-        this.documentImporter.getDocuments();
+        tronconGestionDigueImporter.getTronconsDigues();
+        systemeReperageBorneImporter.getByBorneId();
+        documentImporter.getDocuments();
     }
 
     //TODO remove when import finished
@@ -564,8 +565,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml");
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -592,7 +593,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_CRETE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -602,11 +603,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_CRETE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_DOCUMENT.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.SYS_EVT_CRETE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -614,8 +616,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

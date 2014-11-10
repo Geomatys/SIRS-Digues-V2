@@ -95,6 +95,9 @@ public class OrganismeImporter extends GenericImporter {
             if (row.getDate(OrganismeColumns.DATE_FIN.toString()) != null) {
                 organisme.setDate_fin(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
+            if (row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                organisme.setDateMaj(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             organismes.put(row.getInt(OrganismeColumns.ID_ORGANISME.toString()), organisme);

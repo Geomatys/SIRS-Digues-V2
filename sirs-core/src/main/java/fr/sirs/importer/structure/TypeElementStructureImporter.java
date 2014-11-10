@@ -35,9 +35,9 @@ public class TypeElementStructureImporter extends GenericImporter {
     
     private enum TypeElementStructureColumns {
         ID_TYPE_ELEMENT_STRUCTURE,
-        LIBELLE_TYPE_ELEMENT_STRUCTURE,
+//        LIBELLE_TYPE_ELEMENT_STRUCTURE,
         NOM_TABLE_EVT,
-        ID_TYPE_OBJET_CARTO,
+//        ID_TYPE_OBJET_CARTO,
         DATE_DERNIERE_MAJ
     };
 

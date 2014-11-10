@@ -55,8 +55,8 @@ public class BorneDigueImporter extends GenericImporter {
         DATE_DEBUT_VAL, 
         DATE_FIN_VAL,
         FICTIVE, 
-        X_POINT_ORIGINE, 
-        Y_POINT_ORIGINE,
+//        X_POINT_ORIGINE, 
+//        Y_POINT_ORIGINE,
         COMMENTAIRE_BORNE, 
         DATE_DERNIERE_MAJ
     };
