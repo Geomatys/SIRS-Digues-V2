@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure;
+package fr.sirs.importer.structure.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -10,6 +10,7 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.structure.GenericStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class DesordreImporter extends GenericStructureImporter {
+public class DesordreImporter extends GenericStructureImporter {
 
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
 
-    DesordreImporter(final Database accessDatabase,
+    public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
@@ -118,49 +119,53 @@ class DesordreImporter extends GenericStructureImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
         this.desordres = new HashMap<>();
         this.desordresByTronconId = new HashMap<>();
+        
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre desordre = new Desordre();
+            
             if (row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                final BorneDigue b = borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue());
-                if(b!=null) desordre.setBorne_debut(b.getId());
+                final BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue());
+                if(b!=null) desordre.setBorneDebutId(b.getId());
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
+            if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                desordre.setPR_debut(row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
             
             if (row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()) != null) {
-                BorneDigue b = borneDigueImporter.getBorneDigue().get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) desordre.setBorne_fin(b.getId());
+                BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
+                if (b!=null) desordre.setBorneFinId(b.getId());
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
-
-            desordre.setBorne_debut_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString())); 
-            desordre.setBorne_fin_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString()));
-            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                desordre.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
-
-            if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                desordre.setPR_debut(row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-
             if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
                 desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             if(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())!=null){
-                desordre.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
+                desordre.setSystemeRepId(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
+            }
+
+            desordre.setBorne_debut_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString())); 
+            desordre.setBorne_fin_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString()));
+            
+            final TronconDigue troncon = troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                desordre.setTroncon(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
             if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {

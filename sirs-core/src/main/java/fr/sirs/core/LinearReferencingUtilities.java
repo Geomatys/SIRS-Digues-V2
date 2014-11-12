@@ -240,8 +240,8 @@ public final class LinearReferencingUtilities extends Static{
             //TODO
         }else{
             //reconstruction a partir de bornes et de distances
-            BorneDigue borneDebut = (structure.getBorne_debut()!=null) ? repo.get(structure.getBorne_debut()) : null;
-            BorneDigue borneFin = (structure.getBorne_fin()!=null) ? repo.get(structure.getBorne_fin()) : null;
+            BorneDigue borneDebut = (structure.getBorneDebutId()!=null) ? repo.get(structure.getBorneDebutId()) : null;
+            BorneDigue borneFin = (structure.getBorneFinId()!=null) ? repo.get(structure.getBorneFinId()) : null;
             if(borneDebut==null && borneFin==null){
                 //aucune borne définie, on ne peut pas calculer la géométrie
                 return null;

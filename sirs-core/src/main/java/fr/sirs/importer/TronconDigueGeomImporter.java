@@ -75,8 +75,8 @@ public class TronconDigueGeomImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         tronconDigueGeom = new HashMap<>();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             try {
                 final Row row = it.next();

@@ -73,8 +73,8 @@ public class OrganismeImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         organismes = new HashMap<>();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final Organisme organisme = new Organisme();

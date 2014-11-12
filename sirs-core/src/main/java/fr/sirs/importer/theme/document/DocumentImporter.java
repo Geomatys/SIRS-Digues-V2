@@ -1,13 +1,16 @@
 package fr.sirs.importer.theme.document;
 
+import fr.sirs.importer.theme.document.related.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -111,13 +114,15 @@ public class DocumentImporter extends GenericDocumentImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        documents = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        documents = new HashMap<>();
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Convention> conventions = conventionImporter.getConventions();
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
@@ -165,11 +170,11 @@ public class DocumentImporter extends GenericDocumentImporter {
             
             
             if(row.getDouble(DocumentColumns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(DocumentColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
             if(row.getDouble(DocumentColumns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorne_fin(borneDigueImporter.getBorneDigue().get((int) row.getDouble(DocumentColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                document.setBorneFinId(bornes.get((int) row.getDouble(DocumentColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             document.setBorne_debut_aval(row.getBoolean(DocumentColumns.AMONT_AVAL_DEBUT.toString())); 
             document.setBorne_fin_aval(row.getBoolean(DocumentColumns.AMONT_AVAL_FIN.toString()));
@@ -181,15 +186,17 @@ public class DocumentImporter extends GenericDocumentImporter {
             }
             
             if(row.getInt(DocumentColumns.ID_SYSTEME_REP.toString())!=null){
-                document.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(DocumentColumns.ID_SYSTEME_REP.toString())).getId());
+                document.setSystemeRepId(systemesReperage.get(row.getInt(DocumentColumns.ID_SYSTEME_REP.toString())).getId());
             }
-            
-            if(row.getDouble(DocumentColumns.PR_DEBUT_CALCULE.toString())!=null)
+
+            if (row.getDouble(DocumentColumns.PR_DEBUT_CALCULE.toString()) != null) {
                 document.setPR_debut(row.getDouble(DocumentColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-            
-            if(row.getDouble(DocumentColumns.PR_FIN_CALCULE.toString())!=null)
+            }
+
+            if (row.getDouble(DocumentColumns.PR_FIN_CALCULE.toString()) != null) {
                 document.setPR_fin(row.getDouble(DocumentColumns.PR_FIN_CALCULE.toString()).floatValue());
-            
+            }
+
             
             
             

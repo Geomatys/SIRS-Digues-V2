@@ -100,8 +100,8 @@ public class BorneDigueImporter extends GenericImporter {
     protected void compute() throws IOException{
         bornesDigue = new HashMap<>();
         bornesDigueByTronconId = new HashMap<>();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final BorneDigue borne = new BorneDigue();

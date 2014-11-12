@@ -189,7 +189,7 @@ class PiedDigueImporter extends GenericStructureImporter {
             final PiedDigue piedDigue = new PiedDigue();
             
             if (row.getDouble(PiedDigueColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                piedDigue.setBorne_debut(bornes.get((int) row.getDouble(PiedDigueColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                piedDigue.setBorneDebutId(bornes.get((int) row.getDouble(PiedDigueColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 piedDigue.setBorne_debut_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
@@ -201,7 +201,7 @@ class PiedDigueImporter extends GenericStructureImporter {
             
             if (row.getDouble(PiedDigueColumns.ID_BORNEREF_FIN.toString()) != null) {
                 BorneDigue b = bornes.get((int) row.getDouble(PiedDigueColumns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) piedDigue.setBorne_fin(b.getId());
+                if (b!=null) piedDigue.setBorneFinId(b.getId());
             }
             if (row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 piedDigue.setBorne_fin_distance(row.getDouble(PiedDigueColumns.DIST_BORNEREF_FIN.toString()).floatValue());
@@ -212,7 +212,7 @@ class PiedDigueImporter extends GenericStructureImporter {
             }
             
             if(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())!=null){
-                piedDigue.setSysteme_rep_id(systemesReperage.get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
+                piedDigue.setSystemeRepId(systemesReperage.get(row.getInt(PiedDigueColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
             piedDigue.setCommentaire(row.getString(PiedDigueColumns.COMMENTAIRE.toString()));

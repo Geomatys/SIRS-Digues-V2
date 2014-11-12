@@ -1,7 +1,9 @@
 package fr.sirs.importer.structure;
 
+import fr.sirs.importer.structure.desordre.DesordreImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -15,6 +17,7 @@ import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
 import java.io.IOException;
@@ -34,7 +37,6 @@ public class StructureImporter extends GenericStructureImporter {
     private Map<Integer, List<Structure>> structuresByTronconId = null;
     private Map<Integer, Structure> structures = null;
     private final CreteImporter creteImporter;
-    private final DesordreImporter desordreImporter;
     private final PiedDigueImporter piedDigueImporter;
     private final TypeElementStructureImporter typeElementStructureImporter;
 
@@ -45,7 +47,6 @@ public class StructureImporter extends GenericStructureImporter {
             final BorneDigueImporter borneDigueImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase, couchDbConnector);
     }
@@ -150,7 +151,7 @@ public class StructureImporter extends GenericStructureImporter {
 
     /**
      * 
-     * @return A map referencing the Structure instances from the internal 
+     * @return A map referencing the Structure (without desordres) instances from the internal 
      * database tronçon identifier.
      * @throws IOException
      * @throws AccessDbImporterException 
@@ -189,29 +190,29 @@ public class StructureImporter extends GenericStructureImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {    
         structures = new HashMap<>();
+        
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
+        // Importation détaillée de toutes les structures au sens strict.
         final Map<Integer, Crete> cretes = creteImporter.getCretes();
         if(cretes!=null) for(final Integer key : cretes.keySet()){
-            structures.put(key, cretes.get(key));
+            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+            else structures.put(key, cretes.get(key));
         }
 
         final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
         if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
-            structures.put(key, piedsDigue.get(key));
+            if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+            else structures.put(key, piedsDigue.get(key));
         }
-
-        final Map<Integer, Desordre> desordres = desordreImporter.getDesordres();
-        if(desordres!=null) for(final Integer key : desordres.keySet()){
-            structures.put(key, desordres.get(key));
-        }
-
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
+        
+        
+        //======================================================================
 
 
+        // Vérification de la cohérence des structures au sens strict.
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
 
@@ -224,7 +225,7 @@ public class StructureImporter extends GenericStructureImporter {
                 structure = null;
             }
             else if(typeStructure == Crete.class){
-                structure = this.creteImporter.getCretes().get(structureId);
+                structure = cretes.get(structureId);
             }
             else if(typeStructure == TalusDigue.class){
                 structure = null;
@@ -236,7 +237,7 @@ public class StructureImporter extends GenericStructureImporter {
                 structure = null;
             }
             else if(typeStructure == PiedDigue.class){
-                structure = this.piedDigueImporter.getPiedsDigue().get(structureId);
+                structure = piedsDigue.get(structureId);
             }
 //                else if(typeStructure == Crete.class){
 //                }
@@ -264,7 +265,7 @@ public class StructureImporter extends GenericStructureImporter {
 
 
             if (false && structure != null) {
-                structure.setSysteme_rep_id(systemeReperageImporter.getSystemeRepLineaire().get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
+                structure.setSystemeRepId(systemesReperage.get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
                 
                 structure.setBorne_debut_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_DEBUT.toString())); 
                 structure.setBorne_fin_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_FIN.toString()));
@@ -273,32 +274,31 @@ public class StructureImporter extends GenericStructureImporter {
                 if (row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
                     structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
                 }
-                if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
-                    structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
-                }
                 if (row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                    structure.setBorne_debut(borneDigueImporter.getBorneDigue().get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                    structure.setBorneDebutId(bornes.get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
                 }
                 if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                     structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
                 }
                 if (row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()) != null) {
-                    structure.setBorne_fin(borneDigueImporter.getBorneDigue().get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                    structure.setBorneFinId(bornes.get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
                 if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
                     structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                }
+                if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
+                    structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
                 }
             }
         }
 
 
+        //======================================================================
 
-
-
-
-
+        // Génération de la liste des structures par identifiant de tronçon.
         structuresByTronconId = new HashMap<>();
 
+        // Structures au sens strict
         final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getCretesByTronconId();
         if(cretesByTroncon!=null){
             cretesByTroncon.keySet().stream().map((key) -> {
@@ -323,23 +323,5 @@ public class StructureImporter extends GenericStructureImporter {
                 structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
         });
         }
-
-        final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getDesordresByTronconId();
-        if(desordresByTroncon!=null){
-        desordres.keySet().stream().map((key) -> {
-            if (structuresByTronconId.get(key) == null) {
-                structuresByTronconId.put(key, new ArrayList<>());
-            }
-            return key;
-        }).forEach((key) -> {
-            if(desordresByTroncon.get(key)!=null)
-                structuresByTronconId.get(key).addAll(desordresByTroncon.get(key));
-        });
-        }
-
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-
     }
 }

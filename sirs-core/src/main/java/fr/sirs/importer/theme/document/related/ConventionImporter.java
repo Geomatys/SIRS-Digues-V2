@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document;
+package fr.sirs.importer.theme.document.related;
 
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
@@ -41,13 +41,13 @@ public class ConventionImporter extends GenericImporter {
 
     private enum ConventionColumns {
         ID_CONVENTION,
-//        LIBELLE_CONVENTION,
+        LIBELLE_CONVENTION,
         ID_TYPE_CONVENTION,
         DATE_DEBUT_CONVENTION,
         DATE_FIN_CONVENTION,
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
-//        COMMENTAIRE,
+        COMMENTAIRE,
         DATE_DERNIERE_MAJ
     };
     
@@ -70,10 +70,9 @@ public class ConventionImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         conventions = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeConvention();
 
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Convention convention = new Convention();
@@ -88,6 +87,8 @@ public class ConventionImporter extends GenericImporter {
                 convention.setDate_fin(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
 
+            convention.setLibelle(row.getString(ConventionColumns.LIBELLE_CONVENTION.toString()));
+            convention.setCommentaire(row.getString(ConventionColumns.COMMENTAIRE.toString()));
             convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
             convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
             convention.setTypeConventionId(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());

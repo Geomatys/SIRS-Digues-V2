@@ -65,8 +65,8 @@ public class TypeRiveImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         typesRive = new HashMap<>();
+        
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final RefRive typeRive = new RefRive();

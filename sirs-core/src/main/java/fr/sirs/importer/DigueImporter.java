@@ -68,8 +68,8 @@ public class DigueImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         digues = new HashMap<>();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final Digue digue = new Digue();

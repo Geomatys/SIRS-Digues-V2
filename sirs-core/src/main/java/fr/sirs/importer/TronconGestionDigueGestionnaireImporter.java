@@ -73,6 +73,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         gestionsByTronconId = new HashMap<>();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
+        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         while (it.hasNext()) {
             final Row row = it.next();
             final GestionTroncon gestion = new GestionTroncon();
@@ -96,9 +97,8 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             listeGestions.add(gestion);
 
             // Set the references.
-            final Organisme organisme = organismeImporter.getOrganismes().get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
+            final Organisme organisme = organismes.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
             if (organisme.getId() != null) {
-                System.out.println(organisme.getId());
                 gestion.setGestionnaireId(organisme.getId());
             } else {
                 throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");

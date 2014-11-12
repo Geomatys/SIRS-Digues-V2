@@ -189,7 +189,7 @@ class CreteImporter extends GenericStructureImporter {
             final Crete crete = new Crete();
             
             if (row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                crete.setBorne_debut(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                crete.setBorneDebutId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
@@ -200,7 +200,7 @@ class CreteImporter extends GenericStructureImporter {
             }
 
             if (row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()) != null) {
-                crete.setBorne_fin(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                crete.setBorneFinId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
                 crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
@@ -211,7 +211,7 @@ class CreteImporter extends GenericStructureImporter {
             }
             
             if (row.getInt(CreteColumns.ID_SYSTEME_REP.toString()) != null) {
-                crete.setSysteme_rep_id(systemesReperage.get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
+                crete.setSystemeRepId(systemesReperage.get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
             crete.setCommentaire(row.getString(CreteColumns.COMMENTAIRE.toString()));

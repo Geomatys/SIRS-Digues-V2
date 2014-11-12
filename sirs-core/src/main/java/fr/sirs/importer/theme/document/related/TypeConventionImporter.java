@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document;
+package fr.sirs.importer.theme.document.related;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TypeConventionImporter extends GenericImporter {
 
-    private Map<Integer, RefConvention> typesRive = null;
+    private Map<Integer, RefConvention> typesConvention = null;
     private final RefConventionRepository refConventionRepository;
 
     public TypeConventionImporter(final Database accessDatabase,
@@ -44,8 +44,8 @@ public class TypeConventionImporter extends GenericImporter {
      * @throws IOException 
      */
     public Map<Integer, RefConvention> getTypeConvention() throws IOException {
-        if(typesRive == null) compute();
-        return typesRive;
+        if(typesConvention == null) compute();
+        return typesConvention;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TypeConventionImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesRive = new HashMap<>();
+        typesConvention = new HashMap<>();
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
 
         while (it.hasNext()) {
@@ -75,7 +75,7 @@ public class TypeConventionImporter extends GenericImporter {
             if (row.getDate(TypeConventionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeConvention.setDateMaj(LocalDateTime.parse(row.getDate(TypeConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesRive.put(row.getInt(String.valueOf(TypeConventionColumns.ID_TYPE_CONVENTION.toString())), typeConvention);
+            typesConvention.put(row.getInt(String.valueOf(TypeConventionColumns.ID_TYPE_CONVENTION.toString())), typeConvention);
             refConventionRepository.add(typeConvention);
         }
     }

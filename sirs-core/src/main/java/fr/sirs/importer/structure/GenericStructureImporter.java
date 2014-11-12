@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-abstract class GenericStructureImporter extends GenericImporter {
+public abstract class GenericStructureImporter extends GenericImporter {
 
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;

@@ -88,11 +88,11 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         byBorneId = new HashMap<>();
         bySystemeReperageId = new HashMap<>();
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final SystemeReperageBorne systemeReperageBorne = new SystemeReperageBorne();
@@ -108,7 +108,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             final BorneDigue borne = bornes.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
             
-            SystemeReperage systemeReperage = systemesReperage.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
+            final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){
                 systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             }

@@ -244,12 +244,12 @@ public class FXPositionnablePane extends BorderPane {
         if(startPoint==null){
             //calcule a partir des bornes
             
-            final BorneDigue borneStart = cacheBorneDigue.get(pos.borne_debutProperty().get());
+            final BorneDigue borneStart = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
             final Point borneStartPoint = borneStart.getGeometry();
             double distStart = pos.getBorne_debut_distance();
             if(pos.getBorne_debut_aval()) distStart -= -1;
             
-            final BorneDigue borneEnd = cacheBorneDigue.get(pos.borne_finProperty().get());
+            final BorneDigue borneEnd = cacheBorneDigue.get(pos.borneFinIdProperty().get());
             final Point borneEndPoint = borneEnd.getGeometry();            
             double distEnd = pos.getBorne_fin_distance();
             if(pos.getBorne_fin_aval()) distEnd -= -1;
@@ -423,9 +423,9 @@ public class FXPositionnablePane extends BorderPane {
         
         cacheBorneDigue.clear();
         final List<String> bornes = new ArrayList<>();
-        if(pos.getSysteme_rep_id()!=null && !pos.getSysteme_rep_id().isEmpty()){
+        if(pos.getSystemeRepId()!=null && !pos.getSystemeRepId().isEmpty()){
             final Session session = Injector.getBean(Session.class);
-            final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSysteme_rep_id());
+            final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
             if(sr!=null){
                 for(SystemeReperageBorne srb : sr.systemereperageborneId){
                     final String bid = srb.getBorneId();
@@ -462,9 +462,9 @@ public class FXPositionnablePane extends BorderPane {
                     @Override
                     public void run() {
                         //Bindings
-                        uiSRs.valueProperty().bindBidirectional(pos.systeme_rep_idProperty());
-                        uiBorneStart.valueProperty().bindBidirectional(pos.borne_debutProperty());
-                        uiBorneEnd.valueProperty().bindBidirectional(pos.borne_finProperty());
+                        uiSRs.valueProperty().bindBidirectional(pos.systemeRepIdProperty());
+                        uiBorneStart.valueProperty().bindBidirectional(pos.borneDebutIdProperty());
+                        uiBorneEnd.valueProperty().bindBidirectional(pos.borneFinIdProperty());
                         uiAvalSart.selectedProperty().bindBidirectional(pos.borne_debut_avalProperty());
                         uiAvalEnd.selectedProperty().bindBidirectional(pos.borne_fin_avalProperty());
                         uiDistanceStart.valueProperty().bindBidirectional(pos.borne_debut_distanceProperty());
@@ -544,8 +544,8 @@ public class FXPositionnablePane extends BorderPane {
             //les propriétés sont bindées            
             pos.borne_debut_avalProperty().set(false);
             pos.borne_fin_avalProperty().set(false);
-            pos.borne_debutProperty().set(null);
-            pos.borne_finProperty().set(null);
+            pos.borneDebutIdProperty().set(null);
+            pos.borneFinIdProperty().set(null);
             pos.borne_debut_distanceProperty().set(0);
             pos.borne_fin_distanceProperty().set(0);
         }else{

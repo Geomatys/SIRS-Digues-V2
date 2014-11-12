@@ -69,7 +69,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             // e.setDocument(troncon);
             stuctures.add(e);
             Crete crete = new Crete();
-            crete.setBorne_debut("8");
+            crete.setBorneDebutId("8");
             crete.setCommentaire("Belle crete");
             stuctures.add(crete);
             
