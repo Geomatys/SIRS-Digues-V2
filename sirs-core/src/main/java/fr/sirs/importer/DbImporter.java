@@ -11,9 +11,17 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.RefConventionRepository;
+import fr.sirs.core.component.RefCoteRepository;
+import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefRiveRepository;
+import fr.sirs.core.component.RefSourceRepository;
+import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.importer.structure.desordre.TypeCoteImporter;
+import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
+import fr.sirs.importer.structure.desordre.TypePositionImporter;
+import fr.sirs.importer.structure.desordre.TypeSourceImporter;
 import fr.sirs.importer.theme.document.related.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeConventionImporter;
@@ -47,6 +55,10 @@ public class DbImporter {
     private final DocumentRepository documentRepository;
     private final ConventionRepository conventionRepository; 
     private final RefConventionRepository refConventionRepository;
+    private final RefTypeDesordreRepository refTypeDesordreRepository;
+    private final RefSourceRepository refSourceRepository;
+    private final RefCoteRepository refCoteRepository;
+    private final RefPositionRepository refPositionRepository;
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -63,6 +75,10 @@ public class DbImporter {
     private TypeConventionImporter typeConventionImporter;
     private ConventionImporter conventionImporter;
     private DocumentImporter documentImporter;
+    private TypeDesordreImporter typeDesordreImporter;
+    private TypeSourceImporter typeSourceImporter;
+    private TypeCoteImporter typeCoteImporter;
+    private TypePositionImporter typePositionImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -416,6 +432,10 @@ public class DbImporter {
         this.documentRepository = new DocumentRepository(couchDbConnector);
         this.conventionRepository = new ConventionRepository(couchDbConnector);
         this.refConventionRepository = new RefConventionRepository(couchDbConnector);
+        this.refTypeDesordreRepository = new RefTypeDesordreRepository(couchDbConnector);
+        this.refSourceRepository = new RefSourceRepository(couchDbConnector);
+        this.refCoteRepository = new RefCoteRepository(couchDbConnector);
+        this.refPositionRepository = new RefPositionRepository(couchDbConnector);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -431,11 +451,17 @@ public class DbImporter {
         this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
         this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
                 couchDbConnector, systemeReperageImporter, borneDigueImporter);
+        this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, couchDbConnector, refTypeDesordreRepository);
+        this.typeSourceImporter = new TypeSourceImporter(accessDatabase, couchDbConnector, refSourceRepository);
+        this.typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector, refCoteRepository);
+        this.typePositionImporter = new TypePositionImporter(accessDatabase, couchDbConnector, refPositionRepository);
         this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
                 couchDbConnector, tronconDigueRepository, digueRepository, 
                 borneDigueRepository, digueImporter, tronconDigueGeomImporter, 
                 typeRiveImporter, systemeReperageImporter, 
-                tronconGestionDigueGestionnaireImporter, borneDigueImporter);
+                tronconGestionDigueGestionnaireImporter, borneDigueImporter, 
+                typeDesordreImporter, typeSourceImporter, typePositionImporter,
+                typeCoteImporter);
         this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector, refConventionRepository);
         this.conventionImporter = new ConventionImporter(accessDatabase, couchDbConnector, conventionRepository, typeConventionImporter);
         this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository,borneDigueImporter, systemeReperageImporter, conventionImporter, tronconGestionDigueImporter);
@@ -577,7 +603,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -593,7 +619,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -603,12 +629,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.TYPE_POSITION.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -616,8 +642,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-//            importer.cleanDb();
-//            importer.importation();
+            importer.cleanDb();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

@@ -21,12 +21,11 @@ public abstract class GenericStructureImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
     
-    public GenericStructureImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector, 
+    public GenericStructureImporter(final Database accessDatabase,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter) {
-        this(accessDatabase, couchDbConnector);
+        this(accessDatabase, null);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;

@@ -34,7 +34,7 @@ class PiedDigueImporter extends GenericStructureImporter {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     private enum PiedDigueColumns {

@@ -43,7 +43,7 @@ public class StructureImporter extends GenericStructureImporter {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase, couchDbConnector);
@@ -217,7 +217,7 @@ public class StructureImporter extends GenericStructureImporter {
             final int structureId = row.getInt(ElementStructureColumns.ID_ELEMENT_STRUCTURE.toString());
             final Class typeStructure = this.typeElementStructureImporter.getTypeElementStructure().get(row.getInt(ElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
             final Structure structure;
-
+            
             if(typeStructure==null){
 //                System.out.println("Type de structure non pris en charge !");
                 structure = null;
@@ -289,6 +289,12 @@ public class StructureImporter extends GenericStructureImporter {
                 }
             }
         }
+        
+        
+        //======================================================================
+        // Liens avec les désordres
+        
+        
 
 
         //======================================================================

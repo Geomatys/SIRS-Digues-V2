@@ -85,6 +85,7 @@ public class SystemeReperageImporter extends GenericImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final SystemeReperage systemeReperage = new SystemeReperage();
+            
             systemeReperage.setNom(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
             systemeReperage.setCommentaire(row.getString(SystemeRepLineaireColumns.COMMENTAIRE_SYSTEME_REP.toString()));
             if (row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
@@ -97,7 +98,7 @@ public class SystemeReperageImporter extends GenericImporter {
             List<SystemeReperage> listByTronconId = systemesReperageByTronconId.get(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+//                systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(systemeReperage);
             systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);

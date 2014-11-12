@@ -18,6 +18,10 @@ import fr.sirs.core.model.Structure;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
+import fr.sirs.importer.structure.desordre.TypeCoteImporter;
+import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
+import fr.sirs.importer.structure.desordre.TypePositionImporter;
+import fr.sirs.importer.structure.desordre.TypeSourceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -64,7 +68,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
-            final BorneDigueImporter borneDigueImporter){
+            final BorneDigueImporter borneDigueImporter, 
+            final TypeDesordreImporter typeDesordreImporter,
+            final TypeSourceImporter typeSourceImporter,
+            final TypePositionImporter typePositionImporter,
+            final TypeCoteImporter typeCoteImporter){
         this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueRepository = digueRepository;
@@ -78,7 +86,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
         
         // Structure and Desordre importers need TronconGestionDigue importer itself.
         this.structureImporter = new StructureImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter);
+        this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter, 
+                structureImporter, typeDesordreImporter, typeSourceImporter, typePositionImporter, typeCoteImporter);
     }
 
     /* TODO : s'occuper du lien avec les gestionnaires.

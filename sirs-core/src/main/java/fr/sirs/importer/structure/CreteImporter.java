@@ -34,7 +34,7 @@ class CreteImporter extends GenericStructureImporter {
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
     }
 
     /*
@@ -51,17 +51,17 @@ class CreteImporter extends GenericStructureImporter {
         ID_ELEMENT_STRUCTURE,
         //        id_nom_element,
         //        ID_SOUS_GROUPE_DONNEES,
-        //        LIBELLE_TYPE_ELEMENT_STRUCTURE,
+        //        LIBELLE_TYPE_ELEMENT_STRUCTURE,// Dans le typeElementStructure
         //        DECALAGE_DEFAUT,
         //        DECALAGE,
         //        LIBELLE_SOURCE,
-        //        LIBELLE_SYSTEME_REP,
-        //        NOM_BORNE_DEBUT,
-        //        NOM_BORNE_FIN,
+        //        LIBELLE_SYSTEME_REP,// Dans le SystemeRepImporter
+        //        NOM_BORNE_DEBUT, // Dans le BorneImporter
+        //        NOM_BORNE_FIN, // Dans le BorneImporter
         //        LIBELLE_TYPE_MATERIAU,
         //        LIBELLE_TYPE_NATURE,
         //        LIBELLE_TYPE_FONCTION,
-        //        ID_TYPE_ELEMENT_STRUCTURE,
+        //        ID_TYPE_ELEMENT_STRUCTURE,// Dans le typeElementStructure
         //        ID_SOURCE,
         ID_TRONCON_GESTION,
         DATE_DEBUT_VAL,
