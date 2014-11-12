@@ -43,6 +43,7 @@ public class Session {
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     
+    private final CouchDbConnector connector;
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
@@ -52,12 +53,17 @@ public class Session {
     
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
+        this.connector = couchDbConnector;
         digueRepository = new DigueRepository(couchDbConnector);
         tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
         systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
         borneDigueRepository = new BorneDigueRepository(couchDbConnector);
     }
 
+    public CouchDbConnector getConnector() {
+        return connector;
+    }
+    
     public DigueRepository getDigueRepository() {
         return digueRepository;
     }

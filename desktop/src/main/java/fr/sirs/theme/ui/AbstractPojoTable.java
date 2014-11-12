@@ -11,15 +11,19 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
+import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -31,6 +35,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
@@ -172,31 +177,72 @@ public abstract class AbstractPojoTable extends BorderPane{
             this.desc = desc;
             setEditable(true);
             
-            setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-            
+            final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
+                        
             addEventHandler(TableColumn.editCommitEvent(), (CellEditEvent<Object, Object> event) -> {
                 final Object rowElement = event.getRowValue();
                 new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
             });
             
-            //choix de l'editeur en fonction du type de données
-            final Class type = desc.getReadMethod().getReturnType();            
-            if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
-            }else if(String.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
-            }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
-            }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
-            }else if(Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
-            }else if(LocalDateTime.class.isAssignableFrom(type)){
-                setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+            //choix de l'editeur en fonction du type de données          
+            if(ref!=null){
+                //reference vers un autre objet
+                setEditable(false);
+                setCellValueFactory(new CellLinkValueFactory(desc, ref.ref()));
+                setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());
+                
+            }else{
+                final Class type = desc.getReadMethod().getReturnType();  
+                
+                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
+                }else if(String.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+                }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
+                }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+                }else if(Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+                }else if(LocalDateTime.class.isAssignableFrom(type)){
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+                }
+                
+                setComparator(COMPARATOR);
             }
-            setComparator(COMPARATOR);
             
         }  
+    }
+    
+    public static class CellLinkValueFactory implements Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>{
+
+        private final Session session;
+        private final PropertyDescriptor desc;
+        private final Class refClass;
+
+        public CellLinkValueFactory(PropertyDescriptor desc, Class refClass) {
+            this.session = Injector.getBean(Session.class);
+            this.desc = desc;
+            this.refClass = refClass;
+        }
+        
+        @Override
+        public ObservableValue<Object> call(CellDataFeatures<Element, Object> param) {
+            Object obj = null;
+            try {
+                obj = desc.getReadMethod().invoke(param.getValue());
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+            if(obj instanceof String && !((String)obj).isEmpty()){
+                return new SimpleObjectProperty(session.getConnector().get(refClass,(String)obj));
+            }else{
+                return new SimpleObjectProperty<>();
+            }
+            
+        }
+        
     }
     
     public class DeleteColumn extends TableColumn<Element,Element>{
