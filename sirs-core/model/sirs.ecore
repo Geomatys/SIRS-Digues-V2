@@ -424,7 +424,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="elementReseau" upperBound="-1"
         eType="#//ElementReseauDesordre" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreStructure" upperBound="-1"
-        eType="#//NewEClass133" containment="true"/>
+        eType="#//DesordreStructure" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationSuivi">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_observation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1205,7 +1205,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeLargeurFrancBord"
         eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="NewEClass133">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreStructure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreId" eType="#//Structure"/>
   </eClassifiers>
