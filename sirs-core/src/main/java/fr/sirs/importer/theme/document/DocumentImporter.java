@@ -7,9 +7,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -204,26 +206,31 @@ public class DocumentImporter extends GenericDocumentImporter {
             
             
             
-            
-            
-            
-            
-            
-            
             final Class typeDocument = this.typeDocumentImporter.getTypeDocument().get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
-            
-            if(typeDocument!=null){
+
+            if (typeDocument != null) {
                 document.setTypeDocument(typeDocument.getCanonicalName());
-            if(typeDocument.equals(Convention.class)){
-                // Pour les conventions !
-                if(row.getInt(DocumentColumns.ID_CONVENTION.toString())!=null){
-                    if(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString()))!=null){
-                        document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
+                if (typeDocument.equals(Convention.class)) {
+                    // Pour les conventions !
+                    if (row.getInt(DocumentColumns.ID_CONVENTION.toString()) != null) {
+                        if (conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())) != null) {
+                            document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
+                        }
                     }
+                } 
+                else if(typeDocument.equals(Marche.class)){
+                    
                 }
-            }else{System.out.println("Type de document non pris en charge : ID = "+row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));}
-            }else{System.out.println("Type de document inconnu !");}
-            
+                else if(typeDocument.equals(ArticleJournal.class)){
+                    
+                }
+                else {
+                    System.out.println("Type de document non pris en charge : ID = " + row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+                }
+            } else {
+                System.out.println("Type de document inconnu !");
+            }
+
             documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
             
         }

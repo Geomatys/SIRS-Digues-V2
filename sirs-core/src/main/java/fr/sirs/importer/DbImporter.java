@@ -577,7 +577,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE_ELEMENT_STRUCTURE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -593,7 +593,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -603,12 +603,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.DOCUMENT.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.TYPE_PROFIL_EN_TRAVERS.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -616,8 +616,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

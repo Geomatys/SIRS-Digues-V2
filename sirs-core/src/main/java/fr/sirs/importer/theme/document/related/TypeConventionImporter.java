@@ -65,8 +65,8 @@ public class TypeConventionImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         typesConvention = new HashMap<>();
+        
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final RefConvention typeConvention = new RefConvention();

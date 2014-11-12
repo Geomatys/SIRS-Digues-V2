@@ -1,6 +1,5 @@
 package fr.sirs.importer.structure;
 
-import fr.sirs.importer.structure.desordre.DesordreImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.BorneDigue;
@@ -10,7 +9,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageRevanche;
