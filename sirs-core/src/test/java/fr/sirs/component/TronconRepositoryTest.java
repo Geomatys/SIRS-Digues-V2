@@ -15,7 +15,7 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 import org.ektorp.CouchDbConnector;
@@ -39,7 +39,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 				couchDbConnector);
 		for (TronconDigue troncon : tronconRepository.getAll()) {
 			System.out.println(troncon);
-			for (Structure struct : troncon.getStructures()) {
+			for (Objet struct : troncon.getStructures()) {
 				System.out.println("DocuumentId: " + struct.getDocumentId());
 				
 			}
@@ -73,8 +73,8 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 
 	}
 
-	private void dumpAllStructure(List<? extends Structure> allFondations) {
-		for (Structure fondation : allFondations) {
+	private void dumpAllStructure(List<? extends Objet> allFondations) {
+		for (Objet fondation : allFondations) {
 			System.out.println(fondation.getId() + " / "
 					+ fondation.getDocumentId());
 		}

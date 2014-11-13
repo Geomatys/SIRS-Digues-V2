@@ -14,7 +14,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.RefRive;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
@@ -229,11 +229,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
         }
 
         // Set the references using the this very importer (Structures references TronconDigueId).
-        final Map<Integer, List<Structure>> structuresByTroncon = structureImporter.getStructuresByTronconId();
+        final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getStructuresByTronconId();
         final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getDesordresByTronconId();
 
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
-            List<Structure> structures = tronconDigue.getStructures();
+            List<Objet> structures = tronconDigue.getStructures();
             if(structures==null){
                 structures = new ArrayList<>();
                 tronconDigue.setStructures(structures);
@@ -252,7 +252,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
             final TronconDigue troncon = entry.getValue();
             final Geometry tronconGeom = (Geometry) troncon.getGeometry();
-            for(final Structure str : troncon.getStructures()){
+            for(final Objet str : troncon.getStructures()){
                 final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                 str.setGeometry(structGeom);
             }

@@ -17,7 +17,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 import java.time.Instant;
@@ -124,7 +124,7 @@ public class RepositoriesTest {
             Fondation ecluse = new Fondation();
             ecluse.setCommentaire("Fondation");
             
-            List<Structure> stuctures = new ArrayList<>();
+            List<Objet> stuctures = new ArrayList<>();
             stuctures.add(ecluse);
             tron.setStructures(stuctures);
             tronconRepository.add(tron);
@@ -208,7 +208,7 @@ public class RepositoriesTest {
             Fondation ecluse = new Fondation();
             ecluse.setCommentaire("Fondation");
 
-            List<Structure> stuctures = new ArrayList<>();
+            List<Objet> stuctures = new ArrayList<>();
             stuctures.add(ecluse);
             troncon.setStructures(stuctures);
 

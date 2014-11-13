@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.DesordreStructure;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.structure.StructureImporter;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class DesordreStructureImporter extends GenericImporter {
         this.desordresStructuresByDesordreId = new HashMap<>();
         this.desordresStructuresByStructureId = new HashMap<>();
         
-        final Map<Integer, Structure> structures = structureImporter.getStructures();
+        final Map<Integer, Objet> structures = structureImporter.getStructures();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -87,7 +87,7 @@ public class DesordreStructureImporter extends GenericImporter {
             final DesordreStructure desordreStructure = new DesordreStructure();
             
             if(structures.get(row.getInt(DesordreStructureColumns.ID_ELEMENT_STRUCTURE.toString()))!=null){
-                desordreStructure.setDesordreId(structures.get(row.getInt(DesordreStructureColumns.ID_ELEMENT_STRUCTURE.toString())).getId());
+                desordreStructure.setStructureId(structures.get(row.getInt(DesordreStructureColumns.ID_ELEMENT_STRUCTURE.toString())).getId());
             }
             
             if (row.getDate(DesordreStructureColumns.DATE_DERNIERE_MAJ.toString()) != null) {

@@ -29,11 +29,10 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -149,20 +148,28 @@ public class CorePlugin extends Plugin{
             
             //troncons
             final BeanStore tronconStore = new BeanStore(
-                    new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, ()-> repo.getAll())
+                    new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
+                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
+                            null, PROJECTION, ()-> repo.getAll())
             );
             items.addAll(buildLayers(tronconStore,createTronconStyle(),true));
             
             //bornes
             final BeanStore borneStore = new BeanStore(
-                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, ()-> bornes)
+                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", 
+                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
+                            null, PROJECTION, ()-> bornes)
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),true));
             
             //structures
             final BeanStore structStore = new BeanStore(
-                    new BeanFeatureSupplier(Crete.class, "id", "geometry",MAPPROPERTY_PREDICATE,  null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
-                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
+                    new BeanFeatureSupplier(Crete.class, "id", "geometry",
+                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),  
+                            null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
+                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", 
+                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
+                            null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
             );
                         
             final MapItem structLayer = MapBuilder.createItem();
@@ -234,7 +241,7 @@ public class CorePlugin extends Plugin{
         if(obj instanceof TronconDigue){
             lst.add(new ViewFormItem(obj));
             
-        }else if(obj instanceof Structure){
+        }else if(obj instanceof Objet){
             lst.add(new ViewFormItem(obj));
         }
         
@@ -358,8 +365,8 @@ public class CorePlugin extends Plugin{
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
                 });
-            }else if(candidate instanceof Structure){
-                final Structure cdt = (Structure) candidate;
+            }else if(candidate instanceof Objet){
+                final Objet cdt = (Objet) candidate;
                 final String text = "Objet "+cdt.getClass().getSimpleName()+" : "+cdt.getId();
                 setText(text);
                 

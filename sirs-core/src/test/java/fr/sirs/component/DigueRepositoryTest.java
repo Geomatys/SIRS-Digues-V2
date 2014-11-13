@@ -22,7 +22,7 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 import org.junit.Ignore;
@@ -64,7 +64,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setGeometry(createPoint());
             troncon.setDateMaj(LocalDateTime.now());
 
-            List<Structure> stuctures = new ArrayList<Structure>();
+            List<Objet> stuctures = new ArrayList<Objet>();
             Fondation e = new Fondation();
             // e.setDocument(troncon);
             stuctures.add(e);

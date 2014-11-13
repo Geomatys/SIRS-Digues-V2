@@ -14,7 +14,7 @@ import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
@@ -32,8 +32,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class StructureImporter extends GenericStructureImporter {
 
-    private Map<Integer, List<Structure>> structuresByTronconId = null;
-    private Map<Integer, Structure> structures = null;
+    private Map<Integer, List<Objet>> structuresByTronconId = null;
+    private Map<Integer, Objet> structures = null;
     private final CreteImporter creteImporter;
     private final PiedDigueImporter piedDigueImporter;
     private final TypeElementStructureImporter typeElementStructureImporter;
@@ -154,7 +154,7 @@ public class StructureImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
-    public Map<Integer, List<Structure>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<Objet>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (structuresByTronconId == null)  compute();
         return structuresByTronconId;
     }
@@ -166,7 +166,7 @@ public class StructureImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
-    public Map<Integer, Structure> getStructures() throws IOException, AccessDbImporterException{
+    public Map<Integer, Objet> getStructures() throws IOException, AccessDbImporterException{
         if(structures==null) compute();
         return structures;
     }
@@ -216,7 +216,7 @@ public class StructureImporter extends GenericStructureImporter {
 
             final int structureId = row.getInt(ElementStructureColumns.ID_ELEMENT_STRUCTURE.toString());
             final Class typeStructure = this.typeElementStructureImporter.getTypeElementStructure().get(row.getInt(ElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
-            final Structure structure;
+            final Objet structure;
             
             if(typeStructure==null){
 //                System.out.println("Type de structure non pris en charge !");

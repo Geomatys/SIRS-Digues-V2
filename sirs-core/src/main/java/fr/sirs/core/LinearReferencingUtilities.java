@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.AbstractMap;
@@ -231,7 +231,7 @@ public final class LinearReferencingUtilities extends Static{
                (c.x-segment.segmentCoords[0].x) * (segment.segmentCoords[1].y-segment.segmentCoords[0].y);
     }
     
-    public static LineString buildGeometry(Geometry tronconGeom, Structure structure, BorneDigueRepository repo){
+    public static LineString buildGeometry(Geometry tronconGeom, Objet structure, BorneDigueRepository repo){
         
         final LineString troncon = asLineString(tronconGeom);        
         

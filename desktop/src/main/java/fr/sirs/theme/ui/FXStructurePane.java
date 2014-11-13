@@ -6,7 +6,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Structure;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.NoninvertibleTransformException;
 import java.time.LocalDateTime;
@@ -34,7 +34,7 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class FXStructurePane extends BorderPane {
     
-    private final Structure structure;
+    private final Objet structure;
     private Node specificThemePane;
     private TronconDigue troncon;
     private TronconDigue newTroncon = null;
@@ -61,7 +61,7 @@ public class FXStructurePane extends BorderPane {
     @FXML private Button uiSave;
 
 
-    public FXStructurePane(final Structure structure){
+    public FXStructurePane(final Objet structure){
         SIRS.loadFXML(this);
         this.structure = structure;
         final Session session = Injector.getBean(Session.class);
@@ -90,7 +90,7 @@ public class FXStructurePane extends BorderPane {
             
             if(((ThemePane) specificThemePane).tronconChangedProperty().get()){
                 ((ThemePane) specificThemePane).tronconChangedProperty().set(false);
-                for(final Structure str : troncon.getStructures()){
+                for(final Objet str : troncon.getStructures()){
                     if(str.getId().equals(structure.getId())){
                         troncon.getStructures().remove(str);
                         break;
@@ -102,7 +102,7 @@ public class FXStructurePane extends BorderPane {
                 newTroncon.setDateMaj(LocalDateTime.now());
                 session.getTronconDigueRepository().update(newTroncon);
             } else{
-                for(final Structure str : troncon.getStructures()){
+                for(final Objet str : troncon.getStructures()){
                     if(str.getId().equals(structure.getId())){
                         troncon.getStructures().set(troncon.getStructures().indexOf(str), structure);
                         break;
