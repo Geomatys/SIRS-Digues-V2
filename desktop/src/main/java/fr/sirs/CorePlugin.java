@@ -2,6 +2,7 @@
 
 package fr.sirs;
 
+import com.vividsolutions.jts.geom.Geometry;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -31,6 +32,9 @@ import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Structure;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +45,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javax.measure.unit.NonSI;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
 import org.geotoolkit.data.FeatureCollection;
@@ -78,6 +83,33 @@ public class CorePlugin extends Plugin{
     
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+    
+    private static final Class[] VALID_CLASSES = new Class[]{
+        byte.class,
+        short.class,
+        int.class,
+        long.class,
+        float.class,
+        double.class,
+        Byte.class,
+        Short.class,
+        Integer.class,
+        Long.class,
+        Float.class,
+        Double.class,
+        String.class,
+        LocalDateTime.class
+    };
+    
+    private static final Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = new Predicate<PropertyDescriptor>(){
+
+        @Override
+        public boolean test(PropertyDescriptor t) {
+            final Class c = t.getReadMethod().getReturnType();
+            return ArraysExt.contains(VALID_CLASSES, c) || Geometry.class.isAssignableFrom(c);
+        }
+        
+    };
     
     public CorePlugin() {
     }
@@ -117,20 +149,20 @@ public class CorePlugin extends Plugin{
             
             //troncons
             final BeanStore tronconStore = new BeanStore(
-                    new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", null, PROJECTION, ()-> repo.getAll())
+                    new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, ()-> repo.getAll())
             );
             items.addAll(buildLayers(tronconStore,createTronconStyle(),true));
             
             //bornes
             final BeanStore borneStore = new BeanStore(
-                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", null, PROJECTION, ()-> bornes)
+                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, ()-> bornes)
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),true));
             
             //structures
             final BeanStore structStore = new BeanStore(
-                    new BeanFeatureSupplier(Crete.class, "id", "geometry", null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
-                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
+                    new BeanFeatureSupplier(Crete.class, "id", "geometry",MAPPROPERTY_PREDICATE,  null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
+                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", MAPPROPERTY_PREDICATE, null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
             );
                         
             final MapItem structLayer = MapBuilder.createItem();
