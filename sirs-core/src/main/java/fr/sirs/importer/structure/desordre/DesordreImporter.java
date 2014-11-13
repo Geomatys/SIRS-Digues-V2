@@ -2,6 +2,9 @@ package fr.sirs.importer.structure.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -21,11 +24,19 @@ import fr.sirs.importer.structure.StructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -40,6 +51,7 @@ public class DesordreImporter extends GenericStructureImporter {
     private final TypeSourceImporter typeSourceImporter;
     private final TypeCoteImporter typeCoteImporter;
     private final TypePositionImporter typePositionImporter;
+    private final SubDesordreImporter subDesordreImporter;
 
     public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -51,59 +63,51 @@ public class DesordreImporter extends GenericStructureImporter {
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
-        this.desordreStructureImporter = new DesordreStructureImporter(accessDatabase, couchDbConnector, structureImporter);
+        super(accessDatabase, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter);
+        this.desordreStructureImporter = new DesordreStructureImporter(
+                accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
         this.typeSourceImporter = typeSourceImporter;
         this.typePositionImporter = typePositionImporter;
         this.typeCoteImporter = typeCoteImporter;
+        this.subDesordreImporter = new SubDesordreImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                structureImporter, typeDesordreImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter);
     }
 
     private enum DesordreColumns {
-
         ID_DESORDRE,
-        //            id_nom_element,
-        //            ID_SOUS_GROUPE_DONNEES,
-        //            LIBELLE_SOUS_GROUPE_DONNEES,
-                    ID_TYPE_DESORDRE,
-        //            LIBELLE_TYPE_DESORDRE,// Dans TypeDesordreImporter
-        //            DECALAGE_DEFAUT,
-        //            DECALAGE,
-        //            LIBELLE_SOURCE, // Dans TypeSourceImporter
-        //            LIBELLE_TYPE_COTE, // Dans TypeCoteImporter
-        //            LIBELLE_SYSTEME_REP, // Dans SystemeRepImporter
-        //            NOM_BORNE_DEBUT, //Dans BorneImporter
-        //            NOM_BORNE_FIN, //Dans BorneImporter
-        //            DISPARU_OUI_NON,
-        //            DEJA_OBSERVE_OUI_NON,
-        //            LIBELLE_TYPE_POSITION,// Dans typePositionImporter
-                    ID_TYPE_COTE,
-                    ID_TYPE_POSITION,
+        ID_TYPE_DESORDRE,
+        ID_TYPE_COTE,
+        ID_SOURCE,
         ID_TRONCON_GESTION,
-                    ID_SOURCE,
-                    DATE_DEBUT_VAL,
-                    DATE_FIN_VAL,
+        DATE_DEBUT_VAL,
+        DATE_FIN_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
-                    ID_SYSTEME_REP,
-                    ID_BORNEREF_DEBUT,
-                    AMONT_AVAL_DEBUT,
+        X_DEBUT,
+        Y_DEBUT,
+        X_FIN,
+        Y_FIN,
+        ID_SYSTEME_REP,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-                    ID_BORNEREF_FIN,
-                    AMONT_AVAL_FIN,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-            LIEU_DIT_DESORDRE,
-//            DESCRIPTION_DESORDRE,
-//            ID_AUTO
-
-        //Empty fields
-//     ID_PRESTATION,
-//     LIBELLE_PRESTATION,
-//     X_DEBUT,
-//     Y_DEBUT,
-//     X_FIN,
-//     Y_FIN,
-//     COMMENTAIRE,
+        COMMENTAIRE,
+        LIEU_DIT_DESORDRE,
+        ID_TYPE_POSITION,
+//        ID_PRESTATION,
+//        ID_CRUE,
+//        DESCRIPTION_DESORDRE,
+//        DISPARU,
+//        DEJA_OBSERVE,
+        DATE_DERNIERE_MAJ
     };
 
     /**
@@ -142,8 +146,8 @@ public class DesordreImporter extends GenericStructureImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.desordres = new HashMap<>();
-        this.desordresByTronconId = new HashMap<>();
+        this.desordres = subDesordreImporter.getDesordres();
+        this.desordresByTronconId = subDesordreImporter.getDesordresByTronconId();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
@@ -157,91 +161,287 @@ public class DesordreImporter extends GenericStructureImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Desordre desordre = new Desordre();
+            final Desordre desordre;
+            final boolean nouveauDesordre;
+            if(desordres.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()))!=null){
+                desordre = desordres.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+                nouveauDesordre=false;
+            }
+            else{
+                System.out.println("Nouveau désordre !!");
+                desordre = new Desordre();
+                nouveauDesordre=true;
+            }
             
             if (row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()) != null) {
                 final BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue());
-                if(b!=null) desordre.setBorneDebutId(b.getId());
+                if(b!=null) {
+                    if(nouveauDesordre || desordre.getBorneDebutId()==null){
+                        desordre.setBorneDebutId(b.getId());
+                    }
+                    else if(!desordre.getBorneDebutId().equals(b.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                desordre.setBorne_debut_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                final float v = row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue();
+                if(nouveauDesordre){
+                    desordre.setBorne_debut_distance(v);
+                }
+                else if(v!=desordre.getBorne_debut_distance()) {
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
             }
             if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                desordre.setPR_debut(row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                final float v = row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue();
+                if(nouveauDesordre){
+                    desordre.setPR_debut(v);
+                }
+                else if(v!=desordre.getPR_debut()) {
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
             }
             
             if (row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()) != null) {
-                BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) desordre.setBorneFinId(b.getId());
+                final BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
+                if (b!=null) {
+                    if(desordre.getBorneFinId()==null){
+                        desordre.setBorneFinId(b.getId());
+                    }
+                    else if(!desordre.getBorneFinId().equals(b.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                desordre.setBorne_fin_distance(row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                final float v = row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue();
+                if(nouveauDesordre){
+                    desordre.setBorne_fin_distance(v);
+                }
+                else if(v!=desordre.getBorne_fin_distance()) {
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
             }
             if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
-                desordre.setPR_fin(row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue());
+                final float v = row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue();
+                if(nouveauDesordre){
+                    desordre.setPR_fin(v);
+                }
+                else if(v!=desordre.getPR_fin()) {
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
             }
             
             if(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())!=null){
-                desordre.setSystemeRepId(systemesReperage.get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())).getId());
+                final SystemeReperage sr = systemesReperage.get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString()));
+                if(sr!=null){
+                    if(desordre.getSystemeRepId()==null){
+                        desordre.setSystemeRepId(sr.getId());
+                    }
+                    else if(!desordre.getSystemeRepId().equals(sr.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
 
-            desordre.setBorne_debut_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString())); 
-            desordre.setBorne_fin_aval(row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString()));
-            desordre.setLieu_dit(row.getString(DesordreColumns.LIEU_DIT_DESORDRE.toString()));
+            {
+                final boolean bda = row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString());
+                if(nouveauDesordre){
+                    desordre.setBorne_debut_aval(bda); 
+                } 
+                else if(bda!=desordre.getBorne_debut_aval()){
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
+            }
             
+            {
+                final boolean bfa = row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString());
+                if(nouveauDesordre){
+                    desordre.setBorne_fin_aval(bfa);
+                }
+                else if(bfa!=desordre.getBorne_fin_aval()){
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
+            }
+            
+            {
+                final String ld = row.getString(DesordreColumns.LIEU_DIT_DESORDRE.toString());
+                if (ld != null) {
+                    if (nouveauDesordre) {
+                        desordre.setLieu_dit(ld);
+                    } else if (!ld.equals(desordre.getLieu_dit())) {
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
+            }
+        
             if(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())!=null){
-                desordre.setTypeDesordre(typesDesordre.get(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())).getId());
+                final RefTypeDesordre typeDesordre = typesDesordre.get(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString()));
+                if(typeDesordre!=null){
+                    if(desordre.getTypeDesordre()==null){
+                        desordre.setTypeDesordre(typeDesordre.getId());
+                    }
+                    else if(!desordre.getTypeDesordre().equals(typeDesordre.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             
             if(row.getInt(DesordreColumns.ID_SOURCE.toString())!=null){
-                desordre.setSource(typesSource.get(row.getInt(DesordreColumns.ID_SOURCE.toString())).getId());
+                final RefSource typeSource = typesSource.get(row.getInt(DesordreColumns.ID_SOURCE.toString()));
+                if(typeSource!=null){
+                    if(desordre.getSource()==null){
+                        desordre.setSource(typeSource.getId());
+                    }
+                    else if(!desordre.getSource().equals(typeSource.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             
             if(row.getInt(DesordreColumns.ID_TYPE_POSITION.toString())!=null){
-                desordre.setPosition_structure(typesPosition.get(row.getInt(DesordreColumns.ID_TYPE_POSITION.toString())).getId());
+                final RefPosition typePosition = typesPosition.get(row.getInt(DesordreColumns.ID_TYPE_POSITION.toString()));
+                if(typePosition!=null){
+                    if(desordre.getPosition_structure()==null){
+                        desordre.setPosition_structure(typePosition.getId());
+                    }
+                    else if(!desordre.getPosition_structure().equals(typePosition.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             
             if(row.getInt(DesordreColumns.ID_TYPE_COTE.toString())!=null){
-                desordre.setCote(typesCote.get(row.getInt(DesordreColumns.ID_TYPE_COTE.toString())).getId());
+                final RefCote typeCote = typesCote.get(row.getInt(DesordreColumns.ID_TYPE_COTE.toString()));
+                if(typeCote!=null){
+                    if(desordre.getCote()==null){
+                        desordre.setCote(typeCote.getId());
+                    }
+                    else if(!desordre.getCote().equals(typeCote.getId())){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             
-            List<DesordreStructure> structures = desordresStructures.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
-            if(structures==null){
-                structures = new ArrayList<>();
-            }
-            desordre.setDesordreStructure(structures);
-            
-            final TronconDigue troncon = troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                desordre.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            if (row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()) != null) {
+                final TronconDigue troncon = troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+                if (troncon.getId() != null && desordre.getTroncon()==null) {
+                    desordre.setTroncon(troncon.getId());
+                } else if(troncon.getId()==null) {
+                    throw new AccessDbImporterException("Le tronçon "
+                            + troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                } else if(!desordre.getTroncon().equals(troncon.getId())){
+                    throw new AccessDbImporterException("Inconsistent data.");
+                }
             }
             
             if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
-                desordre.setDate_debut(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                final Date date = row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString());
+                if(date!=null){
+                    final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
+                    if(desordre.getDate_debut()==null){
+                        desordre.setDate_debut(localDate);
+                    }else if(!desordre.getDate_debut().equals(localDate)){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
+            
             if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
-                desordre.setDate_fin(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                final Date date = row.getDate(DesordreColumns.DATE_FIN_VAL.toString());
+                if(date!=null){
+                    final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
+                    if(desordre.getDate_fin()==null){
+                        desordre.setDate_fin(localDate);
+                    }
+                    else if(!desordre.getDate_fin().equals(localDate)){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
             }
             
+            {
+                final String commentaire = row.getString(DesordreColumns.COMMENTAIRE.toString());
+                if(commentaire!=null){
+                    if(desordre.getCommentaire()==null){
+                        desordre.setCommentaire(commentaire);
+                    } else if(!desordre.getCommentaire().equals(commentaire)){
+                        throw new AccessDbImporterException("Inconsistent data.");
+                    }
+                }
+            }
             
-            
-            
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
 
-            // Set the list ByTronconId
-            List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-//                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                try {
+
+                    if (row.getDouble(DesordreColumns.X_DEBUT.toString()) != null 
+                            && row.getDouble(DesordreColumns.Y_DEBUT.toString()) != null) {
+                        final Point positionDebut = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(DesordreColumns.X_DEBUT.toString()),
+                                row.getDouble(DesordreColumns.Y_DEBUT.toString()))), lambertToRGF);
+                        if(desordre.getPositionDebut()==null){
+                            desordre.setPositionDebut(positionDebut);
+                        } else if(!desordre.getPositionDebut().equals(positionDebut)){
+                            throw new AccessDbImporterException("Inconsistent data.");
+                        }
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(DesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                try {
+
+                    if (row.getDouble(DesordreColumns.X_FIN.toString()) != null 
+                            && row.getDouble(DesordreColumns.Y_FIN.toString()) != null) {
+                        final Point positionFin = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                    row.getDouble(DesordreColumns.X_FIN.toString()),
+                                    row.getDouble(DesordreColumns.Y_FIN.toString()))), lambertToRGF);
+                        if(desordre.getPositionFin()==null){
+                            desordre.setPositionFin(positionFin);
+                        } else if(!desordre.getPositionFin().equals(positionFin)){
+                            throw new AccessDbImporterException("Inconsistent data.");
+                        }
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(DesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(DesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
-            listByTronconId.add(desordre);
-            desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            
+            
+            if (row.getDate(DesordreColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                desordre.setDateMaj(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            
+            
+            
+            
+            if (nouveauDesordre) {
+                List<DesordreStructure> structures = desordresStructures.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+                if (structures == null) {
+                    structures = new ArrayList<>();
+                }
+                desordre.setDesordreStructure(structures);
+                
+                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+                //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
+                desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
+
+                // Set the list ByTronconId
+                List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+                if (listByTronconId == null) {
+                    listByTronconId = new ArrayList<>();
+                }
+                listByTronconId.add(desordre);
+                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+
+            }
         }
     }
 

@@ -603,7 +603,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -619,7 +619,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.DESORDRE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -629,12 +629,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.TYPE_POSITION.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.DESORDRE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_POSITION.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.DESORDRE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

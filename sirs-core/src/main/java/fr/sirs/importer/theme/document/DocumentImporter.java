@@ -152,7 +152,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                                 row.getDouble(DocumentColumns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(DocumentImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
@@ -163,7 +163,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                                 row.getDouble(DocumentColumns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(DocumentImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
                 Logger.getLogger(DocumentImporter.class.getName()).log(Level.SEVERE, null, ex);
