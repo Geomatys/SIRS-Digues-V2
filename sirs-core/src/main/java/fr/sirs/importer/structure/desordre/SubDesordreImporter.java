@@ -62,7 +62,8 @@ class SubDesordreImporter extends GenericStructureImporter {
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
         this.typeSourceImporter = typeSourceImporter;
@@ -271,8 +272,6 @@ class SubDesordreImporter extends GenericStructureImporter {
             } catch (FactoryException ex) {
                 Logger.getLogger(SubDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));

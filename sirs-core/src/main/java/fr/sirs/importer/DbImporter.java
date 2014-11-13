@@ -5,19 +5,28 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
+import fr.sirs.core.Repository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
+import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
+import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
+import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
+import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.structure.desordre.DesordreImporter;
 import fr.sirs.importer.structure.desordre.TypeCoteImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
 import fr.sirs.importer.structure.desordre.TypePositionImporter;
@@ -59,6 +68,10 @@ public class DbImporter {
     private final RefSourceRepository refSourceRepository;
     private final RefCoteRepository refCoteRepository;
     private final RefPositionRepository refPositionRepository;
+    private final RefEvenementHydrauliqueRepository refEvenementHydrauliqueRepository;
+    private final EvenementHydrauliqueRepository evenementHydrauliqueRepository;
+    private final RefFrequenceEvenementHydrauliqueRepository refFrequenceEvenementHydrauliqueRepository;
+    private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -79,6 +92,11 @@ public class DbImporter {
     private TypeSourceImporter typeSourceImporter;
     private TypeCoteImporter typeCoteImporter;
     private TypePositionImporter typePositionImporter;
+    private TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
+    private TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter;
+    private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
+    private StructureImporter structureImporter;
+    private DesordreImporter desordreImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -421,21 +439,40 @@ public class DbImporter {
 //     Selections
     }
 
-    public DbImporter(CouchDbConnector couchDbConnector) throws IOException {
+    public DbImporter(final CouchDbConnector couchDbConnector) throws IOException {
         this.couchDbConnector = couchDbConnector;
-        this.digueRepository = new DigueRepository(couchDbConnector);
-        this.tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
-        this.organismeRepository = new OrganismeRepository(couchDbConnector);
-        this.systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
-        this.borneDigueRepository = new BorneDigueRepository(couchDbConnector);
-        this.refRiveRepository = new RefRiveRepository(couchDbConnector);
-        this.documentRepository = new DocumentRepository(couchDbConnector);
-        this.conventionRepository = new ConventionRepository(couchDbConnector);
-        this.refConventionRepository = new RefConventionRepository(couchDbConnector);
-        this.refTypeDesordreRepository = new RefTypeDesordreRepository(couchDbConnector);
-        this.refSourceRepository = new RefSourceRepository(couchDbConnector);
-        this.refCoteRepository = new RefCoteRepository(couchDbConnector);
-        this.refPositionRepository = new RefPositionRepository(couchDbConnector);
+        digueRepository = new DigueRepository(couchDbConnector); 
+        repositories.add(digueRepository);
+        tronconDigueRepository = new TronconDigueRepository(couchDbConnector); 
+        repositories.add(tronconDigueRepository);
+        organismeRepository = new OrganismeRepository(couchDbConnector); 
+        repositories.add(organismeRepository);
+        systemeReperageRepository = new SystemeReperageRepository(couchDbConnector); 
+        repositories.add(systemeReperageRepository);
+        borneDigueRepository = new BorneDigueRepository(couchDbConnector); 
+        repositories.add(borneDigueRepository);
+        refRiveRepository = new RefRiveRepository(couchDbConnector);
+        repositories.add(refRiveRepository);
+        documentRepository = new DocumentRepository(couchDbConnector);
+        repositories.add(documentRepository);
+        conventionRepository = new ConventionRepository(couchDbConnector);
+        repositories.add(conventionRepository);
+        refConventionRepository = new RefConventionRepository(couchDbConnector);
+        repositories.add(refConventionRepository);
+        refTypeDesordreRepository = new RefTypeDesordreRepository(couchDbConnector);
+        repositories.add(refTypeDesordreRepository);
+        refSourceRepository = new RefSourceRepository(couchDbConnector);
+        repositories.add(refSourceRepository);
+        refCoteRepository = new RefCoteRepository(couchDbConnector);
+        repositories.add(refCoteRepository);
+        refPositionRepository = new RefPositionRepository(couchDbConnector);
+        repositories.add(refPositionRepository);
+        refEvenementHydrauliqueRepository = new RefEvenementHydrauliqueRepository(couchDbConnector);
+        repositories.add(refEvenementHydrauliqueRepository);
+        refFrequenceEvenementHydrauliqueRepository = new RefFrequenceEvenementHydrauliqueRepository(couchDbConnector);
+        repositories.add(refFrequenceEvenementHydrauliqueRepository);
+        evenementHydrauliqueRepository = new EvenementHydrauliqueRepository(couchDbConnector);
+        repositories.add(evenementHydrauliqueRepository);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -444,27 +481,48 @@ public class DbImporter {
         this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
         this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
         this.organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
-        this.tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
+        tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
-        this.digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
-        this.borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
-        this.systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
-        this.systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
+        digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
+        borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
+        systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
+        systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
                 couchDbConnector, systemeReperageImporter, borneDigueImporter);
-        this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, couchDbConnector, refTypeDesordreRepository);
-        this.typeSourceImporter = new TypeSourceImporter(accessDatabase, couchDbConnector, refSourceRepository);
-        this.typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector, refCoteRepository);
-        this.typePositionImporter = new TypePositionImporter(accessDatabase, couchDbConnector, refPositionRepository);
-        this.tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
+        typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
+                couchDbConnector, refTypeDesordreRepository);
+        typeSourceImporter = new TypeSourceImporter(accessDatabase, 
+                couchDbConnector, refSourceRepository);
+        typeCoteImporter = new TypeCoteImporter(accessDatabase, 
+                couchDbConnector, refCoteRepository);
+        typePositionImporter = new TypePositionImporter(accessDatabase, 
+                couchDbConnector, refPositionRepository);
+        tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
                 couchDbConnector, tronconDigueRepository, digueRepository, 
                 borneDigueRepository, digueImporter, tronconDigueGeomImporter, 
                 typeRiveImporter, systemeReperageImporter, 
                 tronconGestionDigueGestionnaireImporter, borneDigueImporter, 
                 typeDesordreImporter, typeSourceImporter, typePositionImporter,
                 typeCoteImporter);
-        this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector, refConventionRepository);
-        this.conventionImporter = new ConventionImporter(accessDatabase, couchDbConnector, conventionRepository, typeConventionImporter);
-        this.documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, documentRepository,borneDigueImporter, systemeReperageImporter, conventionImporter, tronconGestionDigueImporter);
+        structureImporter = tronconGestionDigueImporter.getStructureImporter();
+        desordreImporter = tronconGestionDigueImporter.getDesordreImporter();
+        typeConventionImporter = new TypeConventionImporter(accessDatabase, 
+                couchDbConnector, refConventionRepository);
+        conventionImporter = new ConventionImporter(accessDatabase, 
+                couchDbConnector, conventionRepository, typeConventionImporter);
+        documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
+                documentRepository,borneDigueImporter, systemeReperageImporter, 
+                conventionImporter, tronconGestionDigueImporter);
+        typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, refEvenementHydrauliqueRepository);
+        typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, refFrequenceEvenementHydrauliqueRepository);
+        evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, typeEvenementHydrauliqueImporter, 
+                typeFrequenceEvenementHydrauliqueImporter);
+        evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, 
+                typeEvenementHydrauliqueImporter, 
+                typeFrequenceEvenementHydrauliqueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -478,89 +536,20 @@ public class DbImporter {
     public Database getCartoDatabase() {
         return this.accessCartoDatabase;
     }
-
-    public void removeDigues() {
-        final List<Object> digues = new ArrayList<>();
-        digueRepository.getAll().stream().forEach((digue) -> {
-            digues.add(BulkDeleteDocument.of(digue));
+    
+    public void cleanRepo(final Repository repository) {
+        final List<Object> objects = new ArrayList<>();
+        repository.getAll().stream().forEach((refRive) -> {
+            objects.add(BulkDeleteDocument.of(refRive));
         });
-        couchDbConnector.executeBulk(digues);
+        couchDbConnector.executeBulk(objects);
     }
     
-    public void removeOrganismes() {
-        final List<Object> organismes = new ArrayList<>();
-        organismeRepository.getAll().stream().forEach((organisme) -> {
-            organismes.add(BulkDeleteDocument.of(organisme));
-        });
-        couchDbConnector.executeBulk(organismes);
-    }
-    
-    public void removeTronconsDigues() {
-        final List<Object> troncons = new ArrayList<>();
-        tronconDigueRepository.getAll().stream().forEach((tronconDigue) -> {
-            troncons.add(BulkDeleteDocument.of(tronconDigue));
-        });
-        couchDbConnector.executeBulk(troncons);
-    }
-        
-    public void removeSystemesReperage() {
-        final List<Object> systemesReperage = new ArrayList<>();
-        systemeReperageRepository.getAll().stream().forEach((systemeReperage) -> {
-            systemesReperage.add(BulkDeleteDocument.of(systemeReperage));
-        });
-        couchDbConnector.executeBulk(systemesReperage);
-    }
-    
-    public void removeBornes() {
-        final List<Object> bornes = new ArrayList<>();
-        borneDigueRepository.getAll().stream().forEach((borne) -> {
-            bornes.add(BulkDeleteDocument.of(borne));
-        });
-        couchDbConnector.executeBulk(bornes);
-    }
-    
-    public void removeDocuments() {
-        final List<Object> documents = new ArrayList<>();
-        documentRepository.getAll().stream().forEach((document) -> {
-            documents.add(BulkDeleteDocument.of(document));
-        });
-        couchDbConnector.executeBulk(documents);
-    }
-    
-    public void removeConventions() {
-        final List<Object> conventions = new ArrayList<>();
-        conventionRepository.getAll().stream().forEach((convention) -> {
-            conventions.add(BulkDeleteDocument.of(convention));
-        });
-        couchDbConnector.executeBulk(conventions);
-    }
-    
-    public void removeRefConventions() {
-        final List<Object> refConventions = new ArrayList<>();
-        refConventionRepository.getAll().stream().forEach((refConvention) -> {
-            refConventions.add(BulkDeleteDocument.of(refConvention));
-        });
-        couchDbConnector.executeBulk(refConventions);
-    }
-    
-    public void removeRefRive() {
-        final List<Object> refRives = new ArrayList<>();
-        refRiveRepository.getAll().stream().forEach((refRive) -> {
-            refRives.add(BulkDeleteDocument.of(refRive));
-        });
-        couchDbConnector.executeBulk(refRives);
-    }
     
     public void cleanDb(){
-        this.removeTronconsDigues();
-        this.removeDigues();
-        this.removeOrganismes();
-        this.removeSystemesReperage();
-        this.removeBornes();
-        this.removeDocuments();
-        this.removeConventions();
-        this.removeRefConventions();
-        this.removeRefRive();
+        for(final Repository repo : repositories){
+            cleanRepo(repo);
+        }
     }
     
     public void importation() throws IOException, AccessDbImporterException{
@@ -603,7 +592,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -619,7 +608,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.DESORDRE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -629,12 +618,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.DESORDRE.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.DESORDRE.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

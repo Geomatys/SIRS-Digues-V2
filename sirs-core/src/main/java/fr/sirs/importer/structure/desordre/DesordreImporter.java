@@ -63,7 +63,7 @@ public class DesordreImporter extends GenericStructureImporter {
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter);
@@ -132,10 +132,10 @@ public class DesordreImporter extends GenericStructureImporter {
      * @throws AccessDbImporterException
      */
     public Map<Integer, List<Desordre>> getDesordresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.desordresByTronconId == null) {
+        if (desordresByTronconId == null) {
             compute();
         }
-        return this.desordresByTronconId;
+        return desordresByTronconId;
     }
 
     @Override
@@ -146,8 +146,8 @@ public class DesordreImporter extends GenericStructureImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.desordres = subDesordreImporter.getDesordres();
-        this.desordresByTronconId = subDesordreImporter.getDesordresByTronconId();
+        desordres = subDesordreImporter.getDesordres();
+        desordresByTronconId = subDesordreImporter.getDesordresByTronconId();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
@@ -158,7 +158,7 @@ public class DesordreImporter extends GenericStructureImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre desordre;
@@ -440,7 +440,6 @@ public class DesordreImporter extends GenericStructureImporter {
                 }
                 listByTronconId.add(desordre);
                 desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-
             }
         }
     }

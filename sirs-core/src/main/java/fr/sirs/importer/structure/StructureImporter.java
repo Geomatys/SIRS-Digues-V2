@@ -43,7 +43,7 @@ public class StructureImporter extends GenericStructureImporter {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter) {
-        super(accessDatabase, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(accessDatabase, couchDbConnector);
@@ -192,14 +192,15 @@ public class StructureImporter extends GenericStructureImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
-        // Importation détaillée de toutes les structures au sens strict.
         final Map<Integer, Crete> cretes = creteImporter.getCretes();
+        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
+        
+        // Importation détaillée de toutes les structures au sens strict.
         if(cretes!=null) for(final Integer key : cretes.keySet()){
             if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
             else structures.put(key, cretes.get(key));
         }
 
-        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
         if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
             if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
             else structures.put(key, piedsDigue.get(key));
@@ -304,6 +305,8 @@ public class StructureImporter extends GenericStructureImporter {
 
         // Structures au sens strict
         final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getCretesByTronconId();
+        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getPiedsDigueByTronconId();
+        
         if(cretesByTroncon!=null){
             cretesByTroncon.keySet().stream().map((key) -> {
                 if (structuresByTronconId.get(key) == null) {
@@ -315,7 +318,6 @@ public class StructureImporter extends GenericStructureImporter {
             });
         }
 
-        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getPiedsDigueByTronconId();
         if(piedsDigueByTroncon!=null){
         piedsDigue.keySet().stream().map((key) -> {
             if (structuresByTronconId.get(key) == null) {

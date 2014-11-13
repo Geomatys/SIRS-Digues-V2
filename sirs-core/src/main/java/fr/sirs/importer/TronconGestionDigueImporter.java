@@ -83,12 +83,16 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
         this.borneDigueImporter = borneDigueImporter;
-        
+        this.structureImporter = structureImporter;
+        this.desordreImporter = desordreImporter;
         // Structure and Desordre importers need TronconGestionDigue importer itself.
         this.structureImporter = new StructureImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter);
         this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter, 
                 structureImporter, typeDesordreImporter, typeSourceImporter, typePositionImporter, typeCoteImporter);
     }
+    
+    public StructureImporter getStructureImporter(){return structureImporter;}
+    public DesordreImporter getDesordreImporter(){return desordreImporter;}
 
     /* TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.
