@@ -1214,6 +1214,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreStructure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreId" eType="#//Objet"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
   </eClassifiers>
 </ecore:EPackage>
