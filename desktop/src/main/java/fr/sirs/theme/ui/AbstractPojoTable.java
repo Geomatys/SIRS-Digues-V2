@@ -46,6 +46,7 @@ import jidefx.scene.control.field.NumberField;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.internal.Threads;
 
 /**
  *
@@ -235,12 +236,15 @@ public abstract class AbstractPojoTable extends BorderPane{
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
+            
+            final SimpleObjectProperty res = new SimpleObjectProperty();
+            
             if(obj instanceof String && !((String)obj).isEmpty()){
-                return new SimpleObjectProperty(session.getConnector().get(refClass,(String)obj));
-            }else{
-                return new SimpleObjectProperty<>();
+                final String id = (String)obj;
+                res.set(session.getConnector().get(refClass,id));
             }
             
+            return res;
         }
         
     }

@@ -2,6 +2,7 @@
 
 package fr.sirs;
 
+import fr.sirs.core.SirsCore;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -19,37 +20,17 @@ import org.geotoolkit.font.IconBuilder;
  * 
  * @author Johann Sorel
  */
-public final class SIRS {
+public final class SIRS extends SirsCore{
     
     public static final Image ICON_ADD    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_SEARCH = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SEARCH,22,Color.WHITE),null);
     public static final Image ICON_TRASH  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,22,Color.WHITE),null);
     
-    public static final String NAME = "sirs";
     public static final Logger LOGGER = Logging.getLogger(SIRS.class);
     public static final String CSS_PATH = "/fr/sirs/theme.css";
         
     private SIRS(){};
     
-    /**
-     * User directory root folder.
-     * 
-     * @return {user.home}/.sirs
-     */
-    public static String getConfigPath(){
-        final String userHome = System.getProperty("user.home");
-        return userHome+File.separator+"."+NAME;
-    }
-    
-    public static File getConfigFolder(){
-        final String userHome = System.getProperty("user.home");
-        return new File(userHome+File.separator+"."+NAME);
-    }
-    
-    public static File getDatabaseFolder(){
-        return new File(getConfigFolder(), "database");
-    }
-        
     public static void loadFXML(Parent candidate){
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
