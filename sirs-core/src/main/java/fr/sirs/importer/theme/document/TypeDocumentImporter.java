@@ -6,7 +6,6 @@ import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -27,19 +26,17 @@ public class TypeDocumentImporter extends GenericImporter {
 
     private Map<Integer, Class> classesDocument = null;
     private Map<Integer, RefTypeDocument> typesDocument = null;
-    private TypeDocumentGrandeEchelleImporter typeDocumentGrandeEchelleImporter;
 
     TypeDocumentImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TypeDocumentGrandeEchelleImporter typeDocumentGrandeEchelleImporter) {
         super(accessDatabase, couchDbConnector);
-        this.typeDocumentGrandeEchelleImporter = typeDocumentGrandeEchelleImporter;
     }
     
     private enum TypeDocumentColumns {
         ID_TYPE_DOCUMENT,
         LIBELLE_TYPE_DOCUMENT,
-//        ID_TYPE_GENERAL_DOCUMENT,
+//        ID_TYPE_GENERAL_DOCUMENT, // Ignoré dans le nouveau modèle
         NOM_TABLE_EVT,
 //        ID_TYPE_OBJET_CARTO,
         DATE_DERNIERE_MAJ

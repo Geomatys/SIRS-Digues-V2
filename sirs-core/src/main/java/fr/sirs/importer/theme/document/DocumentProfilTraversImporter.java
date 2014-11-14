@@ -58,51 +58,51 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
     
     private enum DocumentProfilTraversColumns {
         ID_DOC,
-//        id_nom_element,
-//        ID_SOUS_GROUPE_DONNEES,
-//        LIBELLE_TYPE_DOCUMENT,
-//        DECALAGE_DEFAUT,
-//        DECALAGE,
-//        LIBELLE_SYSTEME_REP,
-//        NOM_BORNE_DEBUT,
-//        NOM_BORNE_FIN,
-//        NOM_PROFIL_EN_TRAVERS,
+//        id_nom_element, // Redondant avec ID_DOC
+//        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
+//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type de données
+//        DECALAGE_DEFAUT, // Relatif à l'affichage
+//        DECALAGE, // Relatif à l'affichage
+//        LIBELLE_SYSTEME_REP, // Redondant avec les SR
+//        NOM_BORNE_DEBUT, // Redondant avec les bornes
+//        NOM_BORNE_FIN, // Redondant avec les bornes
+//        NOM_PROFIL_EN_TRAVERS, // Redondant avec les profils en travers
 //        LIBELLE_MARCHE,
 //        INTITULE_ARTICLE,
 //        TITRE_RAPPORT_ETUDE,
 //        ID_TYPE_RAPPORT_ETUDE,
 //        TE16_AUTEUR_RAPPORT,
 //        DATE_RAPPORT,
-//        ID_TRONCON_GESTION,
-//        ID_TYPE_DOCUMENT,
+        ID_TRONCON_GESTION,
+//        ID_TYPE_DOCUMENT, // Redondant avec le type de données
 //        ID_DOSSIER,
 //        DATE_DEBUT_VAL,
 //        DATE_FIN_VAL,
-//        PR_DEBUT_CALCULE,
-//        PR_FIN_CALCULE,
-//        X_DEBUT,
-//        Y_DEBUT,
-//        X_FIN,
-//        Y_FIN,
-//        ID_SYSTEME_REP,
-//        ID_BORNEREF_DEBUT,
-//        AMONT_AVAL_DEBUT,
-//        DIST_BORNEREF_DEBUT,
-//        ID_BORNEREF_FIN,
-//        AMONT_AVAL_FIN,
-//        DIST_BORNEREF_FIN,
+        PR_DEBUT_CALCULE,
+        PR_FIN_CALCULE,
+        X_DEBUT,
+        Y_DEBUT,
+        X_FIN,
+        Y_FIN,
+        ID_SYSTEME_REP,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
+        DIST_BORNEREF_DEBUT,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
+        DIST_BORNEREF_FIN,
 //        COMMENTAIRE,
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
 //        REFERENCE_CALQUE,
-//        DATE_DOCUMENT,
-//        NOM,
+        DATE_DOCUMENT,
+        NOM,
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
 //        ID_ARTICLE_JOURNAL,
-//        ID_PROFIL_EN_TRAVERS,
+        ID_PROFIL_EN_TRAVERS,
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
 //        ID_CONVENTION,
 //        ID_RAPPORT_ETUDE,
@@ -136,7 +136,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         while (it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
-            /*
+            
             document.setTronconId(troncons.get(row.getInt(DocumentProfilTraversColumns.ID_TRONCON_GESTION.toString())).getId());
 
             
@@ -175,15 +175,14 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
                 document.setDate_document(LocalDateTime.parse(row.getDate(DocumentProfilTraversColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            document.setNom(row.getString(DocumentProfilTraversColumns.NOM.toString()));
+            document.setLibelle(row.getString(DocumentProfilTraversColumns.NOM.toString()));
             
             
-            if (row.getInt(DocumentProfilTraversColumns.ID_CONVENTION.toString()) != null) {
-                if (profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_CONVENTION.toString())) != null) {
-                    document.setConvention(profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_CONVENTION.toString())).getId());
+            if (row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
+                if (profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
+                    document.setProfilTravers(profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString())).getId());
                 }
             }
-            
             
             
             
@@ -223,8 +222,6 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             
             
             
-            
-            */
             documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
             
         }

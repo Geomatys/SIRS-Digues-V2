@@ -46,8 +46,8 @@ public class ProfilTraversImporter extends GenericImporter {
     
     private enum ProfilTraversColumns {
         ID_PROFIL_EN_TRAVERS,
-//        NOM,
-//        DATE_DERNIERE_MAJ
+        NOM,
+        DATE_DERNIERE_MAJ
     }
     
     @Override
@@ -73,11 +73,11 @@ public class ProfilTraversImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilTravers profil = new ProfilTravers();
             
-//            profil.setNom(row.getString(ProfilTraversColumns.NOM.toString()));
-//            
-//            if (row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//            }
+            profil.setLibelle(row.getString(ProfilTraversColumns.NOM.toString()));
+            
+            if (row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
             
             profils.put(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
