@@ -43,6 +43,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javax.measure.unit.NonSI;
+import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
@@ -227,6 +228,13 @@ public class CorePlugin extends Plugin{
             final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+            
+            final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                    CommonCRS.Temporal.JAVA.crs(), 
+                    GO2Utilities.FILTER_FACTORY.property("date_debut"), 
+                    GO2Utilities.FILTER_FACTORY.property("date_fin")
+            );
+            fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
             fml.setName(name.getLocalPart());
             layers.add(fml);

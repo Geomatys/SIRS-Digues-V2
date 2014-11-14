@@ -9,6 +9,7 @@ import fr.sirs.Injector;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.logging.Level;
 import javafx.embed.swing.SwingFXUtils;
@@ -44,6 +45,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.referencing.operation.TransformException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -171,6 +173,9 @@ public class FXMapPane extends BorderPane {
             uiMap1.getCanvas().setObjectiveCRS(Session.PROJECTION);
             uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
             uiMap1.getCanvas().setTemporalRange(time,time);
+            uiMap2.getCanvas().setTemporalRange(time,time);
+            uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
+            uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
         } catch (NoninvertibleTransformException | TransformException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
         }
