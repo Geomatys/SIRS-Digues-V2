@@ -1,6 +1,8 @@
 
 package fr.sirs.core;
 
+import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.index.SearchEngine;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +26,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class CouchDBInit {
     
+    public static final String DB_CONNECTOR = "connector";
+    public static final String SEARCH_ENGINE = "searchEngine";
+    public static final String CHANGE_EMITTER = "docChangeEmitter";
+    
     static {
         final File directory = Installation.NTv2.directory(true);
         if (!new File(directory, NTv2Transform.RGF93).isFile()) {
@@ -38,7 +44,6 @@ public class CouchDBInit {
         }
     }
     
-    public static final String DB_CONNECTOR = "connector";
     
     public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, String configFile) throws MalformedURLException {
         
@@ -46,9 +51,15 @@ public class CouchDBInit {
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
         final CouchDbConnector connector = couchsb.createConnector(databaseName,false);
         
+        final DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
+        final SearchEngine searchEngine = new SearchEngine(databaseName, changeEmmiter);
+        changeEmmiter.start();
+        
         final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
         applicationContextParent.refresh();
         applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
+        applicationContextParent.getBeanFactory().registerSingleton(SEARCH_ENGINE, searchEngine);
+        applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
 
         final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
             configFile}, applicationContextParent);

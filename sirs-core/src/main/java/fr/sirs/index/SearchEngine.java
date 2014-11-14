@@ -2,6 +2,8 @@
 package fr.sirs.index;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Element;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -31,7 +33,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
  *
  * @author Johann Sorel (Geomatys).
  */
-public class SearchEngine {
+public class SearchEngine implements DocumentListener {
 
     private static final Logger LOGGER = SirsCore.LOGGER;
     private static final Version VERSION = Version.LUCENE_4_10_2;
@@ -40,17 +42,23 @@ public class SearchEngine {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_KEYWORDS = "keywords";
 
+    private final DocumentChangeEmiter changeEmitter;
     private final String dbName;
     private IndexWriter indexWriter;
     private IndexSearcher indexSearcher;
 
 
-    public SearchEngine(String dbName) throws IOException {
+    public SearchEngine(String dbName, DocumentChangeEmiter changeEmitter) {
         this.dbName = dbName;
-        createIndex();
-        initIndexSearcher();
+        this.changeEmitter = changeEmitter;
     }
 
+    public void init() throws IOException{
+        createIndex();
+        initIndexSearcher();
+        
+    }
+    
     private void createIndex() throws IOException {
         final File configFolder = SirsCore.getConfigFolder();
         final File luceneFolder = new File(new File(configFolder, "lucene"),dbName);
@@ -66,6 +74,21 @@ public class SearchEngine {
     private void initIndexSearcher() throws IOException {
         DirectoryReader directoryReader = DirectoryReader.open(indexWriter.getDirectory());
         indexSearcher = new IndexSearcher(directoryReader);
+    }
+    
+    @Override
+    public void documentCreated(Element changed) {
+        
+    }
+
+    @Override
+    public void documentChanged(Element changed) {
+        
+    }
+
+    @Override
+    public void documentDeleted(Element deleteObject) {
+        
     }
     
     public void addDocument(String docId, String type, String keywords) throws IOException{
@@ -88,8 +111,7 @@ public class SearchEngine {
         indexWriter.deleteDocuments(new Term(FIELD_ID, docId));
         indexWriter.commit();
     }
-    
-    
+        
     public Set<String> search(final String type, final String ... words) throws ParseException, IOException {
         final Set<String> result = new HashSet<>();
         initIndexSearcher();
@@ -128,5 +150,7 @@ public class SearchEngine {
         LOGGER.info("closing metadata index");
         indexWriter.close();
     }
+
+    
 
 }

@@ -42,21 +42,18 @@ public class DocumentChangeEmiterTestCase implements DocumentListener {
 	}
 
 	@Override
-	public Element documentDeleted(Element element) {
+	public void documentDeleted(Element element) {
 		SirsCore.LOGGER.info("documentDeleted(" + element + ")");
-		return element;
 	}
 
 	@Override
-	public Element documentChanged(Element element) {
+	public void documentChanged(Element element) {
 		SirsCore.LOGGER.info("documentChanged(" + element + ")");
-		return element;
 	}
 
 	@Override
-	public Element documentCreated(Element changed) {
+	public void documentCreated(Element changed) {
 		SirsCore.LOGGER.info("documentCreated(" + changed + ")");
-		return changed;
 	}
 
 }

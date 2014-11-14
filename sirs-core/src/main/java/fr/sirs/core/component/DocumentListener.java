@@ -4,9 +4,9 @@ import fr.sirs.core.model.Element;
 
 public interface DocumentListener {
 
-	Element documentCreated(Element changed);
+    void documentCreated(Element changed);
 
-	Element documentChanged(Element changed);
+    void documentChanged(Element changed);
 
-	Element documentDeleted(Element deleteObject);
+    void documentDeleted(Element deleteObject);
 }
