@@ -30,6 +30,9 @@
         eType="#//Borne_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Document"
         eOpposite="#//Document/tronconId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" eType="#//Photo"
+        eOpposite="#//Photo/troncon_digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -49,6 +52,8 @@
         eType="#//ContactStructure" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="conventionIds" upperBound="-1"
         eType="#//Convention"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" eType="#//Photo"
+        eOpposite="#//Photo/objet"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
     <eAnnotations source="generation">
@@ -117,6 +122,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
+        eOpposite="#//Troncon_Digue/photo"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objet" eType="#//Objet"
+        eOpposite="#//Objet/photo"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Organisme">
     <eAnnotations source="generation">
@@ -1127,33 +1136,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="StructurelProfilTravers">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereFbLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereFbPente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereRisbermeLongeurRampe"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereRisbermePente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereRisbermeLargeurSommet"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereTalusLongeurRampe"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="riviereTalusPente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteTypeDevers" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="creteTypesDevers" eType="#//RefDevers"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terreTalusLongeurRampe"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terreTalusPente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terreRisbermeLargeurSommet"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terreRisbermeLongeurRampe"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terreRisbermePente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="leveeId" eType="#//LeveeProfilTravers"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefDevers">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1229,5 +1211,15 @@
   <eClassifiers xsi:type="ecore:EClass" name="DesordreStructure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Epi" eSuperTypes="#//Objet">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeTroncon">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
 </ecore:EPackage>
