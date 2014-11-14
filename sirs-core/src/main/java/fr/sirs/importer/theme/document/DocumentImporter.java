@@ -12,6 +12,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
 import fr.sirs.core.model.Marche;
+import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -42,9 +43,8 @@ import org.opengis.util.FactoryException;
  */
 public class DocumentImporter extends GenericDocumentImporter {
     
-    private DocumentRepository documentRepository;
+    private DocumentConventionImporter documentConventionImporter;
     private ConventionImporter conventionImporter;
-    private TronconGestionDigueImporter tronconGestionDigueImporter;
     private TypeDocumentImporter typeDocumentImporter;
     
     public DocumentImporter(final Database accessDatabase, 
@@ -54,24 +54,28 @@ public class DocumentImporter extends GenericDocumentImporter {
             final SystemeReperageImporter systemeReperageImporter,
             final ConventionImporter conventionImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
-        super(accessDatabase, couchDbConnector, borneDigueImporter, systemeReperageImporter);
-        this.documentRepository = documentRepository;
+        super(accessDatabase, couchDbConnector, documentRepository, 
+                borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
         this.conventionImporter = conventionImporter;
-        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
-        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, couchDbConnector);
+        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, couchDbConnector, new TypeDocumentGrandeEchelleImporter(accessDatabase, couchDbConnector));
+        
+        this.documentConventionImporter = new DocumentConventionImporter(
+                accessDatabase, couchDbConnector, documentRepository, 
+                borneDigueImporter, systemeReperageImporter, 
+                tronconGestionDigueImporter, conventionImporter);
     }
     
     private enum DocumentColumns {
         ID_DOC,
         ID_TRONCON_GESTION,
         ID_TYPE_DOCUMENT,
-//        ID_DOSSIER,
-//        REFERENCE_PAPIER,
-//        REFERENCE_NUMERIQUE,
-//        REFERENCE_CALQUE,
+//        ID_DOSSIER, // Pas dans le nouveau modèle
+//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
+//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
+//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
         DATE_DOCUMENT,
-//        DATE_DEBUT_VAL,
-//        DATE_FIN_VAL,
+//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+//        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -85,7 +89,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         ID_BORNEREF_FIN,
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-//        COMMENTAIRE,
+//        COMMENTAIRE, // Pas dans le nouveau modèle
         NOM,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
@@ -118,6 +122,16 @@ public class DocumentImporter extends GenericDocumentImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         
         documents = new HashMap<>();
+        final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
+        final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();
+        final Map<Integer, Document> documentConventions = documentConventionImporter.getDocumentConvention();
+        
+        
+        if(documentConventions!=null) for(final Integer key : documentConventions.keySet()){
+            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+            else documents.put(key, documentConventions.get(key));
+        }
+        
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Convention> conventions = conventionImporter.getConventions();
@@ -127,7 +141,19 @@ public class DocumentImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final Document document = new Document();
+            final Document document;
+            final boolean nouveauDocument;
+            if(documents.get(row.getInt(DocumentColumns.ID_DOC.toString()))!=null){
+                document = documents.get(row.getInt(DocumentColumns.ID_DOC.toString()));
+                nouveauDocument=false;
+            }
+            else{
+                System.out.println("Nouveau désordre !!");
+                document = new Document();
+                nouveauDocument=true;
+            }
+            
+            /*
             
             document.setTronconId(troncons.get(row.getInt(DocumentColumns.ID_TRONCON_GESTION.toString())).getId());
             
@@ -199,18 +225,18 @@ public class DocumentImporter extends GenericDocumentImporter {
                 document.setPR_fin(row.getDouble(DocumentColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
+            */
             
             
             
             
             
             
-            
-            final Class typeDocument = this.typeDocumentImporter.getTypeDocument().get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+            final Class classeDocument = classesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
 
-            if (typeDocument != null) {
-                document.setTypeDocument(typeDocument.getCanonicalName());
-                if (typeDocument.equals(Convention.class)) {
+            if (classeDocument != null) {
+                document.setType(classeDocument.getCanonicalName());
+                if (classeDocument.equals(Convention.class)) {
                     // Pour les conventions !
                     if (row.getInt(DocumentColumns.ID_CONVENTION.toString()) != null) {
                         if (conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())) != null) {
@@ -218,10 +244,10 @@ public class DocumentImporter extends GenericDocumentImporter {
                         }
                     }
                 } 
-                else if(typeDocument.equals(Marche.class)){
+                else if(classeDocument.equals(Marche.class)){
                     
                 }
-                else if(typeDocument.equals(ArticleJournal.class)){
+                else if(classeDocument.equals(ArticleJournal.class)){
                     
                 }
                 else {
@@ -230,9 +256,12 @@ public class DocumentImporter extends GenericDocumentImporter {
             } else {
                 System.out.println("Type de document inconnu !");
             }
+                
+            document.setTypeDocument(typesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString())).getId());
 
-            documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
-            
+            if(nouveauDocument){
+               documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
+            }
         }
         couchDbConnector.executeBulk(documents.values());
     }

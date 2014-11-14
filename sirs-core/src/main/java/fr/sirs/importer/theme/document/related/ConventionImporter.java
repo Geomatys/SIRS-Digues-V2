@@ -48,7 +48,7 @@ public class ConventionImporter extends GenericImporter {
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
         COMMENTAIRE,
-        DATE_DERNIERE_MAJ
+//        DATE_DERNIERE_MAJ
     };
     
     
@@ -77,21 +77,24 @@ public class ConventionImporter extends GenericImporter {
             final Row row = it.next();
             final Convention convention = new Convention();
             
-            if (row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                convention.setDate_fin(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
+            convention.setLibelle(row.getString(ConventionColumns.LIBELLE_CONVENTION.toString()));
+            
+            convention.setTypeConventionId(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
+            
             if (row.getDate(ConventionColumns.DATE_DEBUT_CONVENTION.toString()) != null) {
                 convention.setDate_debut(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DEBUT_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
+            
             if (row.getDate(ConventionColumns.DATE_FIN_CONVENTION.toString()) != null) {
                 convention.setDate_fin(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
-
-            convention.setLibelle(row.getString(ConventionColumns.LIBELLE_CONVENTION.toString()));
-            convention.setCommentaire(row.getString(ConventionColumns.COMMENTAIRE.toString()));
-            convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
+            
             convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
-            convention.setTypeConventionId(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
+            
+            convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
+            
+            convention.setCommentaire(row.getString(ConventionColumns.COMMENTAIRE.toString()));
+
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
             conventionRepository.add(convention);
         }
