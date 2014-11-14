@@ -1,5 +1,8 @@
 package fr.sirs.importer.structure.desordre;
 
+import fr.sirs.importer.structure.TypePositionImporter;
+import fr.sirs.importer.structure.TypeCoteImporter;
+import fr.sirs.importer.structure.TypeSourceImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;

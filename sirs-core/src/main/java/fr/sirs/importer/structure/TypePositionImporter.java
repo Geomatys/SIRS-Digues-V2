@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure.desordre;
+package fr.sirs.importer.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;

@@ -18,10 +18,10 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
-import fr.sirs.importer.structure.desordre.TypeCoteImporter;
+import fr.sirs.importer.structure.TypeCoteImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
-import fr.sirs.importer.structure.desordre.TypePositionImporter;
-import fr.sirs.importer.structure.desordre.TypeSourceImporter;
+import fr.sirs.importer.structure.TypePositionImporter;
+import fr.sirs.importer.structure.TypeSourceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -83,12 +83,16 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
         this.borneDigueImporter = borneDigueImporter;
-        this.structureImporter = structureImporter;
-        this.desordreImporter = desordreImporter;
+        
         // Structure and Desordre importers need TronconGestionDigue importer itself.
-        this.structureImporter = new StructureImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, couchDbConnector, this, systemeReperageImporter, borneDigueImporter, 
-                structureImporter, typeDesordreImporter, typeSourceImporter, typePositionImporter, typeCoteImporter);
+        this.structureImporter = new StructureImporter(accessDatabase, 
+                couchDbConnector, this, systemeReperageImporter, 
+                borneDigueImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter);
+        this.desordreImporter = new DesordreImporter(accessDatabase, 
+                couchDbConnector, this, systemeReperageImporter, 
+                borneDigueImporter, structureImporter, typeDesordreImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter);
     }
     
     public StructureImporter getStructureImporter(){return structureImporter;}

@@ -2,6 +2,9 @@ package fr.sirs.importer.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -9,6 +12,9 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PiedDigue;
+import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefPosition;
+import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.io.IOException;
@@ -18,7 +24,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -28,35 +42,44 @@ class PiedDigueImporter extends GenericStructureImporter {
 
     private Map<Integer, PiedDigue> piedsDigue = null;
     private Map<Integer, List<PiedDigue>> piedsDigueByTronconId = null;
+    private final TypeSourceImporter typeSourceImporter;
+    private final TypeCoteImporter typeCoteImporter;
+    private final TypePositionImporter typePositionImporter;
 
     PiedDigueImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter) {
+            final BorneDigueImporter borneDigueImporter, 
+            final TypeSourceImporter typeSourceImporter,
+            final TypePositionImporter typePositionImporter,
+            final TypeCoteImporter typeCoteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter);
+        this.typeSourceImporter = typeSourceImporter;
+        this.typePositionImporter = typePositionImporter;
+        this.typeCoteImporter = typeCoteImporter;
     }
 
     private enum PiedDigueColumns {
 
         ID_ELEMENT_STRUCTURE,
-        //        id_nom_element,
-        //        ID_SOUS_GROUPE_DONNEES,
-        //        LIBELLE_TYPE_ELEMENT_STRUCTURE,
-        //        DECALAGE_DEFAUT,
-        //        DECALAGE,
-        //        LIBELLE_SOURCE,
-        //        LIBELLE_TYPE_COTE,
-        //        LIBELLE_SYSTEME_REP,
-        //        NOM_BORNE_DEBUT,
-        //        NOM_BORNE_FIN,
+        //        id_nom_element, // Inutile
+        //        ID_SOUS_GROUPE_DONNEES, // Redondant
+        //        LIBELLE_TYPE_ELEMENT_STRUCTURE, //Redondant
+        //        DECALAGE_DEFAUT, // Affichage
+        //        DECALAGE, //Affichage
+        //        LIBELLE_SOURCE, // Dans le TypeSourceImporter
+        //        LIBELLE_TYPE_COTE, // Dans le TypeCoteImporter
+        //        LIBELLE_SYSTEME_REP, //Dans le SystemeReperageImporter
+        //        NOM_BORNE_DEBUT, // Dans le BorneImporter
+        //        NOM_BORNE_FIN, // Dans le BorneImporter
         //        LIBELLE_TYPE_MATERIAU,
         //        LIBELLE_TYPE_NATURE,
         //        LIBELLE_TYPE_FONCTION,
-        //        ID_TYPE_ELEMENT_STRUCTURE,
-        //        ID_TYPE_COTE,
-        //        ID_SOURCE,
+        //        ID_TYPE_ELEMENT_STRUCTURE, //Dans le TypeElementStructureImporter
+                ID_TYPE_COTE,
+                ID_SOURCE,
         ID_TRONCON_GESTION,
                 DATE_DEBUT_VAL,
         PR_DEBUT_CALCULE,
@@ -69,7 +92,7 @@ class PiedDigueImporter extends GenericStructureImporter {
                 AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_COUCHE,
+//        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
 //        ID_TYPE_MATERIAU,
 //        ID_TYPE_NATURE,
 //        ID_TYPE_FONCTION,
@@ -81,7 +104,7 @@ class PiedDigueImporter extends GenericStructureImporter {
 //     LIBELLE_TYPE_NATURE_BAS,
 //     LIBELLE_TYPE_MATERIAU_BAS,
 //     LIBELLE_TYPE_OUVRAGE_PARTICULIER,
-//     LIBELLE_TYPE_POSITION,
+//     LIBELLE_TYPE_POSITION, // Dans le TypePositionImporter
 //     RAISON_SOCIALE_ORG_PROPRIO,
 //     RAISON_SOCIALE_ORG_GESTION,
 //     INTERV_PROPRIO,
@@ -89,11 +112,11 @@ class PiedDigueImporter extends GenericStructureImporter {
 //     LIBELLE_TYPE_COMPOSITION,
 //     LIBELLE_TYPE_VEGETATION,
              DATE_FIN_VAL,
-        //     X_DEBUT,
-        //     Y_DEBUT,
-        //     X_FIN,
-        //     Y_FIN,
-        //     EPAISSEUR,
+             X_DEBUT,
+             Y_DEBUT,
+             X_FIN,
+             Y_FIN,
+        //     EPAISSEUR, // N'existe pas dans le modèle des pieds de digue
         //     TALUS_INTERCEPTE_CRETE,
         //     ID_TYPE_NATURE_HAUT,
         //     ID_TYPE_MATERIAU_HAUT,
@@ -103,7 +126,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         //     LONG_RAMP_BAS,
         //     PENTE_INTERIEURE,
         //     ID_TYPE_OUVRAGE_PARTICULIER,
-        //     ID_TYPE_POSITION,
+             ID_TYPE_POSITION,
         //     ID_ORG_PROPRIO,
         //     ID_ORG_GESTION,
         //     ID_INTERV_PROPRIO,
@@ -183,6 +206,9 @@ class PiedDigueImporter extends GenericStructureImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -217,7 +243,56 @@ class PiedDigueImporter extends GenericStructureImporter {
             }
             
             piedDigue.setCommentaire(row.getString(PiedDigueColumns.COMMENTAIRE.toString()));
+//            piedDigue.setNum_couche(row.getInt(PiedDigueColumns.N_COUCHE.toString()));
 
+            
+            
+            
+            
+            
+            if(row.getInt(PiedDigueColumns.ID_SOURCE.toString())!=null){
+                piedDigue.setSource(typesSource.get(row.getInt(PiedDigueColumns.ID_SOURCE.toString())).getId());
+            }
+            
+            if(row.getInt(PiedDigueColumns.ID_TYPE_POSITION.toString())!=null){
+                piedDigue.setPosition_structure(typesPosition.get(row.getInt(PiedDigueColumns.ID_TYPE_POSITION.toString())).getId());
+            }
+            
+            if(row.getInt(PiedDigueColumns.ID_TYPE_COTE.toString())!=null){
+                piedDigue.setCote(typesCote.get(row.getInt(PiedDigueColumns.ID_TYPE_COTE.toString())).getId());
+            }
+            
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+
+                try {
+
+                    if (row.getDouble(PiedDigueColumns.X_DEBUT.toString()) != null && row.getDouble(PiedDigueColumns.Y_DEBUT.toString()) != null) {
+                        piedDigue.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(PiedDigueColumns.X_DEBUT.toString()),
+                                row.getDouble(PiedDigueColumns.Y_DEBUT.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(PiedDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                try {
+
+                    if (row.getDouble(PiedDigueColumns.X_FIN.toString()) != null && row.getDouble(PiedDigueColumns.Y_FIN.toString()) != null) {
+                        piedDigue.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(PiedDigueColumns.X_FIN.toString()),
+                                row.getDouble(PiedDigueColumns.Y_FIN.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(PiedDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(PiedDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
             final TronconDigue troncon = troncons.get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 piedDigue.setTroncon(troncon.getId());

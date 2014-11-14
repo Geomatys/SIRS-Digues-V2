@@ -27,10 +27,10 @@ import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
 import fr.sirs.importer.structure.StructureImporter;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
-import fr.sirs.importer.structure.desordre.TypeCoteImporter;
+import fr.sirs.importer.structure.TypeCoteImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
-import fr.sirs.importer.structure.desordre.TypePositionImporter;
-import fr.sirs.importer.structure.desordre.TypeSourceImporter;
+import fr.sirs.importer.structure.TypePositionImporter;
+import fr.sirs.importer.structure.TypeSourceImporter;
 import fr.sirs.importer.theme.document.related.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeConventionImporter;
@@ -631,8 +631,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
