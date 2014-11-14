@@ -136,6 +136,25 @@
                   </archive>
               </configuration>
       </plugin>
+      <plugin>
+        <groupId>com.geomatys.maven</groupId>
+        <artifactId>maven-fxmodel-plugin</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>fxml</id>
+            <goals>
+              <goal>fxml</goal>
+            </goals>
+            <configuration>
+              <packageName>fr.sirs.theme.ui</packageName>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <model>../sirs-core/model/sirs.ecore</model>
+        </configuration>
+      </plugin> 
     </plugins>
   </build>
 
