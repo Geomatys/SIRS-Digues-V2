@@ -106,6 +106,10 @@
         eOpposite="#//Troncon_Digue/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//RapportEtude" eOpposite="#//RapportEtude/document"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilLong" eType="#//ProfilLong"
+        eOpposite="#//ProfilLong/document"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTravers" eType="#//ProfilTravers"
+        eOpposite="#//ProfilTravers/document"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="photoIds" upperBound="-1"
@@ -1090,10 +1094,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers" eSuperTypes="#//Document">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveeIds" upperBound="-1"
         eType="#//LeveeProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" eType="#//ProfilTraversTroncon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
+        eType="#//Document" eOpposite="#//Document/profilTravers"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LeveeProfilTravers">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1177,7 +1186,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//Document">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSystemeReleve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleve" eType="#//RefSystemeReleveProfil"/>
@@ -1192,6 +1204,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLongEvenementHydraulique"
         eType="#//ProfilLongEvenementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
+        eType="#//Document" eOpposite="#//Document/profilLong"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
