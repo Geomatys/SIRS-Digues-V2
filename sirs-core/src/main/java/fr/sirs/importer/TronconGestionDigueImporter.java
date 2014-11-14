@@ -164,7 +164,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final Row row = it.next();
             final TronconDigue tronconDigue = new TronconDigue();
 
-            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString()));
+            tronconDigue.setLibelle(row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString()));
             tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE_TRONCON.toString()));
             if (row.getDate(TronconGestionDigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

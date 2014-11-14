@@ -119,7 +119,7 @@ public class FXTronconDiguePane extends BorderPane{
                         super.updateItem(item, empty);
                         setGraphic(null);
                         if(!empty && item!=null){
-                            setText(((SystemeReperage)item).getNom());
+                            setText(((SystemeReperage)item).getLibelle());
                         }else{                            
                             setText("");
                         }
@@ -155,7 +155,7 @@ public class FXTronconDiguePane extends BorderPane{
         
         final TronconDigue troncon = tronconProperty.get();
         final SystemeReperage sr = new SystemeReperage();
-        sr.setNom("Nouveau SR");
+        sr.setLibelle("Nouveau SR");
         sr.setTronconId(troncon.getId());
         repo.add(sr);
         
@@ -210,7 +210,7 @@ public class FXTronconDiguePane extends BorderPane{
         final Digue digue = session.getDigueById(troncon.getDigueId());
         
         this.uiId.setText(troncon.getId());
-        this.uiName.textProperty().bindBidirectional(troncon.nomProperty());
+        this.uiName.textProperty().bindBidirectional(troncon.libelleProperty());
         this.uiComment.setHtmlText(troncon.getCommentaire());
                 
         this.uiDigue.setItems(allDigues);

@@ -29,9 +29,9 @@ public class SirsListCell extends ListCell {
         if (item instanceof CoordinateReferenceSystem) {
             setText(((CoordinateReferenceSystem) item).getName().toString());
         } else if (item instanceof SystemeReperage) {
-            setText(((SystemeReperage) item).getNom());
+            setText(((SystemeReperage) item).getLibelle());
         } else if (item instanceof BorneDigue) {
-            setText(((BorneDigue) item).getNom());
+            setText(((BorneDigue) item).getLibelle());
         } else if (item instanceof PropertyType) {
             setText(((PropertyType) item).getName().tip().toString());
         } else {

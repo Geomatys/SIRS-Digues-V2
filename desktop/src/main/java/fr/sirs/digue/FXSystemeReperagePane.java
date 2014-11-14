@@ -40,7 +40,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         srProperty.addListener((ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) -> {
             if(oldValue!=null){
-                uiNom.textProperty().unbindBidirectional(oldValue.nomProperty());
+                uiNom.textProperty().unbindBidirectional(oldValue.libelleProperty());
                 uiDate.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
                 borneTable.getUiTable().setItems(FXCollections.emptyObservableList());
             }
@@ -56,7 +56,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage sr = srProperty.get();
         if(sr==null) return;
         
-        uiNom.textProperty().bindBidirectional(sr.nomProperty());
+        uiNom.textProperty().bindBidirectional(sr.libelleProperty());
         uiDate.valueProperty().bindBidirectional(sr.dateMajProperty());
         uiComment.setHtmlText(sr.getCommentaire());
                 

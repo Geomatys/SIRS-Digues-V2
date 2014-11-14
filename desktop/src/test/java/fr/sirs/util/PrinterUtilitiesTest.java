@@ -120,7 +120,7 @@ public class PrinterUtilitiesTest {
         borneDigue.setDate_fin(LocalDateTime.now());
         borneDigue.setFictive(false);
         //borneDigue.setIdTronconGestion(2);
-        borneDigue.setNom("Borne principale");
+        borneDigue.setLibelle("Borne principale");
         //borneDigue.setXPoint(1.3);
         //borneDigue.setYPoint(1.4);
         //borneDigue.setZPoint(1.5);

@@ -86,7 +86,7 @@ public class SystemeReperageImporter extends GenericImporter {
             final Row row = it.next();
             final SystemeReperage systemeReperage = new SystemeReperage();
             
-            systemeReperage.setNom(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
+            systemeReperage.setLibelle(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
             systemeReperage.setCommentaire(row.getString(SystemeRepLineaireColumns.COMMENTAIRE_SYSTEME_REP.toString()));
             if (row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

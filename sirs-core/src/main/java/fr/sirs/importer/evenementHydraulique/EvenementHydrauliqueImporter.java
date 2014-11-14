@@ -77,7 +77,7 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
             final Row row = it.next();
             final EvenementHydraulique evenement = new EvenementHydraulique();
             
-            evenement.setNom(row.getString(EvenementHydrauliqueColumns.NOM_EVENEMENT_HYDRAU.toString()));
+            evenement.setLibelle(row.getString(EvenementHydrauliqueColumns.NOM_EVENEMENT_HYDRAU.toString()));
             if(row.getDouble(EvenementHydrauliqueColumns.VITESSE_MOYENNE.toString())!=null){
                 evenement.setVitesse_moy(row.getDouble(EvenementHydrauliqueColumns.VITESSE_MOYENNE.toString()).floatValue());
             }

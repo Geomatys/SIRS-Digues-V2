@@ -363,7 +363,7 @@ public class CorePlugin extends Plugin{
                 
             }else if(candidate instanceof TronconDigue){
                 final TronconDigue cdt = (TronconDigue) candidate;
-                final String text = "Tronçon : "+cdt.getNom();
+                final String text = "Tronçon : "+cdt.getLibelle();
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {

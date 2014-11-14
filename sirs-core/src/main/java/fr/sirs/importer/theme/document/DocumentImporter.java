@@ -137,7 +137,7 @@ public class DocumentImporter extends GenericDocumentImporter {
             if (row.getDate(DocumentColumns.DATE_DOCUMENT.toString()) != null) {
                 document.setDate_document(LocalDateTime.parse(row.getDate(DocumentColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
-            document.setNom(row.getString(DocumentColumns.NOM.toString()));
+            document.setLibelle(row.getString(DocumentColumns.NOM.toString()));
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;

@@ -117,7 +117,7 @@ public class FXDiguesPane extends SplitPane{
                 addTronconMenu.getItems().add(new NouveauTronconMenuItem((Digue) obj));
                 setContextMenu(addTronconMenu);
             } else if (obj instanceof TronconDigue) {
-                this.setText(((TronconDigue) obj).getNom() + " (" + getTreeItem().getChildren().size() + ") ");
+                this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 setContextMenu(null);
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
@@ -133,7 +133,7 @@ public class FXDiguesPane extends SplitPane{
 
                 this.setOnAction((ActionEvent t) -> {
                     final TronconDigue troncon = new TronconDigue();
-                    troncon.setNom("Tronçon vide");
+                    troncon.setLibelle("Tronçon vide");
                     troncon.setDigueId(digue.getId());
                     FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
                     final TreeItem newTroncon = new TreeItem<>(troncon);

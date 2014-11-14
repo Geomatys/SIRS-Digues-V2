@@ -77,7 +77,7 @@ public class FXCretePane extends BorderPane implements ThemePane {
             @Override
             public String toString(TronconDigue object) {
                 if(object == null) return "Pas de tronçon.";
-                return object.getNom()+ " ("+object.getId()+ ")";
+                return object.getLibelle()+ " ("+object.getId()+ ")";
             }
 
             @Override

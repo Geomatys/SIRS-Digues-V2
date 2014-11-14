@@ -106,7 +106,7 @@ public class BorneDigueImporter extends GenericImporter {
             final Row row = it.next();
             final BorneDigue borne = new BorneDigue();
 
-            borne.setNom(row.getString(BorneDigueColumns.NOM_BORNE.toString()));
+            borne.setLibelle(row.getString(BorneDigueColumns.NOM_BORNE.toString()));
             borne.setCommentaire(row.getString(BorneDigueColumns.COMMENTAIRE_BORNE.toString()));
             if (row.getDate(BorneDigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 borne.setDateMaj(LocalDateTime.parse(row.getDate(BorneDigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

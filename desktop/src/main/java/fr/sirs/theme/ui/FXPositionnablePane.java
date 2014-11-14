@@ -326,14 +326,14 @@ public class FXPositionnablePane extends BorderPane {
             }
             
             
-            page.append("<h2>SR : ").append(sr.getNom()).append("</h2>");
+            page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
             page.append("<b>Début </b>");
-            page.append(startBorne.getNom()).append(' ');
+            page.append(startBorne.getLibelle()).append(' ');
             page.append(distanceStartBorne).append("m ");
             page.append(startAval ? "en amont":"en aval");
             page.append("<br/>");
             page.append("<b>Fin </b>");
-            page.append(endBorne.getNom()).append(' ');
+            page.append(endBorne.getLibelle()).append(' ');
             page.append(distanceEndBorne).append("m ");
             page.append(endAval ? "en amont":"en aval");
             page.append("<br/><br/>");

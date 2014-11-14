@@ -97,7 +97,7 @@ public class RepositoriesTest {
         final int nbTroncons = 30;
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = new TronconDigue();
-            tron.setNom("Le tronçon " + i);
+            tron.setLibelle("Le tronçon " + i);
             tron.setCommentaire("<html><body><b>Tronçon " + i + " :</b> Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. Sed non risus. Suspendisse lectus "
                     + "tortor, dignissim sit amet, adipiscing nec, ultricies "

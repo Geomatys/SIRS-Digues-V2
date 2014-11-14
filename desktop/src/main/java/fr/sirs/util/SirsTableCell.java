@@ -70,11 +70,11 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
             if(item instanceof Digue){
                 text = ((Digue)item).getLibelle();
             }else if(item instanceof TronconDigue){
-                text = ((TronconDigue)item).getNom();
+                text = ((TronconDigue)item).getLibelle();
             }else if(item instanceof BorneDigue){
-                text = ((BorneDigue)item).getNom();
+                text = ((BorneDigue)item).getLibelle();
             }else if(item instanceof SystemeReperage){
-                text = ((SystemeReperage)item).getNom();
+                text = ((SystemeReperage)item).getLibelle();
             }
             
             setText(text);

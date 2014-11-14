@@ -56,7 +56,7 @@ public class FXTronconThemePane extends BorderPane {
         uiTronconChoice.setConverter(new StringConverter<TronconDigue>() {
             @Override
             public String toString(TronconDigue object) {
-                return object.getNom();
+                return object.getLibelle();
             }
             @Override
             public TronconDigue fromString(String string) {
