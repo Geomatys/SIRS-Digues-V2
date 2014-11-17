@@ -2,6 +2,7 @@ package fr.sirs.importer.theme.document.related;
 
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -19,7 +20,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class ProfilTraversDescriptionImporter extends GenericImporter {
 
-    private Map<Integer, ProfilTravers> profils = null;
+    private Map<Integer, LeveeProfilTravers> levees = null;
     private ProfilTraversRepository profilTraversRepository;
     private TypeProfilTraversImporter typeProfilTraversImporter;
     
@@ -36,12 +37,12 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         this.typeProfilTraversImporter = typeProfilTraversImporter;
     }
     
-    public Map<Integer, ProfilTravers> getProfilTravers() throws IOException, AccessDbImporterException{
-        if(profils==null) compute();
-        return profils;
+    public Map<Integer, LeveeProfilTravers> getLeveeProfilTravers() throws IOException, AccessDbImporterException{
+        if(levees==null) compute();
+        return levees;
     }
     
-    private enum ProfilTraversColumns {
+    private enum ProfilTraversDescriptionColumns {
 //        ID_PROFIL_EN_TRAVERS_LEVE,
 //        ID_PROFIL_EN_TRAVERS,
 //        DATE_LEVE,
@@ -62,7 +63,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversColumns c : ProfilTraversColumns.values()) {
+        for (ProfilTraversDescriptionColumns c : ProfilTraversDescriptionColumns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -70,7 +71,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS.toString();
+        return DbImporter.TableName.PROFIL_EN_TRAVERS_DESCRIPTION.toString();
     }
 
     @Override

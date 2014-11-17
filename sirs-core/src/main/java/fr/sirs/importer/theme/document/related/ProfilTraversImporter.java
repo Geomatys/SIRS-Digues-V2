@@ -76,6 +76,7 @@ public class ProfilTraversImporter extends GenericImporter {
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
+            
             profils.put(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
         couchDbConnector.executeBulk(profils.values());

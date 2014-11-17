@@ -592,8 +592,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -644,7 +644,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
 //            importer.cleanDb();
-            importer.importation();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
