@@ -1130,7 +1130,6 @@
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveeIds" upperBound="-1"
         eType="#//LeveeProfilTravers"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" eType="#//ProfilTraversTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//Document" eOpposite="#//Document/profilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1155,6 +1154,7 @@
         eType="#//ProfilTraversEvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrigineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="leveeId" eType="#//ProfilTraversTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
