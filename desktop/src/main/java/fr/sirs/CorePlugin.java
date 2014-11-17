@@ -151,7 +151,7 @@ public class CorePlugin extends Plugin{
             final BeanStore tronconStore = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, ()-> repo.getAll())
+                            null, PROJECTION, repo::getAll)
             );
             items.addAll(buildLayers(tronconStore,createTronconStyle(),true));
             

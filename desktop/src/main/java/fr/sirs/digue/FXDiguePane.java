@@ -148,14 +148,14 @@ public class FXDiguePane extends BorderPane {
         private void updateTable() {
             reloadTroncons();
             if (troncons == null) {
-                uiTable.setItems(FXCollections.emptyObservableList());
+                setTableItems(FXCollections.emptyObservableList());
             } else {
             //JavaFX bug : sortable is not possible on filtered list
                 // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
                 // https://javafx-jira.kenai.com/browse/RT-32091
                 final SortedList sortedList = new SortedList(troncons);
-                uiTable.setItems(sortedList);
-                sortedList.comparatorProperty().bind(uiTable.comparatorProperty());
+                setTableItems(sortedList);
+                sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
             }
         }
     

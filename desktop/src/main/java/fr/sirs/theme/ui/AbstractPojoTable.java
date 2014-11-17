@@ -11,42 +11,57 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
+import fr.sirs.index.SearchEngine;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Popup;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.internal.Threads;
 
 /**
  *
@@ -90,15 +105,26 @@ public abstract class AbstractPojoTable extends BorderPane{
         LocalDateTime.class
     };
     
-    protected final TableView uiTable = new FXTableView();
+    private final TableView<Element> uiTable = new FXTableView<>();
     protected final ScrollPane uiScroll = new ScrollPane(uiTable);
     protected final Class pojoClass;
     protected final Session session = Injector.getBean(Session.class);
+    
+    //valeurs affichées
+    private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
+    private final ProgressIndicator searchRunning = new ProgressIndicator();
+    private ObservableList<Element> allValues;
+    private ObservableList<Element> filteredValues;
+    private final Button uiSearch;
+    private final StringProperty currentSearch = new SimpleStringProperty("");
     
     public AbstractPojoTable(Class pojoClass, String title) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
         
+        searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+        searchRunning.setPrefSize(22, 22);
+        searchRunning.setStyle(" -fx-progress-color: white;");
         uiScroll.setFitToHeight(true);
         uiScroll.setFitToWidth(true);
         uiTable.setEditable(true);
@@ -139,9 +165,11 @@ public abstract class AbstractPojoTable extends BorderPane{
             }
         });
         
-        final Button uiSearch = new Button(null, new ImageView(SIRS.ICON_SEARCH));
+        uiSearch = new Button(null, searchNone);
+        uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add("btn-without-style");        
-        uiSearch.setOnAction((ActionEvent event) -> {/*TODO*/});
+        uiSearch.setOnAction((ActionEvent event) -> {search();});
+        uiSearch.getStyleClass().add("label-header");
         
         final Label uiTitle = new Label(title);
         uiTitle.getStyleClass().add("pojotable-header");   
@@ -156,9 +184,69 @@ public abstract class AbstractPojoTable extends BorderPane{
         setTop(top);
     }
 
+    protected void search(){
+        if(uiSearch.getGraphic()!= searchNone){
+            //une recherche est deja en cours
+            return;
+        }
+        
+        final Popup popup = new Popup();
+        final TextField textField = new TextField(currentSearch.get());
+        popup.getContent().add(textField);
+        
+        textField.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                currentSearch.set(textField.getText());
+                popup.hide();
+                setTableItems(allValues);
+            }
+        });
+        final Point2D sc = uiSearch.localToScreen(0, 0);
+        popup.show(uiSearch, sc.getX(), sc.getY());
+        
+    }
+    
     public TableView getUiTable() {
         return uiTable;
     }
+    
+    protected void setTableItems(ObservableList<Element> items){
+        uiSearch.setGraphic(searchRunning);
+        
+        new Thread(){
+            @Override
+            public void run() {
+                allValues = items;
+                final String str = currentSearch.get();
+                if(str == null || str.isEmpty()){
+                    filteredValues = allValues;
+                }else{
+                    final SearchEngine searchEngine = Injector.getSearchEngine();
+                    final String type = pojoClass.getSimpleName();
+                    final Set<String> result = new HashSet<>();
+                    try {
+                        result.addAll(searchEngine.search(type, str.split("\\.")));
+                    } catch (ParseException | IOException ex) {
+                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    }
+
+                    filteredValues = allValues.filtered((Element t) -> {
+                        return result.contains(t.getDocumentId());
+                    });
+                }
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        uiTable.setItems(filteredValues);
+                        uiSearch.setGraphic(searchNone);
+                    }
+                });
+            }
+        }.start();
+    }
+        
     
     protected abstract void deletePojos(Element ... pojos);
     

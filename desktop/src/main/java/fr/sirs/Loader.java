@@ -160,9 +160,7 @@ public class Loader extends Application {
      * Display the main frame.
      */
     private void showMainStage() throws IOException {
-        final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
-                "classpath:/fr/sirs/spring/application-context.xml");
-        
+                
         final FXMainFrame frame = new FXMainFrame();
         final Session session = Injector.getBean(Session.class);
         session.setFrame(frame);
@@ -181,7 +179,7 @@ public class Loader extends Application {
             try {
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 5 + plugins.length;
+                final int total = 6 + plugins.length;
                 
                 GeometryDeserializer.class.newInstance();
                 
@@ -231,6 +229,12 @@ public class Loader extends Application {
                 JAXBSLDUtilities.getMarshallerPoolSLD110();
                 JAXBSLDUtilities.getMarshallerPoolSLD100();
                 final StyleXmlIO io = new StyleXmlIO();
+                
+                // LOAD SIRS DATABASE //////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Chargement et création des indexes ...");
+                final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
+                "classpath:/fr/sirs/spring/application-context.xml");
                 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for(Plugin plugin : plugins){

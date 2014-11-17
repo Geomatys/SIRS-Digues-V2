@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.http.HttpClient;
@@ -45,14 +43,14 @@ public class CouchDBInit {
     }
     
     
-    public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, String configFile) throws MalformedURLException {
+    public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, String configFile) throws MalformedURLException, IOException {
         
         final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
         final CouchDbConnector connector = couchsb.createConnector(databaseName,false);
         
         final DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
-        final SearchEngine searchEngine = new SearchEngine(databaseName, changeEmmiter);
+        final SearchEngine searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
         changeEmmiter.start();
         
         final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();

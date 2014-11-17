@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.index.SearchEngine;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -31,4 +32,13 @@ public class Injector implements ApplicationContextAware {
         return applicationContext.getBean(clazz);
         
     }
+    
+    public static Session getSession(){
+        return getBean(Session.class);
+    }
+    
+    public static SearchEngine getSearchEngine(){
+        return getBean(SearchEngine.class);
+    }
+    
 }
