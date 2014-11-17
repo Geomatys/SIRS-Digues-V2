@@ -91,7 +91,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         ID_BORNEREF_FIN,
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-//        COMMENTAIRE,
+        COMMENTAIRE,
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
 //        REFERENCE_CALQUE,
@@ -177,6 +177,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             
             document.setLibelle(row.getString(DocumentProfilTraversColumns.NOM.toString()));
             
+            document.setCommentaire(row.getString(DocumentProfilTraversColumns.COMMENTAIRE.toString()));
             
             if (row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
                 if (profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
@@ -227,7 +228,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         }
     }
     
-    public Map<Integer, Document> getDocumentConvention() throws IOException, AccessDbImporterException{
+    public Map<Integer, Document> getDocumentProfilTravers() throws IOException, AccessDbImporterException{
         if(documents==null) compute();
         return documents;
     }

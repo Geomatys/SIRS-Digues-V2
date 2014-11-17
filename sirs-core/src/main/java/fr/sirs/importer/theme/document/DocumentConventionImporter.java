@@ -90,7 +90,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         ID_BORNEREF_FIN,
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-//        COMMENTAIRE, // Pas dans le nouveau modèle
+        COMMENTAIRE,
 //        REFERENCE_PAPIER, // Pas dans le nouveau modèle
 //        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
 //        REFERENCE_CALQUE, // Pas dans le nouveau modèle
@@ -176,6 +176,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             
             document.setLibelle(row.getString(DocumentConventionColumns.NOM.toString()));
             
+            document.setCommentaire(row.getString(DocumentConventionColumns.COMMENTAIRE.toString()));
             
             if (row.getInt(DocumentConventionColumns.ID_CONVENTION.toString()) != null) {
                 if (conventions.get(row.getInt(DocumentConventionColumns.ID_CONVENTION.toString())) != null) {

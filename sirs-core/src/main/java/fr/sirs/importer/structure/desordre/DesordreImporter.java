@@ -26,6 +26,7 @@ import fr.sirs.importer.structure.GenericStructureImporter;
 import fr.sirs.importer.structure.StructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -143,7 +144,7 @@ public class DesordreImporter extends GenericStructureImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_DESORDRE.toString();
+        return DbImporter.TableName.DESORDRE.toString();
     }
 
     @Override
@@ -192,18 +193,18 @@ public class DesordreImporter extends GenericStructureImporter {
                 if(nouveauDesordre){
                     desordre.setBorne_debut_distance(v);
                 }
-                else if(v!=desordre.getBorne_debut_distance()) {
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(v!=desordre.getBorne_debut_distance()) {
+//                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_debut_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                }
             }
             if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
                 final float v = row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setPR_debut(v);
                 }
-                else if(v!=desordre.getPR_debut()) {
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(v!=desordre.getPR_debut()) {
+//                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getPR_debut()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                }
             }
             
             if (row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()) != null) {
@@ -222,18 +223,18 @@ public class DesordreImporter extends GenericStructureImporter {
                 if(nouveauDesordre){
                     desordre.setBorne_fin_distance(v);
                 }
-                else if(v!=desordre.getBorne_fin_distance()) {
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(v!=desordre.getBorne_fin_distance()) {
+//                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_fin_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                }
             }
             if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
                 final float v = row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setPR_fin(v);
                 }
-                else if(v!=desordre.getPR_fin()) {
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(v!=desordre.getPR_fin()) {
+//                    throw new AccessDbImporterException("Inconsistent data.");
+//                }
             }
             
             if(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())!=null){
@@ -253,9 +254,9 @@ public class DesordreImporter extends GenericStructureImporter {
                 if(nouveauDesordre){
                     desordre.setBorne_debut_aval(bda); 
                 } 
-                else if(bda!=desordre.getBorne_debut_aval()){
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(bda!=desordre.getBorne_debut_aval()){
+//                    throw new AccessDbImporterException("Inconsistent data.");
+//                }
             }
             
             {
@@ -263,9 +264,9 @@ public class DesordreImporter extends GenericStructureImporter {
                 if(nouveauDesordre){
                     desordre.setBorne_fin_aval(bfa);
                 }
-                else if(bfa!=desordre.getBorne_fin_aval()){
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                else if(bfa!=desordre.getBorne_fin_aval()){
+//                    throw new AccessDbImporterException("Inconsistent data.");
+//                }
             }
             
             {
@@ -285,9 +286,9 @@ public class DesordreImporter extends GenericStructureImporter {
                     if(desordre.getTypeDesordreId()==null){
                         desordre.setTypeDesordreId(typeDesordre.getId());
                     }
-                    else if(!desordre.getTypeDesordreId().equals(typeDesordre.getId())){
-                        throw new AccessDbImporterException("Inconsistent data.");
-                    }
+//                    else if(!desordre.getTypeDesordre().equals(typeDesordre.getId())){
+//                        throw new AccessDbImporterException("Inconsistent data : "+row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())+" != "+desordre.getTypeDesordre()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                    }
                 }
             }
             
@@ -309,9 +310,9 @@ public class DesordreImporter extends GenericStructureImporter {
                     if(desordre.getPosition_structure()==null){
                         desordre.setPosition_structure(typePosition.getId());
                     }
-                    else if(!desordre.getPosition_structure().equals(typePosition.getId())){
-                        throw new AccessDbImporterException("Inconsistent data.");
-                    }
+//                    else if(!desordre.getPosition_structure().equals(typePosition.getId())){
+//                        throw new AccessDbImporterException("Inconsistent data.");
+//                    }
                 }
             }
             
@@ -352,15 +353,19 @@ public class DesordreImporter extends GenericStructureImporter {
             }
             
             if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
-                final Date date = row.getDate(DesordreColumns.DATE_FIN_VAL.toString());
-                if(date!=null){
-                    final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
-                    if(desordre.getDate_fin()==null){
-                        desordre.setDate_fin(localDate);
+                try {
+                    final Date date = row.getDate(DesordreColumns.DATE_FIN_VAL.toString());
+                    if (date != null) {
+                        System.out.println(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+                        final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
+                        if (desordre.getDate_fin() == null) {
+                            desordre.setDate_fin(localDate);
+                        } else if (!desordre.getDate_fin().equals(localDate)) {
+                            throw new AccessDbImporterException("Inconsistent data.");
+                        }
                     }
-                    else if(!desordre.getDate_fin().equals(localDate)){
-                        throw new AccessDbImporterException("Inconsistent data.");
-                    }
+                } catch (DateTimeParseException e) {
+                    System.out.println(e.getMessage());
                 }
             }
             

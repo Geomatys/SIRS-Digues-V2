@@ -12,6 +12,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
@@ -20,6 +21,7 @@ import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefTypeDesordreRepository;
+import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
@@ -33,6 +35,7 @@ import fr.sirs.importer.structure.TypePositionImporter;
 import fr.sirs.importer.structure.TypeSourceImporter;
 import fr.sirs.importer.theme.document.related.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.theme.document.related.ProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeConventionImporter;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +67,8 @@ public class DbImporter {
     private final DocumentRepository documentRepository;
     private final ConventionRepository conventionRepository; 
     private final RefConventionRepository refConventionRepository;
+    private final ProfilTraversRepository profilTraversRepository;
+    private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
     private final RefTypeDesordreRepository refTypeDesordreRepository;
     private final RefSourceRepository refSourceRepository;
     private final RefCoteRepository refCoteRepository;
@@ -86,6 +91,7 @@ public class DbImporter {
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
     private TypeConventionImporter typeConventionImporter;
+    private ProfilTraversImporter profilTraversImporter;
     private ConventionImporter conventionImporter;
     private DocumentImporter documentImporter;
     private TypeDesordreImporter typeDesordreImporter;
@@ -473,6 +479,10 @@ public class DbImporter {
         repositories.add(refFrequenceEvenementHydrauliqueRepository);
         evenementHydrauliqueRepository = new EvenementHydrauliqueRepository(couchDbConnector);
         repositories.add(evenementHydrauliqueRepository);
+        profilTraversRepository = new ProfilTraversRepository(couchDbConnector);
+        repositories.add(profilTraversRepository);
+        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(couchDbConnector);
+        repositories.add(refTypeProfilTraversRepository);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -509,9 +519,11 @@ public class DbImporter {
                 couchDbConnector, refConventionRepository);
         conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, conventionRepository, typeConventionImporter);
+        
+        profilTraversImporter = new ProfilTraversImporter(accessDatabase, couchDbConnector, profilTraversRepository);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
                 documentRepository,borneDigueImporter, systemeReperageImporter, 
-                conventionImporter, tronconGestionDigueImporter);
+                conventionImporter, profilTraversImporter, tronconGestionDigueImporter);
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, refEvenementHydrauliqueRepository);
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
@@ -580,8 +592,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -632,7 +644,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
 //            importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

@@ -24,19 +24,16 @@ public class ProfilTraversImporter extends GenericImporter {
 
     private Map<Integer, ProfilTravers> profils = null;
     private ProfilTraversRepository profilTraversRepository;
-    private TypeProfilTraversImporter typeProfilTraversImporter;
     
-    public ProfilTraversImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private ProfilTraversImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     public ProfilTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilTraversRepository profilTraversRepository,
-            final TypeProfilTraversImporter typeProfilTraversImporter){
+            final ProfilTraversRepository profilTraversRepository){
         this(accessDatabase, couchDbConnector);
         this.profilTraversRepository = profilTraversRepository;
-        this.typeProfilTraversImporter = typeProfilTraversImporter;
     }
     
     public Map<Integer, ProfilTravers> getProfilTravers() throws IOException, AccessDbImporterException{
