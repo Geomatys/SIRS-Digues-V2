@@ -314,12 +314,6 @@ class CreteImporter extends GenericStructureImporter {
             }
             
 
-//            tronconDigue.setNom(row.getString(TronconGestionDigueColumns.NOM.toString()));
-//            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE.toString()));
-//            if (row.getDate(TronconGestionDigueColumns.MAJ.toString()) != null) {
-//                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.MAJ.toString()).toString(), dateTimeFormatter));
-//            }
-
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             cretes.put(row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString()), crete);
@@ -328,7 +322,7 @@ class CreteImporter extends GenericStructureImporter {
             List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+//                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(crete);
             cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);

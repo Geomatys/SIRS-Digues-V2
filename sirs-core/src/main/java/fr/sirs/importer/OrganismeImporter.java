@@ -102,8 +102,9 @@ public class OrganismeImporter extends GenericImporter {
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             organismes.put(row.getInt(OrganismeColumns.ID_ORGANISME.toString()), organisme);
 
-            // Register the organism to retrieve a CouchDb ID.
-            organismeRepository.add(organisme);
+//            // Register the organism to retrieve a CouchDb ID.
+//            organismeRepository.add(organisme);
         }
+        couchDbConnector.executeBulk(organismes.values());
     }
 }

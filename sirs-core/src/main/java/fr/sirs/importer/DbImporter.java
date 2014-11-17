@@ -35,8 +35,10 @@ import fr.sirs.importer.structure.TypePositionImporter;
 import fr.sirs.importer.structure.TypeSourceImporter;
 import fr.sirs.importer.theme.document.related.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.theme.document.related.ProfilTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.ProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeConventionImporter;
+import fr.sirs.importer.theme.document.related.TypeProfilTraversImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,6 +105,8 @@ public class DbImporter {
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private StructureImporter structureImporter;
     private DesordreImporter desordreImporter;
+    private TypeProfilTraversImporter typeProfilTraversImporter;
+    private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -488,9 +492,9 @@ public class DbImporter {
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
-        this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
-        this.tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
-        this.organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
+        typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
+        tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
+        organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
         digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
@@ -519,8 +523,9 @@ public class DbImporter {
                 couchDbConnector, refConventionRepository);
         conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, conventionRepository, typeConventionImporter);
-        
-        profilTraversImporter = new ProfilTraversImporter(accessDatabase, couchDbConnector, profilTraversRepository);
+        typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, couchDbConnector, refTypeProfilTraversRepository);
+        profilTraversDescriptionImporter = new ProfilTraversDescriptionImporter(accessDatabase, couchDbConnector, profilTraversRepository, typeProfilTraversImporter, organismeImporter);
+        profilTraversImporter = new ProfilTraversImporter(accessDatabase, couchDbConnector, profilTraversRepository, profilTraversDescriptionImporter);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
                 documentRepository,borneDigueImporter, systemeReperageImporter, 
                 conventionImporter, profilTraversImporter, tronconGestionDigueImporter);

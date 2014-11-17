@@ -24,16 +24,20 @@ public class ProfilTraversImporter extends GenericImporter {
 
     private Map<Integer, ProfilTravers> profils = null;
     private ProfilTraversRepository profilTraversRepository;
+    private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     
-    private ProfilTraversImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private ProfilTraversImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     public ProfilTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilTraversRepository profilTraversRepository){
+            final ProfilTraversRepository profilTraversRepository, 
+            final ProfilTraversDescriptionImporter profilTraversDescriptionImporter){
         this(accessDatabase, couchDbConnector);
         this.profilTraversRepository = profilTraversRepository;
+        this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
     }
     
     public Map<Integer, ProfilTravers> getProfilTravers() throws IOException, AccessDbImporterException{
@@ -75,7 +79,6 @@ public class ProfilTraversImporter extends GenericImporter {
             if (row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            
             
             profils.put(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
