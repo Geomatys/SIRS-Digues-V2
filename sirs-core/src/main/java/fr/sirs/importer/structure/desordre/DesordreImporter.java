@@ -282,10 +282,10 @@ public class DesordreImporter extends GenericStructureImporter {
             if(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())!=null){
                 final RefTypeDesordre typeDesordre = typesDesordre.get(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString()));
                 if(typeDesordre!=null){
-                    if(desordre.getTypeDesordre()==null){
-                        desordre.setTypeDesordre(typeDesordre.getId());
+                    if(desordre.getTypeDesordreId()==null){
+                        desordre.setTypeDesordreId(typeDesordre.getId());
                     }
-                    else if(!desordre.getTypeDesordre().equals(typeDesordre.getId())){
+                    else if(!desordre.getTypeDesordreId().equals(typeDesordre.getId())){
                         throw new AccessDbImporterException("Inconsistent data.");
                     }
                 }
@@ -294,10 +294,10 @@ public class DesordreImporter extends GenericStructureImporter {
             if(row.getInt(DesordreColumns.ID_SOURCE.toString())!=null){
                 final RefSource typeSource = typesSource.get(row.getInt(DesordreColumns.ID_SOURCE.toString()));
                 if(typeSource!=null){
-                    if(desordre.getSource()==null){
-                        desordre.setSource(typeSource.getId());
+                    if(desordre.getSourceId()==null){
+                        desordre.setSourceId(typeSource.getId());
                     }
-                    else if(!desordre.getSource().equals(typeSource.getId())){
+                    else if(!desordre.getSourceId().equals(typeSource.getId())){
                         throw new AccessDbImporterException("Inconsistent data.");
                     }
                 }
@@ -318,10 +318,10 @@ public class DesordreImporter extends GenericStructureImporter {
             if(row.getInt(DesordreColumns.ID_TYPE_COTE.toString())!=null){
                 final RefCote typeCote = typesCote.get(row.getInt(DesordreColumns.ID_TYPE_COTE.toString()));
                 if(typeCote!=null){
-                    if(desordre.getCote()==null){
-                        desordre.setCote(typeCote.getId());
+                    if(desordre.getCoteId()==null){
+                        desordre.setCoteId(typeCote.getId());
                     }
-                    else if(!desordre.getCote().equals(typeCote.getId())){
+                    else if(!desordre.getCoteId().equals(typeCote.getId())){
                         throw new AccessDbImporterException("Inconsistent data.");
                     }
                 }

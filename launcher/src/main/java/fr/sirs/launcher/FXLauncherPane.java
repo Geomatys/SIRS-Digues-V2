@@ -218,7 +218,7 @@ public class FXLauncherPane extends BorderPane {
                     final File cartoDbFile = new File(uiImportDBCarto.getText());
                     
                     final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
-                            URL_LOCAL, uiImportName.getText().trim(), "classpath:/fr/sirs/spring/couchdb-context.xml");
+                            URL_LOCAL, uiImportName.getText().trim(), "classpath:/fr/sirs/spring/couchdb-context.xml",true,false);
                     final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
                     DbImporter importer = new DbImporter(couchDbConnector);
                     importer.setDatabase(DatabaseBuilder.open(mainDbFile),

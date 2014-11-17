@@ -2,7 +2,6 @@ package fr.sirs.importer.evenementHydraulique;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
@@ -98,10 +97,10 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
             }
             
             if(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())!=null){
-                evenement.setType_evenement(types.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())).getId());
+                evenement.setTypeEvenementHydrauliqueId(types.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())).getId());
             }
             if(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())!=null){
-                evenement.setFrequence(frequences.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())).getId());
+                evenement.setFrequenceEvenementHydrauliqueId(frequences.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())).getId());
             }
             evenements.put(row.getInt(EvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }

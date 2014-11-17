@@ -234,7 +234,7 @@ public class Loader extends Application {
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des indexes ...");
                 final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
-                "classpath:/fr/sirs/spring/application-context.xml");
+                "classpath:/fr/sirs/spring/application-context.xml",false,true);
                 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for(Plugin plugin : plugins){

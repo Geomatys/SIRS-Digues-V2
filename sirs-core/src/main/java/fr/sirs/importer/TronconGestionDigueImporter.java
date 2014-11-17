@@ -207,7 +207,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
                     systemeRep.setTronconId(tronconDigue.getId());
                     });
                 tronconDigue.setSystemeReperageIds(systemesRepIds);
-                tronconDigue.setSysteme_reperage_defaut(systemesReperageById.get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
+                tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
             
             if (row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()) != null) {

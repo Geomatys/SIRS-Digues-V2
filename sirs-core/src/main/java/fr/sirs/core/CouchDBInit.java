@@ -43,21 +43,28 @@ public class CouchDBInit {
     }
     
     
-    public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, String configFile) throws MalformedURLException, IOException {
+    public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, 
+            String configFile, boolean createIfNotExists, boolean setupListener) throws MalformedURLException, IOException {
         
         final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-        final CouchDbConnector connector = couchsb.createConnector(databaseName,false);
+        final CouchDbConnector connector = couchsb.createConnector(databaseName,createIfNotExists);
         
-        final DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
-        final SearchEngine searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
-        changeEmmiter.start();
+        DocumentChangeEmiter changeEmmiter = null;
+        SearchEngine searchEngine = null;
+        if(setupListener){
+            changeEmmiter = new DocumentChangeEmiter(connector);
+            searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
+            changeEmmiter.start();
+        }
         
         final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
         applicationContextParent.refresh();
         applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
-        applicationContextParent.getBeanFactory().registerSingleton(SEARCH_ENGINE, searchEngine);
-        applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
+        if(setupListener){
+            applicationContextParent.getBeanFactory().registerSingleton(SEARCH_ENGINE, searchEngine);
+            applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
+        }
 
         final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
             configFile}, applicationContextParent);

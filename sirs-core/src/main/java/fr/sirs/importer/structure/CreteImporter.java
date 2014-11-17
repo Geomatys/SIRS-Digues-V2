@@ -216,7 +216,7 @@ class CreteImporter extends GenericStructureImporter {
             
             
             if(row.getInt(CreteColumns.ID_SOURCE.toString())!=null){
-                crete.setSource(typesSource.get(row.getInt(CreteColumns.ID_SOURCE.toString())).getId());
+                crete.setSourceId(typesSource.get(row.getInt(CreteColumns.ID_SOURCE.toString())).getId());
             }
             
             final TronconDigue troncon = troncons.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
@@ -276,7 +276,7 @@ class CreteImporter extends GenericStructureImporter {
             }
             
             if(row.getInt(CreteColumns.ID_TYPE_COTE.toString())!=null){
-                crete.setCote(typesCote.get(row.getInt(CreteColumns.ID_TYPE_COTE.toString())).getId());
+                crete.setCoteId(typesCote.get(row.getInt(CreteColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();

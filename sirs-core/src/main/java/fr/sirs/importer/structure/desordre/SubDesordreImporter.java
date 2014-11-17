@@ -205,11 +205,11 @@ class SubDesordreImporter extends GenericStructureImporter {
             desordre.setLieu_dit(row.getString(SubDesordreColumns.LIEU_DIT_DESORDRE.toString()));
             
             if(row.getInt(SubDesordreColumns.ID_TYPE_DESORDRE.toString())!=null){
-                desordre.setTypeDesordre(typesDesordre.get(row.getInt(SubDesordreColumns.ID_TYPE_DESORDRE.toString())).getId());
+                desordre.setTypeDesordreId(typesDesordre.get(row.getInt(SubDesordreColumns.ID_TYPE_DESORDRE.toString())).getId());
             }
             
             if(row.getInt(SubDesordreColumns.ID_SOURCE.toString())!=null){
-                desordre.setSource(typesSource.get(row.getInt(SubDesordreColumns.ID_SOURCE.toString())).getId());
+                desordre.setSourceId(typesSource.get(row.getInt(SubDesordreColumns.ID_SOURCE.toString())).getId());
             }
             
             if(row.getInt(SubDesordreColumns.ID_TYPE_POSITION.toString())!=null){
@@ -217,7 +217,7 @@ class SubDesordreImporter extends GenericStructureImporter {
             }
             
             if(row.getInt(SubDesordreColumns.ID_TYPE_COTE.toString())!=null){
-                desordre.setCote(typesCote.get(row.getInt(SubDesordreColumns.ID_TYPE_COTE.toString())).getId());
+                desordre.setCoteId(typesCote.get(row.getInt(SubDesordreColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             List<DesordreStructure> structures = desordresStructures.get(row.getInt(SubDesordreColumns.ID_DESORDRE.toString()));

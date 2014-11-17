@@ -235,7 +235,7 @@ public class DocumentImporter extends GenericDocumentImporter {
             final Class classeDocument = classesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
 
             if (classeDocument != null) {
-                document.setType(classeDocument.getCanonicalName());
+                document.setTypeDocumentId(classeDocument.getCanonicalName());
                 if (classeDocument.equals(Convention.class)) {
                     // Pour les conventions !
                     if (row.getInt(DocumentColumns.ID_CONVENTION.toString()) != null) {
@@ -257,7 +257,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                 System.out.println("Type de document inconnu !");
             }
                 
-            document.setTypeDocument(typesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString())).getId());
+            document.setTypeDocumentId(typesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString())).getId());
 
             if(nouveauDocument){
                documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);

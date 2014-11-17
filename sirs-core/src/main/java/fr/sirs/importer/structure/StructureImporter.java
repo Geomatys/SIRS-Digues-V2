@@ -339,7 +339,7 @@ public class StructureImporter extends GenericStructureImporter {
             }
                 
                 if(row.getInt(ElementStructureColumns.ID_SOURCE.toString())!=null){
-                structure.setSource(typesSource.get(row.getInt(ElementStructureColumns.ID_SOURCE.toString())).getId());
+                structure.setSourceId(typesSource.get(row.getInt(ElementStructureColumns.ID_SOURCE.toString())).getId());
             }
             
             if(row.getInt(ElementStructureColumns.ID_TYPE_POSITION.toString())!=null){
@@ -347,7 +347,7 @@ public class StructureImporter extends GenericStructureImporter {
             }
             
             if(row.getInt(ElementStructureColumns.ID_TYPE_COTE.toString())!=null){
-                structure.setCote(typesCote.get(row.getInt(ElementStructureColumns.ID_TYPE_COTE.toString())).getId());
+                structure.setCoteId(typesCote.get(row.getInt(ElementStructureColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();

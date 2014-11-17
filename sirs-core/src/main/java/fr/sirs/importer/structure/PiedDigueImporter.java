@@ -216,11 +216,11 @@ class PiedDigueImporter extends GenericStructureImporter {
             final PiedDigue piedDigue = new PiedDigue();
             
             if(row.getInt(PiedDigueColumns.ID_TYPE_COTE.toString())!=null){
-                piedDigue.setCote(typesCote.get(row.getInt(PiedDigueColumns.ID_TYPE_COTE.toString())).getId());
+                piedDigue.setCoteId(typesCote.get(row.getInt(PiedDigueColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             if(row.getInt(PiedDigueColumns.ID_SOURCE.toString())!=null){
-                piedDigue.setSource(typesSource.get(row.getInt(PiedDigueColumns.ID_SOURCE.toString())).getId());
+                piedDigue.setSourceId(typesSource.get(row.getInt(PiedDigueColumns.ID_SOURCE.toString())).getId());
             }
             
             final TronconDigue troncon = troncons.get(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()));
