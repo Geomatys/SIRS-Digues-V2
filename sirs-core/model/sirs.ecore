@@ -12,8 +12,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="systeme_reperage_defaut"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="digueId" eType="#//Digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaires" upperBound="-1"
@@ -33,6 +31,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" eType="#//Photo"
         eOpposite="#//Photo/troncon_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//Systeme_reperage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -41,10 +40,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="source" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeSource" eType="#//RefSource"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="position_structure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeStructure" upperBound="-1"
         eType="#//OrganismeStructure" containment="true"/>
