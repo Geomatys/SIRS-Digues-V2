@@ -16,7 +16,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="digueId" eType="#//Digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaires" upperBound="-1"
         eType="#//GestionTroncon" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gardienTroncon" upperBound="-1"
         eType="#//GardienTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
@@ -37,11 +37,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/structures"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="position_structure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeStructure" upperBound="-1"
@@ -95,14 +94,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="taille" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_document" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="digueId" eType="#//Digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocument" eType="#//RefTypeDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentId" eType="#//RefTypeDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="convention" eType="#//Convention"
         eOpposite="#//Convention/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
@@ -180,24 +178,17 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Crete" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="num_couche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_revanche" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur_murette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauHaut" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauBas" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureBasId" eType="#//RefNature"/>
   </eClassifiers>
@@ -209,33 +200,23 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismesStockantsId"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_glissiere" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="z_du_seuil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_seuil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_batardeaux" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombre_batardeaux" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="poids_unitaires_batardeaux"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="moyen_manipulation_batardeaux"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeSeuil" eType="#//RefSeuil"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeGlissière" eType="#//RefTypeGlissiere"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeNatureBatardeaux"
-        eType="#//RefNatureBatardeaux"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMoyenManipBatardeaux"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSeuilId" eType="#//RefSeuil"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeGlissiereId" eType="#//RefTypeGlissiere"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureBatardeauxId" eType="#//RefNatureBatardeaux"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moyenManipBatardeauxId"
         eType="#//RefMoyenManipBatardeaux"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouverageRevanche" upperBound="-1"
         eType="#//OuvertureBatardableOuvrageRevanche" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Talus_digue" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="num_couche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur_sommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueur_rampart_haut"
@@ -244,19 +225,15 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pente_interieur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauHaut" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauBas" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureBasId" eType="#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionHautId" eType="#//RefFonction"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionBasId" eType="#//RefFonction"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Talus_risberme" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="num_couche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur_sommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueur_rampart_haut"
@@ -265,95 +242,68 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pente_interieur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauHaut" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriauBas" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_bas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature_haut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureBasId" eType="#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionHautId" eType="#//RefFonction"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionBasId" eType="#//RefFonction"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Sommet_risberme" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="num_couche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Fondation" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="num_couche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Pied_digue" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LargeurFrancBord" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeLargeurFrancBord"
-        eType="#//RefLargeurFrancBord"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="largeurFrancBordId" eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_franchissement" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="position_structure_haut"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="position_structure_bas"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="revetement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="usage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRevetement" eType="#//RefRevetement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeUsage" eType="#//RefUsageVoie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOrientationOuvrageFranchissement"
-        eType="#//RefOrientationOuvrageFranchissement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOuvrageFranchissement"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="revetementId" eType="#//RefRevetement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionHautId" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orientationOuvrageId" eType="#//RefOrientationOuvrage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageFranchissementId"
         eType="#//RefOuvrageFranchissement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionBasId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_acces" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="usage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numero_secteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeUsage" eType="#//RefUsageVoie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeNature" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_digue" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_voie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="revetement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="usage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeVoieDigue" eType="#//RefVoieDigue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeUsage" eType="#//RefUsageVoie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOrientationOuvrageFranchissement"
-        eType="#//RefOrientationOuvrageFranchissement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRevetement" eType="#//RefRevetement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="TypeVoieDigueId" eType="#//RefVoieDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orientationOuvrageId" eType="#//RefOrientationOuvrage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="revetementId" eType="#//RefRevetement"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_voirie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOuvrageVoirie" eType="#//RefOuvrageVoirie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageVoirieId" eType="#//RefOuvrageVoirie"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Station_pompage" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -373,68 +323,57 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Reseau_hydraulique_ferme" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_reseau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="utilisation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="implatation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ecoulement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="autorise" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeEcoulement" eType="#//RefEcoulement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeImplantation" eType="#//RefImplantation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeUtilisationConduite"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ecoulementId" eType="#//RefEcoulement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="implantationId" eType="#//RefImplantation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="utilisationConduiteId"
         eType="#//RefUtilisationConduite"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeConduiteFermee" eType="#//RefConduiteFermee"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConduiteFermeeId" eType="#//RefConduiteFermee"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_hydraulique_associe" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOuvrageHydroAssocie"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageHydroAssocieId"
         eType="#//RefOuvrageHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
         eType="#//ReaseauHydroFermeOuvrageHydroAssocie" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Reseau_telecom_energie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_reseau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="implantation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeImplantaiton" eType="#//RefImplantation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeReseauTelecomEnergie"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="implantaitonId" eType="#//RefImplantation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauTelecomEnergieId"
         eType="#//RefReseauTelecomEnergie"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_telecom_energie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOuvrageTelecomEnergie"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageTelecomEnergieId"
         eType="#//RefOuvrageTelecomEnergie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecom" upperBound="-1"
         eType="#//ReaseauTelecomOuvrageTelecom" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Reseau_hydro_ciel_ouvert" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_reseau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeReseauHydroCielOuvert"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauHydroCielOuvertId"
         eType="#//RefReseauHydroCielOuvert"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
         eType="#//ReaseauHydroFermeReseauHydroCielOuvert" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_particulier" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOuvrageParticulier"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageParticulierId"
         eType="#//RefOuvrageParticulier"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Prestation" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_prestation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="realisation_interne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout_metre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout_global" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePrestation" eType="#//RefPrestation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typePrestationId" eType="#//RefPrestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationDesordre" upperBound="-1"
         eType="#//PrestationDesordre" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="DocumentPrestation" upperBound="-1"
@@ -445,11 +384,10 @@
         upperBound="-1" eType="#//IntervenantPrestation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_desordre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
         eType="#//ObservationSuivi"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieu_dit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordre" eType="#//RefTypeDesordre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="#//RefTypeDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueDesordre" upperBound="-1"
         eType="#//CrueDesordre" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleJournalDesordre"
@@ -462,23 +400,20 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationSuivi">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_observation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombre_desordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="urgence" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="evolution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="suite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeUrgence" eType="#//RefUrgence"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LaisseCrue" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="position_laisse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementId" eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeReferenceHauteur"
-        eType="#//RefReferenceHauteur"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleJournalLaisse" upperBound="-1"
         eType="#//ArticleJournalLaisse" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photoLaisse" upperBound="-1"
@@ -489,8 +424,6 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_evenement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="frequence" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeleur_hydraulique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="vitesse_moy" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
@@ -502,19 +435,19 @@
         eType="#//Meteo"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFrequenceEvenementHydraulique"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="frequenceEvenementHydrauliqueId"
         eType="#//RefFrequenceEvenementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeEvenementHydraulique"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeEvenementHydrauliqueId"
         eType="#//RefEvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Meteo">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="data_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="vitesse_vent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation_vent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeOrientationVent" eType="#//RefOrientationVent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeOrientationVentId"
+        eType="#//RefOrientationVent"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MonteeEaux" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="echelle_limnimetrique"
@@ -526,30 +459,25 @@
         upperBound="-1" eType="#//ArticleJournalMonteeEaux" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LigneEau" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="mesureIds" upperBound="-1"
         eType="#//MesureLigneEau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementId" eType="#//EvenementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeReferenceHauteur"
-        eType="#//RefReferenceHauteur"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleJournalLigneEau"
         upperBound="-1" eType="#//ArticleJournalLigneEau" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MesureMonteeEaux">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="debit_max" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeReferenceHauteur"
-        eType="#//RefReferenceHauteur"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="source" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeSource" eType="#//RefSource"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MesureLigneEau" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
@@ -593,19 +521,17 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_rapport" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeRapportEtude" eType="#//RefRapportEtude"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeRapportEtudeId" eType="#//RefRapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//Document" eOpposite="#//Document/document"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//Document">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_documentGE" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeDocumentGrandeEchelle"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentGrandeEchelleId"
         eType="#//RefDocumentGrandeEchelle"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Visite" eSuperTypes="#//Positionable">
@@ -786,7 +712,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationOuvrageFranchissement">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationOuvrage">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -922,8 +848,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireId" lowerBound="1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="TypeProprietaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeProprietaire" eType="#//RefProprietaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProprietaireId" eType="#//RefProprietaire"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Commune">
     <eAnnotations source="generation">
@@ -991,9 +916,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MaitreOeuvre">
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOeuvreId" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="FonctionMaitreOeuvre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ListeFonctionMaitreOeuvre"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvreId"
         eType="#//RefFoncitonMaitreOeuvre"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Financeur">
@@ -1066,9 +990,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gardienId" lowerBound="1"
         eType="#//Commune"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ContactStructure">
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactId" lowerBound="1"
@@ -1117,11 +1040,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeAlimentation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PistePiedDigue" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="materiau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeMateriau" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeFonction" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nature" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers">
@@ -1143,10 +1063,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfils" eType="#//RefTypeProfilTravers"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleve" eType="#//RefSystemeReleveProfil"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSystemeReleve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilId" eType="#//RefTypeProfilTravers"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="origineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1196,18 +1114,16 @@
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSystemeReleve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleve" eType="#//RefSystemeReleveProfil"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrigineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="origineProfilLong" eType="#//RefOrigineProfilLong"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="origineProfilLongId" eType="#//RefOrigineProfilLong"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeCote" eType="#//RefCote"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listePosition" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLongEvenementHydraulique"
         eType="#//ProfilLongEvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
@@ -1230,10 +1146,9 @@
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilFrontFrancBord" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBord" eType="#//RefProfilFrancBord"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_profil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listeLargeurFrancBord"
-        eType="#//RefLargeurFrancBord"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBordId"
+        eType="#//RefProfilFrancBord"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="largeurFrancBordId" eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreStructure">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
