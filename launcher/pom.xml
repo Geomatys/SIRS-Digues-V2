@@ -51,7 +51,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.0</version>
                 <configuration>
-                    <outputDirectory>target/lib_launcher</outputDirectory>
+                    <outputDirectory>target/tozip/lib_launcher</outputDirectory>
                     <stripVersion>false</stripVersion>
                 </configuration>
                 <executions>
@@ -90,11 +90,18 @@
                         <configuration>
                             <tasks>
                                 <!--copie des jars du desktop -->
-                                <copy todir="./target">
+                                <copy todir="./target/tozip">
                                     <fileset dir="../desktop/target">
                                         <include name="**/*.jar"/>
                                     </fileset>
-                                </copy>                                
+                                </copy>     
+                                <move file="./target/tozip/desktop-1.x-SNAPSHOT.jar" tofile="./target/tozip/desktop.jar"/>
+                                <copy file="./target/launcher-1.x-SNAPSHOT.jar" tofile="./target/tozip/launcher.jar"/>
+                                
+                                <!-- archive de l'application finale -->
+                                <zip destfile="./target/sirs.zip" basedir="./target/tozip" />
+                                
+                                
                             </tasks>
                         </configuration>
                         <goals>

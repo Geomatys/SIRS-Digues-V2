@@ -21,6 +21,9 @@ import javafx.beans.property.StringProperty;
 @SuppressWarnings("serial")
 public class PluginInfo {
     
+    public static final String PLUGIN_DESKTOP = "desktop";
+    public static final String PLUGIN_LAUNCHER = "launcher";
+    
     private final StringProperty name = new SimpleStringProperty();
     private final StringProperty description = new SimpleStringProperty();
     private final IntegerProperty versionMajor = new SimpleIntegerProperty();
