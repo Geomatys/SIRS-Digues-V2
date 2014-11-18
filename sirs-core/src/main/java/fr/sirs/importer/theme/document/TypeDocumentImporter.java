@@ -123,9 +123,9 @@ public class TypeDocumentImporter extends GenericImporter {
 //                    classe = .class; break;
 //                case SYS_EVT_PLAN_TOPO:
 //                    classe = .class; break;
-                    case SYS_EVT_PROFIL_EN_LONG:
-                        classe = ProfilLong.class;
-                        break;
+//                    case SYS_EVT_PROFIL_EN_LONG:
+//                        classe = ProfilLong.class;
+//                        break;
                     case SYS_EVT_PROFIL_EN_TRAVERS:
                         classe = ProfilTravers.class;
                         break;

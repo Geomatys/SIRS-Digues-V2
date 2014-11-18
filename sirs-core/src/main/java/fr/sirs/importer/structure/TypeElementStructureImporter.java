@@ -79,30 +79,30 @@ public class TypeElementStructureImporter extends GenericImporter {
             switch(table){
                 case SYS_EVT_CRETE:
                     classe = Crete.class; break;
-                case SYS_EVT_TALUS_DIGUE:
-                    classe = TalusDigue.class; break;
-                case SYS_EVT_SOMMET_RISBERME:
-                    classe = SommetRisberme.class; break;
-                case SYS_EVT_TALUS_RISBERME:
-                    classe = TalusRisberme.class; break;
+//                case SYS_EVT_TALUS_DIGUE:
+//                    classe = TalusDigue.class; break;
+//                case SYS_EVT_SOMMET_RISBERME:
+//                    classe = SommetRisberme.class; break;
+//                case SYS_EVT_TALUS_RISBERME:
+//                    classe = TalusRisberme.class; break;
                 case SYS_EVT_PIED_DE_DIGUE:
                     classe = PiedDigue.class; break;
 //                    case 6:
 //                        classe = LargeurFrancBord.class; break;
 //                    case 7:
 //                        classe = LargeurFrancBord.class; break;
-                case SYS_EVT_FONDATION:
-                    classe = Fondation.class; break;
-                case SYS_EVT_OUVRAGE_PARTICULIER:
-                    classe = OuvrageParticulier.class; break;
+//                case SYS_EVT_FONDATION:
+//                    classe = Fondation.class; break;
+//                case SYS_EVT_OUVRAGE_PARTICULIER:
+//                    classe = OuvrageParticulier.class; break;
 //                    case 10:
 //                        classe = BriseLame.class; break;
 //                    case 11:
 //                        classe = Epi.class; break;
 //                    case 12:
 //                        classe = Vegetation.class; break;
-                case SYS_EVT_OUVRAGE_REVANCHE:
-                    classe = OuvrageRevanche.class; break;
+//                case SYS_EVT_OUVRAGE_REVANCHE:
+//                    classe = OuvrageRevanche.class; break;
                 default:
                     classe = null;
             }

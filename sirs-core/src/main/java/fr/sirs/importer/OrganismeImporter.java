@@ -80,30 +80,37 @@ public class OrganismeImporter extends GenericImporter {
             final Organisme organisme = new Organisme();
 
             organisme.setNom(row.getString(OrganismeColumns.RAISON_SOCIALE.toString()));
+            
             organisme.setStatut_juridique(row.getString(OrganismeColumns.STATUT_JURIDIQUE.toString()));
+            
             organisme.setAdresse(row.getString(OrganismeColumns.ADRESSE_L1_ORG.toString())
                     + row.getString(OrganismeColumns.ADRESSE_L2_ORG.toString())
                     + row.getString(OrganismeColumns.ADRESSE_L3_ORG.toString()));
+            
             organisme.setCode_postal(String.valueOf(row.getInt(OrganismeColumns.ADRESSE_CODE_POSTAL_ORG.toString())));
+            
             organisme.setLocalite(row.getString(OrganismeColumns.ADRESSE_NOM_COMMUNE_ORG.toString()));
+            
             organisme.setTelephone(row.getString(OrganismeColumns.TEL_ORG.toString()));
+            
             organisme.setEmail(row.getString(OrganismeColumns.MAIL_ORG.toString()));
+            
             organisme.setFax(row.getString(OrganismeColumns.FAX_ORG.toString()));
+            
             if (row.getDate(OrganismeColumns.DATE_DEBUT.toString()) != null) {
                 organisme.setDate_debut(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
+            
             if (row.getDate(OrganismeColumns.DATE_FIN.toString()) != null) {
                 organisme.setDate_fin(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
+            
             if (row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 organisme.setDateMaj(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             organismes.put(row.getInt(OrganismeColumns.ID_ORGANISME.toString()), organisme);
-
-//            // Register the organism to retrieve a CouchDb ID.
-//            organismeRepository.add(organisme);
         }
         couchDbConnector.executeBulk(organismes.values());
     }
