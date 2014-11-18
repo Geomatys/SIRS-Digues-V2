@@ -3,6 +3,7 @@ package fr.sirs.importer.theme.document.related;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -68,6 +69,9 @@ public class ProfilTraversImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         profils = new HashMap<>();
+        
+        final Map<Integer, List<LeveeProfilTravers>> levees = 
+                profilTraversDescriptionImporter.getLeveeProfilTraversByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){

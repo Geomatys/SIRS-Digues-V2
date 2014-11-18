@@ -2,9 +2,10 @@ package fr.sirs.importer.theme.document.related;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.RefSystemeReleveProfil;
+import fr.sirs.core.model.RefTypeProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -26,21 +27,21 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
 
     private Map<Integer, LeveeProfilTravers> levees = null;
     private Map<Integer, List<LeveeProfilTravers>> leveesByProfil = null;
-    private ProfilTraversRepository profilTraversRepository;
+    private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypeProfilTraversImporter typeProfilTraversImporter;
     private OrganismeImporter organismeImporter;
     
-    public ProfilTraversDescriptionImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private ProfilTraversDescriptionImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     public ProfilTraversDescriptionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilTraversRepository profilTraversRepository,
+            final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final TypeProfilTraversImporter typeProfilTraversImporter,
             final OrganismeImporter organismeImporter) {
         this(accessDatabase, couchDbConnector);
-        this.profilTraversRepository = profilTraversRepository;
+        this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.typeProfilTraversImporter = typeProfilTraversImporter;
         this.organismeImporter = organismeImporter;
     }
@@ -50,21 +51,26 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         return levees;
     }
     
+    public Map<Integer, List<LeveeProfilTravers>> getLeveeProfilTraversByProfilId() throws IOException, AccessDbImporterException{
+        if(leveesByProfil==null) compute();
+        return leveesByProfil;
+    }
+    
     private enum ProfilTraversDescriptionColumns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_PROFIL_EN_TRAVERS,
         DATE_LEVE,
         ID_ORG_CREATEUR,
-//        ID_TYPE_SYSTEME_RELEVE_PROFIL,
+        ID_TYPE_SYSTEME_RELEVE_PROFIL,
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
         REFERENCE_CALQUE,
-//        ID_TYPE_PROFIL_EN_TRAVERS,
+        ID_TYPE_PROFIL_EN_TRAVERS,
 //        ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS,
 //        ID_DOC_RAPPORT_ETUDES,
         COMMENTAIRE,
-//        NOM_FICHIER_PLAN_ENSEMBLE,
-//        NOM_FICHIER_COUPE_IMAGE,
+//        NOM_FICHIER_PLAN_ENSEMBLE, // Pas dans le nouveau modèle
+//        NOM_FICHIER_COUPE_IMAGE, // Pas dans le nouveau modèle
         DATE_DERNIERE_MAJ
     }
     
@@ -88,6 +94,8 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         leveesByProfil = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeSystemeReleve();
+        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeProfilTravers();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -103,11 +111,15 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
                 levee.setOrganismeCreateurId(organisme.getId());
             }
             
+            levee.setTypeSystemesReleveId(systemesReleve.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
+            
             levee.setReference_papier(row.getString(ProfilTraversDescriptionColumns.REFERENCE_PAPIER.toString()));
             
             levee.setReference_numerique(row.getString(ProfilTraversDescriptionColumns.REFERENCE_NUMERIQUE.toString()));
             
             levee.setReference_calque(row.getString(ProfilTraversDescriptionColumns.REFERENCE_CALQUE.toString()));
+            
+            levee.setTypeProfilId(typesProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
             
             levee.setCommentaire(row.getString(ProfilTraversDescriptionColumns.COMMENTAIRE.toString()));
             
@@ -117,7 +129,6 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
             
             levees.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), levee);
             
-            // Set the list ByTronconId
             List<LeveeProfilTravers> listByProfil = leveesByProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();

@@ -40,11 +40,11 @@ public class TypeProfilTraversImporter extends GenericImporter {
 
     /**
      * 
-     * @return A map containing all the database RefRapportEtude referenced by their
+     * @return A map containing all the database RefTypeProfilTravers referenced by their
      * internal ID.
      * @throws IOException 
      */
-    public Map<Integer, RefTypeProfilTravers> getTypeRapportEtude() throws IOException {
+    public Map<Integer, RefTypeProfilTravers> getTypeProfilTravers() throws IOException {
         if(typesProfilsTravers == null) compute();
         return typesProfilsTravers;
     }
