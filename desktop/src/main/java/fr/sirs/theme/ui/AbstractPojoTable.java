@@ -226,7 +226,7 @@ public abstract class AbstractPojoTable extends BorderPane{
                     final String type = pojoClass.getSimpleName();
                     final Set<String> result = new HashSet<>();
                     try {
-                        result.addAll(searchEngine.search(type, str.split("\\.")));
+                        result.addAll(searchEngine.search(type, str.split(" ")));
                     } catch (ParseException | IOException ex) {
                         SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                     }
