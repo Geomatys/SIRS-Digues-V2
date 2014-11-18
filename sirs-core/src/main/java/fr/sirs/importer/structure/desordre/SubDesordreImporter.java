@@ -24,6 +24,8 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.structure.GenericStructureImporter;
 import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.structure.TypeMateriauImporter;
+import fr.sirs.importer.structure.TypeNatureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,9 +53,6 @@ class SubDesordreImporter extends GenericStructureImporter {
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
     private final DesordreStructureImporter desordreStructureImporter;
     private final TypeDesordreImporter typeDesordreImporter;
-    private final TypeSourceImporter typeSourceImporter;
-    private final TypeCoteImporter typeCoteImporter;
-    private final TypePositionImporter typePositionImporter;
 
     SubDesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -64,14 +63,16 @@ class SubDesordreImporter extends GenericStructureImporter {
             final TypeDesordreImporter typeDesordreImporter, 
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter) {
+            final TypeCoteImporter typeCoteImporter,
+            final TypeMateriauImporter typeMateriauImporter, 
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter);
-        this.desordreStructureImporter = new DesordreStructureImporter(accessDatabase, couchDbConnector, structureImporter);
+                systemeReperageImporter, borneDigueImporter, null, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
+        this.desordreStructureImporter = new DesordreStructureImporter(
+                accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
-        this.typeSourceImporter = typeSourceImporter;
-        this.typePositionImporter = typePositionImporter;
-        this.typeCoteImporter = typeCoteImporter;
     }
 
     private enum SubDesordreColumns {

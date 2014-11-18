@@ -13,10 +13,12 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.OrganismeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,23 +44,22 @@ class PiedDigueImporter extends GenericStructureImporter {
 
     private Map<Integer, PiedDigue> piedsDigue = null;
     private Map<Integer, List<PiedDigue>> piedsDigueByTronconId = null;
-    private final TypeSourceImporter typeSourceImporter;
-    private final TypeCoteImporter typeCoteImporter;
-    private final TypePositionImporter typePositionImporter;
 
     PiedDigueImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final OrganismeImporter organismeImporter,
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter) {
+            final TypeCoteImporter typeCoteImporter,
+            final TypeMateriauImporter typeMateriauImporter, 
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter);
-        this.typeSourceImporter = typeSourceImporter;
-        this.typePositionImporter = typePositionImporter;
-        this.typeCoteImporter = typeCoteImporter;
+                systemeReperageImporter, borneDigueImporter, organismeImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
     }
 
     private enum PiedDigueColumns {
@@ -74,7 +75,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         //        LIBELLE_SYSTEME_REP, //Dans le SystemeReperageImporter
         //        NOM_BORNE_DEBUT, // Dans le BorneImporter
         //        NOM_BORNE_FIN, // Dans le BorneImporter
-        //        LIBELLE_TYPE_MATERIAU,
+        //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
         //        LIBELLE_TYPE_NATURE,
         //        LIBELLE_TYPE_FONCTION,
         //        ID_TYPE_ELEMENT_STRUCTURE, //Dans le TypeElementStructureImporter
@@ -93,16 +94,16 @@ class PiedDigueImporter extends GenericStructureImporter {
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
 //        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
-//        ID_TYPE_MATERIAU,
+        ID_TYPE_MATERIAU,
 //        ID_TYPE_NATURE,
 //        ID_TYPE_FONCTION,
 //        ID_AUTO
 
         // Empty fields
 //     LIBELLE_TYPE_NATURE_HAUT,
-//     LIBELLE_TYPE_MATERIAU_HAUT,
+//     LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
 //     LIBELLE_TYPE_NATURE_BAS,
-//     LIBELLE_TYPE_MATERIAU_BAS,
+//     LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
 //     LIBELLE_TYPE_OUVRAGE_PARTICULIER,
 //     LIBELLE_TYPE_POSITION, // Dans le TypePositionImporter
 //     RAISON_SOCIALE_ORG_PROPRIO,
@@ -119,8 +120,8 @@ class PiedDigueImporter extends GenericStructureImporter {
         //     EPAISSEUR, // N'existe pas dans le modèle des pieds de digue
         //     TALUS_INTERCEPTE_CRETE,
         //     ID_TYPE_NATURE_HAUT,
-        //     ID_TYPE_MATERIAU_HAUT,
-        //     ID_TYPE_MATERIAU_BAS,
+        //     ID_TYPE_MATERIAU_HAUT, // Pas dans le nouveau modèle
+        //     ID_TYPE_MATERIAU_BAS, // Pas dans le nouveau modèle
         //     ID_TYPE_NATURE_BAS,
         //     LONG_RAMP_HAUT,
         //     LONG_RAMP_BAS,
@@ -209,6 +210,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -269,6 +271,10 @@ class PiedDigueImporter extends GenericStructureImporter {
             }
             
             piedDigue.setCommentaire(row.getString(PiedDigueColumns.COMMENTAIRE.toString()));
+            
+            if(row.getInt(PiedDigueColumns.ID_TYPE_MATERIAU.toString())!=null){
+                piedDigue.setMateriauId(typesMateriau.get(row.getInt(PiedDigueColumns.ID_TYPE_MATERIAU.toString())).getId());
+            }
 
             if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {
                 piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));

@@ -24,6 +24,8 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.GenericStructureImporter;
 import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.structure.TypeMateriauImporter;
+import fr.sirs.importer.structure.TypeNatureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -50,11 +52,9 @@ public class DesordreImporter extends GenericStructureImporter {
 
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
+    
     private final DesordreStructureImporter desordreStructureImporter;
     private final TypeDesordreImporter typeDesordreImporter;
-    private final TypeSourceImporter typeSourceImporter;
-    private final TypeCoteImporter typeCoteImporter;
-    private final TypePositionImporter typePositionImporter;
     private final SubDesordreImporter subDesordreImporter;
 
     public DesordreImporter(final Database accessDatabase,
@@ -66,20 +66,22 @@ public class DesordreImporter extends GenericStructureImporter {
             final TypeDesordreImporter typeDesordreImporter, 
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter) {
+            final TypeCoteImporter typeCoteImporter,
+            final TypeMateriauImporter typeMateriauImporter, 
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter);
+                systemeReperageImporter, borneDigueImporter, null, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
-        this.typeSourceImporter = typeSourceImporter;
-        this.typePositionImporter = typePositionImporter;
-        this.typeCoteImporter = typeCoteImporter;
         this.subDesordreImporter = new SubDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 structureImporter, typeDesordreImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter);
+                typePositionImporter, typeCoteImporter, typeMateriauImporter,
+                typeNatureImporter);
     }
 
     private enum DesordreColumns {

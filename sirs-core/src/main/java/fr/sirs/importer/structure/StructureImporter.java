@@ -24,6 +24,7 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
+import fr.sirs.importer.OrganismeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,29 +52,44 @@ public class StructureImporter extends GenericStructureImporter {
     private Map<Integer, Objet> structures = null;
     private final CreteImporter creteImporter;
     private final PiedDigueImporter piedDigueImporter;
+    private final TalusDigueImporter talusDigueImporter;
     private final TypeElementStructureImporter typeElementStructureImporter;
     private final TypeSourceImporter typeSourceImporter;
     private final TypeCoteImporter typeCoteImporter;
     private final TypePositionImporter typePositionImporter;
+    private final OrganismeImporter organismeImporter;
 
     public StructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final OrganismeImporter organismeImporter,
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter) {
+            final TypeCoteImporter typeCoteImporter, 
+            final TypeMateriauImporter typeMateriauImporter,
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter);
+                systemeReperageImporter, borneDigueImporter, organismeImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
+        this.organismeImporter = organismeImporter;
         this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter);
+                borneDigueImporter, organismeImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter, typeMateriauImporter,
+                typeNatureImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter);
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter,
+                typeMateriauImporter, typeNatureImporter);
+        this.talusDigueImporter = new TalusDigueImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter,
+                typeMateriauImporter, typeNatureImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase, couchDbConnector);
         this.typeSourceImporter = typeSourceImporter;
@@ -229,6 +245,7 @@ public class StructureImporter extends GenericStructureImporter {
 
         final Map<Integer, Crete> cretes = creteImporter.getCretes();
         final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
+        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getTalus();
         
         // Importation détaillée de toutes les structures au sens strict.
         if(cretes!=null) for(final Integer key : cretes.keySet()){
@@ -239,6 +256,11 @@ public class StructureImporter extends GenericStructureImporter {
         if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
             if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
             else structures.put(key, piedsDigue.get(key));
+        }
+
+        if(talusDigue!=null) for(final Integer key : talusDigue.keySet()){
+            if(structures.get(key)!=null) throw new AccessDbImporterException(talusDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+            else structures.put(key, talusDigue.get(key));
         }
         
         
