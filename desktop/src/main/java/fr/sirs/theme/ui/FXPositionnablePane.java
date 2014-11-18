@@ -16,6 +16,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsListCell;
 import java.awt.Color;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +73,8 @@ import org.opengis.util.FactoryException;
  * @author Johann Sorel (Geomatys)
  */
 public class FXPositionnablePane extends BorderPane {
+    
+    private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.#");
     
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
     public static final CoordinateReferenceSystem CRS_RGF93 = Session.PROJECTION;
@@ -247,12 +251,12 @@ public class FXPositionnablePane extends BorderPane {
             final BorneDigue borneStart = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
             final Point borneStartPoint = borneStart.getGeometry();
             double distStart = pos.getBorne_debut_distance();
-            if(pos.getBorne_debut_aval()) distStart -= -1;
+            if(pos.getBorne_debut_aval()) distStart *= -1;
             
             final BorneDigue borneEnd = cacheBorneDigue.get(pos.borneFinIdProperty().get());
             final Point borneEndPoint = borneEnd.getGeometry();            
             double distEnd = pos.getBorne_fin_distance();
-            if(pos.getBorne_fin_aval()) distEnd -= -1;
+            if(pos.getBorne_fin_aval()) distEnd *= -1;
             
             startPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneStartPoint, distStart, 0);
             endPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneEndPoint, distEnd, 0);
@@ -284,10 +288,10 @@ public class FXPositionnablePane extends BorderPane {
             page.append("<h2>Coordonnées géographique (WGS-84, EPSG:4326)</h2>");
             page.append("<b>Début</b><br/>");
             page.append("Longitude : ").append(ptStart.getX()).append("<br/>");
-            page.append("Latitude : ").append(ptStart.getY()).append("<br/>");
+            page.append("Latitude&nbsp : ").append(ptStart.getY()).append("<br/>");
             page.append("<b>Fin</b><br/>");
             page.append("Longitude : ").append(ptEnd.getX()).append("<br/>");
-            page.append("Latitude : ").append(ptEnd.getY()).append("<br/>");
+            page.append("Latitude&nbsp : ").append(ptEnd.getY()).append("<br/>");
             page.append("<br/>");
         } catch (FactoryException | TransformException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -329,12 +333,12 @@ public class FXPositionnablePane extends BorderPane {
             page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
             page.append("<b>Début </b>");
             page.append(startBorne.getLibelle()).append(' ');
-            page.append(distanceStartBorne).append("m ");
+            page.append(DISTANCE_FORMAT.format(distanceStartBorne)).append("m ");
             page.append(startAval ? "en amont":"en aval");
             page.append("<br/>");
-            page.append("<b>Fin </b>");
+            page.append("<b>Fin&nbsp&nbsp </b>");
             page.append(endBorne.getLibelle()).append(' ');
-            page.append(distanceEndBorne).append("m ");
+            page.append(DISTANCE_FORMAT.format(distanceEndBorne)).append("m ");
             page.append(endAval ? "en amont":"en aval");
             page.append("<br/><br/>");
         }
@@ -344,6 +348,7 @@ public class FXPositionnablePane extends BorderPane {
         
         final WebView view = new WebView();        
         view.getEngine().loadContent(page.toString());
+        view.getEngine().userStyleSheetLocationProperty().set(FXPositionnablePane.class.getResource("/fr/sirs/web.css").toString() );
         
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();

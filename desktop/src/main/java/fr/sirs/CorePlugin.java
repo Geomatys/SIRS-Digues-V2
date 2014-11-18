@@ -74,6 +74,7 @@ import org.opengis.style.LineSymbolizer;
 import org.opengis.style.Mark;
 import org.opengis.style.PointSymbolizer;
 import org.opengis.style.Stroke;
+import org.opengis.style.TextSymbolizer;
 
 /**
  *
@@ -274,16 +275,16 @@ public class CorePlugin extends Plugin{
     }
 
     private static MutableStyle createTronconStyle(){
-        final Stroke stroke1 = GO2Utilities.STYLE_FACTORY.stroke(SF.literal(Color.DARK_GRAY),FF.literal(4),LITERAL_ONE_FLOAT);
-        final LineSymbolizer line1 = GO2Utilities.STYLE_FACTORY.lineSymbolizer("symbol",
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.DARK_GRAY),FF.literal(4),LITERAL_ONE_FLOAT);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
         
-        final Stroke stroke2 = GO2Utilities.STYLE_FACTORY.stroke(SF.literal(Color.WHITE),FF.literal(2),LITERAL_ONE_FLOAT);
-        final LineSymbolizer line2 = GO2Utilities.STYLE_FACTORY.lineSymbolizer("symbol",
+        final Stroke stroke2 = SF.stroke(SF.literal(Color.WHITE),FF.literal(2),LITERAL_ONE_FLOAT);
+        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
         
         
-        final MutableStyle style = GO2Utilities.STYLE_FACTORY.style(line1,line2);
+        final MutableStyle style = SF.style(line1,line2);
         return style;
     }
     
@@ -291,56 +292,62 @@ public class CorePlugin extends Plugin{
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(7);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = GO2Utilities.STYLE_FACTORY.stroke(Color.BLACK, 1);
-        final Fill fill = GO2Utilities.STYLE_FACTORY.fill(Color.WHITE);
-        final Mark mark = GO2Utilities.STYLE_FACTORY.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        final Stroke stroke = SF.stroke(Color.BLACK, 1);
+        final Fill fill = SF.fill(Color.WHITE);
+        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
         symbols.add(mark);
-        final Graphic graphic = GO2Utilities.STYLE_FACTORY.graphic(symbols, LITERAL_ONE_FLOAT, 
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
                 size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer pointSymbolizer = GO2Utilities.STYLE_FACTORY.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
         
-        final MutableRule ruleClose = GO2Utilities.STYLE_FACTORY.rule(pointSymbolizer);
+        final TextSymbolizer ts = SF.textSymbolizer(
+                SF.fill(Color.BLACK), DEFAULT_FONT, 
+                SF.halo(Color.WHITE, 2), 
+                FF.property("libelle"), 
+                SF.pointPlacement(SF.anchorPoint(0, 0.25), SF.displacement(5, 0), FF.literal(0)), null);
+        
+        final MutableRule ruleClose = SF.rule(pointSymbolizer, ts);
         ruleClose.setMaxScaleDenominator(50000);
         
-        final MutableFeatureTypeStyle fts = GO2Utilities.STYLE_FACTORY.featureTypeStyle();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleClose);
-        final MutableStyle style = GO2Utilities.STYLE_FACTORY.style();
+        final MutableStyle style = SF.style();
         style.featureTypeStyles().add(fts);
         return style;
     }
     
     private static MutableStyle createStructureStyle(Color col){
         final Expression offset = GO2Utilities.FILTER_FACTORY.literal(6);
-        final Expression color = GO2Utilities.STYLE_FACTORY.literal(col);
+        final Expression color = SF.literal(col);
         final Expression width = GO2Utilities.FILTER_FACTORY.literal(2);
-        final Stroke lineStroke = GO2Utilities.STYLE_FACTORY.stroke(color,width,LITERAL_ONE_FLOAT);
-        final LineSymbolizer lineSymbolizer = GO2Utilities.STYLE_FACTORY.lineSymbolizer("symbol",
+        final Stroke lineStroke = SF.stroke(color,width,LITERAL_ONE_FLOAT);
+        final LineSymbolizer lineSymbolizer = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,lineStroke,offset);
         
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(13);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = GO2Utilities.STYLE_FACTORY.stroke(Color.WHITE, 0);
-        final Fill fill = GO2Utilities.STYLE_FACTORY.fill(col);
-        final Mark mark = GO2Utilities.STYLE_FACTORY.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
+        final Stroke stroke = SF.stroke(Color.WHITE, 0);
+        final Fill fill = SF.fill(col);
+        final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
         symbols.add(mark);
-        final Graphic graphic = GO2Utilities.STYLE_FACTORY.graphic(symbols, LITERAL_ONE_FLOAT, 
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
                 size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer pointSymbolizer = GO2Utilities.STYLE_FACTORY.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
         
-        final MutableRule ruleClose = GO2Utilities.STYLE_FACTORY.rule(lineSymbolizer);
+        final MutableRule ruleClose = SF.rule(lineSymbolizer);
         ruleClose.setMaxScaleDenominator(500000);
-        final MutableRule ruleFar = GO2Utilities.STYLE_FACTORY.rule(pointSymbolizer);
+        final MutableRule ruleFar = SF.rule(pointSymbolizer);
         ruleFar.setMinScaleDenominator(500000);
         
-        final MutableFeatureTypeStyle fts = GO2Utilities.STYLE_FACTORY.featureTypeStyle();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleClose);
         fts.rules().add(ruleFar);
         
-        final MutableStyle style = GO2Utilities.STYLE_FACTORY.style();
+        final MutableStyle style = SF.style();
         style.featureTypeStyles().add(fts);
         return style;
     }

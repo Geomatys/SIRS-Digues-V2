@@ -59,6 +59,7 @@ public final class LinearReferencingUtilities extends Static{
         public Point reference;
         public SegmentInfo segment;
         public Coordinate[] nearests;
+        public double distancePerpendicularAbs;
         public double distancePerpendicular;
         public double distanceAlongLinear;
     }
@@ -140,14 +141,16 @@ public final class LinearReferencingUtilities extends Static{
         projection.reference = reference;
         
         //find the nearest segment
+        projection.distancePerpendicularAbs = Double.MAX_VALUE;
         projection.distancePerpendicular = Double.MAX_VALUE;
         
         for(SegmentInfo segment : segments){
             
             final Coordinate[] candidateNearests = DistanceOp.nearestPoints(segment.geometry, reference);
             final double candidateDistance = candidateNearests[0].distance(candidateNearests[1]);
-            if(candidateDistance<projection.distancePerpendicular){
+            if(candidateDistance<projection.distancePerpendicularAbs){
                 final double side = -lineSide(segment, candidateNearests[1]);
+                projection.distancePerpendicularAbs = candidateDistance;
                 projection.distancePerpendicular = candidateDistance * Math.signum(side);
                 projection.nearests = candidateNearests;
                 projection.segment = segment;
