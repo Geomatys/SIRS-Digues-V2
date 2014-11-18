@@ -396,6 +396,7 @@
         eType="#//ElementReseauDesordre" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreStructure" upperBound="-1"
         eType="#//DesordreStructure" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationSuivi">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_observation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
