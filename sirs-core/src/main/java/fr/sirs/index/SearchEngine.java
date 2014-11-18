@@ -17,7 +17,6 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NoLockFactory;
@@ -37,6 +36,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.TopDocs;
+import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
@@ -55,18 +55,23 @@ public class SearchEngine implements DocumentListener {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_KEYWORDS = "keywords";
 
+    //lucense syntax chars
+    private static final char[] SPECIALS = {'+','-','&','|','!','(',')','{','}','[',']','^','"','~','*','?',':','\\','/'};
+    static {
+        Arrays.sort(SPECIALS);
+    }
+    
+    
     private final CouchDbConnector connector;
-    private final DocumentChangeEmiter changeEmitter;
     private final String dbName;
     //thread safe
     private final IndexWriter indexWriter;
-    private final IndexSearcher indexSearcher;
+    private IndexSearcher indexSearcher;
 
 
     public SearchEngine(String dbName, CouchDbConnector connector, DocumentChangeEmiter changeEmitter) throws IOException {
         this.dbName = dbName;
         this.connector = connector;
-        this.changeEmitter = changeEmitter;
         changeEmitter.addListener(this);
         
         
@@ -80,10 +85,7 @@ public class SearchEngine implements DocumentListener {
         final IndexWriterConfig config = new IndexWriterConfig(VERSION, analyzer);
         indexWriter = new IndexWriter(directory, config);
         indexWriter.commit();
-        
-        final DirectoryReader directoryReader = DirectoryReader.open(indexWriter,true);
-        indexSearcher = new IndexSearcher(directoryReader);
-        
+                
         //Creation de l'index s'il n'existe pas.
         if(isNew){
             rebuildIndex();
@@ -112,6 +114,19 @@ public class SearchEngine implements DocumentListener {
         
         indexWriter.commit();
         view.close();
+        unloadSearcher();
+    }
+    
+    private synchronized IndexSearcher getSearcher() throws IOException{
+        if(indexSearcher==null){
+            final DirectoryReader directoryReader = DirectoryReader.open(indexWriter,true);
+            indexSearcher = new IndexSearcher(directoryReader);
+        }
+        return indexSearcher;
+    }
+    
+    private synchronized void unloadSearcher(){
+        indexSearcher = null;
     }
     
     @Override
@@ -135,6 +150,7 @@ public class SearchEngine implements DocumentListener {
         } catch (IOException ex) {
             SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
+        unloadSearcher();
     }
 
     @Override
@@ -144,6 +160,7 @@ public class SearchEngine implements DocumentListener {
         } catch (IOException ex) {
             SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
+        unloadSearcher();
     }
     
     private String createKeyWords(Object obj){
@@ -173,7 +190,10 @@ public class SearchEngine implements DocumentListener {
         
         if(JsonNodeType.STRING.equals(type)){            
             final String txt = node.textValue();
-            keywords.addAll(Arrays.asList(txt.split(" ")));
+            keywords.addAll(Arrays.asList(txt.split("( |-|\\.)")));
+        }else if(JsonNodeType.NUMBER.equals(type)){            
+            final String txt = node.numberValue().toString();
+            keywords.add(txt);
         }else{
             final Iterator<Map.Entry<String, JsonNode>> ite = node.fields();
             
@@ -196,6 +216,7 @@ public class SearchEngine implements DocumentListener {
         doc.add(new TextField(FIELD_KEYWORDS, keywords, Field.Store.YES));
         indexWriter.addDocument(doc);
         if(commit) indexWriter.commit();
+        unloadSearcher();
     }
     
     public void updateDocument(String docId, String keywords) throws IOException{
@@ -203,11 +224,13 @@ public class SearchEngine implements DocumentListener {
         indexWriter.updateDocValues(filter, 
                 new TextField(FIELD_KEYWORDS, keywords, Field.Store.YES));
         indexWriter.commit();
+        unloadSearcher();
     }
     
     public void deleteDocument(String docId) throws IOException{
         indexWriter.deleteDocuments(new Term(FIELD_ID, docId));
         indexWriter.commit();
+        unloadSearcher();
     }
         
     public Set<String> search(final String type, final String ... words) throws ParseException, IOException {
@@ -220,10 +243,12 @@ public class SearchEngine implements DocumentListener {
         //build query
         final StringBuilder sb = new StringBuilder();
         sb.append('(');
-        sb.append(FIELD_KEYWORDS).append(':').append(words[0]);
+        sb.append(FIELD_KEYWORDS).append(':').append(escape(words[0])).append('*');
+        sb.append(" OR ").append(FIELD_KEYWORDS).append(':').append(escape(words[0])).append('~');
         for(int i=1;i<words.length;i++) {
             sb.append(" OR ");
-            sb.append(FIELD_KEYWORDS).append(':').append(words[i]);
+            sb.append(FIELD_KEYWORDS).append(':').append(escape(words[i])).append('*');
+            sb.append(" OR ").append(FIELD_KEYWORDS).append(':').append(escape(words[i])).append('~');
         }
         sb.append(')');
         if(type!=null){
@@ -231,8 +256,8 @@ public class SearchEngine implements DocumentListener {
         }
         final Query q = queryParser.parse(sb.toString());
         
-        
-        final int maxRecords = (int)indexSearcher.collectionStatistics("id").maxDoc();
+        final IndexSearcher indexSearcher = getSearcher();
+        final int maxRecords = (int)indexSearcher.collectionStatistics(FIELD_ID).maxDoc();
         if (maxRecords == 0) {
             return Collections.EMPTY_SET;
         }
@@ -244,6 +269,19 @@ public class SearchEngine implements DocumentListener {
         }
         
         return result;
+    }
+    
+    private static String escape(String word){
+        final StringBuilder sb = new StringBuilder();
+        final int size = word.length();
+        for(int i=0;i<size;i++){
+            final char c = word.charAt(i);
+            if(Arrays.binarySearch(SPECIALS, c)>=0){
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
     
     public void finalize() throws IOException {
