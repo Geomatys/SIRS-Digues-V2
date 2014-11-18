@@ -13,11 +13,13 @@ import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefPositionRepository;
+import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
@@ -34,13 +36,15 @@ import fr.sirs.importer.structure.TypeCoteImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
 import fr.sirs.importer.structure.TypePositionImporter;
 import fr.sirs.importer.structure.TypeSourceImporter;
-import fr.sirs.importer.theme.document.related.ConventionImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
-import fr.sirs.importer.theme.document.related.ProfilTraversDescriptionImporter;
-import fr.sirs.importer.theme.document.related.ProfilTraversImporter;
-import fr.sirs.importer.theme.document.related.TypeConventionImporter;
-import fr.sirs.importer.theme.document.related.TypeProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.convention.TypeConventionImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.TypeProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
+import fr.sirs.importer.theme.document.related.rapportEtude.TypeRapportEtudeImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,6 +85,8 @@ public class DbImporter {
     private final EvenementHydrauliqueRepository evenementHydrauliqueRepository;
     private final RefFrequenceEvenementHydrauliqueRepository refFrequenceEvenementHydrauliqueRepository;
     private final RefSystemeReleveProfilRepository refSystemeReleveProfilRepository;
+    private final RefRapportEtudeRepository refRapportEtudeRepository;
+    private final RapportEtudeRepository rapportEtudeRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -111,6 +117,8 @@ public class DbImporter {
     private TypeProfilTraversImporter typeProfilTraversImporter;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
+    private TypeRapportEtudeImporter typeRapportEtudeImporter;
+    private RapportEtudeImporter rapportEtudeImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -493,6 +501,10 @@ public class DbImporter {
         repositories.add(refTypeProfilTraversRepository);
         refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(couchDbConnector);
         repositories.add(refSystemeReleveProfilRepository);
+        refRapportEtudeRepository = new RefRapportEtudeRepository(couchDbConnector);
+        repositories.add(refRapportEtudeRepository);
+        rapportEtudeRepository = new RapportEtudeRepository(couchDbConnector);
+        repositories.add(rapportEtudeRepository);
     }
     
     public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
@@ -538,9 +550,14 @@ public class DbImporter {
                 typeProfilTraversImporter, organismeImporter);
         profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
                 couchDbConnector, profilTraversRepository, profilTraversDescriptionImporter);
+        typeRapportEtudeImporter = new TypeRapportEtudeImporter(accessDatabase, 
+                couchDbConnector, refRapportEtudeRepository);
+        rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
+                couchDbConnector, rapportEtudeRepository, typeRapportEtudeImporter);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
                 documentRepository,borneDigueImporter, systemeReperageImporter, 
-                conventionImporter, profilTraversImporter, tronconGestionDigueImporter);
+                conventionImporter, profilTraversImporter, rapportEtudeImporter, 
+                tronconGestionDigueImporter);
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, refEvenementHydrauliqueRepository);
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
@@ -621,7 +638,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_SYSTEME_RELEVE_PROFIL.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_RAPPORT_ETUDES.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -637,7 +654,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_ORIGINE_PROFIL_EN_LONG.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_RAPPORT_ETUDES.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -647,12 +664,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.TYPE_ORIGINE_PROFIL_EN_LONG.toString()).getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_RAPPORT_ETUDES.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_ORIGINE_PROFIL_EN_LONG.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.SYS_EVT_RAPPORT_ETUDES.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document.related;
+package fr.sirs.importer.theme.document.related.convention;
 
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;

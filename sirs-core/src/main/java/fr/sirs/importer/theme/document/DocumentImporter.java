@@ -1,6 +1,6 @@
 package fr.sirs.importer.theme.document;
 
-import fr.sirs.importer.theme.document.related.ConventionImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -20,7 +20,8 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,11 +45,13 @@ import org.opengis.util.FactoryException;
  */
 public class DocumentImporter extends GenericDocumentImporter {
     
-    private ConventionImporter conventionImporter;
-    private DocumentConventionImporter documentConventionImporter;
-    private ProfilTraversImporter profilTraversImporter;
-    private DocumentProfilTraversImporter documentProfilTraversImporter;
-    private TypeDocumentImporter typeDocumentImporter;
+    private final ConventionImporter conventionImporter;
+    private final DocumentConventionImporter documentConventionImporter;
+    private final ProfilTraversImporter profilTraversImporter;
+    private final DocumentProfilTraversImporter documentProfilTraversImporter;
+    private final RapportEtudeImporter rapportEtudeImporter;
+    private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
+    private final TypeDocumentImporter typeDocumentImporter;
     
     public DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
@@ -57,6 +60,7 @@ public class DocumentImporter extends GenericDocumentImporter {
             final SystemeReperageImporter systemeReperageImporter,
             final ConventionImporter conventionImporter,
             final ProfilTraversImporter profilTraversImporter,
+            final RapportEtudeImporter rapportEtudeImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
@@ -72,6 +76,11 @@ public class DocumentImporter extends GenericDocumentImporter {
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
+        this.rapportEtudeImporter = rapportEtudeImporter;
+        this.documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
+                accessDatabase, couchDbConnector, documentRepository, 
+                borneDigueImporter, systemeReperageImporter, 
+                tronconGestionDigueImporter, rapportEtudeImporter);
     }
     
     private enum DocumentColumns {
@@ -110,7 +119,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         ID_CONVENTION,
         DATE_DERNIERE_MAJ,
 //        AUTEUR_RAPPORT,
-//        ID_RAPPORT_ETUDE
+        ID_RAPPORT_ETUDE
     }
 
     @Override
@@ -145,6 +154,14 @@ public class DocumentImporter extends GenericDocumentImporter {
             if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
             else documents.put(key, documentProfilTravers.get(key));
         }
+        
+        final Map<Integer, Document> documentRapportEtude = documentRapportEtudeImporter.getDocumentRapportEtude();
+        if(documentRapportEtude!=null) for(final Integer key : documentRapportEtude.keySet()){
+            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+            else documents.put(key, documentRapportEtude.get(key));
+        }
+        
+        
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Convention> conventions = conventionImporter.getConventions();

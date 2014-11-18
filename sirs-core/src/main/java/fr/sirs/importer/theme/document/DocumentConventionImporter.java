@@ -16,7 +16,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.ConventionImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 
     private final ConventionImporter conventionImporter;
     
-    public DocumentConventionImporter(final Database accessDatabase, 
+    DocumentConventionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 

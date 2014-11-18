@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document.related;
+package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -34,7 +34,7 @@ public class TypeProfilTraversImporter extends GenericImporter {
     private enum TypeProfilTraversColumns {
         ID_TYPE_PROFIL_EN_TRAVERS,
         LIBELLE_TYPE_PROFIL_EN_TRAVERS,
-//        ABREGE_TYPE_PROFIL_EN_TRAVERS, // Pas dans le nouveau modèle
+//        ABREGE_TYPE_PROFIL_EN_TRAVERS, // Pas dans le nouveau modèle (supprimé)
         DATE_DERNIERE_MAJ
     };
 

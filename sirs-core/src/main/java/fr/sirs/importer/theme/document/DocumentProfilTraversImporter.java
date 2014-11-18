@@ -17,7 +17,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 
     private final ProfilTraversImporter profilTraversImporter;
     
-    public DocumentProfilTraversImporter(final Database accessDatabase, 
+    DocumentProfilTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 

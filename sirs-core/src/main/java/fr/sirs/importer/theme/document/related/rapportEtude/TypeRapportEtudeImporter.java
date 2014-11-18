@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document.related;
+package fr.sirs.importer.theme.document.related.rapportEtude;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
