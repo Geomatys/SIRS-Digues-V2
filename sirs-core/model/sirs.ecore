@@ -14,11 +14,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="digueId" eType="#//Digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaires" upperBound="-1"
-        eType="#//GestionTroncon" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contactIds" upperBound="-1"
+        eType="#//ContactTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gardienTroncon" upperBound="-1"
-        eType="#//GardienTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
         eType="#//CommuneTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRiveId" eType="#//RefRive"/>
@@ -843,13 +841,16 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="GestionTroncon" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="ContactTroncon" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireId" lowerBound="1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeProprietaireId" eType="#//RefProprietaire"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeContact" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contactId" lowerBound="1"
+        eType="#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Commune">
     <eAnnotations source="generation">
@@ -977,13 +978,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="IntervenantPrestation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantId" eType="#//Contact"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="GardienTroncon" eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gardienId" lowerBound="1"
-        eType="#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CommuneTroncon" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
