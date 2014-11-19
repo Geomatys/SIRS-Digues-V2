@@ -5,7 +5,6 @@ import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
 import org.geotoolkit.gui.javafx.util.FXBooleanCell;
-import fr.sirs.util.property.Internal;
 import com.sun.javafx.property.PropertyReference;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
@@ -16,23 +15,17 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -100,19 +93,6 @@ public class PojoTable extends BorderPane{
             }
         };
     
-    private static final Class[] SUPPORTED_TYPES = new Class[]{
-        Boolean.class,
-        String.class,
-        Integer.class,
-        Float.class,
-        Double.class,
-        boolean.class,
-        int.class,
-        float.class,
-        double.class,
-        LocalDateTime.class
-    };
-    
     private final TableView<Element> uiTable = new FXTableView<>();
     protected final ScrollPane uiScroll = new ScrollPane(uiTable);
     protected final Class pojoClass;
@@ -152,7 +132,7 @@ public class PojoTable extends BorderPane{
         setCenter(uiScroll);
         
         //contruction des colonnes editable
-        final List<PropertyDescriptor> properties = listSimpleProperties(pojoClass);
+        final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
         uiTable.getColumns().add(new DeleteColumn());
         uiTable.getColumns().add(new EditColumn());
         for(PropertyDescriptor desc : properties){
@@ -466,26 +446,6 @@ public class PojoTable extends BorderPane{
                 }
             }));
         }  
-    }
-    
-    private static List<PropertyDescriptor> listSimpleProperties(Class clazz) {
-        final List<PropertyDescriptor> properties = new ArrayList<>();
-        try {
-            for (java.beans.PropertyDescriptor pd : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
-                final Method m = pd.getReadMethod();
-                if(m==null || m.getAnnotation(Internal.class)!=null) continue;
-                final Class propClass = m.getReturnType();
-                for(Class c : SUPPORTED_TYPES){
-                    if(c.isAssignableFrom(propClass)){
-                        properties.add(pd);
-                        break;
-                    }
-                }
-            }
-        } catch (IntrospectionException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return properties;
     }
     
 }
