@@ -54,10 +54,6 @@ public class StructureImporter extends GenericStructureImporter {
     private final PiedDigueImporter piedDigueImporter;
     private final TalusDigueImporter talusDigueImporter;
     private final TypeElementStructureImporter typeElementStructureImporter;
-    private final TypeSourceImporter typeSourceImporter;
-    private final TypeCoteImporter typeCoteImporter;
-    private final TypePositionImporter typePositionImporter;
-    private final OrganismeImporter organismeImporter;
 
     public StructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -69,32 +65,29 @@ public class StructureImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
-        this.organismeImporter = organismeImporter;
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter);
+                typeNatureImporter, typeFonctionImporter);
         this.piedDigueImporter = new PiedDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.talusDigueImporter = new TalusDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase, couchDbConnector);
-        this.typeSourceImporter = typeSourceImporter;
-        this.typePositionImporter = typePositionImporter;
-        this.typeCoteImporter = typeCoteImporter;
     }
 
     private enum ElementStructureColumns {

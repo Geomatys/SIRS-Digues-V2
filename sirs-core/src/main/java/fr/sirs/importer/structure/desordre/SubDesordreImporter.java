@@ -24,6 +24,7 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.structure.GenericStructureImporter;
 import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.structure.TypeFonctionImporter;
 import fr.sirs.importer.structure.TypeMateriauImporter;
 import fr.sirs.importer.structure.TypeNatureImporter;
 import java.io.IOException;
@@ -65,11 +66,12 @@ class SubDesordreImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter, 
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, null, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
@@ -278,14 +280,12 @@ class SubDesordreImporter extends GenericStructureImporter {
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             desordres.put(row.getInt(SubDesordreColumns.ID_DESORDRE.toString()), desordre);
 
             // Set the list ByTronconId
             List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(SubDesordreColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-//                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(desordre);
             desordresByTronconId.put(row.getInt(SubDesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);

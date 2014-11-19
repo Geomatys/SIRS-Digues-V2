@@ -23,8 +23,10 @@ public abstract class GenericStructureImporter extends GenericImporter {
     protected TypePositionImporter typePositionImporter;
     protected TypeMateriauImporter typeMateriauImporter;
     protected TypeNatureImporter typeNatureImporter;
+    protected TypeFonctionImporter typeFonctionImporter;
     
-    private GenericStructureImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private GenericStructureImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
@@ -38,7 +40,8 @@ public abstract class GenericStructureImporter extends GenericImporter {
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter) {
         this(accessDatabase, couchDbConnector);
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
@@ -49,5 +52,6 @@ public abstract class GenericStructureImporter extends GenericImporter {
         this.typePositionImporter = typePositionImporter;
         this.typeMateriauImporter = typeMateriauImporter;
         this.typeNatureImporter = typeNatureImporter;
+        this.typeFonctionImporter = typeFonctionImporter;
     }
 }

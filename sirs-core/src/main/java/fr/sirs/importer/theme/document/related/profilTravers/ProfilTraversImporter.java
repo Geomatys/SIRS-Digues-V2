@@ -70,7 +70,7 @@ public class ProfilTraversImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         profils = new HashMap<>();
         
-        final Map<Integer, List<LeveeProfilTravers>> levees = 
+        final Map<Integer, List<LeveeProfilTravers>> leveesImport = 
                 profilTraversDescriptionImporter.getLeveeProfilTraversByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
@@ -83,6 +83,9 @@ public class ProfilTraversImporter extends GenericImporter {
             if (row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            final List<LeveeProfilTravers> levee = leveesImport.get(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()));
+            if(levee!=null) profil.setLeveeIds(levee);
             
             profils.put(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }

@@ -13,6 +13,7 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
@@ -56,11 +57,12 @@ class PiedDigueImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
 
     private enum PiedDigueColumns {
@@ -78,7 +80,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         //        NOM_BORNE_FIN, // Dans le BorneImporter
         //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
         //        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
-        //        LIBELLE_TYPE_FONCTION,
+        //        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
         //        ID_TYPE_ELEMENT_STRUCTURE, //Dans le TypeElementStructureImporter
                 ID_TYPE_COTE,
                 ID_SOURCE,
@@ -97,7 +99,7 @@ class PiedDigueImporter extends GenericStructureImporter {
 //        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
         ID_TYPE_MATERIAU,
         ID_TYPE_NATURE,
-//        ID_TYPE_FONCTION,
+        ID_TYPE_FONCTION,
 //        ID_AUTO
 
         // Empty fields
@@ -213,6 +215,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -280,6 +283,10 @@ class PiedDigueImporter extends GenericStructureImporter {
             
             if(row.getInt(PiedDigueColumns.ID_TYPE_NATURE.toString())!=null){
                 piedDigue.setNatureId(typesNature.get(row.getInt(PiedDigueColumns.ID_TYPE_NATURE.toString())).getId());
+            }
+            
+            if(row.getInt(PiedDigueColumns.ID_TYPE_FONCTION.toString())!=null){
+                piedDigue.setFonctionId(typesFonction.get(row.getInt(PiedDigueColumns.ID_TYPE_FONCTION.toString())).getId());
             }
 
             if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {

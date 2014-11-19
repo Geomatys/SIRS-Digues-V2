@@ -24,6 +24,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.GenericStructureImporter;
 import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.structure.TypeFonctionImporter;
 import fr.sirs.importer.structure.TypeMateriauImporter;
 import fr.sirs.importer.structure.TypeNatureImporter;
 import java.io.IOException;
@@ -68,11 +69,12 @@ public class DesordreImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter, 
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, null, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = typeDesordreImporter;
@@ -81,7 +83,7 @@ public class DesordreImporter extends GenericStructureImporter {
                 systemeReperageImporter, borneDigueImporter, 
                 structureImporter, typeDesordreImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter);
+                typeNatureImporter, typeFonctionImporter);
     }
 
     private enum DesordreColumns {

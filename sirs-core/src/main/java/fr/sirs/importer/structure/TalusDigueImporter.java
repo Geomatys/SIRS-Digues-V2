@@ -13,6 +13,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
@@ -57,11 +58,12 @@ class TalusDigueImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
 
     /*
@@ -87,7 +89,7 @@ class TalusDigueImporter extends GenericStructureImporter {
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
 //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
 //        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
-//        LIBELLE_TYPE_FONCTION,
+//        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
 //        LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
 //        LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
@@ -123,7 +125,7 @@ class TalusDigueImporter extends GenericStructureImporter {
         N_COUCHE,
 //        ID_TYPE_MATERIAU, // Pas dans le nouveau modèle
 //        ID_TYPE_NATURE, // Pas dans le nouveau modèle
-//        ID_TYPE_FONCTION,
+        ID_TYPE_FONCTION,
         EPAISSEUR,
 //        TALUS_INTERCEPTE_CRETE,
         ID_TYPE_NATURE_HAUT,
@@ -212,6 +214,7 @@ class TalusDigueImporter extends GenericStructureImporter {
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -313,6 +316,11 @@ class TalusDigueImporter extends GenericStructureImporter {
             
             if (row.getDouble(TalusDigueColumns.EPAISSEUR.toString()) != null) {
                 talus.setEpaisseur_sommet(row.getDouble(TalusDigueColumns.EPAISSEUR.toString()).floatValue());
+            }
+            
+            if(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())!=null){
+                talus.setFonctionHautId(typesFonction.get(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())).getId());
+                talus.setFonctionBasId(typesFonction.get(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())).getId());
             }
             
             if(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_HAUT.toString())!=null){

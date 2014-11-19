@@ -13,6 +13,7 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
@@ -56,11 +57,12 @@ class CreteImporter extends GenericStructureImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter) {
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
 
     /*
@@ -86,7 +88,7 @@ class CreteImporter extends GenericStructureImporter {
         //        NOM_BORNE_FIN, // Dans le BorneImporter
         //        LIBELLE_TYPE_MATERIAU, // Dans l'importateur de matériaux
         //        LIBELLE_TYPE_NATURE, // Dans l'importation des natures
-        //        LIBELLE_TYPE_FONCTION,
+        //        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
         //        ID_TYPE_ELEMENT_STRUCTURE,// Dans le TypeElementStructureImporter
                 ID_SOURCE,
         ID_TRONCON_GESTION,
@@ -105,7 +107,7 @@ class CreteImporter extends GenericStructureImporter {
         N_COUCHE,
                 ID_TYPE_MATERIAU,
                 ID_TYPE_NATURE,
-        //        ID_TYPE_FONCTION,
+                ID_TYPE_FONCTION,
         EPAISSEUR,
 //        TALUS_INTERCEPTE_CRETE,
 //        ID_AUTO
@@ -213,6 +215,7 @@ class CreteImporter extends GenericStructureImporter {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -282,6 +285,10 @@ class CreteImporter extends GenericStructureImporter {
             
             if(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())!=null){
                 crete.setNatureId(typesNature.get(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())).getId());
+            }
+            
+            if(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())!=null){
+                crete.setFonctionId(typesFonction.get(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())).getId());
             }
             
             if (row.getDouble(CreteColumns.EPAISSEUR.toString()) != null) {

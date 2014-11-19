@@ -20,6 +20,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
 import fr.sirs.importer.structure.TypeCoteImporter;
+import fr.sirs.importer.structure.TypeFonctionImporter;
 import fr.sirs.importer.structure.TypeMateriauImporter;
 import fr.sirs.importer.structure.TypeNatureImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
@@ -84,7 +85,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter){
+            final TypeNatureImporter typeNatureImporter,
+            final TypeFonctionImporter typeFonctionImporter){
         this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueRepository = digueRepository;
@@ -103,12 +105,12 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter);
+                typeNatureImporter, typeFonctionImporter);
         this.desordreImporter = new DesordreImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, structureImporter, typeDesordreImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter);
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
     
     public StructureImporter getStructureImporter(){return structureImporter;}

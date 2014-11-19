@@ -19,6 +19,7 @@ import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
+import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefMateriauRepository;
 import fr.sirs.core.component.RefNatureRepository;
@@ -37,6 +38,7 @@ import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueIm
 import fr.sirs.importer.structure.StructureImporter;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
 import fr.sirs.importer.structure.TypeCoteImporter;
+import fr.sirs.importer.structure.TypeFonctionImporter;
 import fr.sirs.importer.structure.TypeMateriauImporter;
 import fr.sirs.importer.structure.TypeNatureImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
@@ -98,6 +100,7 @@ public class DbImporter {
     private final RapportEtudeRepository rapportEtudeRepository;
     private final RefMateriauRepository refMateriauRepository;
     private final RefNatureRepository refNatureRepository;
+    private final RefFonctionRepository refFonctionRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -135,6 +138,7 @@ public class DbImporter {
     private RapportEtudeImporter rapportEtudeImporter;
     private TypeMateriauImporter typeMateriauImporter;
     private TypeNatureImporter typeNatureImporter;
+    private TypeFonctionImporter typeFonctionImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -391,7 +395,7 @@ public class DbImporter {
 //     TYPE_ELEMENT_STRUCTURE_COTE,
 //     TYPE_EMPRISE_PARCELLE,
      TYPE_EVENEMENT_HYDRAU,
-//     TYPE_FONCTION,
+     TYPE_FONCTION,
 //     TYPE_FONCTION_MO,
      TYPE_FREQUENCE_EVENEMENT_HYDRAU,
 //     TYPE_GENERAL_DOCUMENT,
@@ -527,6 +531,8 @@ public class DbImporter {
         repositories.add(refNatureRepository);
         contactRepository = new ContactRepository(couchDbConnector);
         repositories.add(contactRepository);
+        refFonctionRepository = new RefFonctionRepository(couchDbConnector);
+        repositories.add(refFonctionRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -569,6 +575,8 @@ public class DbImporter {
                 couchDbConnector, refMateriauRepository);
         typeNatureImporter = new TypeNatureImporter(accessDatabase, 
                 couchDbConnector, refNatureRepository);
+        typeFonctionImporter = new TypeFonctionImporter(accessDatabase, 
+                couchDbConnector, refFonctionRepository);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector, tronconDigueRepository, 
                 digueRepository, borneDigueRepository, digueImporter, 
@@ -578,7 +586,8 @@ public class DbImporter {
                 tronconGestionDigueProprietaireImporter, 
                 borneDigueImporter, organismeImporter, 
                 typeDesordreImporter, typeSourceImporter, typePositionImporter,
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter);
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter,
+                typeFonctionImporter);
         structureImporter = tronconGestionDigueImporter.getStructureImporter();
         desordreImporter = tronconGestionDigueImporter.getDesordreImporter();
         typeConventionImporter = new TypeConventionImporter(accessDatabase, 
@@ -685,7 +694,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -701,7 +710,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -716,7 +725,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");
