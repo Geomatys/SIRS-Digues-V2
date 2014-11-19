@@ -132,9 +132,9 @@ class TalusDigueImporter extends GenericStructureImporter {
         ID_TYPE_MATERIAU_HAUT,
         ID_TYPE_MATERIAU_BAS,
         ID_TYPE_NATURE_BAS,
-//        LONG_RAMP_HAUT,
-//        LONG_RAMP_BAS,
-//        PENTE_INTERIEURE,
+        LONG_RAMP_HAUT,
+        LONG_RAMP_BAS,
+        PENTE_INTERIEURE,
 //        ID_TYPE_OUVRAGE_PARTICULIER,
         ID_TYPE_POSITION,
 //        ID_ORG_PROPRIO,
@@ -339,11 +339,21 @@ class TalusDigueImporter extends GenericStructureImporter {
                 talus.setNatureBasId(typesNature.get(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_BAS.toString())).getId());
             }
             
+            if (row.getDouble(TalusDigueColumns.LONG_RAMP_HAUT.toString()) != null) {
+                talus.setLongueur_rampart_haut(row.getDouble(TalusDigueColumns.LONG_RAMP_HAUT.toString()).floatValue());
+            }
+            
+            if (row.getDouble(TalusDigueColumns.LONG_RAMP_BAS.toString()) != null) {
+                talus.setLongueur_rampart_bas(row.getDouble(TalusDigueColumns.LONG_RAMP_BAS.toString()).floatValue());
+            }
+            
+            if (row.getDouble(TalusDigueColumns.PENTE_INTERIEURE.toString()) != null) {
+                talus.setPente_interieur(row.getDouble(TalusDigueColumns.PENTE_INTERIEURE.toString()).floatValue());
+            }
+            
             if(row.getInt(TalusDigueColumns.ID_TYPE_POSITION.toString())!=null){
                 talus.setPosition_structure(typesPosition.get(row.getInt(TalusDigueColumns.ID_TYPE_POSITION.toString())).getId());
             }
-            
-            
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             talusDigue.put(row.getInt(TalusDigueColumns.ID_ELEMENT_STRUCTURE.toString()), talus);

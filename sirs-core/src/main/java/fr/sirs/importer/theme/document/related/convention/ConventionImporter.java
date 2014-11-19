@@ -48,7 +48,7 @@ public class ConventionImporter extends GenericImporter {
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
         COMMENTAIRE,
-//        DATE_DERNIERE_MAJ
+        DATE_DERNIERE_MAJ
     };
     
     
@@ -94,6 +94,10 @@ public class ConventionImporter extends GenericImporter {
             convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
             
             convention.setCommentaire(row.getString(ConventionColumns.COMMENTAIRE.toString()));
+            
+            if (row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                convention.setDateMaj(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
 
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
             conventionRepository.add(convention);

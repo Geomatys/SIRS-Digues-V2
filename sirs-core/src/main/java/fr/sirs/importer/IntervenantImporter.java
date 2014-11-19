@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -86,12 +87,13 @@ public class IntervenantImporter extends GenericImporter {
             
             intervenant.setPrenom(row.getString(IntervenantColumns.PRENOM_INTERVENANT.toString()));
             
-            intervenant.setAdresse(row.getString(IntervenantColumns.ADRESSE_PERSO_INTERV.toString())
-                    + row.getString(IntervenantColumns.ADRESSE_L1_PERSO_INTERV.toString())
-                    + row.getString(IntervenantColumns.ADRESSE_L2_PERSO_INTERV.toString())
-                    + row.getString(IntervenantColumns.ADRESSE_L3_PERSO_INTERV.toString()));
+            intervenant.setAdresse(cleanNullString(row.getString(IntervenantColumns.ADRESSE_PERSO_INTERV.toString()))
+                    + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L1_PERSO_INTERV.toString()))
+                    + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L2_PERSO_INTERV.toString()))
+                    + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L3_PERSO_INTERV.toString())));
+            System.out.println("Adresse de l'intervenant : "+intervenant.getAdresse());
             
-            intervenant.setCode_postal(String.valueOf(row.getInt(IntervenantColumns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString())));
+            intervenant.setCode_postal(cleanNullString(String.valueOf(row.getInt(IntervenantColumns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
             
             intervenant.setLocalite(row.getString(IntervenantColumns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
             

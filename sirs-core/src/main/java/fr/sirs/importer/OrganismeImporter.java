@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Organisme;
+import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -83,11 +84,11 @@ public class OrganismeImporter extends GenericImporter {
             
             organisme.setStatut_juridique(row.getString(OrganismeColumns.STATUT_JURIDIQUE.toString()));
             
-            organisme.setAdresse(row.getString(OrganismeColumns.ADRESSE_L1_ORG.toString())
-                    + row.getString(OrganismeColumns.ADRESSE_L2_ORG.toString())
-                    + row.getString(OrganismeColumns.ADRESSE_L3_ORG.toString()));
+            organisme.setAdresse(cleanNullString(row.getString(OrganismeColumns.ADRESSE_L1_ORG.toString()))
+                    + cleanNullString(row.getString(OrganismeColumns.ADRESSE_L2_ORG.toString()))
+                    + cleanNullString(row.getString(OrganismeColumns.ADRESSE_L3_ORG.toString())));
             
-            organisme.setCode_postal(String.valueOf(row.getInt(OrganismeColumns.ADRESSE_CODE_POSTAL_ORG.toString())));
+            organisme.setCode_postal(cleanNullString(String.valueOf(row.getInt(OrganismeColumns.ADRESSE_CODE_POSTAL_ORG.toString()))));
             
             organisme.setLocalite(row.getString(OrganismeColumns.ADRESSE_NOM_COMMUNE_ORG.toString()));
             

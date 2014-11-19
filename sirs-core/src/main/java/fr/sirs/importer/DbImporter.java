@@ -74,6 +74,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class DbImporter {
     
+    public static final String NULL_STRING_VALUE = "null";
+    
+    public static final String cleanNullString(String string){
+        return (NULL_STRING_VALUE.equals(string) || string==null) ? "" : string;
+    }
+    
     private final CouchDbConnector couchDbConnector;
 
     private final DigueRepository digueRepository;

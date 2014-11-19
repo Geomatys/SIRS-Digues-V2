@@ -224,7 +224,6 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             
             
             
-            
             documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
             
         }
