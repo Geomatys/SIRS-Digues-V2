@@ -1,15 +1,9 @@
 package fr.sirs.component;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.ektorp.Options;
 import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
 import fr.sirs.core.component.PreviewLabelRepository;
-import fr.sirs.core.model.PreviewLabel;
 
 public class PreviewLabelTestCase extends CouchDBTestCase {
 
