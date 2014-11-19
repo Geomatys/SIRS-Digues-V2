@@ -1,5 +1,7 @@
 package fr.sirs.core.component;
 
+import java.util.UUID;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ public class SirsDBInfoRepository {
 		} catch (DocumentNotFoundException e) {
 			SirsDBInfo sirsDBInfo = new SirsDBInfo();
 			sirsDBInfo.setVersion("1.0.0");
+			sirsDBInfo.setUuid(UUID.randomUUID().toString());
 			db.create("$sirs", sirsDBInfo);
 		}
 		
