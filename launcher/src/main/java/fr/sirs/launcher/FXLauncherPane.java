@@ -344,7 +344,10 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void updateApp(ActionEvent event) {
-
+        final PluginInfo corePlugin = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
+        if(corePlugin != null){
+            PluginInstaller.install(serverURL, corePlugin);
+        }
     }
         
     private static void runDesktop(final String serverUrl, final String database){
