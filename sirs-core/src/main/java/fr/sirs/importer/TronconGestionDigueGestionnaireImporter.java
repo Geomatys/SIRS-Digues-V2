@@ -2,7 +2,7 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.GestionTroncon;
+import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Organisme;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
-    private Map<Integer, List<GestionTroncon>> gestionsByTronconId = null;
+    private Map<Integer, List<ContactTroncon>> gestionsByTronconId = null;
     private OrganismeImporter organismeImporter;
 
     private TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
@@ -49,7 +49,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<ContactTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
         if (gestionsByTronconId == null) compute();
         return gestionsByTronconId;
     }
@@ -76,7 +76,8 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         while (it.hasNext()) {
             final Row row = it.next();
-            final GestionTroncon gestion = new GestionTroncon();
+            final ContactTroncon gestion = new ContactTroncon();
+            gestion.setTypeContact("Gestionnaire");
 
             if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
                 gestion.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
@@ -89,7 +90,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
+            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
                 gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
@@ -99,7 +100,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             // Set the references.
             final Organisme organisme = organismes.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
             if (organisme.getId() != null) {
-                gestion.setGestionnaireId(organisme.getId());
+                gestion.setOrganismeId(organisme.getId());
             } else {
                 throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
             }

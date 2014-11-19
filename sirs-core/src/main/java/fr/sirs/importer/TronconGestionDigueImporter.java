@@ -10,9 +10,9 @@ import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
@@ -153,7 +153,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
         final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeRive();
-        final Map<Integer, List<GestionTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
+        final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
         final Map<Integer, List<BorneDigue>> bornesByTroncon = borneDigueImporter.getBorneDigueByTronconId();
         final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
@@ -184,9 +184,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
             tronconDigueRepository.add(tronconDigue);
 
             // Set simple references.
-            final List<GestionTroncon> gestions = gestionsByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<ContactTroncon> gestions = gestionsByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
             if(gestions != null) {
-                tronconDigue.setGestionnaires(gestions);
+                tronconDigue.setContactIds(gestions);
             }
 
 
