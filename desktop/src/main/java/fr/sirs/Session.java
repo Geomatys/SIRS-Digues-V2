@@ -3,6 +3,7 @@ package fr.sirs;
 import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.ContactRepository;
+
 import java.net.URL;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
@@ -39,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.time.LocalDateTime;
+
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -107,6 +111,7 @@ public class Session {
     private final SystemeReperageRepository systemeReperageRepository;
     private final ContactRepository contactRepository;
     private final OrganismeRepository organismeRepository;
+    private final PreviewLabelRepository previewLabelRepository;
 
     private FXMainFrame frame = null;
     
@@ -119,7 +124,7 @@ public class Session {
         borneDigueRepository = new BorneDigueRepository(connector);
         contactRepository = new ContactRepository(connector);
         organismeRepository = new OrganismeRepository(connector);
-                
+        previewLabelRepository = new PreviewLabelRepository(couchDbConnector);
     }
 
     public CouchDbConnector getConnector() {
@@ -148,6 +153,10 @@ public class Session {
 
     public OrganismeRepository getOrganismeRepository() {
         return organismeRepository;
+    }
+    
+    public PreviewLabelRepository getPreviewLabelRepository() {
+        return previewLabelRepository;
     }
     
     void setFrame(FXMainFrame frame) {
