@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -34,6 +35,15 @@ public class PluginList {
     public void setPlugins(List<PluginInfo> plugins){
         this.plugins.clear();
         this.plugins.addAll(plugins);
+    }
+    
+    public PluginInfo getPluginInfo(String name){
+        for(PluginInfo info : plugins){
+            if(Objects.equals(name, info.nameProperty().get())){
+                return info;
+            }
+        }
+        return null;
     }
     
     public static PluginList read(URL url) throws IOException{

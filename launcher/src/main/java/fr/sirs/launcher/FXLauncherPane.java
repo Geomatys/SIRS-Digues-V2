@@ -8,6 +8,10 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.DatabaseRegistry;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
+import fr.sirs.core.SirsCore;
+import fr.sirs.maj.PluginInfo;
+import fr.sirs.maj.PluginInstaller;
+import fr.sirs.maj.PluginList;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -16,32 +20,39 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
@@ -60,37 +71,38 @@ public class FXLauncherPane extends BorderPane {
     private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
     private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
-    @FXML
-    private TextField uiDistantName;
-    @FXML
-    private TextField uiNewName;
-    @FXML
-    private TextField uiImportDBData;
-    @FXML
-    private TextField uiImportDBCarto;
-    @FXML
-    private TableView<String> uiLocalBaseTable;
-    @FXML
-    private TextField uiDistantUrl;
-    @FXML
-    private CheckBox uiDistantSync;
-    @FXML
-    private TextField uiImportName;           
-    @FXML
-    private Button uiCreateButton;     
-    @FXML
-    private Button uiImportButton;
-    @FXML
-    private Button uiConnectButton;
-    @FXML
-    private ProgressBar uiProgressCreate;    
-    @FXML
-    private ProgressBar uiProgressImport;
-    @FXML
-    private TabPane uiTabPane;
-    @FXML
-    private Tab uiLocalDbTab;
+    @FXML private TabPane uiTabPane;
     
+    // onglet base locales
+    @FXML private TableView<String> uiLocalBaseTable;
+    @FXML private Button uiConnectButton;
+    
+    // onglet base distantes    
+    @FXML private TextField uiDistantName;
+    @FXML private TextField uiDistantUrl;
+    @FXML private CheckBox uiDistantSync;
+    
+    // onglet base creation
+    @FXML private TextField uiNewName;
+    @FXML private ProgressBar uiProgressCreate;    
+    @FXML private Button uiCreateButton;
+    @FXML private TextField uiImportName;
+    @FXML private TextField uiImportDBData;
+    @FXML private TextField uiImportDBCarto;
+    @FXML private ProgressBar uiProgressImport;
+    @FXML private Button uiImportButton;
+    
+    // onglet mise à jour
+    @FXML private Button uiMaj;
+    @FXML private TextField uiMajServerURL;
+    @FXML private Label uiMajCoreVersion;
+    @FXML private TableView<PluginInfo> uiPluginTable;
+           
+    
+    private URL serverURL;
+    private PluginList local = new PluginList();
+    private PluginList distant = new PluginList();
+        
     public FXLauncherPane() {
         final Class cdtClass = getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
@@ -117,8 +129,36 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         
-        updateLocalDbList();
         
+        final TableColumn<PluginInfo,String> colName = new TableColumn<>("Plugin");
+        colName.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PluginInfo, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<PluginInfo, String> param) {
+                return param.getValue().nameProperty();
+            }
+        });
+        
+        final TableColumn<PluginInfo,String> colVersion = new TableColumn<>();
+        colVersion.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PluginInfo, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<PluginInfo, String> param) {
+                final PluginInfo info = param.getValue();
+                final String version = info.getVersionMajor()+"."+info.getVersionMinor();
+                return new SimpleObjectProperty<>(version);
+            }
+        });
+        
+        final TableColumn<PluginInfo,String> colInstall = new TableColumn<>();
+        colInstall.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
+        colInstall.setCellFactory((TableColumn<PluginInfo, String> param) -> new UpdateCell());
+        
+        uiPluginTable.getColumns().add(colName);
+        uiPluginTable.getColumns().add(colVersion);
+        uiPluginTable.getColumns().add(colInstall);
+        
+        
+        updateLocalDbList();
+        updatePluginList(null);
     }
     
     private void updateLocalDbList(){
@@ -129,6 +169,37 @@ public class FXLauncherPane extends BorderPane {
         }
         uiConnectButton.setDisable(names.isEmpty());
     }
+    
+    @FXML
+    void updatePluginList(ActionEvent event) {
+        
+        try{
+            serverURL = new URL(uiMajServerURL.getText());
+            local = PluginInstaller.listLocalPlugins();
+            distant = PluginInstaller.listDistantPlugins(serverURL);
+        }catch(Exception ex){
+            SirsCore.LOGGER.log(Level.WARNING,ex.getMessage(),ex);
+        }
+        
+        // comparaison du plugin core
+        PluginInfo localCore = local.getPluginInfo(PluginInstaller.PLUGIN_CORE);
+        PluginInfo distantCore = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
+        if(localCore==null) localCore = new PluginInfo();
+        if(distantCore==null) distantCore = new PluginInfo();
+        
+        uiMaj.setDisable(!localCore.isOlderOrSame(distantCore));
+        uiMajCoreVersion.setText(distantCore.getVersionMajor()+"."+distantCore.getVersionMinor());
+        
+        
+        //Merge de la liste des plugins
+        final Set<PluginInfo> plugins = new LinkedHashSet<>();
+        plugins.addAll(local.getPlugins());
+        plugins.addAll(distant.getPlugins());
+        
+        uiPluginTable.setItems(FXCollections.observableArrayList(plugins));
+        
+    }
+        
     
     @FXML
     void connectLocal(ActionEvent event) {
@@ -342,6 +413,48 @@ public class FXLauncherPane extends BorderPane {
         }
         
         return dbs;
+    }
+    
+    
+    private final class UpdateCell extends TableCell<PluginInfo, String>{
+
+        private final Button button = new Button("Install");
+        private String name;
+
+        public UpdateCell() {
+             button.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    PluginInfo pluginInfo = distant.getPluginInfo(name);
+                    PluginInstaller.install(serverURL, pluginInfo);
+                    updatePluginList(null);
+                }
+            });
+        }
+        
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            
+            if(empty){
+                button.setDisable(true);
+                return;
+            }
+            
+            final PluginInfo localPlugin = local.getPluginInfo(item);
+            final PluginInfo distantPlugin = distant.getPluginInfo(item);
+
+            if(localPlugin==null && distantPlugin==null){
+                button.setDisable(true);
+            }if(localPlugin==null){
+                button.setDisable(false);
+            }else if(distantPlugin==null){
+                button.setDisable(true);
+            }else{
+                button.setDisable(localPlugin.isOlderOrSame(distantPlugin));
+            }
+        }
+        
     }
     
 }
