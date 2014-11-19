@@ -9,6 +9,7 @@ import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.NoninvertibleTransformException;
+import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 import javafx.beans.binding.BooleanBinding;
@@ -144,15 +145,17 @@ public class FXStructurePane extends BorderPane {
 
     private void initSubPane() {
         
-        // Choose the pane adapted to the specific structure.
-        if(structure instanceof Crete) {
-            specificThemePane = new FXCretePane((Crete) structure);
+        try{
+            // Choose the pane adapted to the specific structure.
+            final String className = "fr.sirs.theme.ui.FX"+structure.getClass().getSimpleName()+"Pane";
+            final Class controllerClass = Class.forName(className);
+            final Constructor cstr = controllerClass.getConstructor(structure.getClass());
+            specificThemePane = (Node) cstr.newInstance(structure);
+            
+            uiEditDetailTronconTheme.setContent(specificThemePane);
+        }catch(Exception ex){
+            throw new UnsupportedOperationException("Failed to load panel : "+ex.getMessage(),ex);
         }
-        else {
-            throw new UnsupportedOperationException("Unknown theme class.");
-        }
-        
-        uiEditDetailTronconTheme.setContent(specificThemePane);
         
         //mode edition
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
