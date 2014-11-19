@@ -15,7 +15,7 @@
   <packaging>jar</packaging>
   <name>Desktop</name>
   <description>Desktop</description>
-  
+
   <properties>
     <spring.version>4.1.0.RELEASE</spring.version>
   </properties>
@@ -26,21 +26,21 @@
       <artifactId>sirs-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
-    
+
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${spring.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-widgets-javafx</artifactId>
@@ -51,7 +51,7 @@
       <artifactId>geotk-jasperreport</artifactId>
       <version>4.x-SNAPSHOT</version>
     </dependency>
-    
+
     <!-- format -->
     <dependency>
       <groupId>org.geotoolkit</groupId>
@@ -83,8 +83,8 @@
       <artifactId>geotk-feature-esri-geodb</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
-        
-        <!-- EPSG database -->
+
+    <!-- EPSG database -->
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
@@ -92,54 +92,54 @@
   </dependencies>
 
   <build>
-      <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <debug>true</debug>
-                </configuration>
-            </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-dependency-plugin</artifactId>
-              <version>2.8</version>
-              <configuration>
-                  <outputDirectory>target/lib_desktop</outputDirectory>
-                  <stripVersion>false</stripVersion>
-              </configuration>
-              <executions>
-                  <execution>
-                      <id>copy-dependencies</id>
-                      <phase>package</phase>
-                      <goals>
-                          <goal>copy-dependencies</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <version>2.2</version>
-              <configuration>
-                  <archive>
-                      <manifest>
-                          <mainClass>fr.sirs.Loader</mainClass>
-                          <packageName>fr.sirs</packageName>
-                          <addClasspath>true</addClasspath>
-                          <addExtensions/>
-                          <classpathPrefix>lib_desktop/</classpathPrefix>
-                      </manifest>
-                  </archive>
-              </configuration>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <debug>true</debug>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <configuration>
+          <outputDirectory>target/lib_desktop</outputDirectory>
+          <stripVersion>false</stripVersion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>fr.sirs.Loader</mainClass>
+              <packageName>fr.sirs</packageName>
+              <addClasspath>true</addClasspath>
+              <addExtensions />
+              <classpathPrefix>lib_desktop/</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>com.geomatys.maven</groupId>
         <artifactId>maven-fxmodel-plugin</artifactId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
         <executions>
           <execution>
             <id>fxml</id>
@@ -150,11 +150,21 @@
               <packageName>fr.sirs.theme.ui</packageName>
             </configuration>
           </execution>
+          <execution>
+            <id>fx-controller</id>
+            <goals>
+              <goal>fxcontroller</goal>
+            </goals>
+            <configuration>
+              <packageName>fr.sirs.theme.ui</packageName>
+            </configuration>
+          </execution>
+
         </executions>
         <configuration>
           <model>../sirs-core/model/sirs.ecore</model>
         </configuration>
-      </plugin> 
+      </plugin>
     </plugins>
   </build>
 
