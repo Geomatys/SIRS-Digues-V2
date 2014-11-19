@@ -1,9 +1,13 @@
-package fr.sirs.importer;
+package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.OrganismeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,7 +31,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
 
-    TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
+    public TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final OrganismeImporter organismeImporter) {
         this(accessDatabase, couchDbConnector);
@@ -44,7 +48,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
     /**
      *
-     * @return A map containing all GestionTroncon instances accessibles from
+     * @return A map containing all ContactTroncon instances accessibles from
      * the internal database <em>TronconGestion</em> identifier.
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
@@ -71,12 +75,14 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         gestionsByTronconId = new HashMap<>();
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
 
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ContactTroncon gestion = new ContactTroncon();
+            
             gestion.setTypeContact("Gestionnaire");
 
             if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {

@@ -1,12 +1,14 @@
 
 package fr.sirs.importer;
 
+import fr.sirs.importer.troncon.TronconGestionDigueGestionnaireImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.Repository;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentRepository;
@@ -49,6 +51,8 @@ import fr.sirs.importer.theme.document.related.profilTravers.TypeProfilTraversIm
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.TypeRapportEtudeImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,6 +77,7 @@ public class DbImporter {
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final OrganismeRepository organismeRepository;
+    private final ContactRepository contactRepository;
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final RefRiveRepository refRiveRepository;
@@ -102,7 +107,10 @@ public class DbImporter {
     private TronconDigueGeomImporter tronconDigueGeomImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
+    private TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter;
+    private TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter;
     private OrganismeImporter organismeImporter;
+    private IntervenantImporter intervenantImporter;
     private TronconGestionDigueImporter tronconGestionDigueImporter;
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
@@ -174,7 +182,7 @@ public class DbImporter {
      EVENEMENT_HYDRAU,
 //     Export_Output,
 //     Export_Output_SHAPE_Index,
-//     GARDIEN_TRONCON_GESTION,
+     GARDIEN_TRONCON_GESTION,
 //     GDB_AnnoSymbols,
 //     GDB_AttrRules,
 //     GDB_CodedDomains,
@@ -246,7 +254,7 @@ public class DbImporter {
 //     PROFIL_EN_TRAVERS_STRUCTUREL,
 //     PROFIL_EN_TRAVERS_TRONCON,
 //     PROFIL_EN_TRAVERS_XYZ,
-//     PROPRIETAIRE_TRONCON_GESTION,
+     PROPRIETAIRE_TRONCON_GESTION,
 //     rampes,
 //     Isere, 
 //     riviere, 
@@ -517,21 +525,38 @@ public class DbImporter {
         repositories.add(refMateriauRepository);
         refNatureRepository = new RefNatureRepository(couchDbConnector);
         repositories.add(refNatureRepository);
+        contactRepository = new ContactRepository(couchDbConnector);
+        repositories.add(contactRepository);
     }
     
-    public void setDatabase(final Database accessDatabase, final Database accessCartoDatabase) throws IOException{
+    public void setDatabase(final Database accessDatabase, 
+            final Database accessCartoDatabase) throws IOException{
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
-        typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector, refRiveRepository);
-        tronconDigueGeomImporter = new TronconDigueGeomImporter(accessCartoDatabase, couchDbConnector);
-        organismeImporter = new OrganismeImporter(accessDatabase, couchDbConnector, organismeRepository);
+        typeRiveImporter = new TypeRiveImporter(accessDatabase, 
+                couchDbConnector, refRiveRepository);
+        tronconDigueGeomImporter = new TronconDigueGeomImporter(
+                accessCartoDatabase, couchDbConnector);
+        organismeImporter = new OrganismeImporter(accessDatabase, 
+                couchDbConnector, organismeRepository);
+        intervenantImporter = new IntervenantImporter(accessDatabase, 
+                couchDbConnector, contactRepository);
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
-        digueImporter = new DigueImporter(accessDatabase, couchDbConnector, digueRepository);
-        borneDigueImporter = new BorneDigueImporter(accessDatabase, couchDbConnector, borneDigueRepository);
-        systemeReperageImporter = new SystemeReperageImporter(accessDatabase, couchDbConnector, systemeReperageRepository);
-        systemeReperageBorneImporter = new SystemeReperageBorneImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, borneDigueImporter);
+        tronconGestionDigueGardienImporter = new TronconGestionDigueGardienImporter(
+                accessDatabase, couchDbConnector, intervenantImporter);
+        tronconGestionDigueProprietaireImporter = new TronconGestionDigueProprietaireImporter(
+                accessDatabase, couchDbConnector, intervenantImporter, 
+                organismeImporter);
+        digueImporter = new DigueImporter(accessDatabase, couchDbConnector, 
+                digueRepository);
+        borneDigueImporter = new BorneDigueImporter(accessDatabase, 
+                couchDbConnector, borneDigueRepository);
+        systemeReperageImporter = new SystemeReperageImporter(accessDatabase, 
+                couchDbConnector, systemeReperageRepository);
+        systemeReperageBorneImporter = new SystemeReperageBorneImporter(
+                accessDatabase, couchDbConnector, systemeReperageImporter, 
+                borneDigueImporter);
         typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
                 couchDbConnector, refTypeDesordreRepository);
         typeSourceImporter = new TypeSourceImporter(accessDatabase, 
@@ -540,13 +565,18 @@ public class DbImporter {
                 couchDbConnector, refCoteRepository);
         typePositionImporter = new TypePositionImporter(accessDatabase, 
                 couchDbConnector, refPositionRepository);
-        typeMateriauImporter = new TypeMateriauImporter(accessDatabase, couchDbConnector, refMateriauRepository);
-        typeNatureImporter = new TypeNatureImporter(accessDatabase, couchDbConnector, refNatureRepository);
-        tronconGestionDigueImporter = new TronconGestionDigueImporter(accessDatabase, 
-                couchDbConnector, tronconDigueRepository, digueRepository, 
-                borneDigueRepository, digueImporter, tronconDigueGeomImporter, 
-                typeRiveImporter, systemeReperageImporter, 
-                tronconGestionDigueGestionnaireImporter, borneDigueImporter,  organismeImporter, 
+        typeMateriauImporter = new TypeMateriauImporter(accessDatabase, 
+                couchDbConnector, refMateriauRepository);
+        typeNatureImporter = new TypeNatureImporter(accessDatabase, 
+                couchDbConnector, refNatureRepository);
+        tronconGestionDigueImporter = new TronconGestionDigueImporter(
+                accessDatabase, couchDbConnector, tronconDigueRepository, 
+                digueRepository, borneDigueRepository, digueImporter, 
+                tronconDigueGeomImporter, typeRiveImporter, 
+                systemeReperageImporter, tronconGestionDigueGestionnaireImporter, 
+                tronconGestionDigueGardienImporter,
+                tronconGestionDigueProprietaireImporter, 
+                borneDigueImporter, organismeImporter, 
                 typeDesordreImporter, typeSourceImporter, typePositionImporter,
                 typeCoteImporter, typeMateriauImporter, typeNatureImporter);
         structureImporter = tronconGestionDigueImporter.getStructureImporter();
@@ -563,7 +593,8 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, typeSystemeReleveProfilImporter, 
                 typeProfilTraversImporter, organismeImporter);
         profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
-                couchDbConnector, profilTraversRepository, profilTraversDescriptionImporter);
+                couchDbConnector, profilTraversRepository, 
+                profilTraversDescriptionImporter);
         typeRapportEtudeImporter = new TypeRapportEtudeImporter(accessDatabase, 
                 couchDbConnector, refRapportEtudeRepository);
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
@@ -575,9 +606,11 @@ public class DbImporter {
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, refEvenementHydrauliqueRepository);
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector, refFrequenceEvenementHydrauliqueRepository);
+                accessDatabase, couchDbConnector, 
+                refFrequenceEvenementHydrauliqueRepository);
         evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector, typeEvenementHydrauliqueImporter, 
+                accessDatabase, couchDbConnector, 
+                typeEvenementHydrauliqueImporter, 
                 typeFrequenceEvenementHydrauliqueImporter);
         evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, 
@@ -652,7 +685,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_NATURE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -668,7 +701,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_NATURE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -683,7 +716,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_NATURE.toString())){
+            for(Row row : importer.getDatabase().getTable(TableName.PROPRIETAIRE_TRONCON_GESTION.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

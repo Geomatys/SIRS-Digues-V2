@@ -14,6 +14,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefMateriau;
+import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -76,7 +77,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         //        NOM_BORNE_DEBUT, // Dans le BorneImporter
         //        NOM_BORNE_FIN, // Dans le BorneImporter
         //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
-        //        LIBELLE_TYPE_NATURE,
+        //        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
         //        LIBELLE_TYPE_FONCTION,
         //        ID_TYPE_ELEMENT_STRUCTURE, //Dans le TypeElementStructureImporter
                 ID_TYPE_COTE,
@@ -95,14 +96,14 @@ class PiedDigueImporter extends GenericStructureImporter {
         COMMENTAIRE,
 //        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
         ID_TYPE_MATERIAU,
-//        ID_TYPE_NATURE,
+        ID_TYPE_NATURE,
 //        ID_TYPE_FONCTION,
 //        ID_AUTO
 
         // Empty fields
-//     LIBELLE_TYPE_NATURE_HAUT,
+//     LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
 //     LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
-//     LIBELLE_TYPE_NATURE_BAS,
+//     LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
 //     LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
 //     LIBELLE_TYPE_OUVRAGE_PARTICULIER,
 //     LIBELLE_TYPE_POSITION, // Dans le TypePositionImporter
@@ -119,10 +120,10 @@ class PiedDigueImporter extends GenericStructureImporter {
              Y_FIN,
         //     EPAISSEUR, // N'existe pas dans le modèle des pieds de digue
         //     TALUS_INTERCEPTE_CRETE,
-        //     ID_TYPE_NATURE_HAUT,
+        //     ID_TYPE_NATURE_HAUT,// Pas dans le nouveau modèle
         //     ID_TYPE_MATERIAU_HAUT, // Pas dans le nouveau modèle
         //     ID_TYPE_MATERIAU_BAS, // Pas dans le nouveau modèle
-        //     ID_TYPE_NATURE_BAS,
+        //     ID_TYPE_NATURE_BAS,// Pas dans le nouveau modèle
         //     LONG_RAMP_HAUT,
         //     LONG_RAMP_BAS,
         //     PENTE_INTERIEURE,
@@ -211,6 +212,7 @@ class PiedDigueImporter extends GenericStructureImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -274,6 +276,10 @@ class PiedDigueImporter extends GenericStructureImporter {
             
             if(row.getInt(PiedDigueColumns.ID_TYPE_MATERIAU.toString())!=null){
                 piedDigue.setMateriauId(typesMateriau.get(row.getInt(PiedDigueColumns.ID_TYPE_MATERIAU.toString())).getId());
+            }
+            
+            if(row.getInt(PiedDigueColumns.ID_TYPE_NATURE.toString())!=null){
+                piedDigue.setNatureId(typesNature.get(row.getInt(PiedDigueColumns.ID_TYPE_NATURE.toString())).getId());
             }
 
             if (row.getDate(PiedDigueColumns.DATE_FIN_VAL.toString()) != null) {

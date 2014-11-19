@@ -305,7 +305,7 @@ public class FXTronconDiguePane extends BorderPane{
         final List<SystemeReperage> srs = repo.getByTroncon(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
         
-        uiContactTable.setTableItems(() -> (ObservableList)troncon.contactIds);
+        uiContactTable.setTableItems(() -> (ObservableList)troncon.contacts);
         
         initializing = false;
     }
@@ -320,7 +320,7 @@ public class FXTronconDiguePane extends BorderPane{
         protected void deletePojos(Element... pojos) {
             final TronconDigue troncon = tronconProperty.get();
             for(Element ele : pojos){
-                troncon.contactIds.remove(ele);
+                troncon.contacts.remove(ele);
             }
         }
 
@@ -333,7 +333,7 @@ public class FXTronconDiguePane extends BorderPane{
         protected void createPojo() {
             final ContactTroncon contact = new ContactTroncon();
             final TronconDigue troncon = tronconProperty.get();
-            troncon.contactIds.add(contact);
+            troncon.contacts.add(contact);
         }
         
     }

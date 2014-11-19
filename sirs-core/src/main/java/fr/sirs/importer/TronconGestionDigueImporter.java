@@ -1,5 +1,6 @@
 package fr.sirs.importer;
 
+import fr.sirs.importer.troncon.TronconGestionDigueGestionnaireImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
@@ -24,6 +25,8 @@ import fr.sirs.importer.structure.TypeNatureImporter;
 import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
 import fr.sirs.importer.structure.TypePositionImporter;
 import fr.sirs.importer.structure.TypeSourceImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,6 +49,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private TypeRiveImporter typeRiveImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
+    private TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter;
+    private TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter;
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private StructureImporter structureImporter;
@@ -70,6 +75,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
+            final TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter,
+            final TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final TypeDesordreImporter typeDesordreImporter,
@@ -87,6 +94,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.typeRiveImporter = typeRiveImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
+        this.tronconGestionDigueGardienImporter = tronconGestionDigueGardienImporter;
+        this.tronconGestionDigueProprietaireImporter = tronconGestionDigueProprietaireImporter;
         this.borneDigueImporter = borneDigueImporter;
         
         // Structure and Desordre importers need TronconGestionDigue importer itself.
@@ -161,6 +170,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
         final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeRive();
         final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
+        final Map<Integer, List<ContactTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
+        final Map<Integer, List<ContactTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
         final Map<Integer, List<BorneDigue>> bornesByTroncon = borneDigueImporter.getBorneDigueByTronconId();
         final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
@@ -191,11 +202,22 @@ public class TronconGestionDigueImporter extends GenericImporter {
             tronconDigueRepository.add(tronconDigue);
 
             // Set simple references.
+            List<ContactTroncon> contacts;
+            
             final List<ContactTroncon> gestions = gestionsByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
-            if(gestions != null) {
-                tronconDigue.setContactIds(gestions);
-            }
-
+            contacts=gestions;
+            
+            final List<ContactTroncon> gardiens = gardiensByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            if(contacts != null && gardiens!=null) contacts.addAll(gardiens);
+            else if(contacts==null) contacts=gardiens;
+            
+            final List<ContactTroncon> proprietaires = propriosByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            if(contacts != null && proprietaires!=null) contacts.addAll(proprietaires);
+            else if (contacts==null) contacts=proprietaires;
+            
+            if(contacts!=null) tronconDigue.setContacts(contacts);
+            // Fin des contacts
+            
             final List<BorneDigue> bornes = bornesByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
             if(bornes != null){
                 final List<String> bornesIds = new ArrayList<>();

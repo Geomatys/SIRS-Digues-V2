@@ -6,15 +6,15 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefMateriau;
+import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -86,11 +86,11 @@ class TalusDigueImporter extends GenericStructureImporter {
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
 //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_NATURE,
+//        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_FONCTION,
-//        LIBELLE_TYPE_NATURE_HAUT,
+//        LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_NATURE_BAS,
+//        LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
 //        LIBELLE_TYPE_OUVRAGE_PARTICULIER,
 //        LIBELLE_TYPE_POSITION, // Redondant avec l'importation des positions
@@ -122,14 +122,14 @@ class TalusDigueImporter extends GenericStructureImporter {
         COMMENTAIRE,
         N_COUCHE,
 //        ID_TYPE_MATERIAU, // Pas dans le nouveau modèle
-//        ID_TYPE_NATURE,
+//        ID_TYPE_NATURE, // Pas dans le nouveau modèle
 //        ID_TYPE_FONCTION,
         EPAISSEUR,
 //        TALUS_INTERCEPTE_CRETE,
-//        ID_TYPE_NATURE_HAUT,
+        ID_TYPE_NATURE_HAUT,
         ID_TYPE_MATERIAU_HAUT,
         ID_TYPE_MATERIAU_BAS,
-//        ID_TYPE_NATURE_BAS,
+        ID_TYPE_NATURE_BAS,
 //        LONG_RAMP_HAUT,
 //        LONG_RAMP_BAS,
 //        PENTE_INTERIEURE,
@@ -211,6 +211,7 @@ class TalusDigueImporter extends GenericStructureImporter {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -314,12 +315,20 @@ class TalusDigueImporter extends GenericStructureImporter {
                 talus.setEpaisseur_sommet(row.getDouble(TalusDigueColumns.EPAISSEUR.toString()).floatValue());
             }
             
+            if(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_HAUT.toString())!=null){
+                talus.setNatureHautId(typesNature.get(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_HAUT.toString())).getId());
+            }
+            
             if(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_HAUT.toString())!=null){
                 talus.setMateriauHautId(typesMateriau.get(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
             }
             
             if(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_BAS.toString())!=null){
                 talus.setMateriauBasId(typesMateriau.get(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_BAS.toString())).getId());
+            }
+            
+            if(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_BAS.toString())!=null){
+                talus.setNatureBasId(typesNature.get(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_BAS.toString())).getId());
             }
             
             if(row.getInt(TalusDigueColumns.ID_TYPE_POSITION.toString())!=null){
