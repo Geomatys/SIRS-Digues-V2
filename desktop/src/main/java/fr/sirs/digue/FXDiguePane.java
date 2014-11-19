@@ -3,7 +3,7 @@ package fr.sirs.digue;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.theme.ui.AbstractPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
@@ -134,7 +134,7 @@ public class FXDiguePane extends BorderPane {
         
     }
     
-    private class TronconPojoTable extends AbstractPojoTable {
+    private class TronconPojoTable extends PojoTable {
     
             public TronconPojoTable() {
             super(TronconDigue.class,"Liste des tronçons");

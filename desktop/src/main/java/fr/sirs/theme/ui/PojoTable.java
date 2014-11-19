@@ -10,6 +10,7 @@ import com.sun.javafx.property.PropertyReference;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.index.SearchEngine;
@@ -39,6 +40,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -73,7 +75,7 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Johann Sorel (Geomatys)
  */
-public abstract class AbstractPojoTable extends BorderPane{
+public class PojoTable extends BorderPane{
     
     private static final Comparator COMPARATOR = new Comparator<Object>() {
             @Override
@@ -114,6 +116,7 @@ public abstract class AbstractPojoTable extends BorderPane{
     private final TableView<Element> uiTable = new FXTableView<>();
     protected final ScrollPane uiScroll = new ScrollPane(uiTable);
     protected final Class pojoClass;
+    private final Repository repo;
     protected final Session session = Injector.getBean(Session.class);
     
     //valeurs affichées
@@ -125,9 +128,18 @@ public abstract class AbstractPojoTable extends BorderPane{
     private final Button uiSearch;
     private final StringProperty currentSearch = new SimpleStringProperty("");
     
-    public AbstractPojoTable(Class pojoClass, String title) {
+    public PojoTable(Class pojoClass, String title) {
+        this(pojoClass, title, null);
+    }
+    
+    public PojoTable(Repository repo, String title) {
+        this(repo.getModelClass(), title, repo);
+    }
+    
+    private PojoTable(Class pojoClass, String title, Repository repo) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
+        this.repo = repo;
         
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
@@ -190,6 +202,11 @@ public abstract class AbstractPojoTable extends BorderPane{
         toolbar.getStyleClass().add("buttonbar");
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
+        
+        if(repo!=null){
+            updateTable();
+        }
+        
     }
 
     public BooleanProperty editableProperty(){
@@ -260,7 +277,14 @@ public abstract class AbstractPojoTable extends BorderPane{
     }
         
     
-    protected abstract void deletePojos(Element ... pojos);
+    protected void deletePojos(Element ... pojos){
+        if(repo!=null){
+            for(Element pojo : pojos){
+                repo.remove(pojo);
+            }
+            updateTable();
+        }
+    }
     
     protected void editPojo(Element pojo){
         final Session session = Injector.getBean(Session.class);
@@ -278,9 +302,26 @@ public abstract class AbstractPojoTable extends BorderPane{
         session.getFrame().addTab(tab);
     }
     
-    protected abstract void elementEdited(TableColumn.CellEditEvent<Element, Object> event);
+    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
+        if(repo!=null){
+            final Element obj = event.getRowValue();
+            if(obj == null) return;
+            repo.update(obj);
+        }
+    }
     
-    protected abstract void createPojo();
+    protected void createPojo() {
+        if(repo!=null){
+            repo.add(repo.create());
+            updateTable();
+        }
+    }
+        
+    private void updateTable(){
+        if(repo!=null){
+            setTableItems(()-> FXCollections.observableList(repo.getAll()));
+        }
+    }
     
     
     public static class PropertyColumn extends TableColumn<Element,Object>{

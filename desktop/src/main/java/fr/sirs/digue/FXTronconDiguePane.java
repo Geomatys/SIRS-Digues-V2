@@ -12,7 +12,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.AbstractPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
 import java.util.logging.Level;
@@ -310,7 +310,7 @@ public class FXTronconDiguePane extends BorderPane{
         initializing = false;
     }
     
-    private final class ContactTable extends AbstractPojoTable{
+    private final class ContactTable extends PojoTable{
 
         public ContactTable() {
             super(ContactTroncon.class, "Liste des contacts");

@@ -18,7 +18,7 @@ import javafx.scene.control.TableColumn;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DefaultTronconPojoTable extends AbstractPojoTable{
+public class DefaultTronconPojoTable extends PojoTable{
     
     private final ObjectProperty<TronconDigue> troncon = new SimpleObjectProperty<>();
     private final AbstractTronconTheme.ThemeGroup group;
@@ -70,11 +70,9 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     @Override
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         final TronconDigue obj = troncon.get();
-        final Session session = Injector.getBean(Session.class);
         session.getTronconDigueRepository().update(obj);
     }
     
-
     @Override
     protected void createPojo() {
     }

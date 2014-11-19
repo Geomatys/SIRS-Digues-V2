@@ -2,6 +2,7 @@ package fr.sirs;
 
 import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.ContactRepository;
 import java.net.URL;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
@@ -48,16 +50,20 @@ public class Session {
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final SystemeReperageRepository systemeReperageRepository;
+    private final ContactRepository contactRepository;
+    private final OrganismeRepository organismeRepository;
 
     private FXMainFrame frame = null;
     
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         this.connector = couchDbConnector;
-        digueRepository = new DigueRepository(couchDbConnector);
-        tronconDigueRepository = new TronconDigueRepository(couchDbConnector);
-        systemeReperageRepository = new SystemeReperageRepository(couchDbConnector);
-        borneDigueRepository = new BorneDigueRepository(couchDbConnector);
+        digueRepository = new DigueRepository(connector);
+        tronconDigueRepository = new TronconDigueRepository(connector);
+        systemeReperageRepository = new SystemeReperageRepository(connector);
+        borneDigueRepository = new BorneDigueRepository(connector);
+        contactRepository = new ContactRepository(connector);
+        organismeRepository = new OrganismeRepository(connector);
     }
 
     public CouchDbConnector getConnector() {
@@ -78,6 +84,14 @@ public class Session {
 
     public SystemeReperageRepository getSystemeReperageRepository(){
         return systemeReperageRepository;
+    }
+
+    public ContactRepository getContactRepository() {
+        return contactRepository;
+    }
+
+    public OrganismeRepository getOrganismeRepository() {
+        return organismeRepository;
     }
     
     void setFrame(FXMainFrame frame) {

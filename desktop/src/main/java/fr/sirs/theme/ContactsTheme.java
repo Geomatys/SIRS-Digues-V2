@@ -2,14 +2,12 @@
 
 package fr.sirs.theme;
 
-import fr.sirs.theme.ui.AbstractPojoTable;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.IntervenantPrestation;
-import fr.sirs.core.model.Organisme;
+import fr.sirs.Injector;
+import fr.sirs.Session;
+import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 
 
@@ -28,11 +26,12 @@ public class ContactsTheme extends Theme {
         final BorderPane uiCenter = new BorderPane();
         final TabPane tabPane = new TabPane();
         
-        final AbstractPojoTable tableIntervenant = new IntervenantTable(IntervenantPrestation.class);
-        final AbstractPojoTable tableOrganisme = new OrgnismeTable(Organisme.class);
+        final Session session = Injector.getSession();
+        final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Liste des contacts");
+        final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Liste des organismes");
         
         final Tab tabIntervenant = new Tab("Intervenant");
-        tabIntervenant.setContent(tableIntervenant);
+        tabIntervenant.setContent(tableContact);
         final Tab tabOrganisme = new Tab("Organisme");
         tabOrganisme.setContent(tableOrganisme);
         
@@ -41,46 +40,6 @@ public class ContactsTheme extends Theme {
         
         uiCenter.setCenter(tabPane);
         return tabPane;
-    }
-
-    private static class IntervenantTable extends AbstractPojoTable {
-
-        public IntervenantTable(Class pojoClass) {
-            super(pojoClass,"Liste des intervenants");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
-
-        @Override
-        protected void createPojo() {
-        }
-    }
-
-    private static class OrgnismeTable extends AbstractPojoTable {
-
-        public OrgnismeTable(Class pojoClass) {
-            super(pojoClass,"Liste des organismes");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
-        
-        @Override
-        protected void createPojo() {
-        }
     }
     
 }

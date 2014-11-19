@@ -4,7 +4,7 @@ package fr.sirs.digue;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.theme.ui.AbstractPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
@@ -83,7 +83,7 @@ public class FXSystemeReperagePane extends BorderPane {
         repo.update(sr);
     }
     
-    private class BorneTable extends AbstractPojoTable{
+    private class BorneTable extends PojoTable{
 
         public BorneTable() {
             super(SystemeReperageBorne.class, "Liste des bornes");
@@ -96,7 +96,7 @@ public class FXSystemeReperagePane extends BorderPane {
 
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            
+            //on ne sauvegarde pas, le formulaire conteneur s'en charge
         }
 
         @Override

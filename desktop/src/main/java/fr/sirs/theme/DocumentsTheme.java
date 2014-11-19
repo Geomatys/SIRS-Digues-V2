@@ -2,7 +2,7 @@
 
 package fr.sirs.theme;
 
-import fr.sirs.theme.ui.AbstractPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
@@ -13,7 +13,6 @@ import fr.sirs.core.model.RapportEtude;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 
 
@@ -32,12 +31,12 @@ public class DocumentsTheme extends Theme {
         final BorderPane uiCenter = new BorderPane();
         final TabPane tabPane = new TabPane();
         
-        final AbstractPojoTable tablePhotos = new PhotoTable(Photo.class);
-        final AbstractPojoTable tableConventions = new ConventionTable(Convention.class);
-        final AbstractPojoTable tableJournal = new JournalTable(ArticleJournal.class);
-        final AbstractPojoTable tableMarches = new MarcheTable(Marche.class);
-        final AbstractPojoTable tableRapport = new RapportTable(RapportEtude.class);
-        final AbstractPojoTable tableDocGrandeEchelle = new DocGrandeEchelleTable(DocumentGrandeEchelle.class);
+        final PojoTable tablePhotos = new PhotoTable(Photo.class);
+        final PojoTable tableConventions = new ConventionTable(Convention.class);
+        final PojoTable tableJournal = new JournalTable(ArticleJournal.class);
+        final PojoTable tableMarches = new MarcheTable(Marche.class);
+        final PojoTable tableRapport = new RapportTable(RapportEtude.class);
+        final PojoTable tableDocGrandeEchelle = new DocGrandeEchelleTable(DocumentGrandeEchelle.class);
         
         final Tab tabPhoto = new Tab("Photo");
         tabPhoto.setContent(tablePhotos);
@@ -63,7 +62,7 @@ public class DocumentsTheme extends Theme {
         return tabPane;
     }
 
-    private static class PhotoTable extends AbstractPojoTable {
+    private static class PhotoTable extends PojoTable {
 
         public PhotoTable(Class pojoClass) {
             super(pojoClass,"Liste des photos");
@@ -73,17 +72,13 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             
         }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
         
         @Override
         protected void createPojo() {
         }
     }
 
-    private static class ConventionTable extends AbstractPojoTable {
+    private static class ConventionTable extends PojoTable {
 
         public ConventionTable(Class pojoClass) {
             super(pojoClass,"Liste des conventions");
@@ -93,17 +88,13 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
         
         @Override
         protected void createPojo() {
         }
     }
 
-    private static class JournalTable extends AbstractPojoTable {
+    private static class JournalTable extends PojoTable {
 
         public JournalTable(Class pojoClass) {
             super(pojoClass,"Liste des journaux");
@@ -113,17 +104,13 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
         
         @Override
         protected void createPojo() {
         }
     }
 
-    private static class MarcheTable extends AbstractPojoTable {
+    private static class MarcheTable extends PojoTable {
 
         public MarcheTable(Class pojoClass) {
             super(pojoClass,"Liste des Marchés");
@@ -133,17 +120,13 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
         
         @Override
         protected void createPojo() {
         }
     }
 
-    private static class RapportTable extends AbstractPojoTable {
+    private static class RapportTable extends PojoTable {
 
         public RapportTable(Class pojoClass) {
             super(pojoClass,"Liste des rapports");
@@ -153,17 +136,13 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-        }
         
         @Override
         protected void createPojo() {
         }
     }
 
-    private static class DocGrandeEchelleTable extends AbstractPojoTable {
+    private static class DocGrandeEchelleTable extends PojoTable {
 
         public DocGrandeEchelleTable(Class pojoClass) {
             super(pojoClass,"Liste des documents");
@@ -172,10 +151,6 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
         
         @Override
