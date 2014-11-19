@@ -187,7 +187,7 @@ class TalusDigueImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, List<TalusDigue>> getCretesByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<TalusDigue>> getTalusDigueByTronconId() throws IOException, AccessDbImporterException {
         if (this.talusByTronconId == null) {
             compute();
         }
@@ -220,7 +220,6 @@ class TalusDigueImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final TalusDigue talus = new TalusDigue();
-            
             
             if(row.getInt(TalusDigueColumns.ID_TYPE_COTE.toString())!=null){
                 talus.setCoteId(typesCote.get(row.getInt(TalusDigueColumns.ID_TYPE_COTE.toString())).getId());

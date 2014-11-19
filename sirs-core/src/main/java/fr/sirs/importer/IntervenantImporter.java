@@ -91,7 +91,6 @@ public class IntervenantImporter extends GenericImporter {
                     + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L1_PERSO_INTERV.toString()))
                     + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L2_PERSO_INTERV.toString()))
                     + cleanNullString(row.getString(IntervenantColumns.ADRESSE_L3_PERSO_INTERV.toString())));
-            System.out.println("Adresse de l'intervenant : "+intervenant.getAdresse());
             
             intervenant.setCode_postal(cleanNullString(String.valueOf(row.getInt(IntervenantColumns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
             
@@ -118,7 +117,7 @@ public class IntervenantImporter extends GenericImporter {
             if (row.getDate(IntervenantColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 intervenant.setDateMaj(LocalDateTime.parse(row.getDate(IntervenantColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             intervenants.put(row.getInt(IntervenantColumns.ID_INTERVENANT.toString()), intervenant);
 

@@ -98,7 +98,7 @@ public class TronconGestionDigueGardienImporter extends GenericImporter {
             final ContactTroncon gardien = new ContactTroncon();
             
             gardien.setTypeContact("Gardien");
-
+            
             if (row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()) != null) {
                 gardien.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
@@ -113,9 +113,9 @@ public class TronconGestionDigueGardienImporter extends GenericImporter {
             List<ContactTroncon> listeGestions = gardiensByTronconId.get(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
-                gardiensByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
             }
             listeGestions.add(gardien);
+            gardiensByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
             final Contact intervenant = intervenants.get(row.getInt(TronconGestionDigueGardienColumns.ID_INTERVENANT.toString()));

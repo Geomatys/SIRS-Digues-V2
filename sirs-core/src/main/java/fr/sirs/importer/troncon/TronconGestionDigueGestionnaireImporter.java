@@ -99,9 +99,9 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
-                gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
             }
             listeGestions.add(gestion);
+            gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
             final Organisme organisme = organismes.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));

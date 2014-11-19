@@ -121,9 +121,9 @@ public class TronconGestionDigueProprietaireImporter extends GenericImporter {
             List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
-                proprietairesByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
             }
             listeGestions.add(gardien);
+            proprietairesByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
             if(row.getInt(TronconGestionDigueGardienColumns.ID_INTERVENANT.toString())!=null){

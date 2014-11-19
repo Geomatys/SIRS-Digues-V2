@@ -4,6 +4,7 @@ import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ConventionRepository;
+import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefConvention;
 import java.io.IOException;
@@ -24,6 +25,8 @@ public class ConventionImporter extends GenericImporter {
     private Map<Integer, Convention> conventions = null;
     private ConventionRepository conventionRepository;
     private TypeConventionImporter typeConventionImporter;
+    private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
+    private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
     
     private ConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -33,10 +36,14 @@ public class ConventionImporter extends GenericImporter {
     public ConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final ConventionRepository conventionRepository,
-            final TypeConventionImporter typeConventionImporter) {
+            final TypeConventionImporter typeConventionImporter,
+            final ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter,
+            final ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter) {
         this(accessDatabase, couchDbConnector);
         this.conventionRepository = conventionRepository;
         this.typeConventionImporter = typeConventionImporter;
+        this.conventionSignataireIntervenantImporter = conventionSignataireIntervenantImporter;
+        this.conventionSignataireOrganismeImporter = conventionSignataireOrganismeImporter;
     }
 
     private enum ConventionColumns {
@@ -71,6 +78,8 @@ public class ConventionImporter extends GenericImporter {
         conventions = new HashMap<>();
         
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeConvention();
+        final Map<Integer, List<ContactTroncon>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
+        final Map<Integer, List<ContactTroncon>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -98,10 +107,21 @@ public class ConventionImporter extends GenericImporter {
             if (row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 convention.setDateMaj(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+             List<ContactTroncon> contacts;
+            
+            final List<ContactTroncon> organisationsSignataires = orgSignataires.get(row.getInt(ConventionColumns.ID_CONVENTION.toString()));
+            contacts=organisationsSignataires;
+            
+            final List<ContactTroncon> intervenantsSignataires = intSignataires.get(row.getInt(ConventionColumns.ID_CONVENTION.toString()));
+            if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
+            else if(contacts==null) contacts=intervenantsSignataires;
+            
+            if(contacts!=null) convention.setContacts(contacts);
 
             conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
-            conventionRepository.add(convention);
         }
+        couchDbConnector.executeBulk(conventions.values());
     }
     
     /**

@@ -51,6 +51,8 @@ import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImport
 import fr.sirs.importer.theme.document.related.convention.TypeConventionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.TypeProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionSignataireIntervenantImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionSignataireOrganismeImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.TypeRapportEtudeImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
@@ -145,14 +147,16 @@ public class DbImporter {
     private TypeMateriauImporter typeMateriauImporter;
     private TypeNatureImporter typeNatureImporter;
     private TypeFonctionImporter typeFonctionImporter;
+    private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
+    private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
 
     public enum TableName{
      BORNE_DIGUE,
      BORNE_PAR_SYSTEME_REP,
      COMMUNE,
      CONVENTION,
-//     CONVENTION_SIGNATAIRES_PM,
-//     CONVENTION_SIGNATAIRES_PP,
+     CONVENTION_SIGNATAIRES_PM,
+     CONVENTION_SIGNATAIRES_PP,
      DEPARTEMENT,
      DESORDRE,
 //     DESORDRE_ELEMENT_RESEAU,
@@ -598,8 +602,14 @@ public class DbImporter {
         desordreImporter = tronconGestionDigueImporter.getDesordreImporter();
         typeConventionImporter = new TypeConventionImporter(accessDatabase, 
                 couchDbConnector, refConventionRepository);
+        conventionSignataireIntervenantImporter = new ConventionSignataireIntervenantImporter(
+                accessDatabase, couchDbConnector, intervenantImporter);
+        conventionSignataireOrganismeImporter = new ConventionSignataireOrganismeImporter(
+                accessDatabase, couchDbConnector, organismeImporter);
         conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, conventionRepository, typeConventionImporter);
+                couchDbConnector, conventionRepository, typeConventionImporter,
+                conventionSignataireIntervenantImporter,
+                conventionSignataireOrganismeImporter);
         typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, 
                 couchDbConnector, refTypeProfilTraversRepository);
         typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
@@ -700,7 +710,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -716,7 +726,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -731,7 +741,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(Row row : importer.getDatabase().getTable(TableName.TYPE_FONCTION.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");
