@@ -11,6 +11,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -28,15 +29,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -47,6 +52,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -111,6 +117,7 @@ public abstract class AbstractPojoTable extends BorderPane{
     protected final Session session = Injector.getBean(Session.class);
     
     //valeurs affichées
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
     private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
     private final ProgressIndicator searchRunning = new ProgressIndicator();
     private ObservableList<Element> allValues;
@@ -175,15 +182,20 @@ public abstract class AbstractPojoTable extends BorderPane{
         uiTitle.getStyleClass().add("pojotable-header");   
         uiTitle.setAlignment(Pos.CENTER);
         
+        uiTable.editableProperty().bind(editableProperty);
+        uiAdd.visibleProperty().bind(editableProperty);
+        uiDelete.visibleProperty().bind(editableProperty);
         
-        uiAdd.visibleProperty().bind(this.disableProperty().not());
-        uiDelete.visibleProperty().bind(this.disableProperty().not());
         final HBox toolbar = new HBox(uiAdd,uiDelete,uiSearch);     
         toolbar.getStyleClass().add("buttonbar");
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
     }
 
+    public BooleanProperty editableProperty(){
+        return editableProperty;
+    }
+    
     protected void search(){
         if(uiSearch.getGraphic()!= searchNone){
             //une recherche est deja en cours
@@ -199,7 +211,7 @@ public abstract class AbstractPojoTable extends BorderPane{
             public void handle(ActionEvent event) {
                 currentSearch.set(textField.getText());
                 popup.hide();
-                setTableItems(allValues);
+                setTableItems(() -> allValues);
             }
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
@@ -211,13 +223,13 @@ public abstract class AbstractPojoTable extends BorderPane{
         return uiTable;
     }
     
-    protected void setTableItems(ObservableList<Element> items){
+    public void setTableItems(Supplier<ObservableList<Element>> producer){
         uiSearch.setGraphic(searchRunning);
         
         new Thread(){
             @Override
             public void run() {
-                allValues = items;
+                allValues = producer.get();
                 final String str = currentSearch.get();
                 if(str == null || str.isEmpty()){
                     filteredValues = allValues;
@@ -250,7 +262,21 @@ public abstract class AbstractPojoTable extends BorderPane{
     
     protected abstract void deletePojos(Element ... pojos);
     
-    protected abstract void editPojo(Element pojo);
+    protected void editPojo(Element pojo){
+        final Session session = Injector.getBean(Session.class);
+        final Tab tab = new Tab();
+        tab.setContent(new FXStructurePane((Objet) pojo));
+        tab.setText(pojo.getClass().getSimpleName());
+        tab.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if(tab.isSelected()){
+                    session.prepareToPrint(pojo);
+                }
+            }
+        });
+        session.getFrame().addTab(tab);
+    }
     
     protected abstract void elementEdited(TableColumn.CellEditEvent<Element, Object> event);
     
@@ -347,6 +373,8 @@ public abstract class AbstractPojoTable extends BorderPane{
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+            DeleteColumn.this.editableProperty().bind(editableProperty);
+            DeleteColumn.this.visibleProperty().bind(editableProperty);
             
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
                 @Override
@@ -379,6 +407,8 @@ public abstract class AbstractPojoTable extends BorderPane{
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_EDIT));
+            EditColumn.this.editableProperty().bind(editableProperty);
+            EditColumn.this.visibleProperty().bind(editableProperty);
             
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
                 @Override

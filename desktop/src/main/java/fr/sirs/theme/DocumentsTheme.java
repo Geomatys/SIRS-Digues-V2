@@ -75,11 +75,6 @@ public class DocumentsTheme extends Theme {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
-            
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
         
@@ -96,11 +91,6 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -125,11 +115,6 @@ public class DocumentsTheme extends Theme {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
         
@@ -146,11 +131,6 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -175,11 +155,6 @@ public class DocumentsTheme extends Theme {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
         
@@ -196,11 +171,6 @@ public class DocumentsTheme extends Theme {
 
         @Override
         protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

@@ -7,9 +7,12 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.AbstractPojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
 import java.util.logging.Level;
@@ -30,6 +33,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -71,8 +76,10 @@ public class FXTronconDiguePane extends BorderPane{
     @FXML private Button uiSRDelete;
     @FXML private Button uiSRAdd;
     @FXML private ListView<SystemeReperage> uiSRList;
+    @FXML private Tab uiContactTab;
     
     private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
+    private final ContactTable uiContactTable = new ContactTable();
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
@@ -91,6 +98,8 @@ public class FXTronconDiguePane extends BorderPane{
         uiDateStart.disableProperty().bind(editBind);
         uiDateEnd.disableProperty().bind(editBind);
         uiComment.disableProperty().bind(editBind);
+        uiContactTable.editableProperty().bind(uiEdit.selectedProperty());
+        srController.editableProperty().bind(uiEdit.selectedProperty());
         uiSRAdd.visibleProperty().bind(uiEdit.selectedProperty());
         uiSRDelete.visibleProperty().bind(uiEdit.selectedProperty());
         
@@ -135,6 +144,7 @@ public class FXTronconDiguePane extends BorderPane{
             }
         });
         
+        uiContactTab.setContent(uiContactTable);
     }
     
     public ObjectProperty<TronconDigue> tronconProperty(){
@@ -295,7 +305,37 @@ public class FXTronconDiguePane extends BorderPane{
         final List<SystemeReperage> srs = repo.getByTroncon(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
         
+        uiContactTable.setTableItems(() -> (ObservableList)troncon.contactIds);
+        
         initializing = false;
+    }
+    
+    private final class ContactTable extends AbstractPojoTable{
+
+        public ContactTable() {
+            super(ContactTroncon.class, "Liste des contacts");
+        }
+
+        @Override
+        protected void deletePojos(Element... pojos) {
+            final TronconDigue troncon = tronconProperty.get();
+            for(Element ele : pojos){
+                troncon.contactIds.remove(ele);
+            }
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            //on ne sauvegarde pas, le formulaire conteneur s'en charge
+        }
+
+        @Override
+        protected void createPojo() {
+            final ContactTroncon contact = new ContactTroncon();
+            final TronconDigue troncon = tronconProperty.get();
+            troncon.contactIds.add(contact);
+        }
+        
     }
     
 }

@@ -9,7 +9,9 @@ import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -32,6 +34,7 @@ public class FXSystemeReperagePane extends BorderPane {
     
     private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();    
     private final BorneTable borneTable = new BorneTable();
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
     
     public FXSystemeReperagePane(){
         SIRS.loadFXML(this);
@@ -46,8 +49,14 @@ public class FXSystemeReperagePane extends BorderPane {
             }
             updateFields();
         });
+        
+        borneTable.editableProperty().bind(editableProperty);
     }
 
+    public BooleanProperty editableProperty(){
+        return editableProperty;
+    }
+    
     public ObjectProperty<SystemeReperage> getSystemeReperageProperty() {
         return srProperty;
     }
@@ -82,11 +91,6 @@ public class FXSystemeReperagePane extends BorderPane {
 
         @Override
         protected void deletePojos(Element... pojos) {
-            
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
             
         }
 

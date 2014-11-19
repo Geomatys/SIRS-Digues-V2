@@ -66,6 +66,7 @@ public class FXDiguePane extends BorderPane {
         uiSave.disableProperty().bind(editBind);
         libelle.disableProperty().bind(editBind);
         uiComment.disableProperty().bind(editBind);
+        table.editableProperty().bind(uiEdit.selectedProperty());
         
         digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
@@ -148,13 +149,13 @@ public class FXDiguePane extends BorderPane {
         private void updateTable() {
             reloadTroncons();
             if (troncons == null) {
-                setTableItems(FXCollections.emptyObservableList());
+                setTableItems(FXCollections::emptyObservableList);
             } else {
             //JavaFX bug : sortable is not possible on filtered list
                 // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
                 // https://javafx-jira.kenai.com/browse/RT-32091
                 final SortedList sortedList = new SortedList(troncons);
-                setTableItems(sortedList);
+                setTableItems(()->sortedList);
                 sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
             }
         }
@@ -170,20 +171,6 @@ public class FXDiguePane extends BorderPane {
         @Override
         protected void editPojo(Element pojo) {
             final Session session = Injector.getBean(Session.class);
-//            final Tab tab = new Tab();
-//            final TronconDigueController tronconDigueController = new TronconDigueController();
-//            tronconDigueController.setTroncon((TronconDigue) pojo);
-//            tab.setContent(tronconDigueController);
-//            tab.setText(pojo.getClass().getSimpleName());
-//            tab.setOnSelectionChanged(new EventHandler<Event>() {
-//                @Override
-//                public void handle(Event event) {
-//                    if(tab.isSelected()){
-//                        session.prepareToPrint(pojo);
-//                    }
-//                }
-//            });
-//            session.getFrame().addTab(tab);
             session.getFrame().getDiguesTab().getDiguesController().displayTronconDigue((TronconDigue) pojo);
             session.prepareToPrint(pojo);
         }

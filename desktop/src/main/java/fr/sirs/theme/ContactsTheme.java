@@ -55,11 +55,6 @@ public class ContactsTheme extends Theme {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
-            
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         }
 
@@ -76,11 +71,6 @@ public class ContactsTheme extends Theme {
 
         @Override
         protected void deletePojos(Element ... pojo) {
-            
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
             
         }
 

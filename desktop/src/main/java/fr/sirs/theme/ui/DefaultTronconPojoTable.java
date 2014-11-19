@@ -4,7 +4,6 @@ package fr.sirs.theme.ui;
 import fr.sirs.Session;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import javafx.beans.property.ObjectProperty;
@@ -13,9 +12,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -45,14 +41,17 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
     private void updateTable(){
         final TronconDigue trc = troncon.get();
         if(trc==null || group==null){
-            setTableItems(FXCollections.emptyObservableList());
+            setTableItems(FXCollections::emptyObservableList);
         }else{
             //JavaFX bug : sortable is not possible on filtered list
             // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
             // https://javafx-jira.kenai.com/browse/RT-32091
-            final SortedList sortedList = new SortedList(group.getExtractor().apply(trc));
-            setTableItems(sortedList);
-            sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
+            setTableItems(() -> {
+                final SortedList sortedList = new SortedList(group.getExtractor().apply(trc));
+                sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
+                return sortedList;
+            });
+            
         }
     }
 
@@ -66,23 +65,6 @@ public class DefaultTronconPojoTable extends AbstractPojoTable{
             final Session session = Injector.getBean(Session.class);
             session.getTronconDigueRepository().update(trc);
         }
-    }
-
-    @Override
-    protected void editPojo(Element pojo) {
-        final Session session = Injector.getBean(Session.class);
-        final Tab tab = new Tab();
-        tab.setContent(new FXStructurePane((Objet) pojo));
-        tab.setText(pojo.getClass().getSimpleName());
-        tab.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                if(tab.isSelected()){
-                    session.prepareToPrint(pojo);
-                }
-            }
-        });
-        session.getFrame().addTab(tab);
     }
 
     @Override
