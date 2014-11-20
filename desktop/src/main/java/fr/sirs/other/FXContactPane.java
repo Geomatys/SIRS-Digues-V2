@@ -43,7 +43,7 @@ public class FXContactPane extends BorderPane {
     
     @FXML private Tab uiOrganismeTab;
     
-    private final PojoTable organismeTable = new OrganismeTable();
+//    private final PojoTable organismeTable = new OrganismeTable();
     
     private Contact contact;
     
@@ -63,8 +63,8 @@ public class FXContactPane extends BorderPane {
         uiCodePostale.editableProperty().bind(editProp);
         uiCommune.editableProperty().bind(editProp);
         
-        uiOrganismeTab.setContent(organismeTable);
-        organismeTable.editableProperty().bind(editProp);
+//        uiOrganismeTab.setContent(organismeTable);
+//        organismeTable.editableProperty().bind(editProp);
         
         uiMode.setSaveAction(this::save);        
         setContact(contact);
@@ -86,7 +86,7 @@ public class FXContactPane extends BorderPane {
         uiCodePostale.textProperty().bindBidirectional(contact.code_postalProperty());
         uiCommune.textProperty().bindBidirectional(contact.paysProperty());
         
-        organismeTable.setTableItems(()->(ObservableList)contact.contactOrganisme);
+//        organismeTable.setTableItems(()->(ObservableList)contact.contactOrganisme);
         
     }
     
@@ -95,29 +95,29 @@ public class FXContactPane extends BorderPane {
         session.getContactRepository().update(contact);
     }
  
-    private final class OrganismeTable extends PojoTable{
-
-        public OrganismeTable() {
-            super(ContactOrganisme.class, "Liste des organismes");
-        }
-
-        @Override
-        protected void editPojo(Element pojo) {
-            
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            //objet inclue dans Contact
-        }
-
-        @Override
-        protected void deletePojos(Element... pojos) {
-            for(Element ele : pojos){
-                contact.contactOrganisme.remove(ele);
-            }
-        }
-        
-    }
+//    private final class OrganismeTable extends PojoTable{
+//
+//        public OrganismeTable() {
+//            super(ContactOrganisme.class, "Liste des organismes");
+//        }
+//
+//        @Override
+//        protected void editPojo(Element pojo) {
+//            
+//        }
+//
+//        @Override
+//        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+//            //objet inclue dans Contact
+//        }
+//
+//        @Override
+//        protected void deletePojos(Element... pojos) {
+//            for(Element ele : pojos){
+//                contact.contactOrganisme.remove(ele);
+//            }
+//        }
+//        
+//    }
     
 }

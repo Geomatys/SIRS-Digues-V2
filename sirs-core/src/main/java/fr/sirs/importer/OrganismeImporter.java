@@ -90,7 +90,7 @@ public class OrganismeImporter extends GenericImporter {
             
             organisme.setCode_postal(cleanNullString(String.valueOf(row.getInt(OrganismeColumns.ADRESSE_CODE_POSTAL_ORG.toString()))));
             
-            organisme.setLocalite(row.getString(OrganismeColumns.ADRESSE_NOM_COMMUNE_ORG.toString()));
+            organisme.setCommune(row.getString(OrganismeColumns.ADRESSE_NOM_COMMUNE_ORG.toString()));
             
             organisme.setTelephone(row.getString(OrganismeColumns.TEL_ORG.toString()));
             

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Element;
@@ -23,6 +24,7 @@ import org.apache.lucene.store.NoLockFactory;
 import org.apache.lucene.util.Version;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,10 +75,11 @@ public class SearchEngine implements DocumentListener {
         this.dbName = dbName;
         this.connector = connector;
         changeEmitter.addListener(this);
-        
-        
+                
+        //dossier de configuration
+        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
         final File configFolder = SirsCore.getConfigFolder();
-        final File luceneFolder = new File(new File(configFolder, "lucene"),dbName);
+        final File luceneFolder = new File(new File(configFolder, "lucene"),URLEncoder.encode(sirs.getUuid()));
         final boolean isNew = !luceneFolder.exists();
         luceneFolder.mkdirs();
         

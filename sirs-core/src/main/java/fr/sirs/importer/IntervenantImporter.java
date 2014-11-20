@@ -95,7 +95,7 @@ public class IntervenantImporter extends GenericImporter {
             
             intervenant.setCode_postal(cleanNullString(String.valueOf(row.getInt(IntervenantColumns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
             
-            intervenant.setLocalite(row.getString(IntervenantColumns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
+            intervenant.setCommune(row.getString(IntervenantColumns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
             
             intervenant.setTelephone(row.getString(IntervenantColumns.TEL_PERSO_INTERV.toString()));
             
