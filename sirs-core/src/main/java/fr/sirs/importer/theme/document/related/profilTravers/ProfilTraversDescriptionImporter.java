@@ -154,6 +154,10 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
                 leve.setLeveePoints(pointsByLeve.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
+            if(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setProfilTraversEvenementHydraulique(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            }
+            
             leves.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             
             List<LeveeProfilTravers> listByProfil = levesByProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()));
