@@ -7,7 +7,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SystemeReperage;
@@ -17,7 +16,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -67,18 +65,18 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
 //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        NOM_PROFIL_EN_TRAVERS,
-//        LIBELLE_MARCHE,
-//        INTITULE_ARTICLE,
-//        TITRE_RAPPORT_ETUDE,
-//        ID_TYPE_RAPPORT_ETUDE, 
+//        NOM_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
+//        LIBELLE_MARCHE, // Non pertinent pour le rapport d'études
+//        INTITULE_ARTICLE, // Non pertinent pour le rapport d'études
+//        TITRE_RAPPORT_ETUDE, // Pas dans le nouveau modèle
+//        ID_TYPE_RAPPORT_ETUDE, // Redondant avec l'importation des rapports d'étude
 //        TE16_AUTEUR_RAPPORT,
 //        DATE_RAPPORT,
         ID_TRONCON_GESTION,
 //        ID_TYPE_DOCUMENT, // Redondant avec le type de données
 //        ID_DOSSIER,
-//        DATE_DEBUT_VAL,
-//        DATE_FIN_VAL,
+//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+//        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -93,19 +91,19 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER,
-//        REFERENCE_NUMERIQUE,
-//        REFERENCE_CALQUE,
+//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
+//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
+//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
         DATE_DOCUMENT,
         NOM,
 //        TM_AUTEUR_RAPPORT,
-//        ID_MARCHE,
+//        ID_MARCHE, // Non pertinent pour le rapport d'études
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
-//        ID_ARTICLE_JOURNAL,
-//        ID_PROFIL_EN_TRAVERS,
+//        ID_ARTICLE_JOURNAL, // Non pertinent pour le rapport d'études
+//        ID_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//        ID_CONVENTION,
+//        ID_CONVENTION, // Non pertinent pour le rapport d'études
         ID_RAPPORT_ETUDE,
 //        ID_AUTO 
     }
@@ -209,7 +207,6 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
             }
             
             document.setLibelle(row.getString(DocumentRapportEtudeColumns.NOM.toString()));
-            
             
             
             

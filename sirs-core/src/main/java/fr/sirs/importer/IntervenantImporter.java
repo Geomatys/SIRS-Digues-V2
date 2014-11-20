@@ -4,7 +4,9 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.ContactOrganisme;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ public class IntervenantImporter extends GenericImporter {
 
     private Map<Integer, Contact> intervenants = null;
     private ContactRepository contactRepository;
+    private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
 
     private IntervenantImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -30,9 +33,11 @@ public class IntervenantImporter extends GenericImporter {
 
     IntervenantImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final ContactRepository contactRepository) {
+            final ContactRepository contactRepository,
+            final OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter) {
         this(accessDatabase, couchDbConnector);
         this.contactRepository = contactRepository;
+        this.organismeDisposeIntervenantImporter = organismeDisposeIntervenantImporter;
     }
 
     private enum IntervenantColumns {
@@ -78,6 +83,8 @@ public class IntervenantImporter extends GenericImporter {
     protected void compute() throws IOException {
         intervenants = new HashMap<>();
         
+        final Map<Integer, List<ContactOrganisme>> contactsOrganismes = organismeDisposeIntervenantImporter.getContactOrganismeByContactId();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
@@ -116,6 +123,10 @@ public class IntervenantImporter extends GenericImporter {
             
             if (row.getDate(IntervenantColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 intervenant.setDateMaj(LocalDateTime.parse(row.getDate(IntervenantColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (contactsOrganismes.get(row.getInt(IntervenantColumns.ID_INTERVENANT.toString()))!=null){
+                intervenant.setContactOrganisme(contactsOrganismes.get(row.getInt(IntervenantColumns.ID_INTERVENANT.toString())));
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

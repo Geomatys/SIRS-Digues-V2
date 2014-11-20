@@ -35,6 +35,7 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
+import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.structure.StructureImporter;
 import fr.sirs.importer.structure.desordre.DesordreImporter;
 import fr.sirs.importer.structure.TypeCoteImporter;
@@ -149,6 +150,7 @@ public class DbImporter {
     private TypeFonctionImporter typeFonctionImporter;
     private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
     private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
+    private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -246,7 +248,7 @@ public class DbImporter {
 //     MONTEE_DES_EAUX_MESURES,
 //     observation_urgence_carto,
      ORGANISME,
-//     ORGANISME_DISPOSE_INTERVENANT,
+     ORGANISME_DISPOSE_INTERVENANT,
 //     ORIENTATION,
 //     PARCELLE_CADASTRE,
 //     PARCELLE_LONGE_DIGUE,
@@ -555,8 +557,12 @@ public class DbImporter {
                 accessCartoDatabase, couchDbConnector);
         organismeImporter = new OrganismeImporter(accessDatabase, 
                 couchDbConnector, organismeRepository);
+        organismeDisposeIntervenantImporter = new OrganismeDisposeIntervenantImporter(
+                accessDatabase, couchDbConnector, organismeRepository, 
+                organismeImporter);
         intervenantImporter = new IntervenantImporter(accessDatabase, 
-                couchDbConnector, contactRepository);
+                couchDbConnector, contactRepository, 
+                organismeDisposeIntervenantImporter);
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
         tronconGestionDigueGardienImporter = new TronconGestionDigueGardienImporter(
@@ -710,7 +716,7 @@ public class DbImporter {
 //            });
 //            
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.ORGANISME_DISPOSE_INTERVENANT.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -726,7 +732,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.ORGANISME_DISPOSE_INTERVENANT.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -741,7 +747,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.CONVENTION_SIGNATAIRES_PP.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.ORGANISME_DISPOSE_INTERVENANT.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

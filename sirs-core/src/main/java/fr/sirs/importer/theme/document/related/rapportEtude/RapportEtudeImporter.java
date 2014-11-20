@@ -1,17 +1,13 @@
 package fr.sirs.importer.theme.document.related.rapportEtude;
 
-import fr.sirs.importer.theme.document.related.convention.*;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.RapportEtudeRepository;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefConvention;
 import fr.sirs.core.model.RefRapportEtude;
+import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,7 +43,7 @@ public class RapportEtudeImporter extends GenericImporter {
         ID_RAPPORT_ETUDE,
 //        TITRE_RAPPORT_ETUDE, // Pas dans le nouveau modèle
         ID_TYPE_RAPPORT_ETUDE,
-//        AUTEUR_RAPPORT, // Pas dans le nouveau modèle
+        AUTEUR_RAPPORT,
 //        DATE_RAPPORT, // Pas dans le nouveau modèle
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
@@ -80,11 +76,13 @@ public class RapportEtudeImporter extends GenericImporter {
             final Row row = it.next();
             final RapportEtude rapport = new RapportEtude();
             
+            rapport.setAuteur(cleanNullString(row.getString(RapportEtudeColumns.REFERENCE_PAPIER.toString())));
+            
             rapport.setTypeRapportEtudeId(typesRapport.get(row.getInt(RapportEtudeColumns.ID_TYPE_RAPPORT_ETUDE.toString())).getId());
             
-            rapport.setReference_papier(row.getString(RapportEtudeColumns.REFERENCE_PAPIER.toString()));
+            rapport.setReference_papier(cleanNullString(row.getString(RapportEtudeColumns.REFERENCE_PAPIER.toString())));
             
-            rapport.setReference_numerique(row.getString(RapportEtudeColumns.REFERENCE_NUMERIQUE.toString()));
+            rapport.setReference_numerique(cleanNullString(row.getString(RapportEtudeColumns.REFERENCE_NUMERIQUE.toString())));
             
             rapportsEtude.put(row.getInt(RapportEtudeColumns.ID_RAPPORT_ETUDE.toString()), rapport);
             rapportEtudeRepository.add(rapport);

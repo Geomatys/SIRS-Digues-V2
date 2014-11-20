@@ -277,9 +277,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 tronconDigue.setStructures(structures);
             }
 
-            for(List<Objet> sbt : structuresByTroncon.values()){
-                for(Objet o : sbt) System.out.println(o.getClass().getCanonicalName());
-            }
+//            for(List<Objet> sbt : structuresByTroncon.values()){
+//                for(Objet o : sbt) System.out.println(o.getClass().getCanonicalName());
+//            }
             if(structuresByTroncon.get(tronconsIds.get(tronconDigue))!=null)
                 structures.addAll(structuresByTroncon.get(tronconsIds.get(tronconDigue)));
             if(desordresByTroncon.get(tronconsIds.get(tronconDigue))!=null)

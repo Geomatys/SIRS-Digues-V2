@@ -342,7 +342,6 @@ class CreteImporter extends GenericStructureImporter {
             List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-//                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(crete);
             cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
