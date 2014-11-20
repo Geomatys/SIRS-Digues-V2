@@ -6,7 +6,9 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.PiedDigue;
+import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.TalusDigue;
+import fr.sirs.core.model.TalusRisberme;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,10 +78,10 @@ public class TypeElementStructureImporter extends GenericImporter {
                     classe = Crete.class; break;
                 case SYS_EVT_TALUS_DIGUE:
                     classe = TalusDigue.class; break;
-//                case SYS_EVT_SOMMET_RISBERME:
-//                    classe = SommetRisberme.class; break;
-//                case SYS_EVT_TALUS_RISBERME:
-//                    classe = TalusRisberme.class; break;
+                case SYS_EVT_SOMMET_RISBERME:
+                    classe = SommetRisberme.class; break;
+                case SYS_EVT_TALUS_RISBERME:
+                    classe = TalusRisberme.class; break;
                 case SYS_EVT_PIED_DE_DIGUE:
                     classe = PiedDigue.class; break;
 //                    case 6:

@@ -78,7 +78,7 @@ public class TypeProfilTraversImporter extends GenericImporter {
                 typeProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(TypeProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typesProfilsTravers.put(row.getInt(String.valueOf(TypeProfilTraversColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())), typeProfilTravers);
-            refTypeProfilTraversRepository.add(typeProfilTravers);
         }
+        couchDbConnector.executeBulk(typesProfilsTravers.values());
     }
 }

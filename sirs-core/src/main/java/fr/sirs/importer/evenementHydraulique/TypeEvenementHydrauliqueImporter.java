@@ -24,7 +24,7 @@ import org.ektorp.CouchDbConnector;
 public class TypeEvenementHydrauliqueImporter extends GenericImporter {
 
     private Map<Integer, RefEvenementHydraulique> typesEvenement = null;
-    private Map<Integer, Class> classesEvenement = null;
+//    private Map<Integer, Class> classesEvenement = null;
 
     public TypeEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -36,7 +36,7 @@ public class TypeEvenementHydrauliqueImporter extends GenericImporter {
         ID_TYPE_EVENEMENT_HYDRAU,
         ABREGE_TYPE_EVENEMENT_HYDRAU,
         LIBELLE_TYPE_EVENEMENT_HYDRAU,
-        NOM_TABLE_EVT,
+//        NOM_TABLE_EVT, // Ces table sont innexistentes dans la base de l'isère
 //        ID_TYPE_OBJET_CARTO,
         DATE_DERNIERE_MAJ
     };
@@ -69,7 +69,7 @@ public class TypeEvenementHydrauliqueImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         typesEvenement = new HashMap<>();
-        classesEvenement = new HashMap<>();
+//        classesEvenement = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -82,17 +82,21 @@ public class TypeEvenementHydrauliqueImporter extends GenericImporter {
                 typeEvenement.setDateMaj(LocalDateTime.parse(row.getDate(TypeEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            final Class classe;
-            final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeEvenementHydrauliqueColumns.NOM_TABLE_EVT.toString()));
-            
-            switch(table){
-//                case SYS_CRUE_OBSERVEE: break;
-//                case SIMULATION_HYDRAU: break;
-                default: classe = null;
+            try{
+//                final Class classe;
+//                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeEvenementHydrauliqueColumns.NOM_TABLE_EVT.toString()));
+//
+//                switch(table){
+//    //                case SYS_CRUE_OBSERVEE: break;
+//    //                case SIMULATION_HYDRAU: break;
+//                    default: classe = null;
+//                }
+//
+//                classesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), classe);
+                typesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), typeEvenement);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
-            
-            classesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), classe);
-            typesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), typeEvenement);
         }
         couchDbConnector.executeBulk(typesEvenement.values());
     }
