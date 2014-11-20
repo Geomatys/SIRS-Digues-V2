@@ -3,8 +3,10 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ public class OrganismeImporter extends GenericImporter {
 
     private Map<Integer, Organisme> organismes = null;
     private OrganismeRepository organismeRepository;
+    private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
 
     private OrganismeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -30,9 +33,11 @@ public class OrganismeImporter extends GenericImporter {
 
     OrganismeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final OrganismeRepository organismeRepository) {
+            final OrganismeRepository organismeRepository,
+            final OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter) {
         this(accessDatabase, couchDbConnector);
         this.organismeRepository = organismeRepository;
+        this.organismeDisposeIntervenantImporter = organismeDisposeIntervenantImporter;
     }
 
     private enum OrganismeColumns {
@@ -75,6 +80,8 @@ public class OrganismeImporter extends GenericImporter {
     protected void compute() throws IOException {
         organismes = new HashMap<>();
         
+        final Map<Integer, List<ContactOrganisme>> contactsOrganismes = organismeDisposeIntervenantImporter.getContactOrganismeByOrganismeId();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
@@ -108,6 +115,10 @@ public class OrganismeImporter extends GenericImporter {
             
             if (row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 organisme.setDateMaj(LocalDateTime.parse(row.getDate(OrganismeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (contactsOrganismes.get(row.getInt(OrganismeColumns.ID_ORGANISME.toString()))!=null){
+                organisme.setContactOrganisme(contactsOrganismes.get(row.getInt(OrganismeColumns.ID_ORGANISME.toString())));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

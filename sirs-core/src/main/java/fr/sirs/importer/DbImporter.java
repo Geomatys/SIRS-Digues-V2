@@ -563,13 +563,13 @@ public class DbImporter {
                 couchDbConnector, refRiveRepository);
         tronconDigueGeomImporter = new TronconDigueGeomImporter(
                 accessCartoDatabase, couchDbConnector);
-        organismeImporter = new OrganismeImporter(accessDatabase, 
-                couchDbConnector, organismeRepository);
-        organismeDisposeIntervenantImporter = new OrganismeDisposeIntervenantImporter(
-                accessDatabase, couchDbConnector, organismeRepository, 
-                organismeImporter);
         intervenantImporter = new IntervenantImporter(accessDatabase, 
-                couchDbConnector, contactRepository, 
+                couchDbConnector, contactRepository);
+        organismeDisposeIntervenantImporter = new OrganismeDisposeIntervenantImporter(
+                accessDatabase, couchDbConnector, contactRepository, 
+                intervenantImporter);
+        organismeImporter = new OrganismeImporter(accessDatabase, 
+                couchDbConnector, organismeRepository,
                 organismeDisposeIntervenantImporter);
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);

@@ -3,9 +3,9 @@ package fr.sirs.importer.intervenant;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.component.ContactRepository;
+import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.Organisme;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
-    private Map<Integer, List<ContactOrganisme>> contactOrganismesByContactId = null;
-    private OrganismeImporter organismeImporter;
+    private Map<Integer, List<ContactOrganisme>> contactOrganismesByOrganismeId = null;
+    private IntervenantImporter intervenantImporter;
 
     private OrganismeDisposeIntervenantImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -31,10 +31,10 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
     public OrganismeDisposeIntervenantImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final OrganismeRepository organismeRepository,
-            final OrganismeImporter organismeImporter) {
+            final ContactRepository contactRepository,
+            final IntervenantImporter intervenantImporter) {
         this(accessDatabase, couchDbConnector);
-        this.organismeImporter = organismeImporter;
+        this.intervenantImporter = intervenantImporter;
     }
 
     private enum OrganismeDisposeIntervenantColumns {
@@ -45,9 +45,9 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
         DATE_DERNIERE_MAJ,
     };
 
-    public Map<Integer, List<ContactOrganisme>> getContactOrganismeByContactId() throws IOException {
-        if (contactOrganismesByContactId == null) compute();
-        return contactOrganismesByContactId;
+    public Map<Integer, List<ContactOrganisme>> getContactOrganismeByOrganismeId() throws IOException {
+        if (contactOrganismesByOrganismeId == null) compute();
+        return contactOrganismesByOrganismeId;
     }
 
     @Override
@@ -66,16 +66,16 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        contactOrganismesByContactId = new HashMap<>();
+        contactOrganismesByOrganismeId = new HashMap<>();
         
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, Contact> organismes = intervenantImporter.getIntervenants();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ContactOrganisme contactOrganisme = new ContactOrganisme();
 
-            contactOrganisme.setOrganismeId(organismes.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_ORGANISME.toString())).getId());
+            contactOrganisme.setContactId(organismes.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_INTERVENANT.toString())).getId());
             
             if (row.getDate(OrganismeDisposeIntervenantColumns.DATE_DEBUT_INTERV_ORG.toString()) != null) {
                 contactOrganisme.setDateDebutIntervenant(LocalDateTime.parse(row.getDate(OrganismeDisposeIntervenantColumns.DATE_DEBUT_INTERV_ORG.toString()).toString(), dateTimeFormatter));
@@ -89,12 +89,12 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
                 contactOrganisme.setDateMaj(LocalDateTime.parse(row.getDate(OrganismeDisposeIntervenantColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
-            List<ContactOrganisme> listByIntervenantId = contactOrganismesByContactId.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_INTERVENANT.toString()));
+            List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_ORGANISME.toString()));
             if (listByIntervenantId == null) {
                 listByIntervenantId = new ArrayList<>();
             }
             listByIntervenantId.add(contactOrganisme);
-            contactOrganismesByContactId.put(row.getInt(OrganismeDisposeIntervenantColumns.ID_INTERVENANT.toString()), listByIntervenantId);
+            contactOrganismesByOrganismeId.put(row.getInt(OrganismeDisposeIntervenantColumns.ID_ORGANISME.toString()), listByIntervenantId);
         }
         
     }
