@@ -42,7 +42,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class PiedDigueImporter extends GenericStructureImporter {
+class PiedDigueImporter extends GenericStructureImporter<PiedDigue> {
 
     private Map<Integer, PiedDigue> piedsDigue = null;
     private Map<Integer, List<PiedDigue>> piedsDigueByTronconId = null;
@@ -166,7 +166,8 @@ class PiedDigueImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, PiedDigue> getPiedsDigue() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, PiedDigue> getStructures() throws IOException, AccessDbImporterException {
         if (this.piedsDigue == null) {
             compute();
         }
@@ -180,7 +181,8 @@ class PiedDigueImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, List<PiedDigue>> getPiedsDigueByTronconId() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, List<PiedDigue>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (this.piedsDigueByTronconId == null) {
             compute();
         }
@@ -341,7 +343,6 @@ class PiedDigueImporter extends GenericStructureImporter {
                 piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(piedDigue);
-            piedsDigueByTronconId.put(row.getInt(PiedDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
     }
 }

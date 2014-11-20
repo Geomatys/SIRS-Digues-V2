@@ -42,7 +42,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class CreteImporter extends GenericStructureImporter {
+class CreteImporter extends GenericStructureImporter<Crete> {
 
     private Map<Integer, Crete> cretes = null;
     private Map<Integer, List<Crete>> cretesByTronconId = null;
@@ -175,7 +175,8 @@ class CreteImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, Crete> getCretes() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, Crete> getStructures() throws IOException, AccessDbImporterException {
         if (this.cretes == null) {
             compute();
         }
@@ -189,7 +190,8 @@ class CreteImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, List<Crete>> getCretesByTronconId() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, List<Crete>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (this.cretesByTronconId == null) {
             compute();
         }
@@ -342,9 +344,9 @@ class CreteImporter extends GenericStructureImporter {
             List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
+                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(crete);
-            cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
     }
 

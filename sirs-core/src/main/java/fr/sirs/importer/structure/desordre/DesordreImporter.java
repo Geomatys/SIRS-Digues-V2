@@ -49,7 +49,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DesordreImporter extends GenericStructureImporter {
+public class DesordreImporter extends GenericStructureImporter<Desordre> {
 
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
@@ -120,12 +120,13 @@ public class DesordreImporter extends GenericStructureImporter {
 
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Desordre instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, Desordre> getDesordres() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, Desordre> getStructures() throws IOException, AccessDbImporterException {
         if (this.desordres == null) {
             compute();
         }
@@ -134,12 +135,13 @@ public class DesordreImporter extends GenericStructureImporter {
 
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Desordre instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, List<Desordre>> getDesordresByTronconId() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, List<Desordre>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (desordresByTronconId == null) {
             compute();
         }
@@ -154,8 +156,8 @@ public class DesordreImporter extends GenericStructureImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        desordres = subDesordreImporter.getDesordres();
-        desordresByTronconId = subDesordreImporter.getDesordresByTronconId();
+        desordres = subDesordreImporter.getStructures();
+        desordresByTronconId = subDesordreImporter.getStructuresByTronconId();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();

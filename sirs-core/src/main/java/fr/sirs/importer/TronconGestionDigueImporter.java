@@ -268,7 +268,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
         // Set the references using the this very importer (Structures references TronconDigueId).
         final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getStructuresByTronconId();
-        final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getDesordresByTronconId();
+        final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getStructuresByTronconId();
 
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
             List<Objet> structures = tronconDigue.getStructures();

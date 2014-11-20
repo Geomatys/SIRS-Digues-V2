@@ -48,7 +48,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SubDesordreImporter extends GenericStructureImporter {
+class SubDesordreImporter extends GenericStructureImporter<Desordre> {
     
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
@@ -126,12 +126,12 @@ class SubDesordreImporter extends GenericStructureImporter {
 
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Desordre instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    Map<Integer, Desordre> getDesordres() throws IOException, AccessDbImporterException {
+    public Map<Integer, Desordre> getStructures() throws IOException, AccessDbImporterException {
         if (this.desordres == null) {
             compute();
         }
@@ -140,12 +140,13 @@ class SubDesordreImporter extends GenericStructureImporter {
 
     /**
      *
-     * @return A map containing all TronconDigue instances accessibles from the
+     * @return A map containing all Desordre instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    Map<Integer, List<Desordre>> getDesordresByTronconId() throws IOException, AccessDbImporterException {
+    @Override
+    public Map<Integer, List<Desordre>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (this.desordresByTronconId == null) {
             compute();
         }

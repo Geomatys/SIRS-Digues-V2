@@ -6,12 +6,12 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
@@ -19,7 +19,7 @@ import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TalusDigue;
+import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.OrganismeImporter;
 import java.io.IOException;
@@ -43,12 +43,12 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
+class TalusRisbermeImporter extends GenericStructureImporter<TalusRisberme> {
 
-    private Map<Integer, TalusDigue> talusDigue = null;
-    private Map<Integer, List<TalusDigue>> talusByTronconId = null;
+    private Map<Integer, TalusRisberme> talusRisbermes = null;
+    private Map<Integer, List<TalusRisberme>> talusRisbermesByTronconId = null;
 
-    TalusDigueImporter(final Database accessDatabase,
+    TalusRisbermeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
@@ -56,7 +56,7 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
             final OrganismeImporter organismeImporter,
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter, 
+            final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
@@ -65,23 +65,14 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
-
-    /*
-     ----------------------------------------------------------------------------
-     TODO : Pourquoi référencer l'indentifiant du tronçon d'appartenance de la 
-     crête ? Puisqu'il n'y a qu'un seul tronçon et que la crête, comme structure,
-     est référencée depuis le tronçon, quel intérêt de maintenir un autre 
-     identifiant ? Cela facilite la navigabilité, mais complique l'import de la 
-     base car il faut vérifier que les identifiants CouchDB des tronçons ne sont 
-     pas nulls.
-     */
-    private enum TalusDigueColumns {
+    
+    private enum TalusRisbermeColumns {
         ID_ELEMENT_STRUCTURE,
 //        id_nom_element, // Redondant avec ID_ELEMENT_STRUCTURE
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
 //        LIBELLE_TYPE_ELEMENT_STRUCTURE, // Redondant avec le type de données
-//        DECALAGE_DEFAUT, // Concerne l'affichage
-//        DECALAGE, // Concerne l'affichage
+//        DECALAGE_DEFAUT, // Affichage
+//        DECALAGE, // Affichage
 //        LIBELLE_SOURCE, // Redondant avec l'importation des sources
 //        LIBELLE_TYPE_COTE, // Redondant avec l'importation des cotés
 //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
@@ -168,44 +159,44 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
 
     /**
      *
-     * @return A map containing all TalusDigue instances accessibles from the
+     * @return A map containing all TalusRisberme instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, TalusDigue> getStructures() throws IOException, AccessDbImporterException {
-        if (this.talusDigue == null) {
+    public Map<Integer, TalusRisberme> getStructures() throws IOException, AccessDbImporterException {
+        if (this.talusRisbermes == null) {
             compute();
         }
-        return talusDigue;
+        return talusRisbermes;
     }
 
     /**
      *
-     * @return A map containing all TalusDigue instances accessibles from the
+     * @return A map containing all TalusRisberme instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, List<TalusDigue>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.talusByTronconId == null) {
+    public Map<Integer, List<TalusRisberme>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+        if (this.talusRisbermesByTronconId == null) {
             compute();
         }
-        return this.talusByTronconId;
+        return this.talusRisbermesByTronconId;
     }
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_TALUS_DIGUE.toString();
+        return DbImporter.TableName.SYS_EVT_TALUS_RISBERME.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.talusDigue = new HashMap<>();
-        this.talusByTronconId = new HashMap<>();
+        this.talusRisbermes = new HashMap<>();
+        this.talusRisbermesByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -213,7 +204,6 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
@@ -221,38 +211,38 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final TalusDigue talus = new TalusDigue();
+            final TalusRisberme talusRisberme = new TalusRisberme();
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_COTE.toString())!=null){
-                talus.setCoteId(typesCote.get(row.getInt(TalusDigueColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_COTE.toString())!=null){
+                talusRisberme.setCoteId(typesCote.get(row.getInt(TalusRisbermeColumns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_SOURCE.toString())!=null){
-                talus.setSourceId(typesSource.get(row.getInt(TalusDigueColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_SOURCE.toString())!=null){
+                talusRisberme.setSourceId(typesSource.get(row.getInt(TalusRisbermeColumns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(TalusDigueColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(TalusRisbermeColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                talus.setTroncon(troncon.getId());
+                talusRisberme.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(TalusDigueColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(TalusRisbermeColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(TalusDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
-                talus.setDate_debut(LocalDateTime.parse(row.getDate(TalusDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(TalusRisbermeColumns.DATE_DEBUT_VAL.toString()) != null) {
+                talusRisberme.setDate_debut(LocalDateTime.parse(row.getDate(TalusRisbermeColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(TalusDigueColumns.DATE_FIN_VAL.toString()) != null) {
-                talus.setDate_fin(LocalDateTime.parse(row.getDate(TalusDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(TalusRisbermeColumns.DATE_FIN_VAL.toString()) != null) {
+                talusRisberme.setDate_fin(LocalDateTime.parse(row.getDate(TalusRisbermeColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(TalusDigueColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                talus.setPR_debut(row.getDouble(TalusDigueColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                talusRisberme.setPR_debut(row.getDouble(TalusRisbermeColumns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(TalusDigueColumns.PR_FIN_CALCULE.toString()) != null) {
-                talus.setPR_fin(row.getDouble(TalusDigueColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.PR_FIN_CALCULE.toString()) != null) {
+                talusRisberme.setPR_fin(row.getDouble(TalusRisbermeColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -262,117 +252,116 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
 
                 try {
 
-                    if (row.getDouble(TalusDigueColumns.X_DEBUT.toString()) != null && row.getDouble(TalusDigueColumns.Y_DEBUT.toString()) != null) {
-                        talus.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(TalusDigueColumns.X_DEBUT.toString()),
-                                row.getDouble(TalusDigueColumns.Y_DEBUT.toString()))), lambertToRGF));
+                    if (row.getDouble(TalusRisbermeColumns.X_DEBUT.toString()) != null && row.getDouble(TalusRisbermeColumns.Y_DEBUT.toString()) != null) {
+                        talusRisberme.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(TalusRisbermeColumns.X_DEBUT.toString()),
+                                row.getDouble(TalusRisbermeColumns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(TalusDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(TalusRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(TalusDigueColumns.X_FIN.toString()) != null && row.getDouble(TalusDigueColumns.Y_FIN.toString()) != null) {
-                        talus.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(TalusDigueColumns.X_FIN.toString()),
-                                row.getDouble(TalusDigueColumns.Y_FIN.toString()))), lambertToRGF));
+                    if (row.getDouble(TalusRisbermeColumns.X_FIN.toString()) != null && row.getDouble(TalusRisbermeColumns.Y_FIN.toString()) != null) {
+                        talusRisberme.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(TalusRisbermeColumns.X_FIN.toString()),
+                                row.getDouble(TalusRisbermeColumns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(TalusDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(TalusRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(TalusDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TalusRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(TalusDigueColumns.ID_SYSTEME_REP.toString()) != null) {
-                talus.setSystemeRepId(systemesReperage.get(row.getInt(TalusDigueColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(TalusRisbermeColumns.ID_SYSTEME_REP.toString()) != null) {
+                talusRisberme.setSystemeRepId(systemesReperage.get(row.getInt(TalusRisbermeColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(TalusDigueColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                talus.setBorneDebutId(bornes.get((int) row.getDouble(TalusDigueColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(TalusRisbermeColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                talusRisberme.setBorneDebutId(bornes.get((int) row.getDouble(TalusRisbermeColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            talus.setBorne_debut_aval(row.getBoolean(TalusDigueColumns.AMONT_AVAL_DEBUT.toString()));
+            talusRisberme.setBorne_debut_aval(row.getBoolean(TalusRisbermeColumns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(TalusDigueColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                talus.setBorne_debut_distance(row.getDouble(TalusDigueColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                talusRisberme.setBorne_debut_distance(row.getDouble(TalusRisbermeColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(TalusDigueColumns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(TalusDigueColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    talus.setBorneFinId(bornes.get((int) row.getDouble(TalusDigueColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-                }
+            if (row.getDouble(TalusRisbermeColumns.ID_BORNEREF_FIN.toString()) != null) {
+                talusRisberme.setBorneFinId(bornes.get((int) row.getDouble(TalusRisbermeColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            talus.setBorne_fin_aval(row.getBoolean(TalusDigueColumns.AMONT_AVAL_FIN.toString()));
+            talusRisberme.setBorne_fin_aval(row.getBoolean(TalusRisbermeColumns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(TalusDigueColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                talus.setBorne_fin_distance(row.getDouble(TalusDigueColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                talusRisberme.setBorne_fin_distance(row.getDouble(TalusRisbermeColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            talus.setCommentaire(row.getString(TalusDigueColumns.COMMENTAIRE.toString()));
+            talusRisberme.setCommentaire(row.getString(TalusRisbermeColumns.COMMENTAIRE.toString()));
 
-            talus.setNum_couche(row.getInt(TalusDigueColumns.N_COUCHE.toString()));
+            talusRisberme.setNum_couche(row.getInt(TalusRisbermeColumns.N_COUCHE.toString()));
             
-            if (row.getDouble(TalusDigueColumns.EPAISSEUR.toString()) != null) {
-                talus.setEpaisseur_sommet(row.getDouble(TalusDigueColumns.EPAISSEUR.toString()).floatValue());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_FONCTION.toString())!=null){
+                talusRisberme.setFonctionHautId(typesFonction.get(row.getInt(TalusRisbermeColumns.ID_TYPE_FONCTION.toString())).getId());
+                talusRisberme.setFonctionBasId(typesFonction.get(row.getInt(TalusRisbermeColumns.ID_TYPE_FONCTION.toString())).getId());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())!=null){
-                talus.setFonctionHautId(typesFonction.get(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())).getId());
-                talus.setFonctionBasId(typesFonction.get(row.getInt(TalusDigueColumns.ID_TYPE_FONCTION.toString())).getId());
+            if (row.getDouble(TalusRisbermeColumns.EPAISSEUR.toString()) != null) {
+                talusRisberme.setEpaisseur_sommet(row.getDouble(TalusRisbermeColumns.EPAISSEUR.toString()).floatValue());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_HAUT.toString())!=null){
-                talus.setNatureHautId(typesNature.get(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_HAUT.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_NATURE_HAUT.toString())!=null){
+                talusRisberme.setNatureHautId(typesNature.get(row.getInt(TalusRisbermeColumns.ID_TYPE_NATURE_HAUT.toString())).getId());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_HAUT.toString())!=null){
-                talus.setMateriauHautId(typesMateriau.get(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_MATERIAU_HAUT.toString())!=null){
+                talusRisberme.setMateriauHautId(typesMateriau.get(row.getInt(TalusRisbermeColumns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_BAS.toString())!=null){
-                talus.setMateriauBasId(typesMateriau.get(row.getInt(TalusDigueColumns.ID_TYPE_MATERIAU_BAS.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_MATERIAU_BAS.toString())!=null){
+                talusRisberme.setMateriauBasId(typesMateriau.get(row.getInt(TalusRisbermeColumns.ID_TYPE_MATERIAU_BAS.toString())).getId());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_BAS.toString())!=null){
-                talus.setNatureBasId(typesNature.get(row.getInt(TalusDigueColumns.ID_TYPE_NATURE_BAS.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_NATURE_BAS.toString())!=null){
+                talusRisberme.setNatureBasId(typesNature.get(row.getInt(TalusRisbermeColumns.ID_TYPE_NATURE_BAS.toString())).getId());
             }
             
-            if (row.getDouble(TalusDigueColumns.LONG_RAMP_HAUT.toString()) != null) {
-                talus.setLongueur_rampart_haut(row.getDouble(TalusDigueColumns.LONG_RAMP_HAUT.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.LONG_RAMP_HAUT.toString()) != null) {
+                talusRisberme.setLongueur_rampart_haut(row.getDouble(TalusRisbermeColumns.LONG_RAMP_HAUT.toString()).floatValue());
             }
             
-            if (row.getDouble(TalusDigueColumns.LONG_RAMP_BAS.toString()) != null) {
-                talus.setLongueur_rampart_bas(row.getDouble(TalusDigueColumns.LONG_RAMP_BAS.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.LONG_RAMP_BAS.toString()) != null) {
+                talusRisberme.setLongueur_rampart_bas(row.getDouble(TalusRisbermeColumns.LONG_RAMP_BAS.toString()).floatValue());
             }
             
-            if (row.getDouble(TalusDigueColumns.PENTE_INTERIEURE.toString()) != null) {
-                talus.setPente_interieur(row.getDouble(TalusDigueColumns.PENTE_INTERIEURE.toString()).floatValue());
+            if (row.getDouble(TalusRisbermeColumns.PENTE_INTERIEURE.toString()) != null) {
+                talusRisberme.setPente_interieur(row.getDouble(TalusRisbermeColumns.PENTE_INTERIEURE.toString()).floatValue());
             }
             
-            if(row.getInt(TalusDigueColumns.ID_TYPE_POSITION.toString())!=null){
-                talus.setPosition_structure(typesPosition.get(row.getInt(TalusDigueColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(TalusRisbermeColumns.ID_TYPE_POSITION.toString())!=null){
+                talusRisberme.setPosition_structure(typesPosition.get(row.getInt(TalusRisbermeColumns.ID_TYPE_POSITION.toString())).getId());
             }
+            
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            talusDigue.put(row.getInt(TalusDigueColumns.ID_ELEMENT_STRUCTURE.toString()), talus);
+            talusRisbermes.put(row.getInt(TalusRisbermeColumns.ID_ELEMENT_STRUCTURE.toString()), talusRisberme);
 
             // Set the list ByTronconId
-            List<TalusDigue> listByTronconId = talusByTronconId.get(row.getInt(TalusDigueColumns.ID_TRONCON_GESTION.toString()));
+            List<TalusRisberme> listByTronconId = talusRisbermesByTronconId.get(row.getInt(TalusRisbermeColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                talusByTronconId.put(row.getInt(TalusDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                talusRisbermesByTronconId.put(row.getInt(TalusRisbermeColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(talus);
+            listByTronconId.add(talusRisberme);
         }
     }
 
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TalusDigueColumns c : TalusDigueColumns.values()) {
+        for (TalusRisbermeColumns c : TalusRisbermeColumns.values()) {
             columns.add(c.toString());
         }
         return columns;

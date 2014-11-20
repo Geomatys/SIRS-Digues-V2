@@ -50,10 +50,15 @@ public class StructureImporter extends GenericStructureImporter {
 
     private Map<Integer, List<Objet>> structuresByTronconId = null;
     private Map<Integer, Objet> structures = null;
+    private final TypeElementStructureImporter typeElementStructureImporter;
+    
+    private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
     private final CreteImporter creteImporter;
     private final PiedDigueImporter piedDigueImporter;
     private final TalusDigueImporter talusDigueImporter;
-    private final TypeElementStructureImporter typeElementStructureImporter;
+    private final SommetRisbermeImporter sommetRisbermeImporter;
+    private final TalusRisbermeImporter talusRisbermeImporter;
+    
 
     public StructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -71,23 +76,38 @@ public class StructureImporter extends GenericStructureImporter {
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.creteImporter = new CreteImporter(accessDatabase, couchDbConnector, 
+        typeElementStructureImporter = new TypeElementStructureImporter(
+                accessDatabase, couchDbConnector);
+        creteImporter = new CreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
                 typeNatureImporter, typeFonctionImporter);
-        this.piedDigueImporter = new PiedDigueImporter(accessDatabase, 
+        structureImporters.add(creteImporter);
+        piedDigueImporter = new PiedDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.talusDigueImporter = new TalusDigueImporter(accessDatabase, 
+        structureImporters.add(piedDigueImporter);
+        talusDigueImporter = new TalusDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.typeElementStructureImporter = new TypeElementStructureImporter(
-                accessDatabase, couchDbConnector);
+        structureImporters.add(talusDigueImporter);
+        sommetRisbermeImporter = new SommetRisbermeImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        structureImporters.add(sommetRisbermeImporter);
+        talusRisbermeImporter = new TalusRisbermeImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        structureImporters.add(talusRisbermeImporter);
     }
 
     private enum ElementStructureColumns {
@@ -236,26 +256,41 @@ public class StructureImporter extends GenericStructureImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
 
-        final Map<Integer, Crete> cretes = creteImporter.getCretes();
-        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getPiedsDigue();
-        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getTalus();
-        
-        // Importation détaillée de toutes les structures au sens strict.
-        if(cretes!=null) for(final Integer key : cretes.keySet()){
-            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
-            else structures.put(key, cretes.get(key));
-        }
-
-        if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
-            if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
-            else structures.put(key, piedsDigue.get(key));
-        }
-
-        if(talusDigue!=null) for(final Integer key : talusDigue.keySet()){
-            if(structures.get(key)!=null) throw new AccessDbImporterException(talusDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
-            else structures.put(key, talusDigue.get(key));
+        for (final GenericStructureImporter gsi : structureImporters){
+            final Map<Integer, Objet> objets = gsi.getStructures();
+            if(objets!=null){
+                for (final Integer key : objets.keySet()){
+                    if(structures.get(key)!=null){
+                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+                    }
+                    else {
+                        structures.put(key, objets.get(key));
+                    }
+                }
+            }
         }
         
+//        // Importation détaillée de toutes les structures au sens strict.
+        final Map<Integer, Crete> cretes = creteImporter.getStructures();
+//        if(cretes!=null) for(final Integer key : cretes.keySet()){
+//            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+//            else structures.put(key, cretes.get(key));
+//        }
+//
+        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getStructures();
+//        if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
+//            if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+//            else structures.put(key, piedsDigue.get(key));
+//        }
+//
+        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getStructures();
+//        if(talusDigue!=null) for(final Integer key : talusDigue.keySet()){
+//            if(structures.get(key)!=null) throw new AccessDbImporterException(talusDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
+//            else structures.put(key, talusDigue.get(key));
+//        }
+        
+        final Map<Integer, SommetRisberme> sommetsRisbermes = sommetRisbermeImporter.getStructures();
+        final Map<Integer, TalusRisberme> talusRisbermes = talusRisbermeImporter.getStructures();
         
         //======================================================================
 
@@ -280,10 +315,10 @@ public class StructureImporter extends GenericStructureImporter {
                 structure = talusDigue.get(structureId);
             }
             else if(typeStructure == SommetRisberme.class){
-                structure = null;
+                structure = sommetsRisbermes.get(structureId);
             }
             else if(typeStructure == TalusRisberme.class){
-                structure = null;
+                structure = talusDigue.get(structureId);
             }
             else if(typeStructure == PiedDigue.class){
                 structure = piedsDigue.get(structureId);
@@ -415,44 +450,67 @@ public class StructureImporter extends GenericStructureImporter {
         // Génération de la liste des structures par identifiant de tronçon.
         structuresByTronconId = new HashMap<>();
 
-        // Structures au sens strict
-        final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getCretesByTronconId();
-        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getPiedsDigueByTronconId();
-        final Map<Integer, List<TalusDigue>> talusDigueByTroncon = talusDigueImporter.getTalusDigueByTronconId();
         
-        if(cretesByTroncon!=null){
-            cretesByTroncon.keySet().stream().map((key) -> {
-                if (structuresByTronconId.get(key) == null) {
-                    structuresByTronconId.put(key, new ArrayList<>());
-                }   return key;
-            }).forEach((key) -> {
-                if(cretesByTroncon.get(key)!=null)
-                    structuresByTronconId.get(key).addAll(cretesByTroncon.get(key));
-            });
+        
+        
+        // Structures au sens strict
+        for (final GenericStructureImporter gsi : structureImporters) {
+            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
+
+            if (objetsByTronconId != null) {
+                objetsByTronconId.keySet().stream().map((key) -> {
+                    if (structuresByTronconId.get(key) == null) {
+                        structuresByTronconId.put(key, new ArrayList<>());
+                    }
+                    return key;
+                }).forEach((key) -> {
+                    if (objetsByTronconId.get(key) != null) {
+                        structuresByTronconId.get(key).addAll(objetsByTronconId.get(key));
+                    }
+                });
+            }
+
         }
 
-        if(piedsDigueByTroncon!=null){
-        piedsDigue.keySet().stream().map((key) -> {
-            if (structuresByTronconId.get(key) == null) {
-                structuresByTronconId.put(key, new ArrayList<>());
-            }
-            return key;
-        }).forEach((key) -> {
-            if(piedsDigueByTroncon.get(key)!=null)
-                structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
-        });
-        }
-
-        if(talusDigueByTroncon!=null){
-        talusDigue.keySet().stream().map((key) -> {
-            if (structuresByTronconId.get(key) == null) {
-                structuresByTronconId.put(key, new ArrayList<>());
-            }
-            return key;
-        }).forEach((key) -> {
-            if(talusDigueByTroncon.get(key)!=null)
-                structuresByTronconId.get(key).addAll(talusDigueByTroncon.get(key));
-        });
-        }
+        
+        
+        
+//        final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getStructuresByTronconId();
+//        if(cretesByTroncon!=null){
+//            cretesByTroncon.keySet().stream().map((key) -> {
+//                if (structuresByTronconId.get(key) == null) {
+//                    structuresByTronconId.put(key, new ArrayList<>());
+//                }   return key;
+//            }).forEach((key) -> {
+//                if(cretesByTroncon.get(key)!=null)
+//                    structuresByTronconId.get(key).addAll(cretesByTroncon.get(key));
+//            });
+//        }
+//
+//        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getStructuresByTronconId();
+//        if(piedsDigueByTroncon!=null){
+//        piedsDigue.keySet().stream().map((key) -> {
+//            if (structuresByTronconId.get(key) == null) {
+//                structuresByTronconId.put(key, new ArrayList<>());
+//            }
+//            return key;
+//        }).forEach((key) -> {
+//            if(piedsDigueByTroncon.get(key)!=null)
+//                structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
+//        });
+//        }
+//
+//        final Map<Integer, List<TalusDigue>> talusDigueByTroncon = talusDigueImporter.getStructuresByTronconId();
+//        if(talusDigueByTroncon!=null){
+//        talusDigue.keySet().stream().map((key) -> {
+//            if (structuresByTronconId.get(key) == null) {
+//                structuresByTronconId.put(key, new ArrayList<>());
+//            }
+//            return key;
+//        }).forEach((key) -> {
+//            if(talusDigueByTroncon.get(key)!=null)
+//                structuresByTronconId.get(key).addAll(talusDigueByTroncon.get(key));
+//        });
+//        }
     }
 }
