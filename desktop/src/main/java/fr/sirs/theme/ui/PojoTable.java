@@ -320,7 +320,7 @@ public class PojoTable extends BorderPane{
     }
     
     
-    public static class PropertyColumn extends TableColumn<Element,Object>{
+    public class PropertyColumn extends TableColumn<Element,Object>{
 
         private final PropertyDescriptor desc;
 
@@ -367,14 +367,12 @@ public class PojoTable extends BorderPane{
         }  
     }
     
-    public static class CellLinkValueFactory implements Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>{
+    public class CellLinkValueFactory implements Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>{
 
-        private final Session session;
         private final PropertyDescriptor desc;
         private final Class refClass;
 
         public CellLinkValueFactory(PropertyDescriptor desc, Class refClass) {
-            this.session = Injector.getBean(Session.class);
             this.desc = desc;
             this.refClass = refClass;
         }
@@ -392,7 +390,7 @@ public class PojoTable extends BorderPane{
             
             if(obj instanceof String && !((String)obj).isEmpty()){
                 final String id = (String)obj;
-                res.set(session.getConnector().get(refClass,id));
+                res.set(session.getPreviewLabelRepository().findById(id));
             }
             
             return res;

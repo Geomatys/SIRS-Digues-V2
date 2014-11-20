@@ -75,6 +75,8 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
                 text = ((BorneDigue)item).getLibelle();
             }else if(item instanceof SystemeReperage){
                 text = ((SystemeReperage)item).getLibelle();
+            }else if(item instanceof String){
+                text = (String) item;
             }
             
             setText(text);
