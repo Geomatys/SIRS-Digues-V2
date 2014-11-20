@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.*?>
+<?import javafx.scene.*?>
+<?import java.net.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="content" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <TabPane style="-fx-background-color: rgb(245,245,245);" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="Contact">
+            <content>
+                  <VBox>
+                     <children>
+                        <GridPane styleClass="bloc_information">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                                 <children>
+                                    <Label text="Prénom" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="uiNom" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiPrenom" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                    <Label text="Nom" GridPane.rowIndex="1" />
+                                    <Label text="Téléphone" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uiEmail" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <TextField fx:id="uiTelephone" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label text="E-mail" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Service" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiService" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiFonction" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                    <Label text="Fonction" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Description" GridPane.columnSpan="2">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="uiFax" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                    <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" />
+                                    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" />
+                                 </columnConstraints>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                                 <rowConstraints>
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                 </rowConstraints>
+                              </GridPane>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="15.0" />
+                           </VBox.margin>
+                        </GridPane>
+                        <GridPane styleClass="bloc_information">
+                           <children>
+                              <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                                 <children>
+                                    <TextField fx:id="uiAdresse" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                                    <Label text="Adresse" GridPane.rowIndex="1" />
+                                    <Label text="Code postal" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCodePostale" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCommune" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                    <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Adresse personnelle" GridPane.columnSpan="2">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" />
+                                 </columnConstraints>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                                 <rowConstraints>
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                    <RowConstraints vgrow="NEVER" />
+                                 </rowConstraints>
+                              </GridPane>
+                           </children>
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                        </GridPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                  </VBox>
+            </content>
+          </Tab>
+            <Tab fx:id="uiOrganismeTab" text="Organismes de rattachement" />
+        </tabs>
+      </TabPane>
+   </center>
+   <top>
+      <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
+         <right>
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <GridPane hgap="10.0" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Fiche du contact" textFill="WHITE" GridPane.columnSpan="4">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="Identifiant : " textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                  <Label fx:id="uiDocId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="280.0" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+               </columnConstraints>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" top="10.0" />
+               </padding>
+               <rowConstraints>
+                  <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+      </BorderPane>
+   </top>
+</fx:root>

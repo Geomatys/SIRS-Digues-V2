@@ -10,9 +10,14 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.index.SearchEngine;
+import fr.sirs.other.FXContactPane;
+import fr.sirs.other.FXOrganismePane;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
@@ -40,6 +45,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -262,14 +268,24 @@ public class PojoTable extends BorderPane{
             for(Element pojo : pojos){
                 repo.remove(pojo);
             }
-            updateTable();
+            updateTable(); 
         }
     }
     
     protected void editPojo(Element pojo){
-        final Session session = Injector.getBean(Session.class);
         final Tab tab = new Tab();
-        tab.setContent(new FXStructurePane((Objet) pojo));
+        
+        Node content = new BorderPane();
+        if(pojo instanceof Positionable){
+            content = new FXStructurePane((Objet) pojo);
+        }else if(pojo instanceof Contact){
+            content = new FXContactPane((Contact) pojo);
+        }else if(pojo instanceof Organisme){
+            content = new FXOrganismePane((Organisme)pojo);
+        }
+        tab.setContent(content);
+        
+        
         tab.setText(pojo.getClass().getSimpleName());
         tab.setOnSelectionChanged(new EventHandler<Event>() {
             @Override

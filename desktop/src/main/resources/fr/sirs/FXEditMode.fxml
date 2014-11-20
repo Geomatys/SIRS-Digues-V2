@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<fx:root alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="10.0" styleClass="blue-dark" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label alignment="CENTER" styleClass="label-header" text="Mode">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <HBox>
+         <children>
+            <ToggleButton fx:id="uiConsult" ellipsisString="" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" selected="true" styleClass="state-button-left" text="Consultation" textOverrun="WORD_ELLIPSIS" />
+            <ToggleButton fx:id="uiEdit" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" styleClass="state-button-right" text="Edition" />
+         </children>
+      </HBox>
+      <Label alignment="CENTER" styleClass="label-header" text="Sauvegarde">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" text="Enregistrer" />
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</fx:root>
