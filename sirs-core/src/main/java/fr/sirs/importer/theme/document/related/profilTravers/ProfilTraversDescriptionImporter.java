@@ -2,6 +2,7 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
@@ -28,13 +29,14 @@ import org.ektorp.CouchDbConnector;
  */
 public class ProfilTraversDescriptionImporter extends GenericImporter {
 
-    private Map<Integer, LeveeProfilTravers> levees = null;
-    private Map<Integer, List<LeveeProfilTravers>> leveesByProfil = null;
+    private Map<Integer, LeveeProfilTravers> leves = null;
+    private Map<Integer, List<LeveeProfilTravers>> levesByProfil = null;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypeProfilTraversImporter typeProfilTraversImporter;
     private TypeOrigineProfilTraversImporter typeOrigineProfilTraversImporter;
     private OrganismeImporter organismeImporter;
     private ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter;
+    private ProfilTraversPointXYZImporter profilTraversPointXYZImporter;
     
     private ProfilTraversDescriptionImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
@@ -53,16 +55,17 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         this.typeOrigineProfilTraversImporter = typeOrigineProfilTraversImporter;
         this.organismeImporter = organismeImporter;
         this.profilTraversEvenementHydrauliqueImporter = profilTraversEvenementHydrauliqueImporter;
+        profilTraversPointXYZImporter = new ProfilTraversPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
     public Map<Integer, LeveeProfilTravers> getLeveeProfilTravers() throws IOException, AccessDbImporterException{
-        if(levees==null) compute();
-        return levees;
+        if(leves==null) compute();
+        return leves;
     }
     
     public Map<Integer, List<LeveeProfilTravers>> getLeveeProfilTraversByProfilId() throws IOException, AccessDbImporterException{
-        if(leveesByProfil==null) compute();
-        return leveesByProfil;
+        if(levesByProfil==null) compute();
+        return levesByProfil;
     }
     
     private enum ProfilTraversDescriptionColumns {
@@ -99,61 +102,66 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        levees = new HashMap<>();
-        leveesByProfil = new HashMap<>();
+        leves = new HashMap<>();
+        levesByProfil = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeSystemeReleve();
         final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeProfilTravers();
         final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeOrigineProfilTravers();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
+        final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LeveeProfilTravers levee = new LeveeProfilTravers();
+            final LeveeProfilTravers leve = new LeveeProfilTravers();
             
             if (row.getDate(ProfilTraversDescriptionColumns.DATE_LEVE.toString()) != null) {
-                levee.setDateLevee(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
+                leve.setDateLevee(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
             }
             
             final Organisme organisme = organismes.get(row.getInt(ProfilTraversDescriptionColumns.ID_ORG_CREATEUR.toString()));
             if(organisme!=null){
-                levee.setOrganismeCreateurId(organisme.getId());
+                leve.setOrganismeCreateurId(organisme.getId());
             }
             
             if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())!=null){
-                levee.setTypeSystemesReleveId(systemesReleve.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
+                leve.setTypeSystemesReleveId(systemesReleve.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
             }
             
-            levee.setReference_papier(row.getString(ProfilTraversDescriptionColumns.REFERENCE_PAPIER.toString()));
+            leve.setReference_papier(row.getString(ProfilTraversDescriptionColumns.REFERENCE_PAPIER.toString()));
             
-            levee.setReference_numerique(row.getString(ProfilTraversDescriptionColumns.REFERENCE_NUMERIQUE.toString()));
+            leve.setReference_numerique(row.getString(ProfilTraversDescriptionColumns.REFERENCE_NUMERIQUE.toString()));
             
-            levee.setReference_calque(row.getString(ProfilTraversDescriptionColumns.REFERENCE_CALQUE.toString()));
+            leve.setReference_calque(row.getString(ProfilTraversDescriptionColumns.REFERENCE_CALQUE.toString()));
             
             if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())!=null){
-                levee.setTypeProfilId(typesProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
+                leve.setTypeProfilId(typesProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
             }
             
             if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())!=null){
-                levee.setTypeOrigineProfil(typesOrigineProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
+                leve.setTypeOrigineProfil(typesOrigineProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
             }
             
-            levee.setCommentaire(row.getString(ProfilTraversDescriptionColumns.COMMENTAIRE.toString()));
+            leve.setCommentaire(row.getString(ProfilTraversDescriptionColumns.COMMENTAIRE.toString()));
             
             if (row.getDate(ProfilTraversDescriptionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                levee.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                leve.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            levees.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), levee);
+            if(pointsByLeve.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setLeveePoints(pointsByLeve.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            }
             
-            List<LeveeProfilTravers> listByProfil = leveesByProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()));
+            leves.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
+            
+            List<LeveeProfilTravers> listByProfil = levesByProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();
+                levesByProfil.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);
             }
-            listByProfil.add(levee);
-            leveesByProfil.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);
+            listByProfil.add(leve);
         }
     }
 }
