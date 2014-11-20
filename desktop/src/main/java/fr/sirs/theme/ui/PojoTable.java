@@ -390,7 +390,7 @@ public class PojoTable extends BorderPane{
             
             if(obj instanceof String && !((String)obj).isEmpty()){
                 final String id = (String)obj;
-                res.set(session.getPreviewLabelRepository().findById(id));
+                res.set(session.getPreviewLabelRepository().getPreview(id));
             }
             
             return res;

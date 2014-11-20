@@ -13,7 +13,7 @@ public class PreviewLabelTestCase extends CouchDBTestCase {
         PreviewLabelRepository previewLabelRepository = new PreviewLabelRepository(
                 connector);
 
-        String label =  previewLabelRepository.findById("1f4f8c701109dc4e42c433aa18000b03");
+        String label =  previewLabelRepository.getPreview("1f4f8c701109dc4e42c433aa18004046");
         System.out.println(label);
     }
 

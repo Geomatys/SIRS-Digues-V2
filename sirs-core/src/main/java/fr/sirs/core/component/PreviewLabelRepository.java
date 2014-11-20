@@ -8,19 +8,22 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
 
-@View(name="all", map="function(doc) {if(doc.libelle) emit(doc._id, doc.libelle)}")
-public class PreviewLabelRepository extends CouchDbRepositorySupport<PreviewLabel>{
+@View(name = "all", map = "function(doc) {if(doc.libelle) emit(doc._id, doc.libelle)}")
+public class PreviewLabelRepository extends
+        CouchDbRepositorySupport<PreviewLabel> {
 
     public PreviewLabelRepository(CouchDbConnector couchDbConnector) {
         super(PreviewLabel.class, couchDbConnector);
         initStandardDesignDocument();
     }
-    
-    public String findById(String id) {
-         List<PreviewLabel> queryView = queryView("all", id);
-         if(queryView.isEmpty())
-             return null;
-         return queryView.get(0).getLabel();
+
+    public String getPreview(String id) {
+
+        List<String> res = db.queryView(createQuery("all").includeDocs(false)
+                .key(id), String.class);
+        if (res.isEmpty())
+            return null;
+        return res.get(0);
     }
 
 }
