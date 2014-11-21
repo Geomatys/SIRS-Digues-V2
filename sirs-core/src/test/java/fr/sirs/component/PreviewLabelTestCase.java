@@ -12,16 +12,21 @@ public class PreviewLabelTestCase extends CouchDBTestCase {
     @Test
     public void test() {
 
+        long start = System.currentTimeMillis();
+
         PreviewLabelRepository previewLabelRepository = new PreviewLabelRepository(
                 connector);
-        
-        BorneDigueRepository borneDigueRepository = new BorneDigueRepository(connector);
 
-        for(BorneDigue borneDigue: borneDigueRepository.getAll()) {
-            
-        String label =  previewLabelRepository.getPreview(borneDigue.getId());
-        System.out.println(label);
+        BorneDigueRepository borneDigueRepository = new BorneDigueRepository(
+                connector);
+
+        for (BorneDigue borneDigue : borneDigueRepository.getAll()) {
+
+            String label = previewLabelRepository
+                    .getPreview(borneDigue.getId());
+
         }
+        System.out.println((System.currentTimeMillis() - start) + " ms");
     }
 
 }
