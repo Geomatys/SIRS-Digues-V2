@@ -3,11 +3,9 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.model.ArticleJournal;
@@ -27,25 +25,17 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.profilLong.ProfilLongImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -54,6 +44,7 @@ import org.opengis.util.FactoryException;
 public class DocumentImporter extends GenericDocumentImporter {
     
     private final ConventionImporter conventionImporter;
+    private final ProfilLongImporter profilLongImporter;
     private final ProfilTraversImporter profilTraversImporter;
     private final ProfilTraversTronconImporter profilTraversTronconImporter;
     private final ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
@@ -62,6 +53,7 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final TypeDocumentImporter typeDocumentImporter;
     
     private final DocumentConventionImporter documentConventionImporter;
+    private final DocumentProfilLongImporter documentProfilLongImporter;
     private final DocumentProfilTraversImporter documentProfilTraversImporter;
     private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
     
@@ -72,6 +64,7 @@ public class DocumentImporter extends GenericDocumentImporter {
             final DocumentRepository documentRepository, 
             final ConventionRepository conventionRepository,
             final ProfilTraversRepository profilTraversRepository,
+            final ProfilLongRepository profilLongRepository,
             final RapportEtudeRepository rapportEtudeRepository,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
@@ -87,9 +80,13 @@ public class DocumentImporter extends GenericDocumentImporter {
                 new TypeDocumentGrandeEchelleImporter(accessDatabase, couchDbConnector));
         
         
-        this.conventionImporter = new ConventionImporter(accessDatabase, 
+        conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, conventionRepository, intervenantImporter, 
                 organismeImporter);
+        
+        profilLongImporter = new ProfilLongImporter(accessDatabase, 
+                couchDbConnector, profilLongRepository, organismeImporter, 
+                typeSystemeReleveProfilImporter);
         
         profilTraversTronconImporter = new ProfilTraversTronconImporter(
                 accessDatabase, couchDbConnector, this);
@@ -98,11 +95,11 @@ public class DocumentImporter extends GenericDocumentImporter {
                 typeSystemeReleveProfilImporter, organismeImporter, 
                 evenementHydrauliqueImporter, 
                 profilTraversTronconImporter);
-        this.profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
+        profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
                 couchDbConnector, profilTraversRepository, 
                 profilTraversDescriptionImporter);
         
-        this.rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
+        rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector, rapportEtudeRepository);
         
         documentConventionImporter = new DocumentConventionImporter(
@@ -114,6 +111,10 @@ public class DocumentImporter extends GenericDocumentImporter {
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
+        documentProfilLongImporter = new DocumentProfilLongImporter(
+                accessDatabase, couchDbConnector, documentRepository, 
+                borneDigueImporter, systemeReperageImporter, 
+                tronconGestionDigueImporter, profilLongImporter);
         documentImporters.add(documentProfilTraversImporter);
         documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
@@ -153,7 +154,7 @@ public class DocumentImporter extends GenericDocumentImporter {
 //        ID_ORG_CREATEUR,
 //        ID_ARTICLE_JOURNAL,
         ID_PROFIL_EN_TRAVERS,
-//        ID_PROFIL_EN_LONG,
+//        ID_PROFIL_EN_LONG, // Utilisation interdite ! C'est ID_DOC qui est utilisé par les profils en long !
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         ID_CONVENTION,
         DATE_DERNIERE_MAJ,

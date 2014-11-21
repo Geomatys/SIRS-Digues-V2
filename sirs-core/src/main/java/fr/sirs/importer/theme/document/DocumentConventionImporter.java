@@ -222,14 +222,8 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             if (row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()) != null) {
                 document.setPR_fin(row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
-//            documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
             
         }
         computed=true;
     }
-    
-//    public Map<Integer, Document> getDocumentConvention() throws IOException, AccessDbImporterException{
-//        if(documents==null) compute();
-//        return documents;
-//    }
 }

@@ -232,27 +232,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
                 }
             }
             
-            
-            
-            
-            
-
-            
-            
-            
-            
-            
-            
-            
-            
-//            documents.put(row.getInt(DocumentRapportEtudeColumns.ID_DOC.toString()), document);
-            
         }
         computed=true;
     }
-    
-//    public Map<Integer, Document> getDocumentRapportEtude() throws IOException, AccessDbImporterException{
-//        if(documents==null) compute();
-//        return documents;
-//    }
 }

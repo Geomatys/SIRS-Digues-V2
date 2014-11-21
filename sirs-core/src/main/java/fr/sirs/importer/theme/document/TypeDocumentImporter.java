@@ -111,8 +111,7 @@ public class TypeDocumentImporter extends GenericImporter {
                     case SYS_EVT_CONVENTION:
                         classe = Convention.class;
                         break;
-////                case SYS_EVT_COUPE_OUVRAGE:
-////                    classe = TalusDigue.class; break;
+////                case SYS_EVT_COUPE_OUVRAGE: // N'existe pas
 //                case SYS_EVT_DOCUMENT_MARCHE:
 //                    classe = .class; break;
 //                case SYS_EVT_FICHE_INSPECTION_VISUELLE:
@@ -123,17 +122,16 @@ public class TypeDocumentImporter extends GenericImporter {
 //                    classe = .class; break;
 //                case SYS_EVT_PLAN_TOPO:
 //                    classe = .class; break;
-//                    case SYS_EVT_PROFIL_EN_LONG:
-//                        classe = ProfilLong.class;
-//                        break;
+                    case SYS_EVT_PROFIL_EN_LONG:
+                        classe = ProfilLong.class;
+                        break;
                     case SYS_EVT_PROFIL_EN_TRAVERS:
                         classe = ProfilTravers.class;
                         break;
                     case SYS_EVT_RAPPORT_ETUDES:
                         classe = RapportEtude.class;
                         break;
-////                case SYS_EVT_SONDAGE:
-////                    classe = OuvrageRevanche.class; break;
+////                case SYS_EVT_SONDAGE: // N'existe pas
                     default:
                         classe = null;
                 }

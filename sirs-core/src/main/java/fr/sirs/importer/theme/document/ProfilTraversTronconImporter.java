@@ -3,14 +3,10 @@ package fr.sirs.importer.theme.document;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Document;
-import fr.sirs.core.model.EvenementHydraulique;
-import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
 import fr.sirs.core.model.ProfilTraversTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.theme.document.DocumentImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,13 +44,13 @@ public class ProfilTraversTronconImporter extends GenericImporter {
     private enum ProfilTraversTronconColumns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_DOC,
-//        COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE,
-//        COTE_RIVIERE_Z_NGF_SOMMET_RISBERME,
-//        CRETE_Z_NGF,
-//        COTE_TERRE_Z_NGF_SOMMET_RISBERME,
-//        COTE_TERRE_Z_NGF_PIED_DE_DIGUE,
-//        DATE_DERNIERE_MAJ,
-//        CRETE_LARGEUR
+        COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE,
+        COTE_RIVIERE_Z_NGF_SOMMET_RISBERME,
+        CRETE_Z_NGF,
+        COTE_TERRE_Z_NGF_SOMMET_RISBERME,
+        COTE_TERRE_Z_NGF_PIED_DE_DIGUE,
+        DATE_DERNIERE_MAJ,
+        CRETE_LARGEUR
     }
     
     @Override
@@ -85,28 +81,35 @@ public class ProfilTraversTronconImporter extends GenericImporter {
             if(documents.get(row.getInt(ProfilTraversTronconColumns.ID_DOC.toString()))!=null){
                 profilTraversTroncon.setDocumentProfilTraversId(documents.get(row.getInt(ProfilTraversTronconColumns.ID_DOC.toString())).getId());
             }
-//            if(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())!=null){
-//                profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())).getId());
-//            }
-//            
-//            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.DEBIT_DE_POINTE_M3S.toString())!=null){
-//                profilTraversEvenementHydraulique.setDebitPointe(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.DEBIT_DE_POINTE_M3S.toString()).floatValue());
-//            }
-//            
-//            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.VITESSE_DE_POINTE_MS.toString())!=null){
-//                profilTraversEvenementHydraulique.setVitessePointe(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.VITESSE_DE_POINTE_MS.toString()).floatValue());
-//            }
-//            
-//            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.COTE_EAU_NGF.toString())!=null){
-//                profilTraversEvenementHydraulique.setCoteEau(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.COTE_EAU_NGF.toString()).floatValue());
-//            }
-//            
-//            profilTraversEvenementHydraulique.setCommentaire(row.getString(ProfilTraversEvenementHydrauliqueColumns.COMMENTAIRE.toString()));
-//            
-//            if (row.getDate(ProfilTraversEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                profilTraversEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//            }
-//            
+            
+            if(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
+                profilTraversTroncon.setCoteRivierePiedDigue(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
+            }
+            
+            if(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString())!=null){
+                profilTraversTroncon.setCoteRiviereSommetRisberme(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
+            }
+            
+            if(row.getDouble(ProfilTraversTronconColumns.CRETE_Z_NGF.toString())!=null){
+                profilTraversTroncon.setCoteCrete(row.getDouble(ProfilTraversTronconColumns.CRETE_Z_NGF.toString()).floatValue());
+            }
+            
+            if(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString())!=null){
+                profilTraversTroncon.setCoteTerreSommetRisberme(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
+            }
+            
+            if(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
+                profilTraversTroncon.setCoteTterrePiedDigue(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
+            }
+            
+            if (row.getDate(ProfilTraversTronconColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profilTraversTroncon.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversTronconColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if(row.getDouble(ProfilTraversTronconColumns.CRETE_LARGEUR.toString())!=null){
+                profilTraversTroncon.setCreteLargeur(row.getDouble(ProfilTraversTronconColumns.CRETE_LARGEUR.toString()).floatValue());
+            }
+            
             List<ProfilTraversTroncon> listByLeve = profilTraversTronconsByLeve.get(row.getInt(ProfilTraversTronconColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();

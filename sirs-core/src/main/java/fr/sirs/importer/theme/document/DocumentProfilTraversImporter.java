@@ -230,19 +230,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
                 document.setPR_fin(row.getDouble(DocumentProfilTraversColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
-            
-            
-            
-            
-            
-//            documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
-            
         }
         computed=true;
     }
-    
-//    public Map<Integer, Document> getDocumentProfilTravers() throws IOException, AccessDbImporterException{
-//        if(documents==null) compute();
-//        return documents;
-//    }
 }
