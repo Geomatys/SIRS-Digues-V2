@@ -3,7 +3,9 @@ package fr.sirs.component;
 import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.model.BorneDigue;
 
 public class PreviewLabelTestCase extends CouchDBTestCase {
 
@@ -12,9 +14,14 @@ public class PreviewLabelTestCase extends CouchDBTestCase {
 
         PreviewLabelRepository previewLabelRepository = new PreviewLabelRepository(
                 connector);
+        
+        BorneDigueRepository borneDigueRepository = new BorneDigueRepository(connector);
 
-        String label =  previewLabelRepository.getPreview("1f4f8c701109dc4e42c433aa18004046");
+        for(BorneDigue borneDigue: borneDigueRepository.getAll()) {
+            
+        String label =  previewLabelRepository.getPreview(borneDigue.getId());
         System.out.println(label);
+        }
     }
 
 }
