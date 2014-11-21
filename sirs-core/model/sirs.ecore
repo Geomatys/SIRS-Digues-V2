@@ -1048,6 +1048,8 @@
         eType="#//LeveePoints" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversEvenementHydraulique"
         upperBound="-1" eType="#//ProfilTraversEvenementHydraulique" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" upperBound="-1"
+        eType="#//ProfilTraversTroncon" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers">
     <eAnnotations source="generation">
@@ -1075,7 +1077,7 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentId" eType="#//Document"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTraversEvenementHydraulique">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
