@@ -2,12 +2,7 @@ package fr.sirs.importer.theme.document;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
-import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
@@ -23,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeDocumentGrandeEchelleImporter extends GenericImporter {
+class TypeDocumentGrandeEchelleImporter extends GenericImporter {
 
     private Map<Integer, RefDocumentGrandeEchelle> typesDocument = null;
 

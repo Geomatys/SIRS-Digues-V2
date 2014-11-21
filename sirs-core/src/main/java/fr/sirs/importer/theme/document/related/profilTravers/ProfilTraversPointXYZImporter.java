@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilTraversPointXYZImporter extends GenericImporter {
+class ProfilTraversPointXYZImporter extends GenericImporter {
 
     private Map<Integer, LeveePoints> points = null;
     private Map<Integer, List<LeveePoints>> pointsByLeve = null;

@@ -6,7 +6,10 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
@@ -18,8 +21,13 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
@@ -46,41 +54,72 @@ import org.opengis.util.FactoryException;
 public class DocumentImporter extends GenericDocumentImporter {
     
     private final ConventionImporter conventionImporter;
-    private final DocumentConventionImporter documentConventionImporter;
     private final ProfilTraversImporter profilTraversImporter;
-    private final DocumentProfilTraversImporter documentProfilTraversImporter;
+    private final ProfilTraversTronconImporter profilTraversTronconImporter;
+    private final ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
-    private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
+    
     private final TypeDocumentImporter typeDocumentImporter;
+    
+    private final DocumentConventionImporter documentConventionImporter;
+    private final DocumentProfilTraversImporter documentProfilTraversImporter;
+    private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
+    
+    private final List<GenericDocumentImporter> documentImporters = new ArrayList<>();
     
     public DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
+            final ConventionRepository conventionRepository,
+            final ProfilTraversRepository profilTraversRepository,
+            final RapportEtudeRepository rapportEtudeRepository,
             final BorneDigueImporter borneDigueImporter,
+            final IntervenantImporter intervenantImporter,
+            final OrganismeImporter organismeImporter,
             final SystemeReperageImporter systemeReperageImporter,
-            final ConventionImporter conventionImporter,
-            final ProfilTraversImporter profilTraversImporter,
-            final RapportEtudeImporter rapportEtudeImporter,
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
-        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, couchDbConnector, new TypeDocumentGrandeEchelleImporter(accessDatabase, couchDbConnector));
+        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
+                couchDbConnector, 
+                new TypeDocumentGrandeEchelleImporter(accessDatabase, couchDbConnector));
         
-        this.conventionImporter = conventionImporter;
-        this.documentConventionImporter = new DocumentConventionImporter(
+        
+        this.conventionImporter = new ConventionImporter(accessDatabase, 
+                couchDbConnector, conventionRepository, intervenantImporter, 
+                organismeImporter);
+        
+        profilTraversTronconImporter = new ProfilTraversTronconImporter(
+                accessDatabase, couchDbConnector, this);
+        profilTraversDescriptionImporter = new ProfilTraversDescriptionImporter(
+                accessDatabase, couchDbConnector, 
+                typeSystemeReleveProfilImporter, organismeImporter, 
+                evenementHydrauliqueImporter, 
+                profilTraversTronconImporter);
+        this.profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
+                couchDbConnector, profilTraversRepository, 
+                profilTraversDescriptionImporter);
+        
+        this.rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
+                couchDbConnector, rapportEtudeRepository);
+        
+        documentConventionImporter = new DocumentConventionImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, conventionImporter);
-        this.profilTraversImporter = profilTraversImporter;
-        this.documentProfilTraversImporter = new DocumentProfilTraversImporter(
+        documentImporters.add(documentConventionImporter);
+        documentProfilTraversImporter = new DocumentProfilTraversImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
-        this.rapportEtudeImporter = rapportEtudeImporter;
-        this.documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
+        documentImporters.add(documentProfilTraversImporter);
+        documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, rapportEtudeImporter);
+        documentImporters.add(documentRapportEtudeImporter);
     }
     
     private enum DocumentColumns {
@@ -137,29 +176,77 @@ public class DocumentImporter extends GenericDocumentImporter {
     }
 
     @Override
+    protected void preCompute() throws IOException, AccessDbImporterException {
+        documents = new HashMap<>();
+        
+        for (final GenericDocumentImporter gdi : documentImporters){
+            final Map<Integer, Document> objets = gdi.getPrecomputedDocuments();
+            if(objets!=null){
+                for (final Integer key : objets.keySet()){
+                    if(documents.get(key)!=null){
+                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+                    }
+                    else {
+                        documents.put(key, objets.get(key));
+                    }
+                }
+            }
+        }
+        
+//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        while (it.hasNext()){
+//            final Row row = it.next();
+//            Document document = documents.get(row.getInt(DocumentColumns.ID_DOC.toString()));
+//            if (document==null) {
+//                document=new Document();
+//                documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
+//            }
+//        }
+        couchDbConnector.executeBulk(documents.values());
+    }
+
+    @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        documents = new HashMap<>();
         final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
         final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();
         
-        final Map<Integer, Document> documentConventions = documentConventionImporter.getDocumentConvention();
-        if(documentConventions!=null) for(final Integer key : documentConventions.keySet()){
-            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
-            else documents.put(key, documentConventions.get(key));
+        
+        
+        for (final GenericDocumentImporter gdi : documentImporters){
+            final Map<Integer, Document> objets = gdi.getDocuments();
+//            if(objets!=null){
+//                for (final Integer key : objets.keySet()){
+//                    if(documents.get(key)!=null){
+//                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+//                    }
+//                    else {
+//                        documents.put(key, objets.get(key));
+//                    }
+//                }
+//            }
         }
         
-        final Map<Integer, Document> documentProfilTravers = documentProfilTraversImporter.getDocumentProfilTravers();
-        if(documentProfilTravers!=null) for(final Integer key : documentProfilTravers.keySet()){
-            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
-            else documents.put(key, documentProfilTravers.get(key));
-        }
         
-        final Map<Integer, Document> documentRapportEtude = documentRapportEtudeImporter.getDocumentRapportEtude();
-        if(documentRapportEtude!=null) for(final Integer key : documentRapportEtude.keySet()){
-            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
-            else documents.put(key, documentRapportEtude.get(key));
-        }
+        
+        
+//        final Map<Integer, Document> documentConventions = documentConventionImporter.getDocuments();
+//        if(documentConventions!=null) for(final Integer key : documentConventions.keySet()){
+//            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+//            else documents.put(key, documentConventions.get(key));
+//        }
+//        
+//        final Map<Integer, Document> documentProfilTravers = documentProfilTraversImporter.getDocuments();
+//        if(documentProfilTravers!=null) for(final Integer key : documentProfilTravers.keySet()){
+//            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+//            else documents.put(key, documentProfilTravers.get(key));
+//        }
+//        
+//        final Map<Integer, Document> documentRapportEtude = documentRapportEtudeImporter.getDocuments();
+//        if(documentRapportEtude!=null) for(final Integer key : documentRapportEtude.keySet()){
+//            if(documents.get(key)!=null) throw new AccessDbImporterException(documentConventions.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+//            else documents.put(key, documentRapportEtude.get(key));
+//        }
         
         
         

@@ -32,11 +32,11 @@ public class RapportEtudeImporter extends GenericImporter {
     
     public RapportEtudeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final RapportEtudeRepository rapportEtudeRepository,
-            final TypeRapportEtudeImporter typeRapportEtudeImporter) {
+            final RapportEtudeRepository rapportEtudeRepository) {
         this(accessDatabase, couchDbConnector);
         this.rapportEtudeRepository = rapportEtudeRepository;
-        this.typeRapportEtudeImporter = typeRapportEtudeImporter;
+        this.typeRapportEtudeImporter = new TypeRapportEtudeImporter(
+                accessDatabase, couchDbConnector);
     }
 
     private enum RapportEtudeColumns {

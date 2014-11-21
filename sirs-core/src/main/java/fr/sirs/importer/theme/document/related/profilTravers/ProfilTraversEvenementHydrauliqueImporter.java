@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
+class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
 
     private Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementHydrauByLeveId = null;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
@@ -30,7 +30,7 @@ public class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
 
-    public ProfilTraversEvenementHydrauliqueImporter(final Database accessDatabase,
+    ProfilTraversEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter) {
         this(accessDatabase, couchDbConnector);

@@ -22,6 +22,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
     protected BorneDigueImporter borneDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
+    protected boolean computed=false;
 
     private GenericDocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -44,12 +45,31 @@ abstract class GenericDocumentImporter extends GenericImporter {
     /**
      *
      * @return A map containing all Document instances accessibles from the
-     * internal database identifier.
+     * internal database identifier (documents may be empty).
+     * @throws IOException
+     * @throws AccessDbImporterException
+     */
+    public Map<Integer, Document> getPrecomputedDocuments() throws IOException, AccessDbImporterException {
+        if (documents == null)  preCompute();
+        return documents;
+    }
+    
+    /**
+     *
+     * @return A map containing all Document instances accessibles from the
+     * internal database identifier (documents are mapped).
      * @throws IOException
      * @throws AccessDbImporterException
      */
     public Map<Integer, Document> getDocuments() throws IOException, AccessDbImporterException {
-        if (documents == null)  compute();
+        if (documents == null)  preCompute();
+        if (!computed)  compute();
         return documents;
     }
+    
+    /**
+     * Registers documents into CouchDb and feed Document list, but do not map
+     * database fields
+     */
+    protected abstract void preCompute() throws IOException, AccessDbImporterException;
 }

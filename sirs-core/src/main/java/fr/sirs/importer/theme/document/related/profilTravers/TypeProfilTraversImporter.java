@@ -19,16 +19,13 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeProfilTraversImporter extends GenericImporter {
+class TypeProfilTraversImporter extends GenericImporter {
 
     private Map<Integer, RefTypeProfilTravers> typesProfilsTravers = null;
-    private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
 
-    public TypeProfilTraversImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final RefTypeProfilTraversRepository refTypeProfilTraversRepository) {
+    TypeProfilTraversImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.refTypeProfilTraversRepository = refTypeProfilTraversRepository;
     }
     
     private enum TypeProfilTraversColumns {

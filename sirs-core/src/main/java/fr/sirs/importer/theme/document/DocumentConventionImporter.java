@@ -123,8 +123,21 @@ class DocumentConventionImporter extends GenericDocumentImporter {
     }
 
     @Override
-    protected void compute() throws IOException, AccessDbImporterException {
+    protected void preCompute() throws IOException {
+        
         documents = new HashMap<>();
+        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()){
+            final Row row = it.next();
+            final Document document = new Document();
+            documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
+        }
+    }
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
+        if(computed) return;
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -134,11 +147,9 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = new Document();
+            final Document document = documents.get(row.getInt(DocumentConventionColumns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(DocumentConventionColumns.ID_TRONCON_GESTION.toString())).getId());
-
-            
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -184,12 +195,6 @@ class DocumentConventionImporter extends GenericDocumentImporter {
                 }
             }
             
-            
-            
-            
-            
-            
-            
             if(row.getDouble(DocumentConventionColumns.ID_BORNEREF_DEBUT.toString())!=null){
                 document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentConventionColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
@@ -217,20 +222,14 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             if (row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()) != null) {
                 document.setPR_fin(row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
-            
-            
-            
-            
-            
-            
-            
-            documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
+//            documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
             
         }
+        computed=true;
     }
     
-    public Map<Integer, Document> getDocumentConvention() throws IOException, AccessDbImporterException{
-        if(documents==null) compute();
-        return documents;
-    }
+//    public Map<Integer, Document> getDocumentConvention() throws IOException, AccessDbImporterException{
+//        if(documents==null) compute();
+//        return documents;
+//    }
 }

@@ -22,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ConventionSignataireOrganismeImporter extends GenericImporter {
+class ConventionSignataireOrganismeImporter extends GenericImporter {
 
     private Map<Integer, List<ContactTroncon>> signatairesByConventionId = null;
     private OrganismeImporter organismeImporter;
@@ -32,7 +32,7 @@ public class ConventionSignataireOrganismeImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
 
-    public ConventionSignataireOrganismeImporter(final Database accessDatabase,
+    ConventionSignataireOrganismeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final OrganismeImporter organismeImporter) {
         this(accessDatabase, couchDbConnector);

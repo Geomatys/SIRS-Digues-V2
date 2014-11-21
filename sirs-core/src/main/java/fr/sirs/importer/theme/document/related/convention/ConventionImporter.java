@@ -36,14 +36,15 @@ public class ConventionImporter extends GenericImporter {
     public ConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final ConventionRepository conventionRepository,
-            final TypeConventionImporter typeConventionImporter,
-            final ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter,
-            final ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter) {
+            final IntervenantImporter intervenantImporter,
+            final OrganismeImporter organismeImporter) {
         this(accessDatabase, couchDbConnector);
         this.conventionRepository = conventionRepository;
-        this.typeConventionImporter = typeConventionImporter;
-        this.conventionSignataireIntervenantImporter = conventionSignataireIntervenantImporter;
-        this.conventionSignataireOrganismeImporter = conventionSignataireOrganismeImporter;
+        this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector);
+        this.conventionSignataireIntervenantImporter = new ConventionSignataireIntervenantImporter(
+                accessDatabase, couchDbConnector, intervenantImporter);
+        this.conventionSignataireOrganismeImporter = new ConventionSignataireOrganismeImporter(
+                accessDatabase, couchDbConnector, organismeImporter);
     }
 
     private enum ConventionColumns {

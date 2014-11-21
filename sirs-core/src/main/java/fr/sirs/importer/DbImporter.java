@@ -49,15 +49,8 @@ import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
-import fr.sirs.importer.theme.document.related.convention.TypeConventionImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.TypeProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionSignataireIntervenantImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionSignataireOrganismeImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversEvenementHydrauliqueImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.TypeOrigineProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
-import fr.sirs.importer.theme.document.related.rapportEtude.TypeRapportEtudeImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.File;
@@ -130,7 +123,6 @@ public class DbImporter {
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
-    private TypeConventionImporter typeConventionImporter;
     private ProfilTraversImporter profilTraversImporter;
     private ConventionImporter conventionImporter;
     private DocumentImporter documentImporter;
@@ -142,19 +134,13 @@ public class DbImporter {
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private StructureImporter structureImporter;
     private DesordreImporter desordreImporter;
-    private TypeProfilTraversImporter typeProfilTraversImporter;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
-    private TypeRapportEtudeImporter typeRapportEtudeImporter;
     private RapportEtudeImporter rapportEtudeImporter;
     private TypeMateriauImporter typeMateriauImporter;
     private TypeNatureImporter typeNatureImporter;
     private TypeFonctionImporter typeFonctionImporter;
-    private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
-    private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
-    private ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter;
-    private TypeOrigineProfilTraversImporter typeOrigineProfilTraversImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -272,7 +258,7 @@ public class DbImporter {
 //     PROFIL_EN_TRAVERS_DZ, // Ne sera probablement plus dans la v2 (à confirmer)
      PROFIL_EN_TRAVERS_EVT_HYDRAU,
 //     PROFIL_EN_TRAVERS_STRUCTUREL, // Ne sera plus dans la v2
-//     PROFIL_EN_TRAVERS_TRONCON,
+     PROFIL_EN_TRAVERS_TRONCON,
      PROFIL_EN_TRAVERS_XYZ,
      PROPRIETAIRE_TRONCON_GESTION,
 //     rampes,
@@ -611,20 +597,10 @@ public class DbImporter {
                 typeFonctionImporter);
         structureImporter = tronconGestionDigueImporter.getStructureImporter();
         desordreImporter = tronconGestionDigueImporter.getDesordreImporter();
-        typeConventionImporter = new TypeConventionImporter(accessDatabase, 
-                couchDbConnector, refConventionRepository);
-        conventionSignataireIntervenantImporter = new ConventionSignataireIntervenantImporter(
-                accessDatabase, couchDbConnector, intervenantImporter);
-        conventionSignataireOrganismeImporter = new ConventionSignataireOrganismeImporter(
-                accessDatabase, couchDbConnector, organismeImporter);
         conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, conventionRepository, typeConventionImporter,
-                conventionSignataireIntervenantImporter,
-                conventionSignataireOrganismeImporter);
-        typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, 
-                couchDbConnector, refTypeProfilTraversRepository);
-        typeOrigineProfilTraversImporter = new TypeOrigineProfilTraversImporter(
-                accessDatabase, couchDbConnector, refTypeProfilTraversRepository);
+                couchDbConnector, conventionRepository,
+                intervenantImporter,
+                organismeImporter);
         typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
                 accessDatabase, couchDbConnector, refSystemeReleveProfilRepository);
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
@@ -636,22 +612,15 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, 
                 typeEvenementHydrauliqueImporter, 
                 typeFrequenceEvenementHydrauliqueImporter);
-        profilTraversEvenementHydrauliqueImporter = new ProfilTraversEvenementHydrauliqueImporter(accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
-        profilTraversDescriptionImporter = new ProfilTraversDescriptionImporter(
-                accessDatabase, couchDbConnector, typeSystemeReleveProfilImporter, 
-                typeProfilTraversImporter, typeOrigineProfilTraversImporter,
-                organismeImporter, profilTraversEvenementHydrauliqueImporter);
-        profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
-                couchDbConnector, profilTraversRepository, 
-                profilTraversDescriptionImporter);
-        typeRapportEtudeImporter = new TypeRapportEtudeImporter(accessDatabase, 
-                couchDbConnector, refRapportEtudeRepository);
-        rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
-                couchDbConnector, rapportEtudeRepository, typeRapportEtudeImporter);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
-                documentRepository,borneDigueImporter, systemeReperageImporter, 
-                conventionImporter, profilTraversImporter, rapportEtudeImporter, 
+                documentRepository, 
+                conventionRepository, profilTraversRepository, rapportEtudeRepository, 
+                borneDigueImporter, intervenantImporter, organismeImporter,
+                systemeReperageImporter, 
+                evenementHydrauliqueImporter,
+                typeSystemeReleveProfilImporter,
                 tronconGestionDigueImporter);
+        
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -722,7 +691,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS_TRONCON.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -738,7 +707,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS_TRONCON.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -753,7 +722,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.PROFIL_EN_TRAVERS_TRONCON.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -761,8 +730,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-//            importer.cleanDb();
-//            importer.importation();
+            importer.cleanDb();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

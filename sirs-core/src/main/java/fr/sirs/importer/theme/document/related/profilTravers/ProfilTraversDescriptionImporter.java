@@ -1,11 +1,13 @@
 package fr.sirs.importer.theme.document.related.profilTravers;
 
+import fr.sirs.importer.theme.document.ProfilTraversTronconImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
+import fr.sirs.core.model.ProfilTraversTroncon;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
@@ -13,6 +15,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,30 +34,34 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
 
     private Map<Integer, LeveeProfilTravers> leves = null;
     private Map<Integer, List<LeveeProfilTravers>> levesByProfil = null;
+    
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypeProfilTraversImporter typeProfilTraversImporter;
     private TypeOrigineProfilTraversImporter typeOrigineProfilTraversImporter;
     private OrganismeImporter organismeImporter;
     private ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter;
     private ProfilTraversPointXYZImporter profilTraversPointXYZImporter;
+    private ProfilTraversTronconImporter profilTraversTronconImporter;
     
-    private ProfilTraversDescriptionImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private ProfilTraversDescriptionImporter(final Database accessDatabase, 
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     public ProfilTraversDescriptionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
-            final TypeProfilTraversImporter typeProfilTraversImporter,
-            final TypeOrigineProfilTraversImporter typeOrigineProfilTraversImporter,
             final OrganismeImporter organismeImporter,
-            final ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final ProfilTraversTronconImporter profilTraversTronconImporter) {
         this(accessDatabase, couchDbConnector);
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
-        this.typeProfilTraversImporter = typeProfilTraversImporter;
-        this.typeOrigineProfilTraversImporter = typeOrigineProfilTraversImporter;
         this.organismeImporter = organismeImporter;
-        this.profilTraversEvenementHydrauliqueImporter = profilTraversEvenementHydrauliqueImporter;
+        this.profilTraversEvenementHydrauliqueImporter = new ProfilTraversEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
+        this.profilTraversTronconImporter = profilTraversTronconImporter;
+        typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, couchDbConnector);
+        typeOrigineProfilTraversImporter = new TypeOrigineProfilTraversImporter(accessDatabase, couchDbConnector);
         profilTraversPointXYZImporter = new ProfilTraversPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
@@ -110,6 +117,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeProfilTravers();
         final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeOrigineProfilTravers();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
+        final Map<Integer, List<ProfilTraversTroncon>> profilTraversTroncons = profilTraversTronconImporter.getProfilTraversTronconByLeveId();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
@@ -156,6 +164,10 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
             
             if(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
                 leve.setProfilTraversEvenementHydraulique(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            }
+            
+            if(profilTraversTroncons.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setProfilTraversTroncon(profilTraversTroncons.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
             leves.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);

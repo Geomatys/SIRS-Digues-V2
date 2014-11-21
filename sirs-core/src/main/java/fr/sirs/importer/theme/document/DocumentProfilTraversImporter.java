@@ -124,8 +124,20 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
     }
 
     @Override
-    protected void compute() throws IOException, AccessDbImporterException {
+    protected void preCompute() throws IOException {
+        
         documents = new HashMap<>();
+        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()){
+            final Row row = it.next();
+            final Document document = new Document();
+            documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
+        }
+    }
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -135,7 +147,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = new Document();
+            final Document document = documents.get(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(DocumentProfilTraversColumns.ID_TRONCON_GESTION.toString())).getId());
 
@@ -223,13 +235,14 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             
             
             
-            documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
+//            documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
             
         }
+        computed=true;
     }
     
-    public Map<Integer, Document> getDocumentProfilTravers() throws IOException, AccessDbImporterException{
-        if(documents==null) compute();
-        return documents;
-    }
+//    public Map<Integer, Document> getDocumentProfilTravers() throws IOException, AccessDbImporterException{
+//        if(documents==null) compute();
+//        return documents;
+//    }
 }

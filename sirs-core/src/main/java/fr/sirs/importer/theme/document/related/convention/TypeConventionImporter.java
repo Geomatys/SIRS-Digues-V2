@@ -19,16 +19,13 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeConventionImporter extends GenericImporter {
+class TypeConventionImporter extends GenericImporter {
 
     private Map<Integer, RefConvention> typesConvention = null;
-    private final RefConventionRepository refConventionRepository;
 
-    public TypeConventionImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final RefConventionRepository refConventionRepository) {
+    TypeConventionImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.refConventionRepository = refConventionRepository;
     }
     
     private enum TypeConventionColumns {
@@ -76,7 +73,7 @@ public class TypeConventionImporter extends GenericImporter {
                 typeConvention.setDateMaj(LocalDateTime.parse(row.getDate(TypeConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typesConvention.put(row.getInt(String.valueOf(TypeConventionColumns.ID_TYPE_CONVENTION.toString())), typeConvention);
-            refConventionRepository.add(typeConvention);
         }
+        couchDbConnector.executeBulk(typesConvention.values());
     }
 }

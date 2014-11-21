@@ -2,7 +2,6 @@ package fr.sirs.importer.theme.document.related.rapportEtude;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.model.RefRapportEtude;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -19,16 +18,13 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeRapportEtudeImporter extends GenericImporter {
+class TypeRapportEtudeImporter extends GenericImporter {
 
     private Map<Integer, RefRapportEtude> typesRapportEtude = null;
-    private final RefRapportEtudeRepository refRapportEtudeRepository;
 
-    public TypeRapportEtudeImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final RefRapportEtudeRepository refRapportEtudeRepository) {
+    TypeRapportEtudeImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.refRapportEtudeRepository = refRapportEtudeRepository;
     }
     
     private enum TypeRapportEtudeColumns {
@@ -78,7 +74,7 @@ public class TypeRapportEtudeImporter extends GenericImporter {
                 typeRapportEtude.setDateMaj(LocalDateTime.parse(row.getDate(TypeRapportEtudeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typesRapportEtude.put(row.getInt(String.valueOf(TypeRapportEtudeColumns.ID_TYPE_RAPPORT_ETUDE.toString())), typeRapportEtude);
-            refRapportEtudeRepository.add(typeRapportEtude);
         }
+        couchDbConnector.executeBulk(typesRapportEtude.values());
     }
 }
