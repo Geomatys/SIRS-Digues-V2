@@ -5,10 +5,11 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.objet.structure.StructureImporter;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.ContactTroncon;
@@ -18,14 +19,13 @@ import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.structure.desordre.DesordreImporter;
-import fr.sirs.importer.structure.TypeCoteImporter;
-import fr.sirs.importer.structure.TypeFonctionImporter;
-import fr.sirs.importer.structure.TypeMateriauImporter;
-import fr.sirs.importer.structure.TypeNatureImporter;
-import fr.sirs.importer.structure.desordre.TypeDesordreImporter;
-import fr.sirs.importer.structure.TypePositionImporter;
-import fr.sirs.importer.structure.TypeSourceImporter;
+import fr.sirs.importer.objet.desordre.DesordreImporter;
+import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.objet.TypeFonctionImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.objet.TypeSourceImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -71,6 +71,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconDigueRepository tronconDigueRepository,
             final DigueRepository digueRepository,
             final BorneDigueRepository borneDigueRepository,
+            final RefTypeDesordreRepository refTypeDesordreRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final TypeRiveImporter typeRiveImporter, 
@@ -80,7 +81,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeDesordreImporter typeDesordreImporter,
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
@@ -107,8 +107,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
                 typeNatureImporter, typeFonctionImporter);
         this.desordreImporter = new DesordreImporter(accessDatabase, 
-                couchDbConnector, this, systemeReperageImporter, 
-                borneDigueImporter, structureImporter, typeDesordreImporter, 
+                couchDbConnector, refTypeDesordreRepository, 
+                this, systemeReperageImporter, 
+                borneDigueImporter, structureImporter,
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }

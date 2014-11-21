@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure;
+package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;

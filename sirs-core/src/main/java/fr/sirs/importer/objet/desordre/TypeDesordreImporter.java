@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure.desordre;
+package fr.sirs.importer.objet.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -19,12 +19,12 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeDesordreImporter extends GenericImporter {
+class TypeDesordreImporter extends GenericImporter {
 
     private Map<Integer, RefTypeDesordre> typesDesordre = null;
     private final RefTypeDesordreRepository refTypeDesordreRepository;
 
-    public TypeDesordreImporter(final Database accessDatabase,
+    TypeDesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final RefTypeDesordreRepository refTypeDesordreRepository) {
         super(accessDatabase, couchDbConnector);
@@ -78,7 +78,7 @@ public class TypeDesordreImporter extends GenericImporter {
                 typeDesordre.setDateMaj(LocalDateTime.parse(row.getDate(TypeDesordreColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typesDesordre.put(row.getInt(String.valueOf(TypeDesordreColumns.ID_TYPE_DESORDRE.toString())), typeDesordre);
-            refTypeDesordreRepository.add(typeDesordre);
         }
+        couchDbConnector.executeBulk(typesDesordre.values());
     }
 }

@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure;
+package fr.sirs.importer.objet.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -25,6 +25,13 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.objet.TypeFonctionImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.objet.TypeSourceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,6 +65,9 @@ public class StructureImporter extends GenericStructureImporter {
     private final TalusDigueImporter talusDigueImporter;
     private final SommetRisbermeImporter sommetRisbermeImporter;
     private final TalusRisbermeImporter talusRisbermeImporter;
+    private final FondationImporter fondationImporter;
+    private final EpiImporter epiImporter;
+    private final OuvrageRevancheImporter ouvrageRevancheImporter;
     
 
     public StructureImporter(final Database accessDatabase,
@@ -108,6 +118,24 @@ public class StructureImporter extends GenericStructureImporter {
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(talusRisbermeImporter);
+        fondationImporter = new  FondationImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        structureImporters.add(fondationImporter);
+        epiImporter = new EpiImporter(accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter, systemeReperageImporter, 
+                borneDigueImporter, organismeImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
+                typeNatureImporter, typeFonctionImporter);
+        structureImporters.add(epiImporter);
+        ouvrageRevancheImporter = new OuvrageRevancheImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        structureImporters.add(ouvrageRevancheImporter);
     }
 
     private enum ElementStructureColumns {

@@ -1,13 +1,14 @@
-package fr.sirs.importer.structure.desordre;
+package fr.sirs.importer.objet.desordre;
 
-import fr.sirs.importer.structure.TypePositionImporter;
-import fr.sirs.importer.structure.TypeCoteImporter;
-import fr.sirs.importer.structure.TypeSourceImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.objet.TypeSourceImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -22,11 +23,11 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.structure.GenericStructureImporter;
-import fr.sirs.importer.structure.StructureImporter;
-import fr.sirs.importer.structure.TypeFonctionImporter;
-import fr.sirs.importer.structure.TypeMateriauImporter;
-import fr.sirs.importer.structure.TypeNatureImporter;
+import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.structure.StructureImporter;
+import fr.sirs.importer.objet.TypeFonctionImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -60,11 +61,11 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 
     public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final RefTypeDesordreRepository refTypeDesordreRepository,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final StructureImporter structureImporter, 
-            final TypeDesordreImporter typeDesordreImporter, 
             final TypeSourceImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
@@ -77,7 +78,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter);
-        this.typeDesordreImporter = typeDesordreImporter;
+        this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
+                couchDbConnector, refTypeDesordreRepository);
         this.subDesordreImporter = new SubDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 

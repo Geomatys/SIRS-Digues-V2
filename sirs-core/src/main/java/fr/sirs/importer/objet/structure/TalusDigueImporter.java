@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure;
+package fr.sirs.importer.objet.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -22,6 +22,13 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.objet.TypeFonctionImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.objet.TypeSourceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,16 +72,7 @@ class TalusDigueImporter extends GenericStructureImporter<TalusDigue> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
-
-    /*
-     ----------------------------------------------------------------------------
-     TODO : Pourquoi référencer l'indentifiant du tronçon d'appartenance de la 
-     crête ? Puisqu'il n'y a qu'un seul tronçon et que la crête, comme structure,
-     est référencée depuis le tronçon, quel intérêt de maintenir un autre 
-     identifiant ? Cela facilite la navigabilité, mais complique l'import de la 
-     base car il faut vérifier que les identifiants CouchDB des tronçons ne sont 
-     pas nulls.
-     */
+    
     private enum TalusDigueColumns {
         ID_ELEMENT_STRUCTURE,
 //        id_nom_element, // Redondant avec ID_ELEMENT_STRUCTURE

@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure;
+package fr.sirs.importer.objet.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -11,7 +11,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
@@ -22,6 +21,13 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.objet.TypeFonctionImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.objet.TypeSourceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

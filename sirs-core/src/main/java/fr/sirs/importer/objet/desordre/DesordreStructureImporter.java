@@ -1,4 +1,4 @@
-package fr.sirs.importer.structure.desordre;
+package fr.sirs.importer.objet.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -7,7 +7,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.DesordreStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.GenericImporter;
-import fr.sirs.importer.structure.StructureImporter;
+import fr.sirs.importer.objet.structure.StructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
