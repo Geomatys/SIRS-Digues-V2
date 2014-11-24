@@ -50,7 +50,7 @@ public class DocumentChangeEmiterTestCase implements DocumentListener {
         Thread.sleep(2000);
         
         digueRepository.remove(digue);
-        thread.join();
+       // thread.join();
     }
 
     @Override
