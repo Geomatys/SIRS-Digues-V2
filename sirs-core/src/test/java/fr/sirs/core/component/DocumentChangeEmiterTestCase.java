@@ -2,8 +2,10 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
+
 import javax.annotation.PostConstruct;
 
+import org.ektorp.CouchDbConnector;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,41 +21,55 @@ import fr.sirs.core.component.DigueRepository;
 @ContextConfiguration("classpath:/spring/test/test-context.xml")
 public class DocumentChangeEmiterTestCase implements DocumentListener {
 
-	@Autowired
-	private DocumentChangeEmiter documentChangeEmiter;
+    @Autowired
+    private CouchDbConnector couchDbConnector;
 
-	@Autowired
-	private DigueRepository digueRepository;
+    private DocumentChangeEmiter documentChangeEmiter;
 
-	@PostConstruct
-	public void init() {
-		documentChangeEmiter.addListener(this);
-	}
+    @Autowired
+    private DigueRepository digueRepository;
 
-	@Test
-	public void testListen() throws InterruptedException {
+    private Thread thread;
 
-		Digue digue = new Digue();
-		digueRepository.add(digue);
-		digue.setCommentaire("zozo");
-		digueRepository.update(digue);
-		digueRepository.remove(digue);
-		Thread.sleep(10000);
-	}
+    @PostConstruct
+    public void init() {
+        documentChangeEmiter = new DocumentChangeEmiter(couchDbConnector);
+        documentChangeEmiter.addListener(this);
+        thread = documentChangeEmiter.start();
+    }
 
-	@Override
-	public void documentDeleted(Element element) {
-		SirsCore.LOGGER.info("documentDeleted(" + element + ")");
-	}
+    @Test
+    public void testListen() throws InterruptedException {
 
-	@Override
-	public void documentChanged(Element element) {
-		SirsCore.LOGGER.info("documentChanged(" + element + ")");
-	}
+        Digue digue = new Digue();
+        digue.setCommentaire("my comment");
+        digueRepository.add(digue);
+        digue.setCommentaire("zozo");
+        digueRepository.update(digue);
+        
+        Thread.sleep(2000);
+        
+        digueRepository.remove(digue);
+        thread.join();
+    }
 
-	@Override
-	public void documentCreated(Element changed) {
-		SirsCore.LOGGER.info("documentCreated(" + changed + ")");
-	}
+    @Override
+    public void documentDeleted(Element element) {
+        info("documentDeleted(" + element + ")");
+    }
 
+    @Override
+    public void documentChanged(Element element) {
+        info("documentChanged(" + element + ")");
+    }
+
+    @Override
+    public void documentCreated(Element changed) {
+        info("documentCreated(" + changed + ")");
+    }
+
+    private void info(String message) {
+        SirsCore.LOGGER.info(message);
+        System.out.println(message);
+    }
 }
