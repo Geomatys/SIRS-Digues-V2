@@ -29,7 +29,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXCretePane extends BorderPane implements ThemePane {
+public class FXCreteSubPane extends BorderPane implements ThemePane {
     
     private final ObjectProperty<Positionable> cretePotitionable = new SimpleObjectProperty<>();
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
@@ -50,7 +50,7 @@ public class FXCretePane extends BorderPane implements ThemePane {
     @FXML FXNumberSpinner uiEpaisseur;
     @FXML FXNumberSpinner uiCouches;
     
-    private FXCretePane(){
+    private FXCreteSubPane(){
         SIRS.loadFXML(this);
         final Session session = Injector.getBean(Session.class);
         tronconDigueRepository = session.getTronconDigueRepository();
@@ -60,7 +60,7 @@ public class FXCretePane extends BorderPane implements ThemePane {
         uiPositionnable.disableFieldsProperty().bind(disableFields);
     }
     
-    public FXCretePane(final Crete crete){
+    public FXCreteSubPane(final Crete crete){
         this();
         this.cretePotitionable.set(crete);
     }       

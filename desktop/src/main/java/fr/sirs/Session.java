@@ -24,9 +24,14 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.component.RefOrigineProfilTraversRepository;
+import fr.sirs.core.component.RefSystemeReleveProfilRepository;
+import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.property.Internal;
 import java.beans.IntrospectionException;
@@ -112,6 +117,10 @@ public class Session {
     private final ContactRepository contactRepository;
     private final OrganismeRepository organismeRepository;
     private final PreviewLabelRepository previewLabelRepository;
+    private final ProfilTraversRepository profilTraversRepository;
+    private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
+    private final RefSystemeReleveProfilRepository refSystemeReleveProfilRepository;
+    private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
 
     private FXMainFrame frame = null;
     
@@ -124,7 +133,11 @@ public class Session {
         borneDigueRepository = new BorneDigueRepository(connector);
         contactRepository = new ContactRepository(connector);
         organismeRepository = new OrganismeRepository(connector);
-        previewLabelRepository = new PreviewLabelRepository(couchDbConnector);
+        previewLabelRepository = new PreviewLabelRepository(connector);
+        profilTraversRepository = new ProfilTraversRepository(connector);
+        refOrigineProfilTraversRepository = new RefOrigineProfilTraversRepository(connector);
+        refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(connector);
+        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(connector);
     }
 
     public CouchDbConnector getConnector() {
@@ -157,6 +170,22 @@ public class Session {
     
     public PreviewLabelRepository getPreviewLabelRepository() {
         return previewLabelRepository;
+    }
+    
+    public ProfilTraversRepository getProfilTraversRepository() {
+        return profilTraversRepository;
+    }
+    
+    public RefOrigineProfilTraversRepository getRefOrigineProfilTraversRepository(){
+        return refOrigineProfilTraversRepository;
+    }
+    
+    public RefSystemeReleveProfilRepository getSystemeReleveProfilRepository(){
+        return refSystemeReleveProfilRepository;
+    }
+    
+    public RefTypeProfilTraversRepository getRefTypeProfilTraversRepository(){
+        return refTypeProfilTraversRepository;
     }
     
     void setFrame(FXMainFrame frame) {

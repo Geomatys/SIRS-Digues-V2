@@ -12,9 +12,11 @@ import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
@@ -281,7 +283,9 @@ public class PojoTable extends BorderPane{
         }else if(pojo instanceof Contact){
             content = new FXContactPane((Contact) pojo);
         }else if(pojo instanceof Organisme){
-            content = new FXOrganismePane((Organisme)pojo);
+            content = new FXOrganismePane((Organisme) pojo);
+        }else if (pojo instanceof ProfilTravers){
+            content = new FXThemePane((ProfilTravers) pojo);
         }
         tab.setContent(content);
         
