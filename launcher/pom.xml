@@ -13,14 +13,14 @@
     <groupId>fr.sirs</groupId>
     <artifactId>launcher</artifactId>
     <packaging>jar</packaging>
-    <name>Launcher</name>
+    <name>SIRS2 Launcher</name>
     <description>Launcher</description>
     
     <dependencies>
         <dependency>
             <groupId>fr.sirs</groupId>
-            <artifactId>sirs-core</artifactId>
-            <version>1.x-SNAPSHOT</version>
+            <artifactId>desktop</artifactId>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -36,6 +36,8 @@
     </dependencies>
     
     <build>
+        <!-- Override final name for jfx:native command to create a friendly-named package -->
+	<finalName>SIRS2-${project.artifactId}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -46,69 +48,17 @@
                     <debug>true</debug>
                 </configuration>
             </plugin>
+            
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.0</version>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
-                    <outputDirectory>target/tozip/lib_launcher</outputDirectory>
-                    <stripVersion>false</stripVersion>
+                    <mainClass>fr.sirs.launcher.Launcher</mainClass>
+                    <needMenu>true</needMenu>
+                    <jvmArgs>
+                        <jvmArg>-Xmx512m</jvmArg>
+                    </jvmArgs>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>fr.sirs.launcher.Launcher</mainClass>
-                            <packageName>fr.sirs.launcher</packageName>
-                            <addClasspath>true</addClasspath>
-                            <addExtensions/>
-                            <classpathPrefix>lib_launcher/</classpathPrefix>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <configuration>
-                            <tasks>
-                                <!--copie des jars du desktop -->
-                                <copy todir="./target/tozip">
-                                    <fileset dir="../desktop/target">
-                                        <include name="**/*.jar"/>
-                                    </fileset>
-                                </copy>     
-                                <move file="./target/tozip/desktop-1.x-SNAPSHOT.jar" tofile="./target/tozip/desktop.jar"/>
-                                <copy file="./target/launcher-1.x-SNAPSHOT.jar" tofile="./target/tozip/launcher.jar"/>
-                                
-                                <!-- archive de l'application finale -->
-                                <zip destfile="./target/sirs.zip" basedir="./target/tozip" />
-                                
-                                
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
