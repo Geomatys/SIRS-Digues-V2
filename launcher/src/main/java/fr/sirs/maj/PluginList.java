@@ -21,32 +21,32 @@ import javafx.collections.ObservableList;
 @SuppressWarnings("serial")
 public class PluginList {
     
-    public ObservableList<PluginInfo> plugins = FXCollections.observableArrayList() ;
-    
-    public PluginList(){
-        
+    public ObservableList<PluginInfo> plugins = FXCollections.observableArrayList();
+
+    public PluginList() {
+
     }
-    
+
     @JsonManagedReference("parent")
-    public List<PluginInfo> getPlugins(){
+    public List<PluginInfo> getPlugins() {
         return this.plugins;
     }
 
-    public void setPlugins(List<PluginInfo> plugins){
+    public void setPlugins(List<PluginInfo> plugins) {
         this.plugins.clear();
         this.plugins.addAll(plugins);
     }
-    
-    public PluginInfo getPluginInfo(String name){
-        for(PluginInfo info : plugins){
-            if(Objects.equals(name, info.nameProperty().get())){
+
+    public PluginInfo getPluginInfo(String name) {
+        for (PluginInfo info : plugins) {
+            if (Objects.equals(name, info.nameProperty().get())) {
                 return info;
             }
         }
         return null;
     }
-    
-    public static PluginList read(URL url) throws IOException{
+
+    public static PluginList read(URL url) throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(url, PluginList.class);
     }

@@ -80,7 +80,7 @@ import org.opengis.style.TextSymbolizer;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class CorePlugin extends Plugin{
+public class CorePlugin extends Plugin {
     
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;

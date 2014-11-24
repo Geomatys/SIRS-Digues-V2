@@ -80,6 +80,7 @@ public class PluginInfo {
     
     @JsonIgnore
     public boolean isOlderOrSame(PluginInfo info){
+        if (info == null || !name.equals(info.name)) return false;
         return getVersionMajor() < info.getVersionMajor() ||                        
                 (getVersionMajor() == info.getVersionMajor() &&
                  getVersionMinor() < info.getVersionMinor());
