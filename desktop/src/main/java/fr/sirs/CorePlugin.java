@@ -154,7 +154,7 @@ public class CorePlugin extends Plugin {
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
                             null, PROJECTION, repo::getAll)
             );
-            items.addAll(buildLayers(tronconStore,createTronconStyle(),true));
+            items.addAll(buildLayers(tronconStore,createTronconStyle(),createTronconSelectionStyle(),true));
             
             //bornes
             final BeanStore borneStore = new BeanStore(
@@ -162,7 +162,7 @@ public class CorePlugin extends Plugin {
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
                             null, PROJECTION, ()-> bornes)
             );
-            items.addAll(buildLayers(borneStore,createBorneStyle(),true));
+            items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
             
             //structures
             final BeanStore structStore = new BeanStore(
@@ -176,7 +176,7 @@ public class CorePlugin extends Plugin {
                         
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll(buildLayers(structStore,createStructureStyle(Color.red),true));
+            structLayer.items().addAll(buildLayers(structStore,createStructureStyle(Color.red),createTronconSelectionStyle(),true));
             items.add(structLayer);
                
             
@@ -222,7 +222,7 @@ public class CorePlugin extends Plugin {
         
     }
     
-    private List<MapLayer> buildLayers(FeatureStore store, MutableStyle baseStyle, boolean visible) throws DataStoreException{
+    private List<MapLayer> buildLayers(FeatureStore store, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         for(Name name : store.getNames()){
@@ -238,6 +238,9 @@ public class CorePlugin extends Plugin {
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
             fml.setName(name.getLocalPart());
+            
+            if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
+            
             layers.add(fml);
         }
         return layers;
@@ -288,6 +291,20 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
+    private static MutableStyle createTronconSelectionStyle(){
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),FF.literal(5),LITERAL_ONE_FLOAT);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
+        
+        
+        final Stroke stroke2 = SF.stroke(SF.literal(Color.GREEN),FF.literal(4),LITERAL_ONE_FLOAT);
+        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
+        
+        final MutableStyle style = SF.style(line1,line2);
+        return style;
+    }
+    
     private static MutableStyle createBorneStyle(){
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(7);
 
@@ -316,6 +333,36 @@ public class CorePlugin extends Plugin {
         style.featureTypeStyles().add(fts);
         return style;
     }
+    
+    private static MutableStyle createBorneSelectionStyle(){
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(10);
+
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final Stroke stroke = SF.stroke(Color.BLACK, 1);
+        final Fill fill = SF.fill(Color.GREEN);
+        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
+                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
+        
+        final TextSymbolizer ts = SF.textSymbolizer(
+                SF.fill(Color.BLACK), SF.font(13), 
+                SF.halo(Color.GREEN, 2), 
+                FF.property("libelle"), 
+                SF.pointPlacement(SF.anchorPoint(0, 0.25), SF.displacement(5, 0), FF.literal(0)), null);
+        
+        final MutableRule ruleClose = SF.rule(pointSymbolizer, ts);
+        ruleClose.setMaxScaleDenominator(50000);
+        
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        fts.rules().add(ruleClose);
+        final MutableStyle style = SF.style();
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
+    
     
     private static MutableStyle createStructureStyle(Color col){
         final Expression offset = GO2Utilities.FILTER_FACTORY.literal(6);

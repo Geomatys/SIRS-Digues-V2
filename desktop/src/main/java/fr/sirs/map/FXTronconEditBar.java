@@ -1,5 +1,7 @@
 package fr.sirs.map;
 
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
@@ -19,8 +21,14 @@ public class FXTronconEditBar extends ToolBar {
     public FXTronconEditBar(FXMap map) {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
 
-        final ToggleButton butEdit = new TronconEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.SHOW);
-        final HBox hboxAction = new HBox(butEdit);
+        final Label text = new Label("Outils de création/édition");
+        text.setAlignment(Pos.CENTER);
+        
+        final ToggleButton butEditTroncon = new TronconEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.SHOW);
+        butEditTroncon.getStyleClass().add(LEFT);
+        final ToggleButton butEditSr = new BorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.SHOW);
+        butEditSr.getStyleClass().add(RIGHT);
+        final HBox hboxAction = new HBox(text, butEditTroncon, butEditSr);
 
         getItems().add(hboxAction);
 

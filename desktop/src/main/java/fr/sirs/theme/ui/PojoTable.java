@@ -129,7 +129,7 @@ public class PojoTable extends BorderPane{
         
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
-        searchRunning.setStyle(" -fx-progress-color: white;");
+        searchRunning.setStyle("-fx-progress-color: white;");
         uiScroll.setFitToHeight(true);
         uiScroll.setFitToWidth(true);
         uiTable.setEditable(true);
@@ -152,7 +152,7 @@ public class PojoTable extends BorderPane{
         
         
         //barre d'outils
-        final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD));
+        final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {createPojo();});
         

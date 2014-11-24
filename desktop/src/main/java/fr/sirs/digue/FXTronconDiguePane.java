@@ -116,7 +116,7 @@ public class FXTronconDiguePane extends BorderPane{
            
         uiSrTab.setCenter(srController);
         uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
-        uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD));
+        uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
         
         uiSRList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         uiSRList.setCellFactory(new Callback<ListView<SystemeReperage>, ListCell<SystemeReperage>>() {

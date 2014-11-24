@@ -20,14 +20,19 @@ import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
@@ -40,7 +45,6 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
-import org.geotoolkit.gui.javafx.util.FXOptionDialog;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
@@ -199,28 +203,37 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             }
                         });
                         
-                        if(FXOptionDialog.showOkCancel(this, choiceBox, "Choix de la digue", true)){
-                            final Digue digue = choiceBox.getValue();
-                            troncon = new TronconDigue();
+                        //choix de la digue
+                        final Dialog dialog = new Dialog();
+                        final DialogPane pane = new DialogPane();
+                        final BorderPane bp = new BorderPane();
+                        bp.setTop(new Label("Rattacher le nouveau tronçon à la digue :"));
+                        bp.setCenter(pane);
+                        
+                        pane.getButtonTypes().add(ButtonType.OK);
+                        dialog.setDialogPane(pane);
+                        dialog.showAndWait();
+                        
+                        final Digue digue = choiceBox.getValue();
+                        troncon = new TronconDigue();
 
-                            final Coordinate coord1 = helper.toCoord(e.getX()-20, e.getY());
-                            final Coordinate coord2 = helper.toCoord(e.getX()+20, e.getY());
-                            try{
-                                Geometry geom = EditionHelper.createLine(coord1,coord2);
-                                //convertion from RGF93
-                                geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), Session.PROJECTION, true));
-                                JTS.setCRS(geom, Session.PROJECTION);
-                                troncon.setDigueId(digue.getId());
-                                troncon.setGeometry(geom);
-                                editGeometry.geometry = geom;
+                        final Coordinate coord1 = helper.toCoord(e.getX()-20, e.getY());
+                        final Coordinate coord2 = helper.toCoord(e.getX()+20, e.getY());
+                        try{
+                            Geometry geom = EditionHelper.createLine(coord1,coord2);
+                            //convertion from RGF93
+                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), Session.PROJECTION, true));
+                            JTS.setCRS(geom, Session.PROJECTION);
+                            if(digue!=null)troncon.setDigueId(digue.getId());
+                            troncon.setGeometry(geom);
+                            editGeometry.geometry = geom;
 
-                                //save troncon
-                                session.getTronconDigueRepository().add(troncon);
-                                updateGeometry();
+                            //save troncon
+                            session.getTronconDigueRepository().add(troncon);
+                            updateGeometry();
 
-                            }catch(TransformException | FactoryException ex){
-                                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                            }
+                        }catch(TransformException | FactoryException ex){
+                            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                         }
                         
                     });
@@ -252,7 +265,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     // -suppression d'un noeud
                     // -terminer édition
                     // -annuler édition
-                    // -annuler édition
+                    // -supprimer troncon
                     popup.getItems().clear();
                     
                     //action : supprission d'un noeud
@@ -371,5 +384,5 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
 
         }
     }
-    
+        
 }

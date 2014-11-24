@@ -4,7 +4,6 @@ package fr.sirs;
 
 import fr.sirs.core.SirsCore;
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
@@ -22,9 +21,11 @@ import org.geotoolkit.font.IconBuilder;
  */
 public final class SIRS extends SirsCore{
     
-    public static final Image ICON_ADD    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
-    public static final Image ICON_SEARCH = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SEARCH,22,Color.WHITE),null);
-    public static final Image ICON_TRASH  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,22,Color.WHITE),null);
+    public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
+    public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.BLACK),null);
+    public static final Image ICON_SEARCH       = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SEARCH,22,Color.WHITE),null);
+    public static final Image ICON_TRASH        = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,22,Color.WHITE),null);
+    public static final Image ICON_CROSSHAIR_BLACK= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CROSSHAIRS,22,Color.BLACK),null);
     
     public static final Logger LOGGER = Logging.getLogger(SIRS.class);
     public static final String CSS_PATH = "/fr/sirs/theme.css";

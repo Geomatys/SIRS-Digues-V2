@@ -13,15 +13,15 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconEditAction extends FXMapAction {
+public class BorneEditAction extends FXMapAction {
         
-    public TronconEditAction(FXMap map) {
-        super(map,"Tronçon","Edition/Création de tronçon",GeotkFX.ICON_EDIT);
+    public BorneEditAction(FXMap map) {
+        super(map,"Système de repèrage","Edition/Création de borne",GeotkFX.ICON_EDIT);
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof TronconEditHandler);
+                selectedProperty().set(newValue instanceof BorneEditHandler);
             }
         });
     }
@@ -29,7 +29,7 @@ public class TronconEditAction extends FXMapAction {
     @Override
     public void accept(ActionEvent event) {
         if (map != null) {
-            map.setHandler(new TronconEditHandler(map));
+            map.setHandler(new BorneEditHandler(map));
         }
     }
     
