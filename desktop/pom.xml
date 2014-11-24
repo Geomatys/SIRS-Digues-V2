@@ -89,6 +89,23 @@
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
     </dependency>
+
+    <!-- JAI -->
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jai_core</artifactId>
+      <version>${jai.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jai_codec</artifactId>
+      <version>${jai.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jai_imageio</artifactId>
+      <version>${jai-io.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
