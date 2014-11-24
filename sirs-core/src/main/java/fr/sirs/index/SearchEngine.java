@@ -147,9 +147,12 @@ public class SearchEngine implements DocumentListener {
     @Override
     public void documentChanged(Element changed) {
         final String docId = changed.getDocumentId();
+        final String type = changed.getClass().getSimpleName();
         final String keywords = createKeyWords(changed);
         try {
-            updateDocument(docId, keywords);
+            deleteDocument(docId);
+            addDocument(docId, type, keywords, true);
+            //updateDocument(docId, keywords);
         } catch (IOException ex) {
             SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
@@ -222,13 +225,14 @@ public class SearchEngine implements DocumentListener {
         unloadSearcher();
     }
     
-    public void updateDocument(String docId, String keywords) throws IOException{
-        final Term filter = new Term(FIELD_ID, docId);
-        indexWriter.updateDocValues(filter, 
-                new TextField(FIELD_KEYWORDS, keywords, Field.Store.YES));
-        indexWriter.commit();
-        unloadSearcher();
-    }
+    //lucene n'accepte pas la maj d'un champ text
+//    public void updateDocument(String docId, String keywords) throws IOException{
+//        final Term filter = new Term(FIELD_ID, docId);
+//        indexWriter.updateDocValues(filter, 
+//                new TextField(FIELD_KEYWORDS, keywords, Field.Store.YES));
+//        indexWriter.commit();
+//        unloadSearcher();
+//    }
     
     public void deleteDocument(String docId) throws IOException{
         indexWriter.deleteDocuments(new Term(FIELD_ID, docId));

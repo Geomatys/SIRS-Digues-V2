@@ -1,9 +1,11 @@
 
 package fr.sirs.map;
 
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -139,6 +141,15 @@ public class FXSystemeReperagePane extends BorderPane {
                 
     }
 
+    public void selectSRB(SystemeReperageBorne srb){
+        final int index = uiBorneTable.getItems().indexOf(srb);
+        if(index>=0){
+            uiBorneTable.getSelectionModel().clearAndSelect(index);
+        }else{
+            uiBorneTable.getSelectionModel().clearSelection();
+        }
+    }
+    
     public ObjectProperty<Mode> modeProperty(){
         return mode;
     }
@@ -195,7 +206,41 @@ public class FXSystemeReperagePane extends BorderPane {
         updateSrList(null, null, null);
         
         //selection du SR
-        uiSrComboBox.getSelectionModel().select(sr);
+        uiSrComboBox.getSelectionModel().clearAndSelect(uiSrComboBox.getItems().indexOf(sr));
+        
+    }
+    
+    public void createBorne(Point geom){
+        final Session session = Injector.getSession();
+        
+        final TronconDigue troncon = tronconProperty().get();
+        final SystemeReperage sr = systemeReperageProperty().get();
+        
+        final TextInputDialog dialog = new TextInputDialog("");
+        dialog.getEditor().setPromptText("borne ...");
+        dialog.setTitle("Nouvelle borne");
+        dialog.setGraphic(null);
+        dialog.setHeaderText("Libellé de la nouvelle borne");
+        
+        final Optional<String> opt = dialog.showAndWait();
+        if(!opt.isPresent() || opt.get().isEmpty()) return;
+        
+        //creation de la borne
+        final String borneLbl = opt.get();
+        final BorneDigue borne = session.getBorneDigueRepository().create();
+        borne.setLibelle(borneLbl);
+        borne.setGeometry(geom);
+        session.getBorneDigueRepository().add(borne);
+        
+        //reference dans le SR
+        final SystemeReperageBorne srb = new SystemeReperageBorne();
+        srb.borneIdProperty().set(borne.getDocumentId());
+        srb.valeurPRProperty().set(0);
+        
+        //sauvegarde du SR
+        sr.systemereperageborneId.add(srb);
+        session.getSystemeReperageRepository().update(sr);
+        updateBorneList(null, null, null);
         
     }
     

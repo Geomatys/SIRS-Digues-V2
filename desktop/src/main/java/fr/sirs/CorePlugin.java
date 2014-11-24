@@ -124,29 +124,29 @@ public class CorePlugin extends Plugin {
         
         try{
             
-            final CouchDbConnector connector = Injector.getBean(CouchDbConnector.class);
+//            final CouchDbConnector connector = Injector.getBean(CouchDbConnector.class);
             
-            //todo : rendre dynamique
-            // Nécessité de l'utilisation d'un dépôt de bornes depuis que les 
-            // tronçons ne référencent plus directement les bornes mais leurs ID
-            // Du coup il est probable que ceci devienne très lent. Cela pourrait
-            // peut-être être amélioré par un map/reduce du côté serveur couchDb
-            // mais il faudrait pour cela que les bornes contiennent un id de 
-            // navigation vers les tronçons, ce qui n'est pas le cas actuellement.
-            final List<BorneDigue> bornes = new ArrayList<>();
-            for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
-                // SOLUTION 1 (brutale)
-//                td.getBorneIds().stream().forEach((id) -> {
-//                    bornes.add(bornesRepo.get(id));
-//                });
-                
-                // SOLUTION 2 (ektorp bulk)
-                ViewQuery vq = new ViewQuery()
-                      .allDocs()
-                      .includeDocs(true)
-                      .keys(td.getBorneIds());
-                bornes.addAll(connector.queryView(vq, BorneDigue.class));
-            }
+//            //todo : rendre dynamique
+//            // Nécessité de l'utilisation d'un dépôt de bornes depuis que les 
+//            // tronçons ne référencent plus directement les bornes mais leurs ID
+//            // Du coup il est probable que ceci devienne très lent. Cela pourrait
+//            // peut-être être amélioré par un map/reduce du côté serveur couchDb
+//            // mais il faudrait pour cela que les bornes contiennent un id de 
+//            // navigation vers les tronçons, ce qui n'est pas le cas actuellement.
+//            final List<BorneDigue> bornes = new ArrayList<>();
+//            for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
+//                // SOLUTION 1 (brutale)
+////                td.getBorneIds().stream().forEach((id) -> {
+////                    bornes.add(bornesRepo.get(id));
+////                });
+//                
+//                // SOLUTION 2 (ektorp bulk)
+//                ViewQuery vq = new ViewQuery()
+//                      .allDocs()
+//                      .includeDocs(true)
+//                      .keys(td.getBorneIds());
+//                bornes.addAll(connector.queryView(vq, BorneDigue.class));
+//            }
             
             //troncons
             final BeanStore tronconStore = new BeanStore(
@@ -160,7 +160,7 @@ public class CorePlugin extends Plugin {
             final BeanStore borneStore = new BeanStore(
                     new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, ()-> bornes)
+                            null, PROJECTION, bornesRepo::getAll) //TODO LENTEUR ICI
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
             
