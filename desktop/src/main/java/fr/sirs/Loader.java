@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javafx.stage.WindowEvent;
+import org.apache.sis.util.ArgumentChecks;
 
 /**
  *
@@ -49,8 +50,22 @@ import javafx.stage.WindowEvent;
  */
 public class Loader extends Application {
 
-    public static String DATABASE_URL = "http://geouser:geopw@localhost:5984";
-    public static String DATABASE_NAME = "sirs";
+    private static String DATABASE_URL = "http://geouser:geopw@localhost:5984";
+    private static String DATABASE_NAME = "sirs";
+    
+    private String databaseUrl;
+    private String databaseName;
+    
+    public Loader() {
+        this(DATABASE_URL, DATABASE_NAME);
+    }
+    
+    public Loader(String databaseUrl, String databaseName) {
+        ArgumentChecks.ensureNonEmpty("Database URL", databaseUrl);
+        ArgumentChecks.ensureNonEmpty("Database name", databaseName);
+        this.databaseUrl = databaseUrl;
+        this.databaseName = databaseName;
+    }
     
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
@@ -58,6 +73,9 @@ public class Loader extends Application {
      * launched through deployment artifacts, e.g., in IDEs with limited FX
      * support. NetBeans ignores main().
      *
+     * TODO : Remove the main, we should always launch application using 
+     * Launcher module.
+     * 
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -180,7 +198,22 @@ public class Loader extends Application {
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
                 final int total = 6 + plugins.length;
+                                                
+                // EPSG DATABASE ///////////////////////////////////////////////
+                updateProgress(inc++, total);
+                updateMessage("Creation de la base EPSG...");
+                //create a database in user directory
+                final File storageFolder = new File(SIRS.getConfigPath()+File.separator+"EPSG");
+                final String url = "jdbc:derby:"+SIRS.getConfigPath()+File.separator+"EPSG"+File.separator+"EPSG;create=true";
+                final DataSource ds = new DefaultDataSource(url);
+                Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
+
+                //try to create it, won't do anything if already exist
+                createEpsgDB(storageFolder,url);
+                //force loading epsg
+                CRS.decode("EPSG:3395");
                 
+                // GEOMETRY / JSON Converter
                 GeometryDeserializer.class.newInstance();
                 
                 // IMAGE ///////////////////////////////////////////////////////
@@ -206,21 +239,7 @@ public class Loader extends Application {
                 updateMessage("Chargement des pilotes pour base de données...");
                 //loading drivers, some plugin systems requiere this call , like netbeans RCP
                 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
-                Class.forName("org.postgresql.Driver").newInstance();           
-                                
-                // EPSG DATABASE ///////////////////////////////////////////////
-                updateProgress(inc++, total);
-                updateMessage("Creation de la base EPSG...");
-                //create a database in user directory
-                final File storageFolder = new File(SIRS.getConfigPath()+File.separator+"EPSG");
-                final String url = "jdbc:derby:"+SIRS.getConfigPath()+File.separator+"EPSG"+File.separator+"EPSG;create=true";
-                final DataSource ds = new DefaultDataSource(url);
-                Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
-
-                //try to create it, won't do anything if already exist
-                createEpsgDB(storageFolder,url);
-                //force loading epsg
-                CRS.decode("EPSG:3395");
+                Class.forName("org.postgresql.Driver").newInstance();
                                 
                 // JAXB ////////////////////////////////////////////////////////
                 updateProgress(inc++, total);
@@ -233,13 +252,13 @@ public class Loader extends Application {
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des indexes ...");
-                final ClassPathXmlApplicationContext context = CouchDBInit.create(DATABASE_URL, DATABASE_NAME,
+                final ClassPathXmlApplicationContext context = CouchDBInit.create(databaseUrl, databaseName,
                 "classpath:/fr/sirs/spring/application-context.xml",false,true);
                 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for(Plugin plugin : plugins){
                     updateProgress(inc++, total);
-                    updateMessage("Loading plugin : "+plugin.getLoadingMessage().getValue());
+                    updateMessage("Chargement du plugin "+plugin.getLoadingMessage().getValue());
                     plugin.load();
                 }                
                 
@@ -248,6 +267,7 @@ public class Loader extends Application {
                 updateMessage("Chargement terminé.");
                 Thread.sleep(400);
             } catch (Throwable ex) {
+                updateMessage("Une erreur inattendue est survenue : "+ex.getLocalizedMessage());
                 SIRS.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 cancel();
             }
@@ -261,8 +281,6 @@ public class Loader extends Application {
         installer.setDatabase(url);
         if(!installer.exists()){
             installer.call();
-            final DataSource ds = new DefaultDataSource(url);
-            Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
         }
     }
 

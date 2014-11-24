@@ -2,6 +2,7 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import fr.sirs.Loader;
 
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -13,16 +14,15 @@ import fr.sirs.maj.PluginInfo;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +44,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -52,6 +51,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
@@ -172,7 +173,8 @@ public class FXLauncherPane extends BorderPane {
     
     @FXML
     void updatePluginList(ActionEvent event) {
-        
+        final String majURL = uiMajServerURL.getText();
+        if (majURL == null || majURL.isEmpty()) return;
         try{
             serverURL = new URL(uiMajServerURL.getText());
             local = PluginInstaller.listLocalPlugins();
@@ -205,6 +207,14 @@ public class FXLauncherPane extends BorderPane {
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
         runDesktop(URL_LOCAL, db);
+        this.setDisabled(true);
+        Window currentWindow = getScene().getWindow();
+        if (currentWindow instanceof Stage) {
+            ((Stage)currentWindow).close();
+        } else {
+            currentWindow.hide();
+        }
+        
     }
 
     @FXML
@@ -344,48 +354,29 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void updateApp(ActionEvent event) {
-        final PluginInfo corePlugin = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
-        if(corePlugin != null){
-            PluginInstaller.install(serverURL, corePlugin);
+        try {
+            restartCore();
+            final PluginInfo corePlugin = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
+            if(corePlugin != null){
+                PluginInstaller.install(serverURL, corePlugin);
+            }
+        } catch (URISyntaxException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
         
     private static void runDesktop(final String serverUrl, final String database){
-        new Thread(){
-            @Override
-            public void run() {
-                final File folder = new File(".");
-                final File[] sub = folder.listFiles();
-                File desktopFile = null;
-                String name = "";
-                for(File f : sub){
-                    if(f.getName().toLowerCase().startsWith("desktop")){
-                        desktopFile = f;
-                        name = f.getName();
-                    }
-                }
-
                 try {
-                    final Properties prop = new Properties();
-                    prop.setProperty("url", serverUrl);
-                    prop.setProperty("database", database);
-                    prop.store(new FileOutputStream(new File("params.run")), "");
-                    Desktop.getDesktop().open(desktopFile);
-                    System.exit(0);
+                    //Loader.main(new String[]{serverUrl, database});
+                    new Loader(serverUrl, database).start(null);
+                    //System.exit(0);
                     
-                    //new Alert(Alert.AlertType.ERROR, "java -jar "+name+" \""+serverUrl+"\" \""+database+"\"").showAndWait();
-                    //Runtime.getRuntime().exec("java -jar "+desktopFile.getAbsolutePath()+" "+serverUrl+" "+database);
-                    //Runtime.getRuntime().exec(new String[]{"java","-jar",name,serverUrl,database});
-                    //ProcessBuilder pb = new ProcessBuilder("java","-jar",desktopFile.getAbsolutePath(), serverUrl, database);
-                    //pb.start();
-                    
-                } catch (IOException ex) {
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Cannot run desktop application with database "+serverUrl+":"+database, ex);
                     new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
-                    ex.printStackTrace();
                 }
-            }
-            
-        }.start();
         
     }
     
@@ -418,6 +409,18 @@ public class FXLauncherPane extends BorderPane {
         return dbs;
     }
     
+    private static void restartCore() throws URISyntaxException, IOException {
+        final String javaBin = Paths.get(System.getProperty("java.home"), "bin", "java")
+                .toAbsolutePath().toString();
+        final String applJar = Paths.get(
+                Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                .toAbsolutePath().toString();
+
+        final ProcessBuilder builder = new ProcessBuilder(
+                javaBin + (applJar.matches("(?i).*\\.jar")? " -jar" : "") +" "+ applJar);
+        builder.start();
+        //System.exit(0);
+    }
     
     private final class UpdateCell extends TableCell<PluginInfo, String>{
 
