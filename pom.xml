@@ -16,11 +16,9 @@
   <name>SIRS</name>
 
   <organization>
-      <name>Geomatys</name>
+    <name>Geomatys</name>
   </organization>
-    <!--
-    External dependencies inherited by all modules.
-    -->
+  <!-- External dependencies inherited by all modules. -->
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -32,11 +30,11 @@
 
 
 
-    <!-- =========================================================== -->
-    <!--     Global project parameters                               -->
-    <!-- =========================================================== -->
+  <!-- =========================================================== -->
+  <!-- Global project parameters -->
+  <!-- =========================================================== -->
   <properties>
-        <!-- Define parent projects versions -->
+    <!-- Define parent projects versions -->
     <geoapi.version>3.1-SNAPSHOT</geoapi.version>
     <sis.version>0.5-jdk7-SNAPSHOT</sis.version>
     <geotoolkit.version>4.x-SNAPSHOT</geotoolkit.version>
@@ -47,12 +45,10 @@
   </properties>
 
 
-    <!--
-    Optional dependencies. These dependencies are not automatically inherited
-    by parameters modules. But if a child module declare one of those depencies
-    without specifying any number of version, then the version by default will
-    be the one declared below.
-    -->
+  <!-- Optional dependencies. These dependencies are not automatically inherited 
+    by parameters modules. But if a child module declare one of those depencies 
+    without specifying any number of version, then the version by default will 
+    be the one declared below. -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -70,14 +66,12 @@
 
 
 
-    <!--
-    Repositories where to find dependencies. A directory http://*.maven.org/
-    is implicit. One can find the necessary dependencies for Maven itself, and
-    some usual dependencies as the JDBC driver for PostgreSQL. The directory
-    "GeotoolKit" contains JARs of GeotoolKit as well as some needed dependencies
-    for GeotoolKit but not published on the Maven repository, for example the
-    UCAR library for the reading of NetCDF files.
-  -->
+  <!-- Repositories where to find dependencies. A directory http://*.maven.org/ 
+    is implicit. One can find the necessary dependencies for Maven itself, and 
+    some usual dependencies as the JDBC driver for PostgreSQL. The directory 
+    "GeotoolKit" contains JARs of GeotoolKit as well as some needed dependencies 
+    for GeotoolKit but not published on the Maven repository, for example the 
+    UCAR library for the reading of NetCDF files. -->
   <repositories>
     <repository>
       <id>geotoolkit</id>
@@ -100,26 +94,23 @@
       </snapshots>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
-      <pluginRepository>
-          <id>geomatys</id>
-          <name>geomatys</name>
-          <url>http://dev.geomatys.com/nexus/content/groups/public/</url>
-      </pluginRepository>
+    <pluginRepository>
+      <id>geomatys</id>
+      <name>geomatys</name>
+      <url>http://dev.geomatys.com/nexus/content/groups/public/</url>
+    </pluginRepository>
   </pluginRepositories>
 
-    <!--
-    Configuration of the compiler and archiver. For each JAR file, an entry "class-path"
-    will be added in "META-INF/MANIFEST.MF" with the list of every used dependencies.
-    Furthermore, these dependencies will be copied in the directory "target/binaries"
-    for convenience (this task is done by an owned Geotools' plugin). These combined
-    functionnalites allow to launch an application easily by specifying the final JAR,
-    without specifying any dependencies in the "classpath".
-
-    http://maven.apache.org/plugins/index.html
-    http://repo1.maven.org/maven2/org/apache/maven/plugins/
-  -->
+  <!-- Configuration of the compiler and archiver. For each JAR file, an 
+    entry "class-path" will be added in "META-INF/MANIFEST.MF" with the list 
+    of every used dependencies. Furthermore, these dependencies will be copied 
+    in the directory "target/binaries" for convenience (this task is done by 
+    an owned Geotools' plugin). These combined functionnalites allow to launch 
+    an application easily by specifying the final JAR, without specifying any 
+    dependencies in the "classpath". http://maven.apache.org/plugins/index.html 
+    http://repo1.maven.org/maven2/org/apache/maven/plugins/ -->
   <build>
     <pluginManagement>
       <plugins>
@@ -143,6 +134,11 @@
           <artifactId>javafx-maven-plugin</artifactId>
           <version>8.1.2</version>
         </plugin>
+        <plugin>
+          <groupId>com.geomatys.maven</groupId>
+          <artifactId>maven-fxmodel-plugin</artifactId>
+          <version>0.2.5-SNAPSHOT</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -152,10 +148,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.8</source>        <!-- The -source argument for the Java compiler.   -->
-          <target>1.8</target>        <!-- The -target argument for the Java compiler.   -->
-          <debug>true</debug>         <!-- Whether to include debugging information.     -->
-          <optimize>true</optimize>   <!-- Whether to optimize the compiled code.        -->
+          <source>1.8</source>        <!-- The -source argument for the Java compiler. -->
+          <target>1.8</target>        <!-- The -target argument for the Java compiler. -->
+          <debug>true</debug>         <!-- Whether to include debugging information. -->
+          <optimize>true</optimize>   <!-- Whether to optimize the compiled code. -->
           <encoding>${project.encoding}</encoding>  <!-- The -encoding argument for the Java compiler. -->
         </configuration>
       </plugin>
@@ -180,7 +176,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
     </plugins>
 
 
