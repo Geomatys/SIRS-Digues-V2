@@ -167,7 +167,7 @@ class OuvrageRevancheImporter extends GenericStructureImporter<OuvrageRevanche> 
 
     /**
      *
-     * @return A map containing all Crete instances accessibles from the
+     * @return A map containing all OuvrageRevanche instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
@@ -197,7 +197,7 @@ class OuvrageRevancheImporter extends GenericStructureImporter<OuvrageRevanche> 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_FONDATION.toString();
+        return DbImporter.TableName.SYS_EVT_OUVRAGE_REVANCHE.toString();
     }
 
     @Override

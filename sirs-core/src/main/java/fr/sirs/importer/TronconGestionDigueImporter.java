@@ -273,11 +273,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getStructuresByTronconId();
 
         
-        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
-        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));
+//        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
+//        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));
         
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
-            System.out.println("Je rentre !"+tronconDigue.getId());
+//            System.out.println("Je rentre !"+tronconDigue.getId());
             List<Objet> structures = tronconDigue.getStructures();
             
             if(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
@@ -287,9 +287,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
 
             //Update the repository
             tronconDigueRepository.update(tronconDigue);
-            for(Objet o : tronconDigue.getStructures()){
-                System.out.println("Structures du troncon : ("+tronconDigue.getId()+") "+o);
-            }
+//            for(Objet o : tronconDigue.getStructures()){
+//                System.out.println("Structures du troncon : ("+tronconDigue.getId()+") "+o);
+//            }
         }
         
         //reconstruction des geometries des structures

@@ -180,7 +180,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 nouveauDesordre=false;
             }
             else{
-                System.out.println("Nouveau désordre !!");
+//                System.out.println("Nouveau désordre !!");
                 desordre = new Desordre();
                 nouveauDesordre=true;
             }
