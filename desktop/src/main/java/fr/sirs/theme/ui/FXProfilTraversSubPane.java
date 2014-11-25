@@ -34,25 +34,14 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
     
     private ProfilTravers profilTravers;
     private ObservableList<LeveeProfilTravers> leves;
-//    private final ObjectProperty<Positionable> cretePotitionable = new SimpleObjectProperty<>();
+    
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
     
     private final ProfilTraversRepository profilTraversRepository;
     private final LeveProfilTraversTable levesTable = new LeveProfilTraversTable();
     
-//    // Propriétés de Positionnable
-//    @FXML FXPositionnablePane uiPositionnable;
-//    
-//    // Propriétés de Structure
-//    @FXML HTMLEditor uiComment;
-//    @FXML FXDateField uiDebut;
-//    @FXML FXDateField uiFin;
-//    @FXML ComboBox<TronconDigue> uiTroncons;
-//    
-//    // Propriétés de Crête
-//    @FXML FXNumberSpinner uiEpaisseur;
-//    @FXML FXNumberSpinner uiCouches;
+    
     @FXML private TextField uiLibelle;
     @FXML private VBox uiVbox;
     
@@ -60,10 +49,6 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         SIRS.loadFXML(this);
         final Session session = Injector.getBean(Session.class);
         profilTraversRepository = session.getProfilTraversRepository();
-//        cretePotitionable.addListener((ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) -> {
-//            initFields();
-//        });
-//        uiPositionnable.disableFieldsProperty().bind(disableFields);
     }
     
     public FXProfilTraversSubPane(final ProfilTravers profilTravers){
@@ -74,56 +59,6 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
             
     private void initFields(){
         
-//        // Propriétés héritées de Positionnable
-//        uiPositionnable.positionableProperty().bindBidirectional(cretePotitionable);
-//        final ProfilTravers crete = (Crete) cretePotitionable.get();
-//        
-//        // Propriétés héritées de Structure
-//        final StringConverter<TronconDigue> tronconsConverter = new StringConverter<TronconDigue>() {
-//
-//            @Override
-//            public String toString(TronconDigue object) {
-//                if(object == null) return "Pas de tronçon.";
-//                return object.getLibelle()+ " ("+object.getId()+ ")";
-//            }
-//
-//            @Override
-//            public TronconDigue fromString(String string) {
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//            }
-//        };
-//        
-//        final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
-//        TronconDigue troncon=null;
-//        
-//        for(final TronconDigue t : profilTraversRepository.getAll()){
-//            troncons.add(t);
-//            if(t.getId().equals(crete.getTroncon())) troncon=t;
-//        }
-//        troncons.add(null);
-//        uiTroncons.setConverter(tronconsConverter);
-//        uiTroncons.setItems(troncons);
-//        uiTroncons.setValue(troncon);
-//        uiTroncons.disableProperty().bind(disableFields);
-//        uiTroncons.valueProperty().addListener(new ChangeListener<TronconDigue>() {
-//
-//            @Override
-//            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-//                tronconChanged.set(true);
-//            }
-//        });
-//        
-//        uiComment.setHtmlText(crete.getCommentaire());
-//        uiComment.disableProperty().bind(disableFields);
-//        
-//        uiDebut.valueProperty().bindBidirectional(crete.date_debutProperty());
-//        uiDebut.disableProperty().bind(disableFields);
-//        
-//        uiFin.valueProperty().bindBidirectional(crete.date_finProperty());
-//        uiFin.disableProperty().bind(disableFields);
-        
-        
-        // Propriétés propres à la Crête
         uiLibelle.textProperty().bindBidirectional(profilTravers.libelleProperty());
         uiLibelle.disableProperty().bind(disableFields);
         
@@ -131,18 +66,7 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         uiVbox.getChildren().add(levesTable);
         levesTable.updateTable();
         levesTable.editableProperty().bind(disableFields.not());
-//        for(final LeveeProfilTravers leve : leves){
-//            //bonjour
-//            uiLeves.getChildren().add(new FXLeveProfilTraversSubPane(leve));
-//            uiLeves.getChildren().add(new Separator(Orientation.HORIZONTAL));
-//        }
-//        uiEpaisseur.valueProperty().bindBidirectional(crete.epaisseurProperty());
-//        uiEpaisseur.disableProperty().bind(disableFields);
-//        
-//        uiCouches.numberTypeProperty().set(NumberField.NumberType.Integer);
-//        uiCouches.minValueProperty().set(0);
-//        uiCouches.valueProperty().bindBidirectional(crete.num_coucheProperty());
-//        uiCouches.disableProperty().bind(disableFields);
+        
     }
 
     @Override
@@ -154,12 +78,6 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
     public void preSave() {
         profilTravers.setDateMaj(LocalDateTime.now());
         profilTraversRepository.update(profilTravers);
-//        uiPositionnable.preSave();
-//        if(uiTroncons.getValue()!=null){
-//            crete.setTroncon(uiTroncons.getValue().getId());
-//        } else {
-//            crete.setTroncon(null);
-//        }
     }
 
     @Override

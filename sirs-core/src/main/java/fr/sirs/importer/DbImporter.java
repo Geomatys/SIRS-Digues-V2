@@ -233,9 +233,9 @@ public class DbImporter {
 //     LIGNE_EAU_JOURNAL,
 //     LIGNE_EAU_MESURES_PRZ,
 //     LIGNE_EAU_MESURES_XYZ,
-//     MARCHE,
-//     MARCHE_FINANCEUR,
-//     MARCHE_MAITRE_OEUVRE,
+     MARCHE, // A FAIRE
+     MARCHE_FINANCEUR, // A FAIRE
+     MARCHE_MAITRE_OEUVRE, // A FAIRE
 //     METEO,
 //     MONTEE_DES_EAUX,
 //     MONTEE_DES_EAUX_JOURNAL,
@@ -300,7 +300,7 @@ public class DbImporter {
      SYS_EVT_DESORDRE,
 //     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON,
 //     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
-//     SYS_EVT_DOCUMENT_MARCHE,
+     SYS_EVT_DOCUMENT_MARCHE, // A FAIRE
 //     SYS_EVT_EMPRISE_COMMUNALE,
 //     SYS_EVT_EMPRISE_SYNDICAT,
      SYS_EVT_EPIS,
@@ -312,7 +312,7 @@ public class DbImporter {
 //     SYS_EVT_LAISSE_CRUE,
      SYS_EVT_LARGEUR_FRANC_BORD,
 //     SYS_EVT_LIGNE_EAU,
-//     SYS_EVT_MARCHE,
+     SYS_EVT_MARCHE, // A FAIRE
 //     SYS_EVT_MONTEE_DES_EAUX_HYDRO,
 //     SYS_EVT_OUVERTURE_BATARDABLE,
 //     SYS_EVT_OUVRAGE_PARTICULIER,
@@ -322,7 +322,7 @@ public class DbImporter {
 //     SYS_EVT_PHOTO_LOCALISEE_EN_PR,
      SYS_EVT_PIED_DE_DIGUE,
 //     SYS_EVT_PIED_FRONT_FRANC_BORD,
-//     SYS_EVT_PLAN_TOPO,
+//     SYS_EVT_PLAN_TOPO, // Vide en Isère / Inexistante dans le Rhône ?
 //     SYS_EVT_POINT_ACCES,
 //     SYS_EVT_PRESTATION,
      SYS_EVT_PROFIL_EN_LONG,
@@ -687,8 +687,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -700,7 +700,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_XYZ.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.MARCHE_MAITRE_OEUVRE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -716,7 +716,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_XYZ.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.MARCHE_MAITRE_OEUVRE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -726,12 +726,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_SOMMET_RISBERME.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.MARCHE_MAITRE_OEUVRE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_XYZ.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.MARCHE_MAITRE_OEUVRE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

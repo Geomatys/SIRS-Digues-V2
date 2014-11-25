@@ -39,27 +39,11 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
     private LeveeProfilTravers leveProfilTravers;
     protected Map<String, Object> resources;
     private final Session session;
-//    private final ObjectProperty<Positionable> cretePotitionable = new SimpleObjectProperty<>();
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
     
-    private final ProfilTraversRepository profilTraversRepository;
-    private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
-    
     private boolean initializing = false;
     
-//    // Propriétés de Positionnable
-//    @FXML FXPositionnablePane uiPositionnable;
-//    
-//    // Propriétés de Structure
-//    @FXML HTMLEditor uiComment;
-//    @FXML FXDateField uiDebut;
-//    @FXML FXDateField uiFin;
-//    @FXML ComboBox<TronconDigue> uiTroncons;
-//    
-//    // Propriétés de Crête
-//    @FXML FXNumberSpinner uiEpaisseur;
-//    @FXML FXNumberSpinner uiCouches;
     @FXML VBox uiLeves;
     @FXML HTMLEditor uiComment;
     @FXML FXDateField uiDateMiseAJour;
@@ -75,12 +59,6 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
     private FXLeveeProfilTraversSubPane(){
         SIRS.loadFXML(this);
         session = Injector.getBean(Session.class);
-        profilTraversRepository = session.getProfilTraversRepository();
-        refOrigineProfilTraversRepository = session.getRefOrigineProfilTraversRepository();
-//        cretePotitionable.addListener((ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) -> {
-//            initFields();
-//        });
-//        uiPositionnable.disableFieldsProperty().bind(disableFields);
     }
     
     public FXLeveeProfilTraversSubPane(final LeveeProfilTravers leveProfilTravers,
@@ -93,55 +71,6 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
             
     private void initFields(){
         initializing = true;
-        
-//        // Propriétés héritées de Positionnable
-//        uiPositionnable.positionableProperty().bindBidirectional(cretePotitionable);
-//        final ProfilTravers crete = (Crete) cretePotitionable.get();
-//        
-//        // Propriétés héritées de Structure
-//        final StringConverter<TronconDigue> tronconsConverter = new StringConverter<TronconDigue>() {
-//
-//            @Override
-//            public String toString(TronconDigue object) {
-//                if(object == null) return "Pas de tronçon.";
-//                return object.getLibelle()+ " ("+object.getId()+ ")";
-//            }
-//
-//            @Override
-//            public TronconDigue fromString(String string) {
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//            }
-//        };
-//        
-//        final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
-//        TronconDigue troncon=null;
-//        
-//        for(final TronconDigue t : profilTraversRepository.getAll()){
-//            troncons.add(t);
-//            if(t.getId().equals(crete.getTroncon())) troncon=t;
-//        }
-//        troncons.add(null);
-//        uiTroncons.setConverter(tronconsConverter);
-//        uiTroncons.setItems(troncons);
-//        uiTroncons.setValue(troncon);
-//        uiTroncons.disableProperty().bind(disableFields);
-//        uiTroncons.valueProperty().addListener(new ChangeListener<TronconDigue>() {
-//
-//            @Override
-//            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-//                tronconChanged.set(true);
-//            }
-//        });
-//        
-//        uiComment.setHtmlText(crete.getCommentaire());
-//        uiComment.disableProperty().bind(disableFields);
-//        
-//        uiDebut.valueProperty().bindBidirectional(crete.date_debutProperty());
-//        uiDebut.disableProperty().bind(disableFields);
-//        
-//        uiFin.valueProperty().bindBidirectional(crete.date_finProperty());
-//        uiFin.disableProperty().bind(disableFields);
-        
         
         // Propriétés propres à la Crête
         uiDateLeve.valueProperty().bindBidirectional(leveProfilTravers.dateLeveeProperty());
