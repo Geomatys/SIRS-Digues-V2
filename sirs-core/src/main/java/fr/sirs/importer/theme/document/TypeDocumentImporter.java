@@ -2,6 +2,7 @@ package fr.sirs.importer.theme.document;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
@@ -116,8 +117,8 @@ public class TypeDocumentImporter extends GenericImporter {
 //                    classe = .class; break;
 //                case SYS_EVT_FICHE_INSPECTION_VISUELLE:
 //                    classe = .class; break;
-//                case SYS_EVT_JOURNAL:
-//                    classe = .class; break;
+                case SYS_EVT_JOURNAL:
+                    classe = ArticleJournal.class; break;
 //                case SYS_EVT_MARCHE:
 //                    classe = .class; break;
 //                case SYS_EVT_PLAN_TOPO:

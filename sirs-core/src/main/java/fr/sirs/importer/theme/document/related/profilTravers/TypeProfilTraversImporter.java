@@ -2,7 +2,6 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.model.RefTypeProfilTravers;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;

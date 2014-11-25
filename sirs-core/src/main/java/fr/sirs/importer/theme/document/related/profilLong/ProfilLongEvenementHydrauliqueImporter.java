@@ -1,11 +1,9 @@
 package fr.sirs.importer.theme.document.related.profilLong;
 
-import fr.sirs.importer.theme.document.related.profilTravers.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.ProfilLongEvenementHydraulique;
-import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;

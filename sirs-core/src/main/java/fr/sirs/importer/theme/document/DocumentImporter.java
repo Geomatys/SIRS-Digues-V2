@@ -3,6 +3,7 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.ProfilLongRepository;
@@ -25,6 +26,7 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.journal.ArticleJournalImporter;
 import fr.sirs.importer.theme.document.related.profilLong.ProfilLongImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
@@ -49,6 +51,7 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final ProfilTraversTronconImporter profilTraversTronconImporter;
     private final ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
+    private final ArticleJournalImporter articleJournalImporter;
     
     private final TypeDocumentImporter typeDocumentImporter;
     
@@ -56,6 +59,7 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final DocumentProfilLongImporter documentProfilLongImporter;
     private final DocumentProfilTraversImporter documentProfilTraversImporter;
     private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
+    private final DocumentJournalImporter documentJournalImporter;
     
     private final List<GenericDocumentImporter> documentImporters = new ArrayList<>();
     
@@ -66,6 +70,7 @@ public class DocumentImporter extends GenericDocumentImporter {
             final ProfilTraversRepository profilTraversRepository,
             final ProfilLongRepository profilLongRepository,
             final RapportEtudeRepository rapportEtudeRepository,
+            final ArticleJournalRepository articleJournalRepository,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter,
@@ -102,6 +107,9 @@ public class DocumentImporter extends GenericDocumentImporter {
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector, rapportEtudeRepository);
         
+        articleJournalImporter = new ArticleJournalImporter(accessDatabase, 
+                couchDbConnector, articleJournalRepository);
+        
         documentConventionImporter = new DocumentConventionImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
@@ -111,6 +119,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
+        documentImporters.add(documentProfilTraversImporter);
         documentProfilLongImporter = new DocumentProfilLongImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
@@ -121,6 +130,11 @@ public class DocumentImporter extends GenericDocumentImporter {
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, rapportEtudeImporter);
         documentImporters.add(documentRapportEtudeImporter);
+        documentJournalImporter = new DocumentJournalImporter(accessDatabase, 
+                couchDbConnector, documentRepository, borneDigueImporter, 
+                systemeReperageImporter, tronconGestionDigueImporter, 
+                articleJournalImporter);
+        documentImporters.add(documentJournalImporter);
     }
     
     private enum DocumentColumns {
@@ -152,7 +166,7 @@ public class DocumentImporter extends GenericDocumentImporter {
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
-//        ID_ARTICLE_JOURNAL,
+        ID_ARTICLE_JOURNAL,
         ID_PROFIL_EN_TRAVERS,
 //        ID_PROFIL_EN_LONG, // Utilisation interdite ! C'est ID_DOC qui est utilisé par les profils en long !
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,

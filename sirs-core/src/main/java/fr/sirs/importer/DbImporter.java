@@ -7,6 +7,7 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.Repository;
+import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.ConventionRepository;
@@ -114,6 +115,7 @@ public class DbImporter {
     private final ProfilLongRepository profilLongRepository;
     private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
     private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
+    private final ArticleJournalRepository articleJournalRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -553,6 +555,8 @@ public class DbImporter {
         repositories.add(refPositionProfilLongSurDigueRepository);
         refOrigineProfilLongRepository = new RefOrigineProfilLongRepository(couchDbConnector);
         repositories.add(refOrigineProfilLongRepository);
+        articleJournalRepository = new ArticleJournalRepository(couchDbConnector);
+        repositories.add(articleJournalRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -632,6 +636,7 @@ public class DbImporter {
                 documentRepository, 
                 conventionRepository, profilTraversRepository, 
                 profilLongRepository, rapportEtudeRepository, 
+                articleJournalRepository,
                 borneDigueImporter, intervenantImporter, organismeImporter,
                 systemeReperageImporter, 
                 evenementHydrauliqueImporter,
@@ -708,7 +713,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_EVT_HYDRAU.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.DOCUMENT.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -724,7 +729,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_EVT_HYDRAU.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -734,12 +739,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_EVT_HYDRAU.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.PROFIL_EN_LONG_EVT_HYDRAU.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.DOCUMENT.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
