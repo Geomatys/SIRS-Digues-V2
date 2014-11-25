@@ -266,7 +266,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                 nouveauDocument=false;
             }
             else{
-                System.out.println("Nouveau document !!");
+//                System.out.println("Nouveau document !!");
                 document = new Document();
                 nouveauDocument=true;
             }
@@ -369,10 +369,10 @@ public class DocumentImporter extends GenericDocumentImporter {
                     
                 }
                 else {
-                    System.out.println("Type de document non pris en charge : ID = " + row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+//                    System.out.println("Type de document non pris en charge : ID = " + row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
                 }
             } else {
-                System.out.println("Type de document inconnu !");
+//                System.out.println("Type de document inconnu !");
             }
                 
             document.setTypeDocumentId(typesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString())).getId());

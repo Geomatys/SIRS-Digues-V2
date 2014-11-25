@@ -24,7 +24,9 @@ import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefMateriauRepository;
 import fr.sirs.core.component.RefNatureRepository;
+import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
+import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.component.RefRiveRepository;
@@ -110,6 +112,8 @@ public class DbImporter {
     private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
     private final RefTypeDocumentRepository refTypeDocumentRepository;
     private final ProfilLongRepository profilLongRepository;
+    private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
+    private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -545,6 +549,10 @@ public class DbImporter {
         repositories.add(refTypeDocumentRepository);
         profilLongRepository = new ProfilLongRepository(couchDbConnector);
         repositories.add(profilLongRepository);
+        refPositionProfilLongSurDigueRepository = new RefPositionProfilLongSurDigueRepository(couchDbConnector);
+        repositories.add(refPositionProfilLongSurDigueRepository);
+        refOrigineProfilLongRepository = new RefOrigineProfilLongRepository(couchDbConnector);
+        repositories.add(refOrigineProfilLongRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -687,8 +695,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);

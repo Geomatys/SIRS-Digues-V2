@@ -364,7 +364,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 try {
                     final Date date = row.getDate(DesordreColumns.DATE_FIN_VAL.toString());
                     if (date != null) {
-                        System.out.println(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                        System.out.println("desordre Id : "+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
                         final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
                         if (desordre.getDate_fin() == null) {
                             desordre.setDate_fin(localDate);

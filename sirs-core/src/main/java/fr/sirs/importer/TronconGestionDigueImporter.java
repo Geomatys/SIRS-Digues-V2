@@ -44,7 +44,7 @@ import org.ektorp.CouchDbConnector;
 public class TronconGestionDigueImporter extends GenericImporter {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
-    private Map<TronconDigue, Integer> tronconsIds = null;
+    private Map<String, Integer> tronconsIds = null;
     
     private TronconDigueGeomImporter tronconDigueGeomImporter;
     private TypeRiveImporter typeRiveImporter;
@@ -197,12 +197,13 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
 
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            tronconsDigue.put(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()), tronconDigue);
-            tronconsIds.put(tronconDigue, row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
-
             // Register the troncon to retrieve a CouchDb ID.
             tronconDigueRepository.add(tronconDigue);
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            tronconsDigue.put(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()), tronconDigue);
+            tronconsIds.put(tronconDigue.getId(), row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+
 
             // Set simple references.
             List<ContactTroncon> contacts;
@@ -271,23 +272,24 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getStructuresByTronconId();
         final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getStructuresByTronconId();
 
+        
+        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
+        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));
+        
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
+            System.out.println("Je rentre !"+tronconDigue.getId());
             List<Objet> structures = tronconDigue.getStructures();
-            if(structures==null){
-                structures = new ArrayList<>();
-                tronconDigue.setStructures(structures);
-            }
-
-//            for(List<Objet> sbt : structuresByTroncon.values()){
-//                for(Objet o : sbt) System.out.println(o.getClass().getCanonicalName());
-//            }
-            if(structuresByTroncon.get(tronconsIds.get(tronconDigue))!=null)
-                structures.addAll(structuresByTroncon.get(tronconsIds.get(tronconDigue)));
-            if(desordresByTroncon.get(tronconsIds.get(tronconDigue))!=null)
-                structures.addAll(desordresByTroncon.get(tronconsIds.get(tronconDigue)));
+            
+            if(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
+                structures.addAll(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
+            if(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
+                structures.addAll(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
 
             //Update the repository
             tronconDigueRepository.update(tronconDigue);
+            for(Objet o : tronconDigue.getStructures()){
+                System.out.println("Structures du troncon : ("+tronconDigue.getId()+") "+o);
+            }
         }
         
         //reconstruction des geometries des structures
