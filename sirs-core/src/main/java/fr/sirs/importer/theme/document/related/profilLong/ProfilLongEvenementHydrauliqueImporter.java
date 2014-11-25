@@ -39,7 +39,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
         this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
     }
     
-    public Map<Integer, List<ProfilLongEvenementHydraulique>> getEvenementHydrauliqueByLeveId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<ProfilLongEvenementHydraulique>> getEvenementHydrauliqueByProfilId() throws IOException, AccessDbImporterException{
         if(evenementHydrauByProfilLongId==null) compute();
         return evenementHydrauByProfilLongId;
     }
@@ -84,13 +84,13 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
                 profilLongEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(ProfilLongEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())).getId());
             }
             
-//            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString())!=null){
-//                profilLongEvenementHydraulique.setPrDebut(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString()).floatValue());
-//            }
-//            
-//            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString())!=null){
-//                profilLongEvenementHydraulique.setPrFin(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString()).floatValue());
-//            }
+            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString())!=null){
+                profilLongEvenementHydraulique.setPrDebut(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString()).floatValue());
+            }
+            
+            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString())!=null){
+                profilLongEvenementHydraulique.setPrFin(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString()).floatValue());
+            }
             
             if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString())!=null){
                 profilLongEvenementHydraulique.setDebitPremerDebordement(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString()).floatValue());

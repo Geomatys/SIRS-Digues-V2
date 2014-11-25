@@ -86,7 +86,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         
         profilLongImporter = new ProfilLongImporter(accessDatabase, 
                 couchDbConnector, profilLongRepository, organismeImporter, 
-                typeSystemeReleveProfilImporter);
+                evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
         
         profilTraversTronconImporter = new ProfilTraversTronconImporter(
                 accessDatabase, couchDbConnector, this);
@@ -115,7 +115,7 @@ public class DocumentImporter extends GenericDocumentImporter {
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilLongImporter);
-        documentImporters.add(documentProfilTraversImporter);
+        documentImporters.add(documentProfilLongImporter);
         documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 

@@ -75,6 +75,6 @@ class TypePositionProfilLongImporter extends GenericImporter {
             }
             typesPositionProfilLong.put(row.getInt(String.valueOf(TypeProfilTraversColumns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())), typePositionProfilLong);
         }
-//        couchDbConnector.executeBulk(typesPositionProfilLong.values());
+        couchDbConnector.executeBulk(typesPositionProfilLong.values());
     }
 }

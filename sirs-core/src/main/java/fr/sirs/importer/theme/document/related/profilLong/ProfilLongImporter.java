@@ -6,6 +6,7 @@ import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
+import fr.sirs.core.model.ProfilLongEvenementHydraulique;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
@@ -13,6 +14,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ public class ProfilLongImporter extends GenericImporter {
     private TypePositionProfilLongImporter typePositionProfilLongImporter;
     private TypeOrigineProfilLongImporter typeOrigineProfilLongImporter;
     private ProfilLongPointXYZImporter profilTraversPointXYZImporter;
+    private ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
     
     private OrganismeImporter organismeImporter;
     
@@ -47,11 +50,14 @@ public class ProfilLongImporter extends GenericImporter {
             final CouchDbConnector couchDbConnector,
             final ProfilLongRepository profilTraversRepository,
             final OrganismeImporter organismeImporter,
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter){
         this(accessDatabase, couchDbConnector);
         this.profilLongRepository = profilTraversRepository;
         this.organismeImporter = organismeImporter;
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
+        this.profilLongEvenementHydrauliqueImporter = new ProfilLongEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
         this.typePositionProfilLongImporter = new TypePositionProfilLongImporter(
                 accessDatabase, couchDbConnector);
         this.typeOrigineProfilLongImporter = new TypeOrigineProfilLongImporter(
@@ -59,7 +65,7 @@ public class ProfilLongImporter extends GenericImporter {
         profilTraversPointXYZImporter = new ProfilLongPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, ProfilLong> getProfilTravers() throws IOException, AccessDbImporterException{
+    public Map<Integer, ProfilLong> getProfilLong() throws IOException, AccessDbImporterException{
         if(profils==null) compute();
         return profils;
     }
@@ -106,6 +112,7 @@ public class ProfilLongImporter extends GenericImporter {
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypePositionProfilLong();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeOrigineProfilLong();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<ProfilLongEvenementHydraulique>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -147,6 +154,10 @@ public class ProfilLongImporter extends GenericImporter {
             
             if(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
                 profil.setLeveePoints(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
+            }
+            
+            if(evenementsHydrauliques.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setProfilLongEvenementHydraulique(evenementsHydrauliques.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
             }
             
             

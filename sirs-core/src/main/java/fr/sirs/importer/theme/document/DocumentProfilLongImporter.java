@@ -141,7 +141,7 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, ProfilLong> profilsLong = profilLongImporter.getProfilTravers();
+        final Map<Integer, ProfilLong> profilsLong = profilLongImporter.getProfilLong();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
