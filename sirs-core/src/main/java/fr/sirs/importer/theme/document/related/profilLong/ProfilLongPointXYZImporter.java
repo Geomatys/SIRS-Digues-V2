@@ -1,6 +1,5 @@
 package fr.sirs.importer.theme.document.related.profilLong;
 
-import fr.sirs.importer.theme.document.related.profilTravers.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LeveePoints;
@@ -59,7 +58,7 @@ class ProfilLongPointXYZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ.toString();
+        return DbImporter.TableName.PROFIL_EN_LONG_XYZ.toString();
     }
 
     @Override

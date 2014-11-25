@@ -7,6 +7,7 @@ import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.RefOrigineProfilLong;
+import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -72,7 +73,7 @@ public class ProfilLongImporter extends GenericImporter {
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
         REFERENCE_CALQUE,
-//        ID_TYPE_POSITION_PROFIL_EN_LONG, // A faire !
+        ID_TYPE_POSITION_PROFIL_EN_LONG,
         ID_TYPE_ORIGINE_PROFIL_EN_LONG,
 //        ID_DOC_RAPPORT_ETUDES,
         COMMENTAIRE,
@@ -102,7 +103,7 @@ public class ProfilLongImporter extends GenericImporter {
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeSystemeReleve();
-//        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeProfilTravers();
+        final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypePositionProfilLong();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeOrigineProfilLong();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
     
@@ -140,9 +141,13 @@ public class ProfilLongImporter extends GenericImporter {
                 profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(ProfilLongColumns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());
             }
             
-//            if(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
-//                profil.set(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
-//            }
+            if(row.getInt(ProfilLongColumns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())!=null){
+                profil.setPositionProfilLongSurDigueId(typesPositionProfil.get(row.getInt(ProfilLongColumns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())).getId());
+            }
+            
+            if(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setLeveePoints(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
+            }
             
             
             profil.setCommentaire(row.getString(ProfilLongColumns.COMMENTAIRE.toString()));
