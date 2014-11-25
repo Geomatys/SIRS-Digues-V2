@@ -10296,7 +10296,7 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_WMJlYF9DEeSu4tBL7n5h2g" red="255" green="255" blue="255"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_LVbTcF9DEeSu4tBL7n5h2g" name="PrDebut : EString" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_LVbTcF9DEeSu4tBL7n5h2g" name="PrDebut : EFloat = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLongEvenementHydraulique/PrDebut"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLongEvenementHydraulique/PrDebut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_OxULgF9DEeSu4tBL7n5h2g" labelAlignment="LEFT">
@@ -10307,7 +10307,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_PLAd4F9DEeSu4tBL7n5h2g" name="PrFin : EString" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_PLAd4F9DEeSu4tBL7n5h2g" name="PrFin : EFloat = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLongEvenementHydraulique/PrFin"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLongEvenementHydraulique/PrFin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_PLAd4V9DEeSu4tBL7n5h2g" labelAlignment="LEFT">
