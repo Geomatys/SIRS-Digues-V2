@@ -16,17 +16,23 @@ import fr.sirs.maj.PluginList;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -397,7 +403,7 @@ public class FXLauncherPane extends BorderPane {
         prefs.put("path", path.getAbsolutePath());
     }
  
-    private static List<String> listLocalDatabase(){
+    private static List<String> listLocalDatabase() {
         List<String> dbs = new ArrayList<>();
         
         try {
@@ -410,19 +416,79 @@ public class FXLauncherPane extends BorderPane {
     }
     
     private static void restartCore() throws URISyntaxException, IOException {
-        final String javaBin = Paths.get(System.getProperty("java.home"), "bin", "java")
-                .toAbsolutePath().toString();
-        final String applJar = Paths.get(
-                Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI())
-                .toAbsolutePath().toString();
+        final Pattern jarPattern = Pattern.compile("(?i).*\\.jar");
+        final Path javaHome = Paths.get(System.getProperty("java.home"));
+        final Path javaBin = javaHome.resolve("bin").resolve("java")
+                .toAbsolutePath();
 
-        final ProcessBuilder builder = new ProcessBuilder(
-                javaBin + (applJar.matches("(?i).*\\.jar")? " -jar" : "") +" "+ applJar);
+        /*
+         * If we cannot find java executable in java home, it means application
+         * has been deployed and started from a native package context. We have
+         * to find the native executable and launch it.
+         * Into native package, jre is located into : 
+         * $APP_DIR/runtime/jre
+         * Application executable should be named sirs-launcher* and located in :
+         * $APP_DIR/
+         * TODO : Find a better way to retrieve application executable
+         */
+        final List<String> args = new ArrayList<>();
+        if (!Files.isExecutable(javaBin)) {
+            final Path appDir = javaHome.getParent().getParent();
+            LOGGER.log(Level.INFO, "Application directory : " + appDir.toString());
+            // we seek for a sirs + something executable file which is not the
+            // uninstaller.
+            Optional<Path> appExec = Files.walk(appDir, 1).filter(path -> {
+                final String str = path.getFileName().toString();
+                return str.matches("(?i)sirs.*") && 
+                        !str.toLowerCase().contains("unins")
+                        && Files.isExecutable(path) 
+                        && Files.isRegularFile(path); // Check needed, cause a diectory can be marked executable...
+            }).findFirst();
+            if (appExec.isPresent()) {
+            LOGGER.log(Level.INFO, "Application executable " + appExec.toString());
+                args.add(appExec.get().toString());
+            } else {
+                throw new IOException("No executable file can be found to restart SIRS application.");
+            }
+
+        } else {
+            args.add(javaBin.toString());
+            String command = System.getProperty("sun.java.command");
+            /* If java command has not been saved (which is really unlikely to 
+             * happen), we must retrieve the Launcher application context (jar
+             * or class).
+             */
+            if (command == null || command.isEmpty()) {
+                final String applJar = Paths.get(
+                        Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .toAbsolutePath().toString();
+                if (jarPattern.matcher(applJar).matches()) {
+                    command = applJar;
+                } else {
+                    command = Launcher.class.getName();
+                }
+            } else {
+                final String[] splitted = command.split(" ");
+                if (splitted != null && splitted.length > 0) {
+                    command = splitted[0];
+                }
+            }
+            args.add("-classpath");
+            args.add(System.getProperty("java.class.path"));
+            LOGGER.log(Level.INFO, command);
+            if (jarPattern.matcher(command).matches()) {
+                args.add("-jar");
+            }
+            args.add(command);
+        }
+        
+        final ProcessBuilder builder = new ProcessBuilder(args);
+        builder.directory(new File(System.getProperty("user.dir")));
         builder.start();
-        //System.exit(0);
+        System.exit(0);
     }
     
-    private final class UpdateCell extends TableCell<PluginInfo, String>{
+    private final class UpdateCell extends TableCell<PluginInfo, String> {
 
         private final Button button = new Button("Install");
         private String name;
@@ -442,21 +508,22 @@ public class FXLauncherPane extends BorderPane {
         protected void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
             
-            if(empty){
+            if (empty) {
                 button.setDisable(true);
                 return;
             }
-            
+
             final PluginInfo localPlugin = local.getPluginInfo(item);
             final PluginInfo distantPlugin = distant.getPluginInfo(item);
 
-            if(localPlugin==null && distantPlugin==null){
+            if (localPlugin == null && distantPlugin == null) {
                 button.setDisable(true);
-            }if(localPlugin==null){
+            }
+            if (localPlugin == null) {
                 button.setDisable(false);
-            }else if(distantPlugin==null){
+            } else if (distantPlugin == null) {
                 button.setDisable(true);
-            }else{
+            } else {
                 button.setDisable(localPlugin.isOlderOrSame(distantPlugin));
             }
         }
