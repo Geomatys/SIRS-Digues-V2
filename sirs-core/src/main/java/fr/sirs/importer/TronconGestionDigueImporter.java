@@ -26,6 +26,7 @@ import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.geometry.GeometryImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -56,6 +57,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private BorneDigueImporter borneDigueImporter;
     private StructureImporter structureImporter;
     private DesordreImporter desordreImporter;
+    private GeometryImporter geometryImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -112,10 +114,16 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 borneDigueImporter, structureImporter,
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        this.geometryImporter = new GeometryImporter(accessDatabase, 
+                couchDbConnector, this, systemeReperageImporter, 
+                borneDigueImporter, organismeImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
+                typeNatureImporter, typeFonctionImporter);
     }
     
     public StructureImporter getStructureImporter(){return structureImporter;}
     public DesordreImporter getDesordreImporter(){return desordreImporter;}
+    public GeometryImporter getGeometryImporter(){return geometryImporter;}
 
     /* TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.
@@ -271,6 +279,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         // Set the references using the this very importer (Structures references TronconDigueId).
         final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getStructuresByTronconId();
         final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getStructuresByTronconId();
+        final Map<Integer, List<Objet>> geometriesByTroncon = geometryImporter.getStructuresByTronconId();
 
         
 //        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
@@ -284,6 +293,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 structures.addAll(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
             if(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
                 structures.addAll(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
+            if(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
+                structures.addAll(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId())));
 
             //Update the repository
             tronconDigueRepository.update(tronconDigue);

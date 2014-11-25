@@ -1,14 +1,10 @@
 package fr.sirs.importer.theme.document.related.journal;
 
-import fr.sirs.importer.theme.document.related.rapportEtude.*;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.ArticleJournalRepository;
-import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
 import java.time.LocalDateTime;

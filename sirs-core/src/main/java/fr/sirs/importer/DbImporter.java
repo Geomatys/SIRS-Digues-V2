@@ -23,12 +23,14 @@ import fr.sirs.core.component.RefCoteRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
+import fr.sirs.core.component.RefLargeurFrancBordRepository;
 import fr.sirs.core.component.RefMateriauRepository;
 import fr.sirs.core.component.RefNatureRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
 import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
+import fr.sirs.core.component.RefProfilFrancBordRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
@@ -38,6 +40,8 @@ import fr.sirs.core.component.RefTypeDocumentRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.RefLargeurFrancBord;
+import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
@@ -116,6 +120,8 @@ public class DbImporter {
     private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
     private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
     private final ArticleJournalRepository articleJournalRepository;
+    private final RefLargeurFrancBordRepository refLargeurFrancBordRepository;
+    private final RefProfilFrancBordRepository refProfilFrancBordRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -165,7 +171,7 @@ public class DbImporter {
      DESORDRE_ELEMENT_STRUCTURE,
 //     DESORDRE_EVENEMENT_HYDRAU,
 //     DESORDRE_JOURNAL,
-//     DESORDRE_OBSERVATION,
+//     DESORDRE_OBSERVATION, // A Faire !
 //     DESORDRE_PRESTATION,
      DIGUE,
      DOCUMENT,
@@ -246,7 +252,7 @@ public class DbImporter {
 //     MONTEE_DES_EAUX,
 //     MONTEE_DES_EAUX_JOURNAL,
 //     MONTEE_DES_EAUX_MESURES,
-//     observation_urgence_carto,
+//     observation_urgence_carto, // A Faire !
      ORGANISME,
      ORGANISME_DISPOSE_INTERVENANT,
 //     ORIENTATION,
@@ -304,7 +310,7 @@ public class DbImporter {
      SYS_EVT_CONVENTION,
      SYS_EVT_CRETE,
      SYS_EVT_DESORDRE,
-//     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON,
+     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON,
 //     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
      SYS_EVT_DOCUMENT_MARCHE, // A FAIRE
 //     SYS_EVT_EMPRISE_COMMUNALE,
@@ -333,7 +339,7 @@ public class DbImporter {
 //     SYS_EVT_PRESTATION,
      SYS_EVT_PROFIL_EN_LONG,
      SYS_EVT_PROFIL_EN_TRAVERS,
-//     SYS_EVT_PROFIL_FRONT_FRANC_BORD,
+     SYS_EVT_PROFIL_FRONT_FRANC_BORD,
 //     SYS_EVT_PROPRIETAIRE_TRONCON,
      SYS_EVT_RAPPORT_ETUDES,
 //     SYS_EVT_RESEAU_EAU,
@@ -400,7 +406,7 @@ public class DbImporter {
 //     TYPE_DONNEES_GROUPE,
 //     TYPE_DONNEES_SOUS_GROUPE,
 //     TYPE_DVPT_VEGETATION,
-//     TYPE_ELEMENT_GEOMETRIE,
+     TYPE_ELEMENT_GEOMETRIE,
 //     TYPE_ELEMENT_RESEAU,
 //     TYPE_ELEMENT_RESEAU_COTE,
      TYPE_ELEMENT_STRUCTURE,
@@ -432,7 +438,7 @@ public class DbImporter {
 //     TYPE_POSITION_SUR_DIGUE,
 //     TYPE_PRESTATION,
      TYPE_PROFIL_EN_TRAVERS,
-//     TYPE_PROFIL_FRANC_BORD,
+     TYPE_PROFIL_FRANC_BORD,
 //     TYPE_PROPRIETAIRE,
      TYPE_RAPPORT_ETUDE,
 //     TYPE_REF_HEAU,
@@ -557,6 +563,10 @@ public class DbImporter {
         repositories.add(refOrigineProfilLongRepository);
         articleJournalRepository = new ArticleJournalRepository(couchDbConnector);
         repositories.add(articleJournalRepository);
+        refLargeurFrancBordRepository = new RefLargeurFrancBordRepository(couchDbConnector);
+        repositories.add(refLargeurFrancBordRepository);
+        refProfilFrancBordRepository = new RefProfilFrancBordRepository(couchDbConnector);
+        repositories.add(refProfilFrancBordRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -713,7 +723,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.DOCUMENT.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -729,7 +739,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -739,12 +749,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.DOCUMENT.toString()).getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_LARGEUR_FRANC_BORD.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.DOCUMENT.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

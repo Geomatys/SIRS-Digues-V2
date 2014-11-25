@@ -11,13 +11,8 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefFonction;
-import fr.sirs.core.model.RefMateriau;
-import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
+import fr.sirs.core.model.RefLargeurFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -52,8 +47,10 @@ import org.opengis.util.FactoryException;
  */
 class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord> {
 
-    private Map<Integer, LargeurFrancBord> cretes = null;
-    private Map<Integer, List<LargeurFrancBord>> cretesByTronconId = null;
+    private Map<Integer, LargeurFrancBord> largeurs = null;
+    private Map<Integer, List<LargeurFrancBord>> largeursByTronconId = null;
+    
+    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
 
     LargeurFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -66,50 +63,52 @@ class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter) {
+            final TypeFonctionImporter typeFonctionImporter,
+            final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        this.typeLargeurFrancBordImporter = typeLargeurFrancBordImporter;
     }
     
-    private enum CreteColumns {
-//ID_ELEMENT_GEOMETRIE,
-//id_nom_element,
-//ID_SOUS_GROUPE_DONNEES,
-//LIBELLE_TYPE_ELEMENT_GEOMETRIE,
-//DECALAGE_DEFAUT,
-//DECALAGE,
-//LIBELLE_SOURCE,
-//LIBELLE_SYSTEME_REP,
-//NOM_BORNE_DEBUT,
-//NOM_BORNE_FIN,
-//LIBELLE_TYPE_LARGEUR_FB,
-//LIBELLE_TYPE_PROFIL_FB,
-//LIBELLE_TYPE_DIST_DIGUE_BERGE,
-//ID_TRONCON_GESTION,
-//ID_TYPE_ELEMENT_GEOMETRIE,
-//ID_SOURCE,
-//DATE_DEBUT_VAL,
-//DATE_FIN_VAL,
-//PR_DEBUT_CALCULE,
-//PR_FIN_CALCULE,
-//X_DEBUT,
-//Y_DEBUT,
-//X_FIN,
-//Y_FIN,
-//ID_SYSTEME_REP,
-//ID_BORNEREF_DEBUT,
-//AMONT_AVAL_DEBUT,
-//DIST_BORNEREF_DEBUT,
-//ID_BORNEREF_FIN,
-//AMONT_AVAL_FIN,
-//DIST_BORNEREF_FIN,
-//COMMENTAIRE,
-//ID_TYPE_LARGEUR_FB,
-//ID_TYPE_PROFIL_FB,
-//ID_TYPE_DIST_DIGUE_BERGE,
-//ID_AUTO
+    private enum LargeurFrancBordColumns {
+        ID_ELEMENT_GEOMETRIE,
+//        id_nom_element, // Redondant avec ID_ELEMENT_GEOMETRIE
+//        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
+//        LIBELLE_TYPE_ELEMENT_GEOMETRIE, // Redondant avec l'importaton des types de géométries
+//        DECALAGE_DEFAUT, // Affichage
+//        DECALAGE, // Affichage
+//        LIBELLE_SOURCE, // Redondant avec l'importation des sources
+//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des systèmes de repérage
+//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
+//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
+//        LIBELLE_TYPE_LARGEUR_FB, // Redondant avec l'importation des types de largeur de FB
+//        LIBELLE_TYPE_PROFIL_FB, // Redondant avec l'importation des types de profil de front de FB
+//        LIBELLE_TYPE_DIST_DIGUE_BERGE, // Redondant avec l'importation des distances digue/berge
+        ID_TRONCON_GESTION,
+//        ID_TYPE_ELEMENT_GEOMETRIE,
+        ID_SOURCE,
+        DATE_DEBUT_VAL,
+        DATE_FIN_VAL,
+        PR_DEBUT_CALCULE,
+        PR_FIN_CALCULE,
+        X_DEBUT,
+        Y_DEBUT,
+        X_FIN,
+        Y_FIN,
+        ID_SYSTEME_REP,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
+        DIST_BORNEREF_DEBUT,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
+        DIST_BORNEREF_FIN,
+        COMMENTAIRE,
+        ID_TYPE_LARGEUR_FB,
+//        ID_TYPE_PROFIL_FB,
+//        ID_TYPE_DIST_DIGUE_BERGE,
+//        ID_AUTO
     };
 
     /**
@@ -121,10 +120,10 @@ class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord
      */
     @Override
     public Map<Integer, LargeurFrancBord> getStructures() throws IOException, AccessDbImporterException {
-        if (this.cretes == null) {
+        if (this.largeurs == null) {
             compute();
         }
-        return cretes;
+        return largeurs;
     }
 
     /**
@@ -136,10 +135,10 @@ class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord
      */
     @Override
     public Map<Integer, List<LargeurFrancBord>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.cretesByTronconId == null) {
+        if (this.largeursByTronconId == null) {
             compute();
         }
-        return this.cretesByTronconId;
+        return this.largeursByTronconId;
     }
 
     @Override
@@ -150,154 +149,126 @@ class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.cretes = new HashMap<>();
-        this.cretesByTronconId = new HashMap<>();
+        this.largeurs = new HashMap<>();
+        this.largeursByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
+        final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypeLargeur();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Crete crete = new Crete();
+            final LargeurFrancBord largeur = new LargeurFrancBord();
             
+            final TronconDigue troncon = troncons.get(row.getInt(LargeurFrancBordColumns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                largeur.setTroncon(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + troncons.get(row.getInt(LargeurFrancBordColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            }
             
-//            if(row.getInt(CreteColumns.ID_SOURCE.toString())!=null){
-//                crete.setSourceId(typesSource.get(row.getInt(CreteColumns.ID_SOURCE.toString())).getId());
-//            }
-//            
-//            final TronconDigue troncon = troncons.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                crete.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-//            
-//            if (row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()) != null) {
-//                crete.setDate_debut(LocalDateTime.parse(row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-//            }
-//            
-//            if (row.getDate(CreteColumns.DATE_FIN_VAL.toString()) != null) {
-//                crete.setDate_fin(LocalDateTime.parse(row.getDate(CreteColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-//            }
-//            
-//            if (row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()) != null) {
-//                crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-//            }
-//            
-//            if (row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()) != null) {
-//                crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
-//            }
-//            
-//            if (row.getInt(CreteColumns.ID_SYSTEME_REP.toString()) != null) {
-//                crete.setSystemeRepId(systemesReperage.get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
-//            }
-//            
-//            if (row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-//                crete.setBorneDebutId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-//            }
-//            
-//            crete.setBorne_debut_aval(row.getBoolean(CreteColumns.AMONT_AVAL_DEBUT.toString()));
-//            
-//            if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-//                crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-//            }
-//            
-//            if (row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()) != null) {
-//                crete.setBorneFinId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-//            }
-//            
-//            crete.setBorne_fin_aval(row.getBoolean(CreteColumns.AMONT_AVAL_FIN.toString()));
-//            
-//            if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
-//                crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-//            }
-//            
-//            crete.setCommentaire(row.getString(CreteColumns.COMMENTAIRE.toString()));
-//
-//            crete.setNum_couche(row.getInt(CreteColumns.N_COUCHE.toString()));
-//            
-//            if(row.getInt(CreteColumns.ID_TYPE_MATERIAU.toString())!=null){
-//                crete.setMateriauId(typesMateriau.get(row.getInt(CreteColumns.ID_TYPE_MATERIAU.toString())).getId());
-//            }
-//            
-//            if(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())!=null){
-//                crete.setNatureId(typesNature.get(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())).getId());
-//            }
-//            
-//            if(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())!=null){
-//                crete.setFonctionId(typesFonction.get(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())).getId());
-//            }
-//            
-//            if (row.getDouble(CreteColumns.EPAISSEUR.toString()) != null) {
-//                crete.setEpaisseur(row.getDouble(CreteColumns.EPAISSEUR.toString()).floatValue());
-//            }
-//            
-//            if(row.getInt(CreteColumns.ID_TYPE_COTE.toString())!=null){
-//                crete.setCoteId(typesCote.get(row.getInt(CreteColumns.ID_TYPE_COTE.toString())).getId());
-//            }
-//            
-//            GeometryFactory geometryFactory = new GeometryFactory();
-//            final MathTransform lambertToRGF;
-//            try {
-//                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
-//
-//                try {
-//
-//                    if (row.getDouble(CreteColumns.X_DEBUT.toString()) != null && row.getDouble(CreteColumns.Y_DEBUT.toString()) != null) {
-//                        crete.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                                row.getDouble(CreteColumns.X_DEBUT.toString()),
-//                                row.getDouble(CreteColumns.Y_DEBUT.toString()))), lambertToRGF));
-//                    }
-//                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//
-//                try {
-//
-//                    if (row.getDouble(CreteColumns.X_FIN.toString()) != null && row.getDouble(CreteColumns.Y_FIN.toString()) != null) {
-//                        crete.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                                row.getDouble(CreteColumns.X_FIN.toString()),
-//                                row.getDouble(CreteColumns.Y_FIN.toString()))), lambertToRGF));
-//                    }
-//                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            } catch (FactoryException ex) {
-//                Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//            
-//            if(row.getInt(CreteColumns.ID_TYPE_POSITION.toString())!=null){
-//                crete.setPosition_structure(typesPosition.get(row.getInt(CreteColumns.ID_TYPE_POSITION.toString())).getId());
-//            }
-//            
-//
-//            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-//            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-//            cretes.put(row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString()), crete);
-//
-//            // Set the list ByTronconId
-//            List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
-//            if (listByTronconId == null) {
-//                listByTronconId = new ArrayList<>();
-//                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
-//            }
-//            listByTronconId.add(crete);
+            if(row.getInt(LargeurFrancBordColumns.ID_SOURCE.toString())!=null){
+                largeur.setSourceId(typesSource.get(row.getInt(LargeurFrancBordColumns.ID_SOURCE.toString())).getId());
+            }
+            
+            if (row.getDate(LargeurFrancBordColumns.DATE_DEBUT_VAL.toString()) != null) {
+                largeur.setDate_debut(LocalDateTime.parse(row.getDate(LargeurFrancBordColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (row.getDate(LargeurFrancBordColumns.DATE_FIN_VAL.toString()) != null) {
+                largeur.setDate_fin(LocalDateTime.parse(row.getDate(LargeurFrancBordColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (row.getDouble(LargeurFrancBordColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                largeur.setPR_debut(row.getDouble(LargeurFrancBordColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
+            
+            if (row.getDouble(LargeurFrancBordColumns.PR_FIN_CALCULE.toString()) != null) {
+                largeur.setPR_fin(row.getDouble(LargeurFrancBordColumns.PR_FIN_CALCULE.toString()).floatValue());
+            }
+            
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+
+                try {
+
+                    if (row.getDouble(LargeurFrancBordColumns.X_DEBUT.toString()) != null && row.getDouble(LargeurFrancBordColumns.Y_DEBUT.toString()) != null) {
+                        largeur.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(LargeurFrancBordColumns.X_DEBUT.toString()),
+                                row.getDouble(LargeurFrancBordColumns.Y_DEBUT.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                try {
+
+                    if (row.getDouble(LargeurFrancBordColumns.X_FIN.toString()) != null && row.getDouble(LargeurFrancBordColumns.Y_FIN.toString()) != null) {
+                        largeur.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(LargeurFrancBordColumns.X_FIN.toString()),
+                                row.getDouble(LargeurFrancBordColumns.Y_FIN.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(LargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            if (row.getInt(LargeurFrancBordColumns.ID_SYSTEME_REP.toString()) != null) {
+                largeur.setSystemeRepId(systemesReperage.get(row.getInt(LargeurFrancBordColumns.ID_SYSTEME_REP.toString())).getId());
+            }
+            
+            if (row.getDouble(LargeurFrancBordColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                largeur.setBorneDebutId(bornes.get((int) row.getDouble(LargeurFrancBordColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            }
+            
+            largeur.setBorne_debut_aval(row.getBoolean(LargeurFrancBordColumns.AMONT_AVAL_DEBUT.toString()));
+            
+            if (row.getDouble(LargeurFrancBordColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                largeur.setBorne_debut_distance(row.getDouble(LargeurFrancBordColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
+            
+            if (row.getDouble(LargeurFrancBordColumns.ID_BORNEREF_FIN.toString()) != null) {
+                largeur.setBorneFinId(bornes.get((int) row.getDouble(LargeurFrancBordColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            }
+            
+            largeur.setBorne_fin_aval(row.getBoolean(LargeurFrancBordColumns.AMONT_AVAL_FIN.toString()));
+            
+            if (row.getDouble(LargeurFrancBordColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                largeur.setBorne_fin_distance(row.getDouble(LargeurFrancBordColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            }
+            
+            largeur.setCommentaire(row.getString(LargeurFrancBordColumns.COMMENTAIRE.toString()));
+            
+            if(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())!=null){
+                largeur.setLargeurFrancBordId(typesLargeur.get(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())).getId());
+            }
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
+            largeurs.put(row.getInt(LargeurFrancBordColumns.ID_ELEMENT_GEOMETRIE.toString()), largeur);
+
+            // Set the list ByTronconId
+            List<LargeurFrancBord> listByTronconId = largeursByTronconId.get(row.getInt(LargeurFrancBordColumns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                largeursByTronconId.put(row.getInt(LargeurFrancBordColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(largeur);
         }
     }
 
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (CreteColumns c : CreteColumns.values()) {
+        for (LargeurFrancBordColumns c : LargeurFrancBordColumns.values()) {
             columns.add(c.toString());
         }
         return columns;
