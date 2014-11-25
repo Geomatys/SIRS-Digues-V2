@@ -355,6 +355,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 session.getBorneDigueRepository().update(borne);
                 editPane.selectSRB(null);
                 Platform.runLater(map.getCanvas()::repaint);
+                editPane.sortBorneTable();
             }
         }
         

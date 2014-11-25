@@ -168,7 +168,7 @@ public final class LinearReferencingUtilities extends Static{
      * @param linear geometry du troncon
      * @return SegmentInfo[] segments du troncon
      */
-    private static SegmentInfo[] buildSegments(final LineString linear){
+    public static SegmentInfo[] buildSegments(final LineString linear){
         
         //find the nearest segment
         final Coordinate[] coords = linear.getCoordinates();
@@ -316,7 +316,7 @@ public final class LinearReferencingUtilities extends Static{
         return null;
     }
     
-    private static LineString asLineString(Geometry tronconGeom) {
+    public static LineString asLineString(Geometry tronconGeom) {
         final LineString troncon;
         if (tronconGeom instanceof LineString) {
             troncon = (LineString) tronconGeom;

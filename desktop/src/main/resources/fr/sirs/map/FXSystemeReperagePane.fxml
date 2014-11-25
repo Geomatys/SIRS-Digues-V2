@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.geotoolkit.gui.javafx.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -26,6 +27,7 @@
                 <RowConstraints vgrow="ALWAYS" />
                   <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
               </rowConstraints>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -34,17 +36,15 @@
                   <Label text="Bornes" />
                   <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnSpan="2" GridPane.rowIndex="1">
                      <content>
-                        <TableView fx:id="uiBorneTable" editable="true">
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TableView>
+                        <FXTableView fx:id="uiBorneTable" editable="true" />
                      </content>
                   </ScrollPane>
                   <Button fx:id="uiCalculatePr" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Calculer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label text="Calculer les valeurs PR entre les 2 bornes sélectionnées" wrapText="true" GridPane.rowIndex="3" />
-                  <Label text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="2" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Calculer les valeurs PR entre les 2 bornes sélectionnées" wrapText="true" GridPane.rowIndex="3" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="2" />
                   <ToggleButton fx:id="uiCreateBorne" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Saisir" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Button fx:id="uiProject" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Projeter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Projeter les bornes sélectionnées sur le tronçon" wrapText="true" GridPane.rowIndex="4" />
                </children>
             </GridPane>
             <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">

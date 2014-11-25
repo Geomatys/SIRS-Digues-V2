@@ -122,7 +122,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.removeDecoration(geomlayer);
-        component.setBottom(null);
     }
     
     private void updateGeometry(){
