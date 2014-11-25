@@ -38,7 +38,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.TopDocs;
-import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;

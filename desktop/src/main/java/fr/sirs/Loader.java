@@ -219,10 +219,7 @@ public class Loader extends Application {
                 // IMAGE ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des lecteurs d'images...");
-                //force loading world file image readers
                 Registry.setDefaultCodecPreferences();
-                WorldFileImageReader.Spi.registerDefaults(null);
-                WorldFileImageWriter.Spi.registerDefaults(null);
                 //global initialization
                 ImageIO.scanForPlugins();
                 
