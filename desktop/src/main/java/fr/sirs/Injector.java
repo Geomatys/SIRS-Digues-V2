@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.index.SearchEngine;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -35,6 +36,10 @@ public class Injector implements ApplicationContextAware {
     
     public static Session getSession(){
         return getBean(Session.class);
+    }
+    
+    public static DocumentChangeEmiter getDocumentChangeEmiter(){
+        return getBean(DocumentChangeEmiter.class);
     }
     
     public static SearchEngine getSearchEngine(){

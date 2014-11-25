@@ -44,7 +44,6 @@ import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
-import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
@@ -82,11 +81,13 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     
     private final Dialog dialog = new Dialog();
-    private final FXSystemeReperagePane editPane = new FXSystemeReperagePane();
+    private final FXSystemeReperagePane editPane;
         
     
     public BorneEditHandler(final FXMap map) {
         super(map);
+        
+        editPane = new FXSystemeReperagePane(map);
         
         final DialogPane subpane = new DialogPane();
         subpane.setContent(editPane);
@@ -96,10 +97,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             @Override
             public void handle(Event event) {
                 dialog.hide();
-                map.setHandler(new FXPanHandler(map, false));
             }
         });
         dialog.initModality(Modality.NONE);
+        dialog.initOwner(map.getScene().getWindow());
         dialog.setDialogPane(subpane);
         
         //on ecoute la selection du troncon et des bornes pour les mettre en surbrillant

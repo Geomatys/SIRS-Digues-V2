@@ -20,6 +20,7 @@ import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -43,6 +44,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
@@ -73,9 +75,11 @@ public class FXSystemeReperagePane extends BorderPane {
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
     private final ObjectProperty<Mode> mode = new SimpleObjectProperty<>(Mode.NONE);
     private final Session session;
+    private final FXMap map;
     
-    public FXSystemeReperagePane() {
+    public FXSystemeReperagePane(FXMap map) {
         SIRS.loadFXML(this);
+        this.map = map;
         session = Injector.getSession();
         
         uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
@@ -157,7 +161,7 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
     
-    public ObjectProperty<Mode> modeProperty(){
+    public ReadOnlyObjectProperty<Mode> modeProperty(){
         return mode;
     }
     
@@ -176,8 +180,12 @@ public class FXSystemeReperagePane extends BorderPane {
     public void save(){
         final TronconDigue troncon = tronconProperty().get();
         if(troncon!=null){
-            final Session session = Injector.getSession();
             session.getTronconDigueRepository().update(troncon);
+        }
+        
+        final SystemeReperage sr = systemeReperageProperty().get();
+        if(sr!=null){
+            session.getSystemeReperageRepository().update(sr);
         }
     }
     
@@ -186,7 +194,12 @@ public class FXSystemeReperagePane extends BorderPane {
     }
     
     private void startCreateBorne(ActionEvent evt){
-        mode.set(Mode.CREATE_BORNE);
+        if(mode.get().equals(Mode.CREATE_BORNE)){
+            //on retourne on mode edition
+            mode.set(Mode.EDIT_BORNE);
+        }else{
+            mode.set(Mode.CREATE_BORNE);
+        }
     }
     
     private void interpolatePR(ActionEvent evt){
@@ -222,6 +235,7 @@ public class FXSystemeReperagePane extends BorderPane {
             lst[i].setValeurPR((float)pr);
         }
         
+        save();
     }
     
     private void projectPoints(ActionEvent evt){
@@ -247,6 +261,9 @@ public class FXSystemeReperagePane extends BorderPane {
         }
         
         uiBorneTable.getSelectionModel().clearSelection();
+        
+        save();
+        map.getCanvas().repaint();
     }
     
     private void createSystemeReperage(ActionEvent evt){
@@ -324,7 +341,7 @@ public class FXSystemeReperagePane extends BorderPane {
         if(troncon==null){
             uiSrComboBox.setItems(null);
         }else{
-            modeProperty().set(Mode.NONE);
+            mode.set(Mode.NONE);
             final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
         }
@@ -335,7 +352,12 @@ public class FXSystemeReperagePane extends BorderPane {
         if(sr==null){
             uiBorneTable.setItems(FXCollections.emptyObservableList());
         }else{
-            modeProperty().set(Mode.EDIT_BORNE);
+            final Mode current = mode.get();
+            if(current.equals(Mode.CREATE_BORNE) || current.equals(Mode.EDIT_BORNE)){
+                //do nothing
+            }else{
+                mode.set(Mode.EDIT_BORNE);
+            }
             final ObservableList bornes = FXCollections.observableList(sr.getSystemereperageborneId());
             uiBorneTable.setItems(bornes);
             sortBorneTable();
@@ -368,6 +390,7 @@ public class FXSystemeReperagePane extends BorderPane {
                     if(ButtonType.YES == res){
                         final SystemeReperage sr = systemeReperageProperty().get();
                         sr.getSystemereperageborneId().remove(t);
+                        updateBorneTable(null, null, null);
                     }
                     return null;
                 }
@@ -421,6 +444,7 @@ public class FXSystemeReperagePane extends BorderPane {
             addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<SystemeReperageBorne, Object> event) -> {
                 final SystemeReperageBorne srb = event.getRowValue();
                 srb.setValeurPR(((Number)event.getNewValue()).floatValue());
+                save();
             });
         }
     }

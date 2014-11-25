@@ -31,6 +31,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.map.BorneDigueCache;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
 import java.time.LocalDateTime;
@@ -46,8 +47,6 @@ import javax.measure.unit.NonSI;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewQuery;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
@@ -124,30 +123,6 @@ public class CorePlugin extends Plugin {
         
         try{
             
-//            final CouchDbConnector connector = Injector.getBean(CouchDbConnector.class);
-            
-//            //todo : rendre dynamique
-//            // Nécessité de l'utilisation d'un dépôt de bornes depuis que les 
-//            // tronçons ne référencent plus directement les bornes mais leurs ID
-//            // Du coup il est probable que ceci devienne très lent. Cela pourrait
-//            // peut-être être amélioré par un map/reduce du côté serveur couchDb
-//            // mais il faudrait pour cela que les bornes contiennent un id de 
-//            // navigation vers les tronçons, ce qui n'est pas le cas actuellement.
-//            final List<BorneDigue> bornes = new ArrayList<>();
-//            for(TronconDigue td : getSession().getTronconDigueRepository().getAll()){
-//                // SOLUTION 1 (brutale)
-////                td.getBorneIds().stream().forEach((id) -> {
-////                    bornes.add(bornesRepo.get(id));
-////                });
-//                
-//                // SOLUTION 2 (ektorp bulk)
-//                ViewQuery vq = new ViewQuery()
-//                      .allDocs()
-//                      .includeDocs(true)
-//                      .keys(td.getBorneIds());
-//                bornes.addAll(connector.queryView(vq, BorneDigue.class));
-//            }
-            
             //troncons
             final BeanStore tronconStore = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
@@ -157,10 +132,11 @@ public class CorePlugin extends Plugin {
             items.addAll(buildLayers(tronconStore,createTronconStyle(),createTronconSelectionStyle(),true));
             
             //bornes
+            final BorneDigueCache cache = new BorneDigueCache();
             final BeanStore borneStore = new BeanStore(
                     new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, bornesRepo::getAll) //TODO LENTEUR ICI
+                            null, PROJECTION, cache::getAll)
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
             

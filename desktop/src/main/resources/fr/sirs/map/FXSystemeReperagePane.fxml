@@ -36,7 +36,10 @@
                   <Label text="Bornes" />
                   <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnSpan="2" GridPane.rowIndex="1">
                      <content>
-                        <FXTableView fx:id="uiBorneTable" editable="true" />
+                        <FXTableView fx:id="uiBorneTable" editable="true">
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy></FXTableView>
                      </content>
                   </ScrollPane>
                   <Button fx:id="uiCalculatePr" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Calculer" GridPane.columnIndex="1" GridPane.rowIndex="3" />

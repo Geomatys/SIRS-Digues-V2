@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -28,11 +29,13 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
@@ -202,19 +205,35 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             }
                         });
                         
-                        //choix de la digue
-                        final Dialog dialog = new Dialog();
-                        final DialogPane pane = new DialogPane();
-                        final BorderPane bp = new BorderPane();
-                        bp.setTop(new Label("Rattacher le nouveau tronçon à la digue :"));
-                        bp.setCenter(pane);
+                        final TextField nameField = new TextField();
                         
+                        //choix de la digue
+                        final GridPane bp = new GridPane();
+                        bp.getRowConstraints().setAll(
+                                new RowConstraints(),
+                                new RowConstraints(),
+                                new RowConstraints(),
+                                new RowConstraints()
+                        );
+                        bp.setPadding(new Insets(10, 10, 10, 10));
+                        bp.setHgap(10);
+                        bp.setVgap(10);
+                        bp.add(new Label("Nom du tronçon"), 0, 0);
+                        bp.add(nameField, 0, 1);
+                        bp.add(new Label("Rattacher à la digue"), 0, 2);
+                        bp.add(choiceBox, 0, 3);
+                        
+                        final DialogPane pane = new DialogPane();
+                        pane.setContent(bp);
                         pane.getButtonTypes().add(ButtonType.OK);
+                        
+                        final Dialog dialog = new Dialog();
                         dialog.setDialogPane(pane);
                         dialog.showAndWait();
                         
                         final Digue digue = choiceBox.getValue();
                         troncon = new TronconDigue();
+                        troncon.setLibelle(nameField.getText());
 
                         final Coordinate coord1 = helper.toCoord(e.getX()-20, e.getY());
                         final Coordinate coord2 = helper.toCoord(e.getX()+20, e.getY());
@@ -230,7 +249,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
                             updateGeometry();
-
+                            
                         }catch(TransformException | FactoryException ex){
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                         }
@@ -288,6 +307,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         troncon = null;
                         editGeometry.reset();
                         updateGeometry();
+                        map.getCanvas().repaint();
                     });
                     popup.getItems().add(saveItem);
                     
@@ -297,6 +317,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         troncon = null;
                         editGeometry.reset();
                         updateGeometry();
+                        map.getCanvas().repaint();
                     });
                     popup.getItems().add(cancelItem);
                     
@@ -309,6 +330,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         troncon = null;
                         editGeometry.reset();
                         updateGeometry();
+                        map.getCanvas().repaint();
                     });
                     popup.getItems().add(deleteItem);
 

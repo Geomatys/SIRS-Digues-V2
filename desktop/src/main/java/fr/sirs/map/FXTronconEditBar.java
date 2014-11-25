@@ -28,7 +28,7 @@ public class FXTronconEditBar extends ToolBar {
         butEditTroncon.getStyleClass().add(LEFT);
         final ToggleButton butEditSr = new BorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.SHOW);
         butEditSr.getStyleClass().add(RIGHT);
-        final HBox hboxAction = new HBox(text, butEditTroncon, butEditSr);
+        final HBox hboxAction = new HBox(butEditTroncon, butEditSr);
 
         getItems().add(hboxAction);
 
