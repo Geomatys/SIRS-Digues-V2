@@ -311,10 +311,10 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Station_pompage" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="pompeIds" upperBound="-1"
-        eType="#//Pompe"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
         eType="#//ReaseauHydroFermeStationPompage" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pompeIds" upperBound="-1"
+        eType="#//Pompe" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Pompe">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="marque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
