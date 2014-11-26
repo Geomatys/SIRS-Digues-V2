@@ -184,7 +184,7 @@ public class DbImporter {
 //     ELEMENT_RESEAU_GARDIEN,
 //     ELEMENT_RESEAU_GESTIONNAIRE,
 //     ELEMENT_RESEAU_OUVERTURE_BATARDABLE,
-//     ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
+     ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES,
 //     ELEMENT_RESEAU_POINT_ACCES,
@@ -429,7 +429,7 @@ public class DbImporter {
 //     TYPE_OUVRAGE_FRANCHISSEMENT,
 //     TYPE_OUVRAGE_HYDRAU_ASSOCIE,
 //     TYPE_OUVRAGE_PARTICULIER,
-//     TYPE_OUVRAGE_TELECOM_NRJ,
+     TYPE_OUVRAGE_TELECOM_NRJ,
 //     TYPE_OUVRAGE_VOIRIE,
      TYPE_POSITION,
      TYPE_POSITION_PROFIL_EN_LONG_SUR_DIGUE,
@@ -721,7 +721,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -737,7 +737,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -752,7 +752,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -760,8 +760,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

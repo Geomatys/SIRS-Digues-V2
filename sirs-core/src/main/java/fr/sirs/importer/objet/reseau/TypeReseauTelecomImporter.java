@@ -66,14 +66,14 @@ class TypeReseauTelecomImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefReseauTelecomEnergie typeEcoulement = new RefReseauTelecomEnergie();
+            final RefReseauTelecomEnergie typeReseau = new RefReseauTelecomEnergie();
             
-            typeEcoulement.setLibelle(row.getString(TypeReseauTelecomColumns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
-            typeEcoulement.setAbrege(row.getString(TypeReseauTelecomColumns.ABREGE_TYPE_RESEAU_COMMUNICATION.toString()));
+            typeReseau.setLibelle(row.getString(TypeReseauTelecomColumns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
+            typeReseau.setAbrege(row.getString(TypeReseauTelecomColumns.ABREGE_TYPE_RESEAU_COMMUNICATION.toString()));
             if (row.getDate(TypeReseauTelecomColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeEcoulement.setDateMaj(LocalDateTime.parse(row.getDate(TypeReseauTelecomColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(TypeReseauTelecomColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesReseauTelecom.put(row.getInt(String.valueOf(TypeReseauTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeEcoulement);
+            typesReseauTelecom.put(row.getInt(String.valueOf(TypeReseauTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
         }
         couchDbConnector.executeBulk(typesReseauTelecom.values());
     }
