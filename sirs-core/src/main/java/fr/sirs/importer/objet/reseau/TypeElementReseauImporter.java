@@ -6,6 +6,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.ProfilFrontFrancBord;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,6 +77,9 @@ class TypeElementReseauImporter extends GenericImporter {
                 switch (table) {
                     case SYS_EVT_STATION_DE_POMPAGE:
                         classe = StationPompage.class;
+                        break;
+                    case SYS_EVT_CONDUITE_FERMEE:
+                        classe = ReseauHydrauliqueFerme.class;
                         break;
 //                    case 2:
 //                        classe = ProfilFrontFrancBord.class;

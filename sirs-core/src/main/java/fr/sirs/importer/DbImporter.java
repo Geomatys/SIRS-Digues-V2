@@ -173,7 +173,7 @@ public class DbImporter {
 //     DESORDRE_PRESTATION,
      DIGUE,
      DOCUMENT,
-//     ECOULEMENT,
+     ECOULEMENT,
      ELEMENT_GEOMETRIE,
      ELEMENT_RESEAU,
 //     ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU,
@@ -233,7 +233,7 @@ public class DbImporter {
 //     GDB_ValidRules,
 //     ILE_BANC,
 //     ILE_TRONCON,
-//     IMPLANTATION,
+     IMPLANTATION,
      INTERVENANT,
      JOURNAL, // A FAIRE
      JOURNAL_ARTICLE, // A FAIRE
@@ -304,7 +304,7 @@ public class DbImporter {
 //     SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE,
 //     SYS_EVT_BRISE_LAME, // Dans le module "ouvrages à la mer" (2015)
 //     SYS_EVT_CHEMIN_ACCES,
-//     SYS_EVT_CONDUITE_FERMEE,
+     SYS_EVT_CONDUITE_FERMEE,
      SYS_EVT_CONVENTION,
      SYS_EVT_CRETE,
      SYS_EVT_DESORDRE,
@@ -392,7 +392,7 @@ public class DbImporter {
 //     TRONCON_GESTION_DIGUE_SITUATION_FONCIERE,
 //     TRONCON_GESTION_DIGUE_SYNDICAT,
 //     TYPE_COMPOSITION,
-//     TYPE_CONDUITE_FERMEE,
+     TYPE_CONDUITE_FERMEE,
      TYPE_CONVENTION,
      TYPE_COTE,
      TYPE_DESORDRE,
@@ -459,7 +459,7 @@ public class DbImporter {
 //     TYPE_VEGETATION_STRATE_DIAMETRE,
 //     TYPE_VEGETATION_STRATE_HAUTEUR,
 //     TYPE_VOIE_SUR_DIGUE,
-//     UTILISATION_CONDUITE,
+     UTILISATION_CONDUITE,
      
      
      
@@ -721,7 +721,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.UTILISATION_CONDUITE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -737,7 +737,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.UTILISATION_CONDUITE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -747,12 +747,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_CONDUITE_FERMEE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.UTILISATION_CONDUITE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -760,8 +760,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-//            importer.cleanDb();
-//            importer.importation();
+            importer.cleanDb();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

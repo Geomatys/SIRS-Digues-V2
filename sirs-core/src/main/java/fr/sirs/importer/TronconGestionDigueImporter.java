@@ -27,6 +27,7 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeSourceImporter;
 import fr.sirs.importer.objet.geometry.GeometryImporter;
+import fr.sirs.importer.objet.reseau.ReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private StructureImporter structureImporter;
     private DesordreImporter desordreImporter;
     private GeometryImporter geometryImporter;
+    private ReseauImporter reseauImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -115,6 +117,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.geometryImporter = new GeometryImporter(accessDatabase, 
+                couchDbConnector, this, systemeReperageImporter, 
+                borneDigueImporter, organismeImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
+                typeNatureImporter, typeFonctionImporter);
+        this.reseauImporter = new ReseauImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter, 
@@ -280,6 +287,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getStructuresByTronconId();
         final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getStructuresByTronconId();
         final Map<Integer, List<Objet>> geometriesByTroncon = geometryImporter.getStructuresByTronconId();
+        final Map<Integer, List<Objet>> reseauxByTroncon = reseauImporter.getStructuresByTronconId();
 
         
 //        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
@@ -295,6 +303,8 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 structures.addAll(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
             if(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
                 structures.addAll(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId())));
+            if(reseauxByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
+                structures.addAll(reseauxByTroncon.get(tronconsIds.get(tronconDigue.getId())));
 
             //Update the repository
             tronconDigueRepository.update(tronconDigue);

@@ -18,6 +18,7 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
+import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.GenericStructureImporter;
@@ -55,10 +56,13 @@ public class ReseauImporter extends GenericStructureImporter {
     private final TypeElementReseauImporter typeElementReseauImporter;
     
     private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
-//    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
-//    private final LargeurFrancBordImporter largeurFrancBordImporter;
-//    private final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter;
-//    private final ProfilFrontFrancBordImporter profilFrontFrancBordImporter;
+    private final PompeImporter pompeImporter;
+    private final StationPompageImporter stationPompageImporter;
+    private final TypeEcoulementImporter typeEcoulementImporter;
+    private final TypeImplantationImporter typeImplantationImporter;
+    private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
+    private final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter;
+    private final ConduiteFermeeImporter conduiteFermeeImporter;
     
 
     public ReseauImporter(final Database accessDatabase,
@@ -79,24 +83,30 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         typeElementReseauImporter = new TypeElementReseauImporter(
                 accessDatabase, couchDbConnector);
-//        typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
-//                accessDatabase, couchDbConnector);
-//        largeurFrancBordImporter = new LargeurFrancBordImporter(accessDatabase, 
-//                couchDbConnector, tronconGestionDigueImporter, 
-//                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-//                typeLargeurFrancBordImporter);
-//        structureImporters.add(largeurFrancBordImporter);
-//        typeProfilFrontFrancBordImporter = new TypeProfilFrontFrancBordImporter(
-//                accessDatabase, couchDbConnector);
-//        profilFrontFrancBordImporter = new ProfilFrontFrancBordImporter(
-//                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-//                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-//                typeProfilFrontFrancBordImporter);
-//        structureImporters.add(profilFrontFrancBordImporter);
+        pompeImporter = new PompeImporter(accessDatabase, couchDbConnector);
+        stationPompageImporter = new StationPompageImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                pompeImporter);
+        structureImporters.add(stationPompageImporter);
+        typeEcoulementImporter = new TypeEcoulementImporter(accessDatabase, 
+                couchDbConnector);
+        typeImplantationImporter = new TypeImplantationImporter(accessDatabase, 
+                couchDbConnector);
+        typeConduiteFermeeImporter = new TypeConduiteFermeeImporter(
+                accessDatabase, couchDbConnector);
+        typeUtilisationConduiteImporter = new TypeUtilisationConduiteImporter(
+                accessDatabase, couchDbConnector);
+        conduiteFermeeImporter = new ConduiteFermeeImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                typeEcoulementImporter, typeImplantationImporter, 
+                typeConduiteFermeeImporter, typeUtilisationConduiteImporter);
+        structureImporters.add(conduiteFermeeImporter);
     }
 
     private enum ElementReseauColumns {
@@ -237,7 +247,7 @@ public class ReseauImporter extends GenericStructureImporter {
         }
         
 //        // Importation détaillée de toutes les structures au sens strict.
-//        final Map<Integer, LargeurFrancBord> largeurFrancBord = largeurFrancBordImporter.getStructures();
+        final Map<Integer, StationPompage> stationPompage = stationPompageImporter.getStructures();
 //        if(cretes!=null) for(final Integer key : cretes.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, cretes.get(key));
@@ -275,7 +285,7 @@ public class ReseauImporter extends GenericStructureImporter {
                 structure = null;
             }
             else if(typeStructure == Crete.class){
-//                structure = largeurFrancBord.get(structureId);
+                structure = stationPompage.get(structureId);
 //            }
 //            else if(typeStructure == TalusDigue.class){
 //                structure = talusDigue.get(structureId);

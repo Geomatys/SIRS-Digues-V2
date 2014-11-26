@@ -82,8 +82,9 @@ class PompeImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         pompes = new HashMap<>();
+        pompesByElementReseau = new HashMap<>();
+        
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-
         while (it.hasNext()) {
             final Row row = it.next();
             final Pompe pompe = new Pompe();

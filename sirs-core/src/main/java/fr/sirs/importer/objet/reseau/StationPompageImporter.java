@@ -6,12 +6,14 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Pompe;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
@@ -51,7 +53,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
     private Map<Integer, StationPompage> stations = null;
     private Map<Integer, List<StationPompage>> stationsByTronconId = null;
     
-//    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
+    private final PompeImporter pompeImporter;
 
     StationPompageImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -64,12 +66,13 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter) {
+            final TypeFonctionImporter typeFonctionImporter, 
+            final PompeImporter pompeImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-//        this.typeLargeurFrancBordImporter = typeLargeurFrancBordImporter;
+        this.pompeImporter = pompeImporter;
     }
     
     private enum StationPompageColumns {
@@ -92,7 +95,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
 //        LIBELLE_TYPE_RESEAU_COMMUNICATION,
 //        LIBELLE_TYPE_VOIE_SUR_DIGUE,
 //        NOM_OUVRAGE_VOIRIE,
-//        LIBELLE_TYPE_POSITION,
+//        LIBELLE_TYPE_POSITION, // Redondant avec l'importation des positions
 //        LIBELLE_TYPE_OUVRAGE_VOIRIE,
 //        LIBELLE_TYPE_RESEAU_EAU,
 //        LIBELLE_TYPE_REVETEMENT,
@@ -131,7 +134,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
 //        ID_OUVRAGE_VOIRIE,
 //        ID_TYPE_REVETEMENT,
 //        ID_TYPE_USAGE_VOIE,
-//        ID_TYPE_POSITION,
+        ID_TYPE_POSITION,
 //        LARGEUR,
 //        ID_TYPE_OUVRAGE_VOIRIE,
 //        HAUTEUR,
@@ -152,7 +155,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
 
     /**
      *
-     * @return A map containing all LargeurFrancBord instances accessibles from the
+     * @return A map containing all StationPompage instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
@@ -167,7 +170,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
 
     /**
      *
-     * @return A map containing all LargeurFrancBord instances accessibles from the
+     * @return A map containing all StationPompage instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
@@ -196,44 +199,46 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
+        final Map<Integer, List<Pompe>> pompes = pompeImporter.getPompeByElementReseau();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final StationPompage largeur = new StationPompage();
+            final StationPompage stationPompage = new StationPompage();
             
-            largeur.setLibelle(cleanNullString(row.getString(StationPompageColumns.NOM.toString())));
+            stationPompage.setLibelle(cleanNullString(row.getString(StationPompageColumns.NOM.toString())));
             
             if(row.getInt(StationPompageColumns.ID_TYPE_COTE.toString())!=null){
-                largeur.setCoteId(typesCote.get(row.getInt(StationPompageColumns.ID_TYPE_COTE.toString())).getId());
+                stationPompage.setCoteId(typesCote.get(row.getInt(StationPompageColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             if(row.getInt(StationPompageColumns.ID_SOURCE.toString())!=null){
-                largeur.setSourceId(typesSource.get(row.getInt(StationPompageColumns.ID_SOURCE.toString())).getId());
+                stationPompage.setSourceId(typesSource.get(row.getInt(StationPompageColumns.ID_SOURCE.toString())).getId());
             }
             
             final TronconDigue troncon = troncons.get(row.getInt(StationPompageColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                largeur.setTroncon(troncon.getId());
+                stationPompage.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
                         + troncons.get(row.getInt(StationPompageColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
             if (row.getDate(StationPompageColumns.DATE_DEBUT_VAL.toString()) != null) {
-                largeur.setDate_debut(LocalDateTime.parse(row.getDate(StationPompageColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                stationPompage.setDate_debut(LocalDateTime.parse(row.getDate(StationPompageColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDate(StationPompageColumns.DATE_FIN_VAL.toString()) != null) {
-                largeur.setDate_fin(LocalDateTime.parse(row.getDate(StationPompageColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                stationPompage.setDate_fin(LocalDateTime.parse(row.getDate(StationPompageColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDouble(StationPompageColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                largeur.setPR_debut(row.getDouble(StationPompageColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                stationPompage.setPR_debut(row.getDouble(StationPompageColumns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
             if (row.getDouble(StationPompageColumns.PR_FIN_CALCULE.toString()) != null) {
-                largeur.setPR_fin(row.getDouble(StationPompageColumns.PR_FIN_CALCULE.toString()).floatValue());
+                stationPompage.setPR_fin(row.getDouble(StationPompageColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -244,7 +249,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
                 try {
 
                     if (row.getDouble(StationPompageColumns.X_DEBUT.toString()) != null && row.getDouble(StationPompageColumns.Y_DEBUT.toString()) != null) {
-                        largeur.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        stationPompage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(StationPompageColumns.X_DEBUT.toString()),
                                 row.getDouble(StationPompageColumns.Y_DEBUT.toString()))), lambertToRGF));
                     }
@@ -255,7 +260,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
                 try {
 
                     if (row.getDouble(StationPompageColumns.X_FIN.toString()) != null && row.getDouble(StationPompageColumns.Y_FIN.toString()) != null) {
-                        largeur.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        stationPompage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(StationPompageColumns.X_FIN.toString()),
                                 row.getDouble(StationPompageColumns.Y_FIN.toString()))), lambertToRGF));
                     }
@@ -267,38 +272,46 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
             }
             
             if (row.getInt(StationPompageColumns.ID_SYSTEME_REP.toString()) != null) {
-                largeur.setSystemeRepId(systemesReperage.get(row.getInt(StationPompageColumns.ID_SYSTEME_REP.toString())).getId());
+                stationPompage.setSystemeRepId(systemesReperage.get(row.getInt(StationPompageColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
             if (row.getDouble(StationPompageColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                largeur.setBorneDebutId(bornes.get((int) row.getDouble(StationPompageColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                stationPompage.setBorneDebutId(bornes.get((int) row.getDouble(StationPompageColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            largeur.setBorne_debut_aval(row.getBoolean(StationPompageColumns.AMONT_AVAL_DEBUT.toString()));
+            stationPompage.setBorne_debut_aval(row.getBoolean(StationPompageColumns.AMONT_AVAL_DEBUT.toString()));
             
             if (row.getDouble(StationPompageColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                largeur.setBorne_debut_distance(row.getDouble(StationPompageColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                stationPompage.setBorne_debut_distance(row.getDouble(StationPompageColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
             if (row.getDouble(StationPompageColumns.ID_BORNEREF_FIN.toString()) != null) {
-                largeur.setBorneFinId(bornes.get((int) row.getDouble(StationPompageColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                if(bornes.get((int) row.getDouble(StationPompageColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
+                    stationPompage.setBorneFinId(bornes.get((int) row.getDouble(StationPompageColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                }
             }
             
-            largeur.setBorne_fin_aval(row.getBoolean(StationPompageColumns.AMONT_AVAL_FIN.toString()));
+            stationPompage.setBorne_fin_aval(row.getBoolean(StationPompageColumns.AMONT_AVAL_FIN.toString()));
             
             if (row.getDouble(StationPompageColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                largeur.setBorne_fin_distance(row.getDouble(StationPompageColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                stationPompage.setBorne_fin_distance(row.getDouble(StationPompageColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            largeur.setCommentaire(row.getString(StationPompageColumns.COMMENTAIRE.toString()));
+            stationPompage.setCommentaire(row.getString(StationPompageColumns.COMMENTAIRE.toString()));
             
-//            if(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())!=null){
-//                largeur.setTypeLargeurFrancBord(typesLargeur.get(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())).getId());
-//            }
-//            
+            if(row.getInt(StationPompageColumns.ID_TYPE_POSITION.toString())!=null){
+                stationPompage.setPosition_structure(typesPosition.get(row.getInt(StationPompageColumns.ID_TYPE_POSITION.toString())).getId());
+            }
+            
+            if(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())!=null){
+                if(pompes.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
+                    stationPompage.setPompeIds(pompes.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
+                }
+            }
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            stations.put(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()), largeur);
+            stations.put(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()), stationPompage);
 
             // Set the list ByTronconId
             List<StationPompage> listByTronconId = stationsByTronconId.get(row.getInt(StationPompageColumns.ID_TRONCON_GESTION.toString()));
@@ -306,7 +319,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
                 listByTronconId = new ArrayList<>();
                 stationsByTronconId.put(row.getInt(StationPompageColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(largeur);
+            listByTronconId.add(stationPompage);
         }
     }
 
