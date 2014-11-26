@@ -53,8 +53,8 @@ import org.opengis.util.FactoryException;
  */
 class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueFerme> {
 
-    private Map<Integer, ReseauHydrauliqueFerme> stations = null;
-    private Map<Integer, List<ReseauHydrauliqueFerme>> stationsByTronconId = null;
+    private Map<Integer, ReseauHydrauliqueFerme> conduites = null;
+    private Map<Integer, List<ReseauHydrauliqueFerme>> conduitesByTronconId = null;
     
     private final TypeEcoulementImporter typeEcoulementImporter;
     private final TypeImplantationImporter typeImplantationImporter;
@@ -174,10 +174,10 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
      */
     @Override
     public Map<Integer, ReseauHydrauliqueFerme> getStructures() throws IOException, AccessDbImporterException {
-        if (this.stations == null) {
+        if (this.conduites == null) {
             compute();
         }
-        return stations;
+        return conduites;
     }
 
     /**
@@ -189,10 +189,10 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
      */
     @Override
     public Map<Integer, List<ReseauHydrauliqueFerme>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.stationsByTronconId == null) {
+        if (this.conduitesByTronconId == null) {
             compute();
         }
-        return this.stationsByTronconId;
+        return this.conduitesByTronconId;
     }
 
     @Override
@@ -203,8 +203,8 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.stations = new HashMap<>();
-        this.stationsByTronconId = new HashMap<>();
+        this.conduites = new HashMap<>();
+        this.conduitesByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -220,40 +220,40 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauHydrauliqueFerme stationPompage = new ReseauHydrauliqueFerme();
+            final ReseauHydrauliqueFerme conduiteFermee = new ReseauHydrauliqueFerme();
             
-            stationPompage.setLibelle(cleanNullString(row.getString(ConduiteFermeeColumns.NOM.toString())));
+            conduiteFermee.setLibelle(cleanNullString(row.getString(ConduiteFermeeColumns.NOM.toString())));
             
             if(row.getInt(ConduiteFermeeColumns.ID_TYPE_COTE.toString())!=null){
-                stationPompage.setCoteId(typesCote.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_COTE.toString())).getId());
+                conduiteFermee.setCoteId(typesCote.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_COTE.toString())).getId());
             }
             
             if(row.getInt(ConduiteFermeeColumns.ID_SOURCE.toString())!=null){
-                stationPompage.setSourceId(typesSource.get(row.getInt(ConduiteFermeeColumns.ID_SOURCE.toString())).getId());
+                conduiteFermee.setSourceId(typesSource.get(row.getInt(ConduiteFermeeColumns.ID_SOURCE.toString())).getId());
             }
             
             final TronconDigue troncon = troncons.get(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                stationPompage.setTroncon(troncon.getId());
+                conduiteFermee.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
                         + troncons.get(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
             if (row.getDate(ConduiteFermeeColumns.DATE_DEBUT_VAL.toString()) != null) {
-                stationPompage.setDate_debut(LocalDateTime.parse(row.getDate(ConduiteFermeeColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                conduiteFermee.setDate_debut(LocalDateTime.parse(row.getDate(ConduiteFermeeColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDate(ConduiteFermeeColumns.DATE_FIN_VAL.toString()) != null) {
-                stationPompage.setDate_fin(LocalDateTime.parse(row.getDate(ConduiteFermeeColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                conduiteFermee.setDate_fin(LocalDateTime.parse(row.getDate(ConduiteFermeeColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDouble(ConduiteFermeeColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                stationPompage.setPR_debut(row.getDouble(ConduiteFermeeColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                conduiteFermee.setPR_debut(row.getDouble(ConduiteFermeeColumns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
             if (row.getDouble(ConduiteFermeeColumns.PR_FIN_CALCULE.toString()) != null) {
-                stationPompage.setPR_fin(row.getDouble(ConduiteFermeeColumns.PR_FIN_CALCULE.toString()).floatValue());
+                conduiteFermee.setPR_fin(row.getDouble(ConduiteFermeeColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -264,7 +264,7 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
                 try {
 
                     if (row.getDouble(ConduiteFermeeColumns.X_DEBUT.toString()) != null && row.getDouble(ConduiteFermeeColumns.Y_DEBUT.toString()) != null) {
-                        stationPompage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        conduiteFermee.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(ConduiteFermeeColumns.X_DEBUT.toString()),
                                 row.getDouble(ConduiteFermeeColumns.Y_DEBUT.toString()))), lambertToRGF));
                     }
@@ -275,7 +275,7 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
                 try {
 
                     if (row.getDouble(ConduiteFermeeColumns.X_FIN.toString()) != null && row.getDouble(ConduiteFermeeColumns.Y_FIN.toString()) != null) {
-                        stationPompage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        conduiteFermee.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(ConduiteFermeeColumns.X_FIN.toString()),
                                 row.getDouble(ConduiteFermeeColumns.Y_FIN.toString()))), lambertToRGF));
                     }
@@ -287,80 +287,80 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
             }
             
             if (row.getInt(ConduiteFermeeColumns.ID_SYSTEME_REP.toString()) != null) {
-                stationPompage.setSystemeRepId(systemesReperage.get(row.getInt(ConduiteFermeeColumns.ID_SYSTEME_REP.toString())).getId());
+                conduiteFermee.setSystemeRepId(systemesReperage.get(row.getInt(ConduiteFermeeColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
             if (row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                stationPompage.setBorneDebutId(bornes.get((int) row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                conduiteFermee.setBorneDebutId(bornes.get((int) row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            stationPompage.setBorne_debut_aval(row.getBoolean(ConduiteFermeeColumns.AMONT_AVAL_DEBUT.toString()));
+            conduiteFermee.setBorne_debut_aval(row.getBoolean(ConduiteFermeeColumns.AMONT_AVAL_DEBUT.toString()));
             
             if (row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                stationPompage.setBorne_debut_distance(row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                conduiteFermee.setBorne_debut_distance(row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
             if (row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_FIN.toString()) != null) {
                 if(bornes.get((int) row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    stationPompage.setBorneFinId(bornes.get((int) row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                    conduiteFermee.setBorneFinId(bornes.get((int) row.getDouble(ConduiteFermeeColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
             }
             
-            stationPompage.setBorne_fin_aval(row.getBoolean(ConduiteFermeeColumns.AMONT_AVAL_FIN.toString()));
+            conduiteFermee.setBorne_fin_aval(row.getBoolean(ConduiteFermeeColumns.AMONT_AVAL_FIN.toString()));
             
             if (row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                stationPompage.setBorne_fin_distance(row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                conduiteFermee.setBorne_fin_distance(row.getDouble(ConduiteFermeeColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            stationPompage.setCommentaire(row.getString(ConduiteFermeeColumns.COMMENTAIRE.toString()));
+            conduiteFermee.setCommentaire(row.getString(ConduiteFermeeColumns.COMMENTAIRE.toString()));
             
             if(row.getInt(ConduiteFermeeColumns.ID_ECOULEMENT.toString())!=null){
                 if(ecoulements.get(row.getInt(ConduiteFermeeColumns.ID_ECOULEMENT.toString()))!=null){
-                    stationPompage.setEcoulementId(ecoulements.get(row.getInt(ConduiteFermeeColumns.ID_ECOULEMENT.toString())).getId());
+                    conduiteFermee.setEcoulementId(ecoulements.get(row.getInt(ConduiteFermeeColumns.ID_ECOULEMENT.toString())).getId());
                 }
             }
             
             if(row.getInt(ConduiteFermeeColumns.ID_IMPLANTATION.toString())!=null){
                 if(implantations.get(row.getInt(ConduiteFermeeColumns.ID_IMPLANTATION.toString()))!=null){
-                    stationPompage.setImplantationId(implantations.get(row.getInt(ConduiteFermeeColumns.ID_IMPLANTATION.toString())).getId());
+                    conduiteFermee.setImplantationId(implantations.get(row.getInt(ConduiteFermeeColumns.ID_IMPLANTATION.toString())).getId());
                 }
             }
             
             if(row.getInt(ConduiteFermeeColumns.ID_UTILISATION_CONDUITE.toString())!=null){
                 if(typesUtilisationConduites.get(row.getInt(ConduiteFermeeColumns.ID_UTILISATION_CONDUITE.toString()))!=null){
-                    stationPompage.setUtilisationConduiteId(typesUtilisationConduites.get(row.getInt(ConduiteFermeeColumns.ID_UTILISATION_CONDUITE.toString())).getId());
+                    conduiteFermee.setUtilisationConduiteId(typesUtilisationConduites.get(row.getInt(ConduiteFermeeColumns.ID_UTILISATION_CONDUITE.toString())).getId());
                 }
             }
             
             if(row.getInt(ConduiteFermeeColumns.ID_TYPE_CONDUITE_FERMEE.toString())!=null){
                 if(typesConduites.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_CONDUITE_FERMEE.toString()))!=null){
-                    stationPompage.setTypeConduiteFermeeId(typesConduites.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_CONDUITE_FERMEE.toString())).getId());
+                    conduiteFermee.setTypeConduiteFermeeId(typesConduites.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_CONDUITE_FERMEE.toString())).getId());
                 }
             }
             
             if(row.getBoolean(ConduiteFermeeColumns.AUTORISE.toString())!=null){
-                stationPompage.setAutorise(row.getBoolean(ConduiteFermeeColumns.AUTORISE.toString()));
+                conduiteFermee.setAutorise(row.getBoolean(ConduiteFermeeColumns.AUTORISE.toString()));
             }
             
             if(row.getInt(ConduiteFermeeColumns.ID_TYPE_POSITION.toString())!=null){
-                stationPompage.setPosition_structure(typesPosition.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_POSITION.toString())).getId());
+                conduiteFermee.setPosition_structure(typesPosition.get(row.getInt(ConduiteFermeeColumns.ID_TYPE_POSITION.toString())).getId());
             }
             
             if (row.getDouble(ConduiteFermeeColumns.DIAMETRE.toString()) != null) {
-                stationPompage.setDiametre(row.getDouble(ConduiteFermeeColumns.DIAMETRE.toString()).floatValue());
+                conduiteFermee.setDiametre(row.getDouble(ConduiteFermeeColumns.DIAMETRE.toString()).floatValue());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            stations.put(row.getInt(ConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()), stationPompage);
+            conduites.put(row.getInt(ConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()), conduiteFermee);
 
             // Set the list ByTronconId
-            List<ReseauHydrauliqueFerme> listByTronconId = stationsByTronconId.get(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString()));
+            List<ReseauHydrauliqueFerme> listByTronconId = conduitesByTronconId.get(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                stationsByTronconId.put(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                conduitesByTronconId.put(row.getInt(ConduiteFermeeColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(stationPompage);
+            listByTronconId.add(conduiteFermee);
         }
     }
 

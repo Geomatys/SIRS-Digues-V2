@@ -56,13 +56,14 @@ public class ReseauImporter extends GenericStructureImporter {
     private final TypeElementReseauImporter typeElementReseauImporter;
     
     private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
-    private final PompeImporter pompeImporter;
-    private final StationPompageImporter stationPompageImporter;
     private final TypeEcoulementImporter typeEcoulementImporter;
     private final TypeImplantationImporter typeImplantationImporter;
     private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
     private final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter;
     private final ConduiteFermeeImporter conduiteFermeeImporter;
+    private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
+    private final PompeImporter pompeImporter;
+    private final StationPompageImporter stationPompageImporter;
     
 
     public ReseauImporter(final Database accessDatabase,
@@ -83,14 +84,6 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         typeElementReseauImporter = new TypeElementReseauImporter(
                 accessDatabase, couchDbConnector);
-        pompeImporter = new PompeImporter(accessDatabase, couchDbConnector);
-        stationPompageImporter = new StationPompageImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                pompeImporter);
-        structureImporters.add(stationPompageImporter);
         typeEcoulementImporter = new TypeEcoulementImporter(accessDatabase, 
                 couchDbConnector);
         typeImplantationImporter = new TypeImplantationImporter(accessDatabase, 
@@ -107,6 +100,16 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeEcoulementImporter, typeImplantationImporter, 
                 typeConduiteFermeeImporter, typeUtilisationConduiteImporter);
         structureImporters.add(conduiteFermeeImporter);
+        reseauConduiteFermeeImporter = new ReseauConduiteFermeeImporter(
+                accessDatabase, couchDbConnector, conduiteFermeeImporter);
+        pompeImporter = new PompeImporter(accessDatabase, couchDbConnector);
+        stationPompageImporter = new StationPompageImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                pompeImporter, reseauConduiteFermeeImporter);
+        structureImporters.add(stationPompageImporter);
     }
 
     private enum ElementReseauColumns {

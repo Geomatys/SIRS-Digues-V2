@@ -5,8 +5,10 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.LargeurFrancBord;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,6 +82,12 @@ class TypeElementReseauImporter extends GenericImporter {
                         break;
                     case SYS_EVT_CONDUITE_FERMEE:
                         classe = ReseauHydrauliqueFerme.class;
+                        break;
+//                    case SYS_EVT_CONDUITE_FERMEE:
+//                        classe = OuvrageHydrauliqueAssocie.class;
+//                        break;
+                    case SYS_EVT_RESEAU_TELECOMMUNICATION:
+                        classe = ReseauTelecomEnergie.class;
                         break;
 //                    case 2:
 //                        classe = ProfilFrontFrancBord.class;

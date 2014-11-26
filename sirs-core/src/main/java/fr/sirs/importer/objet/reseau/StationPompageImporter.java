@@ -15,6 +15,7 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
+import fr.sirs.core.model.ReseauConduiteFermee;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -54,6 +55,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
     private Map<Integer, List<StationPompage>> stationsByTronconId = null;
     
     private final PompeImporter pompeImporter;
+    private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
 
     StationPompageImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -67,12 +69,14 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter, 
-            final PompeImporter pompeImporter) {
+            final PompeImporter pompeImporter,
+            final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.pompeImporter = pompeImporter;
+        this.reseauConduiteFermeeImporter = reseauConduiteFermeeImporter;
     }
     
     private enum StationPompageColumns {
@@ -176,7 +180,8 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, List<StationPompage>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<StationPompage>> getStructuresByTronconId() 
+            throws IOException, AccessDbImporterException {
         if (this.stationsByTronconId == null) {
             compute();
         }
@@ -201,6 +206,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, List<Pompe>> pompes = pompeImporter.getPompeByElementReseau();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
+        final Map<Integer, List<ReseauConduiteFermee>> reseauConduites = reseauConduiteFermeeImporter.getReseauConduiteFermeByReseauId();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -306,6 +312,10 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
             if(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())!=null){
                 if(pompes.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
                     stationPompage.setPompeIds(pompes.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
+                }
+                
+                if(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
+                    stationPompage.setReseauHydroFerme(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
                 }
             }
             
