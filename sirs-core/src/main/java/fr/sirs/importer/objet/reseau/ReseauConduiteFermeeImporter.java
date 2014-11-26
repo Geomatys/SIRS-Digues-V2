@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.ReseauConduiteFermee;
+import fr.sirs.core.model.ReseauReseau;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  */
 class ReseauConduiteFermeeImporter extends GenericImporter {
 
-    private Map<Integer, List<ReseauConduiteFermee>> reseauConduites = null;
+    private Map<Integer, List<ReseauReseau>> reseauConduites = null;
     private final ConduiteFermeeImporter conduiteFermeeImporter;
     
     ReseauConduiteFermeeImporter(final Database accessDatabase, 
@@ -41,11 +41,11 @@ class ReseauConduiteFermeeImporter extends GenericImporter {
 
     /**
      * 
-     * @return A map containing all the database ReseauConduiteFermee referenced by their
+     * @return A map containing all the database ReseauReseau referenced by their
      * internal ID.
      * @throws IOException 
      */
-    public Map<Integer, List<ReseauConduiteFermee>> getReseauConduiteFermeByReseauId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<ReseauReseau>> getReseauConduiteFermeByReseauId() throws IOException, AccessDbImporterException {
         if(reseauConduites == null) compute();
         return reseauConduites;
     }
@@ -73,7 +73,7 @@ class ReseauConduiteFermeeImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauConduiteFermee reseauConduite = new ReseauConduiteFermee();
+            final ReseauReseau reseauConduite = new ReseauReseau();
             
             if(conduitesFermees.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()))!=null){
                 reseauConduite.setReseauId(cleanNullString(conduitesFermees.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString())).getId()));
@@ -84,7 +84,7 @@ class ReseauConduiteFermeeImporter extends GenericImporter {
             }
             
             // Set the list ByTronconId
-            List<ReseauConduiteFermee> listByReseauId = reseauConduites.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
+            List<ReseauReseau> listByReseauId = reseauConduites.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
             if (listByReseauId == null) {
                 listByReseauId = new ArrayList<>();
                 reseauConduites.put(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()), listByReseauId);

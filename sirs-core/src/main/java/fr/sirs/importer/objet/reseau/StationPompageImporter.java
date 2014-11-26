@@ -15,7 +15,7 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.ReseauConduiteFermee;
+import fr.sirs.core.model.ReseauReseau;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -206,7 +206,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, List<Pompe>> pompes = pompeImporter.getPompeByElementReseau();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, List<ReseauConduiteFermee>> reseauConduites = reseauConduiteFermeeImporter.getReseauConduiteFermeByReseauId();
+        final Map<Integer, List<ReseauReseau>> reseauConduites = reseauConduiteFermeeImporter.getReseauConduiteFermeByReseauId();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -315,7 +315,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
                 }
                 
                 if(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
-                    stationPompage.setReseauHydroFerme(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
+                    stationPompage.setReseau(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
                 }
             }
             

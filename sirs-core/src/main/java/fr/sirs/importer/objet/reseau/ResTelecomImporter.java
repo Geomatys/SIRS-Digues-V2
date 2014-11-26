@@ -16,7 +16,6 @@ import fr.sirs.core.model.RefImplantation;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefReseauTelecomEnergie;
 import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.ReseauConduiteFermee;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
