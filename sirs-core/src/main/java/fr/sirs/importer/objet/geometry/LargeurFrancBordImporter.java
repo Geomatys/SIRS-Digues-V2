@@ -248,7 +248,7 @@ class LargeurFrancBordImporter extends GenericStructureImporter<LargeurFrancBord
             largeur.setCommentaire(row.getString(LargeurFrancBordColumns.COMMENTAIRE.toString()));
             
             if(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())!=null){
-                largeur.setLargeurFrancBordId(typesLargeur.get(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())).getId());
+                largeur.setTypeLargeurFrancBord(typesLargeur.get(row.getInt(LargeurFrancBordColumns.ID_TYPE_LARGEUR_FB.toString())).getId());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

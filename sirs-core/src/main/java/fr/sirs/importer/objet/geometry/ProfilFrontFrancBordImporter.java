@@ -250,7 +250,7 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
             profil.setCommentaire(row.getString(ProfilFrontFrancBordColumns.COMMENTAIRE.toString()));
             
             if(row.getInt(ProfilFrontFrancBordColumns.ID_TYPE_PROFIL_FB.toString())!=null){
-                profil.setLargeurFrancBordId(typesProfil.get(row.getInt(ProfilFrontFrancBordColumns.ID_TYPE_PROFIL_FB.toString())).getId());
+                profil.setTypeProfilFrancBordId(typesProfil.get(row.getInt(ProfilFrontFrancBordColumns.ID_TYPE_PROFIL_FB.toString())).getId());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

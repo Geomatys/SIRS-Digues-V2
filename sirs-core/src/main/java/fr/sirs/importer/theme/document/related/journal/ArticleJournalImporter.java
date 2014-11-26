@@ -43,7 +43,7 @@ public class ArticleJournalImporter extends GenericImporter {
         ID_ARTICLE_JOURNAL,
         ID_JOURNAL,
         INTITULE_ARTICLE,
-//        DATE_ARTICLE,
+        DATE_ARTICLE,
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
         COMMENTAIRE,
@@ -81,8 +81,8 @@ public class ArticleJournalImporter extends GenericImporter {
             
             articleJournal.setLibelle(cleanNullString(row.getString(JournalArticleColumns.INTITULE_ARTICLE.toString())));
             
-            if (row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(JournalArticleColumns.DATE_ARTICLE.toString()) != null) {
+                articleJournal.setDateArticle(LocalDateTime.parse(row.getDate(JournalArticleColumns.DATE_ARTICLE.toString()).toString(), dateTimeFormatter));
             }
             
             articleJournal.setReference_papier(cleanNullString(row.getString(JournalArticleColumns.REFERENCE_PAPIER.toString())));
@@ -90,6 +90,10 @@ public class ArticleJournalImporter extends GenericImporter {
             articleJournal.setReference_numerique(cleanNullString(row.getString(JournalArticleColumns.REFERENCE_NUMERIQUE.toString())));
             
             articleJournal.setCommentaire(cleanNullString(row.getString(JournalArticleColumns.COMMENTAIRE.toString())));
+            
+            if (row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()) != null) {
+                articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
             
             articles.put(row.getInt(JournalArticleColumns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
