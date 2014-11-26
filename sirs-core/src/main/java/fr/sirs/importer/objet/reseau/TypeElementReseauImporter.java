@@ -6,6 +6,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -88,6 +89,9 @@ class TypeElementReseauImporter extends GenericImporter {
 //                        break;
                     case SYS_EVT_RESEAU_TELECOMMUNICATION:
                         classe = ReseauTelecomEnergie.class;
+                        break;
+                    case SYS_EVT_OUVRAGE_TELECOMMUNICATION:
+                        classe = OuvrageTelecomEnergie.class;
                         break;
 //                    case 2:
 //                        classe = ProfilFrontFrancBord.class;

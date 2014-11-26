@@ -64,6 +64,8 @@ public class ReseauImporter extends GenericStructureImporter {
     private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
     private final PompeImporter pompeImporter;
     private final StationPompageImporter stationPompageImporter;
+    private final TypeReseauTelecomImporter typeReseauTelecomImporter;
+    private final ResTelecomImporter resTelecomImporter;
     
 
     public ReseauImporter(final Database accessDatabase,
@@ -110,6 +112,15 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
                 pompeImporter, reseauConduiteFermeeImporter);
         structureImporters.add(stationPompageImporter);
+        typeReseauTelecomImporter = new TypeReseauTelecomImporter(
+                accessDatabase, couchDbConnector);
+        resTelecomImporter = new ResTelecomImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                typeImplantationImporter, typeReseauTelecomImporter);
+        structureImporters.add(resTelecomImporter);
     }
 
     private enum ElementReseauColumns {

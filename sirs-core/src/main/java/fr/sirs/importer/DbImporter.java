@@ -327,7 +327,7 @@ public class DbImporter {
 //     SYS_EVT_OUVERTURE_BATARDABLE,
 //     SYS_EVT_OUVRAGE_PARTICULIER,
      SYS_EVT_OUVRAGE_REVANCHE,
-//     SYS_EVT_OUVRAGE_TELECOMMUNICATION,
+     SYS_EVT_OUVRAGE_TELECOMMUNICATION,
 //     SYS_EVT_OUVRAGE_VOIRIE,
 //     SYS_EVT_PHOTO_LOCALISEE_EN_PR,
      SYS_EVT_PIED_DE_DIGUE,
@@ -441,7 +441,7 @@ public class DbImporter {
      TYPE_RAPPORT_ETUDE,
 //     TYPE_REF_HEAU,
 //     TYPE_RESEAU_EAU,
-//     TYPE_RESEAU_TELECOMMUNIC,
+     TYPE_RESEAU_TELECOMMUNIC,
 //     TYPE_REVETEMENT,
      TYPE_RIVE,
 //     TYPE_SERVITUDE,
@@ -721,7 +721,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CONDUITE_FERMEE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -737,7 +737,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CONDUITE_FERMEE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -752,7 +752,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CONDUITE_FERMEE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_RESEAU_TELECOMMUNIC.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
