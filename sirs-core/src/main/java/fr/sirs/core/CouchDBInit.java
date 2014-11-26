@@ -2,6 +2,7 @@
 package fr.sirs.core;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.SearchEngine;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ public class CouchDBInit {
     
     public static final String DB_CONNECTOR = "connector";
     public static final String SEARCH_ENGINE = "searchEngine";
+    public static final String ELASTIC_ENGINE = "elasticEngine";
     public static final String CHANGE_EMITTER = "docChangeEmitter";
     
     static {
@@ -52,9 +54,11 @@ public class CouchDBInit {
         
         DocumentChangeEmiter changeEmmiter = null;
         SearchEngine searchEngine = null;
+        ElasticSearchEngine elasticEngine = null;
         if(setupListener){
             changeEmmiter = new DocumentChangeEmiter(connector);
             searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
+            elasticEngine = new ElasticSearchEngine(connector);
             changeEmmiter.start();
         }
         
@@ -63,6 +67,7 @@ public class CouchDBInit {
         applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
         if(setupListener){
             applicationContextParent.getBeanFactory().registerSingleton(SEARCH_ENGINE, searchEngine);
+            applicationContextParent.getBeanFactory().registerSingleton(ELASTIC_ENGINE, elasticEngine);
             applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
         }
 

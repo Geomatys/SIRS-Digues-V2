@@ -2,6 +2,7 @@
 package fr.sirs;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.SearchEngine;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -44,6 +45,10 @@ public class Injector implements ApplicationContextAware {
     
     public static SearchEngine getSearchEngine(){
         return getBean(SearchEngine.class);
+    }
+    
+    public static ElasticSearchEngine getElasticEngine(){
+        return getBean(ElasticSearchEngine.class);
     }
     
 }

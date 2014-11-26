@@ -3,6 +3,7 @@ package fr.sirs.util;
 
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.query.ElementHit;
 import javafx.scene.control.ListCell;
 import org.opengis.feature.PropertyType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -34,6 +35,8 @@ public class SirsListCell extends ListCell {
             setText(((BorneDigue) item).getLibelle());
         } else if (item instanceof PropertyType) {
             setText(((PropertyType) item).getName().tip().toString());
+        } else if(item instanceof ElementHit){
+            setText(((ElementHit) item).getLibelle());
         } else {
             setText("");
         }

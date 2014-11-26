@@ -11,25 +11,31 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.digue.FXDiguePane;
+import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
+import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -142,7 +148,12 @@ public class PojoTable extends BorderPane{
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
         uiTable.getColumns().add(new DeleteColumn());
-        uiTable.getColumns().add(new EditColumn());
+        
+        final EditColumn editCol = new EditColumn(this::editPojo);
+        editCol.editableProperty().bind(editableProperty);
+        editCol.visibleProperty().bind(editableProperty);
+        
+        uiTable.getColumns().add((TableColumn)editCol);
         for(PropertyDescriptor desc : properties){
             final PropertyColumn col = new PropertyColumn(desc); 
              uiTable.getColumns().add(col);
@@ -274,32 +285,8 @@ public class PojoTable extends BorderPane{
         }
     }
     
-    protected void editPojo(Element pojo){
-        final Tab tab = new Tab();
-        
-        Node content = new BorderPane();
-        if(pojo instanceof Positionable){
-            content = new FXStructurePane((Objet) pojo);
-        }else if(pojo instanceof Contact){
-            content = new FXContactPane((Contact) pojo);
-        }else if(pojo instanceof Organisme){
-            content = new FXOrganismePane((Organisme) pojo);
-        }else if (pojo instanceof ProfilTravers){
-            content = new FXThemePane((ProfilTravers) pojo);
-        }
-        tab.setContent(content);
-        
-        
-        tab.setText(pojo.getClass().getSimpleName());
-        tab.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                if(tab.isSelected()){
-                    session.prepareToPrint(pojo);
-                }
-            }
-        });
-        session.getFrame().addTab(tab);
+    protected void editPojo(Object pojo){
+        editElement(pojo);
     }
     
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
@@ -322,7 +309,60 @@ public class PojoTable extends BorderPane{
             setTableItems(()-> FXCollections.observableList(repo.getAll()));
         }
     }
-    
+        
+    public static void editElement(Object pojo){
+        if(pojo instanceof ElementHit){
+            final ElementHit hit = (ElementHit) pojo;
+            try {
+                pojo = (Element) Injector.getSession().getConnector().get(hit.geteElementClass(), hit.getDocumentId());
+            } catch (ClassNotFoundException ex) {
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+        }
+        
+        final Tab tab = new Tab();
+        
+        Node content = new BorderPane(new Label("Pas d'éditeur pour le type : "+pojo.getClass().getSimpleName()));
+        if(pojo instanceof Objet){
+            content = new FXStructurePane((Objet) pojo);
+        }else if(pojo instanceof Contact){
+            content = new FXContactPane((Contact) pojo);
+        }else if(pojo instanceof Organisme){
+            content = new FXOrganismePane((Organisme) pojo);
+        }else if (pojo instanceof ProfilTravers){
+            content = new FXThemePane((ProfilTravers) pojo);
+        }else if(pojo instanceof TronconDigue){
+            final FXTronconDiguePane ctrl = new FXTronconDiguePane();
+            ctrl.setTroncon((TronconDigue) pojo);
+            content = ctrl;
+        }else if(pojo instanceof Digue){
+            final FXDiguePane ctrl = new FXDiguePane();
+            ctrl.setDigue((Digue) pojo);
+            content = ctrl;
+        }else if(pojo instanceof Objet){
+            try{
+                // Choose the pane adapted to the specific structure.
+                final String className = "fr.sirs.theme.ui.FX"+pojo.getClass().getSimpleName()+"Pane";
+                final Class controllerClass = Class.forName(className);
+                final Constructor cstr = controllerClass.getConstructor(pojo.getClass());
+                content = (Node) cstr.newInstance(pojo);
+            }catch(Exception ex){
+                throw new UnsupportedOperationException("Failed to load panel : "+ex.getMessage(),ex);
+            }
+        }
+        
+        tab.setContent(content);
+        
+        final Session session = Injector.getSession();
+        final Element ele = (Element) pojo;
+        tab.setText(pojo.getClass().getSimpleName());
+        tab.setOnSelectionChanged((Event event) -> {
+            if(tab.isSelected()){
+                session.prepareToPrint(ele);
+            }
+        });
+        session.getFrame().addTab(tab);
+    }
     
     public class PropertyColumn extends TableColumn<Element,Object>{
 
@@ -436,9 +476,9 @@ public class PojoTable extends BorderPane{
         }  
     }
     
-    public class EditColumn extends TableColumn<Element,Element>{
+    public static class EditColumn extends TableColumn<Object,Object>{
 
-        public EditColumn() {
+        public EditColumn(Consumer editFct) {
             super();            
             setSortable(false);
             setResizable(false);
@@ -446,20 +486,18 @@ public class PojoTable extends BorderPane{
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_EDIT));
-            EditColumn.this.editableProperty().bind(editableProperty);
-            EditColumn.this.visibleProperty().bind(editableProperty);
             
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Object, Object>, ObservableValue<Object>>() {
                 @Override
-                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
+                public ObservableValue<Object> call(TableColumn.CellDataFeatures<Object, Object> param) {
                     return new SimpleObjectProperty<>(param.getValue());
                 }
             });
-            setCellFactory((TableColumn<Element, Element> param) -> new ButtonTableCell<>(
-                    false,new ImageView(GeotkFX.ICON_EDIT), (Element t) -> true, new Function<Element, Element>() {
+            setCellFactory((TableColumn<Object,Object> param) -> new ButtonTableCell(
+                    false,new ImageView(GeotkFX.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
                 @Override
-                public Element apply(Element t) {
-                    editPojo(t);
+                public Object apply(Object t) {
+                    editFct.accept(t);
                     return t;
                 }
             }));

@@ -151,7 +151,7 @@ public class FXDiguePane extends BorderPane {
             if (troncons == null) {
                 setTableItems(FXCollections::emptyObservableList);
             } else {
-            //JavaFX bug : sortable is not possible on filtered list
+                //JavaFX bug : sortable is not possible on filtered list
                 // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
                 // https://javafx-jira.kenai.com/browse/RT-32091
                 final SortedList sortedList = new SortedList(troncons);
@@ -169,8 +169,7 @@ public class FXDiguePane extends BorderPane {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
-            final Session session = Injector.getBean(Session.class);
+        protected void editPojo(Object pojo) {
             session.getFrame().getDiguesTab().getDiguesController().displayTronconDigue((TronconDigue) pojo);
             session.prepareToPrint(pojo);
         }

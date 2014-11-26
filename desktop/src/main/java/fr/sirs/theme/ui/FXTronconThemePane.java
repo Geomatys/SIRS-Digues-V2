@@ -12,14 +12,11 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 /**
@@ -81,7 +78,7 @@ public class FXTronconThemePane extends BorderPane {
         }
     }
     
-    public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
+    public static class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
 
         private final ComboBox comboBox;
         private final ObservableList<T> data;
@@ -99,28 +96,31 @@ public class FXTronconThemePane extends BorderPane {
         @Override
         public void handle(KeyEvent event) {
 
-            if (event.getCode() == KeyCode.UP) {
+            final KeyCode code = event.getCode();
+            final String text = comboBox.getEditor().getText();
+            
+            if (code == KeyCode.UP) {
                 caretPos = -1;
-                moveCaret(comboBox.getEditor().getText().length());
+                moveCaret(text.length());
                 return;
-            } else if (event.getCode() == KeyCode.DOWN) {
+            } else if (code == KeyCode.DOWN) {
                 if (!comboBox.isShowing()) {
                     comboBox.show();
                 }
                 caretPos = -1;
-                moveCaret(comboBox.getEditor().getText().length());
+                moveCaret(text.length());
                 return;
-            } else if (event.getCode() == KeyCode.BACK_SPACE) {
+            } else if (code == KeyCode.BACK_SPACE) {
                 moveCaretToPos = true;
                 caretPos = comboBox.getEditor().getCaretPosition();
-            } else if (event.getCode() == KeyCode.DELETE) {
+            } else if (code == KeyCode.DELETE) {
                 moveCaretToPos = true;
                 caretPos = comboBox.getEditor().getCaretPosition();
             }
 
-            if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT
-                    || event.isControlDown() || event.getCode() == KeyCode.HOME
-                    || event.getCode() == KeyCode.END || event.getCode() == KeyCode.TAB) {
+            if (code == KeyCode.RIGHT || code == KeyCode.LEFT
+              ||event.isControlDown() || code == KeyCode.HOME
+              ||code == KeyCode.END   || code == KeyCode.TAB) {
                 return;
             }
 
@@ -133,14 +133,13 @@ public class FXTronconThemePane extends BorderPane {
                     list.add(data.get(i));
                 }
             }
-            String t = comboBox.getEditor().getText();
 
             comboBox.setItems(list);
-            comboBox.getEditor().setText(t);
+            comboBox.getEditor().setText(text);
             if (!moveCaretToPos) {
                 caretPos = -1;
             }
-            moveCaret(t.length());
+            moveCaret(text.length());
             if (!list.isEmpty()) {
                 comboBox.show();
             }

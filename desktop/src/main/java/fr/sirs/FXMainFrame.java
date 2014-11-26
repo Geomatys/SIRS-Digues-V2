@@ -5,6 +5,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.query.FXSearchPane;
 import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
@@ -122,6 +123,14 @@ public class FXMainFrame extends BorderPane {
         getDiguesTab().show();
     }
 
+    @FXML
+    void openSearchTab(ActionEvent event) {
+        final Tab tab = new Tab("Recherche");
+        final FXSearchPane pane = new FXSearchPane();
+        tab.setContent(pane);
+        uiTabs.getTabs().add(tab);
+    }
+    
     @FXML
     void openPref(ActionEvent event) {
         System.out.println("TODO");

@@ -8,6 +8,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.query.ElementHit;
 import javafx.util.StringConverter;
 
 /**
@@ -33,6 +34,8 @@ public class SirsStringConverter extends StringConverter{
             text = ((BorneDigue)item).getLibelle();
         }else if(item instanceof SystemeReperage){
             text = ((SystemeReperage)item).getLibelle();
+        }else if(item instanceof ElementHit){
+            text = ((ElementHit) item).getLibelle();
         }else if(item instanceof String){
             text = (String) item;
         }

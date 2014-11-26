@@ -109,29 +109,29 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         }
         
         @Override
-        protected void editPojo(Element pojo){
-        final Tab tab = new Tab();
-        
-        Node content = new BorderPane();
-        if (pojo instanceof LeveeProfilTravers){
-            final Map<String, Object> resources = new HashMap<>();
-            resources.put("profilTravers", profilTravers);
-            content = new FXThemePane((LeveeProfilTravers) pojo, resources);
-        }
-        tab.setContent(content);
-        
-        
-        tab.setText(pojo.getClass().getSimpleName());
-        tab.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                if(tab.isSelected()){
-                    session.prepareToPrint(pojo);
-                }
+        protected void editPojo(Object pojo){
+            final Tab tab = new Tab();
+
+            Node content = new BorderPane();
+            if (pojo instanceof LeveeProfilTravers){
+                final Map<String, Object> resources = new HashMap<>();
+                resources.put("profilTravers", profilTravers);
+                content = new FXThemePane((LeveeProfilTravers) pojo, resources);
             }
-        });
-        session.getFrame().addTab(tab);
-    }
+            tab.setContent(content);
+
+
+            tab.setText(pojo.getClass().getSimpleName());
+            tab.setOnSelectionChanged(new EventHandler<Event>() {
+                @Override
+                public void handle(Event event) {
+                    if(tab.isSelected()){
+                        session.prepareToPrint(pojo);
+                    }
+                }
+            });
+            session.getFrame().addTab(tab);
+        }
         
         
         private void updateTable() {
