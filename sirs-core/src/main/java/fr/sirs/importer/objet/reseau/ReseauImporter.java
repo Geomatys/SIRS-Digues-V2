@@ -1,5 +1,6 @@
-package fr.sirs.importer.objet.geometry;
+package fr.sirs.importer.objet.reseau;
 
+import fr.sirs.importer.objet.geometry.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -47,20 +48,20 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class GeometryImporter extends GenericStructureImporter {
+public class ReseauImporter extends GenericStructureImporter {
 
     private Map<Integer, List<Objet>> structuresByTronconId = null;
     private Map<Integer, Objet> structures = null;
-    private final TypeElementGeometryImporter typeElementGeometryImporter;
+    private final TypeElementReseauImporter typeElementReseauImporter;
     
     private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
-    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
-    private final LargeurFrancBordImporter largeurFrancBordImporter;
-    private final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter;
-    private final ProfilFrontFrancBordImporter profilFrontFrancBordImporter;
+//    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
+//    private final LargeurFrancBordImporter largeurFrancBordImporter;
+//    private final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter;
+//    private final ProfilFrontFrancBordImporter profilFrontFrancBordImporter;
     
 
-    public GeometryImporter(final Database accessDatabase,
+    public ReseauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
@@ -76,31 +77,32 @@ public class GeometryImporter extends GenericStructureImporter {
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        typeElementGeometryImporter = new TypeElementGeometryImporter(
+        typeElementReseauImporter = new TypeElementReseauImporter(
                 accessDatabase, couchDbConnector);
-        typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
-                accessDatabase, couchDbConnector);
-        largeurFrancBordImporter = new LargeurFrancBordImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                typeLargeurFrancBordImporter);
-        structureImporters.add(largeurFrancBordImporter);
-        typeProfilFrontFrancBordImporter = new TypeProfilFrontFrancBordImporter(
-                accessDatabase, couchDbConnector);
-        profilFrontFrancBordImporter = new ProfilFrontFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                typeProfilFrontFrancBordImporter);
-        structureImporters.add(profilFrontFrancBordImporter);
+//        typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
+//                accessDatabase, couchDbConnector);
+//        largeurFrancBordImporter = new LargeurFrancBordImporter(accessDatabase, 
+//                couchDbConnector, tronconGestionDigueImporter, 
+//                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+//                typeLargeurFrancBordImporter);
+//        structureImporters.add(largeurFrancBordImporter);
+//        typeProfilFrontFrancBordImporter = new TypeProfilFrontFrancBordImporter(
+//                accessDatabase, couchDbConnector);
+//        profilFrontFrancBordImporter = new ProfilFrontFrancBordImporter(
+//                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+//                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+//                typeProfilFrontFrancBordImporter);
+//        structureImporters.add(profilFrontFrancBordImporter);
     }
 
-    private enum ElementGeometryColumns {
-        ID_ELEMENT_GEOMETRIE,
-//        ID_TYPE_ELEMENT_GEOMETRIE,
+    private enum ElementReseauColumns {
+        ID_ELEMENT_RESEAU,
+//        ID_TYPE_ELEMENT_RESEAU,
+//        ID_TYPE_COTE,
 //        ID_SOURCE,
 //        ID_TRONCON_GESTION,
 //        DATE_DEBUT_VAL,
@@ -119,10 +121,57 @@ public class GeometryImporter extends GenericStructureImporter {
 //        AMONT_AVAL_FIN,
 //        DIST_BORNEREF_FIN,
 //        COMMENTAIRE,
-//        ID_TYPE_LARGEUR_FB,
-//        ID_TYPE_PROFIL_FB,
-//        ID_TYPE_DIST_DIGUE_BERGE,
-//        DATE_DERNIERE_MAJ
+//        NOM,
+//        ID_ECOULEMENT,
+//        ID_IMPLANTATION,
+//        ID_UTILISATION_CONDUITE,
+//        ID_TYPE_CONDUITE_FERMEE,
+//        AUTORISE,
+//        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
+//        ID_TYPE_RESEAU_COMMUNICATION,
+//        ID_OUVRAGE_COMM_NRJ,
+//        N_SECTEUR,
+//        ID_TYPE_VOIE_SUR_DIGUE,
+//        ID_OUVRAGE_VOIRIE,
+//        ID_TYPE_REVETEMENT,
+//        ID_TYPE_USAGE_VOIE,
+//        LARGEUR,
+//        ID_TYPE_OUVRAGE_VOIRIE,
+//        ID_TYPE_POSITION,
+//        ID_TYPE_POSITION_HAUTE,
+//        HAUTEUR,
+//        DIAMETRE,
+//        ID_TYPE_RESEAU_EAU,
+//        ID_ORG_PROPRIO,
+//        ID_ORG_GESTION,
+//        ID_INTERV_PROPRIO,
+//        ID_INTERV_GARDIEN,
+//        ID_TYPE_OUVRAGE_PARTICULIER,
+//        DATE_DEBUT_ORGPROPRIO,
+//        DATE_FIN_ORGPROPRIO,
+//        DATE_DEBUT_GESTION,
+//        DATE_FIN_GESTION,
+//        DATE_DEBUT_INTERVPROPRIO,
+//        DATE_FIN_INTERVPROPRIO,
+//        ID_TYPE_OUVRAGE_TELECOM_NRJ,
+//        ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
+//        ID_TYPE_OUVRAGE_FRANCHISSEMENT,
+//        DATE_DERNIERE_MAJ,
+//        Z_SEUIL,
+//        ID_TYPE_SEUIL,
+//        ID_TYPE_GLISSIERE,
+//        ID_TYPE_NATURE_BATARDEAUX,
+//        NOMBRE,
+//        POIDS,
+//        ID_TYPE_MOYEN_MANIP_BATARDEAUX,
+//        ID_ORG_STOCKAGE_BATARDEAUX,
+//        ID_ORG_MANIP_BATARDEAUX,
+//        ID_INTERV_MANIP_BATARDEAUX,
+//        ID_TYPE_NATURE,
+//        ID_TYPE_NATURE_HAUT,
+//        ID_TYPE_NATURE_BAS,
+//        ID_TYPE_REVETEMENT_HAUT,
+//        ID_TYPE_REVETEMENT_BAS
     };
 
     /**
@@ -152,7 +201,7 @@ public class GeometryImporter extends GenericStructureImporter {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ElementGeometryColumns c : ElementGeometryColumns.values()) {
+        for (ElementReseauColumns c : ElementReseauColumns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -160,7 +209,7 @@ public class GeometryImporter extends GenericStructureImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_GEOMETRIE.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU.toString();
     }
     
     @Override
@@ -188,7 +237,7 @@ public class GeometryImporter extends GenericStructureImporter {
         }
         
 //        // Importation détaillée de toutes les structures au sens strict.
-        final Map<Integer, LargeurFrancBord> largeurFrancBord = largeurFrancBordImporter.getStructures();
+//        final Map<Integer, LargeurFrancBord> largeurFrancBord = largeurFrancBordImporter.getStructures();
 //        if(cretes!=null) for(final Integer key : cretes.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, cretes.get(key));
@@ -217,8 +266,8 @@ public class GeometryImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final int structureId = row.getInt(ElementGeometryColumns.ID_ELEMENT_GEOMETRIE.toString());
-            final Class typeStructure = this.typeElementGeometryImporter.getTypeElementStructure().get(row.getInt(ElementGeometryColumns.ID_ELEMENT_GEOMETRIE.toString()));
+            final int structureId = row.getInt(ElementReseauColumns.ID_ELEMENT_RESEAU.toString());
+            final Class typeStructure = this.typeElementReseauImporter.getTypeElementStructure().get(row.getInt(ElementReseauColumns.ID_ELEMENT_RESEAU.toString()));
             final Objet structure;
             
             if(typeStructure==null){
@@ -226,7 +275,7 @@ public class GeometryImporter extends GenericStructureImporter {
                 structure = null;
             }
             else if(typeStructure == Crete.class){
-                structure = largeurFrancBord.get(structureId);
+//                structure = largeurFrancBord.get(structureId);
 //            }
 //            else if(typeStructure == TalusDigue.class){
 //                structure = talusDigue.get(structureId);
@@ -330,7 +379,7 @@ public class GeometryImporter extends GenericStructureImporter {
 //                                row.getDouble(ElementGeometryColumns.Y_DEBUT.toString()))), lambertToRGF));
 //                    }
 //                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(GeometryImporter.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
 //                }
 //
 //                try {
@@ -341,13 +390,13 @@ public class GeometryImporter extends GenericStructureImporter {
 //                                row.getDouble(ElementGeometryColumns.Y_FIN.toString()))), lambertToRGF));
 //                    }
 //                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(GeometryImporter.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
 //                }
 //            } catch (FactoryException ex) {
-//                Logger.getLogger(GeometryImporter.class.getName()).log(Level.SEVERE, null, ex);
+//                Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-                
-                
+//                
+//                
                 
                 
                 

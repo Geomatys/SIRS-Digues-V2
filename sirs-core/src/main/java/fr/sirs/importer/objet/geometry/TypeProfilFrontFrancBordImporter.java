@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeProfilFrontFrancBordImporter extends GenericImporter {
+class TypeProfilFrontFrancBordImporter extends GenericImporter {
 
     private Map<Integer, RefProfilFrancBord> typesProfil = null;
     

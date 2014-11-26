@@ -40,8 +40,6 @@ import fr.sirs.core.component.RefTypeDocumentRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.RefLargeurFrancBord;
-import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
@@ -176,8 +174,8 @@ public class DbImporter {
      DIGUE,
      DOCUMENT,
 //     ECOULEMENT,
-//     ELEMENT_GEOMETRIE,
-//     ELEMENT_RESEAU,
+     ELEMENT_GEOMETRIE,
+     ELEMENT_RESEAU,
 //     ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU,
 //     ELEMENT_RESEAU_CHEMIN_ACCES,
 //     ELEMENT_RESEAU_CONDUITE_FERMEE,
@@ -190,7 +188,7 @@ public class DbImporter {
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES,
 //     ELEMENT_RESEAU_POINT_ACCES,
-//     ELEMENT_RESEAU_POMPE,
+     ELEMENT_RESEAU_POMPE,
 //     ELEMENT_RESEAU_PROPRIETAIRE,
 //     ELEMENT_RESEAU_RESEAU_EAU,
 //     ELEMENT_RESEAU_SERVITUDE,
@@ -310,7 +308,7 @@ public class DbImporter {
      SYS_EVT_CONVENTION,
      SYS_EVT_CRETE,
      SYS_EVT_DESORDRE,
-     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON,
+//     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON, // Dans le module "berges" (2015)
 //     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
      SYS_EVT_DOCUMENT_MARCHE, // A FAIRE
 //     SYS_EVT_EMPRISE_COMMUNALE,
@@ -346,7 +344,7 @@ public class DbImporter {
 //     SYS_EVT_RESEAU_TELECOMMUNICATION,
 //     SYS_EVT_SITUATION_FONCIERE,
      SYS_EVT_SOMMET_RISBERME,
-//     SYS_EVT_STATION_DE_POMPAGE,
+     SYS_EVT_STATION_DE_POMPAGE,
      SYS_EVT_TALUS_DIGUE,
 //     SYS_EVT_TALUS_FRANC_BORD,
      SYS_EVT_TALUS_RISBERME,
@@ -399,7 +397,7 @@ public class DbImporter {
      TYPE_COTE,
      TYPE_DESORDRE,
 //     TYPE_DEVERS,
-//     TYPE_DISTANCE_DIGUE_BERGE,
+//     TYPE_DISTANCE_DIGUE_BERGE, // Dans le module "berges" (2015)
      TYPE_DOCUMENT,
      TYPE_DOCUMENT_A_GRANDE_ECHELLE,
 //     TYPE_DOCUMENT_DECALAGE,
@@ -407,7 +405,7 @@ public class DbImporter {
 //     TYPE_DONNEES_SOUS_GROUPE,
 //     TYPE_DVPT_VEGETATION,
      TYPE_ELEMENT_GEOMETRIE,
-//     TYPE_ELEMENT_RESEAU,
+     TYPE_ELEMENT_RESEAU,
 //     TYPE_ELEMENT_RESEAU_COTE,
      TYPE_ELEMENT_STRUCTURE,
 //     TYPE_ELEMENT_STRUCTURE_COTE,
@@ -723,7 +721,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -739,7 +737,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -749,12 +747,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_LARGEUR_FRANC_BORD.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_POMPE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -762,8 +760,8 @@ public class DbImporter {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-            importer.cleanDb();
-            importer.importation();
+//            importer.cleanDb();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
