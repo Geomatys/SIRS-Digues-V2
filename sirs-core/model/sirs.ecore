@@ -312,7 +312,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="Station_pompage" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
-        eType="#//ReaseauHydroFermeStationPompage" containment="true"/>
+        eType="#//ReseauConduiteFermee" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pompeIds" upperBound="-1"
         eType="#//Pompe" containment="true"/>
   </eClassifiers>
@@ -341,7 +341,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageHydroAssocieId"
         eType="#//RefOuvrageHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
-        eType="#//ReaseauHydroFermeOuvrageHydroAssocie" containment="true"/>
+        eType="#//ReseauConduiteFermee" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Reseau_telecom_energie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -363,7 +363,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauHydroCielOuvertId"
         eType="#//RefReseauHydroCielOuvert"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydroFerme" upperBound="-1"
-        eType="#//ReaseauHydroFermeReseauHydroCielOuvert" containment="true"/>
+        eType="#//ReseauConduiteFermee" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_particulier" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1013,21 +1013,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrganisme" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ReaseauHydroFermeOuvrageHydroAssocie">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_hydraulique_ferme"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ReaseauHydroFermeStationPompage">
+  <eClassifiers xsi:type="ecore:EClass" name="ReseauConduiteFermee">
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_hydraulique_ferme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReaseauTelecomOuvrageTelecom">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_telecom_energie"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ReaseauHydroFermeReseauHydroCielOuvert">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauId" eType="#//Reseau_hydraulique_ferme"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardableOuvrageRevanche">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
