@@ -18,6 +18,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  *
@@ -71,90 +72,13 @@ public class FXTronconThemePane extends BorderPane {
             }
         });
         
-        new AutoCompleteComboBoxListener<>(uiTronconChoice);
+        new ComboBoxCompletion(uiTronconChoice);
         
         if(!troncons.isEmpty()){
             uiTronconChoice.getSelectionModel().select(troncons.get(0));
         }
     }
     
-    public static class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
-
-        private final ComboBox comboBox;
-        private final ObservableList<T> data;
-        private boolean moveCaretToPos = false;
-        private int caretPos;
-
-        public AutoCompleteComboBoxListener(final ComboBox comboBox) {
-            this.comboBox = comboBox;
-            this.data = comboBox.getItems();
-            this.comboBox.setEditable(true);
-            this.comboBox.setOnKeyPressed((KeyEvent t) -> {comboBox.hide();});
-            this.comboBox.setOnKeyReleased(AutoCompleteComboBoxListener.this);
-        }
-
-        @Override
-        public void handle(KeyEvent event) {
-
-            final KeyCode code = event.getCode();
-            final String text = comboBox.getEditor().getText();
-            
-            if (code == KeyCode.UP) {
-                caretPos = -1;
-                moveCaret(text.length());
-                return;
-            } else if (code == KeyCode.DOWN) {
-                if (!comboBox.isShowing()) {
-                    comboBox.show();
-                }
-                caretPos = -1;
-                moveCaret(text.length());
-                return;
-            } else if (code == KeyCode.BACK_SPACE) {
-                moveCaretToPos = true;
-                caretPos = comboBox.getEditor().getCaretPosition();
-            } else if (code == KeyCode.DELETE) {
-                moveCaretToPos = true;
-                caretPos = comboBox.getEditor().getCaretPosition();
-            }
-
-            if (code == KeyCode.RIGHT || code == KeyCode.LEFT
-              ||event.isControlDown() || code == KeyCode.HOME
-              ||code == KeyCode.END   || code == KeyCode.TAB) {
-                return;
-            }
-
-            ObservableList list = FXCollections.observableArrayList();
-            for (int i = 0; i < data.size(); i++) {
-                final String dataStr = comboBox.getConverter().toString(data.get(i));
-                if (dataStr.toLowerCase().startsWith(
-                        AutoCompleteComboBoxListener.this.comboBox
-                        .getEditor().getText().toLowerCase())) {
-                    list.add(data.get(i));
-                }
-            }
-
-            comboBox.setItems(list);
-            comboBox.getEditor().setText(text);
-            if (!moveCaretToPos) {
-                caretPos = -1;
-            }
-            moveCaret(text.length());
-            if (!list.isEmpty()) {
-                comboBox.show();
-            }
-        }
-
-        private void moveCaret(int textLength) {
-            if (caretPos == -1) {
-                comboBox.getEditor().positionCaret(textLength);
-            } else {
-                comboBox.getEditor().positionCaret(caretPos);
-            }
-            moveCaretToPos = false;
-        }
-
-    }
     
     
 }
