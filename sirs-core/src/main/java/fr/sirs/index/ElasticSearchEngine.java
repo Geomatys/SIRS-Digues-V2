@@ -17,7 +17,7 @@ public class ElasticSearchEngine {
     private final Node node;
     private final Client client;
     
-    public ElasticSearchEngine(CouchDbConnector connector) {
+    public ElasticSearchEngine(CouchDbConnector connector, String dbname, String user, String password) {
         this.connector = connector;
         this.node = nodeBuilder().local(true).node();
         this.client = node.client();
@@ -30,10 +30,10 @@ public class ElasticSearchEngine {
         "    \"couchdb\" : {\n" +
         "        \"host\" : \"localhost\",\n" +
         "        \"port\" : 5984,\n" +
-        "        \"db\" : \"sirs\",\n" +
+        "        \"db\" : \""+dbname+"\",\n" +
         "        \"filter\" : null,\n" +
-        "        \"user\" : \"geouser\",\n" +
-        "        \"password\" : \"geopw\"\n" +
+        "        \"user\" : \""+user+"\",\n" +
+        "        \"password\" : \""+password+"\"\n" +
         "    },\n" +
         "    \"index\" : {\n" +
         "        \"index\" : \"sirs\",\n" +

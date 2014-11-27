@@ -48,6 +48,11 @@ public class CouchDBInit {
     public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, 
             String configFile, boolean createIfNotExists, boolean setupListener) throws MalformedURLException, IOException {
         
+        //http://user:password@address.com
+        final String userpass = databaseUrl.split("@")[0].substring(7);
+        final String user = userpass.split(":")[0];
+        final String password = userpass.split(":")[1];
+        
         final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
         final CouchDbConnector connector = couchsb.createConnector(databaseName,createIfNotExists);
@@ -58,7 +63,7 @@ public class CouchDBInit {
         if(setupListener){
             changeEmmiter = new DocumentChangeEmiter(connector);
             searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
-            elasticEngine = new ElasticSearchEngine(connector);
+            elasticEngine = new ElasticSearchEngine(connector, databaseName, user, password);
             changeEmmiter.start();
         }
         

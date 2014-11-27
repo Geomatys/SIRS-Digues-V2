@@ -85,7 +85,7 @@ public class FXSearchPane extends BorderPane {
         
         final ElasticSearchEngine engine = Injector.getElasticEngine();        
         final Client client = engine.getClient();
-        final QueryBuilder qb = QueryBuilders.matchAllQuery();
+        final QueryBuilder qb = QueryBuilders.queryString(uiSearchField.getText());
         
         final SearchResponse response = client.prepareSearch("sirs")
                 .setQuery(qb)
