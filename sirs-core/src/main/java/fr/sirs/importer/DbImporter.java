@@ -18,28 +18,36 @@ import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.component.RapportEtudeRepository;
+import fr.sirs.core.component.RefConduiteFermeeRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
+import fr.sirs.core.component.RefEcoulementRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
+import fr.sirs.core.component.RefImplantationRepository;
 import fr.sirs.core.component.RefLargeurFrancBordRepository;
 import fr.sirs.core.component.RefMateriauRepository;
 import fr.sirs.core.component.RefNatureRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
+import fr.sirs.core.component.RefOuvrageHydrauliqueAssocieRepository;
+import fr.sirs.core.component.RefOuvrageTelecomEnergieRepository;
 import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefProfilFrancBordRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
+import fr.sirs.core.component.RefReseauTelecomEnergieRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
 import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.RefTypeDocumentRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
+import fr.sirs.core.component.RefUtilisationConduiteRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
@@ -120,6 +128,13 @@ public class DbImporter {
     private final ArticleJournalRepository articleJournalRepository;
     private final RefLargeurFrancBordRepository refLargeurFrancBordRepository;
     private final RefProfilFrancBordRepository refProfilFrancBordRepository;
+    private final RefEcoulementRepository refEcoulementRepository;
+    private final RefImplantationRepository refImplantationRepository;
+    private final RefConduiteFermeeRepository refConduiteFermeeRepository;
+    private final RefUtilisationConduiteRepository refUtilisationConduiteRepository;
+    private final RefReseauTelecomEnergieRepository refReseauTelecomEnergieRepository;
+    private final RefOuvrageTelecomEnergieRepository refOuvrageTelecomEnergieRepository;
+    private final RefOuvrageHydrauliqueAssocieRepository refOuvrageHydrauliqueAssocieRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -301,7 +316,7 @@ public class DbImporter {
 //     SYNCHRO_SUIVI_BD,
 //     SYNDICAT,
 //     SYS_DONNEES_LOCALISEES_EN_PR,
-//     SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE,
+     SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE,
 //     SYS_EVT_BRISE_LAME, // Dans le module "ouvrages à la mer" (2015)
 //     SYS_EVT_CHEMIN_ACCES,
      SYS_EVT_CONDUITE_FERMEE,
@@ -427,7 +442,7 @@ public class DbImporter {
      TYPE_ORIGINE_PROFIL_EN_LONG,
      TYPE_ORIGINE_PROFIL_EN_TRAVERS,
 //     TYPE_OUVRAGE_FRANCHISSEMENT,
-//     TYPE_OUVRAGE_HYDRAU_ASSOCIE,
+     TYPE_OUVRAGE_HYDRAU_ASSOCIE,
 //     TYPE_OUVRAGE_PARTICULIER,
      TYPE_OUVRAGE_TELECOM_NRJ,
 //     TYPE_OUVRAGE_VOIRIE,
@@ -565,6 +580,20 @@ public class DbImporter {
         repositories.add(refLargeurFrancBordRepository);
         refProfilFrancBordRepository = new RefProfilFrancBordRepository(couchDbConnector);
         repositories.add(refProfilFrancBordRepository);
+        refEcoulementRepository = new RefEcoulementRepository(couchDbConnector);
+        repositories.add(refEcoulementRepository);
+        refImplantationRepository = new RefImplantationRepository(couchDbConnector);
+        repositories.add(refImplantationRepository);
+        refConduiteFermeeRepository = new RefConduiteFermeeRepository(couchDbConnector);
+        repositories.add(refConduiteFermeeRepository);
+        refUtilisationConduiteRepository = new RefUtilisationConduiteRepository(couchDbConnector);
+        repositories.add(refUtilisationConduiteRepository);
+        refReseauTelecomEnergieRepository = new RefReseauTelecomEnergieRepository(couchDbConnector);
+        repositories.add(refReseauTelecomEnergieRepository);
+        refOuvrageTelecomEnergieRepository = new RefOuvrageTelecomEnergieRepository(couchDbConnector);
+        repositories.add(refOuvrageTelecomEnergieRepository);
+        refOuvrageHydrauliqueAssocieRepository = new RefOuvrageHydrauliqueAssocieRepository(couchDbConnector);
+        repositories.add(refOuvrageHydrauliqueAssocieRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -721,7 +750,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_OUVRAGE_HYDRAU_ASSOCIE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -737,7 +766,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_OUVRAGE_HYDRAU_ASSOCIE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -752,15 +781,15 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString())){
-                System.out.println(row);
+            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_OUVRAGE_HYDRAU_ASSOCIE.toString())){
+//                System.out.println(row);
             }
             System.out.println("=======================");
 //            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
 //                System.out.println(column.getName());
 //            });
 //            System.out.println("++++++++++++++++++++");
-//            importer.cleanDb();
+            importer.cleanDb();
 //            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());

@@ -84,9 +84,9 @@ class TypeElementReseauImporter extends GenericImporter {
                     case SYS_EVT_CONDUITE_FERMEE:
                         classe = ReseauHydrauliqueFerme.class;
                         break;
-//                    case SYS_EVT_CONDUITE_FERMEE:
-//                        classe = OuvrageHydrauliqueAssocie.class;
-//                        break;
+                    case SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE:
+                        classe = OuvrageHydrauliqueAssocie.class;
+                        break;
                     case SYS_EVT_RESEAU_TELECOMMUNICATION:
                         classe = ReseauTelecomEnergie.class;
                         break;

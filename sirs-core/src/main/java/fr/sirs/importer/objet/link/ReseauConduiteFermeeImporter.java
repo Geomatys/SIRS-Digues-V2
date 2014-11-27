@@ -1,17 +1,18 @@
-package fr.sirs.importer.objet.reseau;
+package fr.sirs.importer.objet.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.ReseauReseau;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauReseau;
+import fr.sirs.core.model.StationPompage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.objet.reseau.ReseauImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,16 +22,20 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ReseauConduiteFermeeImporter extends GenericImporter {
+public class ReseauConduiteFermeeImporter extends GenericObjectLinker {
 
-    private Map<Integer, List<ReseauReseau>> reseauConduites = null;
-    private final ConduiteFermeeImporter conduiteFermeeImporter;
+    private final ReseauImporter reseauImpoter;
     
-    ReseauConduiteFermeeImporter(final Database accessDatabase, 
+    public ReseauConduiteFermeeImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final ConduiteFermeeImporter conduiteFermeeImporter) {
+            final ReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
-        this.conduiteFermeeImporter = conduiteFermeeImporter;
+        this.reseauImpoter = reseauImpoter;
+    }
+
+    @Override
+    public void link() throws IOException, AccessDbImporterException {
+        compute();
     }
 
     private enum ElementReseauConduiteFermeeColumns {
@@ -38,17 +43,6 @@ class ReseauConduiteFermeeImporter extends GenericImporter {
         ID_ELEMENT_RESEAU_CONDUITE_FERMEE,
         DATE_DERNIERE_MAJ
     };
-
-    /**
-     * 
-     * @return A map containing all the database ReseauReseau referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, List<ReseauReseau>> getReseauConduiteFermeByReseauId() throws IOException, AccessDbImporterException {
-        if(reseauConduites == null) compute();
-        return reseauConduites;
-    }
     
     @Override
     public List<String> getUsedColumns() {
@@ -66,31 +60,31 @@ class ReseauConduiteFermeeImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        reseauConduites = new HashMap<>();
         
-        final Map<Integer, ReseauHydrauliqueFerme> conduitesFermees = conduiteFermeeImporter.getStructures();
+        final Map<Integer, Objet> reseaux = reseauImpoter.getStructures();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ReseauReseau reseauConduite = new ReseauReseau();
             
-            if(conduitesFermees.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()))!=null){
-                reseauConduite.setReseauId(cleanNullString(conduitesFermees.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString())).getId()));
+            final ReseauHydrauliqueFerme conduiteFermee = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()));
+            final StationPompage stationPompage = (StationPompage) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
+            
+            if(conduiteFermee!=null){
+                reseauConduite.setReseauId(cleanNullString(conduiteFermee.getId()));
             }
             
             if (row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 reseauConduite.setDateMaj(LocalDateTime.parse(row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            // Set the list ByTronconId
-            List<ReseauReseau> listByReseauId = reseauConduites.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
-            if (listByReseauId == null) {
-                listByReseauId = new ArrayList<>();
-                reseauConduites.put(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()), listByReseauId);
+            List<ReseauReseau> listByReseau = stationPompage.getReseau();
+            if (listByReseau == null) {
+                listByReseau = new ArrayList<>();
+                stationPompage.setReseau(listByReseau);
             }
-            listByReseauId.add(reseauConduite);
+            listByReseau.add(reseauConduite);
         }
     }
-    
 }

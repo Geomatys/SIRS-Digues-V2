@@ -6,15 +6,14 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefImplantation;
-import fr.sirs.core.model.RefOuvrageTelecomEnergie;
+import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -49,14 +48,14 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie> {
+class AutreOuvrageHydrauliqueImporter extends GenericStructureImporter<OuvrageHydrauliqueAssocie> {
 
-    private Map<Integer, OuvrageTelecomEnergie> ouvrages = null;
-    private Map<Integer, List<OuvrageTelecomEnergie>> ouvragesByTronconId = null;
+    private Map<Integer, OuvrageHydrauliqueAssocie> ouvrages = null;
+    private Map<Integer, List<OuvrageHydrauliqueAssocie>> ouvragesByTronconId = null;
     
-    private final TypeOuvrageTelecomImporter typeOuvrageTelecomImporter;
+    private final TypeOuvrageAssocieImporter typeOuvrageAssocieImporter;
 
-    OuvTelecomImporter(final Database accessDatabase,
+    AutreOuvrageHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
@@ -68,15 +67,15 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter, 
-            final TypeOuvrageTelecomImporter typeReseauTelecomImporter) {
+            final TypeOuvrageAssocieImporter typeOuvrageAssocieImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.typeOuvrageTelecomImporter = typeReseauTelecomImporter;
+        this.typeOuvrageAssocieImporter = typeOuvrageAssocieImporter;
     }
     
-    private enum OuvTelecomColumns {
+    private enum AutreOuvrageColumns {
         ID_ELEMENT_RESEAU,
 //        id_nom_element,
 //        ID_SOUS_GROUPE_DONNEES,
@@ -128,9 +127,9 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
 //        ID_UTILISATION_CONDUITE,
 //        ID_TYPE_CONDUITE_FERMEE,
 //        AUTORISE,
-//        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
+        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
 //        ID_TYPE_RESEAU_COMMUNICATION,
-        ID_OUVRAGE_COMM_NRJ,
+//        ID_OUVRAGE_COMM_NRJ,
 //        ID_TYPE_VOIE_SUR_DIGUE,
 //        ID_OUVRAGE_VOIRIE,
 //        ID_TYPE_REVETEMENT,
@@ -138,7 +137,7 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
         ID_TYPE_POSITION,
 //        LARGEUR,
 //        ID_TYPE_OUVRAGE_VOIRIE,
-        HAUTEUR,
+//        HAUTEUR,
 //        DIAMETRE,
 //        ID_TYPE_RESEAU_EAU,
 //        ID_TYPE_NATURE,
@@ -156,13 +155,13 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
 
     /**
      *
-     * @return A map containing all OuvrageTelecomEnergie instances accessibles from the
+     * @return A map containing all OuvrageHydrauliqueAssocie instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, OuvrageTelecomEnergie> getStructures() throws IOException, AccessDbImporterException {
+    public Map<Integer, OuvrageHydrauliqueAssocie> getStructures() throws IOException, AccessDbImporterException {
         if (this.ouvrages == null) {
             compute();
         }
@@ -171,14 +170,13 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
 
     /**
      *
-     * @return A map containing all OuvrageTelecomEnergie instances accessibles from the
+     * @return A map containing all OuvrageHydrauliqueAssocie instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, List<OuvrageTelecomEnergie>> getStructuresByTronconId() 
-            throws IOException, AccessDbImporterException {
+    public Map<Integer, List<OuvrageHydrauliqueAssocie>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (this.ouvragesByTronconId == null) {
             compute();
         }
@@ -187,7 +185,7 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_OUVRAGE_TELECOMMUNICATION.toString();
+        return DbImporter.TableName.SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE.toString();
     }
 
     @Override
@@ -202,45 +200,45 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefOuvrageTelecomEnergie> typesOuvrage = typeOuvrageTelecomImporter.getTypeOuvrageTelecom();
+        final Map<Integer, RefOuvrageHydrauliqueAssocie> typesOuvrage = typeOuvrageAssocieImporter.getTypeOuvrageAssocie();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final OuvrageTelecomEnergie ouvrage = new OuvrageTelecomEnergie();
+            final OuvrageHydrauliqueAssocie ouvrage = new OuvrageHydrauliqueAssocie();
             
-            ouvrage.setLibelle(cleanNullString(row.getString(OuvTelecomColumns.NOM.toString())));
+            ouvrage.setLibelle(cleanNullString(row.getString(AutreOuvrageColumns.NOM.toString())));
             
-            if(row.getInt(OuvTelecomColumns.ID_TYPE_COTE.toString())!=null){
-                ouvrage.setCoteId(typesCote.get(row.getInt(OuvTelecomColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(AutreOuvrageColumns.ID_TYPE_COTE.toString())!=null){
+                ouvrage.setCoteId(typesCote.get(row.getInt(AutreOuvrageColumns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(OuvTelecomColumns.ID_SOURCE.toString())!=null){
-                ouvrage.setSourceId(typesSource.get(row.getInt(OuvTelecomColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(AutreOuvrageColumns.ID_SOURCE.toString())!=null){
+                ouvrage.setSourceId(typesSource.get(row.getInt(AutreOuvrageColumns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(OuvTelecomColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 ouvrage.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(OuvTelecomColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(OuvTelecomColumns.DATE_DEBUT_VAL.toString()) != null) {
-                ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(OuvTelecomColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(AutreOuvrageColumns.DATE_DEBUT_VAL.toString()) != null) {
+                ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(AutreOuvrageColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(OuvTelecomColumns.DATE_FIN_VAL.toString()) != null) {
-                ouvrage.setDate_fin(LocalDateTime.parse(row.getDate(OuvTelecomColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(AutreOuvrageColumns.DATE_FIN_VAL.toString()) != null) {
+                ouvrage.setDate_fin(LocalDateTime.parse(row.getDate(AutreOuvrageColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(OuvTelecomColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                ouvrage.setPR_debut(row.getDouble(OuvTelecomColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(AutreOuvrageColumns.PR_DEBUT_CALCULE.toString()) != null) {
+                ouvrage.setPR_debut(row.getDouble(AutreOuvrageColumns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(OuvTelecomColumns.PR_FIN_CALCULE.toString()) != null) {
-                ouvrage.setPR_fin(row.getDouble(OuvTelecomColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(AutreOuvrageColumns.PR_FIN_CALCULE.toString()) != null) {
+                ouvrage.setPR_fin(row.getDouble(AutreOuvrageColumns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -250,75 +248,73 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
 
                 try {
 
-                    if (row.getDouble(OuvTelecomColumns.X_DEBUT.toString()) != null && row.getDouble(OuvTelecomColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(AutreOuvrageColumns.X_DEBUT.toString()) != null && row.getDouble(AutreOuvrageColumns.Y_DEBUT.toString()) != null) {
                         ouvrage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(OuvTelecomColumns.X_DEBUT.toString()),
-                                row.getDouble(OuvTelecomColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(AutreOuvrageColumns.X_DEBUT.toString()),
+                                row.getDouble(AutreOuvrageColumns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(OuvTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(AutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(OuvTelecomColumns.X_FIN.toString()) != null && row.getDouble(OuvTelecomColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(AutreOuvrageColumns.X_FIN.toString()) != null && row.getDouble(AutreOuvrageColumns.Y_FIN.toString()) != null) {
                         ouvrage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(OuvTelecomColumns.X_FIN.toString()),
-                                row.getDouble(OuvTelecomColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(AutreOuvrageColumns.X_FIN.toString()),
+                                row.getDouble(AutreOuvrageColumns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(OuvTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(AutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(OuvTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(OuvTelecomColumns.ID_SYSTEME_REP.toString()) != null) {
-                ouvrage.setSystemeRepId(systemesReperage.get(row.getInt(OuvTelecomColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(AutreOuvrageColumns.ID_SYSTEME_REP.toString()) != null) {
+                ouvrage.setSystemeRepId(systemesReperage.get(row.getInt(AutreOuvrageColumns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(OuvTelecomColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                ouvrage.setBorneDebutId(bornes.get((int) row.getDouble(OuvTelecomColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(AutreOuvrageColumns.ID_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorneDebutId(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            ouvrage.setBorne_debut_aval(row.getBoolean(OuvTelecomColumns.AMONT_AVAL_DEBUT.toString()));
+            ouvrage.setBorne_debut_aval(row.getBoolean(AutreOuvrageColumns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(OuvTelecomColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                ouvrage.setBorne_debut_distance(row.getDouble(OuvTelecomColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorne_debut_distance(row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(OuvTelecomColumns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(OuvTelecomColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    ouvrage.setBorneFinId(bornes.get((int) row.getDouble(OuvTelecomColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()) != null) {
+                if(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
+                    ouvrage.setBorneFinId(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
             }
             
-            ouvrage.setBorne_fin_aval(row.getBoolean(OuvTelecomColumns.AMONT_AVAL_FIN.toString()));
+            ouvrage.setBorne_fin_aval(row.getBoolean(AutreOuvrageColumns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(OuvTelecomColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                ouvrage.setBorne_fin_distance(row.getDouble(OuvTelecomColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_FIN.toString()) != null) {
+                ouvrage.setBorne_fin_distance(row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            ouvrage.setCommentaire(row.getString(OuvTelecomColumns.COMMENTAIRE.toString()));
+            ouvrage.setCommentaire(row.getString(AutreOuvrageColumns.COMMENTAIRE.toString()));
             
-            if(row.getInt(OuvTelecomColumns.ID_OUVRAGE_COMM_NRJ.toString())!=null){
-                if(typesOuvrage.get(row.getInt(OuvTelecomColumns.ID_OUVRAGE_COMM_NRJ.toString()))!=null){
-                    ouvrage.setTypeOuvrageTelecomEnergieId(typesOuvrage.get(row.getInt(OuvTelecomColumns.ID_OUVRAGE_COMM_NRJ.toString())).getId());
-                }
+            if(row.getInt(AutreOuvrageColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())!=null){
+                ouvrage.setTypeOuvrageHydroAssocieId(typesOuvrage.get(row.getInt(AutreOuvrageColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())).getId());
             }
             
-            if(row.getInt(OuvTelecomColumns.ID_TYPE_POSITION.toString())!=null){
-                ouvrage.setPosition_structure(typesPosition.get(row.getInt(OuvTelecomColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(AutreOuvrageColumns.ID_TYPE_POSITION.toString())!=null){
+                ouvrage.setPosition_structure(typesPosition.get(row.getInt(AutreOuvrageColumns.ID_TYPE_POSITION.toString())).getId());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            ouvrages.put(row.getInt(OuvTelecomColumns.ID_ELEMENT_RESEAU.toString()), ouvrage);
+            ouvrages.put(row.getInt(AutreOuvrageColumns.ID_ELEMENT_RESEAU.toString()), ouvrage);
 
             // Set the list ByTronconId
-            List<OuvrageTelecomEnergie> listByTronconId = ouvragesByTronconId.get(row.getInt(OuvTelecomColumns.ID_TRONCON_GESTION.toString()));
+            List<OuvrageHydrauliqueAssocie> listByTronconId = ouvragesByTronconId.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                ouvragesByTronconId.put(row.getInt(OuvTelecomColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                ouvragesByTronconId.put(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(ouvrage);
         }
@@ -327,7 +323,7 @@ class OuvTelecomImporter extends GenericStructureImporter<OuvrageTelecomEnergie>
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (OuvTelecomColumns c : OuvTelecomColumns.values()) {
+        for (AutreOuvrageColumns c : AutreOuvrageColumns.values()) {
             columns.add(c.toString());
         }
         return columns;

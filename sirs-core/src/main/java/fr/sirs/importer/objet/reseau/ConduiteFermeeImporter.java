@@ -351,7 +351,6 @@ class ConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueF
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             conduites.put(row.getInt(ConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()), conduiteFermee);
 
             // Set the list ByTronconId

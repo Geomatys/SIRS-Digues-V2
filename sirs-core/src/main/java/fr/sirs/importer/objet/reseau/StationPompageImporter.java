@@ -55,7 +55,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
     private Map<Integer, List<StationPompage>> stationsByTronconId = null;
     
     private final PompeImporter pompeImporter;
-    private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
+//    private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
 
     StationPompageImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -69,14 +69,13 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter, 
-            final PompeImporter pompeImporter,
-            final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter) {
+            final PompeImporter pompeImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.pompeImporter = pompeImporter;
-        this.reseauConduiteFermeeImporter = reseauConduiteFermeeImporter;
+//        this.reseauConduiteFermeeImporter = reseauConduiteFermeeImporter;
     }
     
     private enum StationPompageColumns {
@@ -206,7 +205,7 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
         final Map<Integer, List<Pompe>> pompes = pompeImporter.getPompeByElementReseau();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, List<ReseauReseau>> reseauConduites = reseauConduiteFermeeImporter.getReseauConduiteFermeByReseauId();
+//        final Map<Integer, List<ReseauReseau>> reseauConduites = reseauConduiteFermeeImporter.getReseauConduiteFermeByReseauId();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -314,9 +313,9 @@ class StationPompageImporter extends GenericStructureImporter<StationPompage> {
                     stationPompage.setPompeIds(pompes.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
                 }
                 
-                if(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
-                    stationPompage.setReseau(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
-                }
+//                if(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString()))!=null){
+//                    stationPompage.setReseau(reseauConduites.get(row.getInt(StationPompageColumns.ID_ELEMENT_RESEAU.toString())));
+//                }
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

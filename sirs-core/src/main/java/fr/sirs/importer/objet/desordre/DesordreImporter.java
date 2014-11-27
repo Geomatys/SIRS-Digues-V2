@@ -16,7 +16,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.DesordreStructure;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -55,7 +54,6 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
     private Map<Integer, Desordre> desordres = null;
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
     
-    private final DesordreStructureImporter desordreStructureImporter;
     private final TypeDesordreImporter typeDesordreImporter;
     private final SubDesordreImporter subDesordreImporter;
 
@@ -76,8 +74,6 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 systemeReperageImporter, borneDigueImporter, null, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.desordreStructureImporter = new DesordreStructureImporter(
-                accessDatabase, couchDbConnector, structureImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
                 couchDbConnector, refTypeDesordreRepository);
         this.subDesordreImporter = new SubDesordreImporter(accessDatabase, 
@@ -163,7 +159,6 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, List<DesordreStructure>> desordresStructures = desordreStructureImporter.getDesordresStructuresByDesordreId();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypeDesordre();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
@@ -439,23 +434,17 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             
             
             if (nouveauDesordre) {
-                List<DesordreStructure> structures = desordresStructures.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
-                if (structures == null) {
-                    structures = new ArrayList<>();
-                }
-                desordre.setDesordreStructure(structures);
                 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
                 desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
 
                 // Set the list ByTronconId
                 List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
+                    desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(desordre);
-                desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
         }
     }

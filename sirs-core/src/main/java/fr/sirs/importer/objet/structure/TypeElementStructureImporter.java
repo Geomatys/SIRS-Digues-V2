@@ -95,21 +95,21 @@ class TypeElementStructureImporter extends GenericImporter {
                     case SYS_EVT_PIED_DE_DIGUE:
                         classe = PiedDigue.class;
                         break;
-//                    case 6:
+//                    case SYS_EVT_FRONT_FRANC_BORD:
 //                        classe = LargeurFrancBord.class; break;
-//                    case 7:
+//                    case SYS_EVT_PIED_FRONT_FRANC_BORD:
 //                        classe = LargeurFrancBord.class; break;
                     case SYS_EVT_FONDATION:
                         classe = Fondation.class;
                         break;
-//                case SYS_EVT_OUVRAGE_PARTICULIER:
+//                case SYS_EVT_OUVRAGE_PARTICULIER: // Les ouvrages particuliers sont en fait des éléments de réseau
 //                    classe = OuvrageParticulier.class; break;
-//                    case 10:
+//                    case SYS_EVT_BRISE_LAME: // Les brise-lames n'existent pas dans le modèle car ils feront partie d'un module "ouvrages à la mer" en 2015
 //                        classe = BriseLame.class; break;
                     case SYS_EVT_EPIS:
                         classe = Epi.class;
                         break;
-//                    case 12:
+//                    case SYS_EVT_VEGETATION:
 //                        classe = Vegetation.class; break;
                     case SYS_EVT_OUVRAGE_REVANCHE:
                         classe = OuvrageRevanche.class;

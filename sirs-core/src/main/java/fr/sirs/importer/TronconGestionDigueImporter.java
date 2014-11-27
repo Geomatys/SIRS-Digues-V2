@@ -27,6 +27,9 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeSourceImporter;
 import fr.sirs.importer.objet.geometry.GeometryImporter;
+import fr.sirs.importer.objet.link.DesordreStructureImporter;
+import fr.sirs.importer.objet.link.ReseauConduiteFermeeImporter;
+import fr.sirs.importer.objet.link.ReseauOuvrageTelecomImporter;
 import fr.sirs.importer.objet.reseau.ReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
@@ -60,6 +63,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private DesordreImporter desordreImporter;
     private GeometryImporter geometryImporter;
     private ReseauImporter reseauImporter;
+    
+    private DesordreStructureImporter desordreStructureImporter;
+    private ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
+    private ReseauOuvrageTelecomImporter reseauOuvrageTelecomImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -126,6 +133,14 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter, 
                 typeNatureImporter, typeFonctionImporter);
+        
+        this.desordreStructureImporter = new DesordreStructureImporter(
+                accessDatabase, couchDbConnector, structureImporter, 
+                desordreImporter);
+        this.reseauConduiteFermeeImporter = new ReseauConduiteFermeeImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        this.reseauOuvrageTelecomImporter = new ReseauOuvrageTelecomImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
     }
     
     public StructureImporter getStructureImporter(){return structureImporter;}
@@ -289,6 +304,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, List<Objet>> geometriesByTroncon = geometryImporter.getStructuresByTronconId();
         final Map<Integer, List<Objet>> reseauxByTroncon = reseauImporter.getStructuresByTronconId();
 
+        desordreStructureImporter.link();
+        reseauConduiteFermeeImporter.link();
+        reseauOuvrageTelecomImporter.link();
         
 //        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
 //        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));

@@ -1,11 +1,7 @@
 package fr.sirs.importer.objet.reseau;
 
-import fr.sirs.importer.objet.geometry.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -13,7 +9,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
@@ -29,21 +24,12 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeSourceImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -55,17 +41,20 @@ public class ReseauImporter extends GenericStructureImporter {
     private Map<Integer, Objet> structures = null;
     private final TypeElementReseauImporter typeElementReseauImporter;
     
-    private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
+    private final List<GenericStructureImporter> reseauImporters = new ArrayList<>();
     private final TypeEcoulementImporter typeEcoulementImporter;
     private final TypeImplantationImporter typeImplantationImporter;
     private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
     private final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter;
     private final ConduiteFermeeImporter conduiteFermeeImporter;
-    private final ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
     private final PompeImporter pompeImporter;
     private final StationPompageImporter stationPompageImporter;
     private final TypeReseauTelecomImporter typeReseauTelecomImporter;
     private final ResTelecomImporter resTelecomImporter;
+    private final TypeOuvrageTelecomImporter typeOuvrageTelecomImporter;
+    private final OuvTelecomImporter ouvTelecomImporter;
+    private final TypeOuvrageAssocieImporter typeOuvrageAssocieImporter;
+    private final AutreOuvrageHydrauliqueImporter autreOuvrageHydrauliqueImporter;
     
 
     public ReseauImporter(final Database accessDatabase,
@@ -101,17 +90,15 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
                 typeEcoulementImporter, typeImplantationImporter, 
                 typeConduiteFermeeImporter, typeUtilisationConduiteImporter);
-        structureImporters.add(conduiteFermeeImporter);
-        reseauConduiteFermeeImporter = new ReseauConduiteFermeeImporter(
-                accessDatabase, couchDbConnector, conduiteFermeeImporter);
+        reseauImporters.add(conduiteFermeeImporter);
         pompeImporter = new PompeImporter(accessDatabase, couchDbConnector);
         stationPompageImporter = new StationPompageImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                pompeImporter, reseauConduiteFermeeImporter);
-        structureImporters.add(stationPompageImporter);
+                pompeImporter);
+        reseauImporters.add(stationPompageImporter);
         typeReseauTelecomImporter = new TypeReseauTelecomImporter(
                 accessDatabase, couchDbConnector);
         resTelecomImporter = new ResTelecomImporter(accessDatabase, 
@@ -120,7 +107,25 @@ public class ReseauImporter extends GenericStructureImporter {
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
                 typeImplantationImporter, typeReseauTelecomImporter);
-        structureImporters.add(resTelecomImporter);
+        reseauImporters.add(resTelecomImporter);
+        typeOuvrageTelecomImporter = new TypeOuvrageTelecomImporter(
+                accessDatabase, couchDbConnector);
+        ouvTelecomImporter = new OuvTelecomImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                typeOuvrageTelecomImporter);
+        reseauImporters.add(ouvTelecomImporter);
+        typeOuvrageAssocieImporter = new TypeOuvrageAssocieImporter(
+                accessDatabase, couchDbConnector);
+        autreOuvrageHydrauliqueImporter = new AutreOuvrageHydrauliqueImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
+                typeOuvrageAssocieImporter);
+        reseauImporters.add(autreOuvrageHydrauliqueImporter);
     }
 
     private enum ElementReseauColumns {
@@ -246,11 +251,12 @@ public class ReseauImporter extends GenericStructureImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
 
-        for (final GenericStructureImporter gsi : structureImporters){
+        for (final GenericStructureImporter gsi : reseauImporters){
             final Map<Integer, Objet> objets = gsi.getStructures();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
+                        System.out.println(gsi.getClass());
                         throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
                     }
                     else {
@@ -444,7 +450,7 @@ public class ReseauImporter extends GenericStructureImporter {
         
         
         // Structures au sens strict
-        for (final GenericStructureImporter gsi : structureImporters) {
+        for (final GenericStructureImporter gsi : reseauImporters) {
             final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
 
             if (objetsByTronconId != null) {

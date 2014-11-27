@@ -326,7 +326,6 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             reseaux.put(row.getInt(ResTelecomColumns.ID_ELEMENT_RESEAU.toString()), reseau);
 
             // Set the list ByTronconId
