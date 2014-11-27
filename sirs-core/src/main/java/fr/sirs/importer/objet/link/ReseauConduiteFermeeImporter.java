@@ -9,7 +9,7 @@ import fr.sirs.core.model.StationPompage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.objet.reseau.ReseauImporter;
+import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ import org.ektorp.CouchDbConnector;
  */
 public class ReseauConduiteFermeeImporter extends GenericObjectLinker {
 
-    private final ReseauImporter reseauImpoter;
+    private final ElementReseauImporter reseauImpoter;
     
     public ReseauConduiteFermeeImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final ReseauImporter reseauImpoter) {
+            final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
         this.reseauImpoter = reseauImpoter;
     }

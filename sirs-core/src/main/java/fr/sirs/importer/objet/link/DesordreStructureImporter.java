@@ -8,7 +8,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.DesordreStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
-import fr.sirs.importer.objet.structure.StructureImporter;
+import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,12 +23,12 @@ import org.ektorp.CouchDbConnector;
  */
 public class DesordreStructureImporter extends GenericObjectLinker {
     
-    private final StructureImporter structureImporter;
+    private final ElementStructureImporter structureImporter;
     private final DesordreImporter desordreImporter;
 
     public DesordreStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final StructureImporter structureImporter,
+            final ElementStructureImporter structureImporter,
             final DesordreImporter desordreImporter) {
         super(accessDatabase, couchDbConnector);
         this.structureImporter = structureImporter;

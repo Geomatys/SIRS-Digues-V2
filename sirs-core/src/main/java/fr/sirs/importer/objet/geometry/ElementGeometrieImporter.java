@@ -22,7 +22,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,26 +35,24 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class GeometryImporter extends GenericStructureImporter {
+public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
 
-    private Map<Integer, List<Objet>> structuresByTronconId = null;
-    private Map<Integer, Objet> structures = null;
     private final TypeElementGeometryImporter typeElementGeometryImporter;
     
     private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
-    private final LargeurFrancBordImporter largeurFrancBordImporter;
-    private final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter;
-    private final ProfilFrontFrancBordImporter profilFrontFrancBordImporter;
+    private final SysEvtLargeurFrancBordImporter largeurFrancBordImporter;
+    private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
+    private final SysEvtProfilFrontFrancBordImporter profilFrontFrancBordImporter;
     
 
-    public GeometryImporter(final Database accessDatabase,
+    public ElementGeometrieImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
             final TypeMateriauImporter typeMateriauImporter,
@@ -68,16 +66,16 @@ public class GeometryImporter extends GenericStructureImporter {
                 accessDatabase, couchDbConnector);
         typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
                 accessDatabase, couchDbConnector);
-        largeurFrancBordImporter = new LargeurFrancBordImporter(accessDatabase, 
+        largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
                 typeLargeurFrancBordImporter);
         structureImporters.add(largeurFrancBordImporter);
-        typeProfilFrontFrancBordImporter = new TypeProfilFrontFrancBordImporter(
+        typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
                 accessDatabase, couchDbConnector);
-        profilFrontFrancBordImporter = new ProfilFrontFrancBordImporter(
+        profilFrontFrancBordImporter = new SysEvtProfilFrontFrancBordImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
@@ -86,7 +84,7 @@ public class GeometryImporter extends GenericStructureImporter {
         structureImporters.add(profilFrontFrancBordImporter);
     }
 
-    private enum ElementGeometryColumns {
+    private enum Columns {
         ID_ELEMENT_GEOMETRIE,
 //        ID_TYPE_ELEMENT_GEOMETRIE,
 //        ID_SOURCE,
@@ -120,6 +118,7 @@ public class GeometryImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
+    @Override
     public Map<Integer, List<Objet>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
         if (structuresByTronconId == null)  compute();
         return structuresByTronconId;
@@ -132,6 +131,7 @@ public class GeometryImporter extends GenericStructureImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
+    @Override
     public Map<Integer, Objet> getStructures() throws IOException, AccessDbImporterException{
         if(structures==null) compute();
         return structures;
@@ -140,7 +140,7 @@ public class GeometryImporter extends GenericStructureImporter {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ElementGeometryColumns c : ElementGeometryColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -157,9 +157,9 @@ public class GeometryImporter extends GenericStructureImporter {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
         for (final GenericStructureImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getStructures();
@@ -205,8 +205,8 @@ public class GeometryImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final int structureId = row.getInt(ElementGeometryColumns.ID_ELEMENT_GEOMETRIE.toString());
-            final Class typeStructure = this.typeElementGeometryImporter.getTypeElementStructure().get(row.getInt(ElementGeometryColumns.ID_ELEMENT_GEOMETRIE.toString()));
+            final int structureId = row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString());
+            final Class typeStructure = this.typeElementGeometryImporter.getTypeElementStructure().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
             final Objet structure;
             
             if(typeStructure==null){

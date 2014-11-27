@@ -11,13 +11,13 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
+import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.OrganismeImporter;
@@ -27,7 +27,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,18 +49,15 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class EpiImporter extends GenericStructureImporter<Epi> {
+class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisberme> {
 
-    private Map<Integer, Epi> epis = null;
-    private Map<Integer, List<Epi>> episByTronconId = null;
-
-    EpiImporter(final Database accessDatabase,
+    SysEvtSommetRisbermeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
@@ -71,8 +68,9 @@ class EpiImporter extends GenericStructureImporter<Epi> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
+
     
-    private enum EpiColumns {
+    private enum Columns {
         ID_ELEMENT_STRUCTURE,
 //        id_nom_element, // Redondant avec ID_ELEMENT_STRUCTURE
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -80,22 +78,22 @@ class EpiImporter extends GenericStructureImporter<Epi> {
 //        DECALAGE_DEFAUT, // Affichage
 //        DECALAGE, // Affichage
 //        LIBELLE_SOURCE, // Redondant avec l'importation des sources
-//        LIBELLE_TYPE_COTE, // Redondant avec l'importation des types de côtés
+//        LIBELLE_TYPE_COTE, // Redondant avec l'importation des cotés
 //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
-//        NOM_BORNE_DEBUT, // Redondant avec l'importatoin des bornes
+//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
 //        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des matériaux
+//        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
 //        LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
 //        LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
 //        LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
 //        LIBELLE_TYPE_OUVRAGE_PARTICULIER, 
-//        LIBELLE_TYPE_POSITION,
+//        LIBELLE_TYPE_POSITION, // Redondant avec l'importation des types de position
 //        RAISON_SOCIALE_ORG_PROPRIO, // Redondant avec l'importation des organismes
 //        RAISON_SOCIALE_ORG_GESTION, // Redondant avec l'importation des organismes
-//        INTERV_PROPRIO, 
+//        INTERV_PROPRIO,
 //        INTERV_GARDIEN,
 //        LIBELLE_TYPE_COMPOSITION,
 //        LIBELLE_TYPE_VEGETATION,
@@ -119,11 +117,11 @@ class EpiImporter extends GenericStructureImporter<Epi> {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_COUCHE, // Pas dans le nouveau modèle
-//        ID_TYPE_MATERIAU, // Pas dans le nouveau modèle
-//        ID_TYPE_NATURE, // Pas dans le nouveau modèle
-//        ID_TYPE_FONCTION, // Pas dans le nouveau modèle
-//        EPAISSEUR, // Pas dans le nouveau modèle
+        N_COUCHE,
+        ID_TYPE_MATERIAU,
+        ID_TYPE_NATURE,
+        ID_TYPE_FONCTION,
+        EPAISSEUR,
 //        TALUS_INTERCEPTE_CRETE,
 //        ID_TYPE_NATURE_HAUT,
 //        ID_TYPE_MATERIAU_HAUT,
@@ -165,90 +163,90 @@ class EpiImporter extends GenericStructureImporter<Epi> {
 
     /**
      *
-     * @return A map containing all Epi instances accessibles from the
+     * @return A map containing all SommetRisberme instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, Epi> getStructures() throws IOException, AccessDbImporterException {
-        if (this.epis == null) {
+    public Map<Integer, SommetRisberme> getStructures() throws IOException, AccessDbImporterException {
+        if (this.structures == null) {
             compute();
         }
-        return epis;
+        return structures;
     }
 
     /**
      *
-     * @return A map containing all Epi instances accessibles from the
+     * @return A map containing all SommetRisberme instances accessibles from the
      * internal database <em>TronconDigue</em> identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, List<Epi>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.episByTronconId == null) {
+    public Map<Integer, List<SommetRisberme>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+        if (this.structuresByTronconId == null) {
             compute();
         }
-        return this.episByTronconId;
+        return this.structuresByTronconId;
     }
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_EPIS.toString();
+        return DbImporter.TableName.SYS_EVT_SOMMET_RISBERME.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.epis = new HashMap<>();
-        this.episByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Epi epi = new Epi();
+            final SommetRisberme sommetRisberme = new SommetRisberme();
             
-            if(row.getInt(EpiColumns.ID_TYPE_COTE.toString())!=null){
-                epi.setCoteId(typesCote.get(row.getInt(EpiColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                sommetRisberme.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(EpiColumns.ID_SOURCE.toString())!=null){
-                epi.setSourceId(typesSource.get(row.getInt(EpiColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                sommetRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(EpiColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                epi.setTroncon(troncon.getId());
+                sommetRisberme.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(EpiColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(EpiColumns.DATE_DEBUT_VAL.toString()) != null) {
-                epi.setDate_debut(LocalDateTime.parse(row.getDate(EpiColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                sommetRisberme.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(EpiColumns.DATE_FIN_VAL.toString()) != null) {
-                epi.setDate_fin(LocalDateTime.parse(row.getDate(EpiColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                sommetRisberme.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(EpiColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                epi.setPR_debut(row.getDouble(EpiColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                sommetRisberme.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(EpiColumns.PR_FIN_CALCULE.toString()) != null) {
-                epi.setPR_fin(row.getDouble(EpiColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                sommetRisberme.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -258,79 +256,96 @@ class EpiImporter extends GenericStructureImporter<Epi> {
 
                 try {
 
-                    if (row.getDouble(EpiColumns.X_DEBUT.toString()) != null && row.getDouble(EpiColumns.Y_DEBUT.toString()) != null) {
-                        epi.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(EpiColumns.X_DEBUT.toString()),
-                                row.getDouble(EpiColumns.Y_DEBUT.toString()))), lambertToRGF));
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                        sommetRisberme.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(EpiImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtSommetRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(EpiColumns.X_FIN.toString()) != null && row.getDouble(EpiColumns.Y_FIN.toString()) != null) {
-                        epi.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(EpiColumns.X_FIN.toString()),
-                                row.getDouble(EpiColumns.Y_FIN.toString()))), lambertToRGF));
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                        sommetRisberme.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(EpiImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtSommetRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(EpiImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtSommetRisbermeImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(EpiColumns.ID_SYSTEME_REP.toString()) != null) {
-                epi.setSystemeRepId(systemesReperage.get(row.getInt(EpiColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                sommetRisberme.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(EpiColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                epi.setBorneDebutId(bornes.get((int) row.getDouble(EpiColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                sommetRisberme.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            epi.setBorne_debut_aval(row.getBoolean(EpiColumns.AMONT_AVAL_DEBUT.toString()));
+            sommetRisberme.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(EpiColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                epi.setBorne_debut_distance(row.getDouble(EpiColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                sommetRisberme.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(EpiColumns.ID_BORNEREF_FIN.toString()) != null) {
-                epi.setBorneFinId(bornes.get((int) row.getDouble(EpiColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                sommetRisberme.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            epi.setBorne_fin_aval(row.getBoolean(EpiColumns.AMONT_AVAL_FIN.toString()));
+            sommetRisberme.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(EpiColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                epi.setBorne_fin_distance(row.getDouble(EpiColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                sommetRisberme.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            epi.setCommentaire(row.getString(EpiColumns.COMMENTAIRE.toString()));
+            sommetRisberme.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+
+            sommetRisberme.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
             
+            if(row.getInt(Columns.ID_TYPE_MATERIAU.toString())!=null){
+                sommetRisberme.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+            }
             
-            if(row.getInt(EpiColumns.ID_TYPE_POSITION.toString())!=null){
-                epi.setPosition_structure(typesPosition.get(row.getInt(EpiColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
+                sommetRisberme.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
+                sommetRisberme.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            }
+            
+            if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
+                sommetRisberme.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                sommetRisberme.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            epis.put(row.getInt(EpiColumns.ID_ELEMENT_STRUCTURE.toString()), epi);
+            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), sommetRisberme);
 
             // Set the list ByTronconId
-            List<Epi> listByTronconId = episByTronconId.get(row.getInt(EpiColumns.ID_TRONCON_GESTION.toString()));
+            List<SommetRisberme> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                episByTronconId.put(row.getInt(EpiColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(epi);
+            listByTronconId.add(sommetRisberme);
         }
     }
 
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (EpiColumns c : EpiColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

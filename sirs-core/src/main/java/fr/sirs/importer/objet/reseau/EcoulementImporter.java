@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefConduiteFermee;
+import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -17,17 +17,17 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> {
+class EcoulementImporter extends GenericTypeImporter<RefEcoulement> {
     
-    TypeConduiteFermeeImporter(final Database accessDatabase, 
+    EcoulementImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
-        ID_TYPE_CONDUITE_FERMEE,
-        LIBELLE_TYPE_CONDUITE_FERMEE,
-        ABREGE_TYPE_CONDUITE_FERMEE,
+        ID_ECOULEMENT,
+        LIBELLE_ECOULEMENT,
+        ABREGE_ECOULEMENT,
         DATE_DERNIERE_MAJ
     };
     
@@ -42,7 +42,7 @@ class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_CONDUITE_FERMEE.toString();
+        return DbImporter.TableName.ECOULEMENT.toString();
     }
 
     @Override
@@ -52,14 +52,14 @@ class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefConduiteFermee typeConduite = new RefConduiteFermee();
+            final RefEcoulement typeEcoulement = new RefEcoulement();
             
-            typeConduite.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONDUITE_FERMEE.toString()));
-            typeConduite.setAbrege(row.getString(Columns.ABREGE_TYPE_CONDUITE_FERMEE.toString()));
+            typeEcoulement.setLibelle(row.getString(Columns.LIBELLE_ECOULEMENT.toString()));
+            typeEcoulement.setAbrege(row.getString(Columns.ABREGE_ECOULEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeEcoulement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())), typeConduite);
+            types.put(row.getInt(String.valueOf(Columns.ID_ECOULEMENT.toString())), typeEcoulement);
         }
         couchDbConnector.executeBulk(types.values());
     }

@@ -4,25 +4,22 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefReseauTelecomEnergie;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeReseauTelecomImporter extends GenericImporter {
-
-    private Map<Integer, RefReseauTelecomEnergie> typesReseauTelecom = null;
+class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTelecomEnergie> {
     
-    TypeReseauTelecomImporter(final Database accessDatabase, 
+    TypeReseauTelecommunicImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
@@ -33,17 +30,6 @@ class TypeReseauTelecomImporter extends GenericImporter {
         ABREGE_TYPE_RESEAU_COMMUNICATION,
         DATE_DERNIERE_MAJ
     };
-
-    /**
-     * 
-     * @return A map containing all the database RefReseauTelecomEnergie referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, RefReseauTelecomEnergie> getTypeReseauTelecom() throws IOException {
-        if(typesReseauTelecom == null) compute();
-        return typesReseauTelecom;
-    }
     
     @Override
     public List<String> getUsedColumns() {
@@ -61,7 +47,7 @@ class TypeReseauTelecomImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesReseauTelecom = new HashMap<>();
+        types = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -73,8 +59,8 @@ class TypeReseauTelecomImporter extends GenericImporter {
             if (row.getDate(TypeReseauTelecomColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(TypeReseauTelecomColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesReseauTelecom.put(row.getInt(String.valueOf(TypeReseauTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
+            types.put(row.getInt(String.valueOf(TypeReseauTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
         }
-        couchDbConnector.executeBulk(typesReseauTelecom.values());
+        couchDbConnector.executeBulk(types.values());
     }
 }

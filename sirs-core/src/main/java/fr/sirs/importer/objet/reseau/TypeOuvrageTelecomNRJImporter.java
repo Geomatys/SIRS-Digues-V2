@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefConduiteFermee;
+import fr.sirs.core.model.RefOuvrageTelecomEnergie;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -17,17 +17,17 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> {
+class TypeOuvrageTelecomNRJImporter extends GenericTypeImporter<RefOuvrageTelecomEnergie> {
     
-    TypeConduiteFermeeImporter(final Database accessDatabase, 
+    TypeOuvrageTelecomNRJImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
-        ID_TYPE_CONDUITE_FERMEE,
-        LIBELLE_TYPE_CONDUITE_FERMEE,
-        ABREGE_TYPE_CONDUITE_FERMEE,
+        ID_TYPE_OUVRAGE_TELECOM_NRJ,
+        ABREGE_TYPE_OUVRAGE_TELECOM_NRJ,
+        LIBELLE_TYPE_OUVRAGE_TELECOM_NRJ,
         DATE_DERNIERE_MAJ
     };
     
@@ -42,7 +42,7 @@ class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_CONDUITE_FERMEE.toString();
+        return DbImporter.TableName.TYPE_OUVRAGE_TELECOM_NRJ.toString();
     }
 
     @Override
@@ -52,14 +52,14 @@ class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefConduiteFermee typeConduite = new RefConduiteFermee();
+            final RefOuvrageTelecomEnergie typeOuvrage = new RefOuvrageTelecomEnergie();
             
-            typeConduite.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONDUITE_FERMEE.toString()));
-            typeConduite.setAbrege(row.getString(Columns.ABREGE_TYPE_CONDUITE_FERMEE.toString()));
+            typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_TELECOM_NRJ.toString()));
+            typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_TELECOM_NRJ.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())), typeConduite);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_TELECOM_NRJ.toString())), typeOuvrage);
         }
         couchDbConnector.executeBulk(types.values());
     }

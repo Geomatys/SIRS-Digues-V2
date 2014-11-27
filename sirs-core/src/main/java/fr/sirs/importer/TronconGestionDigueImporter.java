@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import fr.sirs.importer.objet.structure.StructureImporter;
+import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
@@ -25,12 +25,12 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
-import fr.sirs.importer.objet.geometry.GeometryImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
 import fr.sirs.importer.objet.link.DesordreStructureImporter;
 import fr.sirs.importer.objet.link.ReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ReseauOuvrageTelecomImporter;
-import fr.sirs.importer.objet.reseau.ReseauImporter;
+import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -59,10 +59,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter;
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
-    private StructureImporter structureImporter;
+    private ElementStructureImporter structureImporter;
     private DesordreImporter desordreImporter;
-    private GeometryImporter geometryImporter;
-    private ReseauImporter reseauImporter;
+    private ElementGeometrieImporter geometryImporter;
+    private ElementReseauImporter reseauImporter;
     
     private DesordreStructureImporter desordreStructureImporter;
     private ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
@@ -82,7 +82,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconDigueRepository tronconDigueRepository,
             final DigueRepository digueRepository,
             final BorneDigueRepository borneDigueRepository,
-            final RefTypeDesordreRepository refTypeDesordreRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final TypeRiveImporter typeRiveImporter, 
@@ -92,7 +91,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
@@ -112,23 +111,22 @@ public class TronconGestionDigueImporter extends GenericImporter {
         this.borneDigueImporter = borneDigueImporter;
         
         // Structure and Desordre importers need TronconGestionDigue importer itself.
-        this.structureImporter = new StructureImporter(accessDatabase, 
+        this.structureImporter = new ElementStructureImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
                 typeNatureImporter, typeFonctionImporter);
         this.desordreImporter = new DesordreImporter(accessDatabase, 
-                couchDbConnector, refTypeDesordreRepository, 
-                this, systemeReperageImporter, 
+                couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, structureImporter,
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        this.geometryImporter = new GeometryImporter(accessDatabase, 
+        this.geometryImporter = new ElementGeometrieImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter, 
                 typeNatureImporter, typeFonctionImporter);
-        this.reseauImporter = new ReseauImporter(accessDatabase, 
+        this.reseauImporter = new ElementReseauImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter, 
@@ -143,9 +141,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 accessDatabase, couchDbConnector, reseauImporter);
     }
     
-    public StructureImporter getStructureImporter(){return structureImporter;}
+    public ElementStructureImporter getStructureImporter(){return structureImporter;}
     public DesordreImporter getDesordreImporter(){return desordreImporter;}
-    public GeometryImporter getGeometryImporter(){return geometryImporter;}
+    public ElementGeometrieImporter getGeometryImporter(){return geometryImporter;}
 
     /* TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.

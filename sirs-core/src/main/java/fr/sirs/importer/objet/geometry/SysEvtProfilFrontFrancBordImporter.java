@@ -11,9 +11,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.ProfilFrontFrancBord;
-import fr.sirs.core.model.RefLargeurFrancBord;
 import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -25,7 +23,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,26 +45,23 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontFrancBord> {
-
-    private Map<Integer, ProfilFrontFrancBord> profils = null;
-    private Map<Integer, List<ProfilFrontFrancBord>> profilsByTronconId = null;
+class SysEvtProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontFrancBord> {
     
-    private final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter;
+    private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
 
-    ProfilFrontFrancBordImporter(final Database accessDatabase,
+    SysEvtProfilFrontFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter,
-            final TypeProfilFrontFrancBordImporter typeProfilFrontFrancBordImporter) {
+            final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
@@ -74,7 +69,7 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
         this.typeProfilFrontFrancBordImporter = typeProfilFrontFrancBordImporter;
     }
     
-    private enum ProfilFrontFrancBordColumns {
+    private enum Columns {
         ID_ELEMENT_GEOMETRIE,
 //        id_nom_element, // Redondant avec ID_ELEMENT_GEOMETRIE
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -122,10 +117,10 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
      */
     @Override
     public Map<Integer, ProfilFrontFrancBord> getStructures() throws IOException, AccessDbImporterException {
-        if (this.profils == null) {
+        if (this.structures == null) {
             compute();
         }
-        return profils;
+        return structures;
     }
 
     /**
@@ -137,10 +132,10 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
      */
     @Override
     public Map<Integer, List<ProfilFrontFrancBord>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.profilsByTronconId == null) {
+        if (this.structuresByTronconId == null) {
             compute();
         }
-        return this.profilsByTronconId;
+        return this.structuresByTronconId;
     }
 
     @Override
@@ -151,46 +146,46 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.profils = new HashMap<>();
-        this.profilsByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypeLargeur();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ProfilFrontFrancBord profil = new ProfilFrontFrancBord();
             
-            final TronconDigue troncon = troncons.get(row.getInt(ProfilFrontFrancBordColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 profil.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(ProfilFrontFrancBordColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if(row.getInt(ProfilFrontFrancBordColumns.ID_SOURCE.toString())!=null){
-                profil.setSourceId(typesSource.get(row.getInt(ProfilFrontFrancBordColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                profil.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            if (row.getDate(ProfilFrontFrancBordColumns.DATE_DEBUT_VAL.toString()) != null) {
-                profil.setDate_debut(LocalDateTime.parse(row.getDate(ProfilFrontFrancBordColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                profil.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(ProfilFrontFrancBordColumns.DATE_FIN_VAL.toString()) != null) {
-                profil.setDate_fin(LocalDateTime.parse(row.getDate(ProfilFrontFrancBordColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                profil.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                profil.setPR_debut(row.getDouble(ProfilFrontFrancBordColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                profil.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.PR_FIN_CALCULE.toString()) != null) {
-                profil.setPR_fin(row.getDouble(ProfilFrontFrancBordColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                profil.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -200,68 +195,68 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
 
                 try {
 
-                    if (row.getDouble(ProfilFrontFrancBordColumns.X_DEBUT.toString()) != null && row.getDouble(ProfilFrontFrancBordColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         profil.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ProfilFrontFrancBordColumns.X_DEBUT.toString()),
-                                row.getDouble(ProfilFrontFrancBordColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(ProfilFrontFrancBordColumns.X_FIN.toString()) != null && row.getDouble(ProfilFrontFrancBordColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         profil.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ProfilFrontFrancBordColumns.X_FIN.toString()),
-                                row.getDouble(ProfilFrontFrancBordColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(ProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtProfilFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(ProfilFrontFrancBordColumns.ID_SYSTEME_REP.toString()) != null) {
-                profil.setSystemeRepId(systemesReperage.get(row.getInt(ProfilFrontFrancBordColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                profil.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                profil.setBorneDebutId(bornes.get((int) row.getDouble(ProfilFrontFrancBordColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                profil.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            profil.setBorne_debut_aval(row.getBoolean(ProfilFrontFrancBordColumns.AMONT_AVAL_DEBUT.toString()));
+            profil.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                profil.setBorne_debut_distance(row.getDouble(ProfilFrontFrancBordColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                profil.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.ID_BORNEREF_FIN.toString()) != null) {
-                profil.setBorneFinId(bornes.get((int) row.getDouble(ProfilFrontFrancBordColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                profil.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            profil.setBorne_fin_aval(row.getBoolean(ProfilFrontFrancBordColumns.AMONT_AVAL_FIN.toString()));
+            profil.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(ProfilFrontFrancBordColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                profil.setBorne_fin_distance(row.getDouble(ProfilFrontFrancBordColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                profil.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            profil.setCommentaire(row.getString(ProfilFrontFrancBordColumns.COMMENTAIRE.toString()));
+            profil.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if(row.getInt(ProfilFrontFrancBordColumns.ID_TYPE_PROFIL_FB.toString())!=null){
-                profil.setTypeProfilFrancBordId(typesProfil.get(row.getInt(ProfilFrontFrancBordColumns.ID_TYPE_PROFIL_FB.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())!=null){
+                profil.setTypeProfilFrancBordId(typesProfil.get(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())).getId());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            profils.put(row.getInt(ProfilFrontFrancBordColumns.ID_ELEMENT_GEOMETRIE.toString()), profil);
+            structures.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), profil);
 
             // Set the list ByTronconId
-            List<ProfilFrontFrancBord> listByTronconId = profilsByTronconId.get(row.getInt(ProfilFrontFrancBordColumns.ID_TRONCON_GESTION.toString()));
+            List<ProfilFrontFrancBord> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                profilsByTronconId.put(row.getInt(ProfilFrontFrancBordColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(profil);
         }
@@ -270,7 +265,7 @@ class ProfilFrontFrancBordImporter extends GenericStructureImporter<ProfilFrontF
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilFrontFrancBordColumns c : ProfilFrontFrancBordColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

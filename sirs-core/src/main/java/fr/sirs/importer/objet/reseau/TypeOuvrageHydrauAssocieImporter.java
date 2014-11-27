@@ -4,25 +4,22 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOuvrageAssocieImporter extends GenericImporter {
-
-    private Map<Integer, RefOuvrageHydrauliqueAssocie> typesOuvrageAssocie = null;
+class TypeOuvrageHydrauAssocieImporter extends GenericTypeImporter<RefOuvrageHydrauliqueAssocie> {
     
-    TypeOuvrageAssocieImporter(final Database accessDatabase, 
+    TypeOuvrageHydrauAssocieImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
@@ -33,17 +30,6 @@ class TypeOuvrageAssocieImporter extends GenericImporter {
         ABREGE_TYPE_OUVR_HYDRAU_ASSOCIE,
         DATE_DERNIERE_MAJ
     };
-
-    /**
-     * 
-     * @return A map containing all the database RefOuvrageHydrauliqueAssocie referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, RefOuvrageHydrauliqueAssocie> getTypeOuvrageAssocie() throws IOException {
-        if(typesOuvrageAssocie == null) compute();
-        return typesOuvrageAssocie;
-    }
     
     @Override
     public List<String> getUsedColumns() {
@@ -61,7 +47,7 @@ class TypeOuvrageAssocieImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesOuvrageAssocie = new HashMap<>();
+        types = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -73,8 +59,8 @@ class TypeOuvrageAssocieImporter extends GenericImporter {
             if (row.getDate(TypeOuvrageAssocieColumns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(TypeOuvrageAssocieColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesOuvrageAssocie.put(row.getInt(String.valueOf(TypeOuvrageAssocieColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())), typeOuvrage);
+            types.put(row.getInt(String.valueOf(TypeOuvrageAssocieColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())), typeOuvrage);
         }
-        couchDbConnector.executeBulk(typesOuvrageAssocie.values());
+        couchDbConnector.executeBulk(types.values());
     }
 }

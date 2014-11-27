@@ -31,7 +31,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,30 +53,28 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class StructureImporter extends GenericStructureImporter {
-
-    private Map<Integer, List<Objet>> structuresByTronconId = null;
-    private Map<Integer, Objet> structures = null;
+public class ElementStructureImporter extends GenericStructureImporter<Objet> {
+    
     private final TypeElementStructureImporter typeElementStructureImporter;
     
     private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
-    private final CreteImporter creteImporter;
-    private final PiedDigueImporter piedDigueImporter;
-    private final TalusDigueImporter talusDigueImporter;
-    private final SommetRisbermeImporter sommetRisbermeImporter;
-    private final TalusRisbermeImporter talusRisbermeImporter;
-    private final FondationImporter fondationImporter;
-    private final EpiImporter epiImporter;
-    private final OuvrageRevancheImporter ouvrageRevancheImporter;
+    private final SysEvtCreteImporter creteImporter;
+    private final SysEvtPiedDeDigueImporter piedDigueImporter;
+    private final SysEvtTalusDigueImporter talusDigueImporter;
+    private final SysEvtSommetRisbermeImporter sommetRisbermeImporter;
+    private final SysEvtTalusRisbermeImporter talusRisbermeImporter;
+    private final SysEvtFondationImporter fondationImporter;
+    private final SysEvtEpisImporter epiImporter;
+    private final SysEvtOuvrageRevancheImporter ouvrageRevancheImporter;
     
 
-    public StructureImporter(final Database accessDatabase,
+    public ElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
             final TypeMateriauImporter typeMateriauImporter,
@@ -88,49 +86,49 @@ public class StructureImporter extends GenericStructureImporter {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase, couchDbConnector);
-        creteImporter = new CreteImporter(accessDatabase, couchDbConnector, 
+        creteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter,
                 typeNatureImporter, typeFonctionImporter);
         structureImporters.add(creteImporter);
-        piedDigueImporter = new PiedDigueImporter(accessDatabase, 
+        piedDigueImporter = new SysEvtPiedDeDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(piedDigueImporter);
-        talusDigueImporter = new TalusDigueImporter(accessDatabase, 
+        talusDigueImporter = new SysEvtTalusDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter,
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(talusDigueImporter);
-        sommetRisbermeImporter = new SommetRisbermeImporter(accessDatabase, 
+        sommetRisbermeImporter = new SysEvtSommetRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(sommetRisbermeImporter);
-        talusRisbermeImporter = new TalusRisbermeImporter(accessDatabase, 
+        talusRisbermeImporter = new SysEvtTalusRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(talusRisbermeImporter);
-        fondationImporter = new  FondationImporter(accessDatabase, 
+        fondationImporter = new  SysEvtFondationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(fondationImporter);
-        epiImporter = new EpiImporter(accessDatabase, couchDbConnector, 
+        epiImporter = new SysEvtEpisImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeMateriauImporter, 
                 typeNatureImporter, typeFonctionImporter);
         structureImporters.add(epiImporter);
-        ouvrageRevancheImporter = new OuvrageRevancheImporter(accessDatabase, 
+        ouvrageRevancheImporter = new SysEvtOuvrageRevancheImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
@@ -138,7 +136,7 @@ public class StructureImporter extends GenericStructureImporter {
         structureImporters.add(ouvrageRevancheImporter);
     }
 
-    private enum ElementStructureColumns {
+    private enum Columns {
 
         ID_ELEMENT_STRUCTURE,
         ID_TYPE_ELEMENT_STRUCTURE,
@@ -263,7 +261,7 @@ public class StructureImporter extends GenericStructureImporter {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ElementStructureColumns c : ElementStructureColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -280,9 +278,9 @@ public class StructureImporter extends GenericStructureImporter {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
         for (final GenericStructureImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getStructures();
@@ -328,8 +326,8 @@ public class StructureImporter extends GenericStructureImporter {
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final int structureId = row.getInt(ElementStructureColumns.ID_ELEMENT_STRUCTURE.toString());
-            final Class typeStructure = this.typeElementStructureImporter.getTypeElementStructure().get(row.getInt(ElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
+            final int structureId = row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString());
+            final Class typeStructure = this.typeElementStructureImporter.getTypeElementStructure().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
             final Objet structure;
             
             if(typeStructure==null){
@@ -377,29 +375,29 @@ public class StructureImporter extends GenericStructureImporter {
 
 
             if (false && structure != null) {
-                structure.setSystemeRepId(systemesReperage.get(row.getInt(ElementStructureColumns.ID_SYSTEME_REP.toString())).getId());
+                structure.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
                 
-                structure.setBorne_debut_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_DEBUT.toString())); 
-                structure.setBorne_fin_aval(row.getBoolean(ElementStructureColumns.AMONT_AVAL_FIN.toString()));
-                structure.setCommentaire(row.getString(ElementStructureColumns.COMMENTAIRE.toString()));
+                structure.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
+                structure.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+                structure.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
                 
-                if (row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                    structure.setPR_debut(row.getDouble(ElementStructureColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+                if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                    structure.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
                 }
-                if (row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                    structure.setBorneDebutId(bornes.get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                    structure.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
                 }
-                if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                    structure.setBorne_debut_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                    structure.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
                 }
-                if (row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()) != null) {
-                    structure.setBorneFinId(bornes.get((int) row.getDouble(ElementStructureColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                    structure.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
-                if (row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                    structure.setBorne_fin_distance(row.getDouble(ElementStructureColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+                if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                    structure.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
                 }
-                if (row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()) != null) {
-                    structure.setPR_fin(row.getDouble(ElementStructureColumns.PR_FIN_CALCULE.toString()).floatValue());
+                if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                    structure.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
                 }
                 
 //                   if (row.getDouble(ElementStructureColumns.EPAISSEUR.toString()) != null) {
@@ -409,23 +407,23 @@ public class StructureImporter extends GenericStructureImporter {
 //            structure.setNum_couche(row.getInt(ElementStructureColumns.N_COUCHE.toString()));
                 
                 
-                if (row.getDate(ElementStructureColumns.DATE_DEBUT_VAL.toString()) != null) {
-                structure.setDate_debut(LocalDateTime.parse(row.getDate(ElementStructureColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                structure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(ElementStructureColumns.DATE_FIN_VAL.toString()) != null) {
-                structure.setDate_fin(LocalDateTime.parse(row.getDate(ElementStructureColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                structure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
                 
-                if(row.getInt(ElementStructureColumns.ID_SOURCE.toString())!=null){
-                structure.setSourceId(typesSource.get(row.getInt(ElementStructureColumns.ID_SOURCE.toString())).getId());
+                if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                structure.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            if(row.getInt(ElementStructureColumns.ID_TYPE_POSITION.toString())!=null){
-                structure.setPosition_structure(typesPosition.get(row.getInt(ElementStructureColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                structure.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
-            if(row.getInt(ElementStructureColumns.ID_TYPE_COTE.toString())!=null){
-                structure.setCoteId(typesCote.get(row.getInt(ElementStructureColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                structure.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -435,27 +433,27 @@ public class StructureImporter extends GenericStructureImporter {
 
                 try {
 
-                    if (row.getDouble(ElementStructureColumns.X_DEBUT.toString()) != null && row.getDouble(ElementStructureColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         structure.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ElementStructureColumns.X_DEBUT.toString()),
-                                row.getDouble(ElementStructureColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(StructureImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ElementStructureImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(ElementStructureColumns.X_FIN.toString()) != null && row.getDouble(ElementStructureColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         structure.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ElementStructureColumns.X_FIN.toString()),
-                                row.getDouble(ElementStructureColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(StructureImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ElementStructureImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(StructureImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ElementStructureImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
                 
                 

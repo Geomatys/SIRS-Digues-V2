@@ -27,7 +27,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,18 +49,15 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class CreteImporter extends GenericStructureImporter<Crete> {
+class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
 
-    private Map<Integer, Crete> cretes = null;
-    private Map<Integer, List<Crete>> cretesByTronconId = null;
-
-    CreteImporter(final Database accessDatabase,
+    SysEvtCreteImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
@@ -71,17 +68,8 @@ class CreteImporter extends GenericStructureImporter<Crete> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
-
-    /*
-     ----------------------------------------------------------------------------
-     TODO : Pourquoi référencer l'indentifiant du tronçon d'appartenance de la 
-     crête ? Puisqu'il n'y a qu'un seul tronçon et que la crête, comme structure,
-     est référencée depuis le tronçon, quel intérêt de maintenir un autre 
-     identifiant ? Cela facilite la navigabilité, mais complique l'import de la 
-     base car il faut vérifier que les identifiants CouchDB des tronçons ne sont 
-     pas nulls.
-     */
-    private enum CreteColumns {
+    
+    private enum Columns {
 
         ID_ELEMENT_STRUCTURE,
         //        id_nom_element,//Inutile
@@ -184,10 +172,10 @@ class CreteImporter extends GenericStructureImporter<Crete> {
      */
     @Override
     public Map<Integer, Crete> getStructures() throws IOException, AccessDbImporterException {
-        if (this.cretes == null) {
+        if (this.structures == null) {
             compute();
         }
-        return cretes;
+        return structures;
     }
 
     /**
@@ -199,10 +187,10 @@ class CreteImporter extends GenericStructureImporter<Crete> {
      */
     @Override
     public Map<Integer, List<Crete>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.cretesByTronconId == null) {
+        if (this.structuresByTronconId == null) {
             compute();
         }
-        return this.cretesByTronconId;
+        return this.structuresByTronconId;
     }
 
     @Override
@@ -213,18 +201,18 @@ class CreteImporter extends GenericStructureImporter<Crete> {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.cretes = new HashMap<>();
-        this.cretesByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -232,80 +220,80 @@ class CreteImporter extends GenericStructureImporter<Crete> {
             final Crete crete = new Crete();
             
             
-            if(row.getInt(CreteColumns.ID_SOURCE.toString())!=null){
-                crete.setSourceId(typesSource.get(row.getInt(CreteColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                crete.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 crete.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()) != null) {
-                crete.setDate_debut(LocalDateTime.parse(row.getDate(CreteColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                crete.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(CreteColumns.DATE_FIN_VAL.toString()) != null) {
-                crete.setDate_fin(LocalDateTime.parse(row.getDate(CreteColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                crete.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                crete.setPR_debut(row.getDouble(CreteColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                crete.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()) != null) {
-                crete.setPR_fin(row.getDouble(CreteColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                crete.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
-            if (row.getInt(CreteColumns.ID_SYSTEME_REP.toString()) != null) {
-                crete.setSystemeRepId(systemesReperage.get(row.getInt(CreteColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                crete.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                crete.setBorneDebutId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                crete.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            crete.setBorne_debut_aval(row.getBoolean(CreteColumns.AMONT_AVAL_DEBUT.toString()));
+            crete.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                crete.setBorne_debut_distance(row.getDouble(CreteColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                crete.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()) != null) {
-                crete.setBorneFinId(bornes.get((int) row.getDouble(CreteColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                crete.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            crete.setBorne_fin_aval(row.getBoolean(CreteColumns.AMONT_AVAL_FIN.toString()));
+            crete.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                crete.setBorne_fin_distance(row.getDouble(CreteColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                crete.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            crete.setCommentaire(row.getString(CreteColumns.COMMENTAIRE.toString()));
+            crete.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-            crete.setNum_couche(row.getInt(CreteColumns.N_COUCHE.toString()));
+            crete.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
             
-            if(row.getInt(CreteColumns.ID_TYPE_MATERIAU.toString())!=null){
-                crete.setMateriauId(typesMateriau.get(row.getInt(CreteColumns.ID_TYPE_MATERIAU.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_MATERIAU.toString())!=null){
+                crete.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
             }
             
-            if(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())!=null){
-                crete.setNatureId(typesNature.get(row.getInt(CreteColumns.ID_TYPE_NATURE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
+                crete.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
             }
             
-            if(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())!=null){
-                crete.setFonctionId(typesFonction.get(row.getInt(CreteColumns.ID_TYPE_FONCTION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
+                crete.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
             }
             
-            if (row.getDouble(CreteColumns.EPAISSEUR.toString()) != null) {
-                crete.setEpaisseur(row.getDouble(CreteColumns.EPAISSEUR.toString()).floatValue());
+            if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
+                crete.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
             }
             
-            if(row.getInt(CreteColumns.ID_TYPE_COTE.toString())!=null){
-                crete.setCoteId(typesCote.get(row.getInt(CreteColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                crete.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -315,43 +303,43 @@ class CreteImporter extends GenericStructureImporter<Crete> {
 
                 try {
 
-                    if (row.getDouble(CreteColumns.X_DEBUT.toString()) != null && row.getDouble(CreteColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         crete.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(CreteColumns.X_DEBUT.toString()),
-                                row.getDouble(CreteColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(CreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(CreteColumns.X_FIN.toString()) != null && row.getDouble(CreteColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         crete.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(CreteColumns.X_FIN.toString()),
-                                row.getDouble(CreteColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(CreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(CreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if(row.getInt(CreteColumns.ID_TYPE_POSITION.toString())!=null){
-                crete.setPosition_structure(typesPosition.get(row.getInt(CreteColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                crete.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            cretes.put(row.getInt(CreteColumns.ID_ELEMENT_STRUCTURE.toString()), crete);
+            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), crete);
 
             // Set the list ByTronconId
-            List<Crete> listByTronconId = cretesByTronconId.get(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()));
+            List<Crete> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                cretesByTronconId.put(row.getInt(CreteColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(crete);
         }
@@ -360,7 +348,7 @@ class CreteImporter extends GenericStructureImporter<Crete> {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (CreteColumns c : CreteColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

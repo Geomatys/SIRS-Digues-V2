@@ -11,6 +11,7 @@ import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
+import fr.sirs.core.model.VoieAcces;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,9 +94,9 @@ class TypeElementReseauImporter extends GenericImporter {
                     case SYS_EVT_OUVRAGE_TELECOMMUNICATION:
                         classe = OuvrageTelecomEnergie.class;
                         break;
-//                    case 2:
-//                        classe = ProfilFrontFrancBord.class;
-//                        break;
+                    case SYS_EVT_CHEMIN_ACCES:
+                        classe = VoieAcces.class;
+                        break;
 //                    case 3:
 //                        classe = Distance.class;
 //                        break;

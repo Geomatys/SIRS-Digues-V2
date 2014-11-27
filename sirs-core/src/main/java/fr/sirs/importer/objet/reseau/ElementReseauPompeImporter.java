@@ -19,17 +19,17 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class PompeImporter extends GenericImporter {
+class ElementReseauPompeImporter extends GenericImporter {
 
     private Map<Integer, Pompe> pompes = null;
     private Map<Integer, List<Pompe>> pompesByElementReseau = null;
 
-    PompeImporter(final Database accessDatabase,
+    ElementReseauPompeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    private enum PompeColumns {
+    private enum Columns {
         ID_POMPE,
         ID_ELEMENT_RESEAU,
         NOM_POMPE,
@@ -68,7 +68,7 @@ class PompeImporter extends GenericImporter {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (PompeColumns c : PompeColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -89,31 +89,31 @@ class PompeImporter extends GenericImporter {
             final Row row = it.next();
             final Pompe pompe = new Pompe();
             
-            pompe.setMarque(cleanNullString(row.getString(PompeColumns.NOM_POMPE.toString())));
+            pompe.setMarque(cleanNullString(row.getString(Columns.NOM_POMPE.toString())));
             
-            if (row.getDouble(PompeColumns.PUISSANCE_POMPE.toString()) != null) {
-                pompe.setPuissance(row.getDouble(PompeColumns.PUISSANCE_POMPE.toString()).floatValue());
+            if (row.getDouble(Columns.PUISSANCE_POMPE.toString()) != null) {
+                pompe.setPuissance(row.getDouble(Columns.PUISSANCE_POMPE.toString()).floatValue());
             }
             
-            if (row.getDouble(PompeColumns.DEBIT_POMPE.toString()) != null) {
-                pompe.setDebit(row.getDouble(PompeColumns.DEBIT_POMPE.toString()).floatValue());
+            if (row.getDouble(Columns.DEBIT_POMPE.toString()) != null) {
+                pompe.setDebit(row.getDouble(Columns.DEBIT_POMPE.toString()).floatValue());
             }
             
-            if (row.getDouble(PompeColumns.HAUTEUR_REFOUL.toString()) != null) {
-                pompe.setHauteur_refoulement(row.getDouble(PompeColumns.HAUTEUR_REFOUL.toString()).floatValue());
+            if (row.getDouble(Columns.HAUTEUR_REFOUL.toString()) != null) {
+                pompe.setHauteur_refoulement(row.getDouble(Columns.HAUTEUR_REFOUL.toString()).floatValue());
             }
             
-            if (row.getDate(PompeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                pompe.setDateMaj(LocalDateTime.parse(row.getDate(PompeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                pompe.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            pompes.put(row.getInt(PompeColumns.ID_POMPE.toString()), pompe);
+            pompes.put(row.getInt(Columns.ID_POMPE.toString()), pompe);
 
             // Set the list ByEltReseauId
-            List<Pompe> listByEltReseauId = pompesByElementReseau.get(row.getInt(PompeColumns.ID_ELEMENT_RESEAU.toString()));
+            List<Pompe> listByEltReseauId = pompesByElementReseau.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             if (listByEltReseauId == null) {
                 listByEltReseauId = new ArrayList<>();
-                pompesByElementReseau.put(row.getInt(PompeColumns.ID_ELEMENT_RESEAU.toString()), listByEltReseauId);
+                pompesByElementReseau.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), listByEltReseauId);
             }
             listByEltReseauId.add(pompe);
         }

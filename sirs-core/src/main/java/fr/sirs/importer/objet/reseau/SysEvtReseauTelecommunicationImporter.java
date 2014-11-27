@@ -27,7 +27,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,28 +49,25 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> {
-
-    private Map<Integer, ReseauTelecomEnergie> reseaux = null;
-    private Map<Integer, List<ReseauTelecomEnergie>> reseauxByTronconId = null;
+class SysEvtReseauTelecommunicationImporter extends GenericStructureImporter<ReseauTelecomEnergie> {
     
-    private final TypeImplantationImporter typeImplantationImporter;
-    private final TypeReseauTelecomImporter typeReseauTelecomImporter;
+    private final ImplantationImporter typeImplantationImporter;
+    private final TypeReseauTelecommunicImporter typeReseauTelecomImporter;
 
-    ResTelecomImporter(final Database accessDatabase,
+    SysEvtReseauTelecommunicationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter, 
-            final TypeImplantationImporter typeImplantationImporter,
-            final TypeReseauTelecomImporter typeReseauTelecomImporter) {
+            final ImplantationImporter typeImplantationImporter,
+            final TypeReseauTelecommunicImporter typeReseauTelecomImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
@@ -79,7 +76,7 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
         this.typeReseauTelecomImporter = typeReseauTelecomImporter;
     }
     
-    private enum ResTelecomColumns {
+    private enum Columns {
         ID_ELEMENT_RESEAU,
 //        id_nom_element,
 //        ID_SOUS_GROUPE_DONNEES,
@@ -166,10 +163,10 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
      */
     @Override
     public Map<Integer, ReseauTelecomEnergie> getStructures() throws IOException, AccessDbImporterException {
-        if (this.reseaux == null) {
+        if (this.structures == null) {
             compute();
         }
-        return reseaux;
+        return structures;
     }
 
     /**
@@ -182,10 +179,10 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
     @Override
     public Map<Integer, List<ReseauTelecomEnergie>> getStructuresByTronconId() 
             throws IOException, AccessDbImporterException {
-        if (this.reseauxByTronconId == null) {
+        if (this.structuresByTronconId == null) {
             compute();
         }
-        return this.reseauxByTronconId;
+        return this.structuresByTronconId;
     }
 
     @Override
@@ -196,55 +193,55 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.reseaux = new HashMap<>();
-        this.reseauxByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypeImplantation();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypeReseauTelecom();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ReseauTelecomEnergie reseau = new ReseauTelecomEnergie();
             
-            reseau.setLibelle(cleanNullString(row.getString(ResTelecomColumns.NOM.toString())));
+            reseau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
-            if(row.getInt(ResTelecomColumns.ID_TYPE_COTE.toString())!=null){
-                reseau.setCoteId(typesCote.get(row.getInt(ResTelecomColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                reseau.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(ResTelecomColumns.ID_SOURCE.toString())!=null){
-                reseau.setSourceId(typesSource.get(row.getInt(ResTelecomColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                reseau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(ResTelecomColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 reseau.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(ResTelecomColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(ResTelecomColumns.DATE_DEBUT_VAL.toString()) != null) {
-                reseau.setDate_debut(LocalDateTime.parse(row.getDate(ResTelecomColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                reseau.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(ResTelecomColumns.DATE_FIN_VAL.toString()) != null) {
-                reseau.setDate_fin(LocalDateTime.parse(row.getDate(ResTelecomColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                reseau.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(ResTelecomColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                reseau.setPR_debut(row.getDouble(ResTelecomColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                reseau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(ResTelecomColumns.PR_FIN_CALCULE.toString()) != null) {
-                reseau.setPR_fin(row.getDouble(ResTelecomColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                reseau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -254,85 +251,85 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
 
                 try {
 
-                    if (row.getDouble(ResTelecomColumns.X_DEBUT.toString()) != null && row.getDouble(ResTelecomColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         reseau.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ResTelecomColumns.X_DEBUT.toString()),
-                                row.getDouble(ResTelecomColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ResTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(ResTelecomColumns.X_FIN.toString()) != null && row.getDouble(ResTelecomColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         reseau.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(ResTelecomColumns.X_FIN.toString()),
-                                row.getDouble(ResTelecomColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ResTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(ResTelecomImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(ResTelecomColumns.ID_SYSTEME_REP.toString()) != null) {
-                reseau.setSystemeRepId(systemesReperage.get(row.getInt(ResTelecomColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                reseau.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(ResTelecomColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                reseau.setBorneDebutId(bornes.get((int) row.getDouble(ResTelecomColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                reseau.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            reseau.setBorne_debut_aval(row.getBoolean(ResTelecomColumns.AMONT_AVAL_DEBUT.toString()));
+            reseau.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(ResTelecomColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                reseau.setBorne_debut_distance(row.getDouble(ResTelecomColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                reseau.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(ResTelecomColumns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(ResTelecomColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    reseau.setBorneFinId(bornes.get((int) row.getDouble(ResTelecomColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
+                    reseau.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
             }
             
-            reseau.setBorne_fin_aval(row.getBoolean(ResTelecomColumns.AMONT_AVAL_FIN.toString()));
+            reseau.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(ResTelecomColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                reseau.setBorne_fin_distance(row.getDouble(ResTelecomColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                reseau.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            reseau.setCommentaire(row.getString(ResTelecomColumns.COMMENTAIRE.toString()));
+            reseau.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if(row.getInt(ResTelecomColumns.ID_IMPLANTATION.toString())!=null){
-                if(implantations.get(row.getInt(ResTelecomColumns.ID_IMPLANTATION.toString()))!=null){
-                    reseau.setImplantaitonId(implantations.get(row.getInt(ResTelecomColumns.ID_IMPLANTATION.toString())).getId());
+            if(row.getInt(Columns.ID_IMPLANTATION.toString())!=null){
+                if(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString()))!=null){
+                    reseau.setImplantaitonId(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())).getId());
                 }
             }
             
-            if(row.getInt(ResTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())!=null){
-                if(typesReseau.get(row.getInt(ResTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString()))!=null){
-                    reseau.setTypeReseauTelecomEnergieId(typesReseau.get(row.getInt(ResTelecomColumns.ID_TYPE_RESEAU_COMMUNICATION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())!=null){
+                if(typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString()))!=null){
+                    reseau.setTypeReseauTelecomEnergieId(typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())).getId());
                 }
             }
             
-            if(row.getInt(ResTelecomColumns.ID_TYPE_POSITION.toString())!=null){
-                reseau.setPosition_structure(typesPosition.get(row.getInt(ResTelecomColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                reseau.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
-            if (row.getDouble(ResTelecomColumns.HAUTEUR.toString()) != null) {
-                reseau.setHauteur(row.getDouble(ResTelecomColumns.HAUTEUR.toString()).floatValue());
+            if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
+                reseau.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            reseaux.put(row.getInt(ResTelecomColumns.ID_ELEMENT_RESEAU.toString()), reseau);
+            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), reseau);
 
             // Set the list ByTronconId
-            List<ReseauTelecomEnergie> listByTronconId = reseauxByTronconId.get(row.getInt(ResTelecomColumns.ID_TRONCON_GESTION.toString()));
+            List<ReseauTelecomEnergie> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                reseauxByTronconId.put(row.getInt(ResTelecomColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(reseau);
         }
@@ -341,7 +338,7 @@ class ResTelecomImporter extends GenericStructureImporter<ReseauTelecomEnergie> 
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ResTelecomColumns c : ResTelecomColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

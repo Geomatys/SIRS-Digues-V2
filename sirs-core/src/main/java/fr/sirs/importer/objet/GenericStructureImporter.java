@@ -20,11 +20,15 @@ import org.ektorp.CouchDbConnector;
  */
 public abstract class GenericStructureImporter<T extends Objet> extends GenericImporter {
 
+    protected Map<Integer, T> structures = null;
+    protected Map<Integer, List<T>> structuresByTronconId = null;
+    
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     protected OrganismeImporter organismeImporter;
-    protected TypeSourceImporter typeSourceImporter;
+    
+    protected SourceInfoImporter typeSourceImporter;
     protected TypeCoteImporter typeCoteImporter;
     protected TypePositionImporter typePositionImporter;
     protected TypeMateriauImporter typeMateriauImporter;
@@ -42,7 +46,7 @@ public abstract class GenericStructureImporter<T extends Objet> extends GenericI
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,

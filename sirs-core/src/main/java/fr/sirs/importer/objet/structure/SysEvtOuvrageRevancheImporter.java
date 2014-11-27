@@ -11,7 +11,9 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Fondation;
+import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
@@ -27,7 +29,7 @@ import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,18 +51,15 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class FondationImporter extends GenericStructureImporter<Fondation> {
+class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageRevanche> {
 
-    private Map<Integer, Fondation> fondations = null;
-    private Map<Integer, List<Fondation>> fondationsByTronconId = null;
-
-    FondationImporter(final Database accessDatabase,
+    SysEvtOuvrageRevancheImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
-            final TypeSourceImporter typeSourceImporter,
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter,
@@ -72,15 +71,15 @@ class FondationImporter extends GenericStructureImporter<Fondation> {
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
     }
     
-    private enum FondationColumns {
-        ID_ELEMENT_STRUCTURE,
+    private enum Columns {
+       ID_ELEMENT_STRUCTURE,
 //        id_nom_element, // Redondant avec ID_ELEMENT_STRUCTURE
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
 //        LIBELLE_TYPE_ELEMENT_STRUCTURE, // Redondant avec le type de données
 //        DECALAGE_DEFAUT, // Affichage
 //        DECALAGE, // Affichage
 //        LIBELLE_SOURCE, // Redondant avec l'importation des sources
-//        LIBELLE_TYPE_COTE, // Redondant avec l'importation des cotés
+//        LIBELLE_TYPE_COTE, // Redondant avec l'importation des types de côté
 //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
@@ -119,16 +118,16 @@ class FondationImporter extends GenericStructureImporter<Fondation> {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-        N_COUCHE,
-        ID_TYPE_MATERIAU,
-        ID_TYPE_NATURE,
-        ID_TYPE_FONCTION,
-        EPAISSEUR,
+//        N_COUCHE, // Pas dans le nouveau modèle
+//        ID_TYPE_MATERIAU, // Pas dans le nouveau modèle
+//        ID_TYPE_NATURE, // Pas dans le nouveau modèle
+//        ID_TYPE_FONCTION, // Pas dans le nouveau modèle
+//        EPAISSEUR, // Pas dans le nouveau modèle
 //        TALUS_INTERCEPTE_CRETE,
-//        ID_TYPE_NATURE_HAUT,
-//        ID_TYPE_MATERIAU_HAUT,
-//        ID_TYPE_MATERIAU_BAS,
-//        ID_TYPE_NATURE_BAS,
+        ID_TYPE_NATURE_HAUT,
+        ID_TYPE_MATERIAU_HAUT,
+        ID_TYPE_MATERIAU_BAS,
+        ID_TYPE_NATURE_BAS,
 //        LONG_RAMP_HAUT,
 //        LONG_RAMP_BAS,
 //        PENTE_INTERIEURE,
@@ -165,17 +164,17 @@ class FondationImporter extends GenericStructureImporter<Fondation> {
 
     /**
      *
-     * @return A map containing all Crete instances accessibles from the
+     * @return A map containing all OuvrageRevanche instances accessibles from the
      * internal database identifier.
      * @throws IOException
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, Fondation> getStructures() throws IOException, AccessDbImporterException {
-        if (this.fondations == null) {
+    public Map<Integer, OuvrageRevanche> getStructures() throws IOException, AccessDbImporterException {
+        if (this.structures == null) {
             compute();
         }
-        return fondations;
+        return structures;
     }
 
     /**
@@ -186,69 +185,69 @@ class FondationImporter extends GenericStructureImporter<Fondation> {
      * @throws AccessDbImporterException
      */
     @Override
-    public Map<Integer, List<Fondation>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.fondationsByTronconId == null) {
+    public Map<Integer, List<OuvrageRevanche>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+        if (this.structuresByTronconId == null) {
             compute();
         }
-        return this.fondationsByTronconId;
+        return this.structuresByTronconId;
     }
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_FONDATION.toString();
+        return DbImporter.TableName.SYS_EVT_OUVRAGE_REVANCHE.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.fondations = new HashMap<>();
-        this.fondationsByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeMateriau();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeNature();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeFonction();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Fondation fondation = new Fondation();
+            final OuvrageRevanche ouvrage = new OuvrageRevanche();
             
-            if(row.getInt(FondationColumns.ID_TYPE_COTE.toString())!=null){
-                fondation.setCoteId(typesCote.get(row.getInt(FondationColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                ouvrage.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(FondationColumns.ID_SOURCE.toString())!=null){
-                fondation.setSourceId(typesSource.get(row.getInt(FondationColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(FondationColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                fondation.setTroncon(troncon.getId());
+                ouvrage.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(FondationColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(FondationColumns.DATE_DEBUT_VAL.toString()) != null) {
-                fondation.setDate_debut(LocalDateTime.parse(row.getDate(FondationColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(FondationColumns.DATE_FIN_VAL.toString()) != null) {
-                fondation.setDate_fin(LocalDateTime.parse(row.getDate(FondationColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                ouvrage.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(FondationColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                fondation.setPR_debut(row.getDouble(FondationColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                ouvrage.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(FondationColumns.PR_FIN_CALCULE.toString()) != null) {
-                fondation.setPR_fin(row.getDouble(FondationColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                ouvrage.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -258,96 +257,94 @@ class FondationImporter extends GenericStructureImporter<Fondation> {
 
                 try {
 
-                    if (row.getDouble(FondationColumns.X_DEBUT.toString()) != null && row.getDouble(FondationColumns.Y_DEBUT.toString()) != null) {
-                        fondation.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(FondationColumns.X_DEBUT.toString()),
-                                row.getDouble(FondationColumns.Y_DEBUT.toString()))), lambertToRGF));
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                        ouvrage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(FondationImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
-                    if (row.getDouble(FondationColumns.X_FIN.toString()) != null && row.getDouble(FondationColumns.Y_FIN.toString()) != null) {
-                        fondation.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(FondationColumns.X_FIN.toString()),
-                                row.getDouble(FondationColumns.Y_FIN.toString()))), lambertToRGF));
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                        ouvrage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(FondationImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(FondationImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(FondationColumns.ID_SYSTEME_REP.toString()) != null) {
-                fondation.setSystemeRepId(systemesReperage.get(row.getInt(FondationColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                ouvrage.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(FondationColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                fondation.setBorneDebutId(bornes.get((int) row.getDouble(FondationColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            fondation.setBorne_debut_aval(row.getBoolean(FondationColumns.AMONT_AVAL_DEBUT.toString()));
+            ouvrage.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(FondationColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                fondation.setBorne_debut_distance(row.getDouble(FondationColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(FondationColumns.ID_BORNEREF_FIN.toString()) != null) {
-                fondation.setBorneFinId(bornes.get((int) row.getDouble(FondationColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                ouvrage.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            fondation.setBorne_fin_aval(row.getBoolean(FondationColumns.AMONT_AVAL_FIN.toString()));
+            ouvrage.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(FondationColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                fondation.setBorne_fin_distance(row.getDouble(FondationColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                ouvrage.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            fondation.setCommentaire(row.getString(FondationColumns.COMMENTAIRE.toString()));
-
-            fondation.setNum_couche(row.getInt(FondationColumns.N_COUCHE.toString()));
+            ouvrage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if(row.getInt(FondationColumns.ID_TYPE_MATERIAU.toString())!=null){
-                fondation.setMateriauId(typesMateriau.get(row.getInt(FondationColumns.ID_TYPE_MATERIAU.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())!=null){
+                ouvrage.setNatureHautId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
             }
             
-            if(row.getInt(FondationColumns.ID_TYPE_NATURE.toString())!=null){
-                fondation.setNatureId(typesNature.get(row.getInt(FondationColumns.ID_TYPE_NATURE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())!=null){
+                ouvrage.setMateriauHautId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
             }
             
-            if(row.getInt(FondationColumns.ID_TYPE_FONCTION.toString())!=null){
-                fondation.setFonctionId(typesFonction.get(row.getInt(FondationColumns.ID_TYPE_FONCTION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())!=null){
+                ouvrage.setMateriauBasId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
             }
             
-            if (row.getDouble(FondationColumns.EPAISSEUR.toString()) != null) {
-                fondation.setEpaisseur(row.getDouble(FondationColumns.EPAISSEUR.toString()).floatValue());
+            if(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())!=null){
+                ouvrage.setNatureBasId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
             }
             
-            if(row.getInt(FondationColumns.ID_TYPE_POSITION.toString())!=null){
-                fondation.setPosition_structure(typesPosition.get(row.getInt(FondationColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouvrage.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            fondations.put(row.getInt(FondationColumns.ID_ELEMENT_STRUCTURE.toString()), fondation);
+            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), ouvrage);
 
             // Set the list ByTronconId
-            List<Fondation> listByTronconId = fondationsByTronconId.get(row.getInt(FondationColumns.ID_TRONCON_GESTION.toString()));
+            List<OuvrageRevanche> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                fondationsByTronconId.put(row.getInt(FondationColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(fondation);
+            listByTronconId.add(ouvrage);
         }
     }
 
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (FondationColumns c : FondationColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

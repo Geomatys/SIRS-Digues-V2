@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.desordre;
 
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeSourceImporter;
+import fr.sirs.importer.objet.SourceInfoImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -23,7 +23,7 @@ import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.GenericStructureImporter;
-import fr.sirs.importer.objet.structure.StructureImporter;
+import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
@@ -55,16 +55,15 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
     private Map<Integer, List<Desordre>> desordresByTronconId = null;
     
     private final TypeDesordreImporter typeDesordreImporter;
-    private final SubDesordreImporter subDesordreImporter;
+    private final SysEvtDesordreImporter subDesordreImporter;
 
     public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final RefTypeDesordreRepository refTypeDesordreRepository,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final StructureImporter structureImporter, 
-            final TypeSourceImporter typeSourceImporter,
+            final ElementStructureImporter structureImporter, 
+            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeMateriauImporter typeMateriauImporter, 
@@ -75,8 +74,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
-                couchDbConnector, refTypeDesordreRepository);
-        this.subDesordreImporter = new SubDesordreImporter(accessDatabase, 
+                couchDbConnector);
+        this.subDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 structureImporter, typeDesordreImporter, typeSourceImporter, 
@@ -84,7 +83,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 typeNatureImporter, typeFonctionImporter);
     }
 
-    private enum DesordreColumns {
+    private enum Columns {
         ID_DESORDRE,
         ID_TYPE_DESORDRE,
         ID_TYPE_COTE,
@@ -160,18 +159,18 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypeDesordre();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypeSource();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypePosition();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeCote();
+        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre desordre;
             final boolean nouveauDesordre;
-            if(desordres.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()))!=null){
-                desordre = desordres.get(row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+            if(desordres.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
+                desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
                 nouveauDesordre=false;
             }
             else{
@@ -180,8 +179,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 nouveauDesordre=true;
             }
             
-            if (row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_DEBUT.toString()).doubleValue());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
                 if(b!=null) {
                     if(nouveauDesordre || desordre.getBorneDebutId()==null){
                         desordre.setBorneDebutId(b.getId());
@@ -191,8 +190,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                     }
                 }
             }
-            if (row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                final float v = row.getDouble(DesordreColumns.DIST_BORNEREF_DEBUT.toString()).floatValue();
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                final float v = row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setBorne_debut_distance(v);
                 }
@@ -200,8 +199,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 //                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_debut_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
 //                }
             }
-            if (row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                final float v = row.getDouble(DesordreColumns.PR_DEBUT_CALCULE.toString()).floatValue();
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                final float v = row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setPR_debut(v);
                 }
@@ -210,8 +209,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 //                }
             }
             
-            if (row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(DesordreColumns.ID_BORNEREF_FIN.toString()).doubleValue());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
                 if (b!=null) {
                     if(desordre.getBorneFinId()==null){
                         desordre.setBorneFinId(b.getId());
@@ -221,8 +220,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                     }
                 }
             }
-            if (row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                final float v = row.getDouble(DesordreColumns.DIST_BORNEREF_FIN.toString()).floatValue();
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                final float v = row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setBorne_fin_distance(v);
                 }
@@ -230,8 +229,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 //                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_fin_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
 //                }
             }
-            if (row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()) != null) {
-                final float v = row.getDouble(DesordreColumns.PR_FIN_CALCULE.toString()).floatValue();
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                final float v = row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
                     desordre.setPR_fin(v);
                 }
@@ -240,8 +239,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 //                }
             }
             
-            if(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString())!=null){
-                final SystemeReperage sr = systemesReperage.get(row.getInt(DesordreColumns.ID_SYSTEME_REP.toString()));
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                final SystemeReperage sr = systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString()));
                 if(sr!=null){
                     if(desordre.getSystemeRepId()==null){
                         desordre.setSystemeRepId(sr.getId());
@@ -253,7 +252,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             }
 
             {
-                final boolean bda = row.getBoolean(DesordreColumns.AMONT_AVAL_DEBUT.toString());
+                final boolean bda = row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString());
                 if(nouveauDesordre){
                     desordre.setBorne_debut_aval(bda); 
                 } 
@@ -263,7 +262,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             }
             
             {
-                final boolean bfa = row.getBoolean(DesordreColumns.AMONT_AVAL_FIN.toString());
+                final boolean bfa = row.getBoolean(Columns.AMONT_AVAL_FIN.toString());
                 if(nouveauDesordre){
                     desordre.setBorne_fin_aval(bfa);
                 }
@@ -273,7 +272,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             }
             
             {
-                final String ld = row.getString(DesordreColumns.LIEU_DIT_DESORDRE.toString());
+                final String ld = row.getString(Columns.LIEU_DIT_DESORDRE.toString());
                 if (ld != null) {
                     if (nouveauDesordre) {
                         desordre.setLieu_dit(ld);
@@ -283,8 +282,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
         
-            if(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())!=null){
-                final RefTypeDesordre typeDesordre = typesDesordre.get(row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString()));
+            if(row.getInt(Columns.ID_TYPE_DESORDRE.toString())!=null){
+                final RefTypeDesordre typeDesordre = typesDesordre.get(row.getInt(Columns.ID_TYPE_DESORDRE.toString()));
                 if(typeDesordre!=null){
                     if(desordre.getTypeDesordreId()==null){
                         desordre.setTypeDesordreId(typeDesordre.getId());
@@ -295,8 +294,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
             
-            if(row.getInt(DesordreColumns.ID_SOURCE.toString())!=null){
-                final RefSource typeSource = typesSource.get(row.getInt(DesordreColumns.ID_SOURCE.toString()));
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                final RefSource typeSource = typesSource.get(row.getInt(Columns.ID_SOURCE.toString()));
                 if(typeSource!=null){
                     if(desordre.getSourceId()==null){
                         desordre.setSourceId(typeSource.getId());
@@ -307,8 +306,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
             
-            if(row.getInt(DesordreColumns.ID_TYPE_POSITION.toString())!=null){
-                final RefPosition typePosition = typesPosition.get(row.getInt(DesordreColumns.ID_TYPE_POSITION.toString()));
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                final RefPosition typePosition = typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString()));
                 if(typePosition!=null){
                     if(desordre.getPosition_structure()==null){
                         desordre.setPosition_structure(typePosition.getId());
@@ -319,8 +318,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
             
-            if(row.getInt(DesordreColumns.ID_TYPE_COTE.toString())!=null){
-                final RefCote typeCote = typesCote.get(row.getInt(DesordreColumns.ID_TYPE_COTE.toString()));
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                final RefCote typeCote = typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString()));
                 if(typeCote!=null){
                     if(desordre.getCoteId()==null){
                         desordre.setCoteId(typeCote.getId());
@@ -331,20 +330,20 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
             
-            if (row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()) != null) {
-                final TronconDigue troncon = troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+            if (row.getInt(Columns.ID_TRONCON_GESTION.toString()) != null) {
+                final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (troncon.getId() != null && desordre.getTroncon()==null) {
                     desordre.setTroncon(troncon.getId());
                 } else if(troncon.getId()==null) {
                     throw new AccessDbImporterException("Le tronçon "
-                            + troncons.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                            + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
                 } else if(!desordre.getTroncon().equals(troncon.getId())){
                     throw new AccessDbImporterException("Inconsistent data.");
                 }
             }
             
-            if (row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString()) != null) {
-                final Date date = row.getDate(DesordreColumns.DATE_DEBUT_VAL.toString());
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                final Date date = row.getDate(Columns.DATE_DEBUT_VAL.toString());
                 if(date!=null){
                     final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
                     if(desordre.getDate_debut()==null){
@@ -355,9 +354,9 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
                 }
             }
             
-            if (row.getDate(DesordreColumns.DATE_FIN_VAL.toString()) != null) {
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
                 try {
-                    final Date date = row.getDate(DesordreColumns.DATE_FIN_VAL.toString());
+                    final Date date = row.getDate(Columns.DATE_FIN_VAL.toString());
                     if (date != null) {
 //                        System.out.println("desordre Id : "+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
                         final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
@@ -373,7 +372,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             }
             
             {
-                final String commentaire = row.getString(DesordreColumns.COMMENTAIRE.toString());
+                final String commentaire = row.getString(Columns.COMMENTAIRE.toString());
                 if(commentaire!=null){
                     if(desordre.getCommentaire()==null){
                         desordre.setCommentaire(commentaire);
@@ -390,11 +389,11 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 
                 try {
 
-                    if (row.getDouble(DesordreColumns.X_DEBUT.toString()) != null 
-                            && row.getDouble(DesordreColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null 
+                            && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         final Point positionDebut = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DesordreColumns.X_DEBUT.toString()),
-                                row.getDouble(DesordreColumns.Y_DEBUT.toString()))), lambertToRGF);
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF);
                         if(desordre.getPositionDebut()==null){
                             desordre.setPositionDebut(positionDebut);
                         } else if(!desordre.getPositionDebut().equals(positionDebut)){
@@ -407,11 +406,11 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
 
                 try {
 
-                    if (row.getDouble(DesordreColumns.X_FIN.toString()) != null 
-                            && row.getDouble(DesordreColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null 
+                            && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         final Point positionFin = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                    row.getDouble(DesordreColumns.X_FIN.toString()),
-                                    row.getDouble(DesordreColumns.Y_FIN.toString()))), lambertToRGF);
+                                    row.getDouble(Columns.X_FIN.toString()),
+                                    row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF);
                         if(desordre.getPositionFin()==null){
                             desordre.setPositionFin(positionFin);
                         } else if(!desordre.getPositionFin().equals(positionFin)){
@@ -426,8 +425,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             }
             
             
-            if (row.getDate(DesordreColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                desordre.setDateMaj(LocalDateTime.parse(row.getDate(DesordreColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                desordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
             
@@ -436,13 +435,13 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             if (nouveauDesordre) {
                 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                desordres.put(row.getInt(DesordreColumns.ID_DESORDRE.toString()), desordre);
+                desordres.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
 
                 // Set the list ByTronconId
-                List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()));
+                List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    desordresByTronconId.put(row.getInt(DesordreColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    desordresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(desordre);
             }
@@ -452,7 +451,7 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DesordreColumns c : DesordreColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
