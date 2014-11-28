@@ -13,9 +13,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefFonction;
-import fr.sirs.core.model.RefMateriau;
-import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -160,36 +157,6 @@ class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
 //        ID_AUTO
     };
 
-    /**
-     *
-     * @return A map containing all Epi instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, Epi> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all Epi instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<Epi>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_EPIS.toString();
@@ -207,9 +174,6 @@ class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

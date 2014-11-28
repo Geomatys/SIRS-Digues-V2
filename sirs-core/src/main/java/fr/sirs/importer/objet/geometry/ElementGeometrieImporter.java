@@ -111,32 +111,6 @@ public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
 //        DATE_DERNIERE_MAJ
     };
 
-    /**
-     * 
-     * @return A map referencing the Structure (geometries) instances from the internal 
-     * database tronçon identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException 
-     */
-    @Override
-    public Map<Integer, List<Objet>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (structuresByTronconId == null)  compute();
-        return structuresByTronconId;
-    }
-    
-    /**
-     * 
-     * @return A map referencing the Structure instances from their internal 
-     * database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException 
-     */
-    @Override
-    public Map<Integer, Objet> getStructures() throws IOException, AccessDbImporterException{
-        if(structures==null) compute();
-        return structures;
-    }
-
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();

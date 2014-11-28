@@ -108,36 +108,6 @@ class SysEvtLargeurFrancBordImporter extends GenericStructureImporter<LargeurFra
 //        ID_AUTO
     };
 
-    /**
-     *
-     * @return A map containing all LargeurFrancBord instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, LargeurFrancBord> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all LargeurFrancBord instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<LargeurFrancBord>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_LARGEUR_FRANC_BORD.toString();

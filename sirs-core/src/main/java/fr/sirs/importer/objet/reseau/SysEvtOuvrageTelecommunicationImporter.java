@@ -13,7 +13,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefImplantation;
 import fr.sirs.core.model.RefOuvrageTelecomEnergie;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -150,37 +149,6 @@ class SysEvtOuvrageTelecommunicationImporter extends GenericStructureImporter<Ou
 //        LIBELLE_TYPE_REVETEMENT_BAS,
 //        ID_AUTO
     };
-
-    /**
-     *
-     * @return A map containing all OuvrageTelecomEnergie instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, OuvrageTelecomEnergie> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all OuvrageTelecomEnergie instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<OuvrageTelecomEnergie>> getStructuresByTronconId() 
-            throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
 
     @Override
     public String getTableName() {

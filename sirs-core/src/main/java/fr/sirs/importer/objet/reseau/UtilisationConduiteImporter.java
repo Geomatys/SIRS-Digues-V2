@@ -25,7 +25,7 @@ class UtilisationConduiteImporter extends GenericTypeImporter<RefUtilisationCond
         super(accessDatabase, couchDbConnector);
     }
 
-    private enum TypeUtilisationConduiteColumns {
+    private enum Columns {
         ID_UTILISATION_CONDUITE,
         LIBELLE_UTILISATION_CONDUITE,
         ABREGE_UTILISATION_CONDUITE,
@@ -35,7 +35,7 @@ class UtilisationConduiteImporter extends GenericTypeImporter<RefUtilisationCond
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeUtilisationConduiteColumns c : TypeUtilisationConduiteColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -55,12 +55,12 @@ class UtilisationConduiteImporter extends GenericTypeImporter<RefUtilisationCond
             final Row row = it.next();
             final RefUtilisationConduite typeUtilisation = new RefUtilisationConduite();
             
-            typeUtilisation.setLibelle(row.getString(TypeUtilisationConduiteColumns.LIBELLE_UTILISATION_CONDUITE.toString()));
-            typeUtilisation.setAbrege(row.getString(TypeUtilisationConduiteColumns.ABREGE_UTILISATION_CONDUITE.toString()));
-            if (row.getDate(TypeUtilisationConduiteColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(TypeUtilisationConduiteColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_UTILISATION_CONDUITE.toString()));
+            typeUtilisation.setAbrege(row.getString(Columns.ABREGE_UTILISATION_CONDUITE.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(TypeUtilisationConduiteColumns.ID_UTILISATION_CONDUITE.toString())), typeUtilisation);
+            types.put(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());
     }

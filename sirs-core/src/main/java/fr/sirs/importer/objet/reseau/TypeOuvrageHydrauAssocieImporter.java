@@ -24,7 +24,7 @@ class TypeOuvrageHydrauAssocieImporter extends GenericTypeImporter<RefOuvrageHyd
         super(accessDatabase, couchDbConnector);
     }
 
-    private enum TypeOuvrageAssocieColumns {
+    private enum Columns {
         ID_TYPE_OUVR_HYDRAU_ASSOCIE,
         LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE,
         ABREGE_TYPE_OUVR_HYDRAU_ASSOCIE,
@@ -34,7 +34,7 @@ class TypeOuvrageHydrauAssocieImporter extends GenericTypeImporter<RefOuvrageHyd
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeOuvrageAssocieColumns c : TypeOuvrageAssocieColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -54,12 +54,12 @@ class TypeOuvrageHydrauAssocieImporter extends GenericTypeImporter<RefOuvrageHyd
             final Row row = it.next();
             final RefOuvrageHydrauliqueAssocie typeOuvrage = new RefOuvrageHydrauliqueAssocie();
             
-            typeOuvrage.setLibelle(row.getString(TypeOuvrageAssocieColumns.LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE.toString()));
-            typeOuvrage.setAbrege(row.getString(TypeOuvrageAssocieColumns.ABREGE_TYPE_OUVR_HYDRAU_ASSOCIE.toString()));
-            if (row.getDate(TypeOuvrageAssocieColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(TypeOuvrageAssocieColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE.toString()));
+            typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVR_HYDRAU_ASSOCIE.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(TypeOuvrageAssocieColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())), typeOuvrage);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())), typeOuvrage);
         }
         couchDbConnector.executeBulk(types.values());
     }

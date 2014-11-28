@@ -64,7 +64,32 @@ public abstract class GenericStructureImporter<T extends Objet> extends GenericI
         this.typeNatureImporter = typeNatureImporter;
         this.typeFonctionImporter = typeFonctionImporter;
     }
-    
-    public abstract Map<Integer, T> getStructures() throws IOException, AccessDbImporterException;
-    public abstract Map<Integer, List<T>> getStructuresByTronconId() throws IOException, AccessDbImporterException;
+
+    /**
+     *
+     * @return A map containing all T instances accessibles from the
+     * internal database identifier.
+     * @throws IOException
+     * @throws AccessDbImporterException
+     */
+    public Map<Integer, T> getStructures() throws IOException, AccessDbImporterException {
+        if (this.structures == null) {
+            compute();
+        }
+        return structures;
+    }
+
+    /**
+     *
+     * @return A map containing all T instances accessibles from the
+     * internal database <em>TronconDigue</em> identifier.
+     * @throws IOException
+     * @throws AccessDbImporterException
+     */
+    public Map<Integer, List<T>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
+        if (this.structuresByTronconId == null) {
+            compute();
+        }
+        return this.structuresByTronconId;
+    }
 }

@@ -29,8 +29,10 @@ import fr.sirs.core.component.RefImplantationRepository;
 import fr.sirs.core.component.RefLargeurFrancBordRepository;
 import fr.sirs.core.component.RefMateriauRepository;
 import fr.sirs.core.component.RefNatureRepository;
+import fr.sirs.core.component.RefOrientationOuvrageRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
+import fr.sirs.core.component.RefOuvrageFranchissementRepository;
 import fr.sirs.core.component.RefOuvrageHydrauliqueAssocieRepository;
 import fr.sirs.core.component.RefOuvrageTelecomEnergieRepository;
 import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
@@ -38,15 +40,19 @@ import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefProfilFrancBordRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.component.RefReseauTelecomEnergieRepository;
+import fr.sirs.core.component.RefRevetementRepository;
 import fr.sirs.core.component.RefRiveRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
 import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.RefTypeDocumentRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
+import fr.sirs.core.component.RefUsageVoieRepository;
 import fr.sirs.core.component.RefUtilisationConduiteRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.RefOuvrageFranchissement;
+import fr.sirs.core.model.RefRevetement;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
@@ -134,6 +140,10 @@ public class DbImporter {
     private final RefReseauTelecomEnergieRepository refReseauTelecomEnergieRepository;
     private final RefOuvrageTelecomEnergieRepository refOuvrageTelecomEnergieRepository;
     private final RefOuvrageHydrauliqueAssocieRepository refOuvrageHydrauliqueAssocieRepository;
+    private final RefUsageVoieRepository refUsageVoieRepository;
+    private final RefRevetementRepository refRevetementRepository;
+    private final RefOrientationOuvrageRepository refOrientationOuvrageRepository;
+    private final RefOuvrageFranchissementRepository refOuvrageFranchissementRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -347,7 +357,7 @@ public class DbImporter {
      SYS_EVT_PIED_DE_DIGUE,
 //     SYS_EVT_PIED_FRONT_FRANC_BORD,
 //     SYS_EVT_PLAN_TOPO, // Vide en Isère / Inexistante dans le Rhône ?
-//     SYS_EVT_POINT_ACCES,
+     SYS_EVT_POINT_ACCES,
 //     SYS_EVT_PRESTATION,
      SYS_EVT_PROFIL_EN_LONG,
      SYS_EVT_PROFIL_EN_TRAVERS,
@@ -363,7 +373,7 @@ public class DbImporter {
 //     SYS_EVT_TALUS_FRANC_BORD,
      SYS_EVT_TALUS_RISBERME,
 //     SYS_EVT_VEGETATION,
-//     SYS_EVT_VOIE_SUR_DIGUE,
+     SYS_EVT_VOIE_SUR_DIGUE,
 //     SYS_IMPORT_POINTS,
 //     SYS_INDEFINI,
 //     SYS_OPTIONS,
@@ -436,11 +446,11 @@ public class DbImporter {
      TYPE_NATURE,
 //     TYPE_NATURE_BATARDEAUX,
 //     TYPE_ORGANISME,
-//     TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
+     TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
 //     TYPE_ORIENTATION_VENT,
      TYPE_ORIGINE_PROFIL_EN_LONG,
      TYPE_ORIGINE_PROFIL_EN_TRAVERS,
-//     TYPE_OUVRAGE_FRANCHISSEMENT,
+     TYPE_OUVRAGE_FRANCHISSEMENT,
      TYPE_OUVRAGE_HYDRAU_ASSOCIE,
 //     TYPE_OUVRAGE_PARTICULIER,
      TYPE_OUVRAGE_TELECOM_NRJ,
@@ -456,7 +466,7 @@ public class DbImporter {
 //     TYPE_REF_HEAU,
 //     TYPE_RESEAU_EAU,
      TYPE_RESEAU_TELECOMMUNIC,
-//     TYPE_REVETEMENT,
+     TYPE_REVETEMENT,
      TYPE_RIVE,
 //     TYPE_SERVITUDE,
 //     TYPE_SEUIL,
@@ -472,7 +482,7 @@ public class DbImporter {
 //     TYPE_VEGETATION_ETAT_SANITAIRE,
 //     TYPE_VEGETATION_STRATE_DIAMETRE,
 //     TYPE_VEGETATION_STRATE_HAUTEUR,
-//     TYPE_VOIE_SUR_DIGUE,
+     TYPE_VOIE_SUR_DIGUE,
      UTILISATION_CONDUITE,
      
      
@@ -593,6 +603,14 @@ public class DbImporter {
         repositories.add(refOuvrageTelecomEnergieRepository);
         refOuvrageHydrauliqueAssocieRepository = new RefOuvrageHydrauliqueAssocieRepository(couchDbConnector);
         repositories.add(refOuvrageHydrauliqueAssocieRepository);
+        refUsageVoieRepository = new RefUsageVoieRepository(couchDbConnector);
+        repositories.add(refUsageVoieRepository);
+        refRevetementRepository = new RefRevetementRepository(couchDbConnector);
+        repositories.add(refRevetementRepository);
+        refOrientationOuvrageRepository = new RefOrientationOuvrageRepository(couchDbConnector);
+        repositories.add(refOrientationOuvrageRepository);
+        refOuvrageFranchissementRepository = new RefOuvrageFranchissementRepository(couchDbConnector);
+        repositories.add(refOuvrageFranchissementRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -748,7 +766,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_USAGE_VOIE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -764,7 +782,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_USAGE_VOIE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -779,7 +797,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_USAGE_VOIE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

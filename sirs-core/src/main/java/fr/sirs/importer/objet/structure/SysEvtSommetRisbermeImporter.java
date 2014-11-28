@@ -161,36 +161,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
 //        ID_AUTO
     };
 
-    /**
-     *
-     * @return A map containing all SommetRisberme instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, SommetRisberme> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all SommetRisberme instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<SommetRisberme>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_SOMMET_RISBERME.toString();

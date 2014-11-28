@@ -163,36 +163,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         //     EPAISSEUR_Y22,
     };
 
-    /**
-     *
-     * @return A map containing all TronconDigue instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, PiedDigue> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all TronconDigue instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<PiedDigue>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();

@@ -234,30 +234,6 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
 //    LARGEUR
     };
 
-    /**
-     * 
-     * @return A map referencing the Structure (without desordres) instances from the internal 
-     * database tronçon identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException 
-     */
-    public Map<Integer, List<Objet>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (structuresByTronconId == null)  compute();
-        return structuresByTronconId;
-    }
-    
-    /**
-     * 
-     * @return A map referencing the Structure instances from their internal 
-     * database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException 
-     */
-    public Map<Integer, Objet> getStructures() throws IOException, AccessDbImporterException{
-        if(structures==null) compute();
-        return structures;
-    }
-
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();

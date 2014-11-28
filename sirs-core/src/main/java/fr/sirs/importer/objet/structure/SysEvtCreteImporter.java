@@ -163,36 +163,6 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
 //     EPAISSEUR_Y22,
     };
 
-    /**
-     *
-     * @return A map containing all Crete instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, Crete> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all Crete instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<Crete>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_CRETE.toString();

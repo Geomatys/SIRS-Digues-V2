@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefReseauTelecomEnergie;
+import fr.sirs.core.model.RefRevetement;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -17,17 +17,17 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTelecomEnergie> {
+class TypeRevetementImporter extends GenericTypeImporter<RefRevetement> {
     
-    TypeReseauTelecommunicImporter(final Database accessDatabase, 
+    TypeRevetementImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
-        ID_TYPE_RESEAU_COMMUNICATION,
-        LIBELLE_TYPE_RESEAU_COMMUNICATION,
-        ABREGE_TYPE_RESEAU_COMMUNICATION,
+        ID_TYPE_REVETEMENT,
+        LIBELLE_TYPE_REVETEMENT,
+        ABREGE_TYPE_REVETEMENT,
         DATE_DERNIERE_MAJ
     };
     
@@ -42,7 +42,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTeleco
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_RESEAU_TELECOMMUNIC.toString();
+        return DbImporter.TableName.TYPE_REVETEMENT.toString();
     }
 
     @Override
@@ -52,14 +52,14 @@ class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTeleco
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefReseauTelecomEnergie typeReseau = new RefReseauTelecomEnergie();
+            final RefRevetement typeUtilisation = new RefRevetement();
             
-            typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
-            typeReseau.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_COMMUNICATION.toString()));
+            typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_TYPE_REVETEMENT.toString()));
+            typeUtilisation.setAbrege(row.getString(Columns.ABREGE_TYPE_REVETEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_REVETEMENT.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());
     }

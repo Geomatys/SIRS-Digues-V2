@@ -49,9 +49,6 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
     
-    private Map<Integer, Desordre> desordres = null;
-    private Map<Integer, List<Desordre>> desordresByTronconId = null;
-    
     private final TypeDesordreImporter typeDesordreImporter;
 
     SysEvtDesordreImporter(final Database accessDatabase,
@@ -121,36 +118,6 @@ class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
      COMMENTAIRE,
     };
 
-    /**
-     *
-     * @return A map containing all Desordre instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, Desordre> getStructures() throws IOException, AccessDbImporterException {
-        if (this.desordres == null) {
-            compute();
-        }
-        return desordres;
-    }
-
-    /**
-     *
-     * @return A map containing all Desordre instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<Desordre>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.desordresByTronconId == null) {
-            compute();
-        }
-        return this.desordresByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_DESORDRE.toString();
@@ -159,8 +126,8 @@ class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.desordres = new HashMap<>();
-        this.desordresByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
@@ -272,15 +239,15 @@ class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            desordres.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
+            structures.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
 
             // Set the list ByTronconId
-            List<Desordre> listByTronconId = desordresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<Desordre> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
             }
             listByTronconId.add(desordre);
-            desordresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
     }
 

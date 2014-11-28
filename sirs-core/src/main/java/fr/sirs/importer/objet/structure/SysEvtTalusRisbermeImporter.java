@@ -159,37 +159,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
 //        EPAISSEUR_Y22,
 //        ID_AUTO
     };
-
-    /**
-     *
-     * @return A map containing all TalusRisberme instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, TalusRisberme> getStructures() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
-            compute();
-        }
-        return structures;
-    }
-
-    /**
-     *
-     * @return A map containing all TalusRisberme instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<TalusRisberme>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
-            compute();
-        }
-        return this.structuresByTronconId;
-    }
-
+    
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_TALUS_RISBERME.toString();

@@ -49,9 +49,6 @@ import org.opengis.util.FactoryException;
  * @author Samuel Andrés (Geomatys)
  */
 class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<OuvrageHydrauliqueAssocie> {
-
-    private Map<Integer, OuvrageHydrauliqueAssocie> ouvrages = null;
-    private Map<Integer, List<OuvrageHydrauliqueAssocie>> ouvragesByTronconId = null;
     
     private final TypeOuvrageHydrauAssocieImporter typeOuvrageAssocieImporter;
 
@@ -75,7 +72,7 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
         this.typeOuvrageAssocieImporter = typeOuvrageAssocieImporter;
     }
     
-    private enum AutreOuvrageColumns {
+    private enum Columns {
         ID_ELEMENT_RESEAU,
 //        id_nom_element,
 //        ID_SOUS_GROUPE_DONNEES,
@@ -153,36 +150,6 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
 //        ID_AUTO
     };
 
-    /**
-     *
-     * @return A map containing all OuvrageHydrauliqueAssocie instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, OuvrageHydrauliqueAssocie> getStructures() throws IOException, AccessDbImporterException {
-        if (this.ouvrages == null) {
-            compute();
-        }
-        return ouvrages;
-    }
-
-    /**
-     *
-     * @return A map containing all OuvrageHydrauliqueAssocie instances accessibles from the
-     * internal database <em>TronconDigue</em> identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    @Override
-    public Map<Integer, List<OuvrageHydrauliqueAssocie>> getStructuresByTronconId() throws IOException, AccessDbImporterException {
-        if (this.ouvragesByTronconId == null) {
-            compute();
-        }
-        return this.ouvragesByTronconId;
-    }
-
     @Override
     public String getTableName() {
         return DbImporter.TableName.SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE.toString();
@@ -191,8 +158,8 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.ouvrages = new HashMap<>();
-        this.ouvragesByTronconId = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.structuresByTronconId = new HashMap<>();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -207,38 +174,38 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
             final Row row = it.next();
             final OuvrageHydrauliqueAssocie ouvrage = new OuvrageHydrauliqueAssocie();
             
-            ouvrage.setLibelle(cleanNullString(row.getString(AutreOuvrageColumns.NOM.toString())));
+            ouvrage.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
-            if(row.getInt(AutreOuvrageColumns.ID_TYPE_COTE.toString())!=null){
-                ouvrage.setCoteId(typesCote.get(row.getInt(AutreOuvrageColumns.ID_TYPE_COTE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                ouvrage.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
-            if(row.getInt(AutreOuvrageColumns.ID_SOURCE.toString())!=null){
-                ouvrage.setSourceId(typesSource.get(row.getInt(AutreOuvrageColumns.ID_SOURCE.toString())).getId());
+            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()));
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
                 ouvrage.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            if (row.getDate(AutreOuvrageColumns.DATE_DEBUT_VAL.toString()) != null) {
-                ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(AutreOuvrageColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(AutreOuvrageColumns.DATE_FIN_VAL.toString()) != null) {
-                ouvrage.setDate_fin(LocalDateTime.parse(row.getDate(AutreOuvrageColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                ouvrage.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(AutreOuvrageColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                ouvrage.setPR_debut(row.getDouble(AutreOuvrageColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                ouvrage.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
-            if (row.getDouble(AutreOuvrageColumns.PR_FIN_CALCULE.toString()) != null) {
-                ouvrage.setPR_fin(row.getDouble(AutreOuvrageColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                ouvrage.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -248,10 +215,10 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
 
                 try {
 
-                    if (row.getDouble(AutreOuvrageColumns.X_DEBUT.toString()) != null && row.getDouble(AutreOuvrageColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         ouvrage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(AutreOuvrageColumns.X_DEBUT.toString()),
-                                row.getDouble(AutreOuvrageColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(SysEvtAutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -259,10 +226,10 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
 
                 try {
 
-                    if (row.getDouble(AutreOuvrageColumns.X_FIN.toString()) != null && row.getDouble(AutreOuvrageColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         ouvrage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(AutreOuvrageColumns.X_FIN.toString()),
-                                row.getDouble(AutreOuvrageColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(SysEvtAutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -271,50 +238,50 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
                 Logger.getLogger(SysEvtAutreOuvrageHydrauliqueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getInt(AutreOuvrageColumns.ID_SYSTEME_REP.toString()) != null) {
-                ouvrage.setSystemeRepId(systemesReperage.get(row.getInt(AutreOuvrageColumns.ID_SYSTEME_REP.toString())).getId());
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                ouvrage.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if (row.getDouble(AutreOuvrageColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-                ouvrage.setBorneDebutId(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            ouvrage.setBorne_debut_aval(row.getBoolean(AutreOuvrageColumns.AMONT_AVAL_DEBUT.toString()));
+            ouvrage.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                ouvrage.setBorne_debut_distance(row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                ouvrage.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if (row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    ouvrage.setBorneFinId(bornes.get((int) row.getDouble(AutreOuvrageColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
+                    ouvrage.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
                 }
             }
             
-            ouvrage.setBorne_fin_aval(row.getBoolean(AutreOuvrageColumns.AMONT_AVAL_FIN.toString()));
+            ouvrage.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                ouvrage.setBorne_fin_distance(row.getDouble(AutreOuvrageColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                ouvrage.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            ouvrage.setCommentaire(row.getString(AutreOuvrageColumns.COMMENTAIRE.toString()));
+            ouvrage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if(row.getInt(AutreOuvrageColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())!=null){
-                ouvrage.setTypeOuvrageHydroAssocieId(typesOuvrage.get(row.getInt(AutreOuvrageColumns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())!=null){
+                ouvrage.setTypeOuvrageHydroAssocieId(typesOuvrage.get(row.getInt(Columns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())).getId());
             }
             
-            if(row.getInt(AutreOuvrageColumns.ID_TYPE_POSITION.toString())!=null){
-                ouvrage.setPosition_structure(typesPosition.get(row.getInt(AutreOuvrageColumns.ID_TYPE_POSITION.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouvrage.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            ouvrages.put(row.getInt(AutreOuvrageColumns.ID_ELEMENT_RESEAU.toString()), ouvrage);
+            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), ouvrage);
 
             // Set the list ByTronconId
-            List<OuvrageHydrauliqueAssocie> listByTronconId = ouvragesByTronconId.get(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()));
+            List<OuvrageHydrauliqueAssocie> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                ouvragesByTronconId.put(row.getInt(AutreOuvrageColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(ouvrage);
         }
@@ -323,7 +290,7 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericStructureImporter<Ouv
     @Override
     public List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (AutreOuvrageColumns c : AutreOuvrageColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
