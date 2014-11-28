@@ -22,8 +22,6 @@ import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 
 import org.geotoolkit.factory.Hints;
-import org.geotoolkit.image.io.plugin.WorldFileImageReader;
-import org.geotoolkit.image.io.plugin.WorldFileImageWriter;
 import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.lang.Setup;
@@ -38,6 +36,8 @@ import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.CouchDBInit;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -112,7 +112,6 @@ public class Loader extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
@@ -203,8 +202,8 @@ public class Loader extends Application {
                 updateProgress(inc++, total);
                 updateMessage("Creation de la base EPSG...");
                 //create a database in user directory
-                final File storageFolder = new File(SIRS.getConfigPath()+File.separator+"EPSG");
-                final String url = "jdbc:derby:"+SIRS.getConfigPath()+File.separator+"EPSG"+File.separator+"EPSG;create=true";
+                final Path storageFolder = SIRS.CONFIGURATION_PATH.resolve("EPSG");
+                final String url = "jdbc:derby:"+storageFolder.toString()+File.separator+"EPSG;create=true";
                 final DataSource ds = new DefaultDataSource(url);
                 Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
 
@@ -272,8 +271,8 @@ public class Loader extends Application {
         }
     }
     
-    private static void createEpsgDB(final File folder, final String url) throws FactoryException{
-        folder.mkdirs();
+    private static void createEpsgDB(final Path folder, final String url) throws FactoryException, IOException {
+        Files.createDirectories(folder);
         final EpsgInstaller installer = new EpsgInstaller();
         installer.setDatabase(url);
         if(!installer.exists()){
