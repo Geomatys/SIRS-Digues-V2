@@ -2,21 +2,21 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import fr.sirs.CorePlugin;
 import fr.sirs.Loader;
+import fr.sirs.Plugins;
 
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.DatabaseRegistry;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
-import fr.sirs.core.SirsCore;
-import fr.sirs.maj.PluginInfo;
+import fr.sirs.PluginInfo;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -24,10 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -40,7 +38,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -56,6 +53,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -78,6 +76,7 @@ public class FXLauncherPane extends BorderPane {
     private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
     private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
+    @FXML private Label errorLabel;
     @FXML private TabPane uiTabPane;
     
     // onglet base locales
@@ -103,7 +102,8 @@ public class FXLauncherPane extends BorderPane {
     @FXML private Button uiMaj;
     @FXML private TextField uiMajServerURL;
     @FXML private Label uiMajCoreVersion;
-    @FXML private TableView<PluginInfo> uiPluginTable;
+    @FXML private TableView<PluginInfo> uiInstalledPlugins;
+    @FXML private TableView<PluginInfo> uiAvailablePlugins;
            
     
     private URL serverURL;
@@ -122,9 +122,10 @@ public class FXLauncherPane extends BorderPane {
         try {
             loader.load();
         } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, "An error occurred while loading application libraries", ex);
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
-        
+        errorLabel.setTextFill(Color.RED);
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
         
@@ -159,13 +160,17 @@ public class FXLauncherPane extends BorderPane {
         colInstall.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
         colInstall.setCellFactory((TableColumn<PluginInfo, String> param) -> new UpdateCell());
         
-        uiPluginTable.getColumns().add(colName);
-        uiPluginTable.getColumns().add(colVersion);
-        uiPluginTable.getColumns().add(colInstall);
+        uiInstalledPlugins.getColumns().add(colName);
+        uiInstalledPlugins.getColumns().add(colVersion);
+        uiInstalledPlugins.getColumns().add(colInstall);
         
+        uiAvailablePlugins.getColumns().add(colName);
+        uiAvailablePlugins.getColumns().add(colVersion);
+        uiAvailablePlugins.getColumns().add(colInstall);
         
         updateLocalDbList();
         updatePluginList(null);
+        uiMajServerURL.setOnInputMethodTextChanged((event)->{if (event.getCommitted() != null && !event.getCommitted().isEmpty()) updatePluginList(null);});
     }
     
     private void updateLocalDbList(){
@@ -183,29 +188,54 @@ public class FXLauncherPane extends BorderPane {
         if (majURL == null || majURL.isEmpty()) return;
         try{
             serverURL = new URL(uiMajServerURL.getText());
-            local = PluginInstaller.listLocalPlugins();
-            distant = PluginInstaller.listDistantPlugins(serverURL);
-        }catch(Exception ex){
-            SirsCore.LOGGER.log(Level.WARNING,ex.getMessage(),ex);
+        } catch (MalformedURLException e) {
+            LOGGER.log(Level.WARNING, "Invalid plugin server URL !", e);
+            errorLabel.setText("L'URL du serveur de plugins est invalide.");
+            return;
         }
         
-        // comparaison du plugin core
-        PluginInfo localCore = local.getPluginInfo(PluginInstaller.PLUGIN_CORE);
-        PluginInfo distantCore = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
-        if(localCore==null) localCore = new PluginInfo();
-        if(distantCore==null) distantCore = new PluginInfo();
+        try {
+            local = PluginInstaller.listLocalPlugins();
+            distant = PluginInstaller.listDistantPlugins(serverURL);
+        } catch(Exception ex) {
+            LOGGER.log(Level.WARNING, "Cannot update plugin list !", ex);
+            errorLabel.setText("Une erreur inattendue est survenue lors de la récupération de la liste des plugins.");
+            return;
+        }
         
-        uiMaj.setDisable(!localCore.isOlderOrSame(distantCore));
-        uiMajCoreVersion.setText(distantCore.getVersionMajor()+"."+distantCore.getVersionMinor());
+        /* We check installed core version, and compare it to the available ones
+         * on plugin server. If we found a newer core, we propose update. Even 
+         * if core application is installed multiple time locally, we just want 
+         * current session version, so we do not bother finding newest local version. 
+         */
+        // TODO : find current started core. Now we get any installed one.
+        final Optional<PluginInfo> installedCore = local.getPluginInfo(CorePlugin.NAME).findAny();
         
+        Stream<PluginInfo> availableCores = distant.getPluginInfo(CorePlugin.NAME);
+        // Sort available version to extract highest major version, then get highest minor version.
+        Optional<PluginInfo> upToDate = availableCores.max((p1, p2)-> {
+            final int majorComp = Integer.compare(p1.getVersionMajor(), p2.getVersionMajor());
+            if (majorComp == 0) {
+                return Integer.compare(p1.getVersionMinor(), p2.getVersionMinor());
+            } else {
+                return majorComp;
+            }
+        });
         
-        //Merge de la liste des plugins
-        final Set<PluginInfo> plugins = new LinkedHashSet<>();
-        plugins.addAll(local.getPlugins());
-        plugins.addAll(distant.getPlugins());
+        if (!installedCore.isPresent()) {
+            uiMajCoreVersion.setText("Inconnue");
+            errorLabel.setText("Impossible de trouver la version de l'application installée.");
+        } else {
+            uiMajCoreVersion.setText(installedCore.get().getVersionMajor()+"."+installedCore.get().getVersionMinor());
+        }
         
-        uiPluginTable.setItems(FXCollections.observableArrayList(plugins));
+        if (upToDate.isPresent()) {
+            uiMaj.setDisable(!upToDate.get().isOlderOrSame(installedCore.get()));
+        }
         
+        // TODO : improve to get a single line by plugin. Make version available in a sort of popup.
+        uiInstalledPlugins.setItems(local.plugins);
+        uiAvailablePlugins.setItems(distant.plugins);
     }
         
     
@@ -357,33 +387,25 @@ public class FXLauncherPane extends BorderPane {
             uiImportDBCarto.setText(file.getAbsolutePath());
         }
     }
-
+        
     @FXML
     void updateApp(ActionEvent event) {
         try {
+            // TODO : Download new Core plugin.
             restartCore();
-            final PluginInfo corePlugin = distant.getPluginInfo(PluginInstaller.PLUGIN_CORE);
-            if(corePlugin != null){
-                PluginInstaller.install(serverURL, corePlugin);
-            }
-        } catch (URISyntaxException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
     }
         
     private static void runDesktop(final String serverUrl, final String database){
-                try {
-                    //Loader.main(new String[]{serverUrl, database});
-                    new Loader(serverUrl, database).start(null);
-                    //System.exit(0);
-                    
-                } catch (Exception ex) {
-                    LOGGER.log(Level.WARNING, "Cannot run desktop application with database "+serverUrl+":"+database, ex);
-                    new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
-                }
-        
+        try {
+            Plugins.loadPlugins();
+            new Loader(serverUrl, database).start(null);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Cannot run desktop application with database " + serverUrl + ":" + database, ex);
+            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+        }
     }
     
     private static File getPreviousPath() {
@@ -409,7 +431,9 @@ public class FXLauncherPane extends BorderPane {
         try {
             dbs = DatabaseRegistry.listSirsDatabase(new URL(URL_LOCAL));
         } catch (MalformedURLException ex) {
-            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.WARNING, "Invalid database URL : "+URL_LOCAL, ex);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unexpected error while searching for local database in "+URL_LOCAL, e);
         }
         
         return dbs;
@@ -434,7 +458,7 @@ public class FXLauncherPane extends BorderPane {
         final List<String> args = new ArrayList<>();
         if (!Files.isExecutable(javaBin)) {
             final Path appDir = javaHome.getParent().getParent();
-            LOGGER.log(Level.INFO, "Application directory : " + appDir.toString());
+            LOGGER.log(Level.INFO, "Application directory : {0}", appDir.toString());
             // we seek for a sirs + something executable file which is not the
             // uninstaller.
             Optional<Path> appExec = Files.walk(appDir, 1).filter(path -> {
@@ -445,7 +469,7 @@ public class FXLauncherPane extends BorderPane {
                         && Files.isRegularFile(path); // Check needed, cause a diectory can be marked executable...
             }).findFirst();
             if (appExec.isPresent()) {
-            LOGGER.log(Level.INFO, "Application executable " + appExec.toString());
+            LOGGER.log(Level.INFO, "Application executable {0}", appExec.toString());
                 args.add(appExec.get().toString());
             } else {
                 throw new IOException("No executable file can be found to restart SIRS application.");
@@ -488,18 +512,60 @@ public class FXLauncherPane extends BorderPane {
         System.exit(0);
     }
     
+    /**
+     * Composant contrôlant l'affichage d'une ligne dans la liste des plugins
+     * installés ou disponibles.
+     * 
+     * TODO : Pour le moment, l'installation ou mise à jour choisit toujours la
+     * version la plus à jour du plugin. On pourrait rajouter une étape, où une
+     * modale s'ouvrirait pour laisser le choix de la version à installer à 
+     * l'utilisateur.
+     */
     private final class UpdateCell extends TableCell<PluginInfo, String> {
 
-        private final Button button = new Button("Install");
+        private final Button installBtn = new Button("Installer");
+        private final Button removeBtn = new Button("Supprimer");
         private String name;
 
         public UpdateCell() {
-             button.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    PluginInfo pluginInfo = distant.getPluginInfo(name);
-                    PluginInstaller.install(serverURL, pluginInfo);
-                    updatePluginList(null);
+            installBtn.setOnAction((ActionEvent event) -> {
+                Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
+                if (oldPlugin.isPresent()) {
+                    try {
+                        PluginInstaller.uninstall(oldPlugin.get());
+                    } catch (Exception e) {
+                        errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Erreur inattendue.");
+                        LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + name, e);
+                    }
+                }
+                Optional<PluginInfo> newPlugin = distant.getPluginInfo(name).findFirst();
+
+                // At this state, we should have already checked we've got 
+                // exactly one element, so it should never happen.
+                if (!newPlugin.isPresent()) {
+                    errorLabel.setText("Le plugin " + name + "ne peut être installé : Introuvable.");
+                } else {
+                    try {
+                        PluginInstaller.install(serverURL, newPlugin.get());
+                        updatePluginList(null);
+                    } catch (IOException ex) {
+                        errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
+                        LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
+                    }
+                }
+            });
+
+            removeBtn.setOnAction((ActionEvent event) -> {
+                Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
+                if (oldPlugin.isPresent()) {
+                    try {
+                        PluginInstaller.uninstall(oldPlugin.get());
+                    } catch (Exception e) {
+                        errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Erreur inattendue.");
+                        LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + name, e);
+                    }
+                } else {
+                    errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Introuvable.");
                 }
             });
         }
@@ -508,26 +574,25 @@ public class FXLauncherPane extends BorderPane {
         protected void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
             
+            removeBtn.setVisible(false);
+            installBtn.setVisible(false);
+                
             if (empty) {
-                button.setDisable(true);
                 return;
             }
 
-            final PluginInfo localPlugin = local.getPluginInfo(item);
-            final PluginInfo distantPlugin = distant.getPluginInfo(item);
+            final Optional<PluginInfo> localPlugin = local.getPluginInfo(item).findAny();
+            final Optional<PluginInfo> distantPlugin = distant.getPluginInfo(item).findAny();
 
-            if (localPlugin == null && distantPlugin == null) {
-                button.setDisable(true);
+            if (distantPlugin.isPresent()) {
+                installBtn.setVisible(true);
             }
-            if (localPlugin == null) {
-                button.setDisable(false);
-            } else if (distantPlugin == null) {
-                button.setDisable(true);
-            } else {
-                button.setDisable(localPlugin.isOlderOrSame(distantPlugin));
+            
+            if (localPlugin.isPresent()) {
+                removeBtn.setVisible(true);
+                installBtn.setText("Mise à jour");
             }
         }
-        
     }
     
 }

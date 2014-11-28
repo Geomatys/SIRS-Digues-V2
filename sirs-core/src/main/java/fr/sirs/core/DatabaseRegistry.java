@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.ReplicationCommand;
-import org.ektorp.ReplicationStatus;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -37,7 +36,6 @@ public class DatabaseRegistry {
 		CouchDbInstance dbInstance = new StdCouchDbInstance(client);
 
 		List<String> res = new ArrayList<>();
-
 		for (String db : dbInstance.getAllDatabases()) {
 			if (db.startsWith("_"))
 				continue;
@@ -50,7 +48,6 @@ public class DatabaseRegistry {
 			} catch (Exception e) {
 				SirsCore.LOGGER.log(Level.WARNING, e.getMessage(), e);
 			}
-
 		}
 		return res;
 	}

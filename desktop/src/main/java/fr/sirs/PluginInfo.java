@@ -1,5 +1,5 @@
 
-package fr.sirs.maj;
+package fr.sirs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,7 +13,16 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- * Description d'un plugin.
+ * Description d'un plugin. Les informations requises sont le nom et la version 
+ * du plugin (séparée en deux variables : version majeure et mineure). Une 
+ * description peut également apparaître pour faciliter l'identification du 
+ * module. 
+ * Une URL de téléchargement peut (et c'est fortement recommandé) être donnée
+ * pour spécifier où récupérer le plugin. Par défaut, une URL de téléchargement
+ * est construite. Elle dénote un chemin sur le serveur de plugins courant. Elle
+ * pointe sur le fichier suivant : 
+ * 
+ * urlServeur/nomPlugin_versionMajeure-versionMineure.zip
  * 
  * @author Johann Sorel (Geomatys)
  */
@@ -24,6 +33,7 @@ public class PluginInfo {
         
     private final StringProperty name = new SimpleStringProperty();
     private final StringProperty description = new SimpleStringProperty();
+    private final StringProperty downloadURL = new SimpleStringProperty();
     private final IntegerProperty versionMajor = new SimpleIntegerProperty(1);
     private final IntegerProperty versionMinor = new SimpleIntegerProperty(0);
 
@@ -34,11 +44,11 @@ public class PluginInfo {
        return name;
     }
     
-    public String getName(){
+    public String getName() {
         return this.name.get();
     }
     
-    public void setName(String name){
+    public void setName(String name) {
         this.name.set(name);
     }  
     
@@ -77,9 +87,17 @@ public class PluginInfo {
     public void setVersionMinor(int version){
         this.versionMinor.set(version);
     }  
+
+    public String getDownloadURL() {
+        return downloadURL.get();
+    }
+    
+    public void setDownloadURL(final String dlUrl) {
+        downloadURL.setValue(dlUrl);
+    }
     
     @JsonIgnore
-    public boolean isOlderOrSame(PluginInfo info){
+    public boolean isOlderOrSame(PluginInfo info) {
         if (info == null || !name.equals(info.name)) return false;
         return getVersionMajor() < info.getVersionMajor() ||                        
                 (getVersionMajor() == info.getVersionMajor() &&
@@ -87,8 +105,12 @@ public class PluginInfo {
     }
     
     @JsonIgnore
-    public URL bundleURL(URL serverURL) throws MalformedURLException{
-        return new URL(serverURL.toString() +"/"+name+"_"+getVersionMajor()+"-"+getVersionMinor()+".zip");
+    public URL bundleURL(URL serverURL) throws MalformedURLException {
+        String dlURL = downloadURL.get();
+        if (dlURL == null || dlURL.isEmpty()) {
+            dlURL = serverURL.toString() +"/"+name.get()+"_"+getVersionMajor()+"-"+getVersionMinor()+".zip";
+        }
+        return new URL(dlURL);
     }
 
     @Override
@@ -107,7 +129,10 @@ public class PluginInfo {
             return false;
         }
         final PluginInfo other = (PluginInfo) obj;
-        return Objects.equals(this.name, other.name);
+        return this.getName().equalsIgnoreCase(other.getName()) 
+                && this.getVersionMajor() == other.getVersionMajor()
+                && this.getVersionMinor() == other.getVersionMinor();
+        
     }
     
 }

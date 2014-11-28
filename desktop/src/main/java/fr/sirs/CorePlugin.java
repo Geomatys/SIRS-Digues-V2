@@ -84,6 +84,11 @@ public class CorePlugin extends Plugin {
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     
+    /**
+     * Plugin correspondant au desktop et au launcher.
+     */
+    public static final String NAME = "core";
+    
     private static final Class[] VALID_CLASSES = new Class[]{
         byte.class,
         short.class,
@@ -112,6 +117,7 @@ public class CorePlugin extends Plugin {
     };
     
     public CorePlugin() {
+        name = NAME;
     }
 
     @Override

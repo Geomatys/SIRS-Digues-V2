@@ -1,16 +1,14 @@
 
 package fr.sirs.maj;
 
+import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Stream;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 
 /**
  *
@@ -21,14 +19,13 @@ import javafx.collections.ObservableList;
 @SuppressWarnings("serial")
 public class PluginList {
     
-    public ObservableList<PluginInfo> plugins = FXCollections.observableArrayList();
+    public final SortedList<PluginInfo> plugins = new SortedList(
+            FXCollections.observableArrayList(), new PluginInfoComparator());
 
-    public PluginList() {
-
-    }
+    public PluginList() {}
 
     @JsonManagedReference("parent")
-    public List<PluginInfo> getPlugins() {
+    public SortedList<PluginInfo> getPlugins() {
         return this.plugins;
     }
 
@@ -37,18 +34,7 @@ public class PluginList {
         this.plugins.addAll(plugins);
     }
 
-    public PluginInfo getPluginInfo(String name) {
-        for (PluginInfo info : plugins) {
-            if (Objects.equals(name, info.nameProperty().get())) {
-                return info;
-            }
-        }
-        return null;
+    public Stream<PluginInfo> getPluginInfo(String name) {
+        return plugins.stream().filter((PluginInfo p) -> {return p.getName().equalsIgnoreCase(name);});
     }
-
-    public static PluginList read(URL url) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(url, PluginList.class);
-    }
-    
 }

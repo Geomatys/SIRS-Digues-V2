@@ -19,7 +19,7 @@ import org.geotoolkit.font.IconBuilder;
  * 
  * @author Johann Sorel
  */
-public final class SIRS extends SirsCore{
+public final class SIRS extends SirsCore {
     
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.BLACK),null);
