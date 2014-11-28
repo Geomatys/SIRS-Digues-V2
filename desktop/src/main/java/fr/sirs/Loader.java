@@ -194,6 +194,7 @@ public class Loader extends Application {
         @Override
         protected Object call() throws InterruptedException {
             try {
+                updateMessage("Recherche des plugins");
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
                 final int total = 6 + plugins.length;
