@@ -24,8 +24,9 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
+import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -53,11 +54,11 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementStructureImporter extends GenericStructureImporter<Objet> {
+public class ElementStructureImporter extends GenericObjetImporter<Objet> {
     
     private final TypeElementStructureImporter typeElementStructureImporter;
     
-    private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
+    private final List<GenericObjetImporter> structureImporters = new ArrayList<>();
     private final SysEvtCreteImporter creteImporter;
     private final SysEvtPiedDeDigueImporter piedDigueImporter;
     private final SysEvtTalusDigueImporter talusDigueImporter;
@@ -74,6 +75,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
@@ -82,57 +84,64 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase, couchDbConnector);
         creteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(creteImporter);
         piedDigueImporter = new SysEvtPiedDeDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter,
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(piedDigueImporter);
         talusDigueImporter = new SysEvtTalusDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter,
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(talusDigueImporter);
         sommetRisbermeImporter = new SysEvtSommetRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(sommetRisbermeImporter);
         talusRisbermeImporter = new SysEvtTalusRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(talusRisbermeImporter);
         fondationImporter = new  SysEvtFondationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(fondationImporter);
         epiImporter = new SysEvtEpisImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
-                typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         structureImporters.add(epiImporter);
         ouvrageRevancheImporter = new SysEvtOuvrageRevancheImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(ouvrageRevancheImporter);
     }
 
@@ -258,7 +267,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
-        for (final GenericStructureImporter gsi : structureImporters){
+        for (final GenericObjetImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getStructures();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
@@ -456,7 +465,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         
         
         // Structures au sens strict
-        for (final GenericStructureImporter gsi : structureImporters) {
+        for (final GenericObjetImporter gsi : structureImporters) {
             final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
 
             if (objetsByTronconId != null) {

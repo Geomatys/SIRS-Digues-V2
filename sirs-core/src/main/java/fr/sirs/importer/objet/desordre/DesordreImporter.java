@@ -8,7 +8,6 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -22,7 +21,9 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -49,7 +50,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DesordreImporter extends GenericStructureImporter<Desordre> {
+public class DesordreImporter extends GenericObjetImporter<Desordre> {
     
     private final TypeDesordreImporter typeDesordreImporter;
     private final SysEvtDesordreImporter subDesordreImporter;
@@ -59,6 +60,8 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final ElementStructureImporter structureImporter, 
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
@@ -67,9 +70,10 @@ public class DesordreImporter extends GenericStructureImporter<Desordre> {
             final TypeNatureImporter typeNatureImporter, 
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, 
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
                 couchDbConnector);
         this.subDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 

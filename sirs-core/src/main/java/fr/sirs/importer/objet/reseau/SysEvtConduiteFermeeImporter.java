@@ -22,8 +22,9 @@ import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -51,7 +52,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrauliqueFerme> {
+class SysEvtConduiteFermeeImporter extends GenericObjetImporter<ReseauHydrauliqueFerme> {
     
     private final EcoulementImporter typeEcoulementImporter;
     private final ImplantationImporter typeImplantationImporter;
@@ -64,6 +65,7 @@ class SysEvtConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrau
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
@@ -76,8 +78,9 @@ class SysEvtConduiteFermeeImporter extends GenericStructureImporter<ReseauHydrau
             final UtilisationConduiteImporter typeUtilisationConduiteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         this.typeEcoulementImporter = typeEcoulementImporter;
         this.typeImplantationImporter = typeImplantationImporter;
         this.typeConduiteFermeeImporter = typeConduiteFermeeImporter;

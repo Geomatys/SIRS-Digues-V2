@@ -5,6 +5,7 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
@@ -18,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public abstract class GenericStructureImporter<T extends Objet> extends GenericImporter {
+public abstract class GenericObjetImporter<T extends Objet> extends GenericImporter {
 
     protected Map<Integer, T> structures = null;
     protected Map<Integer, List<T>> structuresByTronconId = null;
@@ -27,6 +28,7 @@ public abstract class GenericStructureImporter<T extends Objet> extends GenericI
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     protected OrganismeImporter organismeImporter;
+    protected IntervenantImporter intervenantImporter;
     
     protected SourceInfoImporter typeSourceImporter;
     protected TypeCoteImporter typeCoteImporter;
@@ -35,17 +37,18 @@ public abstract class GenericStructureImporter<T extends Objet> extends GenericI
     protected TypeNatureImporter typeNatureImporter;
     protected TypeFonctionImporter typeFonctionImporter;
     
-    private GenericStructureImporter(final Database accessDatabase, 
+    private GenericObjetImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    public GenericStructureImporter(final Database accessDatabase,
+    public GenericObjetImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
@@ -57,6 +60,7 @@ public abstract class GenericStructureImporter<T extends Objet> extends GenericI
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
         this.organismeImporter = organismeImporter;
+        this.intervenantImporter = intervenantImporter;
         this.typeSourceImporter = typeSourceImporter;
         this.typeCoteImporter = typeCoteImporter;
         this.typePositionImporter = typePositionImporter;

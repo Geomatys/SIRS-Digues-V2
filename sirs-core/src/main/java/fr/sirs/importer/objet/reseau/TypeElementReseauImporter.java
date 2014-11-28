@@ -2,31 +2,32 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeElementReseauImporter extends GenericImporter {
-
-    private Map<Integer, Class> types = null;
+class TypeElementReseauImporter extends GenericTypeImporter<Class> {
 
     TypeElementReseauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -40,19 +41,6 @@ class TypeElementReseauImporter extends GenericImporter {
 //        ID_TYPE_OBJET_CARTO,
 //        DATE_DERNIERE_MAJ
     };
-
-    /**
-     *
-     * @return A map containing all the database types of Geometry elements
-     * (classes) referenced by their internal ID.
-     * @throws IOException
-     */
-    public Map<Integer, Class> getTypes() throws IOException {
-        if (types == null) {
-            compute();
-        }
-        return types;
-    }
 
     @Override
     public List<String> getUsedColumns() {
@@ -103,9 +91,18 @@ class TypeElementReseauImporter extends GenericImporter {
                     case SYS_EVT_VOIE_SUR_DIGUE:
                         classe = VoieDigue.class;
                         break;
-//                    case 3:
-//                        classe = Distance.class;
-//                        break;
+                    case SYS_EVT_OUVRAGE_VOIRIE:
+                        classe = OuvrageVoirie.class;
+                        break;
+                    case SYS_EVT_RESEAU_EAU:
+                        classe = ReseauHydroCielOuvert.class;
+                        break;
+                    case SYS_EVT_OUVRAGE_PARTICULIER:
+                        classe = OuvrageParticulier.class;
+                        break;
+                    case SYS_EVT_OUVERTURE_BATARDABLE:
+                        classe = OuvertureBatardable.class;
+                        break;
                     default:
                         classe = null;
                 }

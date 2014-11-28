@@ -28,31 +28,38 @@ import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefImplantationRepository;
 import fr.sirs.core.component.RefLargeurFrancBordRepository;
 import fr.sirs.core.component.RefMateriauRepository;
+import fr.sirs.core.component.RefMoyenManipBatardeauxRepository;
+import fr.sirs.core.component.RefNatureBatardeauxRepository;
 import fr.sirs.core.component.RefNatureRepository;
 import fr.sirs.core.component.RefOrientationOuvrageRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
 import fr.sirs.core.component.RefOuvrageFranchissementRepository;
 import fr.sirs.core.component.RefOuvrageHydrauliqueAssocieRepository;
+import fr.sirs.core.component.RefOuvrageParticulierRepository;
 import fr.sirs.core.component.RefOuvrageTelecomEnergieRepository;
+import fr.sirs.core.component.RefOuvrageVoirieRepository;
 import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefProfilFrancBordRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
+import fr.sirs.core.component.RefReseauHydroCielOuvertRepository;
 import fr.sirs.core.component.RefReseauTelecomEnergieRepository;
 import fr.sirs.core.component.RefRevetementRepository;
 import fr.sirs.core.component.RefRiveRepository;
+import fr.sirs.core.component.RefSeuilRepository;
 import fr.sirs.core.component.RefSourceRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
 import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.RefTypeDocumentRepository;
+import fr.sirs.core.component.RefTypeGlissiereRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.RefUsageVoieRepository;
 import fr.sirs.core.component.RefUtilisationConduiteRepository;
+import fr.sirs.core.component.RefVoieDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.core.model.RefRevetement;
+import fr.sirs.core.model.RefReseauHydroCielOuvert;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
@@ -144,6 +151,14 @@ public class DbImporter {
     private final RefRevetementRepository refRevetementRepository;
     private final RefOrientationOuvrageRepository refOrientationOuvrageRepository;
     private final RefOuvrageFranchissementRepository refOuvrageFranchissementRepository;
+    private final RefVoieDigueRepository refVoieDigueRepository;
+    private final RefOuvrageVoirieRepository refOuvrageVoirieRepository;
+    private final RefReseauHydroCielOuvertRepository refReseauHydroCielOuvertRepository;
+    private final RefOuvrageParticulierRepository refOuvrageParticulierRepository;
+    private final RefNatureBatardeauxRepository refNatureBatardeauxRepository;
+    private final RefMoyenManipBatardeauxRepository refMoyenManipBatardeauxRepository;
+    private final RefSeuilRepository refSeuilRepository;
+    private final RefTypeGlissiereRepository refTypeGlissiereRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -348,11 +363,11 @@ public class DbImporter {
 //     SYS_EVT_LIGNE_EAU,
      SYS_EVT_MARCHE, // A FAIRE
 //     SYS_EVT_MONTEE_DES_EAUX_HYDRO,
-//     SYS_EVT_OUVERTURE_BATARDABLE,
-//     SYS_EVT_OUVRAGE_PARTICULIER,
+     SYS_EVT_OUVERTURE_BATARDABLE,
+     SYS_EVT_OUVRAGE_PARTICULIER,
      SYS_EVT_OUVRAGE_REVANCHE,
      SYS_EVT_OUVRAGE_TELECOMMUNICATION,
-//     SYS_EVT_OUVRAGE_VOIRIE,
+     SYS_EVT_OUVRAGE_VOIRIE,
 //     SYS_EVT_PHOTO_LOCALISEE_EN_PR,
      SYS_EVT_PIED_DE_DIGUE,
 //     SYS_EVT_PIED_FRONT_FRANC_BORD,
@@ -364,7 +379,7 @@ public class DbImporter {
      SYS_EVT_PROFIL_FRONT_FRANC_BORD,
 //     SYS_EVT_PROPRIETAIRE_TRONCON,
      SYS_EVT_RAPPORT_ETUDES,
-//     SYS_EVT_RESEAU_EAU,
+     SYS_EVT_RESEAU_EAU,
      SYS_EVT_RESEAU_TELECOMMUNICATION,
 //     SYS_EVT_SITUATION_FONCIERE,
      SYS_EVT_SOMMET_RISBERME,
@@ -439,12 +454,12 @@ public class DbImporter {
 //     TYPE_FONCTION_MO,
      TYPE_FREQUENCE_EVENEMENT_HYDRAU,
 //     TYPE_GENERAL_DOCUMENT,
-//     TYPE_GLISSIERE,
+     TYPE_GLISSIERE,
      TYPE_LARGEUR_FRANC_BORD,
      TYPE_MATERIAU,
-//     TYPE_MOYEN_MANIP_BATARDEAUX,
+     TYPE_MOYEN_MANIP_BATARDEAUX,
      TYPE_NATURE,
-//     TYPE_NATURE_BATARDEAUX,
+     TYPE_NATURE_BATARDEAUX,
 //     TYPE_ORGANISME,
      TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
 //     TYPE_ORIENTATION_VENT,
@@ -452,9 +467,9 @@ public class DbImporter {
      TYPE_ORIGINE_PROFIL_EN_TRAVERS,
      TYPE_OUVRAGE_FRANCHISSEMENT,
      TYPE_OUVRAGE_HYDRAU_ASSOCIE,
-//     TYPE_OUVRAGE_PARTICULIER,
+     TYPE_OUVRAGE_PARTICULIER,
      TYPE_OUVRAGE_TELECOM_NRJ,
-//     TYPE_OUVRAGE_VOIRIE,
+     TYPE_OUVRAGE_VOIRIE,
      TYPE_POSITION,
      TYPE_POSITION_PROFIL_EN_LONG_SUR_DIGUE,
 //     TYPE_POSITION_SUR_DIGUE,
@@ -464,12 +479,12 @@ public class DbImporter {
 //     TYPE_PROPRIETAIRE,
      TYPE_RAPPORT_ETUDE,
 //     TYPE_REF_HEAU,
-//     TYPE_RESEAU_EAU,
+     TYPE_RESEAU_EAU,
      TYPE_RESEAU_TELECOMMUNIC,
      TYPE_REVETEMENT,
      TYPE_RIVE,
 //     TYPE_SERVITUDE,
-//     TYPE_SEUIL,
+     TYPE_SEUIL,
 //     TYPE_SIGNATAIRE,
 //     TYPE_SITUATION_FONCIERE,
      TYPE_SYSTEME_RELEVE_PROFIL,
@@ -611,6 +626,22 @@ public class DbImporter {
         repositories.add(refOrientationOuvrageRepository);
         refOuvrageFranchissementRepository = new RefOuvrageFranchissementRepository(couchDbConnector);
         repositories.add(refOuvrageFranchissementRepository);
+        refVoieDigueRepository = new RefVoieDigueRepository(couchDbConnector);
+        repositories.add(refVoieDigueRepository);
+        refOuvrageVoirieRepository = new RefOuvrageVoirieRepository(couchDbConnector);
+        repositories.add(refOuvrageVoirieRepository);
+        refReseauHydroCielOuvertRepository = new RefReseauHydroCielOuvertRepository(couchDbConnector);
+        repositories.add(refReseauHydroCielOuvertRepository);
+        refOuvrageParticulierRepository = new RefOuvrageParticulierRepository(couchDbConnector);
+        repositories.add(refOuvrageParticulierRepository);
+        refNatureBatardeauxRepository = new RefNatureBatardeauxRepository(couchDbConnector);
+        repositories.add(refNatureBatardeauxRepository);
+        refMoyenManipBatardeauxRepository = new RefMoyenManipBatardeauxRepository(couchDbConnector);
+        repositories.add(refMoyenManipBatardeauxRepository);
+        refSeuilRepository = new RefSeuilRepository(couchDbConnector);
+        repositories.add(refSeuilRepository);
+        refTypeGlissiereRepository = new RefTypeGlissiereRepository(couchDbConnector);
+        repositories.add(refTypeGlissiereRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -664,7 +695,7 @@ public class DbImporter {
                 systemeReperageImporter, tronconGestionDigueGestionnaireImporter, 
                 tronconGestionDigueGardienImporter,
                 tronconGestionDigueProprietaireImporter, 
-                borneDigueImporter, organismeImporter, 
+                borneDigueImporter, organismeImporter, intervenantImporter, 
                 typeSourceImporter, typePositionImporter,
                 typeCoteImporter, typeMateriauImporter, typeNatureImporter,
                 typeFonctionImporter);
@@ -766,7 +797,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_OUVERTURE_BATARDABLE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -782,7 +813,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_OUVERTURE_BATARDABLE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -797,7 +828,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_VOIE_SUR_DIGUE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_OUVERTURE_BATARDABLE.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");
@@ -806,7 +837,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-            importer.importation();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

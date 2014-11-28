@@ -1,4 +1,4 @@
-package fr.sirs.importer.objet.structure;
+package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -6,17 +6,18 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.GenericObjetImporter;
@@ -47,9 +48,9 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
+class SysEvtOuvertureBatardableImporter extends GenericObjetImporter<OuvertureBatardable> {
 
-    SysEvtEpisImporter(final Database accessDatabase,
+    SysEvtOuvertureBatardableImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
@@ -70,33 +71,32 @@ class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
     }
     
     private enum Columns {
-        ID_ELEMENT_STRUCTURE,
-//        id_nom_element, // Redondant avec ID_ELEMENT_STRUCTURE
-//        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_ELEMENT_STRUCTURE, // Redondant avec le type de données
-//        DECALAGE_DEFAUT, // Affichage
-//        DECALAGE, // Affichage
-//        LIBELLE_SOURCE, // Redondant avec l'importation des sources
-//        LIBELLE_TYPE_COTE, // Redondant avec l'importation des types de côtés
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
-//        NOM_BORNE_DEBUT, // Redondant avec l'importatoin des bornes
-//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        LIBELLE_TYPE_MATERIAU, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
-//        LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
-//        LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
-//        LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
-//        LIBELLE_TYPE_OUVRAGE_PARTICULIER, 
+        ID_ELEMENT_RESEAU,
+//        id_nom_element,
+//        ID_SOUS_GROUPE_DONNEES,
+//        LIBELLE_TYPE_ELEMENT_RESEAU,
+//        DECALAGE_DEFAUT,
+//        DECALAGE,
+//        LIBELLE_SOURCE,
+//        LIBELLE_TYPE_COTE,
+//        LIBELLE_SYSTEME_REP,
+//        NOM_BORNE_DEBUT,
+//        NOM_BORNE_FIN,
+//        LIBELLE_ECOULEMENT,
+//        LIBELLE_IMPLANTATION,
+//        LIBELLE_UTILISATION_CONDUITE,
+//        LIBELLE_TYPE_CONDUITE_FERMEE,
+//        LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE,
+//        LIBELLE_TYPE_RESEAU_COMMUNICATION,
+//        LIBELLE_TYPE_VOIE_SUR_DIGUE,
+//        NOM_OUVRAGE_VOIRIE,
 //        LIBELLE_TYPE_POSITION,
-//        RAISON_SOCIALE_ORG_PROPRIO, // Redondant avec l'importation des organismes
-//        RAISON_SOCIALE_ORG_GESTION, // Redondant avec l'importation des organismes
-//        INTERV_PROPRIO, 
-//        INTERV_GARDIEN,
-//        LIBELLE_TYPE_COMPOSITION,
-//        LIBELLE_TYPE_VEGETATION,
-//        ID_TYPE_ELEMENT_STRUCTURE, // Redondant avec le type de données
+//        LIBELLE_TYPE_OUVRAGE_VOIRIE,
+//        LIBELLE_TYPE_RESEAU_EAU,
+//        LIBELLE_TYPE_REVETEMENT,
+//        LIBELLE_TYPE_USAGE_VOIE,
+        NOM,
+//        ID_TYPE_ELEMENT_RESEAU,
         ID_TYPE_COTE,
         ID_SOURCE,
         ID_TRONCON_GESTION,
@@ -116,53 +116,41 @@ class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_COUCHE, // Pas dans le nouveau modèle
-//        ID_TYPE_MATERIAU, // Pas dans le nouveau modèle
-//        ID_TYPE_NATURE, // Pas dans le nouveau modèle
-//        ID_TYPE_FONCTION, // Pas dans le nouveau modèle
-//        EPAISSEUR, // Pas dans le nouveau modèle
-//        TALUS_INTERCEPTE_CRETE,
-//        ID_TYPE_NATURE_HAUT,
-//        ID_TYPE_MATERIAU_HAUT,
-//        ID_TYPE_MATERIAU_BAS,
-//        ID_TYPE_NATURE_BAS,
-//        LONG_RAMP_HAUT,
-//        LONG_RAMP_BAS,
-//        PENTE_INTERIEURE,
-//        ID_TYPE_OUVRAGE_PARTICULIER,
+//        N_SECTEUR,
+//        ID_ECOULEMENT,
+//        ID_IMPLANTATION,
+//        ID_UTILISATION_CONDUITE,
+//        ID_TYPE_CONDUITE_FERMEE,
+//        AUTORISE,
+//        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
+//        ID_TYPE_RESEAU_COMMUNICATION,
+//        ID_OUVRAGE_COMM_NRJ,
+//        ID_TYPE_VOIE_SUR_DIGUE,
+//        ID_OUVRAGE_VOIRIE,
+//        ID_TYPE_REVETEMENT,
+//        ID_TYPE_USAGE_VOIE,
         ID_TYPE_POSITION,
-//        ID_ORG_PROPRIO,
-//        ID_ORG_GESTION,
-//        ID_INTERV_PROPRIO,
-//        ID_INTERV_GARDIEN,
-//        DATE_DEBUT_ORGPROPRIO,
-//        DATE_FIN_ORGPROPRIO,
-//        DATE_DEBUT_GESTION,
-//        DATE_FIN_GESTION,
-//        DATE_DEBUT_INTERVPROPRIO,
-//        DATE_FIN_INTERVPROPRIO,
-//        ID_TYPE_COMPOSITION,
-//        DISTANCE_TRONCON,
-//        LONGUEUR,
-//        DATE_DEBUT_GARDIEN,
-//        DATE_FIN_GARDIEN,
-//        LONGUEUR_PERPENDICULAIRE,
-//        LONGUEUR_PARALLELE,
-//        COTE_AXE,
-//        ID_TYPE_VEGETATION,
-//        HAUTEUR,
+        LARGEUR,
+//        ID_TYPE_OUVRAGE_VOIRIE,
+        HAUTEUR,
 //        DIAMETRE,
-//        DENSITE,
-//        EPAISSEUR_Y11,
-//        EPAISSEUR_Y12,
-//        EPAISSEUR_Y21,
-//        EPAISSEUR_Y22,
+//        ID_TYPE_RESEAU_EAU,
+//        ID_TYPE_NATURE,
+//        LIBELLE_TYPE_NATURE,
+//        ID_TYPE_NATURE_HAUT,
+//        LIBELLE_TYPE_NATURE_HAUT,
+//        ID_TYPE_NATURE_BAS,
+//        LIBELLE_TYPE_NATURE_BAS,
+//        ID_TYPE_REVETEMENT_HAUT,
+//        LIBELLE_TYPE_REVETEMENT_HAUT,
+//        ID_TYPE_REVETEMENT_BAS,
+//        LIBELLE_TYPE_REVETEMENT_BAS,
 //        ID_AUTO
     };
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_EPIS.toString();
+        return DbImporter.TableName.SYS_EVT_OUVERTURE_BATARDABLE.toString();
     }
 
     @Override
@@ -174,45 +162,47 @@ class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Epi epi = new Epi();
+            final OuvertureBatardable ouverture = new OuvertureBatardable();
+            
+            ouverture.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                epi.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+                ouverture.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                epi.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+                ouverture.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
             final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (troncon.getId() != null) {
-                epi.setTroncon(troncon.getId());
+                ouverture.setTroncon(troncon.getId());
             } else {
                 throw new AccessDbImporterException("Le tronçon "
                         + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
             }
             
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                epi.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                ouverture.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                epi.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                ouverture.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                epi.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                ouverture.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                epi.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                ouverture.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -223,71 +213,78 @@ class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
                 try {
 
                     if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        epi.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        ouverture.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_DEBUT.toString()),
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtEpisImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtOuvertureBatardableImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
 
                     if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        epi.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        ouverture.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_FIN.toString()),
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtEpisImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtOuvertureBatardableImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtEpisImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvertureBatardableImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                epi.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+                ouverture.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                epi.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                ouverture.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            epi.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+            ouverture.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                epi.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                ouverture.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                epi.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
+                    ouverture.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                }
             }
             
-            epi.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            ouverture.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                epi.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+                ouverture.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            epi.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                epi.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
-            
+            ouverture.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouverture.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
+            
+            if (row.getDouble(Columns.LARGEUR.toString()) != null) {
+                ouverture.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());
+            }
+            
+            if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
+                ouverture.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());
+            }
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), epi);
+            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), ouverture);
 
             // Set the list ByTronconId
-            List<Epi> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<OuvertureBatardable> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
                 structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
-            listByTronconId.add(epi);
+            listByTronconId.add(ouverture);
         }
     }
 

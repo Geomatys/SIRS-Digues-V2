@@ -15,8 +15,9 @@ import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -35,11 +36,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
+public class ElementGeometrieImporter extends GenericObjetImporter<Objet> {
 
     private final TypeElementGeometryImporter typeElementGeometryImporter;
     
-    private final List<GenericStructureImporter> structureImporters = new ArrayList<>();
+    private final List<GenericObjetImporter> structureImporters = new ArrayList<>();
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
     private final SysEvtLargeurFrancBordImporter largeurFrancBordImporter;
     private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
@@ -52,6 +53,7 @@ public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
@@ -59,28 +61,29 @@ public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         typeElementGeometryImporter = new TypeElementGeometryImporter(
                 accessDatabase, couchDbConnector);
         typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
                 accessDatabase, couchDbConnector);
-        largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase,
+                couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                typeLargeurFrancBordImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter, typeLargeurFrancBordImporter);
         structureImporters.add(largeurFrancBordImporter);
         typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
                 accessDatabase, couchDbConnector);
         profilFrontFrancBordImporter = new SysEvtProfilFrontFrancBordImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter, 
-                typeProfilFrontFrancBordImporter);
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter, typeProfilFrontFrancBordImporter);
         structureImporters.add(profilFrontFrancBordImporter);
     }
 
@@ -135,7 +138,7 @@ public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
-        for (final GenericStructureImporter gsi : structureImporters){
+        for (final GenericObjetImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getStructures();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
@@ -333,7 +336,7 @@ public class ElementGeometrieImporter extends GenericStructureImporter<Objet> {
         
         
         // Structures au sens strict
-        for (final GenericStructureImporter gsi : structureImporters) {
+        for (final GenericObjetImporter gsi : structureImporters) {
             final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
 
             if (objetsByTronconId != null) {

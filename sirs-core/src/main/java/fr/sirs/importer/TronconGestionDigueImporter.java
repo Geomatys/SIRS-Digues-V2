@@ -9,7 +9,6 @@ import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.ContactTroncon;
@@ -91,6 +90,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
+            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
@@ -113,24 +113,25 @@ public class TronconGestionDigueImporter extends GenericImporter {
         // Structure and Desordre importers need TronconGestionDigue importer itself.
         this.structureImporter = new ElementStructureImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter, typeFonctionImporter);
-        this.desordreImporter = new DesordreImporter(accessDatabase, 
-                couchDbConnector, this, systemeReperageImporter, 
-                borneDigueImporter, structureImporter,
+                borneDigueImporter, organismeImporter, intervenantImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+        this.desordreImporter = new DesordreImporter(accessDatabase, 
+                couchDbConnector, this, systemeReperageImporter, 
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                structureImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         this.geometryImporter = new ElementGeometrieImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
-                typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.reseauImporter = new ElementReseauImporter(accessDatabase, 
                 couchDbConnector, this, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
-                typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         
         this.desordreStructureImporter = new DesordreStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter, 

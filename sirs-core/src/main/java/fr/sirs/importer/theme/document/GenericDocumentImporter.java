@@ -17,11 +17,15 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  */
 abstract class GenericDocumentImporter extends GenericImporter {
+    
     protected Map<Integer, Document> documents = null;
+    
     protected DocumentRepository documentRepository;
+    
     protected BorneDigueImporter borneDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
+    
     protected boolean computed=false;
 
     private GenericDocumentImporter(final Database accessDatabase, 

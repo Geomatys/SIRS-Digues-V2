@@ -21,7 +21,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.objet.GenericStructureImporter;
+import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -47,7 +47,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
+class SysEvtDesordreImporter extends GenericObjetImporter<Desordre> {
     
     private final TypeDesordreImporter typeDesordreImporter;
 
@@ -65,7 +65,7 @@ class SysEvtDesordreImporter extends GenericStructureImporter<Desordre> {
             final TypeNatureImporter typeNatureImporter, 
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, 
+                systemeReperageImporter, borneDigueImporter, null, null,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         this.typeDesordreImporter = typeDesordreImporter;
