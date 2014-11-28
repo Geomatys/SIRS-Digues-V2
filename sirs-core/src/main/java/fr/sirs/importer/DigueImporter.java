@@ -34,7 +34,7 @@ public class DigueImporter extends GenericImporter {
         this.digueRepository = digueRepository;
     }
     
-    private enum DigueColumns {
+    private enum Columns {
         ID_DIGUE, 
         LIBELLE_DIGUE, 
         COMMENTAIRE_DIGUE, 
@@ -53,9 +53,9 @@ public class DigueImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for(DigueColumns c : DigueColumns.values())
+        for(Columns c : Columns.values())
             columns.add(c.toString());
         return columns;
     }
@@ -74,15 +74,15 @@ public class DigueImporter extends GenericImporter {
             final Row row = it.next();
             final Digue digue = new Digue();
 
-            digue.setLibelle(row.getString(DigueColumns.LIBELLE_DIGUE.toString()));
-            digue.setCommentaire(row.getString(DigueColumns.COMMENTAIRE_DIGUE.toString()));
-            if (row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                digue.setDateMaj(LocalDateTime.parse(row.getDate(DigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            digue.setLibelle(row.getString(Columns.LIBELLE_DIGUE.toString()));
+            digue.setCommentaire(row.getString(Columns.COMMENTAIRE_DIGUE.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                digue.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //digue.setId(String.valueOf(row.getInt(DigueColumns.ID.toString())));
-            digues.put(row.getInt(DigueColumns.ID_DIGUE.toString()), digue);
+            digues.put(row.getInt(Columns.ID_DIGUE.toString()), digue);
 
             // Register the digue to retrieve a CouchDb ID.
             digueRepository.add(digue);

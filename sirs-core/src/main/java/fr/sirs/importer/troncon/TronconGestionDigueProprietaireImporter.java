@@ -43,7 +43,7 @@ public class TronconGestionDigueProprietaireImporter extends GenericImporter {
         this.organismeImporter = organismeImporter;
     }
 
-    private enum TronconGestionDigueGardienColumns {
+    private enum Columns {
 //        ID_PROPRIETAIRE_TRONCON_GESTION, // Pas dans le nouveau modèle
         ID_TRONCON_GESTION,
 //        ID_TYPE_PROPRIETAIRE, // Pas dans le nouveau modèle
@@ -80,9 +80,9 @@ public class TronconGestionDigueProprietaireImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TronconGestionDigueGardienColumns c : TronconGestionDigueGardienColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -107,35 +107,35 @@ public class TronconGestionDigueProprietaireImporter extends GenericImporter {
             
             gardien.setTypeContact("Proprietaire");
 
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()) != null) {
-                gardien.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
+                gardien.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_FIN.toString()) != null) {
-                gardien.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN.toString()) != null) {
+                gardien.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gardien.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                gardien.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()));
+            List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
             listeGestions.add(gardien);
-            proprietairesByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
+            proprietairesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
-            if(row.getInt(TronconGestionDigueGardienColumns.ID_INTERVENANT.toString())!=null){
-                final Contact intervenant = intervenants.get(row.getInt(TronconGestionDigueGardienColumns.ID_INTERVENANT.toString()));
+            if(row.getInt(Columns.ID_INTERVENANT.toString())!=null){
+                final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
                 if (intervenant.getId() != null) {
                     gardien.setContactId(intervenant.getId());
                 } else {
                     throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
                 }
             }
-            else if (row.getInt(TronconGestionDigueGardienColumns.ID_ORGANISME.toString())!=null){
-                final Organisme organisme = organismes.get(row.getInt(TronconGestionDigueGardienColumns.ID_ORGANISME.toString()));
+            else if (row.getInt(Columns.ID_ORGANISME.toString())!=null){
+                final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
                 if(organisme.getId()!=null){
                     gardien.setOrganismeId(organisme.getId());
                 } else {

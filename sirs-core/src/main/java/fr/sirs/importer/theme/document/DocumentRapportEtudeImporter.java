@@ -55,7 +55,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         this.rapportEtudeImporter = rapportEtudeImporter;
     }
     
-    private enum DocumentRapportEtudeColumns {
+    private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondand avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -109,9 +109,9 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DocumentRapportEtudeColumns c : DocumentRapportEtudeColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -131,7 +131,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         while (it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
-            documents.put(row.getInt(DocumentRapportEtudeColumns.ID_DOC.toString()), document);
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -146,18 +146,18 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(DocumentRapportEtudeColumns.ID_DOC.toString()));
+            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(DocumentRapportEtudeColumns.ID_TRONCON_GESTION.toString())).getId());
+            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
             
-            document.setCommentaire(row.getString(DocumentRapportEtudeColumns.COMMENTAIRE.toString()));
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDouble(DocumentRapportEtudeColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(DocumentRapportEtudeColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
-            if (row.getDouble(DocumentRapportEtudeColumns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(DocumentRapportEtudeColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -167,10 +167,10 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentRapportEtudeColumns.X_DEBUT.toString()) != null && row.getDouble(DocumentRapportEtudeColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         document.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentRapportEtudeColumns.X_DEBUT.toString()),
-                                row.getDouble(DocumentRapportEtudeColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -178,10 +178,10 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentRapportEtudeColumns.X_FIN.toString()) != null && row.getDouble(DocumentRapportEtudeColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         document.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentRapportEtudeColumns.X_FIN.toString()),
-                                row.getDouble(DocumentRapportEtudeColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -190,35 +190,35 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
                 Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getDate(DocumentRapportEtudeColumns.DATE_DOCUMENT.toString()) != null) {
-                document.setDate_document(LocalDateTime.parse(row.getDate(DocumentRapportEtudeColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
+                document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            if(row.getInt(DocumentRapportEtudeColumns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(DocumentRapportEtudeColumns.ID_SYSTEME_REP.toString())).getId());
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if(row.getDouble(DocumentRapportEtudeColumns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentRapportEtudeColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
+                document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_debut_aval(row.getBoolean(DocumentRapportEtudeColumns.AMONT_AVAL_DEBUT.toString()));
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(DocumentRapportEtudeColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(DocumentRapportEtudeColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if(row.getDouble(DocumentRapportEtudeColumns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(DocumentRapportEtudeColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
+                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_fin_aval(row.getBoolean(DocumentRapportEtudeColumns.AMONT_AVAL_FIN.toString()));
+            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(DocumentRapportEtudeColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                document.setBorne_fin_distance(row.getDouble(DocumentRapportEtudeColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            document.setLibelle(row.getString(DocumentRapportEtudeColumns.NOM.toString()));
+            document.setLibelle(row.getString(Columns.NOM.toString()));
             
             
             
@@ -226,9 +226,9 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
             
             
             
-            if (row.getInt(DocumentRapportEtudeColumns.ID_RAPPORT_ETUDE.toString()) != null) {
-                if (rapports.get(row.getInt(DocumentRapportEtudeColumns.ID_RAPPORT_ETUDE.toString())) != null) {
-                    document.setConvention(rapports.get(row.getInt(DocumentRapportEtudeColumns.ID_RAPPORT_ETUDE.toString())).getId());
+            if (row.getInt(Columns.ID_RAPPORT_ETUDE.toString()) != null) {
+                if (rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())) != null) {
+                    document.setConvention(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
                 }
             }
             

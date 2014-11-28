@@ -36,7 +36,7 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
         this.typeFrequenceEvenementHydrauliqueImporter = typeFrequenceEvenementHydrauliqueImporter;
     }
     
-    private enum EvenementHydrauliqueColumns{
+    private enum Columns{
         ID_EVENEMENT_HYDRAU,
         NOM_EVENEMENT_HYDRAU,
         ID_TYPE_EVENEMENT_HYDRAU,
@@ -51,9 +51,9 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (EvenementHydrauliqueColumns c : EvenementHydrauliqueColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -68,41 +68,41 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         evenements = new HashMap<>();
         
-        final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypeEvenementHydraulique();
-        final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypeFrequenceEvenementHydraulique();
+        final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypes();
+        final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypes();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final EvenementHydraulique evenement = new EvenementHydraulique();
             
-            evenement.setLibelle(row.getString(EvenementHydrauliqueColumns.NOM_EVENEMENT_HYDRAU.toString()));
-            if(row.getDouble(EvenementHydrauliqueColumns.VITESSE_MOYENNE.toString())!=null){
-                evenement.setVitesse_moy(row.getDouble(EvenementHydrauliqueColumns.VITESSE_MOYENNE.toString()).floatValue());
+            evenement.setLibelle(row.getString(Columns.NOM_EVENEMENT_HYDRAU.toString()));
+            if(row.getDouble(Columns.VITESSE_MOYENNE.toString())!=null){
+                evenement.setVitesse_moy(row.getDouble(Columns.VITESSE_MOYENNE.toString()).floatValue());
             }
-            if(row.getDouble(EvenementHydrauliqueColumns.DEBIT_MOYEN.toString())!=null){
-                evenement.setDebit_moy(row.getDouble(EvenementHydrauliqueColumns.DEBIT_MOYEN.toString()).floatValue());
+            if(row.getDouble(Columns.DEBIT_MOYEN.toString())!=null){
+                evenement.setDebit_moy(row.getDouble(Columns.DEBIT_MOYEN.toString()).floatValue());
             }
-            evenement.setModeleur_hydraulique(row.getString(EvenementHydrauliqueColumns.NOM_MODELEUR_HYDRAU.toString()));
-            evenement.setCommentaire(row.getString(EvenementHydrauliqueColumns.COMMENTAIRE.toString()));
+            evenement.setModeleur_hydraulique(row.getString(Columns.NOM_MODELEUR_HYDRAU.toString()));
+            evenement.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDate(EvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                evenement.setDate_debut(LocalDateTime.parse(row.getDate(EvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                evenement.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(EvenementHydrauliqueColumns.DATE_DEBUT.toString()) != null) {
-                evenement.setDate_fin(LocalDateTime.parse(row.getDate(EvenementHydrauliqueColumns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
+                evenement.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(EvenementHydrauliqueColumns.DATE_FIN.toString()) != null) {
-                evenement.setDateMaj(LocalDateTime.parse(row.getDate(EvenementHydrauliqueColumns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN.toString()) != null) {
+                evenement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
             
-            if(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())!=null){
-                evenement.setTypeEvenementHydrauliqueId(types.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())!=null){
+                evenement.setTypeEvenementHydrauliqueId(types.get(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())).getId());
             }
-            if(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())!=null){
-                evenement.setFrequenceEvenementHydrauliqueId(frequences.get(row.getInt(EvenementHydrauliqueColumns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())!=null){
+                evenement.setFrequenceEvenementHydrauliqueId(frequences.get(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())).getId());
             }
-            evenements.put(row.getInt(EvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString()), evenement);
+            evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }
         couchDbConnector.executeBulk(evenements.values());
     }

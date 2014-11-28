@@ -54,7 +54,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementStructureImporter extends GenericObjetImporter<Objet> {
+public class ElementStructureImporter extends GenericStructureImporter<Objet> {
     
     private final TypeElementStructureImporter typeElementStructureImporter;
     
@@ -244,7 +244,7 @@ public class ElementStructureImporter extends GenericObjetImporter<Objet> {
     };
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());
@@ -312,7 +312,7 @@ public class ElementStructureImporter extends GenericObjetImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString());
-            final Class typeStructure = this.typeElementStructureImporter.getTypeElementStructure().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
+            final Class typeStructure = this.typeElementStructureImporter.getTypes().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
             final Objet structure;
             
             if(typeStructure==null){

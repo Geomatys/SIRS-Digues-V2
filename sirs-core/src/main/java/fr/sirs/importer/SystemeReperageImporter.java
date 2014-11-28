@@ -30,7 +30,7 @@ public class SystemeReperageImporter extends GenericImporter {
         this.systemeReperageRepository = systemeReperageRepository;
     }
     
-    private enum SystemeRepLineaireColumns {
+    private enum Columns {
         ID_SYSTEME_REP, 
         ID_TRONCON_GESTION, 
         LIBELLE_SYSTEME_REP,
@@ -61,9 +61,9 @@ public class SystemeReperageImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (SystemeRepLineaireColumns c : SystemeRepLineaireColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -86,22 +86,22 @@ public class SystemeReperageImporter extends GenericImporter {
             final Row row = it.next();
             final SystemeReperage systemeReperage = new SystemeReperage();
             
-            systemeReperage.setLibelle(row.getString(SystemeRepLineaireColumns.LIBELLE_SYSTEME_REP.toString()));
-            systemeReperage.setCommentaire(row.getString(SystemeRepLineaireColumns.COMMENTAIRE_SYSTEME_REP.toString()));
-            if (row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(SystemeRepLineaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            systemeReperage.setLibelle(row.getString(Columns.LIBELLE_SYSTEME_REP.toString()));
+            systemeReperage.setCommentaire(row.getString(Columns.COMMENTAIRE_SYSTEME_REP.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            systemesReperage.put(row.getInt(SystemeRepLineaireColumns.ID_SYSTEME_REP.toString()), systemeReperage);
+            systemesReperage.put(row.getInt(Columns.ID_SYSTEME_REP.toString()), systemeReperage);
             
             // Set the list ByTronconId
-            List<SystemeReperage> listByTronconId = systemesReperageByTronconId.get(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()));
+            List<SystemeReperage> listByTronconId = systemesReperageByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
 //                systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(systemeReperage);
-            systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            systemesReperageByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             
             // Register the systemeReperage to retrieve a CouchDb ID.
             systemes.add(systemeReperage);

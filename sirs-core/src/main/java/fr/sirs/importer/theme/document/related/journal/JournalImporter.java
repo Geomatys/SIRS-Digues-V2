@@ -25,7 +25,7 @@ class JournalImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
 
-    private enum JournalColumns {
+    private enum Columns {
         ID_JOURNAL,
         NOM_JOURNAL,
 //        DATE_JOURNAL, // ?
@@ -34,9 +34,9 @@ class JournalImporter extends GenericImporter {
     };
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (JournalColumns c : JournalColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -55,8 +55,8 @@ class JournalImporter extends GenericImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             
-            journalName.put(row.getInt(JournalColumns.ID_JOURNAL.toString()), 
-                    cleanNullString(row.getString(JournalColumns.NOM_JOURNAL.toString())));
+            journalName.put(row.getInt(Columns.ID_JOURNAL.toString()), 
+                    cleanNullString(row.getString(Columns.NOM_JOURNAL.toString())));
         }
     }
     

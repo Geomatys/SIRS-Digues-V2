@@ -21,7 +21,6 @@ import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -49,7 +48,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtReseauEauImporter extends GenericObjetImporter<ReseauHydroCielOuvert> {
+class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuvert> {
     
     private final TypeReseauEauImporter typeReseauEauImporter;
 
@@ -291,7 +290,7 @@ class SysEvtReseauEauImporter extends GenericObjetImporter<ReseauHydroCielOuvert
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

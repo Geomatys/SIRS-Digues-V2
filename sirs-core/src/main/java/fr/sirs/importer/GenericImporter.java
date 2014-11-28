@@ -85,7 +85,7 @@ public abstract class GenericImporter {
      * @return the list of the column names used by the importer. This method must
      * not return the whole columns from the table, but only those used by the importer.
      */
-    public abstract List<String> getUsedColumns();
+    protected abstract List<String> getUsedColumns();
     
     /**
      * 

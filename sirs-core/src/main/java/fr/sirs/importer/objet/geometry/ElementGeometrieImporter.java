@@ -36,7 +36,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementGeometrieImporter extends GenericObjetImporter<Objet> {
+public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 
     private final TypeElementGeometryImporter typeElementGeometryImporter;
     
@@ -115,7 +115,7 @@ public class ElementGeometrieImporter extends GenericObjetImporter<Objet> {
     };
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());
@@ -183,7 +183,7 @@ public class ElementGeometrieImporter extends GenericObjetImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString());
-            final Class typeStructure = this.typeElementGeometryImporter.getTypeElementStructure().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
+            final Class typeStructure = this.typeElementGeometryImporter.getTypes().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
             final Objet structure;
             
             if(typeStructure==null){

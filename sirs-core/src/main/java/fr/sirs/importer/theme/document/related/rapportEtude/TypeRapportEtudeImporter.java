@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefRapportEtude;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,37 +18,24 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeRapportEtudeImporter extends GenericImporter {
-
-    private Map<Integer, RefRapportEtude> typesRapportEtude = null;
+class TypeRapportEtudeImporter extends GenericTypeImporter<RefRapportEtude> {
 
     TypeRapportEtudeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    private enum TypeRapportEtudeColumns {
+    private enum Columns {
         ID_TYPE_RAPPORT_ETUDE,
         LIBELLE_TYPE_RAPPORT_ETUDE,
         ABREGE_TYPE_RAPPORT_ETUDE,
         DATE_DERNIERE_MAJ
     };
 
-    /**
-     * 
-     * @return A map containing all the database RefRapportEtude referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, RefRapportEtude> getTypeRapportEtude() throws IOException {
-        if(typesRapportEtude == null) compute();
-        return typesRapportEtude;
-    }
-
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeRapportEtudeColumns c : TypeRapportEtudeColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -61,20 +48,20 @@ class TypeRapportEtudeImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesRapportEtude = new HashMap<>();
+        types = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final RefRapportEtude typeRapportEtude = new RefRapportEtude();
             
-            typeRapportEtude.setLibelle(row.getString(TypeRapportEtudeColumns.LIBELLE_TYPE_RAPPORT_ETUDE.toString()));
-            typeRapportEtude.setAbrege(row.getString(TypeRapportEtudeColumns.ABREGE_TYPE_RAPPORT_ETUDE.toString()));
-            if (row.getDate(TypeRapportEtudeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeRapportEtude.setDateMaj(LocalDateTime.parse(row.getDate(TypeRapportEtudeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            typeRapportEtude.setLibelle(row.getString(Columns.LIBELLE_TYPE_RAPPORT_ETUDE.toString()));
+            typeRapportEtude.setAbrege(row.getString(Columns.ABREGE_TYPE_RAPPORT_ETUDE.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeRapportEtude.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesRapportEtude.put(row.getInt(String.valueOf(TypeRapportEtudeColumns.ID_TYPE_RAPPORT_ETUDE.toString())), typeRapportEtude);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RAPPORT_ETUDE.toString())), typeRapportEtude);
         }
-        couchDbConnector.executeBulk(typesRapportEtude.values());
+        couchDbConnector.executeBulk(types.values());
     }
 }

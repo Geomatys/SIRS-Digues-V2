@@ -27,7 +27,7 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
     
-    private enum TypeDocumentGrandeEchelleColumns {
+    private enum Columns {
         ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         LIBELLE_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         DATE_DERNIERE_MAJ
@@ -46,9 +46,9 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeDocumentGrandeEchelleColumns c : TypeDocumentGrandeEchelleColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -69,13 +69,13 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
             final Row row = it.next();
             final RefDocumentGrandeEchelle typeDocument = new RefDocumentGrandeEchelle();
             
-            typeDocument.setLibelle(row.getString(TypeDocumentGrandeEchelleColumns.LIBELLE_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString()));
+            typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString()));
             
-            if (row.getDate(TypeDocumentGrandeEchelleColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(TypeDocumentGrandeEchelleColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            typesDocument.put(row.getInt(String.valueOf(TypeDocumentGrandeEchelleColumns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
+            typesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
             
         }
         couchDbConnector.executeBulk(typesDocument.values());

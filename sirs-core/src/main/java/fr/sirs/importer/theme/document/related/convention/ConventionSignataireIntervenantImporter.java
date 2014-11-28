@@ -39,7 +39,7 @@ class ConventionSignataireIntervenantImporter extends GenericImporter {
         this.intervenantImporter = intervenantImporter;
     }
 
-    private enum ConventionSignataireIntervenantColumns {
+    private enum Columns {
         ID_CONVENTION,
         ID_INTERV_SIGNATAIRE,
         DATE_DERNIERE_MAJ
@@ -58,9 +58,9 @@ class ConventionSignataireIntervenantImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ConventionSignataireIntervenantColumns c : ConventionSignataireIntervenantColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -84,20 +84,20 @@ class ConventionSignataireIntervenantImporter extends GenericImporter {
             
             signataire.setTypeContact("Signataire");
             
-            if (row.getDate(ConventionSignataireIntervenantColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                signataire.setDateMaj(LocalDateTime.parse(row.getDate(ConventionSignataireIntervenantColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                signataire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeSignataires = signatairesByConventionId.get(row.getInt(ConventionSignataireIntervenantColumns.ID_CONVENTION.toString()));
+            List<ContactTroncon> listeSignataires = signatairesByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(listeSignataires == null){
                 listeSignataires = new ArrayList<>();
             }
             listeSignataires.add(signataire);
-            signatairesByConventionId.put(row.getInt(ConventionSignataireIntervenantColumns.ID_CONVENTION.toString()), listeSignataires);
+            signatairesByConventionId.put(row.getInt(Columns.ID_CONVENTION.toString()), listeSignataires);
 
             // Set the references.
-            final Contact intervenant = intervenants.get(row.getInt(ConventionSignataireIntervenantColumns.ID_INTERV_SIGNATAIRE.toString()));
+            final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_SIGNATAIRE.toString()));
             if (intervenant.getId() != null) {
                 signataire.setContactId(intervenant.getId());
             } else {

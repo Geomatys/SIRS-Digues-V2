@@ -38,16 +38,16 @@ public class ReseauConduiteFermeeImporter extends GenericObjectLinker {
         compute();
     }
 
-    private enum ElementReseauConduiteFermeeColumns {
+    private enum Columns {
         ID_ELEMENT_RESEAU,
         ID_ELEMENT_RESEAU_CONDUITE_FERMEE,
         DATE_DERNIERE_MAJ
     };
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ElementReseauConduiteFermeeColumns c : ElementReseauConduiteFermeeColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -68,15 +68,15 @@ public class ReseauConduiteFermeeImporter extends GenericObjectLinker {
             final Row row = it.next();
             final ReseauReseau reseauConduite = new ReseauReseau();
             
-            final ReseauHydrauliqueFerme conduiteFermee = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()));
-            final StationPompage stationPompage = (StationPompage) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
+            final ReseauHydrauliqueFerme conduiteFermee = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()));
+            final StationPompage stationPompage = (StationPompage) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(conduiteFermee!=null){
                 reseauConduite.setReseauId(cleanNullString(conduiteFermee.getId()));
             }
             
-            if (row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                reseauConduite.setDateMaj(LocalDateTime.parse(row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                reseauConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
             List<ReseauReseau> listByReseau = stationPompage.getReseau();

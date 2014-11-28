@@ -37,7 +37,7 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
         this.intervenantImporter = intervenantImporter;
     }
 
-    private enum OrganismeDisposeIntervenantColumns {
+    private enum Columns {
         ID_ORGANISME,
         ID_INTERVENANT,
         DATE_DEBUT_INTERV_ORG,
@@ -51,9 +51,9 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (OrganismeDisposeIntervenantColumns c : OrganismeDisposeIntervenantColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -75,26 +75,26 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
             final Row row = it.next();
             final ContactOrganisme contactOrganisme = new ContactOrganisme();
 
-            contactOrganisme.setContactId(organismes.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_INTERVENANT.toString())).getId());
+            contactOrganisme.setContactId(organismes.get(row.getInt(Columns.ID_INTERVENANT.toString())).getId());
             
-            if (row.getDate(OrganismeDisposeIntervenantColumns.DATE_DEBUT_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateDebutIntervenant(LocalDateTime.parse(row.getDate(OrganismeDisposeIntervenantColumns.DATE_DEBUT_INTERV_ORG.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()) != null) {
+                contactOrganisme.setDateDebutIntervenant(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(OrganismeDisposeIntervenantColumns.DATE_FIN_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateFinIntervenant(LocalDateTime.parse(row.getDate(OrganismeDisposeIntervenantColumns.DATE_FIN_INTERV_ORG.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()) != null) {
+                contactOrganisme.setDateFinIntervenant(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(OrganismeDisposeIntervenantColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                contactOrganisme.setDateMaj(LocalDateTime.parse(row.getDate(OrganismeDisposeIntervenantColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                contactOrganisme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
-            List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(OrganismeDisposeIntervenantColumns.ID_ORGANISME.toString()));
+            List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(Columns.ID_ORGANISME.toString()));
             if (listByIntervenantId == null) {
                 listByIntervenantId = new ArrayList<>();
             }
             listByIntervenantId.add(contactOrganisme);
-            contactOrganismesByOrganismeId.put(row.getInt(OrganismeDisposeIntervenantColumns.ID_ORGANISME.toString()), listByIntervenantId);
+            contactOrganismesByOrganismeId.put(row.getInt(Columns.ID_ORGANISME.toString()), listByIntervenantId);
         }
         
     }

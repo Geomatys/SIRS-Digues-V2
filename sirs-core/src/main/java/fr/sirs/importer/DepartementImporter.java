@@ -34,7 +34,7 @@ public class DepartementImporter extends GenericImporter {
         this.departementRepository = departementRepository;
     }
 
-    private enum DepartementColumns {
+    private enum Columns {
         ID_DEPARTEMENT,
         CODE_INSEE_DEPARTEMENT,
         LIBELLE_DEPARTEMENT,
@@ -47,9 +47,9 @@ public class DepartementImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DepartementColumns c : DepartementColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -69,16 +69,16 @@ public class DepartementImporter extends GenericImporter {
             final Row row = it.next();
             final Departement departement = new Departement();
             
-            departement.setCodeInsee(row.getString(DepartementColumns.CODE_INSEE_DEPARTEMENT.toString()));
+            departement.setCodeInsee(row.getString(Columns.CODE_INSEE_DEPARTEMENT.toString()));
             
-            departement.setLibelle(row.getString(DepartementColumns.LIBELLE_DEPARTEMENT.toString()));
+            departement.setLibelle(row.getString(Columns.LIBELLE_DEPARTEMENT.toString()));
             
-            if (row.getDate(DepartementColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                departement.setDateMaj(LocalDateTime.parse(row.getDate(DepartementColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                departement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            departements.put(row.getInt(DepartementColumns.ID_DEPARTEMENT.toString()), departement);
+            departements.put(row.getInt(Columns.ID_DEPARTEMENT.toString()), departement);
         }
         couchDbConnector.executeBulk(departements.values());
     }

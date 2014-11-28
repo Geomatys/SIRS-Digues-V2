@@ -34,7 +34,7 @@ public class CommuneImporter extends GenericImporter {
         this.communeRepository = communeRepository;
     }
 
-    private enum CommuneColumns {
+    private enum Columns {
         ID_COMMUNE,
         CODE_INSEE_COMMUNE,
         LIBELLE_COMMUNE,
@@ -47,9 +47,9 @@ public class CommuneImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (CommuneColumns c : CommuneColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -69,16 +69,16 @@ public class CommuneImporter extends GenericImporter {
             final Row row = it.next();
             final Commune commune = new Commune();
             
-            commune.setCodeInsee(row.getString(CommuneColumns.CODE_INSEE_COMMUNE.toString()));
+            commune.setCodeInsee(row.getString(Columns.CODE_INSEE_COMMUNE.toString()));
             
-            commune.setLibelle(row.getString(CommuneColumns.LIBELLE_COMMUNE.toString()));
+            commune.setLibelle(row.getString(Columns.LIBELLE_COMMUNE.toString()));
             
-            if (row.getDate(CommuneColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                commune.setDateMaj(LocalDateTime.parse(row.getDate(CommuneColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                commune.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            communes.put(row.getInt(CommuneColumns.ID_COMMUNE.toString()), commune);
+            communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);
         }
         couchDbConnector.executeBulk(communes.values());
     }

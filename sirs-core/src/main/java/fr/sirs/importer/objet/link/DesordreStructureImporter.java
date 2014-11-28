@@ -40,7 +40,7 @@ public class DesordreStructureImporter extends GenericObjectLinker {
         compute();
     }
 
-    private enum DesordreStructureColumns {
+    private enum Columns {
         ID_DESORDRE,
         ID_ELEMENT_STRUCTURE,
         DATE_DERNIERE_MAJ
@@ -62,15 +62,15 @@ public class DesordreStructureImporter extends GenericObjectLinker {
             final Row row = it.next();
             final DesordreStructure desordreStructure = new DesordreStructure();
             
-            final Objet structure = structures.get(row.getInt(DesordreStructureColumns.ID_ELEMENT_STRUCTURE.toString()));
-            final Desordre desordre = desordres.get(row.getInt(DesordreStructureColumns.ID_DESORDRE.toString()));
+            final Objet structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+            final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             
             if(structure!=null){
                 desordreStructure.setStructureId(structure.getId());
             }
             
-            if (row.getDate(DesordreStructureColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                desordreStructure.setDateMaj(LocalDateTime.parse(row.getDate(DesordreStructureColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                desordreStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
                 
             List<DesordreStructure> listByDesordre =  desordre.getDesordreStructure();
@@ -83,9 +83,9 @@ public class DesordreStructureImporter extends GenericObjectLinker {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DesordreStructureColumns c : DesordreStructureColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;

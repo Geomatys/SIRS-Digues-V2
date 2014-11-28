@@ -38,7 +38,7 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         this.organismeImporter = organismeImporter;
     }
 
-    private enum TronconGestionDigueGestionnaireColumns {
+    private enum Columns {
         ID_TRONCON_GESTION,
         ID_ORG_GESTION,
         DATE_DEBUT_GESTION, 
@@ -59,9 +59,9 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TronconGestionDigueGestionnaireColumns c : TronconGestionDigueGestionnaireColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -85,26 +85,26 @@ public class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             
             gestion.setTypeContact("Gestionnaire");
 
-            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()) != null) {
-                gestion.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
+                gestion.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()) != null) {
-                gestion.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
+                gestion.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gestion.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGestionnaireColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                gestion.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()));
+            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
             listeGestions.add(gestion);
-            gestionsByTronconId.put(row.getInt(TronconGestionDigueGestionnaireColumns.ID_TRONCON_GESTION.toString()), listeGestions);
+            gestionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
-            final Organisme organisme = organismes.get(row.getInt(TronconGestionDigueGestionnaireColumns.ID_ORG_GESTION.toString()));
+            final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             if (organisme.getId() != null) {
                 gestion.setOrganismeId(organisme.getId());
             } else {

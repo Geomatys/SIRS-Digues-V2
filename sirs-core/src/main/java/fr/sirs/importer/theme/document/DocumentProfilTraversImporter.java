@@ -56,7 +56,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         this.profilTraversImporter = profilTraversImporter;
     }
     
-    private enum DocumentProfilTraversColumns {
+    private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -110,9 +110,9 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DocumentProfilTraversColumns c : DocumentProfilTraversColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -132,7 +132,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         while (it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
-            documents.put(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()), document);
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -147,9 +147,9 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(DocumentProfilTraversColumns.ID_DOC.toString()));
+            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(DocumentProfilTraversColumns.ID_TRONCON_GESTION.toString())).getId());
+            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
 
             
             
@@ -160,10 +160,10 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentProfilTraversColumns.X_DEBUT.toString()) != null && row.getDouble(DocumentProfilTraversColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         document.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentProfilTraversColumns.X_DEBUT.toString()),
-                                row.getDouble(DocumentProfilTraversColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -171,10 +171,10 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentProfilTraversColumns.X_FIN.toString()) != null && row.getDouble(DocumentProfilTraversColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         document.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentProfilTraversColumns.X_FIN.toString()),
-                                row.getDouble(DocumentProfilTraversColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -183,17 +183,17 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
                 Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getDate(DocumentProfilTraversColumns.DATE_DOCUMENT.toString()) != null) {
-                document.setDate_document(LocalDateTime.parse(row.getDate(DocumentProfilTraversColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
+                document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            document.setLibelle(row.getString(DocumentProfilTraversColumns.NOM.toString()));
+            document.setLibelle(row.getString(Columns.NOM.toString()));
             
-            document.setCommentaire(row.getString(DocumentProfilTraversColumns.COMMENTAIRE.toString()));
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
-                if (profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
-                    document.setProfilTravers(profilsTravers.get(row.getInt(DocumentProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString())).getId());
+            if (row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
+                if (profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
+                    document.setProfilTravers(profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())).getId());
                 }
             }
             
@@ -202,32 +202,32 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             
             
             
-            if(row.getDouble(DocumentProfilTraversColumns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentProfilTraversColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
+                document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            if(row.getDouble(DocumentProfilTraversColumns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(DocumentProfilTraversColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
+                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
-            document.setBorne_debut_aval(row.getBoolean(DocumentProfilTraversColumns.AMONT_AVAL_DEBUT.toString())); 
-            document.setBorne_fin_aval(row.getBoolean(DocumentProfilTraversColumns.AMONT_AVAL_FIN.toString()));
-            if (row.getDouble(DocumentProfilTraversColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(DocumentProfilTraversColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
+            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
-            if (row.getDouble(DocumentProfilTraversColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                document.setBorne_fin_distance(row.getDouble(DocumentProfilTraversColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            if(row.getInt(DocumentProfilTraversColumns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(DocumentProfilTraversColumns.ID_SYSTEME_REP.toString())).getId());
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
 
-            if (row.getDouble(DocumentProfilTraversColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(DocumentProfilTraversColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
-            if (row.getDouble(DocumentProfilTraversColumns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(DocumentProfilTraversColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
         }

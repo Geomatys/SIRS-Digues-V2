@@ -55,7 +55,7 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
         this.profilLongImporter = profilLongImporter;
     }
     
-    private enum DocumentProfilLongColumns {
+    private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -109,9 +109,9 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DocumentProfilLongColumns c : DocumentProfilLongColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -131,7 +131,7 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
         while (it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
-            documents.put(row.getInt(DocumentProfilLongColumns.ID_DOC.toString()), document);
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -146,16 +146,16 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(DocumentProfilLongColumns.ID_DOC.toString()));
+            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(DocumentProfilLongColumns.ID_TRONCON_GESTION.toString())).getId());
+            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
 
-            if (row.getDouble(DocumentProfilLongColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(DocumentProfilLongColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
-            if (row.getDouble(DocumentProfilLongColumns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(DocumentProfilLongColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -165,10 +165,10 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentProfilLongColumns.X_DEBUT.toString()) != null && row.getDouble(DocumentProfilLongColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         document.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentProfilLongColumns.X_DEBUT.toString()),
-                                row.getDouble(DocumentProfilLongColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentProfilLongImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -176,10 +176,10 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentProfilLongColumns.X_FIN.toString()) != null && row.getDouble(DocumentProfilLongColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         document.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentProfilLongColumns.X_FIN.toString()),
-                                row.getDouble(DocumentProfilLongColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentProfilLongImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -188,13 +188,13 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
                 Logger.getLogger(DocumentProfilLongImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            document.setCommentaire(row.getString(DocumentProfilLongColumns.COMMENTAIRE.toString()));
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDate(DocumentProfilLongColumns.DATE_DOCUMENT.toString()) != null) {
-                document.setDate_document(LocalDateTime.parse(row.getDate(DocumentProfilLongColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
+                document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            document.setLibelle(row.getString(DocumentProfilLongColumns.NOM.toString()));
+            document.setLibelle(row.getString(Columns.NOM.toString()));
             
             /*
             1- La base du Rhône indique que tous les ID_PROFIL_EN_LONG de la table
@@ -205,37 +205,37 @@ class DocumentProfilLongImporter extends GenericDocumentImporter {
             PROFIL_EN_LONG sont égaux aux ID_DOC des tables DOCUMENT et
             SYS_EVT_PROFIL_EN_LONG
             */
-            if (row.getInt(DocumentProfilLongColumns.ID_DOC.toString()) != null) {
-                if (profilsLong.get(row.getInt(DocumentProfilLongColumns.ID_DOC.toString())) != null) {
-                    document.setProfilLong(profilsLong.get(row.getInt(DocumentProfilLongColumns.ID_DOC.toString())).getId());
+            if (row.getInt(Columns.ID_DOC.toString()) != null) {
+                if (profilsLong.get(row.getInt(Columns.ID_DOC.toString())) != null) {
+                    document.setProfilLong(profilsLong.get(row.getInt(Columns.ID_DOC.toString())).getId());
                 }
             }
             
-            if(row.getInt(DocumentProfilLongColumns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(DocumentProfilLongColumns.ID_SYSTEME_REP.toString())).getId());
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
-            if(row.getDouble(DocumentProfilLongColumns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentProfilLongColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
+                document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_debut_aval(row.getBoolean(DocumentProfilLongColumns.AMONT_AVAL_DEBUT.toString()));
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
-            if (row.getDouble(DocumentProfilLongColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(DocumentProfilLongColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
-            if(row.getDouble(DocumentProfilLongColumns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(DocumentProfilLongColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
+                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_fin_aval(row.getBoolean(DocumentProfilLongColumns.AMONT_AVAL_FIN.toString()));
+            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
-            if (row.getDouble(DocumentProfilLongColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                document.setBorne_fin_distance(row.getDouble(DocumentProfilLongColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            documents.put(row.getInt(DocumentProfilLongColumns.ID_DOC.toString()), document);
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
             
         }
         computed=true;

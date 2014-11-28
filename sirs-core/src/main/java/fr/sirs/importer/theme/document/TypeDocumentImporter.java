@@ -34,7 +34,7 @@ public class TypeDocumentImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
     
-    private enum TypeDocumentColumns {
+    private enum Columns {
         ID_TYPE_DOCUMENT,
         LIBELLE_TYPE_DOCUMENT,
 //        ID_TYPE_GENERAL_DOCUMENT, // Ignoré dans le nouveau modèle
@@ -68,9 +68,9 @@ public class TypeDocumentImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeDocumentColumns c : TypeDocumentColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -92,10 +92,10 @@ public class TypeDocumentImporter extends GenericImporter {
             final Row row = it.next();
             final RefTypeDocument typeDocument = new RefTypeDocument();
             
-            typeDocument.setLibelle(row.getString(TypeDocumentColumns.LIBELLE_TYPE_DOCUMENT.toString()));
+            typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT.toString()));
             
-            if (row.getDate(TypeDocumentColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(TypeDocumentColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
 //            if (row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()) != null) {
@@ -107,7 +107,7 @@ public class TypeDocumentImporter extends GenericImporter {
             
             try {
                 final Class classe;
-                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeDocumentColumns.NOM_TABLE_EVT.toString()));
+                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
                     case SYS_EVT_CONVENTION:
                         classe = Convention.class;
@@ -137,8 +137,8 @@ public class TypeDocumentImporter extends GenericImporter {
                         classe = null;
                 }
                 
-                classesDocument.put(row.getInt(String.valueOf(TypeDocumentColumns.ID_TYPE_DOCUMENT.toString())), classe);
-                typesDocument.put(row.getInt(String.valueOf(TypeDocumentColumns.ID_TYPE_DOCUMENT.toString())), typeDocument);
+                classesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())), classe);
+                typesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())), typeDocument);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }

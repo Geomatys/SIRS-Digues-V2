@@ -3,7 +3,6 @@ package fr.sirs.importer.objet.structure;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -12,6 +11,7 @@ import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,17 +24,14 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeElementStructureImporter extends GenericImporter {
-
-    private Map<Integer, Class> typesElementStructure = null;
+class TypeElementStructureImporter extends GenericTypeImporter<Class> {
 
     TypeElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    private enum TypeElementStructureColumns {
-
+    private enum Columns {
         ID_TYPE_ELEMENT_STRUCTURE,
         //        LIBELLE_TYPE_ELEMENT_STRUCTURE,
         NOM_TABLE_EVT,
@@ -42,23 +39,10 @@ class TypeElementStructureImporter extends GenericImporter {
         DATE_DERNIERE_MAJ
     };
 
-    /**
-     *
-     * @return A map containing all the database types of Structure elements
-     * (classes) referenced by their internal ID.
-     * @throws IOException
-     */
-    public Map<Integer, Class> getTypeElementStructure() throws IOException {
-        if (typesElementStructure == null) {
-            compute();
-        }
-        return typesElementStructure;
-    }
-
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeElementStructureColumns c : TypeElementStructureColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -71,14 +55,14 @@ class TypeElementStructureImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesElementStructure = new HashMap<>();
+        types = new HashMap<>();
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
 
         while (it.hasNext()) {
             final Row row = it.next();
             try {
                 final Class classe;
-                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeElementStructureColumns.NOM_TABLE_EVT.toString()));
+                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
                     case SYS_EVT_CRETE:
                         classe = Crete.class;
@@ -117,7 +101,7 @@ class TypeElementStructureImporter extends GenericImporter {
                     default:
                         classe = null;
                 }
-                typesElementStructure.put(row.getInt(String.valueOf(TypeElementStructureColumns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
+                types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }

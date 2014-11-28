@@ -55,7 +55,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         this.conventionImporter = conventionImporter;
     }
     
-    private enum DocumentConventionColumns {
+    private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
@@ -109,9 +109,9 @@ class DocumentConventionImporter extends GenericDocumentImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DocumentConventionColumns c : DocumentConventionColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -131,7 +131,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         while (it.hasNext()){
             final Row row = it.next();
             final Document document = new Document();
-            documents.put(row.getInt(DocumentConventionColumns.ID_DOC.toString()), document);
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -147,9 +147,9 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(DocumentConventionColumns.ID_DOC.toString()));
+            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(DocumentConventionColumns.ID_TRONCON_GESTION.toString())).getId());
+            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -158,10 +158,10 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentConventionColumns.X_DEBUT.toString()) != null && row.getDouble(DocumentConventionColumns.Y_DEBUT.toString()) != null) {
+                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
                         document.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentConventionColumns.X_DEBUT.toString()),
-                                row.getDouble(DocumentConventionColumns.Y_DEBUT.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_DEBUT.toString()),
+                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -169,10 +169,10 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 
                 try {
 
-                    if (row.getDouble(DocumentConventionColumns.X_FIN.toString()) != null && row.getDouble(DocumentConventionColumns.Y_FIN.toString()) != null) {
+                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
                         document.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(DocumentConventionColumns.X_FIN.toString()),
-                                row.getDouble(DocumentConventionColumns.Y_FIN.toString()))), lambertToRGF));
+                                row.getDouble(Columns.X_FIN.toString()),
+                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
                     Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -181,46 +181,46 @@ class DocumentConventionImporter extends GenericDocumentImporter {
                 Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getDate(DocumentConventionColumns.DATE_DOCUMENT.toString()) != null) {
-                document.setDate_document(LocalDateTime.parse(row.getDate(DocumentConventionColumns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
+                document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            document.setLibelle(row.getString(DocumentConventionColumns.NOM.toString()));
+            document.setLibelle(row.getString(Columns.NOM.toString()));
             
-            document.setCommentaire(row.getString(DocumentConventionColumns.COMMENTAIRE.toString()));
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getInt(DocumentConventionColumns.ID_CONVENTION.toString()) != null) {
-                if (conventions.get(row.getInt(DocumentConventionColumns.ID_CONVENTION.toString())) != null) {
-                    document.setConvention(conventions.get(row.getInt(DocumentConventionColumns.ID_CONVENTION.toString())).getId());
+            if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
+                if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
+                    document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
                 }
             }
             
-            if(row.getDouble(DocumentConventionColumns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorneDebutId(bornes.get((int) row.getDouble(DocumentConventionColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
+                document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            if(row.getDouble(DocumentConventionColumns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(DocumentConventionColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
+                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
-            document.setBorne_debut_aval(row.getBoolean(DocumentConventionColumns.AMONT_AVAL_DEBUT.toString())); 
-            document.setBorne_fin_aval(row.getBoolean(DocumentConventionColumns.AMONT_AVAL_FIN.toString()));
-            if (row.getDouble(DocumentConventionColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(DocumentConventionColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
+            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
-            if (row.getDouble(DocumentConventionColumns.DIST_BORNEREF_FIN.toString()) != null) {
-                document.setBorne_fin_distance(row.getDouble(DocumentConventionColumns.DIST_BORNEREF_FIN.toString()).floatValue());
+            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+                document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            if(row.getInt(DocumentConventionColumns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(DocumentConventionColumns.ID_SYSTEME_REP.toString())).getId());
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
 
-            if (row.getDouble(DocumentConventionColumns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(DocumentConventionColumns.PR_DEBUT_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
-            if (row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(DocumentConventionColumns.PR_FIN_CALCULE.toString()).floatValue());
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
         }

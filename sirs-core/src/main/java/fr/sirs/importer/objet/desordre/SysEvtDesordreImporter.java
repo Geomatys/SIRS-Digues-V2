@@ -21,7 +21,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -47,7 +46,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtDesordreImporter extends GenericObjetImporter<Desordre> {
+class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
     
     private final TypeDesordreImporter typeDesordreImporter;
 
@@ -252,7 +251,7 @@ class SysEvtDesordreImporter extends GenericObjetImporter<Desordre> {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

@@ -53,7 +53,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauImporter extends GenericObjetImporter<Objet> {
+public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     
     private final TypeElementReseauImporter typeElementReseauImporter;
     
@@ -317,7 +317,7 @@ public class ElementReseauImporter extends GenericObjetImporter<Objet> {
     };
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

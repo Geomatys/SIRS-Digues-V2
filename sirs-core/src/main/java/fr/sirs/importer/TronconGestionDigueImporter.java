@@ -152,7 +152,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
      = TODO : faire les structures.
      = TODO : s'occuper des bornes.
      */
-    private enum TronconGestionDigueColumns {
+    private enum Columns {
 
         ID_TRONCON_GESTION, 
 //        ID_ORG_GESTIONNAIRE, //Dans les gestions ?
@@ -181,9 +181,9 @@ public class TronconGestionDigueImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TronconGestionDigueColumns c : TronconGestionDigueColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -200,7 +200,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
         tronconsIds = new HashMap<>();
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
-        final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeRive();
+        final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypes();
         final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
         final Map<Integer, List<ContactTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
         final Map<Integer, List<ContactTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
@@ -214,44 +214,44 @@ public class TronconGestionDigueImporter extends GenericImporter {
             final Row row = it.next();
             final TronconDigue tronconDigue = new TronconDigue();
 
-            tronconDigue.setLibelle(row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString()));
-            tronconDigue.setCommentaire(row.getString(TronconGestionDigueColumns.COMMENTAIRE_TRONCON.toString()));
-            if (row.getDate(TronconGestionDigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
+            tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueColumns.DATE_DEBUT_VAL_TRONCON.toString()) != null) {
-                tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()) != null) {
+                tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueColumns.DATE_FIN_VAL_TRONCON.toString()) != null) {
-                tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueColumns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()) != null) {
+                tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
 
             // Register the troncon to retrieve a CouchDb ID.
             tronconDigueRepository.add(tronconDigue);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            tronconsDigue.put(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()), tronconDigue);
-            tronconsIds.put(tronconDigue.getId(), row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            tronconsDigue.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), tronconDigue);
+            tronconsIds.put(tronconDigue.getId(), row.getInt(Columns.ID_TRONCON_GESTION.toString()));
 
 
             // Set simple references.
             List<ContactTroncon> contacts;
             
-            final List<ContactTroncon> gestions = gestionsByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<ContactTroncon> gestions = gestionsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             contacts=gestions;
             
-            final List<ContactTroncon> gardiens = gardiensByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<ContactTroncon> gardiens = gardiensByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(contacts != null && gardiens!=null) contacts.addAll(gardiens);
             else if(contacts==null) contacts=gardiens;
             
-            final List<ContactTroncon> proprietaires = propriosByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<ContactTroncon> proprietaires = propriosByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(contacts != null && proprietaires!=null) contacts.addAll(proprietaires);
             else if (contacts==null) contacts=proprietaires;
             
             if(contacts!=null) tronconDigue.setContacts(contacts);
             // Fin des contacts
             
-            final List<BorneDigue> bornes = bornesByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<BorneDigue> bornes = bornesByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(bornes != null){
                 final List<String> bornesIds = new ArrayList<>();
                 bornes.stream().forEach((borne) -> {
@@ -260,7 +260,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 tronconDigue.setBorneIds(bornesIds);
             }
 
-            final List<SystemeReperage> systemesRep = systemesReperageByTroncon.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString()));
+            final List<SystemeReperage> systemesRep = systemesReperageByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(systemesRep!=null){
                 final List<String> systemesRepIds = new ArrayList<>();
                 systemesRep.stream().forEach((systemeRep) -> {
@@ -268,18 +268,18 @@ public class TronconGestionDigueImporter extends GenericImporter {
                     systemeRep.setTronconId(tronconDigue.getId());
                     });
                 tronconDigue.setSystemeReperageIds(systemesRepIds);
-                tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(TronconGestionDigueColumns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
+                tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
             
-            if (row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()) != null) {
-                final RefRive typeRive = typesRive.get(row.getInt(TronconGestionDigueColumns.ID_TYPE_RIVE.toString()));
+            if (row.getInt(Columns.ID_TYPE_RIVE.toString()) != null) {
+                final RefRive typeRive = typesRive.get(row.getInt(Columns.ID_TYPE_RIVE.toString()));
                 if(typeRive!=null){
                     tronconDigue.setTypeRiveId(typeRive.getId());
                 }
             }
             
             // Set the references demanding CouchDb identifier.
-            final Digue digue = digues.get(row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
+            final Digue digue = digues.get(row.getInt(Columns.ID_DIGUE.toString()));
 //            System.out.println("Le tronçon : "+row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+"|| "+row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString())+"|| la digue : "+row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
             if (digue != null) {
                 if (digue.getId() != null) {
@@ -294,7 +294,7 @@ public class TronconGestionDigueImporter extends GenericImporter {
             }
 
             // Set the geometry
-            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())));
+            tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
 
         // Set the references using the this very importer (Structures references TronconDigueId).

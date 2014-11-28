@@ -75,7 +75,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         return levesByProfil;
     }
     
-    private enum ProfilTraversDescriptionColumns {
+    private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_PROFIL_EN_TRAVERS,
         DATE_LEVE,
@@ -94,9 +94,9 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversDescriptionColumns c : ProfilTraversDescriptionColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -113,9 +113,9 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
         levesByProfil = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeSystemeReleve();
-        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeProfilTravers();
-        final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeOrigineProfilTravers();
+        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypes();
+        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypes();
+        final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypes();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
         final Map<Integer, List<ProfilTraversTroncon>> profilTraversTroncons = profilTraversTronconImporter.getProfilTraversTronconByLeveId();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
@@ -125,57 +125,57 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
             final Row row = it.next();
             final LeveeProfilTravers leve = new LeveeProfilTravers();
             
-            if (row.getDate(ProfilTraversDescriptionColumns.DATE_LEVE.toString()) != null) {
-                leve.setDateLevee(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
+                leve.setDateLevee(LocalDateTime.parse(row.getDate(Columns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
             }
             
-            final Organisme organisme = organismes.get(row.getInt(ProfilTraversDescriptionColumns.ID_ORG_CREATEUR.toString()));
+            final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));
             if(organisme!=null){
                 leve.setOrganismeCreateurId(organisme.getId());
             }
             
-            if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())!=null){
-                leve.setTypeSystemesReleveId(systemesReleve.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())!=null){
+                leve.setTypeSystemesReleveId(systemesReleve.get(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
             }
             
-            leve.setReference_papier(row.getString(ProfilTraversDescriptionColumns.REFERENCE_PAPIER.toString()));
+            leve.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            leve.setReference_numerique(row.getString(ProfilTraversDescriptionColumns.REFERENCE_NUMERIQUE.toString()));
+            leve.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
-            leve.setReference_calque(row.getString(ProfilTraversDescriptionColumns.REFERENCE_CALQUE.toString()));
+            leve.setReference_calque(row.getString(Columns.REFERENCE_CALQUE.toString()));
             
-            if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())!=null){
-                leve.setTypeProfilId(typesProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())!=null){
+                leve.setTypeProfilId(typesProfil.get(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
             }
             
-            if(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())!=null){
-                leve.setTypeOrigineProfil(typesOrigineProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())!=null){
+                leve.setTypeOrigineProfil(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
             }
             
-            leve.setCommentaire(row.getString(ProfilTraversDescriptionColumns.COMMENTAIRE.toString()));
+            leve.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDate(ProfilTraversDescriptionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                leve.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversDescriptionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                leve.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            if(pointsByLeve.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
-                leve.setLeveePoints(pointsByLeve.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            if(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setLeveePoints(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
-            if(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
-                leve.setProfilTraversEvenementHydraulique(evenementsHydrauliques.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setProfilTraversEvenementHydraulique(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
-            if(profilTraversTroncons.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
-                leve.setProfilTraversTroncon(profilTraversTroncons.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            if(profilTraversTroncons.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
+                leve.setProfilTraversTroncon(profilTraversTroncons.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
-            leves.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
+            leves.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             
-            List<LeveeProfilTravers> listByProfil = levesByProfil.get(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()));
+            List<LeveeProfilTravers> listByProfil = levesByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();
-                levesByProfil.put(row.getInt(ProfilTraversDescriptionColumns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);
+                levesByProfil.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);
             }
             listByProfil.add(leve);
         }

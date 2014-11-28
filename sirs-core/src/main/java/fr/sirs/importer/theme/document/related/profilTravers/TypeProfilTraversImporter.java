@@ -4,51 +4,37 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefTypeProfilTravers;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeProfilTraversImporter extends GenericImporter {
-
-    private Map<Integer, RefTypeProfilTravers> typesProfilsTravers = null;
+class TypeProfilTraversImporter extends GenericTypeImporter<RefTypeProfilTravers> {
 
     TypeProfilTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    private enum TypeProfilTraversColumns {
+    private enum Columns {
         ID_TYPE_PROFIL_EN_TRAVERS,
         LIBELLE_TYPE_PROFIL_EN_TRAVERS,
 //        ABREGE_TYPE_PROFIL_EN_TRAVERS, // Pas dans le nouveau modèle (supprimé)
         DATE_DERNIERE_MAJ
     };
 
-    /**
-     * 
-     * @return A map containing all the database RefTypeProfilTravers referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, RefTypeProfilTravers> getTypeProfilTravers() throws IOException {
-        if(typesProfilsTravers == null) compute();
-        return typesProfilsTravers;
-    }
-
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TypeProfilTraversColumns c : TypeProfilTraversColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -61,20 +47,20 @@ class TypeProfilTraversImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesProfilsTravers = new HashMap<>();
+        types = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final RefTypeProfilTravers typeProfilTravers = new RefTypeProfilTravers();
             
-            typeProfilTravers.setLibelle(row.getString(TypeProfilTraversColumns.LIBELLE_TYPE_PROFIL_EN_TRAVERS.toString()));
+            typeProfilTravers.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROFIL_EN_TRAVERS.toString()));
             
-            if (row.getDate(TypeProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(TypeProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                typeProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typesProfilsTravers.put(row.getInt(String.valueOf(TypeProfilTraversColumns.ID_TYPE_PROFIL_EN_TRAVERS.toString())), typeProfilTravers);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())), typeProfilTravers);
         }
-        couchDbConnector.executeBulk(typesProfilsTravers.values());
+        couchDbConnector.executeBulk(types.values());
     }
 }

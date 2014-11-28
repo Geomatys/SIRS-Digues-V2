@@ -46,16 +46,16 @@ public class ProfilTraversImporter extends GenericImporter {
         return profils;
     }
     
-    private enum ProfilTraversColumns {
+    private enum Columns {
         ID_PROFIL_EN_TRAVERS,
         NOM,
         DATE_DERNIERE_MAJ
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversColumns c : ProfilTraversColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -78,16 +78,16 @@ public class ProfilTraversImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilTravers profil = new ProfilTravers();
             
-            profil.setLibelle(row.getString(ProfilTraversColumns.NOM.toString()));
+            profil.setLibelle(row.getString(Columns.NOM.toString()));
             
-            if (row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            final List<LeveeProfilTravers> leve = levesImport.get(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()));
+            final List<LeveeProfilTravers> leve = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if(leve!=null) profil.setLeveeIds(leve);
             
-            profils.put(row.getInt(ProfilTraversColumns.ID_PROFIL_EN_TRAVERS.toString()), profil);
+            profils.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
         couchDbConnector.executeBulk(profils.values());
     }

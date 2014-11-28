@@ -42,7 +42,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         return evenementHydrauByLeveId;
     }
     
-    private enum ProfilTraversEvenementHydrauliqueColumns {
+    private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_EVENEMENT_HYDRAU,
         DEBIT_DE_POINTE_M3S,
@@ -53,9 +53,9 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversEvenementHydrauliqueColumns c : ProfilTraversEvenementHydrauliqueColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -77,34 +77,34 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilTraversEvenementHydraulique profilTraversEvenementHydraulique = new ProfilTraversEvenementHydraulique();
             
-            if(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())).getId());
+            if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
+                profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
             }
             
-            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.DEBIT_DE_POINTE_M3S.toString())!=null){
-                profilTraversEvenementHydraulique.setDebitPointe(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.DEBIT_DE_POINTE_M3S.toString()).floatValue());
+            if(row.getDouble(Columns.DEBIT_DE_POINTE_M3S.toString())!=null){
+                profilTraversEvenementHydraulique.setDebitPointe(row.getDouble(Columns.DEBIT_DE_POINTE_M3S.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.VITESSE_DE_POINTE_MS.toString())!=null){
-                profilTraversEvenementHydraulique.setVitessePointe(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.VITESSE_DE_POINTE_MS.toString()).floatValue());
+            if(row.getDouble(Columns.VITESSE_DE_POINTE_MS.toString())!=null){
+                profilTraversEvenementHydraulique.setVitessePointe(row.getDouble(Columns.VITESSE_DE_POINTE_MS.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.COTE_EAU_NGF.toString())!=null){
-                profilTraversEvenementHydraulique.setCoteEau(row.getDouble(ProfilTraversEvenementHydrauliqueColumns.COTE_EAU_NGF.toString()).floatValue());
+            if(row.getDouble(Columns.COTE_EAU_NGF.toString())!=null){
+                profilTraversEvenementHydraulique.setCoteEau(row.getDouble(Columns.COTE_EAU_NGF.toString()).floatValue());
             }
             
-            profilTraversEvenementHydraulique.setCommentaire(row.getString(ProfilTraversEvenementHydrauliqueColumns.COMMENTAIRE.toString()));
+            profilTraversEvenementHydraulique.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDate(ProfilTraversEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilTraversEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profilTraversEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            List<ProfilTraversEvenementHydraulique> listByLeve = evenementHydrauByLeveId.get(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            List<ProfilTraversEvenementHydraulique> listByLeve = evenementHydrauByLeveId.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }
             listByLeve.add(profilTraversEvenementHydraulique);
-            evenementHydrauByLeveId.put(row.getInt(ProfilTraversEvenementHydrauliqueColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
+            evenementHydrauByLeveId.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
         }
     }
 }

@@ -41,7 +41,7 @@ public class ProfilTraversTronconImporter extends GenericImporter {
         return profilTraversTronconsByLeve;
     }
     
-    private enum ProfilTraversTronconColumns {
+    private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_DOC,
         COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE,
@@ -54,9 +54,9 @@ public class ProfilTraversTronconImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversTronconColumns c : ProfilTraversTronconColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -78,44 +78,44 @@ public class ProfilTraversTronconImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilTraversTroncon profilTraversTroncon = new ProfilTraversTroncon();
             
-            if(documents.get(row.getInt(ProfilTraversTronconColumns.ID_DOC.toString()))!=null){
-                profilTraversTroncon.setDocumentProfilTraversId(documents.get(row.getInt(ProfilTraversTronconColumns.ID_DOC.toString())).getId());
+            if(documents.get(row.getInt(Columns.ID_DOC.toString()))!=null){
+                profilTraversTroncon.setDocumentProfilTraversId(documents.get(row.getInt(Columns.ID_DOC.toString())).getId());
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
-                profilTraversTroncon.setCoteRivierePiedDigue(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
+            if(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
+                profilTraversTroncon.setCoteRivierePiedDigue(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString())!=null){
-                profilTraversTroncon.setCoteRiviereSommetRisberme(row.getDouble(ProfilTraversTronconColumns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
+            if(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString())!=null){
+                profilTraversTroncon.setCoteRiviereSommetRisberme(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.CRETE_Z_NGF.toString())!=null){
-                profilTraversTroncon.setCoteCrete(row.getDouble(ProfilTraversTronconColumns.CRETE_Z_NGF.toString()).floatValue());
+            if(row.getDouble(Columns.CRETE_Z_NGF.toString())!=null){
+                profilTraversTroncon.setCoteCrete(row.getDouble(Columns.CRETE_Z_NGF.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString())!=null){
-                profilTraversTroncon.setCoteTerreSommetRisberme(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
+            if(row.getDouble(Columns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString())!=null){
+                profilTraversTroncon.setCoteTerreSommetRisberme(row.getDouble(Columns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
-                profilTraversTroncon.setCoteTterrePiedDigue(row.getDouble(ProfilTraversTronconColumns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
+            if(row.getDouble(Columns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
+                profilTraversTroncon.setCoteTterrePiedDigue(row.getDouble(Columns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
             }
             
-            if (row.getDate(ProfilTraversTronconColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilTraversTroncon.setDateMaj(LocalDateTime.parse(row.getDate(ProfilTraversTronconColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profilTraversTroncon.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            if(row.getDouble(ProfilTraversTronconColumns.CRETE_LARGEUR.toString())!=null){
-                profilTraversTroncon.setCreteLargeur(row.getDouble(ProfilTraversTronconColumns.CRETE_LARGEUR.toString()).floatValue());
+            if(row.getDouble(Columns.CRETE_LARGEUR.toString())!=null){
+                profilTraversTroncon.setCreteLargeur(row.getDouble(Columns.CRETE_LARGEUR.toString()).floatValue());
             }
             
-            List<ProfilTraversTroncon> listByLeve = profilTraversTronconsByLeve.get(row.getInt(ProfilTraversTronconColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            List<ProfilTraversTroncon> listByLeve = profilTraversTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }
             listByLeve.add(profilTraversTroncon);
-            profilTraversTronconsByLeve.put(row.getInt(ProfilTraversTronconColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
+            profilTraversTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
         }
     }
 }

@@ -649,7 +649,7 @@ public class DbImporter {
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
         typeRiveImporter = new TypeRiveImporter(accessDatabase, 
-                couchDbConnector, refRiveRepository);
+                couchDbConnector);
         tronconDigueGeomImporter = new TronconDigueGeomImporter(
                 accessCartoDatabase, couchDbConnector);
         intervenantImporter = new IntervenantImporter(accessDatabase, 
@@ -706,12 +706,11 @@ public class DbImporter {
                 intervenantImporter,
                 organismeImporter);
         typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
-                accessDatabase, couchDbConnector, refSystemeReleveProfilRepository);
+                accessDatabase, couchDbConnector);
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector, refEvenementHydrauliqueRepository);
+                accessDatabase, couchDbConnector);
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector, 
-                refFrequenceEvenementHydrauliqueRepository);
+                accessDatabase, couchDbConnector);
         evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, 
                 typeEvenementHydrauliqueImporter, 
@@ -837,7 +836,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

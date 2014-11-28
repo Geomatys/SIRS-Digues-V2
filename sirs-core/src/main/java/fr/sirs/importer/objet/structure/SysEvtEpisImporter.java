@@ -19,7 +19,6 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -47,7 +46,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
+class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
 
     SysEvtEpisImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -292,7 +291,7 @@ class SysEvtEpisImporter extends GenericObjetImporter<Epi> {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

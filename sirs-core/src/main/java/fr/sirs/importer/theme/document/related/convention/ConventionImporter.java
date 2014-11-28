@@ -47,7 +47,7 @@ public class ConventionImporter extends GenericImporter {
                 accessDatabase, couchDbConnector, organismeImporter);
     }
 
-    private enum ConventionColumns {
+    private enum Columns {
         ID_CONVENTION,
         LIBELLE_CONVENTION,
         ID_TYPE_CONVENTION,
@@ -61,9 +61,9 @@ public class ConventionImporter extends GenericImporter {
     
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ConventionColumns c : ConventionColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -78,7 +78,7 @@ public class ConventionImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         conventions = new HashMap<>();
         
-        final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeConvention();
+        final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypes();
         final Map<Integer, List<ContactTroncon>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
         final Map<Integer, List<ContactTroncon>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
 
@@ -87,40 +87,40 @@ public class ConventionImporter extends GenericImporter {
             final Row row = it.next();
             final Convention convention = new Convention();
             
-            convention.setLibelle(row.getString(ConventionColumns.LIBELLE_CONVENTION.toString()));
+            convention.setLibelle(row.getString(Columns.LIBELLE_CONVENTION.toString()));
             
-            convention.setTypeConventionId(typesConvention.get(row.getInt(ConventionColumns.ID_TYPE_CONVENTION.toString())).getId());
+            convention.setTypeConventionId(typesConvention.get(row.getInt(Columns.ID_TYPE_CONVENTION.toString())).getId());
             
-            if (row.getDate(ConventionColumns.DATE_DEBUT_CONVENTION.toString()) != null) {
-                convention.setDate_debut(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DEBUT_CONVENTION.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_CONVENTION.toString()) != null) {
+                convention.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDate(ConventionColumns.DATE_FIN_CONVENTION.toString()) != null) {
-                convention.setDate_fin(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_CONVENTION.toString()) != null) {
+                convention.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
             
-            convention.setReference_papier(row.getString(ConventionColumns.REFERENCE_PAPIER.toString()));
+            convention.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            convention.setReference_numerique(row.getString(ConventionColumns.REFERENCE_NUMERIQUE.toString()));
+            convention.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
-            convention.setCommentaire(row.getString(ConventionColumns.COMMENTAIRE.toString()));
+            convention.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                convention.setDateMaj(LocalDateTime.parse(row.getDate(ConventionColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                convention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
              List<ContactTroncon> contacts;
             
-            final List<ContactTroncon> organisationsSignataires = orgSignataires.get(row.getInt(ConventionColumns.ID_CONVENTION.toString()));
+            final List<ContactTroncon> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             contacts=organisationsSignataires;
             
-            final List<ContactTroncon> intervenantsSignataires = intSignataires.get(row.getInt(ConventionColumns.ID_CONVENTION.toString()));
+            final List<ContactTroncon> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
             else if(contacts==null) contacts=intervenantsSignataires;
             
             if(contacts!=null) convention.setContacts(contacts);
 
-            conventions.put(row.getInt(ConventionColumns.ID_CONVENTION.toString()), convention);
+            conventions.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
         }
         couchDbConnector.executeBulk(conventions.values());
     }

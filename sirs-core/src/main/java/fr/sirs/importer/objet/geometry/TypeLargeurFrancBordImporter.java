@@ -32,7 +32,7 @@ class TypeLargeurFrancBordImporter extends GenericTypeImporter<RefLargeurFrancBo
     };
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

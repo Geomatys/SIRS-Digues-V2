@@ -4,10 +4,8 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauReseau;
 import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.StationPompage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -40,16 +38,16 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
         compute();
     }
 
-    private enum ElementReseauConduiteFermeeColumns {
+    private enum Columns {
         ID_ELEMENT_RESEAU,
         ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
         DATE_DERNIERE_MAJ
     };
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ElementReseauConduiteFermeeColumns c : ElementReseauConduiteFermeeColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -72,12 +70,12 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
             final ReseauReseau reseauReseau = new ReseauReseau();
             
             
-            if (row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                ouvrageReseau.setDateMaj(LocalDateTime.parse(row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                reseauReseau.setDateMaj(LocalDateTime.parse(row.getDate(ElementReseauConduiteFermeeColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                ouvrageReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                reseauReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
-            final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
+            final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
             if(ouvrage!=null){
                 reseauReseau.setReseauId(cleanNullString(ouvrage.getId()));
 
@@ -89,7 +87,7 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
                 listReseauOuvrage.add(ouvrageReseau);
             }
             
-            final ReseauTelecomEnergie objet = (ReseauTelecomEnergie) reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString()));
+            final ReseauTelecomEnergie objet = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
                 
             if(objet!=null){
                 ouvrageReseau.setReseauId(cleanNullString(objet.getId()));
@@ -113,7 +111,7 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
 //                    listReseauReseau.add(reseauReseau);
 //                }
                 else {
-                    System.out.println("Type de réseau non pris en charge : "+reseaux.get(row.getInt(ElementReseauConduiteFermeeColumns.ID_ELEMENT_RESEAU.toString())).getClass());
+                    System.out.println("Type de réseau non pris en charge : "+reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())).getClass());
                 }
                 
 //                System.out.println("Objet : "+objet);

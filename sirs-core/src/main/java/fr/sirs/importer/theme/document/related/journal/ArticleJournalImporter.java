@@ -39,7 +39,7 @@ public class ArticleJournalImporter extends GenericImporter {
                 couchDbConnector);
     }
 
-    private enum JournalArticleColumns {
+    private enum Columns {
         ID_ARTICLE_JOURNAL,
         ID_JOURNAL,
         INTITULE_ARTICLE,
@@ -51,9 +51,9 @@ public class ArticleJournalImporter extends GenericImporter {
     };
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (JournalArticleColumns c : JournalArticleColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -75,27 +75,27 @@ public class ArticleJournalImporter extends GenericImporter {
             final Row row = it.next();
             final ArticleJournal articleJournal = new ArticleJournal();
             
-            if(row.getInt(JournalArticleColumns.ID_JOURNAL.toString())!=null){
-                articleJournal.setNomJournal(cleanNullString(journaux.get(row.getInt(JournalArticleColumns.ID_JOURNAL.toString()))));
+            if(row.getInt(Columns.ID_JOURNAL.toString())!=null){
+                articleJournal.setNomJournal(cleanNullString(journaux.get(row.getInt(Columns.ID_JOURNAL.toString()))));
             }
             
-            articleJournal.setLibelle(cleanNullString(row.getString(JournalArticleColumns.INTITULE_ARTICLE.toString())));
+            articleJournal.setLibelle(cleanNullString(row.getString(Columns.INTITULE_ARTICLE.toString())));
             
-            if (row.getDate(JournalArticleColumns.DATE_ARTICLE.toString()) != null) {
-                articleJournal.setDateArticle(LocalDateTime.parse(row.getDate(JournalArticleColumns.DATE_ARTICLE.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_ARTICLE.toString()) != null) {
+                articleJournal.setDateArticle(LocalDateTime.parse(row.getDate(Columns.DATE_ARTICLE.toString()).toString(), dateTimeFormatter));
             }
             
-            articleJournal.setReference_papier(cleanNullString(row.getString(JournalArticleColumns.REFERENCE_PAPIER.toString())));
+            articleJournal.setReference_papier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
-            articleJournal.setReference_numerique(cleanNullString(row.getString(JournalArticleColumns.REFERENCE_NUMERIQUE.toString())));
+            articleJournal.setReference_numerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
-            articleJournal.setCommentaire(cleanNullString(row.getString(JournalArticleColumns.COMMENTAIRE.toString())));
+            articleJournal.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
-            if (row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(JournalArticleColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            articles.put(row.getInt(JournalArticleColumns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
+            articles.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
         couchDbConnector.executeBulk(articles.values());
     }

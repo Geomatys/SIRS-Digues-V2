@@ -39,7 +39,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         this.borneDigueImporter = borneDigueImporter;
     }
 
-    private enum SystemeReperageBorneColumns {
+    private enum Columns {
         ID_BORNE,
         ID_SYSTEME_REP,
         VALEUR_PR,
@@ -71,9 +71,9 @@ public class SystemeReperageBorneImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (SystemeReperageBorneColumns c : SystemeReperageBorneColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -97,31 +97,31 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             final Row row = it.next();
             final SystemeReperageBorne systemeReperageBorne = new SystemeReperageBorne();
 
-            if (row.getDate(SystemeReperageBorneColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                systemeReperageBorne.setDateMaj(LocalDateTime.parse(row.getDate(SystemeReperageBorneColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                systemeReperageBorne.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            if (row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString())!=null){
-                systemeReperageBorne.setValeurPR(row.getDouble(SystemeReperageBorneColumns.VALEUR_PR.toString()).floatValue());
+            if (row.getDouble(Columns.VALEUR_PR.toString())!=null){
+                systemeReperageBorne.setValeurPR(row.getDouble(Columns.VALEUR_PR.toString()).floatValue());
             }
             
-            final BorneDigue borne = bornes.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()));
+            final BorneDigue borne = bornes.get(row.getInt(Columns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
             
-            final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()));
+            final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){
                 systemeReperage.systemereperageborneId.add(systemeReperageBorne);
             }
             
-            if(byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()))==null) {
-                byBorneId.put(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString()), new ArrayList<>());
+            if(byBorneId.get(row.getInt(Columns.ID_BORNE.toString()))==null) {
+                byBorneId.put(row.getInt(Columns.ID_BORNE.toString()), new ArrayList<>());
             }
-            byBorneId.get(row.getInt(SystemeReperageBorneColumns.ID_BORNE.toString())).add(systemeReperageBorne);
+            byBorneId.get(row.getInt(Columns.ID_BORNE.toString())).add(systemeReperageBorne);
             
-            if(bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()))==null) {
-                bySystemeReperageId.put(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString()), new ArrayList<>());
+            if(bySystemeReperageId.get(row.getInt(Columns.ID_SYSTEME_REP.toString()))==null) {
+                bySystemeReperageId.put(row.getInt(Columns.ID_SYSTEME_REP.toString()), new ArrayList<>());
             }
-            bySystemeReperageId.get(row.getInt(SystemeReperageBorneColumns.ID_SYSTEME_REP.toString())).add(systemeReperageBorne);
+            bySystemeReperageId.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).add(systemeReperageBorne);
         }
         
         couchDbConnector.executeBulk(systemesReperage.values());

@@ -22,7 +22,6 @@ import fr.sirs.core.model.VoieAcces;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -50,7 +49,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtCheminAccesImporter extends GenericObjetImporter<VoieAcces> {
+class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
     
     private final TypeUsageVoieImporter typeUsageVoieImporter;
 
@@ -314,7 +313,7 @@ class SysEvtCheminAccesImporter extends GenericObjetImporter<VoieAcces> {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());

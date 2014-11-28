@@ -137,7 +137,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         documentImporters.add(documentJournalImporter);
     }
     
-    private enum DocumentColumns {
+    private enum Columns {
         ID_DOC,
         ID_TRONCON_GESTION,
         ID_TYPE_DOCUMENT,
@@ -177,9 +177,9 @@ public class DocumentImporter extends GenericDocumentImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (DocumentColumns c : DocumentColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -275,8 +275,8 @@ public class DocumentImporter extends GenericDocumentImporter {
             final Row row = it.next();
             final Document document;
             final boolean nouveauDocument;
-            if(documents.get(row.getInt(DocumentColumns.ID_DOC.toString()))!=null){
-                document = documents.get(row.getInt(DocumentColumns.ID_DOC.toString()));
+            if(documents.get(row.getInt(Columns.ID_DOC.toString()))!=null){
+                document = documents.get(row.getInt(Columns.ID_DOC.toString()));
                 nouveauDocument=false;
             }
             else{
@@ -364,15 +364,15 @@ public class DocumentImporter extends GenericDocumentImporter {
             
             
             
-            final Class classeDocument = classesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+            final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
 
             if (classeDocument != null) {
                 document.setTypeDocumentId(classeDocument.getCanonicalName());
                 if (classeDocument.equals(Convention.class)) {
                     // Pour les conventions !
-                    if (row.getInt(DocumentColumns.ID_CONVENTION.toString()) != null) {
-                        if (conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())) != null) {
-                            document.setConvention(conventions.get(row.getInt(DocumentColumns.ID_CONVENTION.toString())).getId());
+                    if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
+                        if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
+                            document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
                         }
                     }
                 } 
@@ -389,10 +389,10 @@ public class DocumentImporter extends GenericDocumentImporter {
 //                System.out.println("Type de document inconnu !");
             }
                 
-            document.setTypeDocumentId(typesDocument.get(row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString())).getId());
+            document.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
 
             if(nouveauDocument){
-               documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
+               documents.put(row.getInt(Columns.ID_DOC.toString()), document);
             }
         }
         couchDbConnector.executeBulk(documents.values());

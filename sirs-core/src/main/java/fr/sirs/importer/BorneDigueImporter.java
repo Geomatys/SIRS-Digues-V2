@@ -45,7 +45,7 @@ public class BorneDigueImporter extends GenericImporter {
         this.borneDigueRepository = borneDigueRepository;
     }
     
-    private enum BorneDigueColumns {
+    private enum Columns {
         ID_BORNE, 
         ID_TRONCON_GESTION, 
         NOM_BORNE,
@@ -84,9 +84,9 @@ public class BorneDigueImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for(BorneDigueColumns c : BorneDigueColumns.values())
+        for(Columns c : Columns.values())
             columns.add(c.toString());
         return columns;
     }
@@ -106,33 +106,33 @@ public class BorneDigueImporter extends GenericImporter {
             final Row row = it.next();
             final BorneDigue borne = new BorneDigue();
 
-            borne.setLibelle(row.getString(BorneDigueColumns.NOM_BORNE.toString()));
-            borne.setCommentaire(row.getString(BorneDigueColumns.COMMENTAIRE_BORNE.toString()));
-            if (row.getDate(BorneDigueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                borne.setDateMaj(LocalDateTime.parse(row.getDate(BorneDigueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            borne.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
+            borne.setCommentaire(row.getString(Columns.COMMENTAIRE_BORNE.toString()));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                borne.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(BorneDigueColumns.DATE_DEBUT_VAL.toString()) != null) {
-                borne.setDate_debut(LocalDateTime.parse(row.getDate(BorneDigueColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+                borne.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(BorneDigueColumns.DATE_FIN_VAL.toString()) != null) {
-                borne.setDate_fin(LocalDateTime.parse(row.getDate(BorneDigueColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+                borne.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
-            borne.setFictive(row.getBoolean(BorneDigueColumns.FICTIVE.toString()));
+            borne.setFictive(row.getBoolean(Columns.FICTIVE.toString()));
             GeometryFactory geometryFactory = new GeometryFactory();
 
             try {
                 final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
 
                 final Point point;
-                if (row.getDouble(BorneDigueColumns.Z_POINT.toString()) != null) {
+                if (row.getDouble(Columns.Z_POINT.toString()) != null) {
                     point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(BorneDigueColumns.X_POINT.toString()),
-                            row.getDouble(BorneDigueColumns.Y_POINT.toString()),
-                            row.getDouble(BorneDigueColumns.Z_POINT.toString()))), lambertToRGF);
+                            row.getDouble(Columns.X_POINT.toString()),
+                            row.getDouble(Columns.Y_POINT.toString()),
+                            row.getDouble(Columns.Z_POINT.toString()))), lambertToRGF);
                 } else {
                     point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(BorneDigueColumns.X_POINT.toString()),
-                            row.getDouble(BorneDigueColumns.Y_POINT.toString()))), lambertToRGF);
+                            row.getDouble(Columns.X_POINT.toString()),
+                            row.getDouble(Columns.Y_POINT.toString()))), lambertToRGF);
                 }
                 borne.setGeometry(point);
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
@@ -140,16 +140,16 @@ public class BorneDigueImporter extends GenericImporter {
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            bornesDigue.put(row.getInt(BorneDigueColumns.ID_BORNE.toString()), borne);
+            bornesDigue.put(row.getInt(Columns.ID_BORNE.toString()), borne);
 
             // Set the list ByTronconId
-            List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()));
+            List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                bornesDigueByTronconId.put(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(borne);
-            bornesDigueByTronconId.put(row.getInt(BorneDigueColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
         couchDbConnector.executeBulk(bornesDigue.values());
     }

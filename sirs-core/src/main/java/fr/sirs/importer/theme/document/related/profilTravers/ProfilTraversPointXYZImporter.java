@@ -37,7 +37,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
         return pointsByLeve;
     }
     
-    private enum ProfilTraversPointXYZDescriptionColumns {
+    private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_POINT,
         X,
@@ -47,9 +47,9 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilTraversPointXYZDescriptionColumns c : ProfilTraversPointXYZDescriptionColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -70,26 +70,26 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             final Row row = it.next();
             final LeveePoints leveePoint = new LeveePoints();
             
-            if (row.getDouble(ProfilTraversPointXYZDescriptionColumns.X.toString()) != null) {
-                leveePoint.setX(row.getDouble(ProfilTraversPointXYZDescriptionColumns.X.toString()).doubleValue());
+            if (row.getDouble(Columns.X.toString()) != null) {
+                leveePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
             }
             
-            if (row.getDouble(ProfilTraversPointXYZDescriptionColumns.Y.toString()) != null) {
-                leveePoint.setY(row.getDouble(ProfilTraversPointXYZDescriptionColumns.Y.toString()).doubleValue());
+            if (row.getDouble(Columns.Y.toString()) != null) {
+                leveePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
             }
             
-            if (row.getDouble(ProfilTraversPointXYZDescriptionColumns.Z.toString()) != null) {
-                leveePoint.setZ(row.getDouble(ProfilTraversPointXYZDescriptionColumns.Z.toString()).doubleValue());
+            if (row.getDouble(Columns.Z.toString()) != null) {
+                leveePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
             }
             
             leveePoint.setD(Double.NaN);
             
-            points.put(row.getInt(ProfilTraversPointXYZDescriptionColumns.ID_POINT.toString()), leveePoint);
+            points.put(row.getInt(Columns.ID_POINT.toString()), leveePoint);
             
-            List<LeveePoints> listByLeve = pointsByLeve.get(row.getInt(ProfilTraversPointXYZDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            List<LeveePoints> listByLeve = pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
-                pointsByLeve.put(row.getInt(ProfilTraversPointXYZDescriptionColumns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
+                pointsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
             }
             listByLeve.add(leveePoint);
         }

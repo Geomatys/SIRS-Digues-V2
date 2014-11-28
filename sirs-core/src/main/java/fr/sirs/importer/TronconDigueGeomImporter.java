@@ -38,15 +38,15 @@ public class TronconDigueGeomImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (CartoTronconGestionDigueColumns c : CartoTronconGestionDigueColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
     }
     
-    private enum CartoTronconGestionDigueColumns {
+    private enum Columns {
         //OBJECTID,
         SHAPE,
         //OBJECTID_old,
@@ -81,7 +81,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
             try {
                 final Row row = it.next();
 
-                final byte[] bytes = row.getBytes(CartoTronconGestionDigueColumns.SHAPE.toString());
+                final byte[] bytes = row.getBytes(Columns.SHAPE.toString());
                 final ByteBuffer bb = ByteBuffer.wrap(bytes);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 final int id = bb.getInt();
@@ -92,7 +92,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
                 final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
                 geom = JTS.transform(geom, lambertToRGF);
 
-                tronconDigueGeom.put(row.getInt(String.valueOf(CartoTronconGestionDigueColumns.ID_TRONCON_GESTION.toString())),
+                tronconDigueGeom.put(row.getInt(String.valueOf(Columns.ID_TRONCON_GESTION.toString())),
                         geom);
             } catch (FactoryException | DataStoreException | MismatchedDimensionException | TransformException ex) {
                 Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);

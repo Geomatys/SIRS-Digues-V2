@@ -70,7 +70,7 @@ public class ProfilLongImporter extends GenericImporter {
         return profils;
     }
     
-    private enum ProfilLongColumns {
+    private enum Columns {
         ID_PROFIL_EN_LONG,
         NOM,
         DATE_LEVE,
@@ -90,9 +90,9 @@ public class ProfilLongImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilLongColumns c : ProfilLongColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -108,9 +108,9 @@ public class ProfilLongImporter extends GenericImporter {
         profils = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeSystemeReleve();
-        final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypePositionProfilLong();
-        final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeOrigineProfilLong();
+        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypes();
+        final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypes();
+        final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypes();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
         final Map<Integer, List<ProfilLongEvenementHydraulique>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
@@ -119,51 +119,51 @@ public class ProfilLongImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilLong profil = new ProfilLong();
             
-            profil.setLibelle(row.getString(ProfilLongColumns.NOM.toString()));
+            profil.setLibelle(row.getString(Columns.NOM.toString()));
             
-            if (row.getDate(ProfilLongColumns.DATE_LEVE.toString()) != null) {
-                profil.setDateLevee(LocalDateTime.parse(row.getDate(ProfilLongColumns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
+                profil.setDateLevee(LocalDateTime.parse(row.getDate(Columns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
             }
             
-            final Organisme organisme = organismes.get(row.getInt(ProfilLongColumns.ID_ORG_CREATEUR.toString()));
+            final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));
             if(organisme!=null){
                 profil.setOrganismeCreateurId(organisme.getId());
             }
             
-            if(row.getInt(ProfilLongColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())!=null){
-                profil.setTypeSystemesReleveId(systemesReleve.get(row.getInt(ProfilLongColumns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())!=null){
+                profil.setTypeSystemesReleveId(systemesReleve.get(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
             }
             
-            if (row.getDate(ProfilLongColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profil.setDateMaj(LocalDateTime.parse(row.getDate(ProfilLongColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            profil.setReference_papier(row.getString(ProfilLongColumns.REFERENCE_PAPIER.toString()));
+            profil.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            profil.setReference_numerique(row.getString(ProfilLongColumns.REFERENCE_NUMERIQUE.toString()));
+            profil.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
-            profil.setReference_calque(row.getString(ProfilLongColumns.REFERENCE_CALQUE.toString()));
+            profil.setReference_calque(row.getString(Columns.REFERENCE_CALQUE.toString()));
             
-            if(row.getInt(ProfilLongColumns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())!=null){
-                profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(ProfilLongColumns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())!=null){
+                profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());
             }
             
-            if(row.getInt(ProfilLongColumns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())!=null){
-                profil.setPositionProfilLongSurDigueId(typesPositionProfil.get(row.getInt(ProfilLongColumns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())).getId());
+            if(row.getInt(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())!=null){
+                profil.setPositionProfilLongSurDigueId(typesPositionProfil.get(row.getInt(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())).getId());
             }
             
-            if(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
-                profil.setLeveePoints(pointsByLeve.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
+            if(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setLeveePoints(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             }
             
-            if(evenementsHydrauliques.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()))!=null){
-                profil.setProfilLongEvenementHydraulique(evenementsHydrauliques.get(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString())));
+            if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setProfilLongEvenementHydraulique(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             }
             
             
-            profil.setCommentaire(row.getString(ProfilLongColumns.COMMENTAIRE.toString()));
+            profil.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            profils.put(row.getInt(ProfilLongColumns.ID_PROFIL_EN_LONG.toString()), profil);
+            profils.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);
         }
         couchDbConnector.executeBulk(profils.values());
     }

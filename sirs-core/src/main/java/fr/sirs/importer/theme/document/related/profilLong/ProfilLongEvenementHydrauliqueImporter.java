@@ -42,7 +42,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
         return evenementHydrauByProfilLongId;
     }
     
-    private enum ProfilLongEvenementHydrauliqueColumns {
+    private enum Columns {
         ID_PROFIL_EN_LONG,
         ID_EVENEMENT_HYDRAU,
         PR_DEBUT_SAISI,
@@ -54,9 +54,9 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
     }
     
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (ProfilLongEvenementHydrauliqueColumns c : ProfilLongEvenementHydrauliqueColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -78,32 +78,32 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
             final Row row = it.next();
             final ProfilLongEvenementHydraulique profilLongEvenementHydraulique = new ProfilLongEvenementHydraulique();
             
-            if(row.getInt(ProfilLongEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                profilLongEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(ProfilLongEvenementHydrauliqueColumns.ID_EVENEMENT_HYDRAU.toString())).getId());
+            if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
+                profilLongEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
             }
             
-            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString())!=null){
-                profilLongEvenementHydraulique.setPrDebut(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_DEBUT_SAISI.toString()).floatValue());
+            if(row.getDouble(Columns.PR_DEBUT_SAISI.toString())!=null){
+                profilLongEvenementHydraulique.setPrDebut(row.getDouble(Columns.PR_DEBUT_SAISI.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString())!=null){
-                profilLongEvenementHydraulique.setPrFin(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PR_FIN_SAISI.toString()).floatValue());
+            if(row.getDouble(Columns.PR_FIN_SAISI.toString())!=null){
+                profilLongEvenementHydraulique.setPrFin(row.getDouble(Columns.PR_FIN_SAISI.toString()).floatValue());
             }
             
-            if(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString())!=null){
-                profilLongEvenementHydraulique.setDebitPremerDebordement(row.getDouble(ProfilLongEvenementHydrauliqueColumns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString()).floatValue());
+            if(row.getDouble(Columns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString())!=null){
+                profilLongEvenementHydraulique.setDebitPremerDebordement(row.getDouble(Columns.PREMIER_DEBORDEMENT_DEBIT_M3S.toString()).floatValue());
             }
             
-            if (row.getDate(ProfilLongEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilLongEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(ProfilLongEvenementHydrauliqueColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                profilLongEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            List<ProfilLongEvenementHydraulique> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(ProfilLongEvenementHydrauliqueColumns.ID_PROFIL_EN_LONG.toString()));
+            List<ProfilLongEvenementHydraulique> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }
             listByLeve.add(profilLongEvenementHydraulique);
-            evenementHydrauByProfilLongId.put(row.getInt(ProfilLongEvenementHydrauliqueColumns.ID_PROFIL_EN_LONG.toString()), listByLeve);
+            evenementHydrauByProfilLongId.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), listByLeve);
         }
     }
 }

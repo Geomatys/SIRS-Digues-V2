@@ -38,7 +38,7 @@ public class TronconGestionDigueGardienImporter extends GenericImporter {
         this.intervenantImporter = intervenantImporter;
     }
 
-    private enum TronconGestionDigueGardienColumns {
+    private enum Columns {
 //        ID_GARDIEN_TRONCON_GESTION, // Pas dans le nouveau modèle
         ID_INTERVENANT,
         ID_TRONCON_GESTION,
@@ -73,9 +73,9 @@ public class TronconGestionDigueGardienImporter extends GenericImporter {
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
-        for (TronconGestionDigueGardienColumns c : TronconGestionDigueGardienColumns.values()) {
+        for (Columns c : Columns.values()) {
             columns.add(c.toString());
         }
         return columns;
@@ -99,26 +99,26 @@ public class TronconGestionDigueGardienImporter extends GenericImporter {
             
             gardien.setTypeContact("Gardien");
             
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()) != null) {
-                gardien.setDate_debut(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
+                gardien.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_FIN.toString()) != null) {
-                gardien.setDate_fin(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_FIN.toString()) != null) {
+                gardien.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
-            if (row.getDate(TronconGestionDigueGardienColumns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gardien.setDateMaj(LocalDateTime.parse(row.getDate(TronconGestionDigueGardienColumns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                gardien.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = gardiensByTronconId.get(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()));
+            List<ContactTroncon> listeGestions = gardiensByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
             listeGestions.add(gardien);
-            gardiensByTronconId.put(row.getInt(TronconGestionDigueGardienColumns.ID_TRONCON_GESTION.toString()), listeGestions);
+            gardiensByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
-            final Contact intervenant = intervenants.get(row.getInt(TronconGestionDigueGardienColumns.ID_INTERVENANT.toString()));
+            final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
             if (intervenant.getId() != null) {
                 gardien.setContactId(intervenant.getId());
             } else {

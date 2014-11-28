@@ -46,7 +46,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtLargeurFrancBordImporter extends GenericObjetImporter<LargeurFrancBord> {
+class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFrancBord> {
     
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
 
@@ -236,7 +236,7 @@ class SysEvtLargeurFrancBordImporter extends GenericObjetImporter<LargeurFrancBo
     }
 
     @Override
-    public List<String> getUsedColumns() {
+    protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
         for (Columns c : Columns.values()) {
             columns.add(c.toString());
