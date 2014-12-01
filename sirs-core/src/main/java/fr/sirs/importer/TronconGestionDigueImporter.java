@@ -29,6 +29,7 @@ import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
 import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
 import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
 import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
+import fr.sirs.importer.objet.link.ElementReseauCheminAccessImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -70,6 +71,7 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
     private ElementReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
     private ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
     private ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
+    private ElementReseauCheminAccessImporter elementReseauCheminAccessImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -148,6 +150,8 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
         reseauOuvrageTelecomImporter = new ElementReseauOuvrageTelNrjImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         elementReseauAutreOuvrageHydrauImporter = new ElementReseauAutreOuvrageHydrauImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        elementReseauCheminAccessImporter = new ElementReseauCheminAccessImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
     }
     
@@ -322,6 +326,7 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
         reseauConduiteFermeeImporter.link();
         reseauOuvrageTelecomImporter.link();
         elementReseauAutreOuvrageHydrauImporter.link();
+        elementReseauCheminAccessImporter.link();
         
 //        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
 //        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));

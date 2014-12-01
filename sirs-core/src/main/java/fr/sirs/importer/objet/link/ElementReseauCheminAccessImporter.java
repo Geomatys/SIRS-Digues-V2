@@ -6,6 +6,7 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.VoieAcces;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -22,11 +23,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker {
+public class ElementReseauCheminAccessImporter extends GenericObjectLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
-    public ElementReseauAutreOuvrageHydrauImporter(final Database accessDatabase, 
+    public ElementReseauCheminAccessImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
@@ -35,7 +36,7 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
-        ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU,
+        ID_ELEMENT_RESEAU_CHEMIN_ACCES,
         DATE_DERNIERE_MAJ
     };
     
@@ -50,7 +51,7 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString();
     }
 
     @Override
@@ -64,32 +65,32 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker
             final ObjetReferenceObjet referenceReseauFerme = new ObjetReferenceObjet();
             final ObjetReferenceObjet referenceOuvrageAssocie = new ObjetReferenceObjet();
             
-            final OuvrageHydrauliqueAssocie ouvrageHydrauliqueAssocie = (OuvrageHydrauliqueAssocie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()));
-            final ReseauHydrauliqueFerme reseauHydrau = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final VoieAcces ouvrageHydrauliqueAssocie = (VoieAcces) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CHEMIN_ACCES.toString()));
+            final Objet reseauHydrau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
 
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                    referenceOuvrageAssocie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-                
-                referenceReseauFerme.setObjetId(cleanNullString(reseauHydrau.getId()));
-                referenceOuvrageAssocie.setObjetId(cleanNullString(ouvrageHydrauliqueAssocie.getId()));
-
-                List<ObjetReferenceObjet> listReseauFerme = ouvrageHydrauliqueAssocie.getObjet();
-                if (listReseauFerme == null) {
-                    listReseauFerme = new ArrayList<>();
-                    ouvrageHydrauliqueAssocie.setObjet(listReseauFerme);
-                }
-                listReseauFerme.add(referenceReseauFerme);
-
-                List<ObjetReferenceObjet> listOuvrageAssocie = reseauHydrau.getObjet();
-                if (listOuvrageAssocie == null) {
-                    listOuvrageAssocie = new ArrayList<>();
-                    reseauHydrau.setObjet(listOuvrageAssocie);
-                }
-                listOuvrageAssocie.add(referenceOuvrageAssocie);
+//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+//                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+//                    referenceOuvrageAssocie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+//                }
+//                
+//                referenceReseauFerme.setObjetId(cleanNullString(reseauHydrau.getId()));
+//                referenceOuvrageAssocie.setObjetId(cleanNullString(ouvrageHydrauliqueAssocie.getId()));
+//
+//                List<ObjetReferenceObjet> listReseauFerme = ouvrageHydrauliqueAssocie.getObjet();
+//                if (listReseauFerme == null) {
+//                    listReseauFerme = new ArrayList<>();
+//                    ouvrageHydrauliqueAssocie.setObjet(listReseauFerme);
+//                }
+//                listReseauFerme.add(referenceReseauFerme);
+//
+//                List<ObjetReferenceObjet> listOuvrageAssocie = reseauHydrau.getObjet();
+//                if (listOuvrageAssocie == null) {
+//                    listOuvrageAssocie = new ArrayList<>();
+//                    reseauHydrau.setObjet(listOuvrageAssocie);
+//                }
+//                listOuvrageAssocie.add(referenceOuvrageAssocie);
             }
         }
     }

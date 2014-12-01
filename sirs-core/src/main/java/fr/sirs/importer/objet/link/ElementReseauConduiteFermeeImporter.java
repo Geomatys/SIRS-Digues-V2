@@ -61,7 +61,8 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjectLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ObjetReferenceObjet reseauConduite = new ObjetReferenceObjet();
+            final ObjetReferenceObjet referenceConduite = new ObjetReferenceObjet();
+            final ObjetReferenceObjet referenceStation = new ObjetReferenceObjet();
             
             final ReseauHydrauliqueFerme conduiteFermee = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()));
             final StationPompage stationPompage = (StationPompage) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
@@ -69,17 +70,26 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjectLinker {
             if(conduiteFermee!=null && stationPompage!=null){
             
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    reseauConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    referenceConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    referenceStation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
                 
-                reseauConduite.setObjetId(cleanNullString(conduiteFermee.getId()));
+                referenceConduite.setObjetId(cleanNullString(conduiteFermee.getId()));
+                referenceStation.setObjetId(cleanNullString(stationPompage.getId()));
 
-                List<ObjetReferenceObjet> listByReseau = stationPompage.getObjet();
-                if (listByReseau == null) {
-                    listByReseau = new ArrayList<>();
-                    stationPompage.setObjet(listByReseau);
+                List<ObjetReferenceObjet> listConduites = stationPompage.getObjet();
+                if (listConduites == null) {
+                    listConduites = new ArrayList<>();
+                    stationPompage.setObjet(listConduites);
                 }
-                listByReseau.add(reseauConduite);
+                listConduites.add(referenceConduite);
+
+                List<ObjetReferenceObjet> listStations = conduiteFermee.getObjet();
+                if (listStations == null) {
+                    listStations = new ArrayList<>();
+                    conduiteFermee.setObjet(listStations);
+                }
+                listStations.add(referenceStation);
             }
         }
     }
