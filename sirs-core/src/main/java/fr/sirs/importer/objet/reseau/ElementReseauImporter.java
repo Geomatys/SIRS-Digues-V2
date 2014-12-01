@@ -67,7 +67,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     private final SysEvtStationDePompageImporter stationPompageImporter;
     private final TypeReseauTelecommunicImporter typeReseauTelecomImporter;
     private final SysEvtReseauTelecommunicationImporter resTelecomImporter;
-    private final TypeOuvrageTelecomNRJImporter typeOuvrageTelecomImporter;
+    private final TypeOuvrageTelecomNrjImporter typeOuvrageTelecomImporter;
     private final SysEvtOuvrageTelecommunicationImporter ouvTelecomImporter;
     private final TypeOuvrageHydrauAssocieImporter typeOuvrageAssocieImporter;
     private final SysEvtAutreOuvrageHydrauliqueImporter autreOuvrageHydrauliqueImporter;
@@ -146,7 +146,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 typeFonctionImporter, typeImplantationImporter, 
                 typeReseauTelecomImporter);
         reseauImporters.add(resTelecomImporter);
-        typeOuvrageTelecomImporter = new TypeOuvrageTelecomNRJImporter(
+        typeOuvrageTelecomImporter = new TypeOuvrageTelecomNrjImporter(
                 accessDatabase, couchDbConnector);
         ouvTelecomImporter = new SysEvtOuvrageTelecommunicationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
@@ -239,6 +239,10 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         reseauImporters.add(sysEvtOuvertureBatardableImporter);
+    }
+    
+    public TypeElementReseauImporter getTypeElementReseauImporter(){
+        return typeElementReseauImporter;
     }
 
     private enum Columns {

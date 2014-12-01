@@ -34,7 +34,7 @@ public abstract class GenericImporter {
         this.couchDbConnector = couchDbConnector;
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
         this.columnDataFlags = new HashMap<>();
-        this.tableName = this.getTableName().toString();
+        this.tableName = this.getTableName();
         
         // Set the data flags to false for all the columns used by the importer. 
         this.getUsedColumns().stream().forEach((column) -> {this.columnDataFlags.put(column, Boolean.FALSE);});
@@ -49,8 +49,6 @@ public abstract class GenericImporter {
                 emptyFields.stream().forEach((field) -> {
                     System.out.println(field);
                 });
-            } else {
-                //System.out.println("No emty fields for table " + tableName);
             }
 
             // Detect the coluns used by the importer that do not exist in the table.
@@ -60,8 +58,6 @@ public abstract class GenericImporter {
                 erroneousFields.stream().forEach((field) -> {
                     System.out.println(field);
                 });
-            } else {
-                //System.out.println("No erronous fields for table " + tableName);
             }
 
             // Detect the coluns forgotten by the importer but containing data;
@@ -71,9 +67,8 @@ public abstract class GenericImporter {
                 forgottenFields.stream().forEach((field) -> {
                     System.out.println(field);
                 });
-            } else {
-                //System.out.println("No erronous fields for table " + tableName);
             }
+            
         } catch (IOException ex) {
             Logger.getLogger(GenericImporter.class.getName()).log(Level.SEVERE, null, ex);
         }

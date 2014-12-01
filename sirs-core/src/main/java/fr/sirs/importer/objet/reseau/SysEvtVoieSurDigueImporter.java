@@ -298,9 +298,6 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
                 if(typesUsages.get(row.getInt(Columns.ID_TYPE_USAGE_VOIE.toString()))!=null){
                     voie.setUsageId(typesUsages.get(row.getInt(Columns.ID_TYPE_USAGE_VOIE.toString())).getId());
                 }
-                else {
-                    System.out.println("Type d'usage null pour l'élément : "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+" ("+row.getInt(Columns.ID_TYPE_USAGE_VOIE.toString())+")");
-                }
             }
             
             if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){

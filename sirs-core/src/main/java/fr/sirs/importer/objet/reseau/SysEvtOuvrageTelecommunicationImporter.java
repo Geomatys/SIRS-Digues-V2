@@ -50,7 +50,7 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtOuvrageTelecommunicationImporter extends GenericReseauImporter<OuvrageTelecomEnergie> {
     
-    private final TypeOuvrageTelecomNRJImporter typeOuvrageTelecomImporter;
+    private final TypeOuvrageTelecomNrjImporter typeOuvrageTelecomImporter;
 
     SysEvtOuvrageTelecommunicationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -65,7 +65,7 @@ class SysEvtOuvrageTelecommunicationImporter extends GenericReseauImporter<Ouvra
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter, 
-            final TypeOuvrageTelecomNRJImporter typeReseauTelecomImporter) {
+            final TypeOuvrageTelecomNrjImporter typeReseauTelecomImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 intervenantImporter, typeSourceImporter, typeCoteImporter, 

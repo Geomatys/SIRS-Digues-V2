@@ -22,11 +22,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
+public class ElementReseauOuvrageTelNrjImporter extends GenericObjectLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
-    public ReseauOuvrageTelecomImporter(final Database accessDatabase, 
+    public ElementReseauOuvrageTelNrjImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
@@ -78,7 +78,6 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
             final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
             if(ouvrage!=null){
                 reseauReseau.setReseauId(cleanNullString(ouvrage.getId()));
-
                 List<ReseauReseau> listReseauOuvrage = ouvrage.getReseau();
                 if (listReseauOuvrage == null) {
                     listReseauOuvrage = new ArrayList<>();
@@ -87,36 +86,15 @@ public class ReseauOuvrageTelecomImporter extends GenericObjectLinker {
                 listReseauOuvrage.add(ouvrageReseau);
             }
             
-            final ReseauTelecomEnergie objet = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-                
-            if(objet!=null){
-                ouvrageReseau.setReseauId(cleanNullString(objet.getId()));
-
-                if(objet instanceof ReseauTelecomEnergie){
-                    final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) objet;
-                    List<ReseauReseau> listReseauReseau = reseau.getReseau();
-                    if (listReseauReseau == null) {
-                        listReseauReseau = new ArrayList<>();
-                        reseau.setReseau(listReseauReseau);
-                    }
-                    listReseauReseau.add(reseauReseau);
+            final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            if(reseau!=null){
+                ouvrageReseau.setReseauId(cleanNullString(reseau.getId()));
+                List<ReseauReseau> listReseauReseau = reseau.getReseau();
+                if (listReseauReseau == null) {
+                    listReseauReseau = new ArrayList<>();
+                    reseau.setReseau(listReseauReseau);
                 }
-//                else if(objet instanceof StationPompage){
-//                    final StationPompage reseau = (StationPompage) objet;
-//                    List<ReseauReseau> listReseauReseau = reseau.getReseau();
-//                    if (listReseauReseau == null) {
-//                        listReseauReseau = new ArrayList<>();
-//                        reseau.setReseau(listReseauReseau);
-//                    }
-//                    listReseauReseau.add(reseauReseau);
-//                }
-                else {
-                    System.out.println("Type de réseau non pris en charge : "+reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())).getClass());
-                }
-                
-//                System.out.println("Objet : "+objet);
-//                System.out.println("Ouvrage-Réseau : "+ouvrageReseau);
-//                System.out.println("Réseau-Réseau : "+reseauReseau);
+                listReseauReseau.add(reseauReseau);
             }
             else {
 //                System.out.println("Autre instance : "+objet);

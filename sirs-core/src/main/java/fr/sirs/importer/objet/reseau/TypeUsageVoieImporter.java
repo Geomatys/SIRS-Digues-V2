@@ -25,9 +25,9 @@ class TypeUsageVoieImporter extends GenericTypeImporter<RefUsageVoie> {
     }
 
     private enum Columns {
-        ID_UTILISATION_CONDUITE,
-        LIBELLE_UTILISATION_CONDUITE,
-        ABREGE_UTILISATION_CONDUITE,
+        ID_TYPE_USAGE_VOIE,
+        LIBELLE_TYPE_USAGE_VOIE,
+        ABREGE_TYPE_USAGE_VOIE,
         DATE_DERNIERE_MAJ
     };
     
@@ -54,12 +54,12 @@ class TypeUsageVoieImporter extends GenericTypeImporter<RefUsageVoie> {
             final Row row = it.next();
             final RefUsageVoie typeUtilisation = new RefUsageVoie();
             
-            typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_UTILISATION_CONDUITE.toString()));
-            typeUtilisation.setAbrege(row.getString(Columns.ABREGE_UTILISATION_CONDUITE.toString()));
+            typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_TYPE_USAGE_VOIE.toString()));
+            typeUtilisation.setAbrege(row.getString(Columns.ABREGE_TYPE_USAGE_VOIE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())), typeUtilisation);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_USAGE_VOIE.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());
     }

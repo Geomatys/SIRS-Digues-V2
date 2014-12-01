@@ -52,7 +52,7 @@ import org.opengis.util.FactoryException;
 public class DesordreImporter extends GenericDesordreImporter<Desordre> {
     
     private final TypeDesordreImporter typeDesordreImporter;
-    private final SysEvtDesordreImporter subDesordreImporter;
+    private final SysEvtDesordreImporter sysEvtDesordreImporter;
 
     public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -75,7 +75,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                 typeFonctionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
                 couchDbConnector);
-        this.subDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
+        this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 structureImporter, typeDesordreImporter, typeSourceImporter, 
@@ -123,8 +123,8 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        structures = subDesordreImporter.getStructures();
-        structuresByTronconId = subDesordreImporter.getStructuresByTronconId();
+        structures = sysEvtDesordreImporter.getStructures();
+        structuresByTronconId = sysEvtDesordreImporter.getStructuresByTronconId();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();

@@ -26,9 +26,11 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
-import fr.sirs.importer.objet.link.DesordreStructureImporter;
-import fr.sirs.importer.objet.link.ReseauConduiteFermeeImporter;
-import fr.sirs.importer.objet.link.ReseauOuvrageTelecomImporter;
+import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
+import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
+import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
+import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
+import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
@@ -63,9 +65,11 @@ public class TronconGestionDigueImporter extends GenericImporter {
     private ElementGeometrieImporter geometryImporter;
     private ElementReseauImporter reseauImporter;
     
-    private DesordreStructureImporter desordreStructureImporter;
-    private ReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
-    private ReseauOuvrageTelecomImporter reseauOuvrageTelecomImporter;
+    private DesordreElementStructureImporter desordreStructureImporter;
+    private DesordreElementReseauImporter desordreElementReseauImporter;
+    private ElementReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
+    private ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
+    private ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -133,12 +137,17 @@ public class TronconGestionDigueImporter extends GenericImporter {
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         
-        this.desordreStructureImporter = new DesordreStructureImporter(
+        desordreStructureImporter = new DesordreElementStructureImporter(
                 accessDatabase, couchDbConnector, structureImporter, 
                 desordreImporter);
-        this.reseauConduiteFermeeImporter = new ReseauConduiteFermeeImporter(
+        desordreElementReseauImporter = new DesordreElementReseauImporter(
+                accessDatabase, couchDbConnector, reseauImporter, 
+                desordreImporter);
+        reseauConduiteFermeeImporter = new ElementReseauConduiteFermeeImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
-        this.reseauOuvrageTelecomImporter = new ReseauOuvrageTelecomImporter(
+        reseauOuvrageTelecomImporter = new ElementReseauOuvrageTelNrjImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        elementReseauAutreOuvrageHydrauImporter = new ElementReseauAutreOuvrageHydrauImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
     }
     
@@ -280,7 +289,6 @@ public class TronconGestionDigueImporter extends GenericImporter {
             
             // Set the references demanding CouchDb identifier.
             final Digue digue = digues.get(row.getInt(Columns.ID_DIGUE.toString()));
-//            System.out.println("Le tronçon : "+row.getInt(TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+"|| "+row.getString(TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString())+"|| la digue : "+row.getInt(TronconGestionDigueColumns.ID_DIGUE.toString()));
             if (digue != null) {
                 if (digue.getId() != null) {
                     tronconDigue.setDigueId(digue.getId());
@@ -304,8 +312,10 @@ public class TronconGestionDigueImporter extends GenericImporter {
         final Map<Integer, List<Objet>> reseauxByTroncon = reseauImporter.getStructuresByTronconId();
 
         desordreStructureImporter.link();
+        desordreElementReseauImporter.link();
         reseauConduiteFermeeImporter.link();
         reseauOuvrageTelecomImporter.link();
+        elementReseauAutreOuvrageHydrauImporter.link();
         
 //        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
 //        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));

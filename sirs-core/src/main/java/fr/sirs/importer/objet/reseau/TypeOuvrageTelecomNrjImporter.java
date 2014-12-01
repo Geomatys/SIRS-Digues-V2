@@ -17,9 +17,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOuvrageTelecomNRJImporter extends GenericTypeImporter<RefOuvrageTelecomEnergie> {
+class TypeOuvrageTelecomNrjImporter extends GenericTypeImporter<RefOuvrageTelecomEnergie> {
     
-    TypeOuvrageTelecomNRJImporter(final Database accessDatabase, 
+    TypeOuvrageTelecomNrjImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }

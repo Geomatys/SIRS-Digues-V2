@@ -21,12 +21,12 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DesordreStructureImporter extends GenericObjectLinker {
+public class DesordreElementStructureImporter extends GenericObjectLinker {
     
     private final ElementStructureImporter structureImporter;
     private final DesordreImporter desordreImporter;
 
-    public DesordreStructureImporter(final Database accessDatabase,
+    public DesordreElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final ElementStructureImporter structureImporter,
             final DesordreImporter desordreImporter) {

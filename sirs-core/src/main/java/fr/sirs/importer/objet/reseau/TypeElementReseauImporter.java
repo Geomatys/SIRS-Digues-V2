@@ -27,7 +27,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeElementReseauImporter extends GenericTypeImporter<Class> {
+public class TypeElementReseauImporter extends GenericTypeImporter<Class> {
 
     TypeElementReseauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
