@@ -47,7 +47,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconGestionDigueImporter extends GenericImporter {
+public class TronconGestionDigueImporter extends GenericImporter implements DocumentsUpdater {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
     private Map<String, Integer> tronconsIds = null;
@@ -154,6 +154,12 @@ public class TronconGestionDigueImporter extends GenericImporter {
     public ElementStructureImporter getStructureImporter(){return structureImporter;}
     public DesordreImporter getDesordreImporter(){return desordreImporter;}
     public ElementGeometrieImporter getGeometryImporter(){return geometryImporter;}
+
+    @Override
+    public void update() throws IOException, AccessDbImporterException {
+        if(tronconsDigue==null) compute();
+        couchDbConnector.executeBulk(tronconsDigue.values());
+    }
 
     /* TODO : s'occuper du lien avec les gestionnaires.
      * TODO : s'occuper du lien avec les rives.

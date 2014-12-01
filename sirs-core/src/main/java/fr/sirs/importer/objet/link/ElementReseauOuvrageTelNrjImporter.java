@@ -3,8 +3,8 @@ package fr.sirs.importer.objet.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.ReseauReseau;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -31,11 +31,6 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjectLinker {
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
         this.reseauImpoter = reseauImpoter;
-    }
-
-    @Override
-    public void link() throws IOException, AccessDbImporterException {
-        compute();
     }
 
     private enum Columns {
@@ -66,38 +61,33 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjectLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauReseau ouvrageReseau = new ReseauReseau();
-            final ReseauReseau reseauReseau = new ReseauReseau();
-            
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                ouvrageReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                reseauReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
-
+            final ObjetReferenceObjet ouvrageReseau = new ObjetReferenceObjet();
+            final ObjetReferenceObjet reseauReseau = new ObjetReferenceObjet();
             final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
-            if(ouvrage!=null){
-                reseauReseau.setReseauId(cleanNullString(ouvrage.getId()));
-                List<ReseauReseau> listReseauOuvrage = ouvrage.getReseau();
+            final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            
+            if(ouvrage!=null && reseau!=null){
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    ouvrageReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    reseauReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
+                
+                ouvrageReseau.setObjetId(cleanNullString(reseau.getId()));
+                reseauReseau.setObjetId(cleanNullString(ouvrage.getId()));
+
+                List<ObjetReferenceObjet> listReseauOuvrage = ouvrage.getObjet();
                 if (listReseauOuvrage == null) {
                     listReseauOuvrage = new ArrayList<>();
-                    ouvrage.setReseau(listReseauOuvrage);
+                    ouvrage.setObjet(listReseauOuvrage);
                 }
                 listReseauOuvrage.add(ouvrageReseau);
-            }
-            
-            final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-            if(reseau!=null){
-                ouvrageReseau.setReseauId(cleanNullString(reseau.getId()));
-                List<ReseauReseau> listReseauReseau = reseau.getReseau();
+                
+                List<ObjetReferenceObjet> listReseauReseau = reseau.getObjet();
                 if (listReseauReseau == null) {
                     listReseauReseau = new ArrayList<>();
-                    reseau.setReseau(listReseauReseau);
+                    reseau.setObjet(listReseauReseau);
                 }
                 listReseauReseau.add(reseauReseau);
-            }
-            else {
-//                System.out.println("Autre instance : "+objet);
             }
         }
     }

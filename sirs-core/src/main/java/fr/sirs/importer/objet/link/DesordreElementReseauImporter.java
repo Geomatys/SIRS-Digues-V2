@@ -5,8 +5,8 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.core.model.ElementReseauDesordre;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.reseau.TypeElementReseauImporter;
@@ -38,11 +38,6 @@ public class DesordreElementReseauImporter extends GenericObjectLinker {
         typeElementReseauImporter = elementReseauImporter.getTypeElementReseauImporter();
     }
 
-    @Override
-    public void link() throws IOException, AccessDbImporterException {
-        compute();
-    }
-
     private enum Columns {
         ID_DESORDRE,
         ID_ELEMENT_RESEAU,
@@ -65,28 +60,28 @@ public class DesordreElementReseauImporter extends GenericObjectLinker {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ElementReseauDesordre elementReseauDesordre = new ElementReseauDesordre();
+            final ObjetReferenceObjet elementReseauDesordre = new ObjetReferenceObjet();
             
             final Objet elementReseau = elementsReseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Class classeElementReseau = classesElementReseaux.get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             
-            
-            if(elementReseau!=null){
-                System.out.println("Classe de l'élément de réseau : "+classeElementReseau);
+            if(elementReseau!=null && desordre!=null){
+
                 if(elementReseau.getClass() != classeElementReseau){
                     throw new AccessDbImporterException("Bad type !");
                 }
-                elementReseauDesordre.setElementId(elementReseau.getId());
-
+            
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                     elementReseauDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
-
-                List<ElementReseauDesordre> listByDesordre =  desordre.getElementReseau();
+                
+                elementReseauDesordre.setObjetId(elementReseau.getId());
+                
+                List<ObjetReferenceObjet> listByDesordre =  desordre.getObjet();
                 if(listByDesordre==null) {
                     listByDesordre = new ArrayList<>();
-                    desordre.setElementReseau(listByDesordre);
+                    desordre.setObjet(listByDesordre);
                 }
                 listByDesordre.add(elementReseauDesordre);
             }

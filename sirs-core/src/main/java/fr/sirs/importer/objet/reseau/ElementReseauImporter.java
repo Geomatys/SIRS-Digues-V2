@@ -3,12 +3,14 @@ package fr.sirs.importer.objet.reseau;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Contact;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
@@ -310,9 +312,9 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         NOMBRE,
         POIDS,
         ID_TYPE_MOYEN_MANIP_BATARDEAUX,
-//        ID_ORG_STOCKAGE_BATARDEAUX,
-//        ID_ORG_MANIP_BATARDEAUX,
-//        ID_INTERV_MANIP_BATARDEAUX,
+        ID_ORG_STOCKAGE_BATARDEAUX,
+        ID_ORG_MANIP_BATARDEAUX,
+        ID_INTERV_MANIP_BATARDEAUX,
 //        ID_TYPE_NATURE,
 //        ID_TYPE_NATURE_HAUT,
 //        ID_TYPE_NATURE_BAS,
@@ -366,6 +368,8 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         final Map<Integer, RefMoyenManipBatardeaux> typesMoyenManipBatardeaux = typeMoyenManipBatardeauxImporter.getTypes();
         final Map<Integer, RefSeuil> typesSeuil = typeSeuilImporter.getTypes();
         final Map<Integer, RefTypeGlissiere> typesGlissiere = typeGlissiereImporter.getTypes();
+        final Map<Integer, Contact> contacts = intervenantImporter.getIntervenants();
+        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
 
         // Vérification de la cohérence des structures au sens strict.
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
@@ -481,8 +485,6 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 }
                 
                 final OuvertureBatardable ouverture = (OuvertureBatardable) structure;
-                
-
 
                 if (row.getDouble(Columns.Z_SEUIL.toString()) != null) {
                     ouverture.setZ_du_seuil(row.getDouble(Columns.Z_SEUIL.toString()).floatValue());
@@ -512,6 +514,17 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                     ouverture.setMoyenManipBatardeauxId(typesMoyenManipBatardeaux.get(row.getInt(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())).getId());
                 }
                 
+                if(row.getInt(Columns.ID_ORG_STOCKAGE_BATARDEAUX.toString())!=null){
+                    ouverture.setOrganismesStockantsId(organismes.get(row.getInt(Columns.ID_ORG_STOCKAGE_BATARDEAUX.toString())).getId());
+                }
+                
+                if(row.getInt(Columns.ID_ORG_MANIP_BATARDEAUX.toString())!=null){
+                    ouverture.setOrganismesManipulateursId(organismes.get(row.getInt(Columns.ID_ORG_MANIP_BATARDEAUX.toString())).getId());
+                }
+                
+                if(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())!=null){
+                    ouverture.setIntervenantManupulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
+                }
                 
             }
             

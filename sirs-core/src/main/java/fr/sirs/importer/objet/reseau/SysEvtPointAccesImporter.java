@@ -173,7 +173,6 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypes();
         final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypes();
@@ -274,14 +273,6 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
             }
             
             pointAcces.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-//            if (row.getString(Columns.N_SECTEUR.toString()) != null) {
-//                try{
-//                    voie.setNumero_secteur(Integer.parseInt(row.getString(Columns.N_SECTEUR.toString())));
-//                } catch (NumberFormatException e){
-//                    System.out.println(e.getMessage());
-//                }
-//            }
             
             if(row.getInt(Columns.ID_TYPE_REVETEMENT.toString())!=null){
                 pointAcces.setRevetementId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT.toString())).getId());

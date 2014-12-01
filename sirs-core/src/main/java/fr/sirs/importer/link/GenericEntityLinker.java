@@ -1,4 +1,4 @@
-package fr.sirs.importer.objet.link;
+package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.importer.AccessDbImporterException;
@@ -10,9 +10,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-abstract class GenericObjectLinker extends GenericLinker {
+abstract class GenericEntityLinker extends GenericLinker {
 
-    public GenericObjectLinker(Database accessDatabase, CouchDbConnector couchDbConnector) {
+    public GenericEntityLinker(Database accessDatabase, CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     

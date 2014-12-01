@@ -35,11 +35,6 @@ public class DesordreElementStructureImporter extends GenericObjectLinker {
         this.desordreImporter = desordreImporter;
     }
 
-    @Override
-    public void link() throws IOException, AccessDbImporterException {
-        compute();
-    }
-
     private enum Columns {
         ID_DESORDRE,
         ID_ELEMENT_STRUCTURE,
@@ -65,20 +60,21 @@ public class DesordreElementStructureImporter extends GenericObjectLinker {
             final Objet structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             
-            if(structure!=null){
-                desordreStructure.setStructureId(structure.getId());
-            }
+            if(structure!=null && desordre!=null){
             
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                desordreStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    desordreStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
                 
-            List<DesordreStructure> listByDesordre =  desordre.getDesordreStructure();
-            if(listByDesordre==null) {
-                listByDesordre = new ArrayList<>();
-                desordre.setDesordreStructure(listByDesordre);
+                desordreStructure.setStructureId(structure.getId());
+
+                List<DesordreStructure> listByDesordre =  desordre.getDesordreStructure();
+                if(listByDesordre==null) {
+                    listByDesordre = new ArrayList<>();
+                    desordre.setDesordreStructure(listByDesordre);
+                }
+                listByDesordre.add(desordreStructure);
             }
-            listByDesordre.add(desordreStructure);
         }
     }
 

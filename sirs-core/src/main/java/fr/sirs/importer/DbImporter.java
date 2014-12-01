@@ -63,6 +63,7 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
+import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -189,6 +190,7 @@ public class DbImporter {
     private TypeNatureImporter typeNatureImporter;
     private TypeFonctionImporter typeFonctionImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
+    private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
 
     public enum TableName{
      BORNE_DIGUE,
@@ -201,7 +203,7 @@ public class DbImporter {
      DESORDRE,
      DESORDRE_ELEMENT_RESEAU,
      DESORDRE_ELEMENT_STRUCTURE,
-//     DESORDRE_EVENEMENT_HYDRAU,
+     DESORDRE_EVENEMENT_HYDRAU,
 //     DESORDRE_JOURNAL,
 //     DESORDRE_OBSERVATION, // A Faire !
 //     DESORDRE_PRESTATION,
@@ -719,6 +721,12 @@ public class DbImporter {
                 typeSystemeReleveProfilImporter,
                 tronconGestionDigueImporter);
         
+        
+        // Linkers
+        desordreEvenementHydrauImporter = new DesordreEvenementHydrauImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getDesordreImporter(), 
+                evenementHydrauliqueImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -763,6 +771,9 @@ public class DbImporter {
         tronconGestionDigueImporter.getTronconsDigues();
         systemeReperageBorneImporter.getByBorneId();
         documentImporter.getDocuments();
+        desordreEvenementHydrauImporter.link();
+        
+        tronconGestionDigueImporter.update();
     }
 
     //TODO remove when import finished
@@ -789,7 +800,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -805,7 +816,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -820,7 +831,7 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.DESORDRE_EVENEMENT_HYDRAU.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -829,7 +840,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

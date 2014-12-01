@@ -3,10 +3,9 @@ package fr.sirs.importer.objet.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauReseau;
-import fr.sirs.core.model.StationPompage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -32,11 +31,6 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
         this.reseauImpoter = reseauImpoter;
-    }
-
-    @Override
-    public void link() throws IOException, AccessDbImporterException {
-        compute();
     }
 
     private enum Columns {
@@ -67,22 +61,23 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjectLinker
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauReseau reseauConduite = new ReseauReseau();
+            final ObjetReferenceObjet reseauConduite = new ObjetReferenceObjet();
             
             final OuvrageHydrauliqueAssocie ouvrageHydrauliqueAssocie = (OuvrageHydrauliqueAssocie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()));
             final ReseauHydrauliqueFerme reseauHydrau = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-                reseauConduite.setReseauId(cleanNullString(reseauHydrau.getId()));
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                     reseauConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
+                
+                reseauConduite.setObjetId(cleanNullString(reseauHydrau.getId()));
 
-                List<ReseauReseau> listByReseau = ouvrageHydrauliqueAssocie.getReseau();
+                List<ObjetReferenceObjet> listByReseau = ouvrageHydrauliqueAssocie.getObjet();
                 if (listByReseau == null) {
                     listByReseau = new ArrayList<>();
-                    ouvrageHydrauliqueAssocie.setReseau(listByReseau);
+                    ouvrageHydrauliqueAssocie.setObjet(listByReseau);
                 }
                 listByReseau.add(reseauConduite);
             }
