@@ -334,6 +334,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="utilisationConduiteId"
         eType="#//RefUtilisationConduite"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConduiteFermeeId" eType="#//RefConduiteFermee"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objet" upperBound="-1"
+        eType="#//ObjetReferenceObjet" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_hydraulique_associe" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
