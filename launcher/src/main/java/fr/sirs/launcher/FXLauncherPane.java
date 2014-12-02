@@ -34,10 +34,12 @@ import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -76,6 +78,12 @@ public class FXLauncherPane extends BorderPane {
     private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
     private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
+    /**
+     * Si le serveur de plugins ne pointe pas sur une liste valide de {@link PluginInfo}
+     * serialisés, on essaie d'atteindre le fichier suivant.
+     */
+    private static final String DEFAULT_PLUGIN_DESCRIPTOR = "plugins.json";
+    
     @FXML private Label errorLabel;
     @FXML private TabPane uiTabPane;
     
@@ -99,12 +107,14 @@ public class FXLauncherPane extends BorderPane {
     @FXML private Button uiImportButton;
     
     // onglet mise à jour
-    @FXML private Button uiMaj;
     @FXML private TextField uiMajServerURL;
-    @FXML private Label uiMajCoreVersion;
     @FXML private TableView<PluginInfo> uiInstalledPlugins;
     @FXML private TableView<PluginInfo> uiAvailablePlugins;
-           
+    
+    @FXML private Button uiInstallPluginBtn;
+    @FXML private Button uiDeletePluginBtn;
+    
+    @FXML private ProgressBar uiProgressPlugins;
     
     private URL serverURL;
     private PluginList local = new PluginList();
@@ -137,42 +147,55 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         
+        uiInstallPluginBtn.setDisable(true);
+        uiDeletePluginBtn.setDisable(true);
         
-        final TableColumn<PluginInfo,String> colName = new TableColumn<>("Plugin");
-        colName.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PluginInfo, String>, ObservableValue<String>>() {
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<PluginInfo, String> param) {
-                return param.getValue().nameProperty();
+        uiInstalledPlugins.getColumns().add(newNameColumn());
+        uiInstalledPlugins.getColumns().add(newVersionColumn());
+        uiInstalledPlugins.getColumns().add(newDescriptionColumn());
+        
+        uiAvailablePlugins.getColumns().add(newNameColumn());
+        uiAvailablePlugins.getColumns().add(newVersionColumn());
+        uiAvailablePlugins.getColumns().add(newDescriptionColumn());
+        
+        uiInstalledPlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {          
+            if (newValue != null) {
+                uiDeletePluginBtn.setDisable(false);
+                uiDeletePluginBtn.setOnAction((ActionEvent event) -> {deletePlugin(newValue); updatePluginList(null);});
+            } else {
+                uiDeletePluginBtn.setDisable(true);
+            }
+        });        
+                
+        uiAvailablePlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {          
+            if (newValue != null) {
+                if (local.getPluginInfo(newValue.getName()).findAny().isPresent()) {
+                    uiInstallPluginBtn.setText("Mettre à jour");
+                } else {
+                    uiInstallPluginBtn.setText("Installer");
+                }
+                uiInstallPluginBtn.setDisable(false);
+                uiInstallPluginBtn.setOnAction((ActionEvent event) -> {
+                    installPlugin(newValue);
+                    updatePluginList(null);
+                });
+            } else {
+                uiInstallPluginBtn.setDisable(true);
             }
         });
         
-        final TableColumn<PluginInfo,String> colVersion = new TableColumn<>();
-        colVersion.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PluginInfo, String>, ObservableValue<String>>() {
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<PluginInfo, String> param) {
-                final PluginInfo info = param.getValue();
-                final String version = info.getVersionMajor()+"."+info.getVersionMinor();
-                return new SimpleObjectProperty<>(version);
-            }
-        });
-        
-        final TableColumn<PluginInfo,String> colInstall = new TableColumn<>();
-        colInstall.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
-        colInstall.setCellFactory((TableColumn<PluginInfo, String> param) -> new UpdateCell());
-        
-        uiInstalledPlugins.getColumns().add(colName);
-        uiInstalledPlugins.getColumns().add(colVersion);
-        uiInstalledPlugins.getColumns().add(colInstall);
-        
-        uiAvailablePlugins.getColumns().add(colName);
-        uiAvailablePlugins.getColumns().add(colVersion);
-        uiAvailablePlugins.getColumns().add(colInstall);
+        uiProgressPlugins.visibleProperty().bind(
+                uiInstallPluginBtn.armedProperty().or(uiDeletePluginBtn.armedProperty()));
         
         updateLocalDbList();
         updatePluginList(null);
         uiMajServerURL.setOnInputMethodTextChanged((event)->{if (event.getCommitted() != null && !event.getCommitted().isEmpty()) updatePluginList(null);});
     }
     
+    /** 
+     * Cherche la liste des plugins installés localement, puis ceux disponibles 
+     * sur le serveur de mise à jour (si l'utilisateur a donné une URL valide).
+     */
     private void updateLocalDbList(){
         final ObservableList<String> names = FXCollections.observableList(listLocalDatabase());
         uiLocalBaseTable.setItems(names);
@@ -184,9 +207,17 @@ public class FXLauncherPane extends BorderPane {
     
     @FXML
     void updatePluginList(ActionEvent event) {
+        try {
+            local = PluginInstaller.listLocalPlugins();
+            uiInstalledPlugins.setItems(local.plugins);
+        } catch(Exception ex) {
+            LOGGER.log(Level.WARNING, "Cannot update local plugin list !", ex);
+            errorLabel.setText("Une erreur inattendue est survenue lors de la récupération des plugins installés.");
+        }
+               
         final String majURL = uiMajServerURL.getText();
         if (majURL == null || majURL.isEmpty()) return;
-        try{
+        try {
             serverURL = new URL(uiMajServerURL.getText());
         } catch (MalformedURLException e) {
             LOGGER.log(Level.WARNING, "Invalid plugin server URL !", e);
@@ -195,47 +226,24 @@ public class FXLauncherPane extends BorderPane {
         }
         
         try {
-            local = PluginInstaller.listLocalPlugins();
             distant = PluginInstaller.listDistantPlugins(serverURL);
+            uiAvailablePlugins.setItems(distant.plugins);
         } catch(Exception ex) {
-            LOGGER.log(Level.WARNING, "Cannot update plugin list !", ex);
-            errorLabel.setText("Une erreur inattendue est survenue lors de la récupération de la liste des plugins.");
-            return;
-        }
-        
-        /* We check installed core version, and compare it to the available ones
-         * on plugin server. If we found a newer core, we propose update. Even 
-         * if core application is installed multiple time locally, we just want 
-         * current session version, so we do not bother finding newest local version. 
-         */
-        // TODO : find current started core. Now we get any installed one.
-        final Optional<PluginInfo> installedCore = local.getPluginInfo(CorePlugin.NAME).findAny();
-        
-        Stream<PluginInfo> availableCores = distant.getPluginInfo(CorePlugin.NAME);
-        // Sort available version to extract highest major version, then get highest minor version.
-        Optional<PluginInfo> upToDate = availableCores.max((p1, p2)-> {
-            final int majorComp = Integer.compare(p1.getVersionMajor(), p2.getVersionMajor());
-            if (majorComp == 0) {
-                return Integer.compare(p1.getVersionMinor(), p2.getVersionMinor());
-            } else {
-                return majorComp;
+            try {
+                String serverStr = serverURL.toExternalForm();
+                if (!serverStr.endsWith("/")) {
+                    serverStr = serverStr + "/";
+                }
+                distant = PluginInstaller.listDistantPlugins(
+                        new URL(serverStr+DEFAULT_PLUGIN_DESCRIPTOR));
+                distant.plugins.removeAll(local.plugins);
+                uiAvailablePlugins.setItems(distant.plugins);
+            } catch (Exception e) {
+                ex.addSuppressed(e);
+                LOGGER.log(Level.WARNING, "Cannot update distant plugin list !", ex);
+                errorLabel.setText("Impossible de récupérer la liste des plugins disponibles.");
             }
-        });
-        
-        if (!installedCore.isPresent()) {
-            uiMajCoreVersion.setText("Inconnue");
-            errorLabel.setText("Impossible de trouver la version de l'application installée.");
-        } else {
-            uiMajCoreVersion.setText(installedCore.get().getVersionMajor()+"."+installedCore.get().getVersionMinor());
         }
-        
-        if (upToDate.isPresent()) {
-            uiMaj.setDisable(!upToDate.get().isOlderOrSame(installedCore.get()));
-        }
-        
-        // TODO : improve to get a single line by plugin. Make version available in a sort of popup.
-        uiInstalledPlugins.setItems(local.plugins);
-        uiAvailablePlugins.setItems(distant.plugins);
     }
         
     
@@ -388,16 +396,31 @@ public class FXLauncherPane extends BorderPane {
         }
     }
         
-    @FXML
-    void updateApp(ActionEvent event) {
+    private void installPlugin(final PluginInfo input) {
+        final String name = input.getName();
+        Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
+        if (oldPlugin.isPresent()) {
+            deletePlugin(oldPlugin.get());
+        }
+
         try {
-            // TODO : Download new Core plugin.
-            restartCore();
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            PluginInstaller.install(serverURL, input);
+            //updatePluginList(null);
+        } catch (IOException ex) {
+            errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
+            LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
         }
     }
-        
+    
+    private void deletePlugin(final PluginInfo input) {
+        try {
+            PluginInstaller.uninstall(input);
+        } catch (Exception e) {
+            errorLabel.setText("Le plugin " + input.getName() + "ne peut être désinstallé : Erreur inattendue.");
+            LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + input.getName(), e);
+        }
+    }
+    
     private static void runDesktop(final String serverUrl, final String database){
         try {
             Plugins.loadPlugins();
@@ -439,6 +462,13 @@ public class FXLauncherPane extends BorderPane {
         return dbs;
     }
     
+    /**
+     * Permet de redémarrer l'application en cours d'éxecution.
+     * @throws URISyntaxException Si l'application n'est pas démarrée en mode
+     * natif, et que le chemin vers le JAR d'éxecution est corrompu.
+     * @throws IOException Si un problème survient lors de l'accès à l'éxecutable
+     * permettant de démarrer l'application.
+     */
     private static void restartCore() throws URISyntaxException, IOException {
         final Pattern jarPattern = Pattern.compile("(?i).*\\.jar");
         final Path javaHome = Paths.get(System.getProperty("java.home"));
@@ -512,87 +542,27 @@ public class FXLauncherPane extends BorderPane {
         System.exit(0);
     }
     
-    /**
-     * Composant contrôlant l'affichage d'une ligne dans la liste des plugins
-     * installés ou disponibles.
-     * 
-     * TODO : Pour le moment, l'installation ou mise à jour choisit toujours la
-     * version la plus à jour du plugin. On pourrait rajouter une étape, où une
-     * modale s'ouvrirait pour laisser le choix de la version à installer à 
-     * l'utilisateur.
-     */
-    private final class UpdateCell extends TableCell<PluginInfo, String> {
-
-        private final Button installBtn = new Button("Installer");
-        private final Button removeBtn = new Button("Supprimer");
-        private String name;
-
-        public UpdateCell() {
-            installBtn.setOnAction((ActionEvent event) -> {
-                Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
-                if (oldPlugin.isPresent()) {
-                    try {
-                        PluginInstaller.uninstall(oldPlugin.get());
-                    } catch (Exception e) {
-                        errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Erreur inattendue.");
-                        LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + name, e);
-                    }
-                }
-                Optional<PluginInfo> newPlugin = distant.getPluginInfo(name).findFirst();
-
-                // At this state, we should have already checked we've got 
-                // exactly one element, so it should never happen.
-                if (!newPlugin.isPresent()) {
-                    errorLabel.setText("Le plugin " + name + "ne peut être installé : Introuvable.");
-                } else {
-                    try {
-                        PluginInstaller.install(serverURL, newPlugin.get());
-                        updatePluginList(null);
-                    } catch (IOException ex) {
-                        errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
-                        LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
-                    }
-                }
-            });
-
-            removeBtn.setOnAction((ActionEvent event) -> {
-                Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
-                if (oldPlugin.isPresent()) {
-                    try {
-                        PluginInstaller.uninstall(oldPlugin.get());
-                    } catch (Exception e) {
-                        errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Erreur inattendue.");
-                        LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + name, e);
-                    }
-                } else {
-                    errorLabel.setText("Le plugin " + name + "ne peut être désinstallé : Introuvable.");
-                }
-            });
-        }
-        
-        @Override
-        protected void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            
-            removeBtn.setVisible(false);
-            installBtn.setVisible(false);
-                
-            if (empty) {
-                return;
-            }
-
-            final Optional<PluginInfo> localPlugin = local.getPluginInfo(item).findAny();
-            final Optional<PluginInfo> distantPlugin = distant.getPluginInfo(item).findAny();
-
-            if (distantPlugin.isPresent()) {
-                installBtn.setVisible(true);
-            }
-            
-            if (localPlugin.isPresent()) {
-                removeBtn.setVisible(true);
-                installBtn.setText("Mise à jour");
-            }
-        }
+    private static TableColumn newNameColumn() {
+        final TableColumn<PluginInfo,String> colName = new TableColumn<>("Plugin");
+        colName.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
+        return colName;
     }
     
+        
+    private static TableColumn newVersionColumn() { 
+        final TableColumn<PluginInfo,String> colVersion = new TableColumn<>("Version");
+        colVersion.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> {
+            final PluginInfo info = param.getValue();
+            final String version = info.getVersionMajor()+"."+info.getVersionMinor();
+            return new SimpleObjectProperty<>(version);
+        });
+        return colVersion;
+    }
+    
+        
+    private static TableColumn newDescriptionColumn() {
+        final TableColumn<PluginInfo,String> colDescription = new TableColumn<>("Description");
+        colDescription.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().descriptionProperty());
+        return colDescription;
+    }        
 }

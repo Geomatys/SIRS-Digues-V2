@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.List;
 import java.util.stream.Stream;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 /**
@@ -19,13 +20,13 @@ import javafx.collections.transformation.SortedList;
 @SuppressWarnings("serial")
 public class PluginList {
     
-    public final SortedList<PluginInfo> plugins = new SortedList(
-            FXCollections.observableArrayList(), new PluginInfoComparator());
+    public final ObservableList<PluginInfo> plugins = //new SortedList(
+            FXCollections.observableArrayList()/*, new PluginInfoComparator())*/;
 
     public PluginList() {}
 
     @JsonManagedReference("parent")
-    public SortedList<PluginInfo> getPlugins() {
+    public ObservableList<PluginInfo> getPlugins() {
         return this.plugins;
     }
 

@@ -1,8 +1,10 @@
 
 package fr.sirs.maj;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.CorePlugin;
 import fr.sirs.Loader;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
@@ -10,15 +12,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -49,20 +54,28 @@ public class PluginInstaller {
         return list;
     }
     
-    public static PluginList listDistantPlugins(URL serverUrl) {
+    public static PluginList listDistantPlugins(URL serverUrl) throws IOException {
         final PluginList list = new PluginList();
-        // TODO
+        URLConnection connection = serverUrl.openConnection();
+        try (final InputStream input = connection.getInputStream()) {
+            list.setPlugins(new ObjectMapper().readValue(
+                    input, new TypeReference<List<PluginInfo>>(){}));
+        }
+        // TODO : allow core plugin to appear un available plugin list ?
+        list.plugins.filtered((PluginInfo info) -> {
+            return !info.getName().equalsIgnoreCase(CorePlugin.NAME);
+        });
         return list;
     }
         
     public static void install(URL serverUrl, PluginInfo toInstall) throws IOException {
-        final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), "tmp");
+        final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".tmp");
         final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toInstall.getName());
 
         try {
             // Start by target directory and descriptor file creation, cause if 
             // those two simple operations fail, it's useless to download plugin.
-            Files.createDirectory(pluginDir);
+            Files.createDirectories(pluginDir);
             final Path pluginDescriptor = pluginDir.resolve(toInstall.getName()+".json");            
             try (final OutputStream stream = Files.newOutputStream(pluginDescriptor)) {
                 new ObjectMapper().writeValue(stream, toInstall);
@@ -71,24 +84,26 @@ public class PluginInstaller {
             // Download temporary zip file
             URL bundleURL = toInstall.bundleURL(serverUrl);
             try (final InputStream input = bundleURL.openStream()) {
-                Files.copy(input, tmpFile);
+                Files.copy(input, tmpFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
             // Copy zip content into plugin directory.
-            try (FileSystem zipSystem = FileSystems.newFileSystem(URI.create("jar:file" + tmpFile.toUri().toString()), new HashMap<>())) {
+            try (FileSystem zipSystem = FileSystems.newFileSystem(URI.create("jar:" + tmpFile.toUri().toString()), new HashMap<>())) {
                 final Path tmpZip = zipSystem.getRootDirectories().iterator().next();
 
                 Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>() {
 
                     @Override
                     public FileVisitResult visitFile(Path t, BasicFileAttributes bfa) throws IOException {
-                        Files.copy(t, pluginDir.resolve(tmpZip.relativize(t)));
+                        Files.copy(t, pluginDir.resolve(tmpZip.relativize(t).toString()));
                         return super.visitFile(t, bfa);
                     }
 
                     @Override
                     public FileVisitResult preVisitDirectory(Path t, BasicFileAttributes bfa) throws IOException {
-                        Files.createDirectory(pluginDir.resolve(tmpZip.relativize(t)));
+                        if (!t.equals(tmpZip)) {
+                            Files.createDirectory(pluginDir.resolve(tmpZip.relativize(t).toString()));
+                        }
                         return super.preVisitDirectory(t, bfa);
                     }
 

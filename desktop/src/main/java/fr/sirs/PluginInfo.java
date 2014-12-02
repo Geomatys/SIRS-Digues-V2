@@ -2,8 +2,6 @@
 package fr.sirs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
@@ -22,15 +20,15 @@ import javafx.beans.property.StringProperty;
  * est construite. Elle dénote un chemin sur le serveur de plugins courant. Elle
  * pointe sur le fichier suivant : 
  * 
- * urlServeur/nomPlugin_versionMajeure-versionMineure.zip
+ * urlServeur/${nomPlugin}-${versionMajeure}.${versionMineure}-plugin-package.zip
  * 
  * @author Johann Sorel (Geomatys)
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 @SuppressWarnings("serial")
 public class PluginInfo {
         
+    private static final String ASSEMBLY_SUFFIX = "-plugin-package";
+    
     private final StringProperty name = new SimpleStringProperty();
     private final StringProperty description = new SimpleStringProperty();
     private final StringProperty downloadURL = new SimpleStringProperty();
@@ -108,7 +106,8 @@ public class PluginInfo {
     public URL bundleURL(URL serverURL) throws MalformedURLException {
         String dlURL = downloadURL.get();
         if (dlURL == null || dlURL.isEmpty()) {
-            dlURL = serverURL.toString() +"/"+name.get()+"_"+getVersionMajor()+"-"+getVersionMinor()+".zip";
+            String serverUrl = serverURL.toExternalForm().replaceFirst("(?i)([^/]+\\.json)$", "");
+            dlURL = serverUrl +"/"+name.get()+"-"+getVersionMajor()+"."+getVersionMinor()+ASSEMBLY_SUFFIX+".zip";
         }
         return new URL(dlURL);
     }
