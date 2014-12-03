@@ -139,7 +139,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
         for (final GenericObjetImporter gsi : structureImporters){
-            final Map<Integer, Objet> objets = gsi.getStructures();
+            final Map<Integer, Objet> objets = gsi.getById();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
@@ -153,7 +153,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         }
         
 //        // Importation détaillée de toutes les structures au sens strict.
-        final Map<Integer, LargeurFrancBord> largeurFrancBord = largeurFrancBordImporter.getStructures();
+        final Map<Integer, LargeurFrancBord> largeurFrancBord = largeurFrancBordImporter.getById();
 //        if(cretes!=null) for(final Integer key : cretes.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, cretes.get(key));
@@ -337,7 +337,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         
         // Structures au sens strict
         for (final GenericObjetImporter gsi : structureImporters) {
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
+            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
 
             if (objetsByTronconId != null) {
                 objetsByTronconId.keySet().stream().map((key) -> {

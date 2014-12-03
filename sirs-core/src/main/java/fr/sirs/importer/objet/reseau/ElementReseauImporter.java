@@ -347,7 +347,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
         for (final GenericObjetImporter gsi : reseauImporters){
-            final Map<Integer, Objet> objets = gsi.getStructures();
+            final Map<Integer, Objet> objets = gsi.getById();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
@@ -644,7 +644,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         
         // Structures au sens strict
         for (final GenericObjetImporter gsi : reseauImporters) {
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
+            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
 
             if (objetsByTronconId != null) {
                 objetsByTronconId.keySet().stream().map((key) -> {

@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TypeFonctionImporter extends GenericTypeImporter<RefFonction> {
     
-    public TypeFonctionImporter(final Database accessDatabase, 
+    TypeFonctionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }

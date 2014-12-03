@@ -4,15 +4,11 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReferenceObjet;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauCheminAccessImporter extends GenericObjectLinker {
+public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
@@ -57,7 +53,7 @@ public class ElementReseauCheminAccessImporter extends GenericObjectLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = reseauImpoter.getStructures();
+        final Map<Integer, Objet> reseaux = reseauImpoter.getById();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -69,7 +65,8 @@ public class ElementReseauCheminAccessImporter extends GenericObjectLinker {
             final Objet reseauHydrau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-
+                System.out.println("Linker à faire : "+ reseauHydrau.getClass().getSimpleName());
+//
 //                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
 //                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
 //                    referenceOuvrageAssocie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

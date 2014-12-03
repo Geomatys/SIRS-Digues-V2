@@ -22,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauOuvrageTelNrjImporter extends GenericObjectLinker {
+public class ElementReseauOuvrageTelNrjImporter extends GenericObjetLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
@@ -56,7 +56,7 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjectLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = reseauImpoter.getStructures();
+        final Map<Integer, Objet> reseaux = reseauImpoter.getById();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

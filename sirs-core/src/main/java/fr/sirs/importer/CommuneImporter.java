@@ -20,18 +20,10 @@ import org.ektorp.CouchDbConnector;
 public class CommuneImporter extends GenericImporter {
 
     private Map<Integer, Commune> communes = null;
-    private CommuneRepository communeRepository;
-
-    private CommuneImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
 
     CommuneImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final CommuneRepository communeRepository) {
-        this(accessDatabase, couchDbConnector);
-        this.communeRepository = communeRepository;
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {

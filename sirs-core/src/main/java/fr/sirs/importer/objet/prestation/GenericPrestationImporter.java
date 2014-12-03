@@ -1,4 +1,4 @@
-package fr.sirs.importer.objet.geometry;
+package fr.sirs.importer.objet.prestation;
 
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;
@@ -15,9 +15,9 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-abstract class GenericGeometrieImporter<T extends Objet> extends GenericObjetImporter<T> {
+abstract class GenericPrestationImporter<T extends Objet> extends GenericObjetImporter<T> {
 
-    GenericGeometrieImporter(final Database accessDatabase, 
+    public GenericPrestationImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 

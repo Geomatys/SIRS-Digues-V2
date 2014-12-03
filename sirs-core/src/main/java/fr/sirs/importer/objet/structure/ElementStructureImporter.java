@@ -268,7 +268,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 
         for (final GenericObjetImporter gsi : structureImporters){
-            final Map<Integer, Objet> objets = gsi.getStructures();
+            final Map<Integer, Objet> objets = gsi.getById();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
@@ -282,26 +282,26 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         }
         
 //        // Importation détaillée de toutes les structures au sens strict.
-        final Map<Integer, Crete> cretes = creteImporter.getStructures();
+        final Map<Integer, Crete> cretes = creteImporter.getById();
 //        if(cretes!=null) for(final Integer key : cretes.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, cretes.get(key));
 //        }
 //
-        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getStructures();
+        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getById();
 //        if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, piedsDigue.get(key));
 //        }
 //
-        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getStructures();
+        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getById();
 //        if(talusDigue!=null) for(final Integer key : talusDigue.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(talusDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, talusDigue.get(key));
 //        }
         
-        final Map<Integer, SommetRisberme> sommetsRisbermes = sommetRisbermeImporter.getStructures();
-        final Map<Integer, TalusRisberme> talusRisbermes = talusRisbermeImporter.getStructures();
+        final Map<Integer, SommetRisberme> sommetsRisbermes = sommetRisbermeImporter.getById();
+        final Map<Integer, TalusRisberme> talusRisbermes = talusRisbermeImporter.getById();
         
         //======================================================================
 
@@ -466,7 +466,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         
         // Structures au sens strict
         for (final GenericObjetImporter gsi : structureImporters) {
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getStructuresByTronconId();
+            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
 
             if (objetsByTronconId != null) {
                 objetsByTronconId.keySet().stream().map((key) -> {

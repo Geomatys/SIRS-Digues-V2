@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DesordreElementStructureImporter extends GenericObjectLinker {
+public class DesordreElementStructureImporter extends GenericObjetLinker {
     
     private final ElementStructureImporter structureImporter;
     private final DesordreImporter desordreImporter;
@@ -49,8 +49,8 @@ public class DesordreElementStructureImporter extends GenericObjectLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> structures = structureImporter.getStructures();
-        final Map<Integer, Desordre> desordres = desordreImporter.getStructures();
+        final Map<Integer, Objet> structures = structureImporter.getById();
+        final Map<Integer, Desordre> desordres = desordreImporter.getById();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

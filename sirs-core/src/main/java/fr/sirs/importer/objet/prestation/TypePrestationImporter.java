@@ -1,8 +1,8 @@
-package fr.sirs.importer.objet;
+package fr.sirs.importer.objet.prestation;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefPrestation;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -11,24 +11,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
+public class TypePrestationImporter extends GenericTypeImporter<RefPrestation> {
     
-    TypeCoteImporter(final Database accessDatabase, 
+    public TypePrestationImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
-        ID_TYPE_COTE,
-        LIBELLE_TYPE_COTE,
-        ABREGE_TYPE_COTE,
+        ID_TYPE_PRESTATION,
+        LIBELLE_TYPE_PRESTATION,
         DATE_DERNIERE_MAJ
     };
     
@@ -43,7 +41,7 @@ public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_COTE.toString();
+        return DbImporter.TableName.TYPE_PRESTATION.toString();
     }
 
     @Override
@@ -53,15 +51,15 @@ public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefCote typeCote = new RefCote();
+            final RefPrestation typePrestation = new RefPrestation();
             
-            typeCote.setLibelle(row.getString(Columns.LIBELLE_TYPE_COTE.toString()));
-            typeCote.setAbrege(row.getString(Columns.ABREGE_TYPE_COTE.toString()));
+            typePrestation.setLibelle(row.getString(Columns.LIBELLE_TYPE_PRESTATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeCote.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typePrestation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())), typeCote);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PRESTATION.toString())), typePrestation);
         }
         couchDbConnector.executeBulk(types.values());
     }
+    
 }

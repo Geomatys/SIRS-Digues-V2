@@ -22,9 +22,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
+class SysEvtDesordreImporter extends GenericDesordreImporter {
     
     private final TypeDesordreImporter typeDesordreImporter;
 
@@ -55,18 +52,14 @@ class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final ElementStructureImporter structureImporter, 
-            final TypeDesordreImporter typeDesordreImporter, 
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
+            final ElementStructureImporter structureImporter, 
+            final TypeDesordreImporter typeDesordreImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, null,
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = typeDesordreImporter;
     }
 
@@ -76,7 +69,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
         //            id_nom_element,// Aucun intéret
         //            ID_SOUS_GROUPE_DONNEES,// Aucun intéret
         //            LIBELLE_SOUS_GROUPE_DONNEES,// Aucun intéret
-                    ID_TYPE_DESORDRE,
+        ID_TYPE_DESORDRE,
         //            LIBELLE_TYPE_DESORDRE,// Dans TypeDesordreImporter
         //            DECALAGE_DEFAUT, // Info d'affichage
         //            DECALAGE, // Info d'affichage
@@ -88,33 +81,33 @@ class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
         //            DISPARU_OUI_NON,
         //            DEJA_OBSERVE_OUI_NON,
         //            LIBELLE_TYPE_POSITION,// Dans typePositionImporter
-                    ID_TYPE_COTE,
-                    ID_TYPE_POSITION,
+        ID_TYPE_COTE,
+        ID_TYPE_POSITION,
         ID_TRONCON_GESTION,
-                    ID_SOURCE,
-                    DATE_DEBUT_VAL,
-                    DATE_FIN_VAL,
+        ID_SOURCE,
+        DATE_DEBUT_VAL,
+        DATE_FIN_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
-                    ID_SYSTEME_REP,
-                    ID_BORNEREF_DEBUT,
-                    AMONT_AVAL_DEBUT,
+        ID_SYSTEME_REP,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-                    ID_BORNEREF_FIN,
-                    AMONT_AVAL_FIN,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-            LIEU_DIT_DESORDRE,
-//            DESCRIPTION_DESORDRE,
-//            ID_AUTO
+        LIEU_DIT_DESORDRE,
+        DESCRIPTION_DESORDRE,
+        //            ID_AUTO
 
         //Empty fields
-//     ID_PRESTATION,
-//     LIBELLE_PRESTATION, // Dans l'importateur de prestations
-     X_DEBUT,
-     Y_DEBUT,
-     X_FIN,
-     Y_FIN,
-     COMMENTAIRE,
+        //     ID_PRESTATION,
+        //     LIBELLE_PRESTATION, // Dans l'importateur de prestations
+        X_DEBUT,
+        Y_DEBUT,
+        X_FIN,
+        Y_FIN,
+//     COMMENTAIRE,
     };
 
     @Override
@@ -131,10 +124,12 @@ class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        
+        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -203,8 +198,8 @@ class SysEvtDesordreImporter extends GenericDesordreImporter<Desordre> {
             }
             
             
-            if (row.getString(Columns.COMMENTAIRE.toString()) != null) {
-                desordre.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+            if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {
+                desordre.setCommentaire(row.getString(Columns.DESCRIPTION_DESORDRE.toString()));
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();

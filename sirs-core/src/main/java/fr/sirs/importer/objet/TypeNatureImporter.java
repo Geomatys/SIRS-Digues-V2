@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TypeNatureImporter extends GenericTypeImporter<RefNature> {
     
-    public TypeNatureImporter(final Database accessDatabase, 
+    TypeNatureImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }

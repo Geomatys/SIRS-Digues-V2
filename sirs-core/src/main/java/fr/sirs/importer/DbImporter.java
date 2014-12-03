@@ -41,8 +41,10 @@ import fr.sirs.core.component.RefOuvrageTelecomEnergieRepository;
 import fr.sirs.core.component.RefOuvrageVoirieRepository;
 import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
+import fr.sirs.core.component.RefPrestationRepository;
 import fr.sirs.core.component.RefProfilFrancBordRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
+import fr.sirs.core.component.RefReferenceHauteurRepository;
 import fr.sirs.core.component.RefReseauHydroCielOuvertRepository;
 import fr.sirs.core.component.RefReseauTelecomEnergieRepository;
 import fr.sirs.core.component.RefRevetementRepository;
@@ -64,12 +66,6 @@ import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
 import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
@@ -157,6 +153,8 @@ public class DbImporter {
     private final RefMoyenManipBatardeauxRepository refMoyenManipBatardeauxRepository;
     private final RefSeuilRepository refSeuilRepository;
     private final RefTypeGlissiereRepository refTypeGlissiereRepository;
+    private final RefReferenceHauteurRepository refReferenceHauteurRepository;
+    private final RefPrestationRepository refPrestationRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -177,18 +175,12 @@ public class DbImporter {
     private ProfilTraversImporter profilTraversImporter;
     private ConventionImporter conventionImporter;
     private DocumentImporter documentImporter;
-    private SourceInfoImporter typeSourceImporter;
-    private TypeCoteImporter typeCoteImporter;
-    private TypePositionImporter typePositionImporter;
     private TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
     private TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     private RapportEtudeImporter rapportEtudeImporter;
-    private TypeMateriauImporter typeMateriauImporter;
-    private TypeNatureImporter typeNatureImporter;
-    private TypeFonctionImporter typeFonctionImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
 
@@ -273,17 +265,17 @@ public class DbImporter {
      INTERVENANT,
      JOURNAL, // A FAIRE
      JOURNAL_ARTICLE, // A FAIRE
-//     LAISSE_CRUE,
+     LAISSE_CRUE,
 //     LAISSE_CRUE_JOURNAL,
-//     LIGNE_EAU,
+     LIGNE_EAU,
 //     LIGNE_EAU_JOURNAL,
-//     LIGNE_EAU_MESURES_PRZ,
+     LIGNE_EAU_MESURES_PRZ,
 //     LIGNE_EAU_MESURES_XYZ,
      MARCHE, // A FAIRE
      MARCHE_FINANCEUR, // A FAIRE
      MARCHE_MAITRE_OEUVRE, // A FAIRE
 //     METEO,
-//     MONTEE_DES_EAUX,
+     MONTEE_DES_EAUX,
 //     MONTEE_DES_EAUX_JOURNAL,
 //     MONTEE_DES_EAUX_MESURES,
 //     observation_urgence_carto, // A Faire !
@@ -295,10 +287,10 @@ public class DbImporter {
 //     PHOTO_LAISSE,
 //     PHOTO_LOCALISEE_EN_PR,
 //     PHOTO_LOCALISEE_EN_XY,
-//     PRESTATION,
+     PRESTATION,
 //     PRESTATION_DOCUMENT,
 //     PRESTATION_EVENEMENT_HYDRAU,
-//     PRESTATION_INTERVENANT,
+     PRESTATION_INTERVENANT,
      PROFIL_EN_LONG,
 //     PROFIL_EN_LONG_DZ, // Même sort que PROFIL_EN_TRAVERS_DZ ?
      PROFIL_EN_LONG_EVT_HYDRAU,
@@ -355,11 +347,11 @@ public class DbImporter {
 //     SYS_EVT_GARDIEN_TRONCON,
 //     SYS_EVT_ILE_TRONCON,
      SYS_EVT_JOURNAL, // A FAIRE
-//     SYS_EVT_LAISSE_CRUE,
+     SYS_EVT_LAISSE_CRUE,
      SYS_EVT_LARGEUR_FRANC_BORD,
-//     SYS_EVT_LIGNE_EAU,
+     SYS_EVT_LIGNE_EAU,
      SYS_EVT_MARCHE, // A FAIRE
-//     SYS_EVT_MONTEE_DES_EAUX_HYDRO,
+     SYS_EVT_MONTEE_DES_EAUX_HYDRO,
      SYS_EVT_OUVERTURE_BATARDABLE,
      SYS_EVT_OUVRAGE_PARTICULIER,
      SYS_EVT_OUVRAGE_REVANCHE,
@@ -370,7 +362,7 @@ public class DbImporter {
 //     SYS_EVT_PIED_FRONT_FRANC_BORD,
 //     SYS_EVT_PLAN_TOPO, // Vide en Isère / Inexistante dans le Rhône ?
      SYS_EVT_POINT_ACCES,
-//     SYS_EVT_PRESTATION,
+     SYS_EVT_PRESTATION,
      SYS_EVT_PROFIL_EN_LONG,
      SYS_EVT_PROFIL_EN_TRAVERS,
      SYS_EVT_PROFIL_FRONT_FRANC_BORD,
@@ -442,9 +434,9 @@ public class DbImporter {
 //     TYPE_DVPT_VEGETATION,
      TYPE_ELEMENT_GEOMETRIE,
      TYPE_ELEMENT_RESEAU,
-//     TYPE_ELEMENT_RESEAU_COTE,
+//     TYPE_ELEMENT_RESEAU_COTE, // Concerne l'affichage
      TYPE_ELEMENT_STRUCTURE,
-//     TYPE_ELEMENT_STRUCTURE_COTE,
+//     TYPE_ELEMENT_STRUCTURE_COTE, // Concerne l'affichage
 //     TYPE_EMPRISE_PARCELLE,
      TYPE_EVENEMENT_HYDRAU,
      TYPE_FONCTION,
@@ -457,7 +449,7 @@ public class DbImporter {
      TYPE_MOYEN_MANIP_BATARDEAUX,
      TYPE_NATURE,
      TYPE_NATURE_BATARDEAUX,
-//     TYPE_ORGANISME,
+//     TYPE_ORGANISME, // Vide dans la base de l'Isère. Semble ne correspondre à rien en l'absence de données et de champ ID_TYPE_ORGANISME dans la table ORGANISME
      TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
 //     TYPE_ORIENTATION_VENT,
      TYPE_ORIGINE_PROFIL_EN_LONG,
@@ -470,12 +462,12 @@ public class DbImporter {
      TYPE_POSITION,
      TYPE_POSITION_PROFIL_EN_LONG_SUR_DIGUE,
 //     TYPE_POSITION_SUR_DIGUE,
-//     TYPE_PRESTATION,
+     TYPE_PRESTATION,
      TYPE_PROFIL_EN_TRAVERS,
      TYPE_PROFIL_FRANC_BORD,
 //     TYPE_PROPRIETAIRE,
      TYPE_RAPPORT_ETUDE,
-//     TYPE_REF_HEAU,
+     TYPE_REF_HEAU,
      TYPE_RESEAU_EAU,
      TYPE_RESEAU_TELECOMMUNIC,
      TYPE_REVETEMENT,
@@ -639,6 +631,10 @@ public class DbImporter {
         repositories.add(refSeuilRepository);
         refTypeGlissiereRepository = new RefTypeGlissiereRepository(couchDbConnector);
         repositories.add(refTypeGlissiereRepository);
+        refReferenceHauteurRepository = new RefReferenceHauteurRepository(couchDbConnector);
+        repositories.add(refReferenceHauteurRepository);
+        refPrestationRepository = new RefPrestationRepository(couchDbConnector);
+        repositories.add(refPrestationRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -673,35 +669,6 @@ public class DbImporter {
         systemeReperageBorneImporter = new SystemeReperageBorneImporter(
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter);
-        typeSourceImporter = new SourceInfoImporter(accessDatabase, 
-                couchDbConnector);
-        typeCoteImporter = new TypeCoteImporter(accessDatabase, 
-                couchDbConnector);
-        typePositionImporter = new TypePositionImporter(accessDatabase, 
-                couchDbConnector);
-        typeMateriauImporter = new TypeMateriauImporter(accessDatabase, 
-                couchDbConnector);
-        typeNatureImporter = new TypeNatureImporter(accessDatabase, 
-                couchDbConnector);
-        typeFonctionImporter = new TypeFonctionImporter(accessDatabase, 
-                couchDbConnector);
-        tronconGestionDigueImporter = new TronconGestionDigueImporter(
-                accessDatabase, couchDbConnector, tronconDigueRepository, 
-                digueRepository, borneDigueRepository, digueImporter, 
-                tronconDigueGeomImporter, typeRiveImporter, 
-                systemeReperageImporter, tronconGestionDigueGestionnaireImporter, 
-                tronconGestionDigueGardienImporter,
-                tronconGestionDigueProprietaireImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
-                typeSourceImporter, typePositionImporter,
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter,
-                typeFonctionImporter);
-        conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, conventionRepository,
-                intervenantImporter,
-                organismeImporter);
-        typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
-                accessDatabase, couchDbConnector);
         typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector);
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
@@ -710,6 +677,21 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, 
                 typeEvenementHydrauliqueImporter, 
                 typeFrequenceEvenementHydrauliqueImporter);
+        tronconGestionDigueImporter = new TronconGestionDigueImporter(
+                accessDatabase, couchDbConnector, tronconDigueRepository, 
+                digueRepository, borneDigueRepository, digueImporter, 
+                tronconDigueGeomImporter, typeRiveImporter, 
+                systemeReperageImporter, tronconGestionDigueGestionnaireImporter, 
+                tronconGestionDigueGardienImporter,
+                tronconGestionDigueProprietaireImporter, 
+                borneDigueImporter, organismeImporter, intervenantImporter, 
+                evenementHydrauliqueImporter);
+        conventionImporter = new ConventionImporter(accessDatabase, 
+                couchDbConnector, conventionRepository,
+                intervenantImporter,
+                organismeImporter);
+        typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
+                accessDatabase, couchDbConnector);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
                 documentRepository, 
                 conventionRepository, profilTraversRepository, 
@@ -720,7 +702,6 @@ public class DbImporter {
                 evenementHydrauliqueImporter,
                 typeSystemeReleveProfilImporter,
                 tronconGestionDigueImporter);
-        
         
         // Linkers
         desordreEvenementHydrauImporter = new DesordreEvenementHydrauImporter(
@@ -800,7 +781,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -816,7 +797,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -826,12 +807,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

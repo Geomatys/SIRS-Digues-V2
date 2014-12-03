@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TypeMateriauImporter extends GenericTypeImporter<RefMateriau> {
     
-    public TypeMateriauImporter(final Database accessDatabase, 
+    TypeMateriauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }

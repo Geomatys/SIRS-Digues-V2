@@ -1,7 +1,7 @@
-package fr.sirs.importer.objet.geometry;
+package fr.sirs.importer.objet.laisseCrue;
 
 import com.healthmarketscience.jackcess.Database;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -15,9 +15,9 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-abstract class GenericGeometrieImporter<T extends Objet> extends GenericObjetImporter<T> {
+abstract class GenericLaisseCrueImporter extends GenericObjetImporter<LaisseCrue> {
 
-    GenericGeometrieImporter(final Database accessDatabase, 
+    public GenericLaisseCrueImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 

@@ -21,12 +21,7 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -49,7 +44,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DesordreImporter extends GenericDesordreImporter<Desordre> {
+public class DesordreImporter extends GenericDesordreImporter {
     
     private final TypeDesordreImporter typeDesordreImporter;
     private final SysEvtDesordreImporter sysEvtDesordreImporter;
@@ -59,28 +54,20 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
-            final ElementStructureImporter structureImporter, 
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
+            final ElementStructureImporter structureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
+                typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
                 couchDbConnector);
         this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, 
-                structureImporter, typeDesordreImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter,
-                typeNatureImporter, typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter,
+                structureImporter, typeDesordreImporter);
     }
 
     private enum Columns {
@@ -104,12 +91,12 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
         ID_BORNEREF_FIN,
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-        COMMENTAIRE,
+//        COMMENTAIRE,
         LIEU_DIT_DESORDRE,
         ID_TYPE_POSITION,
 //        ID_PRESTATION,
 //        ID_CRUE,
-//        DESCRIPTION_DESORDRE,
+        DESCRIPTION_DESORDRE,
 //        DISPARU,
 //        DEJA_OBSERVE,
         DATE_DERNIERE_MAJ
@@ -123,16 +110,18 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        structures = sysEvtDesordreImporter.getStructures();
-        structuresByTronconId = sysEvtDesordreImporter.getStructuresByTronconId();
+        structures = sysEvtDesordreImporter.getById();
+        structuresByTronconId = sysEvtDesordreImporter.getByTronconId();
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        
+        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -144,7 +133,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                 nouveauDesordre=false;
             }
             else{
-//                System.out.println("Nouveau désordre !!");
+                System.out.println("Nouveau désordre !!");
                 desordre = new Desordre();
                 nouveauDesordre=true;
             }
@@ -160,6 +149,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                     }
                 }
             }
+            
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 final float v = row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue();
                 if(nouveauDesordre){
@@ -169,6 +159,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
 //                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_debut_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
 //                }
             }
+            
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 final float v = row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
@@ -190,6 +181,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                     }
                 }
             }
+            
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 final float v = row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue();
                 if(nouveauDesordre){
@@ -199,6 +191,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
 //                    throw new AccessDbImporterException("Inconsistent data : "+v+" != "+desordre.getBorne_fin_distance()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
 //                }
             }
+            
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
                 final float v = row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue();
                 if(nouveauDesordre){
@@ -236,7 +229,7 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                 if(nouveauDesordre){
                     desordre.setBorne_fin_aval(bfa);
                 }
-//                else if(bfa!=desordre.getBorne_fin_aval()){
+//                else if(bda!=desordre.getBorne_debut_aval()){
 //                    throw new AccessDbImporterException("Inconsistent data.");
 //                }
             }
@@ -258,9 +251,6 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                     if(desordre.getTypeDesordreId()==null){
                         desordre.setTypeDesordreId(typeDesordre.getId());
                     }
-//                    else if(!desordre.getTypeDesordre().equals(typeDesordre.getId())){
-//                        throw new AccessDbImporterException("Inconsistent data : "+row.getInt(DesordreColumns.ID_TYPE_DESORDRE.toString())+" != "+desordre.getTypeDesordre()+" (id="+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
-//                    }
                 }
             }
             
@@ -282,9 +272,6 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                     if(desordre.getPosition_structure()==null){
                         desordre.setPosition_structure(typePosition.getId());
                     }
-//                    else if(!desordre.getPosition_structure().equals(typePosition.getId())){
-//                        throw new AccessDbImporterException("Inconsistent data.");
-//                    }
                 }
             }
             
@@ -293,9 +280,6 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
                 if(typeCote!=null){
                     if(desordre.getCoteId()==null){
                         desordre.setCoteId(typeCote.getId());
-                    }
-                    else if(!desordre.getCoteId().equals(typeCote.getId())){
-                        throw new AccessDbImporterException("Inconsistent data.");
                     }
                 }
             }
@@ -342,13 +326,16 @@ public class DesordreImporter extends GenericDesordreImporter<Desordre> {
             }
             
             {
-                final String commentaire = row.getString(Columns.COMMENTAIRE.toString());
+                final String commentaire = row.getString(Columns.DESCRIPTION_DESORDRE.toString());
                 if(commentaire!=null){
                     if(desordre.getCommentaire()==null){
                         desordre.setCommentaire(commentaire);
-                    } else if(!desordre.getCommentaire().equals(commentaire)){
-                        throw new AccessDbImporterException("Inconsistent data.");
-                    }
+                    } 
+//                    else if(!desordre.getCommentaire().equals(commentaire)){ 
+// Les commentaires peuvent différer pour les désordres (ex : désordre 325 de l'Isère
+//                        System.out.println(row.getInt(Columns.ID_DESORDRE.toString()));
+//                        throw new AccessDbImporterException("Inconsistent data.");
+//                    }
                 }
             }
             

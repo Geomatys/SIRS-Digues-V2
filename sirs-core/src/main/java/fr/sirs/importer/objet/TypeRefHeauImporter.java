@@ -2,7 +2,7 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -11,24 +11,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
+public class TypeRefHeauImporter extends GenericTypeImporter<RefReferenceHauteur> {
     
-    TypeCoteImporter(final Database accessDatabase, 
+    TypeRefHeauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
-        ID_TYPE_COTE,
-        LIBELLE_TYPE_COTE,
-        ABREGE_TYPE_COTE,
+        ID_TYPE_REF_HEAU,
+        ABREGE_TYPE_REF_HEAU,
+        LIBELLE_TYPE_REF_HEAU,
         DATE_DERNIERE_MAJ
     };
     
@@ -43,7 +42,7 @@ public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_COTE.toString();
+        return DbImporter.TableName.TYPE_REF_HEAU.toString();
     }
 
     @Override
@@ -53,15 +52,15 @@ public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefCote typeCote = new RefCote();
+            final RefReferenceHauteur refHauteur = new RefReferenceHauteur();
             
-            typeCote.setLibelle(row.getString(Columns.LIBELLE_TYPE_COTE.toString()));
-            typeCote.setAbrege(row.getString(Columns.ABREGE_TYPE_COTE.toString()));
+            refHauteur.setLibelle(row.getString(Columns.LIBELLE_TYPE_REF_HEAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeCote.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                refHauteur.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())), typeCote);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString())), refHauteur);
         }
         couchDbConnector.executeBulk(types.values());
     }
+    
 }

@@ -59,7 +59,7 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Desordre> desordres = desordreImporter.getStructures();
+        final Map<Integer, Desordre> desordres = desordreImporter.getById();
         final Map<Integer, EvenementHydraulique> evenements = evenementHydrauliqueImporter.getEvenementHydraulique();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
