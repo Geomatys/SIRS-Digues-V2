@@ -33,7 +33,7 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjetLinker {
     private enum Columns {
         ID_ELEMENT_RESEAU,
         ID_ELEMENT_RESEAU_CONDUITE_FERMEE,
-        DATE_DERNIERE_MAJ
+//        DATE_DERNIERE_MAJ
     };
     
     @Override

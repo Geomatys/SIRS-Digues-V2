@@ -20,11 +20,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
+public class ElementReseauPointAccesImporter extends GenericObjetLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
-    public ElementReseauCheminAccessImporter(final Database accessDatabase, 
+    public ElementReseauPointAccesImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
@@ -33,7 +33,7 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
-        ID_ELEMENT_RESEAU_CHEMIN_ACCES,
+        ID_ELEMENT_RESEAU_POINT_ACCES,
 //        DATE_DERNIERE_MAJ
     };
     
@@ -48,7 +48,7 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU_POINT_ACCES.toString();
     }
 
     @Override
@@ -59,25 +59,29 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
+            final OuvrageFranchissement ouvrage = (OuvrageFranchissement) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_POINT_ACCES.toString()));
+            final Objet reseau =  reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
-            final VoieAcces voieAcces = (VoieAcces) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CHEMIN_ACCES.toString()));
-            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-            
-            if(voieAcces!=null && reseau!=null){
+            if(ouvrage!=null && reseau!=null){
                 
-                if(reseau instanceof OuvrageFranchissement){
-                    final OuvrageFranchissement ouvrageFranchissement = (OuvrageFranchissement) reseau;
-                    ouvrageFranchissement.getVoie_acces().add(voieAcces.getId());
-                    voieAcces.getOuvrage_franchissement().add(ouvrageFranchissement.getId());
+                if(reseau instanceof VoieAcces){
+                    final VoieAcces voieAcces = (VoieAcces) reseau;
+                    voieAcces.getOuvrage_franchissement().add(ouvrage.getId());
+                    ouvrage.getVoie_acces().add(voieAcces.getId());
                 }
                 else if(reseau instanceof VoieDigue){
-                    final VoieDigue voieDigue = (VoieDigue) reseau;
-                    voieDigue.getVoie_acces().add(voieAcces.getId());
-                    voieAcces.getVoie_digue().add(voieDigue.getId());
+                    System.out.println("Pas de lien pour le moment entre les voies sur digue et les ouvrages de franchissement.");
+//                    final VoieDigue voieDigue = (VoieDigue) reseau;
+//                    voieDigue.getOuvrage_franchissement().add(ouvrage.getId());
+//                    ouvrage.getVoie_digue().add(voieDigue.getId());
                 }
                 else {
                     throw new AccessDbImporterException("Bad type");
                 }
+            }
+            else if(reseau==null){
+                
+            System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             }
         }
     }

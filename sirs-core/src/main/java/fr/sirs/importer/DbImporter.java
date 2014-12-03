@@ -13,6 +13,7 @@ import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
+import fr.sirs.core.component.MarcheRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
@@ -148,6 +149,7 @@ public class DbImporter {
     private final RefTypeGlissiereRepository refTypeGlissiereRepository;
     private final RefReferenceHauteurRepository refReferenceHauteurRepository;
     private final RefPrestationRepository refPrestationRepository;
+    private final MarcheRepository marcheRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -198,14 +200,14 @@ public class DbImporter {
      ELEMENT_RESEAU_EVENEMENT_HYDRAU, // A remplir
 //     ELEMENT_RESEAU_GARDIEN,
 //     ELEMENT_RESEAU_GESTIONNAIRE,
-     ELEMENT_RESEAU_OUVERTURE_BATARDABLE,
+//     ELEMENT_RESEAU_OUVERTURE_BATARDABLE, // N'existe plus dans le nouveau modèle
      ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
-//     ELEMENT_RESEAU_OUVRAGE_VOIRIE,
-//     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES,
-//     ELEMENT_RESEAU_POINT_ACCES,
+//     ELEMENT_RESEAU_OUVRAGE_VOIRIE, // A priori n'existe plus dans le nouveau modèle. Mais demande de confirmation car la table contient beaucoup de données entre les voiries d'une part et d'autre part des voies sur digue et des ouvrages de franchissement.
+//     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES, // Idem que ELEMENT_RESEAU_OUVRAGE_VOIRIE
+     ELEMENT_RESEAU_POINT_ACCES,
      ELEMENT_RESEAU_POMPE,
 //     ELEMENT_RESEAU_PROPRIETAIRE,
-//     ELEMENT_RESEAU_RESEAU_EAU,
+     ELEMENT_RESEAU_RESEAU_EAU,
 //     ELEMENT_RESEAU_SERVITUDE,
 //     ELEMENT_RESEAU_STRUCTURE,
 //     ELEMENT_RESEAU_VOIE_SUR_DIGUE,
@@ -520,7 +522,8 @@ public class DbImporter {
         repositories.add(tronconDigueRepository);
         organismeRepository = new OrganismeRepository(couchDbConnector); 
         repositories.add(organismeRepository);
-        systemeReperageRepository = new SystemeReperageRepository(couchDbConnector); 
+        systemeReperageRepository = new SystemeReperageRepository(
+                couchDbConnector); 
         repositories.add(systemeReperageRepository);
         borneDigueRepository = new BorneDigueRepository(couchDbConnector); 
         repositories.add(borneDigueRepository);
@@ -544,13 +547,16 @@ public class DbImporter {
         repositories.add(refEvenementHydrauliqueRepository);
         refFrequenceEvenementHydrauliqueRepository = new RefFrequenceEvenementHydrauliqueRepository(couchDbConnector);
         repositories.add(refFrequenceEvenementHydrauliqueRepository);
-        evenementHydrauliqueRepository = new EvenementHydrauliqueRepository(couchDbConnector);
+        evenementHydrauliqueRepository = new EvenementHydrauliqueRepository(
+                couchDbConnector);
         repositories.add(evenementHydrauliqueRepository);
         profilTraversRepository = new ProfilTraversRepository(couchDbConnector);
         repositories.add(profilTraversRepository);
-        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(couchDbConnector);
+        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(
+                couchDbConnector);
         repositories.add(refTypeProfilTraversRepository);
-        refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(couchDbConnector);
+        refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(
+                couchDbConnector);
         repositories.add(refSystemeReleveProfilRepository);
         refRapportEtudeRepository = new RefRapportEtudeRepository(couchDbConnector);
         repositories.add(refRapportEtudeRepository);
@@ -622,6 +628,8 @@ public class DbImporter {
         repositories.add(refReferenceHauteurRepository);
         refPrestationRepository = new RefPrestationRepository(couchDbConnector);
         repositories.add(refPrestationRepository);
+        marcheRepository = new MarcheRepository(couchDbConnector);
+        repositories.add(marcheRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -742,8 +750,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -755,7 +763,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.MARCHE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -771,7 +779,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.MARCHE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -781,12 +789,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.MARCHE.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.MARCHE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -795,7 +803,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-            importer.importation();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

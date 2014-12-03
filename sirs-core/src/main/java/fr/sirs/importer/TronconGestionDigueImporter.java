@@ -21,12 +21,6 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
-import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
-import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
-import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
-import fr.sirs.importer.objet.link.ElementReseauCheminAccessImporter;
-import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
-import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -110,13 +104,7 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
         if(tronconsDigue==null) compute();
         couchDbConnector.executeBulk(tronconsDigue.values());
     }
-
-    /* TODO : s'occuper du lien avec les gestionnaires.
-     * TODO : s'occuper du lien avec les rives.
-     = TODO : s'occuper du lien avec les systèmes de repérage.
-     = TODO : faire les structures.
-     = TODO : s'occuper des bornes.
-     */
+    
     private enum Columns {
 
         ID_TRONCON_GESTION, 

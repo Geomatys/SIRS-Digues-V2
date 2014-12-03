@@ -18,7 +18,9 @@ import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
 import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
 import fr.sirs.importer.objet.link.ElementReseauCheminAccessImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
+import fr.sirs.importer.objet.link.ElementReseauPointAccesImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
+import fr.sirs.importer.objet.link.ElementReseauReseauEauImporter;
 import fr.sirs.importer.objet.link.GenericObjetLinker;
 import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
@@ -60,6 +62,8 @@ public class ObjetManager {
     private final ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
     private final ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
     private final ElementReseauCheminAccessImporter elementReseauCheminAccessImporter;
+    private final ElementReseauPointAccesImporter elementReseauPointAccesImporter;
+    private final ElementReseauReseauEauImporter elementReseauReseauEauImporter;
     private final List<GenericObjetLinker> linkers = new ArrayList<>();
     
     public ObjetManager(final Database accessDatabase, 
@@ -157,6 +161,12 @@ public class ObjetManager {
         elementReseauCheminAccessImporter = new ElementReseauCheminAccessImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauCheminAccessImporter);
+        elementReseauPointAccesImporter = new ElementReseauPointAccesImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        linkers.add(elementReseauPointAccesImporter);
+        elementReseauReseauEauImporter = new ElementReseauReseauEauImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        linkers.add(elementReseauReseauEauImporter);
     }
     
     public List<Objet> getByTronconId(final int tronconId) 

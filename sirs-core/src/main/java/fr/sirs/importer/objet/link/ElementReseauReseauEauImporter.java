@@ -3,8 +3,10 @@ package fr.sirs.importer.objet.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.VoieAcces;
+import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -19,11 +21,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker {
+public class ElementReseauReseauEauImporter extends GenericObjetLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
-    public ElementReseauAutreOuvrageHydrauImporter(final Database accessDatabase, 
+    public ElementReseauReseauEauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
@@ -32,8 +34,9 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
-        ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU,
-//        DATE_DERNIERE_MAJ
+        ID_ELEMENT_RESEAU_RESEAU_EAU,
+//        DATE_DERNIERE_MAJ,
+//        GESTION_SYNCHRO // Qu'est-ce que cela ?
     };
     
     @Override
@@ -47,7 +50,7 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU_RESEAU_EAU.toString();
     }
 
     @Override
@@ -58,13 +61,24 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
+            final ReseauHydroCielOuvert reseauCielOuvert = (ReseauHydroCielOuvert) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_RESEAU_EAU.toString()));
+            final Objet reseau =  reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
-            final OuvrageHydrauliqueAssocie ouvrageHydrauliqueAssocie = (OuvrageHydrauliqueAssocie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()));
-            final ReseauHydrauliqueFerme reseauHydrau = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-            
-            if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-                ouvrageHydrauliqueAssocie.getReseau_hydraulique_ferme().add(reseauHydrau.getId());
-                reseauHydrau.getOuvrage_hydraulique_associe().add(ouvrageHydrauliqueAssocie.getId());
+            if(reseauCielOuvert!=null && reseau!=null){
+                System.out.println("Linker info :: "+ reseau.getClass().getSimpleName());
+                
+                if(reseau instanceof ReseauHydrauliqueFerme){
+                    final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
+                    reseauFerme.getReseau_hydro_ciel_ouvert().add(reseauCielOuvert.getId());
+                    reseauCielOuvert.getReseau_hydraulique_ferme().add(reseauFerme.getId());
+                }
+                else {
+                    throw new AccessDbImporterException("Bad type");
+                }
+            }
+            else if(reseau==null){
+                
+            System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             }
         }
     }
