@@ -55,7 +55,6 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final ElementStructureImporter structureImporter, 
             final TypeDesordreImporter typeDesordreImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter,
@@ -101,13 +100,13 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         //            ID_AUTO
 
         //Empty fields
-        //     ID_PRESTATION,
+        //     ID_PRESTATION, // obsolète ? voir table DESORDRE_PRESTATION
         //     LIBELLE_PRESTATION, // Dans l'importateur de prestations
         X_DEBUT,
         Y_DEBUT,
         X_FIN,
         Y_FIN,
-//     COMMENTAIRE,
+//     COMMENTAIRE, // obsolète ? voir champ DESCRIPTION_DESORDRE 
     };
 
     @Override

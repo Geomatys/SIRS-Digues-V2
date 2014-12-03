@@ -16,17 +16,10 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,28 +46,19 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
     private static final String OUI = "Oui";
     private static final String NON = "Non";
     
-    private final TypePrestationImporter typePrestationImporter;
+    protected final TypePrestationImporter typePrestationImporter;
 
     SysEvtPrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
-            final ElementStructureImporter structureImporter, 
-            final TypePrestationImporter typePrestationImporter, 
-            final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
+            final TypePrestationImporter typePrestationImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter,  null,
+                typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = typePrestationImporter;
     }
 
@@ -144,10 +128,11 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
+        
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         
+        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

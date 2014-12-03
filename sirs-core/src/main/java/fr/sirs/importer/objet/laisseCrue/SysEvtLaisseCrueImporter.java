@@ -19,17 +19,10 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,32 +46,19 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
 
-    private final EvenementHydrauliqueImporter evenementHydrauliqueImporter;
-    private final TypeRefHeauImporter typeRefHeauImporter;
-
     SysEvtLaisseCrueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final ElementStructureImporter structureImporter, 
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
-        this.typeRefHeauImporter = typeRefHeauImporter;
-        this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
+                systemeReperageImporter, borneDigueImporter,
+                intervenantImporter, evenementHydrauliqueImporter, 
+                typeSourceImporter, typeRefHeauImporter);
     }
 
     private enum Columns {
@@ -143,9 +123,12 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
+        
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypes();
         
         

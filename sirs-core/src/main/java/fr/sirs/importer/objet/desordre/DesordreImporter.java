@@ -56,8 +56,7 @@ public class DesordreImporter extends GenericDesordreImporter {
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final ElementStructureImporter structureImporter) {
+            final TypeCoteImporter typeCoteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter);
@@ -66,8 +65,7 @@ public class DesordreImporter extends GenericDesordreImporter {
         this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter,
-                structureImporter, typeDesordreImporter);
+                typePositionImporter, typeCoteImporter, typeDesordreImporter);
     }
 
     private enum Columns {
@@ -91,11 +89,11 @@ public class DesordreImporter extends GenericDesordreImporter {
         ID_BORNEREF_FIN,
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
-//        COMMENTAIRE,
+//        COMMENTAIRE, // Apparemment bsolète voir le champ DESCRIPTION_DESORDRE
         LIEU_DIT_DESORDRE,
         ID_TYPE_POSITION,
-//        ID_PRESTATION,
-//        ID_CRUE,
+//        ID_PRESTATION, // La colonne est vide dans la base de l'Isère. Il s'agit visiblement d'une colonne obsolète remplacée par la table d'association DESORDRE_PRESTATION
+//        ID_CRUE, // La colonne est vide dans la base de l'Isère. Il s'agit visiblement d'une colonne obsolète remplacée par la table d'association DESORDRE_EVENEMENT_HYDRAULIQUE
         DESCRIPTION_DESORDRE,
 //        DISPARU,
 //        DEJA_OBSERVE,

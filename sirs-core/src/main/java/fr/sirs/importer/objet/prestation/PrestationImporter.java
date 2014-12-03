@@ -60,28 +60,16 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
-            final ElementStructureImporter structureImporter, 
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+            final TypePositionImporter typePositionImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, borneDigueImporter, typeSourceImporter, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
                 couchDbConnector);
         this.sysEvtPrestationImporter = new SysEvtPrestationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, structureImporter, typePrestationImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, 
+                typePositionImporter, typeCoteImporter, typePrestationImporter);
     }
 
     private enum Columns {
@@ -139,10 +127,12 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        
+        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
         
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();

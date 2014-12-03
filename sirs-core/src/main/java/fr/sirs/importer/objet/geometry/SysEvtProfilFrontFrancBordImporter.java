@@ -54,20 +54,10 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter,
             final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         this.typeProfilFrontFrancBordImporter = typeProfilFrontFrancBordImporter;
     }
     
@@ -104,9 +94,9 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        ID_TYPE_LARGEUR_FB,
+//        ID_TYPE_LARGEUR_FB, //Ne concerne pas cette table
         ID_TYPE_PROFIL_FB,
-//        ID_TYPE_DIST_DIGUE_BERGE,
+//        ID_TYPE_DIST_DIGUE_BERGE, // Pas dans le modèle actuel
 //        ID_AUTO
     };
 
@@ -124,6 +114,7 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypes();
         
