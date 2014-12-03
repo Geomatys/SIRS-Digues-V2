@@ -12,26 +12,14 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.ContactTroncon;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.objet.TypeRefHeauImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
 import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
 import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
@@ -39,11 +27,6 @@ import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
 import fr.sirs.importer.objet.link.ElementReseauCheminAccessImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
-import fr.sirs.importer.objet.laisseCrue.LaisseCrueImporter;
-import fr.sirs.importer.objet.ligneEau.LigneEauImporter;
-import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
-import fr.sirs.importer.objet.prestation.PrestationImporter;
-import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -73,21 +56,6 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private ObjetManager objetManager;
-//    private ElementStructureImporter structureImporter;
-//    private DesordreImporter desordreImporter;
-//    private ElementGeometrieImporter geometryImporter;
-//    private ElementReseauImporter reseauImporter;
-//    private PrestationImporter prestationImporter;
-//    private LaisseCrueImporter laisseCrueImporter;
-//    private LigneEauImporter ligneEauImporter;
-//    private MonteeDesEauxImporter monteeDesEauxImporter;
-    
-    private DesordreElementStructureImporter desordreStructureImporter;
-    private DesordreElementReseauImporter desordreElementReseauImporter;
-    private ElementReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
-    private ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
-    private ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
-    private ElementReseauCheminAccessImporter elementReseauCheminAccessImporter;
     
     private DigueRepository digueRepository;
     private TronconDigueRepository tronconDigueRepository;
@@ -115,13 +83,6 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
-//            final SourceInfoImporter typeSourceImporter,
-//            final TypePositionImporter typePositionImporter,
-//            final TypeCoteImporter typeCoteImporter,
-//            final TypeMateriauImporter typeMateriauImporter,
-//            final TypeNatureImporter typeNatureImporter,
-//            final TypeFonctionImporter typeFonctionImporter,
-//            final TypeRefHeauImporter typeRefHeauImporter){
         this(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueRepository = digueRepository;
@@ -138,68 +99,6 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 intervenantImporter, evenementHydrauliqueImporter);
-        // Objet importers need TronconGestionDigue importer itself.
-//        structureImporter = new ElementStructureImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-//        desordreImporter = new DesordreImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                structureImporter, typeSourceImporter, typePositionImporter, 
-//                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
-//                typeFonctionImporter);
-//        geometryImporter = new ElementGeometrieImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-//        reseauImporter = new ElementReseauImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-//        prestationImporter = new PrestationImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                structureImporter, typeSourceImporter, typePositionImporter, 
-//                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
-//                typeFonctionImporter);
-//        laisseCrueImporter = new LaisseCrueImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                evenementHydrauliqueImporter, structureImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter,
-//                typeRefHeauImporter);
-//        ligneEauImporter = new LigneEauImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                evenementHydrauliqueImporter, structureImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-//        monteeDesEauxImporter = new MonteeDesEauxImporter(accessDatabase, 
-//                couchDbConnector, this, systemeReperageImporter, 
-//                borneDigueImporter, organismeImporter, intervenantImporter, 
-//                evenementHydrauliqueImporter, structureImporter, 
-//                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-//                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
-        
-//        desordreStructureImporter = new DesordreElementStructureImporter(
-//                accessDatabase, couchDbConnector, structureImporter, 
-//                desordreImporter);
-//        desordreElementReseauImporter = new DesordreElementReseauImporter(
-//                accessDatabase, couchDbConnector, reseauImporter, 
-//                desordreImporter);
-//        reseauConduiteFermeeImporter = new ElementReseauConduiteFermeeImporter(
-//                accessDatabase, couchDbConnector, reseauImporter);
-//        reseauOuvrageTelecomImporter = new ElementReseauOuvrageTelNrjImporter(
-//                accessDatabase, couchDbConnector, reseauImporter);
-//        elementReseauAutreOuvrageHydrauImporter = new ElementReseauAutreOuvrageHydrauImporter(
-//                accessDatabase, couchDbConnector, reseauImporter);
-//        elementReseauCheminAccessImporter = new ElementReseauCheminAccessImporter(
-//                accessDatabase, couchDbConnector, reseauImporter);
     }
     
     public ElementStructureImporter getStructureImporter(){return objetManager.getStructureImporter();}
@@ -361,49 +260,12 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
-
-        // Set the references using the this very importer (Structures references TronconDigueId).
-//        final Map<Integer, List<Objet>> structuresByTroncon = structureImporter.getByTronconId();
-//        final Map<Integer, List<Desordre>> desordresByTroncon = desordreImporter.getByTronconId();
-//        final Map<Integer, List<Objet>> geometriesByTroncon = geometryImporter.getByTronconId();
-//        final Map<Integer, List<Objet>> reseauxByTroncon = reseauImporter.getByTronconId();
-//        final Map<Integer, List<Prestation>> prestationsByTroncon = prestationImporter.getByTronconId();
-//        final Map<Integer, List<LaisseCrue>> laisseCruesByTroncon = laisseCrueImporter.getByTronconId();
-//        final Map<Integer, List<LigneEau>> ligneEauxByTroncon = ligneEauImporter.getByTronconId();
-//        final Map<Integer, List<MonteeEaux>> monteeEauxByTroncon = monteeDesEauxImporter.getByTronconId();
-//
-//        desordreStructureImporter.link();
-//        desordreElementReseauImporter.link();
-//        reseauConduiteFermeeImporter.link();
-//        reseauOuvrageTelecomImporter.link();
-//        elementReseauAutreOuvrageHydrauImporter.link();
-//        elementReseauCheminAccessImporter.link();
-        
-//        for(Integer i : structuresByTroncon.keySet()) System.out.println(structuresByTroncon.get(i));
-//        for(Integer i : desordresByTroncon.keySet()) System.out.println(desordresByTroncon.get(i));
         
         objetManager.link();
         
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
 //            System.out.println("Je rentre !"+tronconDigue.getId());
             List<Objet> structures = tronconDigue.getStructures();
-            
-//            if(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(structuresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(desordresByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(geometriesByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(reseauxByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(reseauxByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(prestationsByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(prestationsByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(laisseCruesByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(laisseCruesByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(ligneEauxByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(ligneEauxByTroncon.get(tronconsIds.get(tronconDigue.getId())));
-//            if(monteeEauxByTroncon.get(tronconsIds.get(tronconDigue.getId()))!=null)
-//                structures.addAll(monteeEauxByTroncon.get(tronconsIds.get(tronconDigue.getId())));
             
             structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
 

@@ -3,9 +3,8 @@ package fr.sirs.importer.objet.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -20,11 +19,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
+public class ElementReseauOuvertureBatardableImporter extends GenericObjetLinker {
 
     private final ElementReseauImporter reseauImpoter;
     
-    public ElementReseauCheminAccessImporter(final Database accessDatabase, 
+    public ElementReseauOuvertureBatardableImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final ElementReseauImporter reseauImpoter) {
         super(accessDatabase, couchDbConnector);
@@ -33,7 +32,7 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
-        ID_ELEMENT_RESEAU_CHEMIN_ACCES,
+        ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
         DATE_DERNIERE_MAJ
     };
     
@@ -48,7 +47,7 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_CHEMIN_ACCES.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU_OUVERTURE_BATARDABLE.toString();
     }
 
     @Override
@@ -59,25 +58,12 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
+            final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
+            final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
-            final VoieAcces voieAcces = (VoieAcces) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CHEMIN_ACCES.toString()));
-            final Objet reseauHydrau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-            
-            if(voieAcces!=null && reseauHydrau!=null){
-                
-                if(reseauHydrau instanceof OuvrageFranchissement){
-                    final OuvrageFranchissement ouvrageFranchissement = (OuvrageFranchissement) reseauHydrau;
-                    ouvrageFranchissement.getVoie_acces().add(voieAcces.getId());
-                    voieAcces.getOuvrage_franchissement().add(ouvrageFranchissement.getId());
-                }
-                else if(reseauHydrau instanceof VoieDigue){
-                    final VoieDigue voieDigue = (VoieDigue) reseauHydrau;
-                    voieDigue.getVoie_acces().add(voieAcces.getId());
-                    voieAcces.getVoie_digue().add(voieDigue.getId());
-                }
-                else {
-                    throw new AccessDbImporterException("Bad type");
-                }
+            if(ouvrage!=null && reseau!=null){
+                ouvrage.getReseau_telecom_energie().add(reseau.getId());
+                reseau.getOuvrage_telecom_energie().add(ouvrage.getId());
             }
         }
     }

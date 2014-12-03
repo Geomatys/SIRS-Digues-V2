@@ -1,4 +1,3 @@
-
 package fr.sirs.importer;
 
 import fr.sirs.importer.troncon.TronconGestionDigueGestionnaireImporter;
@@ -199,7 +198,7 @@ public class DbImporter {
      ELEMENT_RESEAU_EVENEMENT_HYDRAU, // A remplir
 //     ELEMENT_RESEAU_GARDIEN,
 //     ELEMENT_RESEAU_GESTIONNAIRE,
-//     ELEMENT_RESEAU_OUVERTURE_BATARDABLE,
+     ELEMENT_RESEAU_OUVERTURE_BATARDABLE,
      ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES,

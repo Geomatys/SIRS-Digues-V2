@@ -65,7 +65,7 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjetLinker {
             if(conduiteFermee!=null && stationPompage!=null){
                 
                 conduiteFermee.getStation_pompage().add(stationPompage.getId());
-                stationPompage.getStation_pompage().add(conduiteFermee.getId());
+                stationPompage.getReseau_hydraulique_ferme().add(conduiteFermee.getId());
             }
         }
     }
