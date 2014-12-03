@@ -9,7 +9,6 @@ import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -17,7 +16,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,34 +38,34 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class DocumentProfilTraversImporter extends GenericDocumentImporter {
+class SysEvtConventionImporter extends GenericDocumentImporter {
 
-    private final ProfilTraversImporter profilTraversImporter;
+    private final ConventionImporter conventionImporter;
     
-    DocumentProfilTraversImporter(final Database accessDatabase, 
+    SysEvtConventionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final ProfilTraversImporter profilTraversImporter) {
+            final ConventionImporter conventionImporter) {
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
-        this.profilTraversImporter = profilTraversImporter;
+        this.conventionImporter = conventionImporter;
     }
     
     private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type de données
+//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type d'importateur
 //        DECALAGE_DEFAUT, // Relatif à l'affichage
 //        DECALAGE, // Relatif à l'affichage
-//        LIBELLE_SYSTEME_REP, // Redondant avec les SR
-//        NOM_BORNE_DEBUT, // Redondant avec les bornes
-//        NOM_BORNE_FIN, // Redondant avec les bornes
-//        NOM_PROFIL_EN_TRAVERS, // Redondant avec les profils en travers
+//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
+//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
+//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
+//        NOM_PROFIL_EN_TRAVERS, 
 //        LIBELLE_MARCHE,
 //        INTITULE_ARTICLE,
 //        TITRE_RAPPORT_ETUDE,
@@ -74,10 +73,10 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 //        TE16_AUTEUR_RAPPORT,
 //        DATE_RAPPORT,
         ID_TRONCON_GESTION,
-//        ID_TYPE_DOCUMENT, // Redondant avec le type de données
-//        ID_DOSSIER,
-//        DATE_DEBUT_VAL,
-//        DATE_FIN_VAL,
+//        ID_TYPE_DOCUMENT,
+//        ID_DOSSIER, // Pas dans le nouveau modèle
+//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+//        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -92,9 +91,9 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER,
-//        REFERENCE_NUMERIQUE,
-//        REFERENCE_CALQUE,
+//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
+//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
+//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
         DATE_DOCUMENT,
         NOM,
 //        TM_AUTEUR_RAPPORT,
@@ -102,9 +101,9 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
 //        ID_ARTICLE_JOURNAL,
-        ID_PROFIL_EN_TRAVERS,
+//        ID_PROFIL_EN_TRAVERS,
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//        ID_CONVENTION,
+        ID_CONVENTION,
 //        ID_RAPPORT_ETUDE,
 //        ID_AUTO
     }
@@ -120,7 +119,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PROFIL_EN_TRAVERS.toString();
+        return DbImporter.TableName.SYS_EVT_CONVENTION.toString();
     }
 
     @Override
@@ -138,11 +137,12 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
+        if(computed) return;
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, ProfilTravers> profilsTravers = profilTraversImporter.getProfilTravers();
+        final Map<Integer, Convention> conventions = conventionImporter.getRelated();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
@@ -150,8 +150,6 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
-
-            
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -166,7 +164,7 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
@@ -177,10 +175,10 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(DocumentProfilTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
@@ -191,16 +189,11 @@ class DocumentProfilTraversImporter extends GenericDocumentImporter {
             
             document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            if (row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
-                if (profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
-                    document.setProfilTravers(profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())).getId());
+            if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
+                if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
+                    document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
                 }
             }
-            
-            
-            
-            
-            
             
             if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
                 document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());

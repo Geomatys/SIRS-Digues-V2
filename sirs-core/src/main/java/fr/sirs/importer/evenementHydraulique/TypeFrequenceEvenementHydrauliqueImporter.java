@@ -17,9 +17,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeImporter<RefFrequenceEvenementHydraulique> {
+class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeImporter<RefFrequenceEvenementHydraulique> {
 
-    public TypeFrequenceEvenementHydrauliqueImporter(final Database accessDatabase,
+    TypeFrequenceEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }

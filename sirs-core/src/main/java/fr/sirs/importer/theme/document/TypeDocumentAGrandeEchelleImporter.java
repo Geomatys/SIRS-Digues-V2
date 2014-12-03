@@ -4,25 +4,22 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeDocumentGrandeEchelleImporter extends GenericImporter {
+class TypeDocumentAGrandeEchelleImporter extends GenericTypeImporter<RefDocumentGrandeEchelle> {
 
-    private Map<Integer, RefDocumentGrandeEchelle> typesDocument = null;
-
-    TypeDocumentGrandeEchelleImporter(final Database accessDatabase,
+    TypeDocumentAGrandeEchelleImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
@@ -32,18 +29,6 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
         LIBELLE_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         DATE_DERNIERE_MAJ
     };
-    
-    /**
-     * 
-     * @return A map containing all the database types of Document elements 
-     * (RefTypeDocument) referenced by their
-     * internal ID.
-     * @throws IOException 
-     */
-    public Map<Integer, RefDocumentGrandeEchelle> getTypeDocumentGrandeEchelle() throws IOException {
-        if(typesDocument == null) compute();
-        return typesDocument;
-    }
 
     @Override
     protected List<String> getUsedColumns() {
@@ -61,7 +46,7 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        typesDocument = new HashMap<>();
+        types = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
 
@@ -75,9 +60,9 @@ class TypeDocumentGrandeEchelleImporter extends GenericImporter {
                 typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            typesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
             
         }
-        couchDbConnector.executeBulk(typesDocument.values());
+        couchDbConnector.executeBulk(types.values());
     }
 }

@@ -28,12 +28,12 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
     private final TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter;
     
     public EvenementHydrauliqueImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector,
-            final TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter,
-            final TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter) {
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.typeEvenementHydrauliqueImporter = typeEvenementHydrauliqueImporter;
-        this.typeFrequenceEvenementHydrauliqueImporter = typeFrequenceEvenementHydrauliqueImporter;
+        this.typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector);
+        this.typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
+                accessDatabase, couchDbConnector);
     }
     
     private enum Columns{

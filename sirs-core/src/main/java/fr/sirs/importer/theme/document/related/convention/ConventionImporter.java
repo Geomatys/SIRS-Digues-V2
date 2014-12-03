@@ -22,8 +22,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class ConventionImporter extends GenericImporter {
 
-    private Map<Integer, Convention> conventions = null;
-    private ConventionRepository conventionRepository;
+    private Map<Integer, Convention> related = null;
+    
     private TypeConventionImporter typeConventionImporter;
     private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
     private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
@@ -34,12 +34,11 @@ public class ConventionImporter extends GenericImporter {
     }
     
     public ConventionImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final ConventionRepository conventionRepository,
+            final CouchDbConnector couchDbConnector,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter) {
         this(accessDatabase, couchDbConnector);
-        this.conventionRepository = conventionRepository;
+        
         this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector);
         this.conventionSignataireIntervenantImporter = new ConventionSignataireIntervenantImporter(
                 accessDatabase, couchDbConnector, intervenantImporter);
@@ -76,7 +75,7 @@ public class ConventionImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        conventions = new HashMap<>();
+        related = new HashMap<>();
         
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypes();
         final Map<Integer, List<ContactTroncon>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
@@ -120,9 +119,9 @@ public class ConventionImporter extends GenericImporter {
             
             if(contacts!=null) convention.setContacts(contacts);
 
-            conventions.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
+            related.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
         }
-        couchDbConnector.executeBulk(conventions.values());
+        couchDbConnector.executeBulk(related.values());
     }
     
     /**
@@ -132,8 +131,8 @@ public class ConventionImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, Convention> getConventions() throws IOException, AccessDbImporterException {
-        if (conventions == null)  compute();
-        return conventions;
+    public Map<Integer, Convention> getRelated() throws IOException, AccessDbImporterException {
+        if (related == null)  compute();
+        return related;
     }
 }

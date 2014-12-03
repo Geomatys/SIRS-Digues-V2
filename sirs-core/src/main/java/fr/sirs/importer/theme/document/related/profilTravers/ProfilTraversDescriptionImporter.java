@@ -1,6 +1,6 @@
 package fr.sirs.importer.theme.document.related.profilTravers;
 
-import fr.sirs.importer.theme.document.ProfilTraversTronconImporter;
+import fr.sirs.importer.theme.document.ProfilEnTraversTronconImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LeveePoints;
@@ -41,7 +41,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
     private OrganismeImporter organismeImporter;
     private ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter;
     private ProfilTraversPointXYZImporter profilTraversPointXYZImporter;
-    private ProfilTraversTronconImporter profilTraversTronconImporter;
+    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
     
     private ProfilTraversDescriptionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -53,7 +53,7 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final OrganismeImporter organismeImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final ProfilTraversTronconImporter profilTraversTronconImporter) {
+            final ProfilEnTraversTronconImporter profilTraversTronconImporter) {
         this(accessDatabase, couchDbConnector);
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.organismeImporter = organismeImporter;

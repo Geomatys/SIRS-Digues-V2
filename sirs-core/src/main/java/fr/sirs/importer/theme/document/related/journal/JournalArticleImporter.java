@@ -3,7 +3,6 @@ package fr.sirs.importer.theme.document.related.journal;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.model.ArticleJournal;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
@@ -19,22 +18,14 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ArticleJournalImporter extends GenericImporter {
+public class JournalArticleImporter extends GenericImporter {
 
-    private Map<Integer, ArticleJournal> articles = null;
-    private ArticleJournalRepository articleJournalRepository;
-    private JournalImporter journalImporter;
+    private Map<Integer, ArticleJournal> related = null;
+    private final JournalImporter journalImporter;
     
-    private ArticleJournalImporter(final Database accessDatabase,
+    public JournalArticleImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-    }
-    
-    public ArticleJournalImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final ArticleJournalRepository articleJournalRepository) {
-        this(accessDatabase, couchDbConnector);
-        this.articleJournalRepository = articleJournalRepository;
         this.journalImporter = new JournalImporter(accessDatabase, 
                 couchDbConnector);
     }
@@ -66,7 +57,7 @@ public class ArticleJournalImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        articles = new HashMap<>();
+        related = new HashMap<>();
         
         final Map<Integer, String> journaux = journalImporter.getJournalNames();
         
@@ -95,9 +86,9 @@ public class ArticleJournalImporter extends GenericImporter {
                 articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            articles.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
+            related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
-        couchDbConnector.executeBulk(articles.values());
+        couchDbConnector.executeBulk(related.values());
     }
     
     /**
@@ -107,8 +98,8 @@ public class ArticleJournalImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, ArticleJournal> getArticleJournal() throws IOException, AccessDbImporterException {
-        if (articles == null)  compute();
-        return articles;
+    public Map<Integer, ArticleJournal> getRelated() throws IOException, AccessDbImporterException {
+        if (related == null)  compute();
+        return related;
     }
 }

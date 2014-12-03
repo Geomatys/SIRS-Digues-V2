@@ -6,20 +6,17 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
-import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
-import fr.sirs.importer.theme.document.related.journal.ArticleJournalImporter;
+import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,45 +38,45 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class DocumentJournalImporter extends GenericDocumentImporter {
+class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
 
-    private final ArticleJournalImporter articleJournalImporter;
+    private final RapportEtudeImporter rapportEtudeImporter;
     
-    DocumentJournalImporter(final Database accessDatabase, 
+    SysEvtRapportEtudesImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final ArticleJournalImporter articleJournalImporter) {
+            final RapportEtudeImporter rapportEtudeImporter) {
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
-        this.articleJournalImporter = articleJournalImporter;
+        this.rapportEtudeImporter = rapportEtudeImporter;
     }
     
     private enum Columns {
         ID_DOC,
-//        id_nom_element, // Redondant avec ID_DOC
+//        id_nom_element, // Redondand avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_DOCUMENT, // Redondant avec l'importation des types de documents
-//        DECALAGE_DEFAUT, // Affichage
-//        DECALAGE, // Affichage
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des systèmes de repérage
+//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type de données
+//        DECALAGE_DEFAUT, // Relatif à l'affichage
+//        DECALAGE, // Relatif à l'affichage
+//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        NOM_PROFIL_EN_TRAVERS, // Redondant avec l'importation des profils en travers
-//        LIBELLE_MARCHE, 
-//        INTITULE_ARTICLE,
-//        TITRE_RAPPORT_ETUDE,
-//        ID_TYPE_RAPPORT_ETUDE,
+//        NOM_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
+//        LIBELLE_MARCHE, // Non pertinent pour le rapport d'études
+//        INTITULE_ARTICLE, // Non pertinent pour le rapport d'études
+//        TITRE_RAPPORT_ETUDE, // Pas dans le nouveau modèle
+//        ID_TYPE_RAPPORT_ETUDE, // Redondant avec l'importation des rapports d'étude
 //        TE16_AUTEUR_RAPPORT,
 //        DATE_RAPPORT,
         ID_TRONCON_GESTION,
-//        ID_TYPE_DOCUMENT,
+//        ID_TYPE_DOCUMENT, // Redondant avec le type de données
 //        ID_DOSSIER,
-//        DATE_DEBUT_VAL,
-//        DATE_FIN_VAL,
+//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+//        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -94,21 +91,21 @@ class DocumentJournalImporter extends GenericDocumentImporter {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER,
-//        REFERENCE_NUMERIQUE,
-//        REFERENCE_CALQUE,
+//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
+//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
+//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
         DATE_DOCUMENT,
         NOM,
 //        TM_AUTEUR_RAPPORT,
-//        ID_MARCHE,
+//        ID_MARCHE, // Non pertinent pour le rapport d'études
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
-        ID_ARTICLE_JOURNAL,
-//        ID_PROFIL_EN_TRAVERS,
+//        ID_ARTICLE_JOURNAL, // Non pertinent pour le rapport d'études
+//        ID_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//        ID_CONVENTION,
-//        ID_RAPPORT_ETUDE,
-//        ID_AUTO
+//        ID_CONVENTION, // Non pertinent pour le rapport d'études
+        ID_RAPPORT_ETUDE,
+//        ID_AUTO 
     }
 
     @Override
@@ -122,7 +119,7 @@ class DocumentJournalImporter extends GenericDocumentImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_JOURNAL.toString();
+        return DbImporter.TableName.SYS_EVT_RAPPORT_ETUDES.toString();
     }
 
     @Override
@@ -140,12 +137,11 @@ class DocumentJournalImporter extends GenericDocumentImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        if(computed) return;
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, ArticleJournal> articles = articleJournalImporter.getArticleJournal();
+        final Map<Integer, RapportEtude> rapports = rapportEtudeImporter.getRelated();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
@@ -153,6 +149,8 @@ class DocumentJournalImporter extends GenericDocumentImporter {
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
+            
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
@@ -175,7 +173,7 @@ class DocumentJournalImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentJournalImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtRapportEtudesImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
@@ -186,10 +184,10 @@ class DocumentJournalImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentJournalImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtRapportEtudesImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(DocumentJournalImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtRapportEtudesImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
@@ -204,7 +202,7 @@ class DocumentJournalImporter extends GenericDocumentImporter {
                 document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
@@ -220,13 +218,17 @@ class DocumentJournalImporter extends GenericDocumentImporter {
                 document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            document.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
+            document.setLibelle(row.getString(Columns.NOM.toString()));
             
-            document.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
-            if (row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()) != null) {
-                if (articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())) != null) {
-                    document.setConvention(articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())).getId());
+            
+            
+            
+            
+            
+            if (row.getInt(Columns.ID_RAPPORT_ETUDE.toString()) != null) {
+                if (rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())) != null) {
+                    document.setConvention(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
                 }
             }
             

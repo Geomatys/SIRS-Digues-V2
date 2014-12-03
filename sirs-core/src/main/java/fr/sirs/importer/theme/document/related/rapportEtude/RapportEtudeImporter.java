@@ -3,7 +3,6 @@ package fr.sirs.importer.theme.document.related.rapportEtude;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -21,20 +20,13 @@ import org.ektorp.CouchDbConnector;
  */
 public class RapportEtudeImporter extends GenericImporter {
 
-    private Map<Integer, RapportEtude> rapportsEtude = null;
-    private RapportEtudeRepository rapportEtudeRepository;
-    private TypeRapportEtudeImporter typeRapportEtudeImporter;
+    private Map<Integer, RapportEtude> related = null;
     
-    private RapportEtudeImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
+    private final TypeRapportEtudeImporter typeRapportEtudeImporter;
     
     public RapportEtudeImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final RapportEtudeRepository rapportEtudeRepository) {
-        this(accessDatabase, couchDbConnector);
-        this.rapportEtudeRepository = rapportEtudeRepository;
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
         this.typeRapportEtudeImporter = new TypeRapportEtudeImporter(
                 accessDatabase, couchDbConnector);
     }
@@ -67,7 +59,7 @@ public class RapportEtudeImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        rapportsEtude = new HashMap<>();
+        related = new HashMap<>();
         
         final Map<Integer, RefRapportEtude> typesRapport = typeRapportEtudeImporter.getTypes();
 
@@ -84,9 +76,9 @@ public class RapportEtudeImporter extends GenericImporter {
             
             rapport.setReference_numerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
-            rapportsEtude.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
-            rapportEtudeRepository.add(rapport);
+            related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }
+        couchDbConnector.executeBulk(related.values());
     }
     
     /**
@@ -96,8 +88,8 @@ public class RapportEtudeImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, RapportEtude> getRapportsEtude() throws IOException, AccessDbImporterException {
-        if (rapportsEtude == null)  compute();
-        return rapportsEtude;
+    public Map<Integer, RapportEtude> getRelated() throws IOException, AccessDbImporterException {
+        if (related == null)  compute();
+        return related;
     }
 }

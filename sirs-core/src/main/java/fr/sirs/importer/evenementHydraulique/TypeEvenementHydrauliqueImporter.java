@@ -17,9 +17,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEvenementHydraulique> {
+class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEvenementHydraulique> {
 
-    public TypeEvenementHydrauliqueImporter(final Database accessDatabase,
+    TypeEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
@@ -28,7 +28,7 @@ public class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEve
         ID_TYPE_EVENEMENT_HYDRAU,
         ABREGE_TYPE_EVENEMENT_HYDRAU,
         LIBELLE_TYPE_EVENEMENT_HYDRAU,
-//        NOM_TABLE_EVT, // Ces table sont innexistentes dans la base de l'isère
+//        NOM_TABLE_EVT, // Ces tables sont innexistentes dans la base de l'isère
 //        ID_TYPE_OBJET_CARTO,
         DATE_DERNIERE_MAJ
     };
@@ -50,7 +50,6 @@ public class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEve
     @Override
     protected void compute() throws IOException {
         types = new HashMap<>();
-//        classesEvenement = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

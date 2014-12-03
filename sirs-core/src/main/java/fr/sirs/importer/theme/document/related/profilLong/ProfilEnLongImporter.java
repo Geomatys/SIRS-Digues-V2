@@ -29,10 +29,10 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilLongImporter extends GenericImporter {
+public class ProfilEnLongImporter extends GenericImporter {
 
-    private Map<Integer, ProfilLong> profils = null;
-    private ProfilLongRepository profilLongRepository;
+    private Map<Integer, ProfilLong> related = null;
+    
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypePositionProfilLongImporter typePositionProfilLongImporter;
     private TypeOrigineProfilLongImporter typeOrigineProfilLongImporter;
@@ -41,19 +41,17 @@ public class ProfilLongImporter extends GenericImporter {
     
     private OrganismeImporter organismeImporter;
     
-    private ProfilLongImporter(final Database accessDatabase, 
+    private ProfilEnLongImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    public ProfilLongImporter(final Database accessDatabase,
+    public ProfilEnLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilLongRepository profilTraversRepository,
             final OrganismeImporter organismeImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter){
         this(accessDatabase, couchDbConnector);
-        this.profilLongRepository = profilTraversRepository;
         this.organismeImporter = organismeImporter;
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.profilLongEvenementHydrauliqueImporter = new ProfilLongEvenementHydrauliqueImporter(
@@ -65,9 +63,9 @@ public class ProfilLongImporter extends GenericImporter {
         profilTraversPointXYZImporter = new ProfilLongPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, ProfilLong> getProfilLong() throws IOException, AccessDbImporterException{
-        if(profils==null) compute();
-        return profils;
+    public Map<Integer, ProfilLong> getRelated() throws IOException, AccessDbImporterException{
+        if(related==null) compute();
+        return related;
     }
     
     private enum Columns {
@@ -105,7 +103,7 @@ public class ProfilLongImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        profils = new HashMap<>();
+        related = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypes();
@@ -163,9 +161,9 @@ public class ProfilLongImporter extends GenericImporter {
             
             profil.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            profils.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);
+            related.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);
         }
-        couchDbConnector.executeBulk(profils.values());
+        couchDbConnector.executeBulk(related.values());
     }
     
 }

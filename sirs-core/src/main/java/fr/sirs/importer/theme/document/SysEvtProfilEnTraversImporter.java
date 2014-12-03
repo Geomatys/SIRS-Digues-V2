@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Document;
-import fr.sirs.core.model.RapportEtude;
+import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -16,7 +16,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilEnTraversImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,45 +38,45 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class DocumentRapportEtudeImporter extends GenericDocumentImporter {
+class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
 
-    private final RapportEtudeImporter rapportEtudeImporter;
+    private final ProfilEnTraversImporter profilTraversImporter;
     
-    DocumentRapportEtudeImporter(final Database accessDatabase, 
+    SysEvtProfilEnTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final RapportEtudeImporter rapportEtudeImporter) {
+            final ProfilEnTraversImporter profilTraversImporter) {
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
-        this.rapportEtudeImporter = rapportEtudeImporter;
+        this.profilTraversImporter = profilTraversImporter;
     }
     
     private enum Columns {
         ID_DOC,
-//        id_nom_element, // Redondand avec ID_DOC
+//        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
 //        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type de données
 //        DECALAGE_DEFAUT, // Relatif à l'affichage
 //        DECALAGE, // Relatif à l'affichage
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
-//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
-//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        NOM_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
-//        LIBELLE_MARCHE, // Non pertinent pour le rapport d'études
-//        INTITULE_ARTICLE, // Non pertinent pour le rapport d'études
-//        TITRE_RAPPORT_ETUDE, // Pas dans le nouveau modèle
-//        ID_TYPE_RAPPORT_ETUDE, // Redondant avec l'importation des rapports d'étude
+//        LIBELLE_SYSTEME_REP, // Redondant avec les SR
+//        NOM_BORNE_DEBUT, // Redondant avec les bornes
+//        NOM_BORNE_FIN, // Redondant avec les bornes
+//        NOM_PROFIL_EN_TRAVERS, // Redondant avec les profils en travers
+//        LIBELLE_MARCHE,
+//        INTITULE_ARTICLE,
+//        TITRE_RAPPORT_ETUDE,
+//        ID_TYPE_RAPPORT_ETUDE,
 //        TE16_AUTEUR_RAPPORT,
 //        DATE_RAPPORT,
         ID_TRONCON_GESTION,
 //        ID_TYPE_DOCUMENT, // Redondant avec le type de données
 //        ID_DOSSIER,
-//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
-//        DATE_FIN_VAL, // Pas dans le nouveau modèle
+//        DATE_DEBUT_VAL,
+//        DATE_FIN_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -91,21 +91,21 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
-//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
-//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
+//        REFERENCE_PAPIER,
+//        REFERENCE_NUMERIQUE,
+//        REFERENCE_CALQUE,
         DATE_DOCUMENT,
         NOM,
 //        TM_AUTEUR_RAPPORT,
-//        ID_MARCHE, // Non pertinent pour le rapport d'études
+//        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
-//        ID_ARTICLE_JOURNAL, // Non pertinent pour le rapport d'études
-//        ID_PROFIL_EN_TRAVERS, // Non pertinent pour le rapport d'études
+//        ID_ARTICLE_JOURNAL,
+        ID_PROFIL_EN_TRAVERS,
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//        ID_CONVENTION, // Non pertinent pour le rapport d'études
-        ID_RAPPORT_ETUDE,
-//        ID_AUTO 
+//        ID_CONVENTION,
+//        ID_RAPPORT_ETUDE,
+//        ID_AUTO
     }
 
     @Override
@@ -119,7 +119,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_RAPPORT_ETUDES.toString();
+        return DbImporter.TableName.SYS_EVT_PROFIL_EN_TRAVERS.toString();
     }
 
     @Override
@@ -141,7 +141,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RapportEtude> rapports = rapportEtudeImporter.getRapportsEtude();
+        final Map<Integer, ProfilTravers> profilsTravers = profilTraversImporter.getRelated();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
@@ -149,16 +149,8 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
-            
-            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
 
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
+            
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -173,7 +165,7 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilEnTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
@@ -184,52 +176,57 @@ class DocumentRapportEtudeImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilEnTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(DocumentRapportEtudeImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtProfilEnTraversImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
                 document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+            document.setLibelle(row.getString(Columns.NOM.toString()));
+            
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+            
+            if (row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
+                if (profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
+                    document.setProfilTravers(profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())).getId());
+                }
             }
+            
+            
+            
+            
+            
             
             if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
                 document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
             if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
                 document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
-            
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
             document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
+            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            }
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            document.setLibelle(row.getString(Columns.NOM.toString()));
-            
-            
-            
-            
-            
-            
-            
-            if (row.getInt(Columns.ID_RAPPORT_ETUDE.toString()) != null) {
-                if (rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())) != null) {
-                    document.setConvention(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
-                }
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+            }
+
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
+
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
         }

@@ -7,8 +7,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -16,7 +16,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
+import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,31 +38,31 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class DocumentConventionImporter extends GenericDocumentImporter {
+class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
 
-    private final ConventionImporter conventionImporter;
+    private final ProfilEnLongImporter profilLongImporter;
     
-    DocumentConventionImporter(final Database accessDatabase, 
+    SysEvtProfilEnLongImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final ConventionImporter conventionImporter) {
+            final ProfilEnLongImporter profilLongImporter) {
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
-        this.conventionImporter = conventionImporter;
+        this.profilLongImporter = profilLongImporter;
     }
     
     private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
 //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type d'importateur
-//        DECALAGE_DEFAUT, // Relatif à l'affichage
-//        DECALAGE, // Relatif à l'affichage
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
+//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type de document
+//        DECALAGE_DEFAUT, // Affichage
+//        DECALAGE, // Affichage
+//        LIBELLE_SYSTEME_REP, // Redondant avec l'importaton des SR
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
 //        NOM_PROFIL_EN_TRAVERS, 
@@ -74,9 +74,9 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 //        DATE_RAPPORT,
         ID_TRONCON_GESTION,
 //        ID_TYPE_DOCUMENT,
-//        ID_DOSSIER, // Pas dans le nouveau modèle
-//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
-//        DATE_FIN_VAL, // Pas dans le nouveau modèle
+//        ID_DOSSIER,
+//        DATE_DEBUT_VAL,
+//        DATE_FIN_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -91,9 +91,9 @@ class DocumentConventionImporter extends GenericDocumentImporter {
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
-//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
-//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
+//        REFERENCE_PAPIER,
+//        REFERENCE_NUMERIQUE,
+//        REFERENCE_CALQUE,
         DATE_DOCUMENT,
         NOM,
 //        TM_AUTEUR_RAPPORT,
@@ -103,7 +103,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 //        ID_ARTICLE_JOURNAL,
 //        ID_PROFIL_EN_TRAVERS,
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-        ID_CONVENTION,
+//        ID_CONVENTION,
 //        ID_RAPPORT_ETUDE,
 //        ID_AUTO
     }
@@ -119,7 +119,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_CONVENTION.toString();
+        return DbImporter.TableName.SYS_EVT_PROFIL_EN_LONG.toString();
     }
 
     @Override
@@ -137,12 +137,11 @@ class DocumentConventionImporter extends GenericDocumentImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        if(computed) return;
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, Convention> conventions = conventionImporter.getConventions();
+        final Map<Integer, ProfilLong> profilsLong = profilLongImporter.getRelated();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
@@ -150,7 +149,15 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
-            
+
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            }
+
+            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            }
+
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
             try {
@@ -164,7 +171,7 @@ class DocumentConventionImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
@@ -175,11 +182,13 @@ class DocumentConventionImporter extends GenericDocumentImporter {
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(DocumentConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
                 document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
@@ -187,41 +196,46 @@ class DocumentConventionImporter extends GenericDocumentImporter {
             
             document.setLibelle(row.getString(Columns.NOM.toString()));
             
-            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
-                if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
-                    document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
+            /*
+            1- La base du Rhône indique que tous les ID_PROFIL_EN_LONG de la table
+            DOCUMENT sont absent de SYS_EVT_PROFIL_EN_LONG.
+            2- Elle permet également de se rendre compte que tous les 
+            ID_PROFIL_EN_LONG de la table DOCUMENT sont nuls.
+            3- Ainsi que du fait que les ID_PROFIL_EN_LONG de la table 
+            PROFIL_EN_LONG sont égaux aux ID_DOC des tables DOCUMENT et
+            SYS_EVT_PROFIL_EN_LONG
+            */
+            if (row.getInt(Columns.ID_DOC.toString()) != null) {
+                if (profilsLong.get(row.getInt(Columns.ID_DOC.toString())) != null) {
+                    document.setProfilLong(profilsLong.get(row.getInt(Columns.ID_DOC.toString())).getId());
                 }
+            }
+            
+            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
+                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
             if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
                 document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-            }
-            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
-            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+            
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
+            
+            if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
+                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            }
+            
+            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
+            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
             
         }
         computed=true;

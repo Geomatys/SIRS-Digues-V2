@@ -21,29 +21,27 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilTraversImporter extends GenericImporter {
+public class ProfilEnTraversImporter extends GenericImporter {
 
-    private Map<Integer, ProfilTravers> profils = null;
-    private ProfilTraversRepository profilTraversRepository;
+    private Map<Integer, ProfilTravers> related = null;
+    
     private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     
-    private ProfilTraversImporter(final Database accessDatabase, 
+    private ProfilEnTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    public ProfilTraversImporter(final Database accessDatabase,
+    public ProfilEnTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilTraversRepository profilTraversRepository, 
             final ProfilTraversDescriptionImporter profilTraversDescriptionImporter){
         this(accessDatabase, couchDbConnector);
-        this.profilTraversRepository = profilTraversRepository;
         this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
     }
     
-    public Map<Integer, ProfilTravers> getProfilTravers() throws IOException, AccessDbImporterException{
-        if(profils==null) compute();
-        return profils;
+    public Map<Integer, ProfilTravers> getRelated() throws IOException, AccessDbImporterException{
+        if(related==null) compute();
+        return related;
     }
     
     private enum Columns {
@@ -68,7 +66,7 @@ public class ProfilTraversImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        profils = new HashMap<>();
+        related = new HashMap<>();
         
         final Map<Integer, List<LeveeProfilTravers>> levesImport = 
                 profilTraversDescriptionImporter.getLeveeProfilTraversByProfilId();
@@ -87,9 +85,9 @@ public class ProfilTraversImporter extends GenericImporter {
             final List<LeveeProfilTravers> leve = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if(leve!=null) profil.setLeveeIds(leve);
             
-            profils.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
+            related.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
-        couchDbConnector.executeBulk(profils.values());
+        couchDbConnector.executeBulk(related.values());
     }
     
 }

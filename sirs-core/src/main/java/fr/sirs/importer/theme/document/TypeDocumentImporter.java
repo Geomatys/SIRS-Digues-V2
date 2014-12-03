@@ -30,7 +30,7 @@ public class TypeDocumentImporter extends GenericImporter {
 
     TypeDocumentImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TypeDocumentGrandeEchelleImporter typeDocumentGrandeEchelleImporter) {
+            final TypeDocumentAGrandeEchelleImporter typeDocumentGrandeEchelleImporter) {
         super(accessDatabase, couchDbConnector);
     }
     

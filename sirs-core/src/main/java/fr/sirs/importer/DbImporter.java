@@ -62,16 +62,10 @@ import fr.sirs.core.component.RefVoieDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.evenementHydraulique.TypeEvenementHydrauliqueImporter;
-import fr.sirs.importer.evenementHydraulique.TypeFrequenceEvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
-import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.File;
@@ -172,15 +166,9 @@ public class DbImporter {
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
-    private ProfilTraversImporter profilTraversImporter;
-    private ConventionImporter conventionImporter;
     private DocumentImporter documentImporter;
-    private TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
-    private TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
-    private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
-    private RapportEtudeImporter rapportEtudeImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
 
@@ -272,8 +260,8 @@ public class DbImporter {
      LIGNE_EAU_MESURES_PRZ,
 //     LIGNE_EAU_MESURES_XYZ,
      MARCHE, // A FAIRE
-     MARCHE_FINANCEUR, // A FAIRE
-     MARCHE_MAITRE_OEUVRE, // A FAIRE
+//     MARCHE_FINANCEUR, // A FAIRE
+//     MARCHE_MAITRE_OEUVRE, // A FAIRE
 //     METEO,
      MONTEE_DES_EAUX,
 //     MONTEE_DES_EAUX_JOURNAL,
@@ -338,7 +326,7 @@ public class DbImporter {
      SYS_EVT_DESORDRE,
 //     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON, // Dans le module "berges" (2015)
 //     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
-     SYS_EVT_DOCUMENT_MARCHE, // A FAIRE
+//     SYS_EVT_DOCUMENT_MARCHE, // Hypothèse que cette table est remplacée par SYS_EVT_MARCHE 
 //     SYS_EVT_EMPRISE_COMMUNALE,
 //     SYS_EVT_EMPRISE_SYNDICAT,
      SYS_EVT_EPIS,
@@ -346,11 +334,11 @@ public class DbImporter {
      SYS_EVT_FONDATION,
 //     SYS_EVT_GARDIEN_TRONCON,
 //     SYS_EVT_ILE_TRONCON,
-     SYS_EVT_JOURNAL, // A FAIRE
+     SYS_EVT_JOURNAL,
      SYS_EVT_LAISSE_CRUE,
      SYS_EVT_LARGEUR_FRANC_BORD,
      SYS_EVT_LIGNE_EAU,
-     SYS_EVT_MARCHE, // A FAIRE
+     SYS_EVT_MARCHE,
      SYS_EVT_MONTEE_DES_EAUX_HYDRO,
      SYS_EVT_OUVERTURE_BATARDABLE,
      SYS_EVT_OUVRAGE_PARTICULIER,
@@ -669,14 +657,8 @@ public class DbImporter {
         systemeReperageBorneImporter = new SystemeReperageBorneImporter(
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter);
-        typeEvenementHydrauliqueImporter = new TypeEvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector);
-        typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector);
         evenementHydrauliqueImporter = new EvenementHydrauliqueImporter(
-                accessDatabase, couchDbConnector, 
-                typeEvenementHydrauliqueImporter, 
-                typeFrequenceEvenementHydrauliqueImporter);
+                accessDatabase, couchDbConnector);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector, tronconDigueRepository, 
                 digueRepository, borneDigueRepository, digueImporter, 
@@ -686,17 +668,10 @@ public class DbImporter {
                 tronconGestionDigueProprietaireImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter, 
                 evenementHydrauliqueImporter);
-        conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, conventionRepository,
-                intervenantImporter,
-                organismeImporter);
         typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
                 accessDatabase, couchDbConnector);
         documentImporter = new DocumentImporter(accessDatabase, couchDbConnector, 
                 documentRepository, 
-                conventionRepository, profilTraversRepository, 
-                profilLongRepository, rapportEtudeRepository, 
-                articleJournalRepository,
                 borneDigueImporter, intervenantImporter, organismeImporter,
                 systemeReperageImporter, 
                 evenementHydrauliqueImporter,
@@ -781,7 +756,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.MARCHE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -797,7 +772,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.MARCHE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -807,12 +782,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.MARCHE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.MARCHE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

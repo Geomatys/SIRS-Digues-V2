@@ -3,12 +3,7 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ArticleJournalRepository;
-import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DocumentRepository;
-import fr.sirs.core.component.ProfilLongRepository;
-import fr.sirs.core.component.ProfilTraversRepository;
-import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
@@ -26,10 +21,11 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
-import fr.sirs.importer.theme.document.related.journal.ArticleJournalImporter;
-import fr.sirs.importer.theme.document.related.profilLong.ProfilLongImporter;
+import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
+import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilEnTraversImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,31 +42,28 @@ import org.ektorp.CouchDbConnector;
 public class DocumentImporter extends GenericDocumentImporter {
     
     private final ConventionImporter conventionImporter;
-    private final ProfilLongImporter profilLongImporter;
-    private final ProfilTraversImporter profilTraversImporter;
-    private final ProfilTraversTronconImporter profilTraversTronconImporter;
+    private final ProfilEnLongImporter profilLongImporter;
+    private final ProfilEnTraversImporter profilTraversImporter;
+    private final ProfilEnTraversTronconImporter profilTraversTronconImporter;
     private final ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
-    private final ArticleJournalImporter articleJournalImporter;
+    private final JournalArticleImporter articleJournalImporter;
+    private final MarcheImporter marcheImporter;
     
     private final TypeDocumentImporter typeDocumentImporter;
     
-    private final DocumentConventionImporter documentConventionImporter;
-    private final DocumentProfilLongImporter documentProfilLongImporter;
-    private final DocumentProfilTraversImporter documentProfilTraversImporter;
-    private final DocumentRapportEtudeImporter documentRapportEtudeImporter;
-    private final DocumentJournalImporter documentJournalImporter;
+    private final SysEvtConventionImporter documentConventionImporter;
+    private final SysEvtProfilEnLongImporter documentProfilLongImporter;
+    private final SysEvtProfilEnTraversImporter documentProfilTraversImporter;
+    private final SysEvtRapportEtudesImporter documentRapportEtudeImporter;
+    private final SysEvtJournalImporter documentJournalImporter;
+    private final SysEvtMarcheImporter sysEvtMarcheImporter;
     
     private final List<GenericDocumentImporter> documentImporters = new ArrayList<>();
     
     public DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
-            final ConventionRepository conventionRepository,
-            final ProfilTraversRepository profilTraversRepository,
-            final ProfilLongRepository profilLongRepository,
-            final RapportEtudeRepository rapportEtudeRepository,
-            final ArticleJournalRepository articleJournalRepository,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter,
@@ -82,59 +75,66 @@ public class DocumentImporter extends GenericDocumentImporter {
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
         this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
                 couchDbConnector, 
-                new TypeDocumentGrandeEchelleImporter(accessDatabase, couchDbConnector));
+                new TypeDocumentAGrandeEchelleImporter(accessDatabase, couchDbConnector));
         
         
         conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, conventionRepository, intervenantImporter, 
-                organismeImporter);
+                couchDbConnector, intervenantImporter, organismeImporter);
         
-        profilLongImporter = new ProfilLongImporter(accessDatabase, 
-                couchDbConnector, profilLongRepository, organismeImporter, 
+        profilLongImporter = new ProfilEnLongImporter(accessDatabase, 
+                couchDbConnector, organismeImporter, 
                 evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
         
-        profilTraversTronconImporter = new ProfilTraversTronconImporter(
+        profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
                 accessDatabase, couchDbConnector, this);
         profilTraversDescriptionImporter = new ProfilTraversDescriptionImporter(
                 accessDatabase, couchDbConnector, 
                 typeSystemeReleveProfilImporter, organismeImporter, 
                 evenementHydrauliqueImporter, 
                 profilTraversTronconImporter);
-        profilTraversImporter = new ProfilTraversImporter(accessDatabase, 
-                couchDbConnector, profilTraversRepository, 
+        profilTraversImporter = new ProfilEnTraversImporter(accessDatabase, 
+                couchDbConnector, 
                 profilTraversDescriptionImporter);
         
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
-                couchDbConnector, rapportEtudeRepository);
+                couchDbConnector);
         
-        articleJournalImporter = new ArticleJournalImporter(accessDatabase, 
-                couchDbConnector, articleJournalRepository);
+        articleJournalImporter = new JournalArticleImporter(accessDatabase, 
+                couchDbConnector);
         
-        documentConventionImporter = new DocumentConventionImporter(
+        marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
+                organismeImporter);
+        
+        documentConventionImporter = new SysEvtConventionImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, conventionImporter);
         documentImporters.add(documentConventionImporter);
-        documentProfilTraversImporter = new DocumentProfilTraversImporter(
+        documentProfilTraversImporter = new SysEvtProfilEnTraversImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
         documentImporters.add(documentProfilTraversImporter);
-        documentProfilLongImporter = new DocumentProfilLongImporter(
+        documentProfilLongImporter = new SysEvtProfilEnLongImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilLongImporter);
         documentImporters.add(documentProfilLongImporter);
-        documentRapportEtudeImporter = new DocumentRapportEtudeImporter(
+        documentRapportEtudeImporter = new SysEvtRapportEtudesImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, rapportEtudeImporter);
         documentImporters.add(documentRapportEtudeImporter);
-        documentJournalImporter = new DocumentJournalImporter(accessDatabase, 
+        documentJournalImporter = new SysEvtJournalImporter(accessDatabase, 
                 couchDbConnector, documentRepository, borneDigueImporter, 
                 systemeReperageImporter, tronconGestionDigueImporter, 
                 articleJournalImporter);
         documentImporters.add(documentJournalImporter);
+        sysEvtMarcheImporter = new SysEvtMarcheImporter(accessDatabase, 
+                couchDbConnector, documentRepository, borneDigueImporter, 
+                systemeReperageImporter, tronconGestionDigueImporter, 
+                marcheImporter);
+        documentImporters.add(sysEvtMarcheImporter);
     }
     
     private enum Columns {
@@ -266,7 +266,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, Convention> conventions = conventionImporter.getConventions();
+        final Map<Integer, Convention> conventions = conventionImporter.getRelated();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         

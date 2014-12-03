@@ -20,16 +20,16 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilTraversTronconImporter extends GenericImporter {
+public class ProfilEnTraversTronconImporter extends GenericImporter {
 
     private Map<Integer, List<ProfilTraversTroncon>> profilTraversTronconsByLeve = null;
     private DocumentImporter documentImporter;
     
-    private ProfilTraversTronconImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    private ProfilEnTraversTronconImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    ProfilTraversTronconImporter(final Database accessDatabase,
+    ProfilEnTraversTronconImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final DocumentImporter documentImporter) {
         this(accessDatabase, couchDbConnector);

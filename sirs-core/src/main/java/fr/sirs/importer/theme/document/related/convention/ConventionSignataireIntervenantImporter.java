@@ -1,6 +1,5 @@
 package fr.sirs.importer.theme.document.related.convention;
 
-import fr.sirs.importer.troncon.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
