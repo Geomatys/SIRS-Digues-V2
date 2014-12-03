@@ -289,6 +289,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageFranchissementId"
         eType="#//RefOuvrageFranchissement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionBasId" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_acces" upperBound="-1"
+        eType="#//Voie_acces" eOpposite="#//Voie_acces/ouvrage_franchissement"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_acces" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -296,10 +298,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numero_secteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeNature" eType="#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesVoieDigue" upperBound="-1"
-        eType="#//VoieAccesVoieDigue" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesOuvrageFranchissement"
-        upperBound="-1" eType="#//VoieAccesOuvrageFranchissement" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_digue" upperBound="-1"
+        eType="#//Voie_digue" eOpposite="#//Voie_digue/voie_acces"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_franchissement"
+        upperBound="-1" eType="#//Ouvrage_franchissement" eOpposite="#//Ouvrage_franchissement/voie_acces"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_digue" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -307,6 +309,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="TypeVoieDigueId" eType="#//RefVoieDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="revetementId" eType="#//RefRevetement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_acces" upperBound="-1"
+        eType="#//Voie_acces" eOpposite="#//Voie_acces/voie_digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_voirie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -316,8 +320,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pompeIds" upperBound="-1"
         eType="#//Pompe" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="station_pompage" upperBound="-1"
-        eType="#//Reseau_hydraulique_ferme" eOpposite="#//Reseau_hydraulique_ferme/station_pompage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
+        upperBound="-1" eType="#//Reseau_hydraulique_ferme" eOpposite="#//Reseau_hydraulique_ferme/station_pompage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Pompe">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="marque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -339,7 +343,7 @@
         eType="#//RefUtilisationConduite"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConduiteFermeeId" eType="#//RefConduiteFermee"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="station_pompage" upperBound="-1"
-        eType="#//Station_pompage" eOpposite="#//Station_pompage/station_pompage"/>
+        eType="#//Station_pompage" eOpposite="#//Station_pompage/reseau_hydraulique_ferme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydro_ciel_ouvert"
         upperBound="-1" eType="#//Reseau_hydro_ciel_ouvert" eOpposite="#//Reseau_hydro_ciel_ouvert/reseau_hydraulique_ferme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_hydraulique_associe"
@@ -1201,13 +1205,5 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VoieAccesVoieDigue">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieId" eType="#//Voie_digue"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VoieAccesOuvrageFranchissement">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageId" eType="#//Ouvrage_franchissement"/>
   </eClassifiers>
 </ecore:EPackage>
