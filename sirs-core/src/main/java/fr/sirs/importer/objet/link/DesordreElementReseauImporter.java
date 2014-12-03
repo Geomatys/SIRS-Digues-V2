@@ -6,12 +6,10 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.reseau.TypeElementReseauImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +58,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ObjetReferenceObjet elementReseauDesordre = new ObjetReferenceObjet();
+//            final ObjetReferenceObjet elementReseauDesordre = new ObjetReferenceObjet();
             
             final Objet elementReseau = elementsReseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Class classeElementReseau = classesElementReseaux.get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
@@ -68,22 +66,22 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
             
             if(elementReseau!=null && desordre!=null){
 
-                if(elementReseau.getClass() != classeElementReseau){
-                    throw new AccessDbImporterException("Bad type !");
-                }
-            
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    elementReseauDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-                
-                elementReseauDesordre.setObjetId(elementReseau.getId());
-                
-                List<ObjetReferenceObjet> listByDesordre =  desordre.getObjet();
-                if(listByDesordre==null) {
-                    listByDesordre = new ArrayList<>();
-                    desordre.setObjet(listByDesordre);
-                }
-                listByDesordre.add(elementReseauDesordre);
+//                if(elementReseau.getClass() != classeElementReseau){
+//                    throw new AccessDbImporterException("Bad type !");
+//                }
+//            
+//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+//                    elementReseauDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+//                }
+//                
+//                elementReseauDesordre.setObjetId(elementReseau.getId());
+//                
+//                List<ObjetReferenceObjet> listByDesordre =  desordre.getObjet();
+//                if(listByDesordre==null) {
+//                    listByDesordre = new ArrayList<>();
+//                    desordre.setObjet(listByDesordre);
+//                }
+//                listByDesordre.add(elementReseauDesordre);
             }
         }
     }

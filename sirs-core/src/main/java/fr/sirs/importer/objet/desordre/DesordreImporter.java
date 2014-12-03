@@ -21,7 +21,6 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;

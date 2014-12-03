@@ -3,7 +3,6 @@ package fr.sirs.importer.objet.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.ObjetReferenceObjet;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -58,8 +57,8 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ObjetReferenceObjet referenceReseauFerme = new ObjetReferenceObjet();
-            final ObjetReferenceObjet referenceOuvrageAssocie = new ObjetReferenceObjet();
+//            final ObjetReferenceObjet referenceReseauFerme = new ObjetReferenceObjet();
+//            final ObjetReferenceObjet referenceOuvrageAssocie = new ObjetReferenceObjet();
             
             final VoieAcces ouvrageHydrauliqueAssocie = (VoieAcces) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CHEMIN_ACCES.toString()));
             final Objet reseauHydrau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
