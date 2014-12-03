@@ -289,8 +289,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageFranchissementId"
         eType="#//RefOuvrageFranchissement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionBasId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_acces" upperBound="-1"
-        eType="#//Voie_acces" eOpposite="#//Voie_acces/ouvrage_franchissement"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_acces" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -298,10 +296,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numero_secteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeNature" eType="#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_digue" upperBound="-1"
-        eType="#//Voie_digue" eOpposite="#//Voie_digue/voie_acces"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_franchissement"
-        upperBound="-1" eType="#//Ouvrage_franchissement" eOpposite="#//Ouvrage_franchissement/voie_acces"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_digue" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -309,8 +303,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="TypeVoieDigueId" eType="#//RefVoieDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="revetementId" eType="#//RefRevetement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_acces" upperBound="-1"
-        eType="#//Voie_acces" eOpposite="#//Voie_acces/voie_digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_voirie" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
