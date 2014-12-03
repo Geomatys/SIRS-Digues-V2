@@ -66,6 +66,8 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
 
+//                ouvrageHydrauliqueAssocie.setReseau_hydraulique_ferme(reseauHydrau.getId());
+//                reseauHydrau.set
 //                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
 //                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
 //                    referenceOuvrageAssocie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

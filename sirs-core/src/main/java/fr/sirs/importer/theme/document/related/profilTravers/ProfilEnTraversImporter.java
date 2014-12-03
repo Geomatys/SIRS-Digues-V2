@@ -2,12 +2,11 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,11 +20,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnTraversImporter extends GenericImporter {
-
-    private Map<Integer, ProfilTravers> related = null;
+public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<ProfilTravers> {
     
-    private ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
+    private ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
     
     private ProfilEnTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -34,14 +31,9 @@ public class ProfilEnTraversImporter extends GenericImporter {
 
     public ProfilEnTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilTraversDescriptionImporter profilTraversDescriptionImporter){
+            final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter){
         this(accessDatabase, couchDbConnector);
         this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
-    }
-    
-    public Map<Integer, ProfilTravers> getRelated() throws IOException, AccessDbImporterException{
-        if(related==null) compute();
-        return related;
     }
     
     private enum Columns {

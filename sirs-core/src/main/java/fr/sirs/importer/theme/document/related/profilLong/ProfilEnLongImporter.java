@@ -15,6 +15,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,29 +30,22 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnLongImporter extends GenericImporter {
-
-    private Map<Integer, ProfilLong> related = null;
+public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilLong> {
     
-    private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
-    private TypePositionProfilLongImporter typePositionProfilLongImporter;
-    private TypeOrigineProfilLongImporter typeOrigineProfilLongImporter;
-    private ProfilLongPointXYZImporter profilTraversPointXYZImporter;
-    private ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
+    private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
+    private final TypePositionProfilLongImporter typePositionProfilLongImporter;
+    private final TypeOrigineProfilLongImporter typeOrigineProfilLongImporter;
+    private final ProfilLongPointXYZImporter profilTraversPointXYZImporter;
+    private final ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
     
-    private OrganismeImporter organismeImporter;
-    
-    private ProfilEnLongImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
+    private final OrganismeImporter organismeImporter;
 
     public ProfilEnLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final OrganismeImporter organismeImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter){
-        this(accessDatabase, couchDbConnector);
+        super(accessDatabase, couchDbConnector);
         this.organismeImporter = organismeImporter;
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.profilLongEvenementHydrauliqueImporter = new ProfilLongEvenementHydrauliqueImporter(
@@ -61,11 +55,6 @@ public class ProfilEnLongImporter extends GenericImporter {
         this.typeOrigineProfilLongImporter = new TypeOrigineProfilLongImporter(
                 accessDatabase, couchDbConnector);
         profilTraversPointXYZImporter = new ProfilLongPointXYZImporter(accessDatabase, couchDbConnector);
-    }
-    
-    public Map<Integer, ProfilLong> getRelated() throws IOException, AccessDbImporterException{
-        if(related==null) compute();
-        return related;
     }
     
     private enum Columns {
@@ -165,5 +154,4 @@ public class ProfilEnLongImporter extends GenericImporter {
         }
         couchDbConnector.executeBulk(related.values());
     }
-    
 }

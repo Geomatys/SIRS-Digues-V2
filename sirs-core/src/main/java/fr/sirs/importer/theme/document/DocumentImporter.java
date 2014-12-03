@@ -24,7 +24,7 @@ import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
-import fr.sirs.importer.theme.document.related.profilTravers.ProfilTraversDescriptionImporter;
+import fr.sirs.importer.theme.document.related.profilTravers.ProfilEnTraversDescriptionImporter;
 import fr.sirs.importer.theme.document.related.profilTravers.ProfilEnTraversImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
@@ -44,8 +44,8 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final ConventionImporter conventionImporter;
     private final ProfilEnLongImporter profilLongImporter;
     private final ProfilEnTraversImporter profilTraversImporter;
-    private final ProfilEnTraversTronconImporter profilTraversTronconImporter;
-    private final ProfilTraversDescriptionImporter profilTraversDescriptionImporter;
+//    private final ProfilEnTraversTronconImporter profilTraversTronconImporter;
+    private final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
     private final JournalArticleImporter articleJournalImporter;
     private final MarcheImporter marcheImporter;
@@ -85,16 +85,13 @@ public class DocumentImporter extends GenericDocumentImporter {
                 couchDbConnector, organismeImporter, 
                 evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
         
-        profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
-                accessDatabase, couchDbConnector, this);
-        profilTraversDescriptionImporter = new ProfilTraversDescriptionImporter(
+        
+        profilTraversDescriptionImporter = new ProfilEnTraversDescriptionImporter(
                 accessDatabase, couchDbConnector, 
                 typeSystemeReleveProfilImporter, organismeImporter, 
-                evenementHydrauliqueImporter, 
-                profilTraversTronconImporter);
+                evenementHydrauliqueImporter, this);
         profilTraversImporter = new ProfilEnTraversImporter(accessDatabase, 
-                couchDbConnector, 
-                profilTraversDescriptionImporter);
+                couchDbConnector, profilTraversDescriptionImporter);
         
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector);

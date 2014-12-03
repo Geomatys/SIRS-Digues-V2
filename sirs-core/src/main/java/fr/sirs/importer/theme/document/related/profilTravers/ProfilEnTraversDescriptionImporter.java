@@ -1,6 +1,5 @@
 package fr.sirs.importer.theme.document.related.profilTravers;
 
-import fr.sirs.importer.theme.document.ProfilEnTraversTronconImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LeveePoints;
@@ -16,6 +15,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilTraversDescriptionImporter extends GenericImporter {
+public class ProfilEnTraversDescriptionImporter extends GenericImporter {
 
     private Map<Integer, LeveeProfilTravers> leves = null;
     private Map<Integer, List<LeveeProfilTravers>> levesByProfil = null;
@@ -43,23 +43,24 @@ public class ProfilTraversDescriptionImporter extends GenericImporter {
     private ProfilTraversPointXYZImporter profilTraversPointXYZImporter;
     private ProfilEnTraversTronconImporter profilTraversTronconImporter;
     
-    private ProfilTraversDescriptionImporter(final Database accessDatabase, 
+    private ProfilEnTraversDescriptionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
-    public ProfilTraversDescriptionImporter(final Database accessDatabase,
+    public ProfilEnTraversDescriptionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final OrganismeImporter organismeImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final ProfilEnTraversTronconImporter profilTraversTronconImporter) {
+            final DocumentImporter documentImporter) {
         this(accessDatabase, couchDbConnector);
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.organismeImporter = organismeImporter;
         this.profilTraversEvenementHydrauliqueImporter = new ProfilTraversEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
-        this.profilTraversTronconImporter = profilTraversTronconImporter;
+        this.profilTraversTronconImporter = profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
+                accessDatabase, couchDbConnector, documentImporter);
         typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, couchDbConnector);
         typeOrigineProfilTraversImporter = new TypeOrigineProfilTraversImporter(accessDatabase, couchDbConnector);
         profilTraversPointXYZImporter = new ProfilTraversPointXYZImporter(accessDatabase, couchDbConnector);

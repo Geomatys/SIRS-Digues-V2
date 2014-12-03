@@ -6,6 +6,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,9 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class RapportEtudeImporter extends GenericImporter {
-
-    private Map<Integer, RapportEtude> related = null;
+public class RapportEtudeImporter extends GenericDocumentRelatedImporter<RapportEtude> {
     
     private final TypeRapportEtudeImporter typeRapportEtudeImporter;
     
@@ -79,17 +78,5 @@ public class RapportEtudeImporter extends GenericImporter {
             related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }
         couchDbConnector.executeBulk(related.values());
-    }
-    
-    /**
-     *
-     * @return A map containing all RapportEtude instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    public Map<Integer, RapportEtude> getRelated() throws IOException, AccessDbImporterException {
-        if (related == null)  compute();
-        return related;
     }
 }

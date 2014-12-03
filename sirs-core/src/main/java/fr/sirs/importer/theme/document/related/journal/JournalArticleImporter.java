@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,9 +19,8 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JournalArticleImporter extends GenericImporter {
-
-    private Map<Integer, ArticleJournal> related = null;
+public class JournalArticleImporter extends GenericDocumentRelatedImporter<ArticleJournal> {
+    
     private final JournalImporter journalImporter;
     
     public JournalArticleImporter(final Database accessDatabase,
@@ -89,17 +89,5 @@ public class JournalArticleImporter extends GenericImporter {
             related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
         couchDbConnector.executeBulk(related.values());
-    }
-    
-    /**
-     *
-     * @return A map containing all RapportEtude instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    public Map<Integer, ArticleJournal> getRelated() throws IOException, AccessDbImporterException {
-        if (related == null)  compute();
-        return related;
     }
 }

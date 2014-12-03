@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,9 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class MarcheImporter extends GenericImporter {
-
-    private Map<Integer, Marche> related = null;
+public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
     
     private final OrganismeImporter organismeImporter;
     
@@ -95,17 +94,5 @@ public class MarcheImporter extends GenericImporter {
             related.put(row.getInt(Columns.ID_MARCHE.toString()), marche);
         }
         couchDbConnector.executeBulk(related.values());
-    }
-    
-    /**
-     *
-     * @return A map containing all Convention instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    public Map<Integer, Marche> getRelated() throws IOException, AccessDbImporterException {
-        if (related == null)  compute();
-        return related;
     }
 }

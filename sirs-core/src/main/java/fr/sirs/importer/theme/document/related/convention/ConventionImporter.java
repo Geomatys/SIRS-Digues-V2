@@ -3,10 +3,10 @@ package fr.sirs.importer.theme.document.related.convention;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefConvention;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,24 +20,17 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ConventionImporter extends GenericImporter {
-
-    private Map<Integer, Convention> related = null;
+public class ConventionImporter extends GenericDocumentRelatedImporter<Convention> {
     
-    private TypeConventionImporter typeConventionImporter;
-    private ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
-    private ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
-    
-    private ConventionImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
+    private final TypeConventionImporter typeConventionImporter;
+    private final ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;
+    private final ConventionSignataireOrganismeImporter conventionSignataireOrganismeImporter;
     
     public ConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter) {
-        this(accessDatabase, couchDbConnector);
+        super(accessDatabase, couchDbConnector);
         
         this.typeConventionImporter = new TypeConventionImporter(accessDatabase, couchDbConnector);
         this.conventionSignataireIntervenantImporter = new ConventionSignataireIntervenantImporter(
@@ -122,17 +115,5 @@ public class ConventionImporter extends GenericImporter {
             related.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
         }
         couchDbConnector.executeBulk(related.values());
-    }
-    
-    /**
-     *
-     * @return A map containing all Convention instances accessibles from the
-     * internal database identifier.
-     * @throws IOException
-     * @throws AccessDbImporterException
-     */
-    public Map<Integer, Convention> getRelated() throws IOException, AccessDbImporterException {
-        if (related == null)  compute();
-        return related;
     }
 }
