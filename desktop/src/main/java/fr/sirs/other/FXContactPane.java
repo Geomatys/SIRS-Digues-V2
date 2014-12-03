@@ -5,11 +5,19 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.ContactRepository;
+import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.PojoTable;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Iterator;
 import javafx.beans.property.BooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -37,18 +45,34 @@ public class FXContactPane extends BorderPane {
     @FXML private TextField uiEmail;
     
     @FXML private TextField uiAdresse;
-    @FXML private TextField uiComplement;
     @FXML private TextField uiCodePostale;
     @FXML private TextField uiCommune;
     
-    @FXML private Tab uiOrganismeTab;
+    @FXML private Tab uiOrganismesTab;
     
-//    private final PojoTable organismeTable = new OrganismeTable();
+    private final PojoTable organismeTable = new ContactOrganismeTable();
     
     private Contact contact;
+    private final ContactRepository contactRepository;
+    private final OrganismeRepository orgRepository;
     
+    final ObservableList orgsOfContact = 
+            FXCollections.observableArrayList();
+    
+    final HashSet<Organisme> modifiedOrgs = new HashSet<>();
+    
+    /**
+     *
+     * @param contact
+     * @param contactRepository
+     * @param orgRepository
+     */
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
+        
+        final Session session = Injector.getSession();
+        this.contactRepository = session.getContactRepository();
+        this.orgRepository = session.getOrganismeRepository();
         
         final BooleanProperty editProp = uiMode.editionState();
         uiNom.editableProperty().bind(editProp);
@@ -59,19 +83,21 @@ public class FXContactPane extends BorderPane {
         uiFax.editableProperty().bind(editProp);
         uiEmail.editableProperty().bind(editProp);
         uiAdresse.editableProperty().bind(editProp);
-        uiComplement.editableProperty().bind(editProp);
+//        uiComplement.editableProperty().bind(editProp);
         uiCodePostale.editableProperty().bind(editProp);
         uiCommune.editableProperty().bind(editProp);
         
-//        uiOrganismeTab.setContent(organismeTable);
-//        organismeTable.editableProperty().bind(editProp);
+        uiOrganismesTab.setContent(organismeTable);
+        organismeTable.editableProperty().bind(editProp);
         
-        uiMode.setSaveAction(this::save);        
+        uiMode.setSaveAction(this::save);
         setContact(contact);
     }
     
     public void setContact(Contact contact){
         this.contact = contact;
+        
+        if (contact == null) return;
         
         uiDocId.setText(contact.getDocumentId());
         
@@ -85,39 +111,81 @@ public class FXContactPane extends BorderPane {
         uiAdresse.textProperty().bindBidirectional(contact.adresseProperty());
         uiCodePostale.textProperty().bindBidirectional(contact.code_postalProperty());
         uiCommune.textProperty().bindBidirectional(contact.paysProperty());
-        
-//        organismeTable.setTableItems(()->(ObservableList)contact.contactOrganisme);
-        
+               
+        // Retrieve all organisms current contact is / was part of.
+        orgsOfContact.clear();
+        modifiedOrgs.clear();
+        if (contact.getId() != null) {
+            for (final Organisme org : orgRepository.getAll()) {
+                orgsOfContact.addAll(org.contactOrganisme.filtered((ContactOrganisme co) -> {
+                    return contact.getId().equals(co.getContactId());
+                }));
+            }
+        }
+           
     }
     
     private void save(){
-        final Session session = Injector.getSession();
-        session.getContactRepository().update(contact);
+        contactRepository.update(contact);
+        modifiedOrgs.stream().forEach((org) -> orgRepository.update(org));
+        modifiedOrgs.clear();
     }
  
-//    private final class OrganismeTable extends PojoTable{
-//
-//        public OrganismeTable() {
-//            super(ContactOrganisme.class, "Liste des organismes");
-//        }
-//
-//        @Override
-//        protected void editPojo(Element pojo) {
-//            
-//        }
-//
-//        @Override
-//        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-//            //objet inclue dans Contact
-//        }
-//
-//        @Override
-//        protected void deletePojos(Element... pojos) {
-//            for(Element ele : pojos){
-//                contact.contactOrganisme.remove(ele);
-//            }
-//        }
-//        
-//    }
+    /**
+     * Table listant les rattachement du contact courant aux organismes connus.
+     * Aucune opération de suavegarde n'est effectuée ici, elles seront apliquées
+     * lors de la sauvegarde globale du panneau.
+     */
+    private final class ContactOrganismeTable extends PojoTable {
+
+        public ContactOrganismeTable() {
+            super(ContactOrganisme.class, "Liste des organismes", true);
+            setTableItems(() -> orgsOfContact);
+            
+            orgsOfContact.addListener(new ListChangeListener() {
+
+                @Override
+                public void onChanged(ListChangeListener.Change c) {
+                    // We check only removed elements, because new ones do not 
+                    // have an attached organism.
+                    final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
+                    it.forEachRemaining((ContactOrganisme co)->{
+                        if (co.getParent() != null ) {
+                            modifiedOrgs.add(co.getParent());
+                        }
+                    });
+                }
+            });
+        }
+
+        @Override
+        protected void editPojo(Object pojo) {
+            // 
+        }
+        
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            if (event.getRowValue() instanceof ContactOrganisme) {
+                final ContactOrganisme co = (ContactOrganisme) event.getRowValue();
+                if (co.getParent() != null) {
+                    modifiedOrgs.add(co.getParent());
+                }
+            }
+        }
+        
+        @Override
+        protected void deletePojos(Element... pojos) {
+            orgsOfContact.removeAll(pojos);
+        }
+
+        @Override
+        protected Object createPojo() {
+            final ContactOrganisme co = new ContactOrganisme();
+            co.setContactId(contact.getId());
+            co.setDateDebutIntervenant(LocalDateTime.now());
+            orgsOfContact.add(co);
+            return co;
+        }
+    }
     
 }
