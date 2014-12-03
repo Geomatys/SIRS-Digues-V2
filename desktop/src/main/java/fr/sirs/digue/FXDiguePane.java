@@ -137,7 +137,7 @@ public class FXDiguePane extends BorderPane {
     private class TronconPojoTable extends PojoTable {
     
             public TronconPojoTable() {
-            super(TronconDigue.class,"Liste des tronçons");
+            super(TronconDigue.class, "Liste des tronçons", true);
 
             final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
                 updateTable();
@@ -180,13 +180,14 @@ public class FXDiguePane extends BorderPane {
         }
 
         @Override
-        protected void createPojo() {
+        protected Object createPojo() {
             TronconDigue troncon = new TronconDigue();
             troncon.setDigueId(digueProperty.get().getId());
             session.add(troncon);
             System.out.println("Id du nouveau tronçon : "+troncon.getId());
             troncons.add(troncon);
             updateTable();
+            return troncon;
         }
     }
     

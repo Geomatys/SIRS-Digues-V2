@@ -85,27 +85,23 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         return this.tronconChanged;
     }
     
-    
-    private void reloadLeves(){
-        
+    private void reloadLeves() {        
         final List<LeveeProfilTravers> items = this.profilTravers.getLeveeIds();
         this.leves = FXCollections.observableArrayList();
         items.stream().forEach((item) -> {
             this.leves.add(item);
         });
-    }
-    
-    
+    }    
 
     private class LeveProfilTraversTable extends PojoTable {
 
         public LeveProfilTraversTable() {
-            super(LeveeProfilTravers.class, "Liste des levés de profils en travers");
+            super(LeveeProfilTravers.class, "Liste des levés de profils en travers", true);
         }
 
         @Override
         protected void deletePojos(Element ... pojo) {
-            
+            // TODO
         }
         
         @Override
@@ -149,10 +145,11 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         }
         
         @Override
-        protected void createPojo() {
+        protected Object createPojo() {
             final LeveeProfilTravers leve = new LeveeProfilTravers();
             profilTravers.getLeveeIds().add(leve);
             updateTable();
+            return leve;
         }
     }
 }

@@ -24,7 +24,7 @@ public class DefaultTronconPojoTable extends PojoTable{
     private final AbstractTronconTheme.ThemeGroup group;
 
     public DefaultTronconPojoTable(AbstractTronconTheme.ThemeGroup group) {
-        super(group.getDataClass(),group.getTableTitle());
+        super(group.getDataClass(), group.getTableTitle(), true);
         this.group = group;
         
         final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
@@ -72,9 +72,4 @@ public class DefaultTronconPojoTable extends PojoTable{
         final TronconDigue obj = troncon.get();
         session.getTronconDigueRepository().update(obj);
     }
-    
-    @Override
-    protected void createPojo() {
-    }
-    
 }

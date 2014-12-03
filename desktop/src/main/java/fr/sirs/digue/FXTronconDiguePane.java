@@ -313,7 +313,7 @@ public class FXTronconDiguePane extends BorderPane{
     private final class ContactTable extends PojoTable{
 
         public ContactTable() {
-            super(ContactTroncon.class, "Liste des contacts");
+            super(ContactTroncon.class, "Liste des contacts", true);
         }
 
         @Override
@@ -330,10 +330,11 @@ public class FXTronconDiguePane extends BorderPane{
         }
 
         @Override
-        protected void createPojo() {
+        protected Object createPojo() {
             final ContactTroncon contact = new ContactTroncon();
             final TronconDigue troncon = tronconProperty.get();
             troncon.contacts.add(contact);
+            return contact;
         }
         
     }

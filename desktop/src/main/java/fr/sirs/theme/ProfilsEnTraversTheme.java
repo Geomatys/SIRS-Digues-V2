@@ -39,15 +39,6 @@ public class ProfilsEnTraversTheme extends Theme {
         public ProfilTraversTable(Repository repo) {
             super(repo, "Liste des profils en travers");
         }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            
-        }
-        
-        @Override
-        protected void createPojo() {
-        }
     }
     
 }

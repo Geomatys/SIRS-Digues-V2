@@ -67,15 +67,6 @@ public class DocumentsTheme extends Theme {
         public PhotoTable(Class pojoClass) {
             super(pojoClass,"Liste des photos");
         }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            
-        }
-        
-        @Override
-        protected void createPojo() {
-        }
     }
 
     private static class ConventionTable extends PojoTable {
@@ -87,10 +78,6 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
-        @Override
-        protected void createPojo() {
         }
     }
 
@@ -104,10 +91,6 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-        
-        @Override
-        protected void createPojo() {
-        }
     }
 
     private static class MarcheTable extends PojoTable {
@@ -119,10 +102,6 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
-        @Override
-        protected void createPojo() {
         }
     }
 
@@ -136,10 +115,6 @@ public class DocumentsTheme extends Theme {
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-        
-        @Override
-        protected void createPojo() {
-        }
     }
 
     private static class DocGrandeEchelleTable extends PojoTable {
@@ -151,10 +126,6 @@ public class DocumentsTheme extends Theme {
         @Override
         protected void deletePojos(Element ... pojo) {
             throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
-        @Override
-        protected void createPojo() {
         }
     }
     

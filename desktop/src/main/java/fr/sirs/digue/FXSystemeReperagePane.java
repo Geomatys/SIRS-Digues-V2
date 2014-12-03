@@ -83,27 +83,16 @@ public class FXSystemeReperagePane extends BorderPane {
         repo.update(sr);
     }
     
-    private class BorneTable extends PojoTable{
+    private class BorneTable extends PojoTable {
 
         public BorneTable() {
             super(SystemeReperageBorne.class, "Liste des bornes");
         }
 
         @Override
-        protected void deletePojos(Element... pojos) {
-            
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
             //on ne sauvegarde pas, le formulaire conteneur s'en charge
-        }
-
-        @Override
-        protected void createPojo() {
-            
-        }
-        
+        }        
     }
     
 }

@@ -15,7 +15,6 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,6 +55,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -66,6 +65,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -82,30 +82,7 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class PojoTable extends BorderPane{
-    
-    private static final Comparator COMPARATOR = new Comparator<Object>() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                if(o1==null && o2==null) return 0;
-                if(o1==null) return -1;
-                if(o2==null) return +1;
-
-                if(o1 instanceof Boolean){
-                    return Boolean.compare((Boolean)o1, (Boolean)o2);
-                }else if(o1 instanceof Number){
-                    final double d1 = ((Number)o1).doubleValue();
-                    final double d2 = ((Number)o2).doubleValue();
-                    return Double.compare(d1, d2);
-                }else if(o1 instanceof String){
-                    return ((String)o1).compareToIgnoreCase((String)o2);
-                }else if(o1 instanceof LocalDateTime){
-                    return ((LocalDateTime)o1).compareTo((LocalDateTime)o2);
-                }else {
-                    return 0;
-                }
-            }
-        };
+public class PojoTable extends BorderPane {
     
     private final TableView<Element> uiTable = new FXTableView<>();
     protected final ScrollPane uiScroll = new ScrollPane(uiTable);
@@ -123,14 +100,18 @@ public class PojoTable extends BorderPane{
     private final StringProperty currentSearch = new SimpleStringProperty("");
     
     public PojoTable(Class pojoClass, String title) {
-        this(pojoClass, title, null);
+        this(pojoClass, title, null, false);
+    }
+        
+    public PojoTable(Class pojoClass, String title, boolean isEditable) {
+        this(pojoClass, title, null, isEditable);
     }
     
     public PojoTable(Repository repo, String title) {
-        this(repo.getModelClass(), title, repo);
+        this(repo.getModelClass(), title, repo, true);
     }
     
-    private PojoTable(Class pojoClass, String title, Repository repo) {
+    private PojoTable(Class pojoClass, String title, Repository repo, boolean isEditable) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
         this.repo = repo;
@@ -163,42 +144,52 @@ public class PojoTable extends BorderPane{
              });
         }
         
-        
-        //barre d'outils
-        final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
-        uiAdd.getStyleClass().add("btn-without-style");
-        uiAdd.setOnAction((ActionEvent event) -> {createPojo();});
-        
-        final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
-        uiDelete.getStyleClass().add("btn-without-style");
-        uiDelete.setOnAction((ActionEvent event) -> {
-            final Element[] elements = ((List<Element>)uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
-            if(elements.length>0){
-                final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
-                        ButtonType.NO, ButtonType.YES).showAndWait().get();
-                if(ButtonType.YES == res){
-                    deletePojos(elements);
-                }
-                
-            }
-        });
-        
+        /* barre d'outils. Si on a un accesseur sur la base, on affiche des
+         * boutons de création / suppression.
+         */        
         uiSearch = new Button(null, searchNone);
         uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add("btn-without-style");        
         uiSearch.setOnAction((ActionEvent event) -> {search();});
         uiSearch.getStyleClass().add("label-header");
+        uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
         
         final Label uiTitle = new Label(title);
         uiTitle.getStyleClass().add("pojotable-header");   
         uiTitle.setAlignment(Pos.CENTER);
         
         uiTable.editableProperty().bind(editableProperty);
-        uiAdd.visibleProperty().bind(editableProperty);
-        uiDelete.visibleProperty().bind(editableProperty);
         
-        final HBox toolbar = new HBox(uiAdd,uiDelete,uiSearch);     
+        final HBox toolbar = new HBox(uiSearch);
         toolbar.getStyleClass().add("buttonbar");
+        
+        if (isEditable) {
+            final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
+            uiAdd.getStyleClass().add("btn-without-style");
+            uiAdd.setOnAction((ActionEvent event) -> {
+                editPojo(createPojo());
+            });
+
+            final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
+            uiDelete.getStyleClass().add("btn-without-style");
+            uiDelete.setOnAction((ActionEvent event) -> {
+                final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
+                if (elements.length > 0) {
+                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                            ButtonType.NO, ButtonType.YES).showAndWait().get();
+                    if (ButtonType.YES == res) {
+                        deletePojos(elements);
+                    }
+                } else {
+                    new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
+                }
+            });
+            uiAdd.visibleProperty().bind(editableProperty);
+            uiDelete.visibleProperty().bind(editableProperty);
+
+            toolbar.getChildren().addAll(uiAdd, uiDelete);
+        }
+        
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
         
@@ -277,11 +268,13 @@ public class PojoTable extends BorderPane{
         
     
     protected void deletePojos(Element ... pojos){
-        if(repo!=null){
+        if (repo!=null) {
             for(Element pojo : pojos){
                 repo.remove(pojo);
             }
             updateTable(); 
+        } else {
+            new Alert(Alert.AlertType.INFORMATION, "L'entrée ne peut pas être supprimée.").showAndWait();
         }
     }
     
@@ -297,11 +290,16 @@ public class PojoTable extends BorderPane{
         }
     }
     
-    protected void createPojo() {
-        if(repo!=null){
-            repo.add(repo.create());
+    protected Object createPojo() {
+        Object result = null;
+        if (repo != null) {
+            result = repo.create();
+            repo.add(result);
             updateTable();
+        } else {
+            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
         }
+        return result;
     }
         
     private void updateTable(){
@@ -311,7 +309,7 @@ public class PojoTable extends BorderPane{
     }
         
     public static void editElement(Object pojo){
-        if(pojo instanceof ElementHit){
+        if (pojo instanceof ElementHit) {
             final ElementHit hit = (ElementHit) pojo;
             try {
                 pojo = (Element) Injector.getSession().getConnector().get(hit.geteElementClass(), hit.getDocumentId());
@@ -319,49 +317,51 @@ public class PojoTable extends BorderPane{
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
         }
-        
+
         final Tab tab = new Tab();
-        
-        Node content = new BorderPane(new Label("Pas d'éditeur pour le type : "+pojo.getClass().getSimpleName()));
-        if(pojo instanceof Objet){
-            content = new FXStructurePane((Objet) pojo);
-        }else if(pojo instanceof Contact){
-            content = new FXContactPane((Contact) pojo);
-        }else if(pojo instanceof Organisme){
-            content = new FXOrganismePane((Organisme) pojo);
-        }else if (pojo instanceof ProfilTravers){
-            content = new FXThemePane((ProfilTravers) pojo);
-        }else if(pojo instanceof TronconDigue){
-            final FXTronconDiguePane ctrl = new FXTronconDiguePane();
-            ctrl.setTroncon((TronconDigue) pojo);
-            content = ctrl;
-        }else if(pojo instanceof Digue){
-            final FXDiguePane ctrl = new FXDiguePane();
-            ctrl.setDigue((Digue) pojo);
-            content = ctrl;
-        }else if(pojo instanceof Objet){
-            try{
+
+        try {
+            Node content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
+            if (pojo instanceof Objet) {
+                content = new FXStructurePane((Objet) pojo);
+            } else if (pojo instanceof Contact) {
+                content = new FXContactPane((Contact) pojo);
+            } else if (pojo instanceof Organisme) {
+                content = new FXOrganismePane((Organisme) pojo);
+            } else if (pojo instanceof ProfilTravers) {
+                content = new FXThemePane((ProfilTravers) pojo);
+            } else if (pojo instanceof TronconDigue) {
+                final FXTronconDiguePane ctrl = new FXTronconDiguePane();
+                ctrl.setTroncon((TronconDigue) pojo);
+                content = ctrl;
+            } else if (pojo instanceof Digue) {
+                final FXDiguePane ctrl = new FXDiguePane();
+                ctrl.setDigue((Digue) pojo);
+                content = ctrl;
+            } else if (pojo instanceof Objet) {
                 // Choose the pane adapted to the specific structure.
-                final String className = "fr.sirs.theme.ui.FX"+pojo.getClass().getSimpleName()+"Pane";
+                final String className = "fr.sirs.theme.ui.FX" + pojo.getClass().getSimpleName() + "Pane";
                 final Class controllerClass = Class.forName(className);
                 final Constructor cstr = controllerClass.getConstructor(pojo.getClass());
                 content = (Node) cstr.newInstance(pojo);
-            }catch(Exception ex){
-                throw new UnsupportedOperationException("Failed to load panel : "+ex.getMessage(),ex);
             }
+
+            tab.setContent(content);
+            final Session session = Injector.getSession();
+            final Element ele = (Element) pojo;
+            tab.setText(pojo.getClass().getSimpleName());
+            tab.setOnSelectionChanged((Event event) -> {
+                if (tab.isSelected()) {
+                    session.prepareToPrint(ele);
+                }
+            });
+            session.getFrame().addTab(tab);
+        } catch (Exception ex) {
+            Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
+            d.showAndWait();
+            throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
+            
         }
-        
-        tab.setContent(content);
-        
-        final Session session = Injector.getSession();
-        final Element ele = (Element) pojo;
-        tab.setText(pojo.getClass().getSimpleName());
-        tab.setOnSelectionChanged((Event event) -> {
-            if(tab.isSelected()){
-                session.prepareToPrint(ele);
-            }
-        });
-        session.getFrame().addTab(tab);
     }
     
     public class PropertyColumn extends TableColumn<Element,Object>{
@@ -404,8 +404,6 @@ public class PojoTable extends BorderPane{
                 }else if(LocalDateTime.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
                 }
-                
-                setComparator(COMPARATOR);
             }
             
         }  
