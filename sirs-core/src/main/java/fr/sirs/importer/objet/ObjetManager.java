@@ -16,9 +16,7 @@ import fr.sirs.importer.objet.ligneEau.LigneEauImporter;
 import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
 import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
 import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
-import fr.sirs.importer.objet.link.ElementReseauCheminAccessImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
-import fr.sirs.importer.objet.link.ElementReseauPointAccesImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
 import fr.sirs.importer.objet.link.ElementReseauReseauEauImporter;
 import fr.sirs.importer.objet.link.GenericObjetLinker;
@@ -61,8 +59,6 @@ public class ObjetManager {
     private final ElementReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
     private final ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
     private final ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
-    private final ElementReseauCheminAccessImporter elementReseauCheminAccessImporter;
-    private final ElementReseauPointAccesImporter elementReseauPointAccesImporter;
     private final ElementReseauReseauEauImporter elementReseauReseauEauImporter;
     private final List<GenericObjetLinker> linkers = new ArrayList<>();
     
@@ -158,12 +154,6 @@ public class ObjetManager {
         elementReseauAutreOuvrageHydrauImporter = new ElementReseauAutreOuvrageHydrauImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauAutreOuvrageHydrauImporter);
-        elementReseauCheminAccessImporter = new ElementReseauCheminAccessImporter(
-                accessDatabase, couchDbConnector, reseauImporter);
-        linkers.add(elementReseauCheminAccessImporter);
-        elementReseauPointAccesImporter = new ElementReseauPointAccesImporter(
-                accessDatabase, couchDbConnector, reseauImporter);
-        linkers.add(elementReseauPointAccesImporter);
         elementReseauReseauEauImporter = new ElementReseauReseauEauImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauReseauEauImporter);
