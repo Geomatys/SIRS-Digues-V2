@@ -58,37 +58,13 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-//            final ObjetReferenceObjet referenceReseauFerme = new ObjetReferenceObjet();
-//            final ObjetReferenceObjet referenceOuvrageAssocie = new ObjetReferenceObjet();
             
             final OuvrageHydrauliqueAssocie ouvrageHydrauliqueAssocie = (OuvrageHydrauliqueAssocie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU.toString()));
             final ReseauHydrauliqueFerme reseauHydrau = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-
-//                ouvrageHydrauliqueAssocie.setReseau_hydraulique_ferme(reseauHydrau.getId());
-//                reseauHydrau.set
-//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                    referenceOuvrageAssocie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                }
-//                
-//                referenceReseauFerme.setObjetId(cleanNullString(reseauHydrau.getId()));
-//                referenceOuvrageAssocie.setObjetId(cleanNullString(ouvrageHydrauliqueAssocie.getId()));
-//
-//                List<ObjetReferenceObjet> listReseauFerme = ouvrageHydrauliqueAssocie.getObjet();
-//                if (listReseauFerme == null) {
-//                    listReseauFerme = new ArrayList<>();
-//                    ouvrageHydrauliqueAssocie.setObjet(listReseauFerme);
-//                }
-//                listReseauFerme.add(referenceReseauFerme);
-//
-//                List<ObjetReferenceObjet> listOuvrageAssocie = reseauHydrau.getObjet();
-//                if (listOuvrageAssocie == null) {
-//                    listOuvrageAssocie = new ArrayList<>();
-//                    reseauHydrau.setObjet(listOuvrageAssocie);
-//                }
-//                listOuvrageAssocie.add(referenceOuvrageAssocie);
+                ouvrageHydrauliqueAssocie.getReseau_hydraulique_ferme().add(reseauHydrau.getId());
+                reseauHydrau.getOuvrage_hydraulique_associe().add(ouvrageHydrauliqueAssocie.getId());
             }
         }
     }

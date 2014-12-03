@@ -64,7 +64,9 @@ public class ElementReseauCheminAccessImporter extends GenericObjetLinker {
             final Objet reseauHydrau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-                System.out.println("Linker à faire : "+ reseauHydrau.getClass().getSimpleName());
+                
+//                ouvrageHydrauliqueAssocie.get
+//                System.out.println("Linker à faire : "+ reseauHydrau.getClass().getSimpleName());
 //
 //                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
 //                    referenceReseauFerme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

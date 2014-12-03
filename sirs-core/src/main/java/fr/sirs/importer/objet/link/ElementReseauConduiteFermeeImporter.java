@@ -58,35 +58,14 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-//            final ObjetReferenceObjet referenceConduite = new ObjetReferenceObjet();
-//            final ObjetReferenceObjet referenceStation = new ObjetReferenceObjet();
             
             final ReseauHydrauliqueFerme conduiteFermee = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_CONDUITE_FERMEE.toString()));
             final StationPompage stationPompage = (StationPompage) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(conduiteFermee!=null && stationPompage!=null){
-            
-//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                    referenceConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                    referenceStation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                }
-//                
-//                referenceConduite.setObjetId(cleanNullString(conduiteFermee.getId()));
-//                referenceStation.setObjetId(cleanNullString(stationPompage.getId()));
-//
-//                List<ObjetReferenceObjet> listConduites = stationPompage.getObjet();
-//                if (listConduites == null) {
-//                    listConduites = new ArrayList<>();
-//                    stationPompage.setObjet(listConduites);
-//                }
-//                listConduites.add(referenceConduite);
-//
-//                List<ObjetReferenceObjet> listStations = conduiteFermee.getObjet();
-//                if (listStations == null) {
-//                    listStations = new ArrayList<>();
-//                    conduiteFermee.setObjet(listStations);
-//                }
-//                listStations.add(referenceStation);
+                
+                conduiteFermee.getStation_pompage().add(stationPompage.getId());
+                stationPompage.getStation_pompage().add(conduiteFermee.getId());
             }
         }
     }

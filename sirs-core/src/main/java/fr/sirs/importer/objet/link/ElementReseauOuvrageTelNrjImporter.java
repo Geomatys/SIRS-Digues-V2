@@ -58,33 +58,12 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-//            final ObjetReferenceObjet referenceReseau = new ObjetReferenceObjet();
-//            final ObjetReferenceObjet referenceOuvrage = new ObjetReferenceObjet();
             final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));
             final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrage!=null && reseau!=null){
-//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                    referenceReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                    referenceOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                }
-//                
-//                referenceReseau.setObjetId(cleanNullString(reseau.getId()));
-//                referenceOuvrage.setObjetId(cleanNullString(ouvrage.getId()));
-//
-//                List<ObjetReferenceObjet> listReseauOuvrage = ouvrage.getObjet();
-//                if (listReseauOuvrage == null) {
-//                    listReseauOuvrage = new ArrayList<>();
-//                    ouvrage.setObjet(listReseauOuvrage);
-//                }
-//                listReseauOuvrage.add(referenceReseau);
-//                
-//                List<ObjetReferenceObjet> listReseauReseau = reseau.getObjet();
-//                if (listReseauReseau == null) {
-//                    listReseauReseau = new ArrayList<>();
-//                    reseau.setObjet(listReseauReseau);
-//                }
-//                listReseauReseau.add(referenceOuvrage);
+                ouvrage.getReseau_telecom_energie().add(reseau.getId());
+                reseau.getOuvrage_telecom_energie().add(ouvrage.getId());
             }
         }
     }
