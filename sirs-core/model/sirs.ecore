@@ -410,14 +410,19 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreStructure" upperBound="-1"
         eType="#//DesordreStructure" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference8" eType="#//Reseau_hydraulique_ferme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference9" eType="#//Ouvrage_hydraulique_associe"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference10" eType="#//Reseau_telecom_energie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference11" eType="#//Ouvrage_telecom_energie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference12" eType="#//Reseau_hydro_ciel_ouvert"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference13" eType="#//Ouvrage_particulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference14" eType="#//Voie_digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newEReference15" eType="#//Ouvrage_voirie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
+        eType="#//Reseau_hydraulique_ferme"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrag_hydraulique_associe"
+        eType="#//Ouvrage_hydraulique_associe"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_telecom_energie"
+        eType="#//Reseau_telecom_energie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_telecom_energie"
+        eType="#//Ouvrage_telecom_energie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydro_ciel_ouvert"
+        eType="#//Reseau_hydro_ciel_ouvert"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_particulier" eType="#//Ouvrage_particulier"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_digue" eType="#//Voie_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_voirie" eType="#//Ouvrage_voirie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" eType="#//Prestation"
         eOpposite="#//Prestation/desordre"/>
   </eClassifiers>
