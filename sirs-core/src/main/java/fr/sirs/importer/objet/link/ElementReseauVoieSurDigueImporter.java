@@ -65,17 +65,13 @@ DATE_DERNIERE_MAJ
             final Objet reseau =  reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(voieDigue!=null && reseau!=null){
-                System.out.println("Linker info :: "+ reseau.getClass().getSimpleName());
                 
                 if(reseau instanceof ReseauHydrauliqueFerme){
                     final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
                     reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
-//                    voieDigue.getReseau_hydraulique_ferme().add(reseauFerme.getId());
                 }
                 if(reseau instanceof OuvrageFranchissement){
-                    final OuvrageFranchissement ouvrageFranchissement = (OuvrageFranchissement) reseau;
-//                    ouvrageFranchissement.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
-//                    voieDigue.getReseau_hydraulique_ferme().add(reseauFerme.getId());
+                    System.out.println("Supprimé du modèle.");
                 }
                 else {
                     throw new AccessDbImporterException("Bad type");

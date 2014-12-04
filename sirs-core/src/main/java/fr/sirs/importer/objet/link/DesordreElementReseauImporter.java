@@ -6,6 +6,14 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageParticulier;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauTelecomEnergie;
+import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.reseau.TypeElementReseauImporter;
@@ -40,7 +48,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
         ID_DESORDRE,
         ID_ELEMENT_RESEAU,
         ID_TYPE_ELEMENT_RESEAU,
-        DATE_DERNIERE_MAJ
+//        DATE_DERNIERE_MAJ
     };
 
     @Override
@@ -65,23 +73,40 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             
             if(elementReseau!=null && desordre!=null){
-
-//                if(elementReseau.getClass() != classeElementReseau){
-//                    throw new AccessDbImporterException("Bad type !");
-//                }
-//            
-//                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                    elementReseauDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-//                }
-//                
-//                elementReseauDesordre.setObjetId(elementReseau.getId());
-//                
-//                List<ObjetReferenceObjet> listByDesordre =  desordre.getObjet();
-//                if(listByDesordre==null) {
-//                    listByDesordre = new ArrayList<>();
-//                    desordre.setObjet(listByDesordre);
-//                }
-//                listByDesordre.add(elementReseauDesordre);
+                
+                if (elementReseau.getClass().equals(classeElementReseau)) {
+                    if (elementReseau instanceof VoieDigue) {
+                        desordre.getVoie_digue().add(elementReseau.getId());
+                    } 
+                    else if (elementReseau instanceof OuvrageParticulier){
+                        desordre.getOuvrage_particulier().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof OuvrageHydrauliqueAssocie){
+                        desordre.getOuvrag_hydraulique_associe().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof OuvrageTelecomEnergie){
+                        desordre.getOuvrage_telecom_energie().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof OuvrageVoirie){
+                        desordre.getOuvrage_voirie().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof ReseauTelecomEnergie){
+                        desordre.getReseau_telecom_energie().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof ReseauHydroCielOuvert){
+                        desordre.getReseau_hydro_ciel_ouvert().add(elementReseau.getId());
+                    }
+                    else if (elementReseau instanceof ReseauHydrauliqueFerme){
+                        desordre.getReseau_hydraulique_ferme().add(elementReseau.getId());
+                    }
+                    else {
+                        System.out.println(elementReseau.getClass().getSimpleName());
+                        throw new AccessDbImporterException("Bad type.");
+                    }
+                }
+                else {
+                    throw new AccessDbImporterException("Bad referenced type. Incoherent data.");
+                }
             }
         }
     }

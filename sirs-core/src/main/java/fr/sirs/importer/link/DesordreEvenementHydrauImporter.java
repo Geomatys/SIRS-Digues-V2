@@ -2,16 +2,13 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.CrueDesordre;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +36,7 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
     private enum Columns {
         ID_DESORDRE,
         ID_EVENEMENT_HYDRAU,
-        DATE_DERNIERE_MAJ
+//        DATE_DERNIERE_MAJ
     };
     
     @Override
@@ -65,24 +62,13 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final CrueDesordre crueDesordre = new CrueDesordre();
             
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             final EvenementHydraulique evenement = evenements.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
             
             if(desordre!=null && evenement!=null){
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    crueDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-                
-                crueDesordre.setEvenementId(cleanNullString(evenement.getId()));
-
-                List<CrueDesordre> listReseauOuvrage = desordre.getCrueDesordre();
-                if (listReseauOuvrage == null) {
-                    listReseauOuvrage = new ArrayList<>();
-                    desordre.setCrueDesordre(listReseauOuvrage);
-                }
-                listReseauOuvrage.add(crueDesordre);
+                desordre.getEvenementHydraulique().add(evenement.getId());
+                evenement.getDesordre().add(desordre.getId());
             }
         }
     }

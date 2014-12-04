@@ -14,7 +14,6 @@ import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
 import fr.sirs.importer.objet.laisseCrue.LaisseCrueImporter;
 import fr.sirs.importer.objet.ligneEau.LigneEauImporter;
 import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
-import fr.sirs.importer.objet.link.DesordreElementStructureImporter;
 import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
@@ -55,7 +54,6 @@ public class ObjetManager {
     private final MonteeDesEauxImporter monteeDesEauxImporter;
     private final List<GenericObjetImporter> importers = new ArrayList<>();
     
-    private final DesordreElementStructureImporter desordreStructureImporter;
     private final DesordreElementReseauImporter desordreElementReseauImporter;
     private final ElementReseauConduiteFermeeImporter reseauConduiteFermeeImporter;
     private final ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
@@ -139,10 +137,6 @@ public class ObjetManager {
         importers.add(monteeDesEauxImporter);
         
         
-        desordreStructureImporter = new DesordreElementStructureImporter(
-                accessDatabase, couchDbConnector, structureImporter, 
-                desordreImporter);
-        linkers.add(desordreStructureImporter);
         desordreElementReseauImporter = new DesordreElementReseauImporter(
                 accessDatabase, couchDbConnector, reseauImporter, 
                 desordreImporter);
