@@ -187,4 +187,7 @@ public class ObjetManager {
     public ElementGeometrieImporter getElementGeometryImporter(){return geometryImporter;}
     public PrestationImporter getPrestationImporter(){return prestationImporter;}
     public ElementReseauImporter getElementReseauImporter(){return reseauImporter;}
+    public LaisseCrueImporter getLaisseCrueImporter(){return laisseCrueImporter;}
+    public LigneEauImporter getLigneEauImporter() {return ligneEauImporter;}
+    public MonteeDesEauxImporter getMonteeDesEauxImporter(){return monteeDesEauxImporter;}
 }

@@ -628,21 +628,12 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         }
         
         
-        //======================================================================
-        // Liens avec les désordres
-        
-        
 
 
         //======================================================================
 
         // Génération de la liste des structures par identifiant de tronçon.
         structuresByTronconId = new HashMap<>();
-
-        
-        
-        
-        // Structures au sens strict
         for (final GenericObjetImporter gsi : reseauImporters) {
             final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
 
@@ -660,46 +651,5 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             }
 
         }
-
-        
-        
-        
-//        final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getStructuresByTronconId();
-//        if(cretesByTroncon!=null){
-//            cretesByTroncon.keySet().stream().map((key) -> {
-//                if (structuresByTronconId.get(key) == null) {
-//                    structuresByTronconId.put(key, new ArrayList<>());
-//                }   return key;
-//            }).forEach((key) -> {
-//                if(cretesByTroncon.get(key)!=null)
-//                    structuresByTronconId.get(key).addAll(cretesByTroncon.get(key));
-//            });
-//        }
-//
-//        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getStructuresByTronconId();
-//        if(piedsDigueByTroncon!=null){
-//        piedsDigue.keySet().stream().map((key) -> {
-//            if (structuresByTronconId.get(key) == null) {
-//                structuresByTronconId.put(key, new ArrayList<>());
-//            }
-//            return key;
-//        }).forEach((key) -> {
-//            if(piedsDigueByTroncon.get(key)!=null)
-//                structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
-//        });
-//        }
-//
-//        final Map<Integer, List<TalusDigue>> talusDigueByTroncon = talusDigueImporter.getStructuresByTronconId();
-//        if(talusDigueByTroncon!=null){
-//        talusDigue.keySet().stream().map((key) -> {
-//            if (structuresByTronconId.get(key) == null) {
-//                structuresByTronconId.put(key, new ArrayList<>());
-//            }
-//            return key;
-//        }).forEach((key) -> {
-//            if(talusDigueByTroncon.get(key)!=null)
-//                structuresByTronconId.get(key).addAll(talusDigueByTroncon.get(key));
-//        });
-//        }
     }
 }

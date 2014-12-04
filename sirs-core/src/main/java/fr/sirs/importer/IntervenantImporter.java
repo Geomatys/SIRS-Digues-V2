@@ -98,9 +98,9 @@ public class IntervenantImporter extends GenericImporter {
             
             intervenant.setTelephone(row.getString(Columns.TEL_PERSO_INTERV.toString()));
             
-            intervenant.setEmail(row.getString(Columns.FAX_PERSO_INTERV.toString()));
+            intervenant.setEmail(row.getString(Columns.MAIL_INTERV.toString()));
             
-            intervenant.setFax(row.getString(Columns.MAIL_INTERV.toString()));
+            intervenant.setFax(row.getString(Columns.FAX_PERSO_INTERV.toString()));
             
             intervenant.setService(row.getString(Columns.SERVICE_INTERV.toString()));
             

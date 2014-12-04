@@ -3,7 +3,9 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
+import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -23,7 +25,7 @@ import org.ektorp.CouchDbConnector;
 public class ElementReseauConventionImporter extends GenericEntityLinker {
 
     private final ElementReseauImporter elementReseauImporter;
-    private final ConventionImporter journalArticleImporter;
+    private final ConventionImporter conventionImporter;
     
     public ElementReseauConventionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
@@ -31,13 +33,12 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
             final ConventionImporter journalArticleImporter) {
         super(accessDatabase, couchDbConnector);
         this.elementReseauImporter = desordreImporter;
-        this.journalArticleImporter = journalArticleImporter;
+        this.conventionImporter = journalArticleImporter;
     }
 
     private enum Columns {
-        ID_ARTICLE_JOURNAL,
-        ID_DESORDRE,
-//        DATE_DERNIERE_MAJ
+        ID_ELEMENT_RESEAU,
+        ID_CONVENTION
     };
     
     @Override
@@ -51,26 +52,25 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE_JOURNAL.toString();
+        return DbImporter.TableName.ELEMENT_RESEAU_CONVENTION.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-//        final Map<Integer, Desordre> desordres = elementReseauImporter.getById();
-//        final Map<Integer, ArticleJournal> articles = journalArticleImporter.getRelated();
+        final Map<Integer, Objet> reseaux = elementReseauImporter.getById();
+        final Map<Integer, Convention> conventions = conventionImporter.getRelated();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
-//            final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
-//            final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
+            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final Convention convention = conventions.get(row.getInt(Columns.ID_CONVENTION.toString()));
             
-//            if(desordre!=null && article!=null){
-//                desordre.getArticleJournal().add(article.getId());
-//                article.getDesordre().add(desordre.getId());
-//            }
+            if(reseau!=null && convention!=null){
+                reseau.getConventionIds().add(convention.getId());
+            }
         }
     }
 }

@@ -13,7 +13,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefRevetement;
 import fr.sirs.core.model.RefSource;
