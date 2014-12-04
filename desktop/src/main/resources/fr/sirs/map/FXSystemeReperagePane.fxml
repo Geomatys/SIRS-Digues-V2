@@ -26,6 +26,7 @@
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="ALWAYS" />
                   <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
               </rowConstraints>
@@ -42,12 +43,14 @@
                            </columnResizePolicy></FXTableView>
                      </content>
                   </ScrollPane>
-                  <Button fx:id="uiCalculatePr" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Calculer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Calculer les valeurs PR entre les 2 bornes sélectionnées" wrapText="true" GridPane.rowIndex="3" />
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="2" />
-                  <ToggleButton fx:id="uiCreateBorne" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Saisir" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Button fx:id="uiProject" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Projeter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Projeter les bornes sélectionnées sur le tronçon" wrapText="true" GridPane.rowIndex="4" />
+                  <Button fx:id="uiCalculatePr" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Calculer" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="Calculer les valeurs PR entre les 2 bornes sélectionnées" wrapText="true" GridPane.rowIndex="4" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="3" />
+                  <ToggleButton fx:id="uiCreateBorne" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Saisir" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Button fx:id="uiProject" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Projeter" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <Label text="Projeter les bornes sélectionnées sur le tronçon" wrapText="true" GridPane.rowIndex="5" />
+                  <Label text="Ajouter des bornes existantes" GridPane.rowIndex="2" />
+                  <Button fx:id="uiAddBorne" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ajouter" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
             <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
