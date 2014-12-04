@@ -10,7 +10,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-abstract class GenericEntityLinker extends GenericLinker {
+public abstract class GenericEntityLinker extends GenericLinker {
 
     public GenericEntityLinker(Database accessDatabase, CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);

@@ -14,6 +14,7 @@ import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
 import fr.sirs.importer.objet.laisseCrue.LaisseCrueImporter;
 import fr.sirs.importer.objet.ligneEau.LigneEauImporter;
 import fr.sirs.importer.objet.link.DesordreElementReseauImporter;
+import fr.sirs.importer.objet.link.DesordrePrestationImporter;
 import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
@@ -60,6 +61,7 @@ public class ObjetManager {
     private final ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
     private final ElementReseauReseauEauImporter elementReseauReseauEauImporter;
     private final ElementReseauVoieSurDigueImporter elementReseauVoieSurDigueImporter;
+    private final DesordrePrestationImporter desordrePrestationImporter;
     private final List<GenericObjetLinker> linkers = new ArrayList<>();
     
     public ObjetManager(final Database accessDatabase, 
@@ -156,6 +158,10 @@ public class ObjetManager {
         elementReseauVoieSurDigueImporter = new ElementReseauVoieSurDigueImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauVoieSurDigueImporter);
+        desordrePrestationImporter = new DesordrePrestationImporter(
+                accessDatabase, couchDbConnector, prestationImporter, 
+                desordreImporter);
+        linkers.add(desordrePrestationImporter);
     }
     
     public List<Objet> getByTronconId(final int tronconId) 
@@ -176,7 +182,9 @@ public class ObjetManager {
     }
     
     
-    public ElementStructureImporter getStructureImporter(){return structureImporter;}
+    public ElementStructureImporter getElementStructureImporter(){return structureImporter;}
     public DesordreImporter getDesordreImporter(){return desordreImporter;}
-    public ElementGeometrieImporter getGeometryImporter(){return geometryImporter;}
+    public ElementGeometrieImporter getElementGeometryImporter(){return geometryImporter;}
+    public PrestationImporter getPrestationImporter(){return prestationImporter;}
+    public ElementReseauImporter getElementReseauImporter(){return reseauImporter;}
 }

@@ -64,6 +64,9 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
+import fr.sirs.importer.link.DesordreJournalImporter;
+import fr.sirs.importer.link.GenericEntityLinker;
+import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
@@ -171,7 +174,11 @@ public class DbImporter {
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
+    
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
+    private PrestationEvenementHydrauImporter prestationEvenementHydrauImporter;
+    private DesordreJournalImporter desordreJournalImporter;
+    private List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
      BORNE_DIGUE,
@@ -185,9 +192,9 @@ public class DbImporter {
      DESORDRE_ELEMENT_RESEAU,
      DESORDRE_ELEMENT_STRUCTURE,
      DESORDRE_EVENEMENT_HYDRAU,
-//     DESORDRE_JOURNAL,
+     DESORDRE_JOURNAL,
 //     DESORDRE_OBSERVATION, // A Faire !
-//     DESORDRE_PRESTATION,
+     DESORDRE_PRESTATION,
      DIGUE,
      DOCUMENT,
      ECOULEMENT,
@@ -197,7 +204,7 @@ public class DbImporter {
      ELEMENT_RESEAU_CHEMIN_ACCES, //
      ELEMENT_RESEAU_CONDUITE_FERMEE,
 //     ELEMENT_RESEAU_CONVENTION,
-     ELEMENT_RESEAU_EVENEMENT_HYDRAU, // A remplir
+//     ELEMENT_RESEAU_EVENEMENT_HYDRAU, // Plus de liens dans le nouveau modèle
 //     ELEMENT_RESEAU_GARDIEN,
 //     ELEMENT_RESEAU_GESTIONNAIRE,
 //     ELEMENT_RESEAU_OUVERTURE_BATARDABLE, // N'existe plus dans le nouveau modèle
@@ -209,10 +216,10 @@ public class DbImporter {
 //     ELEMENT_RESEAU_PROPRIETAIRE,
      ELEMENT_RESEAU_RESEAU_EAU,
 //     ELEMENT_RESEAU_SERVITUDE, // Ni les parcelles cadastrales, ni les servitudes ni les liens qu'elles pouvaient entretenir n'existent dans le nouveau modèle
-//     ELEMENT_RESEAU_STRUCTURE,
+//     ELEMENT_RESEAU_STRUCTURE, // Plus de liens dans le nouveau modèle
      ELEMENT_RESEAU_VOIE_SUR_DIGUE,
      ELEMENT_STRUCTURE,
-//     ELEMENT_STRUCTURE_ABONDANCE_ESSENCE,
+//     ELEMENT_STRUCTURE_ABONDANCE_ESSENCE, // Végétation (module à part)
 //     ELEMENT_STRUCTURE_GARDIEN,
 //     ELEMENT_STRUCTURE_GESTIONNAIRE,
 //     ELEMENT_STRUCTURE_PROPRIETAIRE,
@@ -271,14 +278,14 @@ public class DbImporter {
      ORGANISME,
      ORGANISME_DISPOSE_INTERVENANT,
 //     ORIENTATION,
-//     PARCELLE_CADASTRE,
-//     PARCELLE_LONGE_DIGUE,
+//     PARCELLE_CADASTRE, // Plus de parcelles dans le nouveau modèle
+//     PARCELLE_LONGE_DIGUE, // Plus de parcelles dans le nouveau modèle
 //     PHOTO_LAISSE,
 //     PHOTO_LOCALISEE_EN_PR,
 //     PHOTO_LOCALISEE_EN_XY,
      PRESTATION,
 //     PRESTATION_DOCUMENT,
-//     PRESTATION_EVENEMENT_HYDRAU,
+     PRESTATION_EVENEMENT_HYDRAU,
      PRESTATION_INTERVENANT,
      PROFIL_EN_LONG,
 //     PROFIL_EN_LONG_DZ, // Même sort que PROFIL_EN_TRAVERS_DZ ?
@@ -365,7 +372,7 @@ public class DbImporter {
      SYS_EVT_TALUS_DIGUE,
 //     SYS_EVT_TALUS_FRANC_BORD,
      SYS_EVT_TALUS_RISBERME,
-//     SYS_EVT_VEGETATION,
+//     SYS_EVT_VEGETATION, // Végétation (module à part)
      SYS_EVT_VOIE_SUR_DIGUE,
 //     SYS_IMPORT_POINTS,
 //     SYS_INDEFINI,
@@ -426,7 +433,7 @@ public class DbImporter {
 //     TYPE_ELEMENT_RESEAU_COTE, // Concerne l'affichage
      TYPE_ELEMENT_STRUCTURE,
 //     TYPE_ELEMENT_STRUCTURE_COTE, // Concerne l'affichage
-//     TYPE_EMPRISE_PARCELLE,
+//     TYPE_EMPRISE_PARCELLE, // Pas de parcelles cadastrales dans le nouveau modèle
      TYPE_EVENEMENT_HYDRAU,
      TYPE_FONCTION,
 //     TYPE_FONCTION_MO,
@@ -461,20 +468,20 @@ public class DbImporter {
      TYPE_RESEAU_TELECOMMUNIC,
      TYPE_REVETEMENT,
      TYPE_RIVE,
-//     TYPE_SERVITUDE,
+//     TYPE_SERVITUDE, // Pas de servitudes dans le nouveau modèle
      TYPE_SEUIL,
 //     TYPE_SIGNATAIRE,
 //     TYPE_SITUATION_FONCIERE,
      TYPE_SYSTEME_RELEVE_PROFIL,
 //     TYPE_URGENCE,
      TYPE_USAGE_VOIE,
-//     TYPE_VEGETATION,
-//     TYPE_VEGETATION_ABONDANCE,
-//     TYPE_VEGETATION_ABONDANCE_BRAUN_BLANQUET,
-//     TYPE_VEGETATION_ESSENCE,
-//     TYPE_VEGETATION_ETAT_SANITAIRE,
-//     TYPE_VEGETATION_STRATE_DIAMETRE,
-//     TYPE_VEGETATION_STRATE_HAUTEUR,
+//     TYPE_VEGETATION, // Végétation (module à part)
+//     TYPE_VEGETATION_ABONDANCE, // Végétation (module à part)
+//     TYPE_VEGETATION_ABONDANCE_BRAUN_BLANQUET, // Végétation (module à part)
+//     TYPE_VEGETATION_ESSENCE, // Végétation (module à part)
+//     TYPE_VEGETATION_ETAT_SANITAIRE, // Végétation (module à part)
+//     TYPE_VEGETATION_STRATE_DIAMETRE, // Végétation (module à part)
+//     TYPE_VEGETATION_STRATE_HAUTEUR, // Végétation (module à part)
      TYPE_VOIE_SUR_DIGUE,
      UTILISATION_CONDUITE,
      
@@ -688,8 +695,20 @@ public class DbImporter {
         // Linkers
         desordreEvenementHydrauImporter = new DesordreEvenementHydrauImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getDesordreImporter(), 
+                tronconGestionDigueImporter.getObjetManager().getDesordreImporter(), 
                 evenementHydrauliqueImporter);
+        linkers.add(desordreEvenementHydrauImporter);
+        prestationEvenementHydrauImporter = new PrestationEvenementHydrauImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
+                evenementHydrauliqueImporter);
+        linkers.add(prestationEvenementHydrauImporter);
+        desordreJournalImporter = new DesordreJournalImporter(accessDatabase, 
+                couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getDesordreImporter(), 
+                documentImporter.getJournalArticleImporter());
+        linkers.add(desordreJournalImporter);
+        
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -734,8 +753,8 @@ public class DbImporter {
         tronconGestionDigueImporter.getTronconsDigues();
         systemeReperageBorneImporter.getByBorneId();
         documentImporter.getDocuments();
-        desordreEvenementHydrauImporter.link();
         
+        for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();
     }
 
@@ -750,8 +769,8 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto.mdb")));
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
 //            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
 //                System.out.println(tableName);
@@ -763,7 +782,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.DESORDRE_JOURNAL.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -779,7 +798,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.DESORDRE_JOURNAL.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -789,12 +808,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.DESORDRE_JOURNAL.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.DESORDRE_JOURNAL.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -803,7 +822,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-            importer.importation();
+//            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

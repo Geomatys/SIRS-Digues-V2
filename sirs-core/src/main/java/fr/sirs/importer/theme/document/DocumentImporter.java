@@ -44,10 +44,9 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final ConventionImporter conventionImporter;
     private final ProfilEnLongImporter profilLongImporter;
     private final ProfilEnTraversImporter profilTraversImporter;
-//    private final ProfilEnTraversTronconImporter profilTraversTronconImporter;
     private final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
-    private final JournalArticleImporter articleJournalImporter;
+    private final JournalArticleImporter journalArticleImporter;
     private final MarcheImporter marcheImporter;
     
     private final TypeDocumentImporter typeDocumentImporter;
@@ -96,7 +95,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector);
         
-        articleJournalImporter = new JournalArticleImporter(accessDatabase, 
+        journalArticleImporter = new JournalArticleImporter(accessDatabase, 
                 couchDbConnector);
         
         marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
@@ -125,7 +124,7 @@ public class DocumentImporter extends GenericDocumentImporter {
         documentJournalImporter = new SysEvtJournalImporter(accessDatabase, 
                 couchDbConnector, documentRepository, borneDigueImporter, 
                 systemeReperageImporter, tronconGestionDigueImporter, 
-                articleJournalImporter);
+                journalArticleImporter);
         documentImporters.add(documentJournalImporter);
         sysEvtMarcheImporter = new SysEvtMarcheImporter(accessDatabase, 
                 couchDbConnector, documentRepository, borneDigueImporter, 
@@ -133,6 +132,9 @@ public class DocumentImporter extends GenericDocumentImporter {
                 marcheImporter);
         documentImporters.add(sysEvtMarcheImporter);
     }
+    
+    public JournalArticleImporter getJournalArticleImporter() {return this.journalArticleImporter;}
+    public ConventionImporter getConventionImporter() {return this.conventionImporter;}
     
     private enum Columns {
         ID_DOC,

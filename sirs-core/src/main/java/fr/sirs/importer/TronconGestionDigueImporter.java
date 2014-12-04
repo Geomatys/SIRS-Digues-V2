@@ -21,6 +21,7 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
+import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
 import java.io.IOException;
@@ -95,9 +96,7 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
                 intervenantImporter, evenementHydrauliqueImporter);
     }
     
-    public ElementStructureImporter getStructureImporter(){return objetManager.getStructureImporter();}
-    public DesordreImporter getDesordreImporter(){return objetManager.getDesordreImporter();}
-    public ElementGeometrieImporter getGeometryImporter(){return objetManager.getGeometryImporter();}
+    public ObjetManager getObjetManager(){return objetManager;}
 
     @Override
     public void update() throws IOException, AccessDbImporterException {

@@ -61,28 +61,32 @@ DATE_DERNIERE_MAJ
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final VoieDigue voieDigue = (VoieDigue) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
+            
+            
+            final Objet reseauVoieDigue = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
             final Objet reseau =  reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
-            if(voieDigue!=null && reseau!=null){
-                
-                if(reseau instanceof ReseauHydrauliqueFerme){
-                    final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
-                    reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
+            if(reseauVoieDigue instanceof VoieDigue){
+                final VoieDigue voieDigue = (VoieDigue) reseauVoieDigue;
+                if(voieDigue!=null && reseau!=null){
+
+                    if(reseau instanceof ReseauHydrauliqueFerme){
+                        final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
+                        reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
+                    }
+                    if(reseau instanceof OuvrageFranchissement){
+                        System.out.println("Supprimé du modèle.");
+                    }
+                    else {
+                        throw new AccessDbImporterException("Bad type");
+                    }
                 }
-                if(reseau instanceof OuvrageFranchissement){
-                    System.out.println("Supprimé du modèle.");
-                }
-                else {
-                    throw new AccessDbImporterException("Bad type");
-                }
-            }
-            else if(reseau==null){
-                
-            System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
-            }
-            else if(voieDigue==null){
-                System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
+//                else if(reseau==null){
+//                    System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+//                }
+//                else if(voieDigue==null){
+//                    System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
+//                }
             }
         }
     }
