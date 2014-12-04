@@ -383,7 +383,7 @@ public class DbImporter {
      SYS_EVT_SOMMET_RISBERME,
      SYS_EVT_STATION_DE_POMPAGE,
      SYS_EVT_TALUS_DIGUE,
-//     SYS_EVT_TALUS_FRANC_BORD,
+     SYS_EVT_TALUS_FRANC_BORD,
      SYS_EVT_TALUS_RISBERME,
 //     SYS_EVT_VEGETATION, // Végétation (module à part)
      SYS_EVT_VOIE_SUR_DIGUE,
@@ -821,7 +821,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TYPE_ORIENTATION_VENT.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -837,7 +837,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TYPE_ORIENTATION_VENT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -847,12 +847,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.TYPE_ORIENTATION_VENT.toString()).getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.TYPE_ORIENTATION_VENT.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");

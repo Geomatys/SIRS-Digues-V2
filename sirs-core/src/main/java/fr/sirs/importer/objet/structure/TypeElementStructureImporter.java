@@ -6,6 +6,7 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
+import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
@@ -93,13 +94,18 @@ class TypeElementStructureImporter extends GenericTypeImporter<Class> {
                     case SYS_EVT_EPIS:
                         classe = Epi.class;
                         break;
-//                    case SYS_EVT_VEGETATION:
+//                    case SYS_EVT_VEGETATION: // La végétation est un module à part.
 //                        classe = Vegetation.class; break;
                     case SYS_EVT_OUVRAGE_REVANCHE:
                         classe = OuvrageRevanche.class;
                         break;
                     default:
-                        classe = null;
+                        if("SYS_EVT_FRONT_FRANC_BORD".equals(row.getString(Columns.NOM_TABLE_EVT.toString()))){
+                            classe = FrontFrancBord.class;
+                        }
+                        else {
+                            classe = null;
+                        }
                 }
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
             } catch (IllegalArgumentException e) {
