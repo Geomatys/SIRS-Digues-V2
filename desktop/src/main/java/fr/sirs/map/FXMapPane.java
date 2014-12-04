@@ -9,7 +9,6 @@ import fr.sirs.Injector;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
-import java.time.Instant;
 import java.util.Date;
 import java.util.logging.Level;
 import javafx.embed.swing.SwingFXUtils;
@@ -29,6 +28,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
+import org.geotoolkit.factory.Hints;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
@@ -57,6 +57,14 @@ public class FXMapPane extends BorderPane {
     
     public static final Image ICON_SPLIT= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COLUMNS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
+    private static final Hints MAPHINTS = new Hints();
+    static {
+        MAPHINTS.put(GO2Hints.KEY_VIEW_TILE, GO2Hints.VIEW_TILE_ON);
+        MAPHINTS.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        MAPHINTS.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        MAPHINTS.put(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
+    }
+    
     private final MapContext context;
     private final SplitPane mapsplit = new SplitPane();
     private final FXAddDataBar uiAddBar;
@@ -66,9 +74,9 @@ public class FXMapPane extends BorderPane {
     private final FXMapContextTree uiTree;
     private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
-    
-    private final FXMap uiMap1 = new FXMap(false);
-    private final FXMap uiMap2 = new FXMap(false);
+        
+    private final FXMap uiMap1 = new FXMap(false,MAPHINTS);
+    private final FXMap uiMap2 = new FXMap(false,MAPHINTS);
     private final FXCoordinateBar uiCoordBar1 = new FXCoordinateBar(uiMap1);
     private final FXCoordinateBar uiCoordBar2 = new FXCoordinateBar(uiMap2);
     private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
@@ -81,14 +89,7 @@ public class FXMapPane extends BorderPane {
     public FXMapPane() {
         Injector.injectDependencies(this);        
         context = session.getMapContext();
-        
-        uiMap1.getCanvas().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        uiMap1.getCanvas().setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        uiMap1.getCanvas().setRenderingHint(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
-        uiMap2.getCanvas().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        uiMap2.getCanvas().setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        uiMap2.getCanvas().setRenderingHint(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
-        
+                
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getContainer().setContext(context);
         uiMap2.getContainer().setContext(context);
