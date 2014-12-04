@@ -263,9 +263,9 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                 piedDigue.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
             }
             
-            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
-                piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
+//                piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+//            }
 
             if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
                 piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
@@ -309,7 +309,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);
 
             // Set the list ByTronconId

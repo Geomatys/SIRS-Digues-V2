@@ -3,6 +3,7 @@ package fr.sirs.importer.evenementHydraulique;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.EvenementHydraulique;
+import fr.sirs.core.model.Meteo;
 import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
@@ -73,6 +74,7 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
         
         final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypes();
         final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypes();
+        final Map<Integer, List<Meteo>> meteos = meteoImporter.getMeteoByEvenementHydrauliqueId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -110,6 +112,12 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
             if(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())!=null){
                 evenement.setFrequenceEvenementHydrauliqueId(frequences.get(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())).getId());
             }
+            
+            final List<Meteo> meteoEvt = meteos.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
+            if(meteoEvt!=null){
+                evenement.setEvenementMeteoIds(meteoEvt);
+            }
+            
             evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }
         couchDbConnector.executeBulk(evenements.values());

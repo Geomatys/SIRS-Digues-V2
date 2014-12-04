@@ -32,6 +32,7 @@ import fr.sirs.core.component.RefMoyenManipBatardeauxRepository;
 import fr.sirs.core.component.RefNatureBatardeauxRepository;
 import fr.sirs.core.component.RefNatureRepository;
 import fr.sirs.core.component.RefOrientationOuvrageRepository;
+import fr.sirs.core.component.RefOrientationVentRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
 import fr.sirs.core.component.RefOuvrageFranchissementRepository;
@@ -159,6 +160,7 @@ public class DbImporter {
     private final RefReferenceHauteurRepository refReferenceHauteurRepository;
     private final RefPrestationRepository refPrestationRepository;
     private final MarcheRepository marcheRepository;
+    private final RefOrientationVentRepository refOrientationVentRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -648,6 +650,8 @@ public class DbImporter {
         repositories.add(refPrestationRepository);
         marcheRepository = new MarcheRepository(couchDbConnector);
         repositories.add(marcheRepository);
+        refOrientationVentRepository = new RefOrientationVentRepository(couchDbConnector);
+        repositories.add(refOrientationVentRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
