@@ -208,9 +208,9 @@ public class DbImporter {
      ELEMENT_RESEAU_POMPE,
 //     ELEMENT_RESEAU_PROPRIETAIRE,
      ELEMENT_RESEAU_RESEAU_EAU,
-//     ELEMENT_RESEAU_SERVITUDE,
+//     ELEMENT_RESEAU_SERVITUDE, // Ni les parcelles cadastrales, ni les servitudes ni les liens qu'elles pouvaient entretenir n'existent dans le nouveau modèle
 //     ELEMENT_RESEAU_STRUCTURE,
-//     ELEMENT_RESEAU_VOIE_SUR_DIGUE,
+     ELEMENT_RESEAU_VOIE_SUR_DIGUE,
      ELEMENT_STRUCTURE,
 //     ELEMENT_STRUCTURE_ABONDANCE_ESSENCE,
 //     ELEMENT_STRUCTURE_GARDIEN,
@@ -763,7 +763,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -779,7 +779,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -789,12 +789,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString())){
                 System.out.println(row);
             }
             System.out.println("=======================");
@@ -803,7 +803,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

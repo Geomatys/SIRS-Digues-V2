@@ -19,6 +19,7 @@ import fr.sirs.importer.objet.link.ElementReseauAutreOuvrageHydrauImporter;
 import fr.sirs.importer.objet.link.ElementReseauConduiteFermeeImporter;
 import fr.sirs.importer.objet.link.ElementReseauOuvrageTelNrjImporter;
 import fr.sirs.importer.objet.link.ElementReseauReseauEauImporter;
+import fr.sirs.importer.objet.link.ElementReseauVoieSurDigueImporter;
 import fr.sirs.importer.objet.link.GenericObjetLinker;
 import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
@@ -60,6 +61,7 @@ public class ObjetManager {
     private final ElementReseauOuvrageTelNrjImporter reseauOuvrageTelecomImporter;
     private final ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
     private final ElementReseauReseauEauImporter elementReseauReseauEauImporter;
+    private final ElementReseauVoieSurDigueImporter elementReseauVoieSurDigueImporter;
     private final List<GenericObjetLinker> linkers = new ArrayList<>();
     
     public ObjetManager(final Database accessDatabase, 
@@ -157,6 +159,9 @@ public class ObjetManager {
         elementReseauReseauEauImporter = new ElementReseauReseauEauImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauReseauEauImporter);
+        elementReseauVoieSurDigueImporter = new ElementReseauVoieSurDigueImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        linkers.add(elementReseauVoieSurDigueImporter);
     }
     
     public List<Objet> getByTronconId(final int tronconId) 
