@@ -103,8 +103,8 @@
         eOpposite="#//Convention/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/tronconId"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="RapportEtude" upperBound="-1"
-        eType="#//RapportEtude" eOpposite="#//RapportEtude/document"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="RapportEtude" eType="#//RapportEtude"
+        eOpposite="#//RapportEtude/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLong" eType="#//ProfilLong"
         eOpposite="#//ProfilLong/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTravers" eType="#//ProfilTravers"
