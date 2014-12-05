@@ -86,6 +86,13 @@ public class DigueRepositoryTest extends CouchDBTestCase {
               System.out.println(digue);
           }
 
+          TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
+          for(TronconDigue troncon: tronconRepository.getAll()) {
+              for(Objet str: troncon.getStructures()) {
+                  System.out.println(str.getParent() + " " + str.getDocumentId());
+              }
+          }
+          
     }
     
     @Test

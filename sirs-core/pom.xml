@@ -31,6 +31,12 @@
               <goal>fxmodel</goal>
             </goals>
           </execution>
+          <execution>
+            <id>fxmodel2sql</id>
+            <goals>
+              <goal>fxmodel2sql</goal>
+            </goals>
+          </execution>
         </executions>
         <configuration>
           <generateEquals>true</generateEquals>
@@ -69,9 +75,9 @@
     </dependency>
     <!-- RDBMS deps -->
     <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
-      <version>${liquidbase.version}</version>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.182</version>
     </dependency>
     <dependency>
       <groupId>org.jooq</groupId>

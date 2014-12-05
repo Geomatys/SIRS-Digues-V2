@@ -1,8 +1,15 @@
 package fr.sirs;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Properties;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -17,10 +24,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+
 import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 
+import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.internal.sql.DefaultDataSource;
@@ -32,17 +43,9 @@ import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import fr.sirs.util.json.GeometryDeserializer;
 import fr.sirs.core.CouchDBInit;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.logging.Logger;
-import javafx.stage.WindowEvent;
-import org.apache.sis.util.ArgumentChecks;
+import fr.sirs.core.h2.H2Helper;
+import fr.sirs.util.json.GeometryDeserializer;
 
 /**
  *
@@ -115,7 +118,8 @@ public class Loader extends Application {
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
-        new Thread(initTask).start();
+        // new Thread(initTask).start();
+        initTask.run();
     }
 
     /**
@@ -197,86 +201,104 @@ public class Loader extends Application {
                 updateMessage("Recherche des plugins");
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 6 + plugins.length;
-                                                
+                final int total = 7 + plugins.length;
+
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Creation de la base EPSG...");
-                //create a database in user directory
-                final Path storageFolder = SIRS.CONFIGURATION_PATH.resolve("EPSG");
-                final String url = "jdbc:derby:"+storageFolder.toString()+File.separator+"EPSG;create=true";
+                // create a database in user directory
+                final Path storageFolder = SIRS.CONFIGURATION_PATH
+                        .resolve("EPSG");
+                final String url = "jdbc:derby:" + storageFolder.toString()
+                        + File.separator + "EPSG;create=true";
                 final DataSource ds = new DefaultDataSource(url);
                 Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
 
-                //try to create it, won't do anything if already exist
-                createEpsgDB(storageFolder,url);
-                //force loading epsg
+                // try to create it, won't do anything if already exist
+                createEpsgDB(storageFolder, url);
+                // force loading epsg
                 CRS.decode("EPSG:3395");
-                
+
                 // GEOMETRY / JSON Converter
                 GeometryDeserializer.class.newInstance();
-                
+
                 // IMAGE ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des lecteurs d'images...");
                 Registry.setDefaultCodecPreferences();
-                //global initialization
+                // global initialization
                 ImageIO.scanForPlugins();
-                
+
                 // GEOTK ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement de Geotoolkit...");
-                //Geotoolkit startup
+                // Geotoolkit startup
                 Setup.initialize(null);
-                //work in lazy mode, do your best for lenient datum shift
+                // work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-                
+
                 // DATABASE ////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des pilotes pour base de données...");
-                //loading drivers, some plugin systems requiere this call , like netbeans RCP
-                Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+                // loading drivers, some plugin systems requiere this call ,
+                // like netbeans RCP
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver")
+                        .newInstance();
                 Class.forName("org.postgresql.Driver").newInstance();
-                                
+                Class.forName("org.h2.Driver").newInstance();
+
                 // JAXB ////////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des parseurs XML/JSON...");
-                //force loading marshallers
+                // force loading marshallers
                 JAXBSLDUtilities.getMarshallerPoolSLD110();
                 JAXBSLDUtilities.getMarshallerPoolSLD100();
                 final StyleXmlIO io = new StyleXmlIO();
-                
+
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des indexes ...");
-                final ClassPathXmlApplicationContext context = CouchDBInit.create(databaseUrl, databaseName,
-                "classpath:/fr/sirs/spring/application-context.xml",false,true);
-                
+                final ClassPathXmlApplicationContext context = CouchDBInit
+                        .create(databaseUrl,
+                                databaseName,
+                                "classpath:/fr/sirs/spring/application-context.xml",
+                                false, true);
+
                 // LOAD PLUGINS ////////////////////////////////////////////////
-                for(Plugin plugin : plugins){
+                for (Plugin plugin : plugins) {
                     updateProgress(inc++, total);
-                    updateMessage("Chargement du plugin "+plugin.getLoadingMessage().getValue());
+                    updateMessage("Chargement du plugin "
+                            + plugin.getLoadingMessage().getValue());
                     plugin.load();
-                }                
-                
-                
+                }
+
+                updateMessage("Exporting data to RDBMS");
+
+                H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class));
+
+                updateProgress(inc++, total);
+
                 updateProgress(total, total);
                 updateMessage("Chargement terminé.");
                 Thread.sleep(400);
             } catch (Throwable ex) {
-                updateMessage("Une erreur inattendue est survenue : "+ex.getLocalizedMessage());
+                updateMessage("Une erreur inattendue est survenue : "
+                        + ex.getLocalizedMessage());
                 SIRS.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 cancel();
             }
             return null;
         }
+
+      
     }
-    
-    private static void createEpsgDB(final Path folder, final String url) throws FactoryException, IOException {
+
+    private static void createEpsgDB(final Path folder, final String url)
+            throws FactoryException, IOException {
         Files.createDirectories(folder);
         final EpsgInstaller installer = new EpsgInstaller();
         installer.setDatabase(url);
-        if(!installer.exists()){
+        if (!installer.exists()) {
             installer.call();
         }
     }
