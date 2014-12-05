@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -32,7 +33,6 @@ import javafx.scene.layout.BorderPane;
  */
 public class FXContactPane extends BorderPane {
     
-    
     @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
     
@@ -48,9 +48,9 @@ public class FXContactPane extends BorderPane {
     @FXML private TextField uiCodePostale;
     @FXML private TextField uiCommune;
     
-    @FXML private Tab uiOrganismesTab;
+    @FXML private Tab uiOrganismeTab;
     
-    private final PojoTable organismeTable = new ContactOrganismeTable();
+    private final PojoTable organismeTable;
     
     private Contact contact;
     private final ContactRepository contactRepository;
@@ -87,16 +87,36 @@ public class FXContactPane extends BorderPane {
         uiCodePostale.editableProperty().bind(editProp);
         uiCommune.editableProperty().bind(editProp);
         
-        uiOrganismesTab.setContent(organismeTable);
+        organismeTable = new ContactOrganismeTable();
+        uiOrganismeTab.setContent(organismeTable);
         organismeTable.editableProperty().bind(editProp);
         
         uiMode.setSaveAction(this::save);
         setContact(contact);
+        
+        orgsOfContact.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+                    // We check only removed elements, because new ones do not 
+                // have an attached organism.
+                final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
+                while (it.hasNext()) {
+                    final ContactOrganisme co = it.next();
+                    if (co.getParent() != null) {
+                        modifiedOrgs.add((Organisme) co.getParent());
+                    }
+                }
+            }
+        });
     }
     
     public void setContact(Contact contact){
         this.contact = contact;
         
+        orgsOfContact.clear();
+        modifiedOrgs.clear();
+        
+        // We should not need to unbind fields, as they use weak listeners.
         if (contact == null) return;
         
         uiDocId.setText(contact.getDocumentId());
@@ -113,8 +133,6 @@ public class FXContactPane extends BorderPane {
         uiCommune.textProperty().bindBidirectional(contact.paysProperty());
                
         // Retrieve all organisms current contact is / was part of.
-        orgsOfContact.clear();
-        modifiedOrgs.clear();
         if (contact.getId() != null) {
             for (final Organisme org : orgRepository.getAll()) {
                 orgsOfContact.addAll(org.contactOrganisme.filtered((ContactOrganisme co) -> {
@@ -140,27 +158,24 @@ public class FXContactPane extends BorderPane {
 
         public ContactOrganismeTable() {
             super(ContactOrganisme.class, "Liste des organismes", true);
-            setTableItems(() -> orgsOfContact);
-            
-            orgsOfContact.addListener(new ListChangeListener() {
-
-                @Override
-                public void onChanged(ListChangeListener.Change c) {
-                    // We check only removed elements, because new ones do not 
-                    // have an attached organism.
-                    final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
-                    it.forEachRemaining((ContactOrganisme co)->{
-                        if (co.getParent() != null ) {
-                            modifiedOrgs.add(co.getParent());
-                        }
-                    });
-                }
-            });
+            setTableItems(() -> orgsOfContact);          
         }
 
         @Override
         protected void editPojo(Object pojo) {
-            // 
+            if (!(pojo instanceof ContactOrganisme)) {
+                return;
+            }
+            final ContactOrganisme co = (ContactOrganisme) pojo;
+            co.contactIdProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                if (!contact.getId().equals(newValue)) {
+                    orgsOfContact.remove(co);
+                }
+            });
+            final Tab tab = new Tab("Rattachement");
+            final FXContactOrganismePane coPane = new FXContactOrganismePane(co);
+            tab.setContent(new FXContactOrganismePane(co));
+            session.getFrame().addTab(tab);
         }
         
         @Override
@@ -168,7 +183,7 @@ public class FXContactPane extends BorderPane {
             if (event.getRowValue() instanceof ContactOrganisme) {
                 final ContactOrganisme co = (ContactOrganisme) event.getRowValue();
                 if (co.getParent() != null) {
-                    modifiedOrgs.add(co.getParent());
+                    modifiedOrgs.add((Organisme)co.getParent());
                 }
             }
         }

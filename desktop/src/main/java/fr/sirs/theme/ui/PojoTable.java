@@ -11,6 +11,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
@@ -20,6 +21,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.index.SearchEngine;
+import fr.sirs.other.FXContactOrganismePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.query.ElementHit;
@@ -84,7 +86,7 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class PojoTable extends BorderPane {
     
-    private final TableView<Element> uiTable = new FXTableView<>();
+    protected final TableView<Element> uiTable = new FXTableView<>();
     protected final ScrollPane uiScroll = new ScrollPane(uiTable);
     protected final Class pojoClass;
     private final Repository repo;
@@ -328,6 +330,8 @@ public class PojoTable extends BorderPane {
                 content = new FXContactPane((Contact) pojo);
             } else if (pojo instanceof Organisme) {
                 content = new FXOrganismePane((Organisme) pojo);
+            } else if (pojo instanceof ContactOrganisme) {
+                content = new FXContactOrganismePane((ContactOrganisme)pojo);
             } else if (pojo instanceof ProfilTravers) {
                 content = new FXThemePane((ProfilTravers) pojo);
             } else if (pojo instanceof TronconDigue) {

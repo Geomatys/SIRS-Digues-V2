@@ -11,7 +11,40 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="content" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="content" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
+         <right>
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <GridPane hgap="10.0" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Fiche du contact" textFill="WHITE" GridPane.columnSpan="4">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="Identifiant : " textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                  <Label fx:id="uiDocId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="280.0" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+               </columnConstraints>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" top="10.0" />
+               </padding>
+               <rowConstraints>
+                  <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+      </BorderPane>
+   </top>
    <center>
       <TabPane style="-fx-background-color: rgb(245,245,245);" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -141,37 +174,4 @@
         </tabs>
       </TabPane>
    </center>
-   <top>
-      <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
-         <right>
-            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
-         </right>
-         <center>
-            <GridPane hgap="10.0" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Label text="Fiche du contact" textFill="WHITE" GridPane.columnSpan="4">
-                     <font>
-                        <Font name="System Bold" size="14.0" />
-                     </font>
-                  </Label>
-                  <Label text="Identifiant : " textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                  <Label fx:id="uiDocId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-               </children>
-               <columnConstraints>
-                  <ColumnConstraints hgrow="NEVER" />
-                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="280.0" />
-                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
-                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
-               </columnConstraints>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" top="10.0" />
-               </padding>
-               <rowConstraints>
-                  <RowConstraints vgrow="NEVER" />
-                  <RowConstraints vgrow="NEVER" />
-               </rowConstraints>
-            </GridPane>
-         </center>
-      </BorderPane>
-   </top>
 </fx:root>
