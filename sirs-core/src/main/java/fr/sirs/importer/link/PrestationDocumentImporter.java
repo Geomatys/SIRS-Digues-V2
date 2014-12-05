@@ -2,9 +2,7 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Document;
-import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;

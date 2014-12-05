@@ -22,12 +22,7 @@ import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
@@ -63,23 +58,17 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter, 
+            final TypePositionImporter typePositionImporter,
             final EcoulementImporter typeEcoulementImporter,
             final ImplantationImporter typeImplantationImporter,
             final TypeConduiteFermeeImporter typeConduiteFermeeImporter,
             final UtilisationConduiteImporter typeUtilisationConduiteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, null,
+                null, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, null);
         this.typeEcoulementImporter = typeEcoulementImporter;
         this.typeImplantationImporter = typeImplantationImporter;
         this.typeConduiteFermeeImporter = typeConduiteFermeeImporter;
@@ -178,13 +167,15 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        
         final Map<Integer, RefEcoulement> ecoulements = typeEcoulementImporter.getTypes();
         final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypes();
         final Map<Integer, RefConduiteFermee> typesConduites = typeConduiteFermeeImporter.getTypes();
         final Map<Integer, RefUtilisationConduite> typesUtilisationConduites = typeUtilisationConduiteImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

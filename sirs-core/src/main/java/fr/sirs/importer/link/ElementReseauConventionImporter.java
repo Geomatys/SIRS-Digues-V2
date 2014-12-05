@@ -2,15 +2,12 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
-import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,10 +26,10 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
     
     public ElementReseauConventionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final ElementReseauImporter desordreImporter,
+            final ElementReseauImporter elementReseauImporter,
             final ConventionImporter journalArticleImporter) {
         super(accessDatabase, couchDbConnector);
-        this.elementReseauImporter = desordreImporter;
+        this.elementReseauImporter = elementReseauImporter;
         this.conventionImporter = journalArticleImporter;
     }
 

@@ -263,9 +263,9 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                 piedDigue.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
             }
             
-//            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
-//                piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
-//            }
+            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
+                piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            }
 
             if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
                 piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));

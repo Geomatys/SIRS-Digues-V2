@@ -27,13 +27,11 @@ abstract class GenericReseauImporter<T extends Objet> extends GenericObjetImport
             final SourceInfoImporter typeSourceImporter, 
             final TypeCoteImporter typeCoteImporter, 
             final TypePositionImporter typePositionImporter, 
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                typePositionImporter, null, typeNatureImporter, 
+                null);
     }
 }

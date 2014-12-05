@@ -51,40 +51,20 @@ import org.opengis.util.FactoryException;
 public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
     
     private final SysEvtMonteeDesEauHydroImporter sysEvtMonteeDesEauHydroImporter;
-    private final TypeRefHeauImporter typeRefHeauImporter;
-    
-    private final EvenementHydrauliqueImporter evenementHydrauliqueImporter;
 
     public MonteeDesEauxImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final ElementStructureImporter structureImporter, 
-            final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter,
-            final TypeRefHeauImporter typeRefHeauImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
-        this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
-        this.typeRefHeauImporter = typeRefHeauImporter;
+                systemeReperageImporter, borneDigueImporter, 
+                evenementHydrauliqueImporter);
         sysEvtMonteeDesEauHydroImporter = new SysEvtMonteeDesEauHydroImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, evenementHydrauliqueImporter, 
-                structureImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter, typeMateriauImporter, 
-                typeNatureImporter, typeFonctionImporter, typeRefHeauImporter);
+                systemeReperageImporter, borneDigueImporter, 
+                evenementHydrauliqueImporter);
     }
 
     private enum Columns {
@@ -126,8 +106,8 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+        
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
-        final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypes();
         
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();

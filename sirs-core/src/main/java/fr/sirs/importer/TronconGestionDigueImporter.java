@@ -5,7 +5,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
@@ -19,11 +18,8 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.objet.desordre.DesordreImporter;
-import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
-import fr.sirs.importer.objet.prestation.PrestationImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
+import fr.sirs.importer.troncon.GardienTronconGestionImporter;
+import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +33,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconGestionDigueImporter extends GenericImporter implements DocumentsUpdater {
+public class TronconGestionDigueImporter 
+extends GenericImporter 
+implements DocumentsUpdater {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
     private Map<String, Integer> tronconsIds = null;
@@ -46,8 +44,8 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
     private TypeRiveImporter typeRiveImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
-    private TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter;
-    private TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter;
+    private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
+    private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private ObjetManager objetManager;
@@ -72,8 +70,8 @@ public class TronconGestionDigueImporter extends GenericImporter implements Docu
             final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
-            final TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter,
-            final TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter,
+            final GardienTronconGestionImporter tronconGestionDigueGardienImporter,
+            final ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,

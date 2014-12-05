@@ -67,17 +67,22 @@ import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
 import fr.sirs.importer.link.DesordreJournalImporter;
 import fr.sirs.importer.link.ElementReseauConventionImporter;
+import fr.sirs.importer.link.ElementReseauGardienImporter;
+import fr.sirs.importer.link.ElementReseauGestionnaireImporter;
+import fr.sirs.importer.link.ElementReseauProprietaireImporter;
+import fr.sirs.importer.link.ElementStructureGardienImporter;
+import fr.sirs.importer.link.ElementStructureGestionnaireImporter;
+import fr.sirs.importer.link.ElementStructureProprietaireImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.link.LaisseCrueJournalImporter;
 import fr.sirs.importer.link.LigneEauJournalImporter;
 import fr.sirs.importer.link.MonteeDesEauxJournalImporter;
 import fr.sirs.importer.link.PrestationDocumentImporter;
 import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
-import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueGardienImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueProprietaireImporter;
+import fr.sirs.importer.troncon.GardienTronconGestionImporter;
+import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -170,8 +175,8 @@ public class DbImporter {
     private TronconDigueGeomImporter tronconDigueGeomImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
-    private TronconGestionDigueGardienImporter tronconGestionDigueGardienImporter;
-    private TronconGestionDigueProprietaireImporter tronconGestionDigueProprietaireImporter;
+    private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
+    private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
     private OrganismeImporter organismeImporter;
     private IntervenantImporter intervenantImporter;
     private TronconGestionDigueImporter tronconGestionDigueImporter;
@@ -191,6 +196,12 @@ public class DbImporter {
     private LigneEauJournalImporter ligneEauJournalImporter;
     private MonteeDesEauxJournalImporter monteeDesEauxJournalImporter;
     private PrestationDocumentImporter prestationDocumentImporter;
+    private ElementReseauGardienImporter elementReseauGardienImporter;
+    private ElementReseauGestionnaireImporter elementReseauGestionnaireImporter;
+    private ElementReseauProprietaireImporter elementReseauProprietaireImporter;
+    private ElementStructureGardienImporter elementStructureGardienImporter;
+    private ElementStructureGestionnaireImporter elementStructureGestionnaireImporter;
+    private ElementStructureProprietaireImporter elementStructureProprietaireImporter;
     private List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
@@ -206,7 +217,7 @@ public class DbImporter {
      DESORDRE_ELEMENT_STRUCTURE,
      DESORDRE_EVENEMENT_HYDRAU,
      DESORDRE_JOURNAL,
-//     DESORDRE_OBSERVATION, // A Faire !
+     DESORDRE_OBSERVATION, // A Faire !
      DESORDRE_PRESTATION,
      DIGUE,
      DOCUMENT,
@@ -214,28 +225,28 @@ public class DbImporter {
      ELEMENT_GEOMETRIE,
      ELEMENT_RESEAU,
      ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU,
-     ELEMENT_RESEAU_CHEMIN_ACCES, //
+//     ELEMENT_RESEAU_CHEMIN_ACCES, // Plus de liens dans le nouveau modèle
      ELEMENT_RESEAU_CONDUITE_FERMEE,
      ELEMENT_RESEAU_CONVENTION,
 //     ELEMENT_RESEAU_EVENEMENT_HYDRAU, // Plus de liens dans le nouveau modèle
-//     ELEMENT_RESEAU_GARDIEN,
-//     ELEMENT_RESEAU_GESTIONNAIRE,
+     ELEMENT_RESEAU_GARDIEN,
+     ELEMENT_RESEAU_GESTIONNAIRE,
 //     ELEMENT_RESEAU_OUVERTURE_BATARDABLE, // N'existe plus dans le nouveau modèle
      ELEMENT_RESEAU_OUVRAGE_TEL_NRJ,
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE, // A priori n'existe plus dans le nouveau modèle. Mais demande de confirmation car la table contient beaucoup de données entre les voiries d'une part et d'autre part des voies sur digue et des ouvrages de franchissement.
 //     ELEMENT_RESEAU_OUVRAGE_VOIRIE_POINT_ACCES, // Idem que ELEMENT_RESEAU_OUVRAGE_VOIRIE
      ELEMENT_RESEAU_POINT_ACCES,
      ELEMENT_RESEAU_POMPE,
-//     ELEMENT_RESEAU_PROPRIETAIRE,
+     ELEMENT_RESEAU_PROPRIETAIRE,
      ELEMENT_RESEAU_RESEAU_EAU,
 //     ELEMENT_RESEAU_SERVITUDE, // Ni les parcelles cadastrales, ni les servitudes ni les liens qu'elles pouvaient entretenir n'existent dans le nouveau modèle
 //     ELEMENT_RESEAU_STRUCTURE, // Plus de liens dans le nouveau modèle
      ELEMENT_RESEAU_VOIE_SUR_DIGUE,
      ELEMENT_STRUCTURE,
 //     ELEMENT_STRUCTURE_ABONDANCE_ESSENCE, // Végétation (module à part)
-//     ELEMENT_STRUCTURE_GARDIEN,
-//     ELEMENT_STRUCTURE_GESTIONNAIRE,
-//     ELEMENT_STRUCTURE_PROPRIETAIRE,
+     ELEMENT_STRUCTURE_GARDIEN,
+     ELEMENT_STRUCTURE_GESTIONNAIRE,
+     ELEMENT_STRUCTURE_PROPRIETAIRE,
      EVENEMENT_HYDRAU,
 //     Export_Output,
 //     Export_Output_SHAPE_Index,
@@ -287,7 +298,7 @@ public class DbImporter {
      MONTEE_DES_EAUX,
      MONTEE_DES_EAUX_JOURNAL,
 //     MONTEE_DES_EAUX_MESURES,
-//     observation_urgence_carto, // A Faire !
+     observation_urgence_carto, // A Faire !
      ORGANISME,
      ORGANISME_DISPOSE_INTERVENANT,
 //     ORIENTATION,
@@ -299,7 +310,7 @@ public class DbImporter {
      PRESTATION,
      PRESTATION_DOCUMENT,
      PRESTATION_EVENEMENT_HYDRAU,
-     PRESTATION_INTERVENANT,
+//     PRESTATION_INTERVENANT,
      PROFIL_EN_LONG,
 //     PROFIL_EN_LONG_DZ, // Même sort que PROFIL_EN_TRAVERS_DZ ?
      PROFIL_EN_LONG_EVT_HYDRAU,
@@ -368,7 +379,7 @@ public class DbImporter {
      SYS_EVT_OUVRAGE_VOIRIE,
 //     SYS_EVT_PHOTO_LOCALISEE_EN_PR,
      SYS_EVT_PIED_DE_DIGUE,
-//     SYS_EVT_PIED_FRONT_FRANC_BORD,
+     SYS_EVT_PIED_FRONT_FRANC_BORD,
 //     SYS_EVT_PLAN_TOPO, // Vide en Isère / Inexistante dans le Rhône ?
      SYS_EVT_POINT_ACCES,
      SYS_EVT_PRESTATION,
@@ -672,9 +683,9 @@ public class DbImporter {
                 organismeDisposeIntervenantImporter);
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
-        tronconGestionDigueGardienImporter = new TronconGestionDigueGardienImporter(
+        tronconGestionDigueGardienImporter = new GardienTronconGestionImporter(
                 accessDatabase, couchDbConnector, intervenantImporter);
-        tronconGestionDigueProprietaireImporter = new TronconGestionDigueProprietaireImporter(
+        tronconGestionDigueProprietaireImporter = new ProprietaireTronconGestionImporter(
                 accessDatabase, couchDbConnector, intervenantImporter, 
                 organismeImporter);
         digueImporter = new DigueImporter(accessDatabase, couchDbConnector, 
@@ -748,6 +759,36 @@ public class DbImporter {
                 tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
                 documentImporter);
         linkers.add(prestationDocumentImporter);
+        elementReseauGardienImporter = new ElementReseauGardienImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                intervenantImporter);
+        linkers.add(elementReseauGardienImporter);
+        elementReseauGestionnaireImporter = new ElementReseauGestionnaireImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                organismeImporter);
+        linkers.add(elementReseauGestionnaireImporter);
+        elementReseauProprietaireImporter = new ElementReseauProprietaireImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                intervenantImporter, organismeImporter);
+        linkers.add(elementReseauProprietaireImporter);
+        elementStructureGardienImporter = new ElementStructureGardienImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                intervenantImporter);
+        linkers.add(elementStructureGardienImporter);
+        elementStructureGestionnaireImporter = new ElementStructureGestionnaireImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                organismeImporter);
+        linkers.add(elementStructureGestionnaireImporter);
+        elementStructureProprietaireImporter = new ElementStructureProprietaireImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                intervenantImporter, organismeImporter);
+        linkers.add(elementStructureProprietaireImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -769,7 +810,6 @@ public class DbImporter {
         });
         couchDbConnector.executeBulk(objects);
     }
-    
     
     public void cleanDb(){
         for(final Repository repo : repositories){
@@ -795,6 +835,12 @@ public class DbImporter {
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();
+        // Normalement les documents et les pièces reliées aux documents ne sont 
+        // pas affectées par les linkers car les liaisons sont en sens unique 
+        // depuis les objets des troncons. Mais au cas où des associations 
+        // bidirectionnelles seraient ajoutées on fait un update().
+        documentImporter.update(); 
+        evenementHydrauliqueImporter.update();
     }
 
     //TODO remove when import finished
@@ -821,7 +867,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -837,7 +883,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -847,13 +893,13 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_TALUS_FRANC_BORD.toString())){
-                System.out.println(row);
+            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString())){
+//                System.out.println(row);
             }
             System.out.println("=======================");
 //            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
@@ -861,7 +907,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {

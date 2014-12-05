@@ -3,10 +3,9 @@ package fr.sirs.importer.objet.monteeDesEaux;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.*;
 import org.ektorp.CouchDbConnector;
 
@@ -16,24 +15,18 @@ import org.ektorp.CouchDbConnector;
  * @param <T>
  */
 abstract class GenericMonteeDesEauxImporter extends GenericObjetImporter<MonteeEaux> {
+    
+    protected final EvenementHydrauliqueImporter evenementHydrauliqueImporter;
 
     public GenericMonteeDesEauxImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter, 
-            final IntervenantImporter intervenantImporter, 
-            final SourceInfoImporter typeSourceImporter, 
-            final TypeCoteImporter typeCoteImporter, 
-            final TypePositionImporter typePositionImporter, 
-            final TypeMateriauImporter typeMateriauImporter, 
-            final TypeNatureImporter typeNatureImporter, 
-            final TypeFonctionImporter typeFonctionImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, null, 
+                null, null, null, null, null, null, null);
+        this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
     }
 }

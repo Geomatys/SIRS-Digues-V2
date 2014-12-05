@@ -21,12 +21,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
@@ -61,22 +56,16 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
-            final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter, 
+            final TypePositionImporter typePositionImporter,
             final TypeUsageVoieImporter typeUsageVoieImporter,
             final TypeRevetementImporter typeRevetementImporter,
             final TypeVoieSurDigueImporter typeVoieSurDigueImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, null,
+                null, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, null);
         this.typeUsageVoieImporter = typeUsageVoieImporter;
         this.typeRevetementImporter = typeRevetementImporter;
         this.typeVoieSurDigueImporter = typeVoieSurDigueImporter;
@@ -174,10 +163,12 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
-        final Map<Integer, RefVoieDigue> typesVoieDigue = typeVoieSurDigueImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        
+        final Map<Integer, RefVoieDigue> typesVoieDigue = typeVoieSurDigueImporter.getTypes();
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypes();
         final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypes();
         

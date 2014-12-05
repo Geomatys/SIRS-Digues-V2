@@ -8,6 +8,7 @@ import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.DocumentsUpdater;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.meteo.MeteoImporter;
 import java.io.IOException;
@@ -23,7 +24,9 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class EvenementHydrauliqueImporter extends GenericImporter {
+public class EvenementHydrauliqueImporter 
+extends GenericImporter 
+implements DocumentsUpdater {
 
     private Map<Integer, EvenementHydraulique> evenements = null;
     private final TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
@@ -38,6 +41,12 @@ public class EvenementHydrauliqueImporter extends GenericImporter {
         typeFrequenceEvenementHydrauliqueImporter = new TypeFrequenceEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector);
         meteoImporter = new MeteoImporter(accessDatabase, couchDbConnector);
+    }
+
+    @Override
+    public void update() throws IOException, AccessDbImporterException {
+        if(evenements==null) compute();
+        couchDbConnector.executeBulk(evenements.values());
     }
     
     private enum Columns{

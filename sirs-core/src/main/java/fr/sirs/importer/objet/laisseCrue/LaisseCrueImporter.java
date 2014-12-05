@@ -10,8 +10,6 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;

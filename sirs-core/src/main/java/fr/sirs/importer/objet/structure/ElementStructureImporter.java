@@ -67,6 +67,8 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
     private final SysEvtFondationImporter fondationImporter;
     private final SysEvtEpisImporter epiImporter;
     private final SysEvtOuvrageRevancheImporter ouvrageRevancheImporter;
+    private final SysEvtTalusFrancBordImporter talusFrancBordImporter;
+    private final SysEvtPiedFrontFrancBordImporter sysEvtPiedFrontFrancBordImporter;
     
 
     public ElementStructureImporter(final Database accessDatabase,
@@ -143,6 +145,20 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
                 typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(ouvrageRevancheImporter);
+        talusFrancBordImporter = new SysEvtTalusFrancBordImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
+        structureImporters.add(talusFrancBordImporter);
+        sysEvtPiedFrontFrancBordImporter = new SysEvtPiedFrontFrancBordImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                intervenantImporter, typeSourceImporter, typePositionImporter, 
+                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
+        structureImporters.add(sysEvtPiedFrontFrancBordImporter);
     }
 
     private enum Columns {

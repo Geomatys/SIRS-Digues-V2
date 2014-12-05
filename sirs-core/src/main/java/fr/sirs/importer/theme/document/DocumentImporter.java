@@ -15,11 +15,13 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.DocumentsUpdater;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
 import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
@@ -39,7 +41,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericDocumentImporter {
+public class DocumentImporter extends GenericDocumentImporter  implements DocumentsUpdater {
     
     private final ConventionImporter conventionImporter;
     private final ProfilEnLongImporter profilLongImporter;
@@ -48,6 +50,8 @@ public class DocumentImporter extends GenericDocumentImporter {
     private final RapportEtudeImporter rapportEtudeImporter;
     private final JournalArticleImporter journalArticleImporter;
     private final MarcheImporter marcheImporter;
+    
+    private final List<GenericDocumentRelatedImporter> documentRelated = new ArrayList<GenericDocumentRelatedImporter>();
     
     private final TypeDocumentImporter typeDocumentImporter;
     
@@ -79,11 +83,12 @@ public class DocumentImporter extends GenericDocumentImporter {
         
         conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, intervenantImporter, organismeImporter);
+        documentRelated.add(conventionImporter);
         
         profilLongImporter = new ProfilEnLongImporter(accessDatabase, 
                 couchDbConnector, organismeImporter, 
                 evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
-        
+        documentRelated.add(profilLongImporter);
         
         profilTraversDescriptionImporter = new ProfilEnTraversDescriptionImporter(
                 accessDatabase, couchDbConnector, 
@@ -91,15 +96,19 @@ public class DocumentImporter extends GenericDocumentImporter {
                 evenementHydrauliqueImporter, this);
         profilTraversImporter = new ProfilEnTraversImporter(accessDatabase, 
                 couchDbConnector, profilTraversDescriptionImporter);
+        documentRelated.add(profilTraversImporter);
         
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector);
+        documentRelated.add(rapportEtudeImporter);
         
         journalArticleImporter = new JournalArticleImporter(accessDatabase, 
                 couchDbConnector);
+        documentRelated.add(journalArticleImporter);
         
         marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
                 organismeImporter);
+        documentRelated.add(marcheImporter);
         
         documentConventionImporter = new SysEvtConventionImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
@@ -135,6 +144,15 @@ public class DocumentImporter extends GenericDocumentImporter {
     
     public JournalArticleImporter getJournalArticleImporter() {return this.journalArticleImporter;}
     public ConventionImporter getConventionImporter() {return this.conventionImporter;}
+
+    @Override
+    public void update() throws IOException, AccessDbImporterException {
+        for(final GenericDocumentRelatedImporter related : documentRelated){
+            related.update();
+        }
+        if(documents==null) compute();
+        couchDbConnector.executeBulk(documents.values());
+    }
     
     private enum Columns {
         ID_DOC,

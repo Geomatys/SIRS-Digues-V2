@@ -9,6 +9,7 @@ import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
+import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
@@ -80,10 +81,12 @@ class TypeElementStructureImporter extends GenericTypeImporter<Class> {
                     case SYS_EVT_PIED_DE_DIGUE:
                         classe = PiedDigue.class;
                         break;
-//                    case SYS_EVT_FRONT_FRANC_BORD:
-//                        classe = LargeurFrancBord.class; break;
-//                    case SYS_EVT_PIED_FRONT_FRANC_BORD:
-//                        classe = LargeurFrancBord.class; break;
+                    case SYS_EVT_TALUS_FRANC_BORD:
+                        classe = FrontFrancBord.class; 
+                        break;
+                    case SYS_EVT_PIED_FRONT_FRANC_BORD:
+                        classe = PiedFrontFrancBord.class; 
+                        break;
                     case SYS_EVT_FONDATION:
                         classe = Fondation.class;
                         break;
@@ -100,6 +103,7 @@ class TypeElementStructureImporter extends GenericTypeImporter<Class> {
                         classe = OuvrageRevanche.class;
                         break;
                     default:
+                        // Dans la table de l'Isère, on trouve SYS_EVT_FRONT_FRANC_BORD qui n'existe pas et qui semble correspondre à SYS_EVT_TALUS_FRANC_BORD
                         if("SYS_EVT_FRONT_FRANC_BORD".equals(row.getString(Columns.NOM_TABLE_EVT.toString()))){
                             classe = FrontFrancBord.class;
                         }

@@ -3,7 +3,6 @@ package fr.sirs.importer.evenementHydraulique.meteo;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Meteo;
-import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefOrientationVent;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;

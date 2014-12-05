@@ -125,8 +125,8 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
         
