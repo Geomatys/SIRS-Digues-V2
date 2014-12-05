@@ -34,6 +34,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.BorneDigueCache;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,6 +48,8 @@ import javax.measure.unit.NonSI;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
+import org.geotoolkit.cql.CQL;
+import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
@@ -68,6 +71,7 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.style.Fill;
 import org.opengis.style.Graphic;
+import org.opengis.style.GraphicStroke;
 import org.opengis.style.GraphicalSymbol;
 import org.opengis.style.LineSymbolizer;
 import org.opengis.style.Mark;
@@ -162,7 +166,7 @@ public class CorePlugin extends Plugin {
             items.add(structLayer);
                
             
-        }catch(DataStoreException ex){
+        }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         
@@ -259,7 +263,7 @@ public class CorePlugin extends Plugin {
         
     }
 
-    private static MutableStyle createTronconStyle(){
+    private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.DARK_GRAY),FF.literal(4),LITERAL_ONE_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
@@ -268,12 +272,27 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
         
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final GraphicalSymbol external = SF.externalGraphic(
+                    SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-white.png").toURI()),
+                    "image/png",null);
+        symbols.add(external);        
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
+                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final Expression initialGap = FF.literal(10);
+        final Expression strokeGap = FF.literal(100);
+        final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
         
-        final MutableStyle style = SF.style(line1,line2);
-        return style;
+        final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
+                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
+        
+        return SF.style(line1,line2,direction);
     }
     
-    private static MutableStyle createTronconSelectionStyle(){
+    private static MutableStyle createTronconSelectionStyle() throws URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),FF.literal(5),LITERAL_ONE_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
@@ -283,7 +302,25 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
         
-        final MutableStyle style = SF.style(line1,line2);
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        
+        final GraphicalSymbol external = SF.externalGraphic(
+                    SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-green.png").toURI()),
+                    "image/png",null);
+        symbols.add(external);        
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
+                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final Expression initialGap = FF.literal(10);
+        final Expression strokeGap = FF.literal(100);
+        final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
+        
+        final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
+                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
+        
+        final MutableStyle style = SF.style(line1,line2,direction);
         return style;
     }
     
