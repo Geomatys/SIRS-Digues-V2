@@ -103,7 +103,7 @@
         eOpposite="#//Convention/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/tronconId"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="RapportEtude" upperBound="-1"
         eType="#//RapportEtude" eOpposite="#//RapportEtude/document"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLong" eType="#//ProfilLong"
         eOpposite="#//ProfilLong/document"/>
@@ -560,7 +560,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRapportEtudeId" eType="#//RefRapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
-        eType="#//Document" eOpposite="#//Document/document"/>
+        eType="#//Document" eOpposite="#//Document/RapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>

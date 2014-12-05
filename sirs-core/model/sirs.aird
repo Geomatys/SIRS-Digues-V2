@@ -3405,7 +3405,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_pfH4cXxvEeSaK9lUa8ruuA" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_pfH4cnxvEeSaK9lUa8ruuA" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pfH4c3xvEeSaK9lUa8ruuA" points="[-6, 0, 3285, 61]$[-3288, -104, 3, -43]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pfH4c3xvEeSaK9lUa8ruuA" points="[74, -3, 2706, 46]$[74, -7, 2706, 42]$[-1308, -7, 1324, 42]$[-1308, -49, 1324, 0]$[-2612, -49, 20, 0]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_pfIfgnxvEeSaK9lUa8ruuA" id="(0.03205128205128205,0.04)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_pfIfg3xvEeSaK9lUa8ruuA" id="(0.8507462686567164,0.23178807947019867)"/>
           </edges>
@@ -3421,7 +3421,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_v_-9YXxvEeSaK9lUa8ruuA" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_v_-9YnxvEeSaK9lUa8ruuA" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_v_-9Y3xvEeSaK9lUa8ruuA" points="[-8, 1, 2918, -60]$[-2922, 102, 4, 41]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_v_-9Y3xvEeSaK9lUa8ruuA" points="[34, -3, 2374, -52]$[34, -15, 2374, -64]$[-1166, -15, 1174, -64]$[-1166, 49, 1174, 0]$[-2326, 49, 14, 0]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_v_-9anxvEeSaK9lUa8ruuA" id="(0.04487179487179487,0.04)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_v_-9a3xvEeSaK9lUa8ruuA" id="(0.8955223880597015,0.7401574803149606)"/>
           </edges>
@@ -8992,9 +8992,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_P49ckGsWEeSz0bikHziHTg" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_zOLzoEi6EeSShKVOxlfrCQ" beginLabel="[0..*] document" endLabel="[0..*] document">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/document"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/document"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_P49ckGsWEeSz0bikHziHTg" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_zOLzoEi6EeSShKVOxlfrCQ" beginLabel="[0..*] document" endLabel="[0..*] RapportEtude">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/RapportEtude"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/RapportEtude"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//RapportEtude/document"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_P4-DoGsWEeSz0bikHziHTg" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
