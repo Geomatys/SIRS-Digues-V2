@@ -7,8 +7,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -16,7 +16,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
+import fr.sirs.importer.theme.document.related.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,18 +40,19 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
 
-//    private final ConventionImporter conventionImporter;
+    private final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
     
     SysEvtDocumentAGrandeEchelleImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
-            final TronconGestionDigueImporter tronconGestionDigueImporter) {
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
+            final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter) {
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
-//        this.conventionImporter = conventionImporter;
+        this.documentAGrandeEchelleImporter = documentAGrandeEchelleImporter;
     }
     
     private enum Columns {
@@ -141,7 +142,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-//        final Map<Integer, Convention> conventions = conventionImporter.getRelated();
+        final Map<Integer, DocumentGrandeEchelle> documentsGrandeEchelle = documentAGrandeEchelleImporter.getRelated();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
@@ -222,12 +223,12 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
             document.setLibelle(row.getString(Columns.NOM.toString()));
             
             // Pas d'identifiant vers des documents à grande échelle ???
-//            if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
-//                if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
-//                    document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
-//                }
-//            }
-            
+            // Comme pour les profils en long on se base sur l'identifiant du document relatif
+            if (row.getInt(Columns.ID_DOC.toString()) != null) {
+                if (documentsGrandeEchelle.get(row.getInt(Columns.ID_DOC.toString())) != null) {
+                    document.setConvention(documentsGrandeEchelle.get(row.getInt(Columns.ID_DOC.toString())).getId());
+                }
+            }
         }
         computed=true;
     }

@@ -23,6 +23,7 @@ import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
@@ -50,6 +51,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
     private final RapportEtudeImporter rapportEtudeImporter;
     private final JournalArticleImporter journalArticleImporter;
     private final MarcheImporter marcheImporter;
+    private final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
     
     private final List<GenericDocumentRelatedImporter> documentRelated = new ArrayList<GenericDocumentRelatedImporter>();
     
@@ -110,6 +112,10 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
                 organismeImporter);
         documentRelated.add(marcheImporter);
         
+        documentAGrandeEchelleImporter = new DocumentAGrandeEchelleImporter(
+                accessDatabase, couchDbConnector, typeDocumentImporter);
+        documentRelated.add(documentAGrandeEchelleImporter);
+        
         documentConventionImporter = new SysEvtConventionImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
@@ -143,13 +149,15 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         sysEvtDocumentAGrandeEchelleImporter = new SysEvtDocumentAGrandeEchelleImporter(
                 accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, 
-                tronconGestionDigueImporter);
+                tronconGestionDigueImporter, documentAGrandeEchelleImporter);
         documentImporters.add(sysEvtDocumentAGrandeEchelleImporter);
     }
     
     public JournalArticleImporter getJournalArticleImporter() {return this.journalArticleImporter;}
     public ConventionImporter getConventionImporter() {return this.conventionImporter;}
     public RapportEtudeImporter getRapportEtudeImporter() {return this.rapportEtudeImporter;}
+    public DocumentAGrandeEchelleImporter getDocumentAGrandeEchelleImporter() {return this.documentAGrandeEchelleImporter;}
+    
 
     @Override
     public void update() throws IOException, AccessDbImporterException {

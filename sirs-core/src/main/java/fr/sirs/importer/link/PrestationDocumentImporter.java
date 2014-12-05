@@ -5,12 +5,16 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Document;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.theme.document.related.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
+import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,10 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
     private final PrestationImporter prestationImporter;
     private final DocumentImporter documentImporter;
     
+    final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
+    final RapportEtudeImporter rapportEtudeImporter;
+        
+        
     public PrestationDocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final PrestationImporter prestationImporter,
@@ -32,6 +40,9 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         super(accessDatabase, couchDbConnector);
         this.prestationImporter = prestationImporter;
         this.documentImporter = documentImporter;
+        
+        documentAGrandeEchelleImporter = documentImporter.getDocumentAGrandeEchelleImporter();
+        rapportEtudeImporter = documentImporter.getRapportEtudeImporter();
     }
 
     private enum Columns {
@@ -59,7 +70,8 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, Document> documents = documentImporter.getDocuments();
-//        documentImporter.get
+        final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
+        final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -70,12 +82,34 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             
             if(prestation!=null && document!=null){
                 if(document.getDocumentgrandeechelle()!=null){
-//                    final DocumentGrandeEchelle documentGrandeEchelle = documentImdocument.getDocumentgrandeechelle();
+                    final DocumentGrandeEchelle documentGrandeEchelle = documentsGrandeEchelle.get(document.getDocumentgrandeechelle());
+                    documentGrandeEchelle.getPrestation().add(prestation.getId());
+                    prestation.getDocumentGrandeEchelle().add(documentGrandeEchelle.getId());
                 }
-//                if(document.)
-//                prestation.getDocument().add(document.getId());
-//                document.getPrestation().add(prestation.getId());
+                if(document.getRapportEtude()!=null){
+                    final RapportEtude rapport = rapportsEtude.get(document.getRapportEtude());
+                    rapport.getPrestation().add(prestation.getId());
+                    prestation.getRapportEtude().add(rapport.getId());
+                }
             }
         }
+    }
+    
+    private Map<String, RapportEtude> rapportEtudeByCouchDbId() 
+            throws IOException, AccessDbImporterException{
+        final Map<String, RapportEtude> rapports = new HashMap<>();
+        for(final RapportEtude rapport : rapportEtudeImporter.getRelated().values()){
+            rapports.put(rapport.getId(), rapport);
+        }
+        return rapports;
+    }
+    
+    private Map<String, DocumentGrandeEchelle> documentGrandeEchelleByCouchDbId() 
+            throws IOException, AccessDbImporterException{
+        final Map<String, DocumentGrandeEchelle> documents = new HashMap<>();
+        for(final DocumentGrandeEchelle document : documentAGrandeEchelleImporter.getRelated().values()){
+            documents.put(document.getId(), document);
+        }
+        return documents;
     }
 }
