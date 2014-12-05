@@ -27,8 +27,8 @@ abstract class GenericLigneEauImporter extends GenericObjetImporter<LigneEau> {
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, 
-                null, null, null, null, null, null, null);
+                systemeReperageImporter, borneDigueImporter,
+                null, null, null, null, null, null);
         this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
         this.typeRefHeauImporter = typeRefHeauImporter;
     }

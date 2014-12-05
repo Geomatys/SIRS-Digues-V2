@@ -57,17 +57,15 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
+            final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
     }
@@ -133,7 +131,7 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
         //LONG_RAMP_BAS,
         PENTE_INTERIEURE,
         //ID_TYPE_OUVRAGE_PARTICULIER,
-        //ID_TYPE_POSITION,
+        ID_TYPE_POSITION,
         //ID_ORG_PROPRIO,
         //ID_ORG_GESTION,
         //ID_INTERV_PROPRIO,
@@ -177,10 +175,10 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
@@ -300,6 +298,10 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
             
             if (row.getDouble(Columns.PENTE_INTERIEURE.toString()) != null) {
                 talus.setPente_interieur(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                talus.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

@@ -24,8 +24,6 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
@@ -76,8 +74,6 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
@@ -85,79 +81,76 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase, couchDbConnector);
         creteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, typeSourceImporter, typeCoteImporter, 
+                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeFonctionImporter);
         structureImporters.add(creteImporter);
         piedDigueImporter = new SysEvtPiedDeDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(piedDigueImporter);
         talusDigueImporter = new SysEvtTalusDigueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(talusDigueImporter);
         sommetRisbermeImporter = new SysEvtSommetRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(sommetRisbermeImporter);
         talusRisbermeImporter = new SysEvtTalusRisbermeImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(talusRisbermeImporter);
         fondationImporter = new  SysEvtFondationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(fondationImporter);
         epiImporter = new SysEvtEpisImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
-                typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
+                borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter);
         structureImporters.add(epiImporter);
         ouvrageRevancheImporter = new SysEvtOuvrageRevancheImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
         structureImporters.add(ouvrageRevancheImporter);
         talusFrancBordImporter = new SysEvtTalusFrancBordImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         structureImporters.add(talusFrancBordImporter);
         sysEvtPiedFrontFrancBordImporter = new SysEvtPiedFrontFrancBordImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                systemeReperageImporter, borneDigueImporter, 
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                typeMateriauImporter, typeNatureImporter);
         structureImporters.add(sysEvtPiedFrontFrancBordImporter);
     }
 

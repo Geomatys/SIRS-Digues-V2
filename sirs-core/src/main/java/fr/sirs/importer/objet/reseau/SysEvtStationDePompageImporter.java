@@ -19,12 +19,7 @@ import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
@@ -62,8 +57,8 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
             final TypePositionImporter typePositionImporter,
             final ElementReseauPompeImporter pompeImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.pompeImporter = pompeImporter;
     }

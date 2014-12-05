@@ -57,8 +57,8 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
             final TypePositionImporter typePositionImporter,
             final TypeOuvrageHydrauAssocieImporter typeOuvrageAssocieImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.typeOuvrageAssocieImporter = typeOuvrageAssocieImporter;
     }

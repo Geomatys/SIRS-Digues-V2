@@ -57,8 +57,8 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
             final TypePositionImporter typePositionImporter,
             final TypeOuvrageVoirieImporter typeOuvrageVoirieImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.typeOuvrageVoirieImporter = typeOuvrageVoirieImporter;
     }

@@ -60,8 +60,8 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
             final ImplantationImporter typeImplantationImporter,
             final TypeReseauTelecommunicImporter typeReseauTelecomImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.typeImplantationImporter = typeImplantationImporter;
         this.typeReseauTelecomImporter = typeReseauTelecomImporter;

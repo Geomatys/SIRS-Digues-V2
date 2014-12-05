@@ -20,8 +20,6 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -56,17 +54,15 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
+            final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
     }
@@ -176,6 +172,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();

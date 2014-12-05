@@ -91,7 +91,7 @@ public class ObjetManager {
         
         structureImporter = new ElementStructureImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
+                borneDigueImporter,
                 typeSourceImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         importers.add(structureImporter);
@@ -106,8 +106,8 @@ public class ObjetManager {
         importers.add(geometryImporter);
         reseauImporter = new ElementReseauImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                borneDigueImporter, organismeImporter, intervenantImporter,
+                typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeNatureImporter);
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 

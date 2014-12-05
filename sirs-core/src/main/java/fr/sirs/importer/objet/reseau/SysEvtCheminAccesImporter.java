@@ -60,8 +60,8 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
             final TypeNatureImporter typeNatureImporter, 
             final TypeUsageVoieImporter typeUsageVoieImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeNatureImporter);
         this.typeUsageVoieImporter = typeUsageVoieImporter;
     }

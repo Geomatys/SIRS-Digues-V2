@@ -5,8 +5,6 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import java.io.IOException;
@@ -27,8 +25,6 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
-    protected OrganismeImporter organismeImporter;
-    protected IntervenantImporter intervenantImporter;
     
     protected SourceInfoImporter typeSourceImporter;
     protected TypeCoteImporter typeCoteImporter;
@@ -47,8 +43,6 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
@@ -59,8 +53,6 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
-        this.organismeImporter = organismeImporter;
-        this.intervenantImporter = intervenantImporter;
         this.typeSourceImporter = typeSourceImporter;
         this.typeCoteImporter = typeCoteImporter;
         this.typePositionImporter = typePositionImporter;

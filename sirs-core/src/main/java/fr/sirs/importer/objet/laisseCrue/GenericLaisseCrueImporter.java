@@ -17,6 +17,7 @@ import org.ektorp.CouchDbConnector;
  */
 abstract class GenericLaisseCrueImporter extends GenericObjetImporter<LaisseCrue> {
 
+    protected final IntervenantImporter intervenantImporter;
     protected final EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     protected final TypeRefHeauImporter typeRefHeauImporter;
 
@@ -30,10 +31,11 @@ abstract class GenericLaisseCrueImporter extends GenericObjetImporter<LaisseCrue
             final SourceInfoImporter typeSourceImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, 
-                intervenantImporter, typeSourceImporter, null, null, null, null,
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, null, null, null, null,
                 null);
         this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
         this.typeRefHeauImporter = typeRefHeauImporter;
+        this.intervenantImporter = intervenantImporter;
     }
 }

@@ -58,19 +58,16 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
+            final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
-            final TypeNatureImporter typeNatureImporter,
-            final TypeFonctionImporter typeFonctionImporter) {
+            final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
-                typeFonctionImporter);
+                null);
     }
     
     private enum Columns {
@@ -134,7 +131,7 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
 //        LONG_RAMP_BAS,
 //        PENTE_INTERIEURE,
 //        ID_TYPE_OUVRAGE_PARTICULIER,
-//        ID_TYPE_POSITION,
+        ID_TYPE_POSITION,
 //        ID_ORG_PROPRIO,
 //        ID_ORG_GESTION,
 //        ID_INTERV_PROPRIO,
@@ -178,13 +175,12 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -287,6 +283,10 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
             
             if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
                 pied.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                pied.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

@@ -53,8 +53,8 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
     }
     

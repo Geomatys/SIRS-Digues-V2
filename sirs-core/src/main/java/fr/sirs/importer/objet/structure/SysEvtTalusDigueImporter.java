@@ -6,7 +6,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -21,8 +20,6 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -57,17 +54,15 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
+            final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
     }
@@ -177,10 +172,10 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        
         final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();

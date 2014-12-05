@@ -60,8 +60,8 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
             final TypeUsageVoieImporter typeUsageVoieImporter,
             final TypeRevetementImporter typeRevetementImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.typeUsageVoieImporter = typeUsageVoieImporter;
         this.typeRevetementImporter = typeRevetementImporter;

@@ -22,7 +22,7 @@ abstract class GenericGeometrieImporter<T extends Objet> extends GenericObjetImp
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, null,
+                systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, null, null, null, null, null);
     }
 }

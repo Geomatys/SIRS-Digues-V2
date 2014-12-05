@@ -57,6 +57,9 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     
     private final TypeElementReseauImporter typeElementReseauImporter;
     
+    private final OrganismeImporter organismeImporter;
+    private final IntervenantImporter intervenantImporter;
+    
     private final List<GenericObjetImporter> reseauImporters = new ArrayList<>();
     private final EcoulementImporter typeEcoulementImporter;
     private final ImplantationImporter typeImplantationImporter;
@@ -99,13 +102,16 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter, 
+            final TypePositionImporter typePositionImporter,
             final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeNatureImporter);
+        this.organismeImporter = organismeImporter;
+        this.intervenantImporter = intervenantImporter;
+        
         typeElementReseauImporter = new TypeElementReseauImporter(
                 accessDatabase, couchDbConnector);
         typeEcoulementImporter = new EcoulementImporter(accessDatabase, 

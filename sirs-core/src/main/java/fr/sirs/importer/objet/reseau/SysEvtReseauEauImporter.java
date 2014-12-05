@@ -57,8 +57,8 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
             final TypePositionImporter typePositionImporter,
             final TypeReseauEauImporter typeReseauEauImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null,
-                null, typeSourceImporter, typeCoteImporter, 
+                systemeReperageImporter, borneDigueImporter,
+                typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
         this.typeReseauEauImporter = typeReseauEauImporter;
     }

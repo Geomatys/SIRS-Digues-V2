@@ -24,7 +24,7 @@ abstract class GenericPrestationImporter<T extends Objet> extends GenericObjetIm
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, null, 
+                systemeReperageImporter, borneDigueImporter,
                 sourceInfoImporter, typeCoteImporter, typePositionImporter, 
                 null, null, null);
     }

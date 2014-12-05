@@ -12,6 +12,7 @@ import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
+        related = new HashMap<>();
         
         final Map<Integer, RefDocumentGrandeEchelle> types = typeDocumentAGrandeEchelleImporter.getTypes();
         final Map<Integer, Class> typesDocument = typeDocumentImporter.getClasseDocument();
@@ -123,10 +125,10 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                     documentGrandeEchelle.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
-            }
             
-            // Faute de mieux, on référence le document à grande échelle avec l'id du document.
-            related.put(row.getInt(Columns.ID_DOC.toString()), documentGrandeEchelle);
+                // Faute de mieux, on référence le document à grande échelle avec l'id du document.
+                related.put(row.getInt(Columns.ID_DOC.toString()), documentGrandeEchelle);
+            }
         }
         couchDbConnector.executeBulk(related.values());
     }

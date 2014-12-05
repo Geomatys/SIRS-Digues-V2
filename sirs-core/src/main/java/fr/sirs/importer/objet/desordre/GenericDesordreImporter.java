@@ -24,7 +24,7 @@ abstract class GenericDesordreImporter extends GenericObjetImporter<Desordre> {
             final TypeCoteImporter typeCoteImporter, 
             final TypePositionImporter typePositionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, null, null, 
+                systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 null, null, null);
     }
