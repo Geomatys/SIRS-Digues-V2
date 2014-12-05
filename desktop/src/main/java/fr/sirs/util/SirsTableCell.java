@@ -65,24 +65,9 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
                 final SystemeReperageBorne srb = (SystemeReperageBorne) item;
                 final Session session = Injector.getBean(Session.class);
                 item = session.getBorneDigueRepository().get(srb.getBorneId());
-            }
+            }            
             
-            String text = null;
-            if(item instanceof Digue){
-                text = ((Digue)item).getLibelle();
-            }else if(item instanceof TronconDigue){
-                text = ((TronconDigue)item).getLibelle();
-            }else if(item instanceof BorneDigue){
-                text = ((BorneDigue)item).getLibelle();
-            }else if(item instanceof SystemeReperage){
-                text = ((SystemeReperage)item).getLibelle();
-            }else if(item instanceof ElementHit){
-                text = ((ElementHit) item).getLibelle();
-            }else if(item instanceof String){
-                text = (String) item;
-            }
-            
-            setText(text);
+            setText(new SirsStringConverter().toString(item));
         }
     }
     

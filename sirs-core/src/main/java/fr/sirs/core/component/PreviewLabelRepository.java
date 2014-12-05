@@ -8,7 +8,13 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
 
-@View(name = "all", map = "function(doc) {if(doc.libelle) emit(doc._id, doc.libelle)}")
+@View(name = "all", map = "function(doc) {"
+        + "if(doc.libelle) {"
+        + " emit(doc._id, doc.libelle) "
+        + "} else if (doc.nom) { "
+        + "emit(doc._id, doc.nom) "
+        + "}"
+        + "}")
 public class PreviewLabelRepository extends
         CouchDbRepositorySupport<PreviewLabel> {
 
