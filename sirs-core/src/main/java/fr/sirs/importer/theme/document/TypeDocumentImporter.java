@@ -29,8 +29,7 @@ public class TypeDocumentImporter extends GenericImporter {
     private Map<Integer, RefTypeDocument> typesDocument = null;
 
     TypeDocumentImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final TypeDocumentAGrandeEchelleImporter typeDocumentGrandeEchelleImporter) {
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     

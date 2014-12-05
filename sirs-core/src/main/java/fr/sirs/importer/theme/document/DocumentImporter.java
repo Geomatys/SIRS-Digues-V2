@@ -61,6 +61,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
     private final SysEvtRapportEtudesImporter documentRapportEtudeImporter;
     private final SysEvtJournalImporter documentJournalImporter;
     private final SysEvtMarcheImporter sysEvtMarcheImporter;
+    private final SysEvtDocumentAGrandeEchelleImporter sysEvtDocumentAGrandeEchelleImporter;
     
     private final List<GenericDocumentImporter> documentImporters = new ArrayList<>();
     
@@ -77,8 +78,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         super(accessDatabase, couchDbConnector, documentRepository, 
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
         this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
-                couchDbConnector, 
-                new TypeDocumentAGrandeEchelleImporter(accessDatabase, couchDbConnector));
+                couchDbConnector);
         
         
         conventionImporter = new ConventionImporter(accessDatabase, 
@@ -140,10 +140,16 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
                 systemeReperageImporter, tronconGestionDigueImporter, 
                 marcheImporter);
         documentImporters.add(sysEvtMarcheImporter);
+        sysEvtDocumentAGrandeEchelleImporter = new SysEvtDocumentAGrandeEchelleImporter(
+                accessDatabase, couchDbConnector, documentRepository, 
+                borneDigueImporter, systemeReperageImporter, 
+                tronconGestionDigueImporter);
+        documentImporters.add(sysEvtDocumentAGrandeEchelleImporter);
     }
     
     public JournalArticleImporter getJournalArticleImporter() {return this.journalArticleImporter;}
     public ConventionImporter getConventionImporter() {return this.conventionImporter;}
+    public RapportEtudeImporter getRapportEtudeImporter() {return this.rapportEtudeImporter;}
 
     @Override
     public void update() throws IOException, AccessDbImporterException {

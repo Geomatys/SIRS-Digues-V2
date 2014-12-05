@@ -3,6 +3,7 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -58,6 +59,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, Document> documents = documentImporter.getDocuments();
+//        documentImporter.get
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -67,8 +69,12 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             if(prestation!=null && document!=null){
-                prestation.getDocument().add(document.getId());
-                document.getPrestation().add(prestation.getId());
+                if(document.getDocumentgrandeechelle()!=null){
+//                    final DocumentGrandeEchelle documentGrandeEchelle = documentImdocument.getDocumentgrandeechelle();
+                }
+//                if(document.)
+//                prestation.getDocument().add(document.getId());
+//                document.getPrestation().add(prestation.getId());
             }
         }
     }

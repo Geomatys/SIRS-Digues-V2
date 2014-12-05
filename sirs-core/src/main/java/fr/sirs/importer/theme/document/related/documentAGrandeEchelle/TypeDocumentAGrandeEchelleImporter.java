@@ -1,4 +1,4 @@
-package fr.sirs.importer.theme.document;
+package fr.sirs.importer.theme.document.related.documentAGrandeEchelle;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;

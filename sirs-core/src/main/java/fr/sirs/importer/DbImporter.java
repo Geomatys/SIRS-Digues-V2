@@ -357,7 +357,7 @@ public class DbImporter {
      SYS_EVT_CRETE,
      SYS_EVT_DESORDRE,
 //     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON, // Dans le module "berges" (2015)
-//     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
+     SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
 //     SYS_EVT_DOCUMENT_MARCHE, // Hypothèse que cette table est remplacée par SYS_EVT_MARCHE 
 //     SYS_EVT_EMPRISE_COMMUNALE,
 //     SYS_EVT_EMPRISE_SYNDICAT,
@@ -867,7 +867,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -883,7 +883,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -893,12 +893,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString()).getPrimaryKeyIndex());
+//            System.out.println(importer.getDatabase().getTable(TableName.SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");
