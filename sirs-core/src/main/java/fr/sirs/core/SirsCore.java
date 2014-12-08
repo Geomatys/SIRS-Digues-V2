@@ -35,6 +35,8 @@ public class SirsCore {
     
     public static final Path DATABASE_PATH = CONFIGURATION_PATH.resolve("database");
     
+    public static final Path H2_PATH = CONFIGURATION_PATH.resolve("h2");
+    
     public static final Path PLUGINS_PATH = CONFIGURATION_PATH.resolve("plugins");
     
     public static final Path LOGS_PATH = CONFIGURATION_PATH.resolve("logs.txt");

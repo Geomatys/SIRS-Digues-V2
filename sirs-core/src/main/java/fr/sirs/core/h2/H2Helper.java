@@ -30,26 +30,25 @@ public class H2Helper {
     public static void exportDataToRDBMS(CouchDbConnector connector)
             throws IOException {
         final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
-        Path file = new File(new File(SirsCore.getConfigFolder(), "h2"),
-                URLEncoder.encode(sirs.getUuid())).toPath();
+        Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
 
-        
+        if (Files.isDirectory(SirsCore.H2_PATH)) {
+            Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                        throws IOException {
+                    Files.delete(dir);
+                    return super.postVisitDirectory(dir, exc);
+                }
 
-        Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                    throws IOException {
-                Files.delete(dir);
-                return super.postVisitDirectory(dir, exc);
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file,
-                    BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return super.visitFile(file, attrs);
-            }
-        });
+                @Override
+                public FileVisitResult visitFile(Path file,
+                        BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return super.visitFile(file, attrs);
+                }
+            });
+        }
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd")) {
             init(conn, connector);
