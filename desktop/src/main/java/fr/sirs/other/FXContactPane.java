@@ -151,7 +151,7 @@ public class FXContactPane extends BorderPane {
  
     /**
      * Table listant les rattachement du contact courant aux organismes connus.
-     * Aucune opération de suavegarde n'est effectuée ici, elles seront apliquées
+     * Aucune opération de suavegarde n'est effectuée ici, elles seront appliquées
      * lors de la sauvegarde globale du panneau.
      */
     private final class ContactOrganismeTable extends PojoTable {
