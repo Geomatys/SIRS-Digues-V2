@@ -44,6 +44,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class DocumentImporter extends GenericDocumentImporter  implements DocumentsUpdater {
     
+    private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
+    
     private final ConventionImporter conventionImporter;
     private final ProfilEnLongImporter profilLongImporter;
     private final ProfilEnTraversImporter profilTraversImporter;
@@ -69,19 +71,19 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
     
     public DocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
-            final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
-        super(accessDatabase, couchDbConnector, documentRepository, 
+        super(accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
         this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
                 couchDbConnector);
         
+        typeSystemeReleveProfilImporter = new TypeSystemeReleveProfilImporter(
+                accessDatabase, couchDbConnector);
         
         conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, intervenantImporter, organismeImporter);
@@ -117,37 +119,37 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         documentRelated.add(documentAGrandeEchelleImporter);
         
         documentConventionImporter = new SysEvtConventionImporter(
-                accessDatabase, couchDbConnector, documentRepository, 
+                accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, conventionImporter);
         documentImporters.add(documentConventionImporter);
         documentProfilTraversImporter = new SysEvtProfilEnTraversImporter(
-                accessDatabase, couchDbConnector, documentRepository, 
+                accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilTraversImporter);
         documentImporters.add(documentProfilTraversImporter);
         documentProfilLongImporter = new SysEvtProfilEnLongImporter(
-                accessDatabase, couchDbConnector, documentRepository, 
+                accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, profilLongImporter);
         documentImporters.add(documentProfilLongImporter);
         documentRapportEtudeImporter = new SysEvtRapportEtudesImporter(
-                accessDatabase, couchDbConnector, documentRepository, 
+                accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, rapportEtudeImporter);
         documentImporters.add(documentRapportEtudeImporter);
         documentJournalImporter = new SysEvtJournalImporter(accessDatabase, 
-                couchDbConnector, documentRepository, borneDigueImporter, 
+                couchDbConnector, borneDigueImporter, 
                 systemeReperageImporter, tronconGestionDigueImporter, 
                 journalArticleImporter);
         documentImporters.add(documentJournalImporter);
         sysEvtMarcheImporter = new SysEvtMarcheImporter(accessDatabase, 
-                couchDbConnector, documentRepository, borneDigueImporter, 
+                couchDbConnector, borneDigueImporter, 
                 systemeReperageImporter, tronconGestionDigueImporter, 
                 marcheImporter);
         documentImporters.add(sysEvtMarcheImporter);
         sysEvtDocumentAGrandeEchelleImporter = new SysEvtDocumentAGrandeEchelleImporter(
-                accessDatabase, couchDbConnector, documentRepository, 
+                accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter, documentAGrandeEchelleImporter);
         documentImporters.add(sysEvtDocumentAGrandeEchelleImporter);

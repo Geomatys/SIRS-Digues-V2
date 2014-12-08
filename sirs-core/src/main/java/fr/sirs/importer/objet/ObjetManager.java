@@ -184,4 +184,6 @@ public class ObjetManager {
     public LaisseCrueImporter getLaisseCrueImporter(){return laisseCrueImporter;}
     public LigneEauImporter getLigneEauImporter() {return ligneEauImporter;}
     public MonteeDesEauxImporter getMonteeDesEauxImporter(){return monteeDesEauxImporter;}
+    
+    public TypeCoteImporter getTypeCoteImporter(){return typeCoteImporter;}
 }

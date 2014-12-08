@@ -5,7 +5,6 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Document;
@@ -44,12 +43,11 @@ class SysEvtConventionImporter extends GenericDocumentImporter {
     
     SysEvtConventionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
-            final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final ConventionImporter conventionImporter) {
-        super(accessDatabase, couchDbConnector, documentRepository, 
+        super(accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 tronconGestionDigueImporter);
         this.conventionImporter = conventionImporter;

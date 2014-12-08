@@ -2,7 +2,6 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.SystemeReperage;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,13 +20,10 @@ public class SystemeReperageImporter extends GenericImporter {
 
     private Map<Integer, SystemeReperage> systemesReperage = null;
     private Map<Integer, List<SystemeReperage>> systemesReperageByTronconId = null;
-    private final SystemeReperageRepository systemeReperageRepository;
 
     SystemeReperageImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final SystemeReperageRepository systemeReperageRepository) {
+            final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-        this.systemeReperageRepository = systemeReperageRepository;
     }
     
     private enum Columns {

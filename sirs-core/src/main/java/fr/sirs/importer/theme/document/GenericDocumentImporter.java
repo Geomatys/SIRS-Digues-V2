@@ -1,7 +1,6 @@
 package fr.sirs.importer.theme.document;
 
 import com.healthmarketscience.jackcess.Database;
-import fr.sirs.core.component.DocumentRepository;
 import fr.sirs.core.model.Document;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -20,7 +19,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
     
     protected Map<Integer, Document> documents = null;
     
-    protected DocumentRepository documentRepository;
+//    protected DocumentRepository documentRepository;
     
     protected BorneDigueImporter borneDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
@@ -35,12 +34,10 @@ abstract class GenericDocumentImporter extends GenericImporter {
     
     public GenericDocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final DocumentRepository documentRepository, 
             final BorneDigueImporter borneDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
         this(accessDatabase, couchDbConnector);
-        this.documentRepository = documentRepository;
         this.borneDigueImporter = borneDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;

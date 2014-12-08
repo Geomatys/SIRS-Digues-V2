@@ -2,7 +2,6 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
@@ -21,18 +20,10 @@ import org.ektorp.CouchDbConnector;
 public class IntervenantImporter extends GenericImporter {
 
     private Map<Integer, Contact> intervenants = null;
-    private ContactRepository contactRepository;
-
-    private IntervenantImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
 
     IntervenantImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final ContactRepository contactRepository) {
-        this(accessDatabase, couchDbConnector);
-        this.contactRepository = contactRepository;
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {

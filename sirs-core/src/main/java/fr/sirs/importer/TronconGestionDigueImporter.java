@@ -10,6 +10,7 @@ import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.RefRive;
@@ -20,6 +21,7 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.troncon.GardienTronconGestionImporter;
 import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueCommuneImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,25 +42,21 @@ implements DocumentsUpdater {
     private Map<Integer, TronconDigue> tronconsDigue = null;
     private Map<String, Integer> tronconsIds = null;
     
-    private TronconDigueGeomImporter tronconDigueGeomImporter;
-    private TypeRiveImporter typeRiveImporter;
-    private SystemeReperageImporter systemeReperageImporter;
-    private TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
-    private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
-    private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
-    private DigueImporter digueImporter;
-    private BorneDigueImporter borneDigueImporter;
-    private ObjetManager objetManager;
+    private final TronconDigueGeomImporter tronconDigueGeomImporter;
+    private final TypeRiveImporter typeRiveImporter;
+    private final SystemeReperageImporter systemeReperageImporter;
+    private final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
+    private final GardienTronconGestionImporter tronconGestionDigueGardienImporter;
+    private final ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
+    private final TronconGestionDigueCommuneImporter tronconGestionDigueCommuneImporter;
+    private final DigueImporter digueImporter;
+    private final BorneDigueImporter borneDigueImporter;
+    private final CommuneImporter communeImporter;
+    private final ObjetManager objetManager;
     
-    private DigueRepository digueRepository;
-    private TronconDigueRepository tronconDigueRepository;
-    private BorneDigueRepository borneDigueRepository;
-    
-    
-    private TronconGestionDigueImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
+    private final DigueRepository digueRepository;
+    private final TronconDigueRepository tronconDigueRepository;
+    private final BorneDigueRepository borneDigueRepository;
     
     TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -67,31 +65,36 @@ implements DocumentsUpdater {
             final BorneDigueRepository borneDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
-            final TypeRiveImporter typeRiveImporter, 
             final SystemeReperageImporter systemeReperageImporter,
-            final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter, 
-            final GardienTronconGestionImporter tronconGestionDigueGardienImporter,
-            final ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
-        this(accessDatabase, couchDbConnector);
+        super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
         this.digueRepository = digueRepository;
         this.borneDigueRepository = borneDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
-        this.typeRiveImporter = typeRiveImporter;
+        this.typeRiveImporter = new TypeRiveImporter(accessDatabase, couchDbConnector);
         this.systemeReperageImporter = systemeReperageImporter;
-        this.tronconGestionDigueGestionnaireImporter = tronconGestionDigueGestionnaireImporter;
-        this.tronconGestionDigueGardienImporter = tronconGestionDigueGardienImporter;
-        this.tronconGestionDigueProprietaireImporter = tronconGestionDigueProprietaireImporter;
-        this.borneDigueImporter = borneDigueImporter;
         
+        this.borneDigueImporter = borneDigueImporter;
+        tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
+                accessDatabase, couchDbConnector, organismeImporter);
+        tronconGestionDigueGardienImporter = new GardienTronconGestionImporter(
+                accessDatabase, couchDbConnector, intervenantImporter);
+        tronconGestionDigueProprietaireImporter = new ProprietaireTronconGestionImporter(
+                accessDatabase, couchDbConnector, intervenantImporter, 
+                organismeImporter);
+        communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 intervenantImporter, evenementHydrauliqueImporter);
+        this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(
+                accessDatabase, couchDbConnector, systemeReperageImporter, 
+                borneDigueImporter, communeImporter, 
+                objetManager.getTypeCoteImporter());
     }
     
     public ObjetManager getObjetManager(){return objetManager;}
@@ -158,6 +161,7 @@ implements DocumentsUpdater {
         final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
+        final Map<Integer, List<CommuneTroncon>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -200,6 +204,10 @@ implements DocumentsUpdater {
             
             if(contacts!=null) tronconDigue.setContacts(contacts);
             // Fin des contacts
+            
+            final List<CommuneTroncon> communesTroncons = communes.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(communesTroncons!=null) tronconDigue.setCommuneTroncon(communesTroncons);
+            // Fin des communes
             
             final List<BorneDigue> bornes = bornesByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(bornes != null){

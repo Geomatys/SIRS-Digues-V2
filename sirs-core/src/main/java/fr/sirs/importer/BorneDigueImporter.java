@@ -32,17 +32,10 @@ public class BorneDigueImporter extends GenericImporter {
 
     private Map<Integer, BorneDigue> bornesDigue = null;
     private Map<Integer, List<BorneDigue>> bornesDigueByTronconId = null;
-    private BorneDigueRepository borneDigueRepository;
 
-    private BorneDigueImporter(final Database accessDatabase,
+    BorneDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
-    }
-    
-    BorneDigueImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, final BorneDigueRepository borneDigueRepository) {
-        super(accessDatabase, couchDbConnector);
-        this.borneDigueRepository = borneDigueRepository;
     }
     
     private enum Columns {

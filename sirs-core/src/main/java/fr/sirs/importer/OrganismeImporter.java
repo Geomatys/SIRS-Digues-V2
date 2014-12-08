@@ -2,7 +2,6 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -23,7 +22,6 @@ import org.ektorp.CouchDbConnector;
 public class OrganismeImporter extends GenericImporter {
 
     private Map<Integer, Organisme> organismes = null;
-    private OrganismeRepository organismeRepository;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
 
     private OrganismeImporter(final Database accessDatabase,
@@ -33,10 +31,8 @@ public class OrganismeImporter extends GenericImporter {
 
     OrganismeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final OrganismeRepository organismeRepository,
             final OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter) {
         this(accessDatabase, couchDbConnector);
-        this.organismeRepository = organismeRepository;
         this.organismeDisposeIntervenantImporter = organismeDisposeIntervenantImporter;
     }
 

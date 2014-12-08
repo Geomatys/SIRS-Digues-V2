@@ -3,7 +3,6 @@ package fr.sirs.importer.intervenant;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import java.io.IOException;
@@ -31,7 +30,6 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
     public OrganismeDisposeIntervenantImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final ContactRepository contactRepository,
             final IntervenantImporter intervenantImporter) {
         this(accessDatabase, couchDbConnector);
         this.intervenantImporter = intervenantImporter;
