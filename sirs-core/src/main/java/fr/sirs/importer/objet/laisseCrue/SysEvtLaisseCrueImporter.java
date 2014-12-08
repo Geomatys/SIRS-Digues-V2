@@ -124,7 +124,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
         
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();

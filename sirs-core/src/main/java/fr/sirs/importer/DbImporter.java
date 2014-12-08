@@ -76,6 +76,8 @@ import fr.sirs.importer.link.ElementStructureProprietaireImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.link.LaisseCrueJournalImporter;
 import fr.sirs.importer.link.LigneEauJournalImporter;
+import fr.sirs.importer.link.MarcheFinanceurImporter;
+import fr.sirs.importer.link.MarcheMaitreOeuvreImporter;
 import fr.sirs.importer.link.MonteeDesEauxJournalImporter;
 import fr.sirs.importer.link.PrestationDocumentImporter;
 import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
@@ -204,6 +206,8 @@ public class DbImporter {
     private ElementStructureGestionnaireImporter elementStructureGestionnaireImporter;
     private ElementStructureProprietaireImporter elementStructureProprietaireImporter;
     private PrestationIntervenantImporter prestationIntervenantImporter;
+    private MarcheFinanceurImporter marcheFinanceurImporter;
+    private MarcheMaitreOeuvreImporter marcheMaitreOeuvreImporter;
     private List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
@@ -292,22 +296,22 @@ public class DbImporter {
      LIGNE_EAU,
      LIGNE_EAU_JOURNAL,
      LIGNE_EAU_MESURES_PRZ,
-//     LIGNE_EAU_MESURES_XYZ,
-     MARCHE, // A FAIRE
-//     MARCHE_FINANCEUR, // A FAIRE
-//     MARCHE_MAITRE_OEUVRE, // A FAIRE
+     LIGNE_EAU_MESURES_XYZ,
+     MARCHE,
+     MARCHE_FINANCEUR,
+     MARCHE_MAITRE_OEUVRE,
      METEO,
      MONTEE_DES_EAUX,
      MONTEE_DES_EAUX_JOURNAL,
-//     MONTEE_DES_EAUX_MESURES,
-     observation_urgence_carto, // A Faire !
+     MONTEE_DES_EAUX_MESURES,
+//     observation_urgence_carto, //  Signification ???
      ORGANISME,
      ORGANISME_DISPOSE_INTERVENANT,
 //     ORIENTATION,
 //     PARCELLE_CADASTRE, // Plus de parcelles dans le nouveau modèle
 //     PARCELLE_LONGE_DIGUE, // Plus de parcelles dans le nouveau modèle
 //     PHOTO_LAISSE,
-//     PHOTO_LOCALISEE_EN_PR,
+     PHOTO_LOCALISEE_EN_PR,
 //     PHOTO_LOCALISEE_EN_XY,
      PRESTATION,
      PRESTATION_DOCUMENT,
@@ -450,9 +454,9 @@ public class DbImporter {
 //     TYPE_DISTANCE_DIGUE_BERGE, // Dans le module "berges" (2015)
      TYPE_DOCUMENT,
      TYPE_DOCUMENT_A_GRANDE_ECHELLE,
-//     TYPE_DOCUMENT_DECALAGE,
-//     TYPE_DONNEES_GROUPE,
-//     TYPE_DONNEES_SOUS_GROUPE,
+//     TYPE_DOCUMENT_DECALAGE, // Affichage
+//     TYPE_DONNEES_GROUPE, // Redondance avec les types
+//     TYPE_DONNEES_SOUS_GROUPE, // Redondance avec les types
 //     TYPE_DVPT_VEGETATION, // Dans le module "vegetation" (2015)
      TYPE_ELEMENT_GEOMETRIE,
      TYPE_ELEMENT_RESEAU,
@@ -462,9 +466,9 @@ public class DbImporter {
 //     TYPE_EMPRISE_PARCELLE, // Pas de parcelles cadastrales dans le nouveau modèle
      TYPE_EVENEMENT_HYDRAU,
      TYPE_FONCTION,
-//     TYPE_FONCTION_MO,
+     TYPE_FONCTION_MO,
      TYPE_FREQUENCE_EVENEMENT_HYDRAU,
-//     TYPE_GENERAL_DOCUMENT,
+//     TYPE_GENERAL_DOCUMENT, // Plus dans le nouveau modèle
      TYPE_GLISSIERE,
      TYPE_LARGEUR_FRANC_BORD,
      TYPE_MATERIAU,
@@ -796,6 +800,14 @@ public class DbImporter {
                 tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
                 intervenantImporter);
         linkers.add(prestationIntervenantImporter);
+        marcheFinanceurImporter = new MarcheFinanceurImporter(accessDatabase, 
+                couchDbConnector, documentImporter.getMarcheImporter(), 
+                organismeImporter);
+        linkers.add(marcheFinanceurImporter);
+        marcheMaitreOeuvreImporter = new MarcheMaitreOeuvreImporter(
+                accessDatabase, couchDbConnector, 
+                documentImporter.getMarcheImporter(), organismeImporter);
+        linkers.add(marcheMaitreOeuvreImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -874,7 +886,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.LIGNE_EAU_MESURES_XYZ.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -890,7 +902,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.LIGNE_EAU_MESURES_XYZ.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -900,12 +912,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.LIGNE_EAU_MESURES_XYZ.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.PRESTATION_INTERVENANT.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.LIGNE_EAU_MESURES_XYZ.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

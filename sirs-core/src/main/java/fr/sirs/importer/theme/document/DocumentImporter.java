@@ -157,7 +157,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
     public ConventionImporter getConventionImporter() {return this.conventionImporter;}
     public RapportEtudeImporter getRapportEtudeImporter() {return this.rapportEtudeImporter;}
     public DocumentAGrandeEchelleImporter getDocumentAGrandeEchelleImporter() {return this.documentAGrandeEchelleImporter;}
-    
+    public MarcheImporter getMarcheImporter(){return this.marcheImporter;}
 
     @Override
     public void update() throws IOException, AccessDbImporterException {

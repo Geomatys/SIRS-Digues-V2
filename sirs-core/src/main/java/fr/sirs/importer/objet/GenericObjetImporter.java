@@ -26,7 +26,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     
-    protected SourceInfoImporter typeSourceImporter;
+    protected SourceInfoImporter sourceInfoImporter;
     protected TypeCoteImporter typeCoteImporter;
     protected TypePositionImporter typePositionImporter;
     protected TypeMateriauImporter typeMateriauImporter;
@@ -53,7 +53,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
-        this.typeSourceImporter = typeSourceImporter;
+        this.sourceInfoImporter = typeSourceImporter;
         this.typeCoteImporter = typeCoteImporter;
         this.typePositionImporter = typePositionImporter;
         this.typeMateriauImporter = typeMateriauImporter;

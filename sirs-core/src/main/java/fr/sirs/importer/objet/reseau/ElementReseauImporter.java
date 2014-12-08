@@ -321,7 +321,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
 

@@ -7,8 +7,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.EvenementHydraulique;
+import fr.sirs.core.model.MesureMonteeEaux;
 import fr.sirs.core.model.MonteeEaux;
-import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -16,18 +16,11 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeFonctionImporter;
-import fr.sirs.importer.objet.TypeMateriauImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +43,7 @@ import org.opengis.util.FactoryException;
  */
 public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
     
+    private final MonteeDesEauxMesuresImporter monteeDesEauxMesuresImporter;
     private final SysEvtMonteeDesEauHydroImporter sysEvtMonteeDesEauHydroImporter;
 
     public MonteeDesEauxImporter(final Database accessDatabase,
@@ -57,14 +51,20 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final IntervenantImporter intervenantImporter,
+            final TypeRefHeauImporter typeRefHeauImporter,
+            final SourceInfoImporter sourceInfoImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 evenementHydrauliqueImporter);
+        monteeDesEauxMesuresImporter = new MonteeDesEauxMesuresImporter(
+                accessDatabase, couchDbConnector, intervenantImporter, 
+                sourceInfoImporter, typeRefHeauImporter);
         sysEvtMonteeDesEauHydroImporter = new SysEvtMonteeDesEauHydroImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
-                evenementHydrauliqueImporter);
+                evenementHydrauliqueImporter, monteeDesEauxMesuresImporter);
     }
 
     private enum Columns {
@@ -109,6 +109,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
         
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
         
+        final Map<Integer, List<MesureMonteeEaux>> mesures = monteeDesEauxMesuresImporter.getMesuresByMonteeDesEaux();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -298,6 +299,10 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
             }
             
             if (nouvelleLaisseCrue) {
+                
+                if(mesures.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()))!=null){
+                    monteeEaux.setMesureId(mesures.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
+                }
                 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 structures.put(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()), monteeEaux);

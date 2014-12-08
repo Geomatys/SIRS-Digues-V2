@@ -18,22 +18,23 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class LigneEauMesuresPrzImporter extends GenericImporter {
+class LigneEauMesuresXyzImporter extends GenericImporter {
 
     private Map<Integer, List<MesureLigneEau>> mesuresByLigneEau = null;
 
-    LigneEauMesuresPrzImporter(final Database accessDatabase,
+    LigneEauMesuresXyzImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
         ID_LIGNE_EAU,
-//        PR_SAISI,
+//        X,
+//        Y,
         HAUTEUR_EAU,
 //        PR_CALCULE,
 //        ID_POINT,
-        DATE_DERNIERE_MAJ,
+        DATE_DERNIERE_MAJ
     };
 
     /**
@@ -60,7 +61,7 @@ class LigneEauMesuresPrzImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.LIGNE_EAU_MESURES_PRZ.toString();
+        return DbImporter.TableName.LIGNE_EAU_MESURES_XYZ.toString();
     }
 
     @Override

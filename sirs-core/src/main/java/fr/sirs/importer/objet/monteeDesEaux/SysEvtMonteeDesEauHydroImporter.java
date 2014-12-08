@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.EvenementHydraulique;
+import fr.sirs.core.model.MesureMonteeEaux;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -38,16 +39,20 @@ import org.opengis.util.FactoryException;
  * @author Samuel Andrés (Geomatys)
  */
 class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
+    
+    private final MonteeDesEauxMesuresImporter monteeDesEauxMesuresImporter;
 
     SysEvtMonteeDesEauHydroImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final MonteeDesEauxMesuresImporter monteeDesEauxMesuresImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter,
                 evenementHydrauliqueImporter);
+        this.monteeDesEauxMesuresImporter = monteeDesEauxMesuresImporter;
     }
 
     private enum Columns {
@@ -101,6 +106,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
         
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
         
+        final Map<Integer, List<MesureMonteeEaux>> mesures = monteeDesEauxMesuresImporter.getMesuresByMonteeDesEaux();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -189,9 +195,9 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
             
             monteeEaux.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
-//            if(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())!=null){
-//                monteeEaux.setReferenceHauteurId(referenceHauteur.get(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())).getId());
-//            }
+            if(mesures.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()))!=null){
+                monteeEaux.setMesureId(mesures.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
+            }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()), monteeEaux);

@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MesureLigneEau;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -42,6 +43,8 @@ import org.opengis.util.FactoryException;
  */
 public class LigneEauImporter extends GenericLigneEauImporter {
     
+    private final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter;
+    private final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter;
     private final SysEvtLigneEauImporter sysEvtLigneEauImporter;
 
     public LigneEauImporter(final Database accessDatabase,
@@ -54,10 +57,15 @@ public class LigneEauImporter extends GenericLigneEauImporter {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 evenementHydrauliqueImporter, typeRefHeauImporter);
+        ligneEauMesuresPrzImporter = new LigneEauMesuresPrzImporter(
+                accessDatabase, couchDbConnector);
+        ligneEauMesuresXyzImporter = new LigneEauMesuresXyzImporter(
+                accessDatabase, couchDbConnector);
         sysEvtLigneEauImporter = new SysEvtLigneEauImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
-                evenementHydrauliqueImporter, typeRefHeauImporter);
+                evenementHydrauliqueImporter, ligneEauMesuresPrzImporter, 
+                ligneEauMesuresXyzImporter, typeRefHeauImporter);
     }
 
     private enum Columns {
@@ -112,24 +120,26 @@ public class LigneEauImporter extends GenericLigneEauImporter {
         
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypes();
         
+        final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
+        final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final LigneEau ligneEau;
-            final boolean nouvelleLaisseCrue;
+            final boolean nouvelleLigneEau;
             if(structures.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
                 ligneEau = structures.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
-                nouvelleLaisseCrue=false;
+                nouvelleLigneEau=false;
             }
             else{
                 System.out.println("Nouvelle ligne eau !!");
                 ligneEau = new LigneEau();
-                nouvelleLaisseCrue=true;
+                nouvelleLigneEau=true;
             }
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
                 }
             }
@@ -148,7 +158,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 final float v = row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue();
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setPR_debut(v);
                 }
 //                else if(v!=desordre.getPR_debut()) {
@@ -158,7 +168,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
                 final float v = row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue();
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setPR_fin(v);
                 }
 //                else if(v!=desordre.getPR_fin()) {
@@ -223,7 +233,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
                 final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
                 if(b!=null) {
-                    if(nouvelleLaisseCrue || ligneEau.getBorneDebutId()==null){
+                    if(nouvelleLigneEau || ligneEau.getBorneDebutId()==null){
                         ligneEau.setBorneDebutId(b.getId());
                     }
                     else if(!ligneEau.getBorneDebutId().equals(b.getId())){
@@ -234,7 +244,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
 
             {
                 final boolean bda = row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString());
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setBorne_debut_aval(bda); 
                 } 
 //                else if(bda!=desordre.getBorne_debut_aval()){
@@ -244,7 +254,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
                 final float v = row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue();
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setBorne_debut_distance(v);
                 }
 //                else if(v!=desordre.getBorne_debut_distance()) {
@@ -266,7 +276,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             {
                 final boolean bfa = row.getBoolean(Columns.AMONT_AVAL_FIN.toString());
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setBorne_fin_aval(bfa);
                 }
 //                else if(bda!=desordre.getBorne_debut_aval()){
@@ -276,7 +286,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 final float v = row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue();
-                if(nouvelleLaisseCrue){
+                if(nouvelleLigneEau){
                     ligneEau.setBorne_fin_distance(v);
                 }
 //                else if(v!=desordre.getBorne_fin_distance()) {
@@ -287,7 +297,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             {
                 final Date date = row.getDate(Columns.DATE.toString());
                 if (date != null) {
-                    if(nouvelleLaisseCrue){
+                    if(nouvelleLigneEau){
                         ligneEau.setDateMaj(LocalDateTime.parse(date.toString(), dateTimeFormatter));
                     }
                     else if(!ligneEau.getDate().equals(LocalDateTime.parse(date.toString(), dateTimeFormatter))){
@@ -299,7 +309,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             {
                 final String c = cleanNullString(row.getString(Columns.COMMENTAIRE.toString()));
                 if (c!=null){
-                    if(nouvelleLaisseCrue){
+                    if(nouvelleLigneEau){
                         ligneEau.setCommentaire(c);
                     } 
                     else if(!c.equals(ligneEau.getCommentaire())){
@@ -324,7 +334,16 @@ public class LigneEauImporter extends GenericLigneEauImporter {
                 ligneEau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            if (nouvelleLaisseCrue) {
+            if (nouvelleLigneEau) {
+                
+            
+                if(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
+                    ligneEau.getMesureId().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+                }
+                
+                if(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
+                    ligneEau.getMesureId().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+                }
                 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 structures.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), ligneEau);

@@ -108,7 +108,7 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
-        final Map<Integer, RefSource> typesSource = typeSourceImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
         
         final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypes();
         

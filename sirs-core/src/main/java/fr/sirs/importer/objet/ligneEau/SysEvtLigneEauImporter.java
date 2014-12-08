@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MesureLigneEau;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -42,16 +43,23 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtLigneEauImporter extends GenericLigneEauImporter {
 
+    private final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter;
+    private final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter;
+    
     SysEvtLigneEauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter,
+            final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter,
                 evenementHydrauliqueImporter, typeRefHeauImporter);
+        this.ligneEauMesuresPrzImporter = ligneEauMesuresPrzImporter;
+        this.ligneEauMesuresXyzImporter = ligneEauMesuresXyzImporter;
     }
 
     private enum Columns {
@@ -115,6 +123,8 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypes();
         
+        final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
+        final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -205,6 +215,14 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
             
             if(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())!=null){
                 ligneEau.setReferenceHauteurId(referenceHauteur.get(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())).getId());
+            }
+            
+            if(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
+                ligneEau.getMesureId().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+            }
+                
+            if(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
+                ligneEau.getMesureId().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

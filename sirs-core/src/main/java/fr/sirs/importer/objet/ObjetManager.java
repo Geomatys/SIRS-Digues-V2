@@ -37,7 +37,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class ObjetManager {
     
-    private final SourceInfoImporter typeSourceImporter;
+    private final SourceInfoImporter sourceInfoImporter;
     private final TypeCoteImporter typeCoteImporter;
     private final TypePositionImporter typePositionImporter;
     private final TypeMateriauImporter typeMateriauImporter;
@@ -74,7 +74,7 @@ public class ObjetManager {
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter
             ){
         
-        typeSourceImporter = new SourceInfoImporter(accessDatabase, 
+        sourceInfoImporter = new SourceInfoImporter(accessDatabase, 
                 couchDbConnector);
         typeCoteImporter = new TypeCoteImporter(accessDatabase, 
                 couchDbConnector);
@@ -92,34 +92,34 @@ public class ObjetManager {
         structureImporter = new ElementStructureImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter,
-                typeSourceImporter, typePositionImporter, typeCoteImporter, 
+                sourceInfoImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         importers.add(structureImporter);
         desordreImporter = new DesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, intervenantImporter, typeSourceImporter, 
+                borneDigueImporter, intervenantImporter, sourceInfoImporter, 
                 typePositionImporter, typeCoteImporter);
         importers.add(desordreImporter);
         geometryImporter = new ElementGeometrieImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, typeSourceImporter);
+                borneDigueImporter, sourceInfoImporter);
         importers.add(geometryImporter);
         reseauImporter = new ElementReseauImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter, 
+                sourceInfoImporter, typeCoteImporter, typePositionImporter, 
                 typeNatureImporter);
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter,typeSourceImporter, 
+                systemeReperageImporter, borneDigueImporter,sourceInfoImporter, 
                 typeCoteImporter, typePositionImporter);
         importers.add(prestationImporter);
         laisseCrueImporter = new LaisseCrueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 intervenantImporter, evenementHydrauliqueImporter, 
-                typeSourceImporter, typeRefHeauImporter);
+                sourceInfoImporter, typeRefHeauImporter);
         importers.add(laisseCrueImporter);
         ligneEauImporter = new LigneEauImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
@@ -128,7 +128,8 @@ public class ObjetManager {
         importers.add(ligneEauImporter);
         monteeDesEauxImporter = new MonteeDesEauxImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, evenementHydrauliqueImporter);
+                borneDigueImporter, evenementHydrauliqueImporter, 
+                intervenantImporter, typeRefHeauImporter, sourceInfoImporter);
         importers.add(monteeDesEauxImporter);
         
         
