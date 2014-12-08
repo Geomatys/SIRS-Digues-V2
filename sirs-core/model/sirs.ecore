@@ -400,8 +400,6 @@
         upperBound="-1" eType="#//DocumentGrandeEchelle" eOpposite="#//DocumentGrandeEchelle/prestation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
-        eType="#//ObservationSuivi"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieu_dit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="#//RefTypeDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -427,6 +425,8 @@
         eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/desordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleJournal" upperBound="-1"
         eType="#//ArticleJournal" eOpposite="#//ArticleJournal/desordre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observationSuivi" upperBound="-1"
+        eType="#//ObservationSuivi" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationSuivi">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_observation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
