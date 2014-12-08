@@ -87,7 +87,7 @@ import org.geotoolkit.internal.GeotkFX;
 public class PojoTable extends BorderPane {
     
     protected final TableView<Element> uiTable = new FXTableView<>();
-    protected final ScrollPane uiScroll = new ScrollPane(uiTable);
+//    protected final ScrollPane uiScroll = new ScrollPane(uiTable);
     protected final Class pojoClass;
     private final Repository repo;
     protected final Session session = Injector.getBean(Session.class);
@@ -121,12 +121,10 @@ public class PojoTable extends BorderPane {
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
-        uiScroll.setFitToHeight(true);
-        uiScroll.setFitToWidth(true);
+//        uiScroll.setFitToHeight(true);
+//        uiScroll.setFitToWidth(true);
         uiTable.setEditable(true);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-                
-        setCenter(uiScroll);
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
@@ -145,6 +143,7 @@ public class PojoTable extends BorderPane {
                  elementEdited(event);
              });
         }
+        
         
         /* barre d'outils. Si on a un accesseur sur la base, on affiche des
          * boutons de création / suppression.
@@ -194,6 +193,8 @@ public class PojoTable extends BorderPane {
         
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
+        uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        setCenter(uiTable);
         
         if(repo!=null){
             updateTable();
