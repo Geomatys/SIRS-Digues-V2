@@ -218,7 +218,7 @@ public class TronconGestionDigueCommuneImporter extends GenericImporter {
             // Set the references.
             final Commune commune = communes.get(row.getInt(Columns.ID_COMMUNE.toString()));
             if (commune.getId() != null) {
-                communeTroncon.setGardienId(commune.getId());
+                communeTroncon.setCommuneId(commune.getId());
             } else {
                 throw new AccessDbImporterException("L'organisme " + commune + " n'a pas encore d'identifiant CouchDb !");
             }
