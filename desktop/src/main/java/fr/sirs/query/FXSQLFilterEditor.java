@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.gui.javafx.util.TextFieldCompletion;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Literal;
@@ -130,6 +131,11 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.add(uiPropertyName, 0, 0);
         uiPropertyPane.add(uiConditionBox, 1, 0);
         uiPropertyPane.add(uiPropertyValue, 2, 0);
+        
+        
+        //autocompletion sur les champs
+        new TextFieldCompletion(uiPropertyName);
+        
     }
     
     private void typeChanged(ObservableValue<? extends Type> observable, Type oldValue, Type newValue){
