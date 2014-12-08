@@ -97,8 +97,8 @@ public class ObjetManager {
         importers.add(structureImporter);
         desordreImporter = new DesordreImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, typeSourceImporter, typePositionImporter, 
-                typeCoteImporter);
+                borneDigueImporter, intervenantImporter, typeSourceImporter, 
+                typePositionImporter, typeCoteImporter);
         importers.add(desordreImporter);
         geometryImporter = new ElementGeometrieImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 

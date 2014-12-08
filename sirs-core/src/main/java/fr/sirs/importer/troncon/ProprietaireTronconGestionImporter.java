@@ -66,6 +66,7 @@ public class ProprietaireTronconGestionImporter extends GenericImporter {
 //        AMONT_AVAL_FIN, // Pas dans le nouveau modèle
         DATE_DERNIERE_MAJ
     };
+    
 
     /**
      *

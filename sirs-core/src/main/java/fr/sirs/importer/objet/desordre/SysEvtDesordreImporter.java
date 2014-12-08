@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.ObservationSuivi;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -21,7 +22,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconGestionDigueImporter;
-import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,12 +46,14 @@ import org.opengis.util.FactoryException;
 class SysEvtDesordreImporter extends GenericDesordreImporter {
     
     private final TypeDesordreImporter typeDesordreImporter;
+    private final DesordreObservationImporter desordreObservationImporter;
 
     SysEvtDesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final DesordreObservationImporter desordreObservationImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
@@ -60,6 +62,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = typeDesordreImporter;
+        this.desordreObservationImporter = desordreObservationImporter;
     }
 
     private enum Columns {
@@ -129,6 +132,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
         
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
+        final Map<Integer, List<ObservationSuivi>> observations = desordreObservationImporter.getObservationsByDesordreId();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -196,7 +200,6 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
                 desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
             }
             
-            
             if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {
                 desordre.setCommentaire(row.getString(Columns.DESCRIPTION_DESORDRE.toString()));
             }
@@ -229,6 +232,10 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
                 }
             } catch (FactoryException ex) {
                 Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            if(observations.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
+                desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
