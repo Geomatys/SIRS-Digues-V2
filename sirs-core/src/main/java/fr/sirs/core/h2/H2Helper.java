@@ -6,15 +6,17 @@ import java.net.URLEncoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-import java.util.Optional;
 
 import org.ektorp.CouchDbConnector;
+import org.h2.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,7 @@ public class H2Helper {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd")) {
             init(conn, connector);
+            
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -83,8 +86,20 @@ public class H2Helper {
             }
 
         }
-
-        conn.close();
-
+        
     }
+    
+    public static void dumbSchema(Connection connection, Path file) throws SQLException {
+            Statement stat = null;
+            String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
+            try {
+                stat = connection.createStatement();
+                stat.execute(create);
+                
+            } finally {
+                JdbcUtils.closeSilently(stat);
+                JdbcUtils.closeSilently(connection);
+            }
+        }    
+   
 }
