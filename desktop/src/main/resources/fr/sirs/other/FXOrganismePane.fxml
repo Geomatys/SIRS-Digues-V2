@@ -11,7 +11,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="blue-dark" stylesheets="@../theme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="blue-dark" stylesheets="@../theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane style="-fx-background-color: rgb(245,245,245);" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -27,26 +27,26 @@
                               <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
-                              <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                              <GridPane fx:id="uiDescriptionGrid" hgap="10.0" styleClass="gray-light" vgap="10.0">
                                  <children>
                                     <Label text="Statut juridique" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="raisonSocialeTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <TextField fx:id="statutJuridiqueTextField" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiRaisonSocialeTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiStatutJuridiqueTextField" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                     <Label text="Raison sociale" GridPane.rowIndex="1" />
                                     <Label text="Téléphone" GridPane.rowIndex="3" />
                                     <TextField fx:id="faxOrgTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                                    <TextField fx:id="telOrgTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uiTelTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                     <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
                                     <Label text="E-mail" GridPane.rowIndex="4" />
-                                    <TextField fx:id="mailOrgTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <TextField fx:id="uiEmailTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                     <Label text="Description" GridPane.columnSpan="2">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
@@ -54,8 +54,8 @@
                                     </Label>
                                     <Label text="Apparition" GridPane.rowIndex="2" />
                                     <Label text="Disparition" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
-                                    <DatePicker fx:id="dateDebutDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <DatePicker fx:id="dateFinDatePicker" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                    <DatePicker fx:id="uiDebutDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <DatePicker fx:id="uiFinDatePicker" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="NEVER" />
@@ -81,16 +81,14 @@
                         </GridPane>
                         <GridPane styleClass="bloc_information">
                            <children>
-                              <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                              <GridPane fx:id="uiAdresseGrid" hgap="10.0" styleClass="gray-light" vgap="10.0">
                                  <children>
-                                    <TextField fx:id="adresseL1OrgTextField" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiAdresseTextField" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                                     <Label text="Adresse" GridPane.rowIndex="1" />
-                                    <Label text="Complément" GridPane.rowIndex="2" />
-                                    <TextField fx:id="adresseL2OrgTextField" prefHeight="26.0" prefWidth="253.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
-                                    <Label text="Code postal" GridPane.rowIndex="3" />
-                                    <TextField fx:id="adresseCodePostalOrgTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <TextField fx:id="adresseNomCommuneOrgTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                                    <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
+                                    <Label text="Code postal" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCodePostalTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCommuneTextField" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                    <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
@@ -114,7 +112,6 @@
                                     <RowConstraints vgrow="NEVER" />
                                     <RowConstraints vgrow="NEVER" />
                                     <RowConstraints vgrow="NEVER" />
-                                    <RowConstraints vgrow="NEVER" />
                                  </rowConstraints>
                               </GridPane>
                            </children>
@@ -132,17 +129,17 @@
                   </VBox>
             </content>
           </Tab>
-            <Tab text="Personnes rattachées" />
+            <Tab fx:id="uiContactOrganismesTab" text="Personnes rattachées" />
         </tabs>
       </TabPane>
    </center>
    <top>
       <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
          <right>
-            <FXEditMode BorderPane.alignment="CENTER" />
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
          </right>
          <center>
-            <GridPane hgap="10.0" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
+            <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
                <children>
                   <Label text="Fiche de l'organisme" textFill="WHITE" GridPane.columnSpan="2">
                      <font>
@@ -169,4 +166,4 @@
          </center>
       </BorderPane>
    </top>
-</BorderPane>
+</fx:root>

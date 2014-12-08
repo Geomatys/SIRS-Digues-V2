@@ -158,6 +158,7 @@ public class FXContactPane extends BorderPane {
 
         public ContactOrganismeTable() {
             super(ContactOrganisme.class, "Liste des organismes", true);
+            editableProperty().bind(uiMode.editionState());
             setTableItems(() -> orgsOfContact);          
         }
 
@@ -173,7 +174,6 @@ public class FXContactPane extends BorderPane {
                 }
             });
             final Tab tab = new Tab("Rattachement");
-            final FXContactOrganismePane coPane = new FXContactOrganismePane(co);
             tab.setContent(new FXContactOrganismePane(co));
             session.getFrame().addTab(tab);
         }

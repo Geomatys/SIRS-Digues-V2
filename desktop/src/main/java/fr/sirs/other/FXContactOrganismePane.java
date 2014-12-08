@@ -119,7 +119,7 @@ public class FXContactOrganismePane extends BorderPane {
         }
         
         final Organisme newOrg = (Organisme) contactOrganisme.getParent();
-        if (newOrg != null && !newOrg.equals(this)) {
+        if (newOrg != null && !newOrg.equals(originalOrg)) {
             orgRepository.update(newOrg);
         }
         
