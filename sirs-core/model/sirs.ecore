@@ -27,8 +27,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Document"
         eOpposite="#//Document/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" eType="#//Photo"
-        eOpposite="#//Photo/troncon_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
+        eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//Systeme_reperage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
@@ -47,8 +47,8 @@
         eType="#//ContactStructure" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="conventionIds" upperBound="-1"
         eType="#//Convention"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" eType="#//Photo"
-        eOpposite="#//Photo/objet"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
+        eType="#//Photo" eOpposite="#//Photo/objet"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
     <eAnnotations source="generation">
