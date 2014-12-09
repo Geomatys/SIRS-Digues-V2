@@ -48,7 +48,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="conventionIds" upperBound="-1"
         eType="#//Convention"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
-        eType="#//Photo" eOpposite="#//Photo/objet"/>
+        eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
     <eAnnotations source="generation">
@@ -122,8 +122,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/photo"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="objet" eType="#//Objet"
-        eOpposite="#//Objet/photo"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
