@@ -444,7 +444,7 @@ public class DbImporter {
      TYPE_CONVENTION,
      TYPE_COTE,
      TYPE_DESORDRE,
-//     TYPE_DEVERS,
+//     TYPE_DEVERS, // Semble ne plus être à jour (utilisé dans les structuresL qui ne sont plus dans le modèle)
 //     TYPE_DISTANCE_DIGUE_BERGE, // Dans le module "berges" (2015)
      TYPE_DOCUMENT,
      TYPE_DOCUMENT_A_GRANDE_ECHELLE,
@@ -495,7 +495,7 @@ public class DbImporter {
 //     TYPE_SERVITUDE, // Pas de servitudes dans le nouveau modèle
      TYPE_SEUIL,
 //     TYPE_SIGNATAIRE, // Semble inutilisé dans la V1. Pas dans le modèle de la V2.
-//     TYPE_SITUATION_FONCIERE,
+//     TYPE_SITUATION_FONCIERE, // Pas dans le nouveau modèle
      TYPE_SYSTEME_RELEVE_PROFIL,
      TYPE_URGENCE,
      TYPE_USAGE_VOIE,
@@ -785,7 +785,8 @@ public class DbImporter {
         linkers.add(marcheMaitreOeuvreImporter);
         photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, intervenantImporter);
+                systemeReperageImporter, borneDigueImporter, 
+                intervenantImporter, documentImporter);
         linkers.add(photoLocaliseeEnPrImporter);
     }
     
@@ -851,7 +852,7 @@ public class DbImporter {
             final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
-            DbImporter importer = new DbImporter(couchDbConnector);
+            final DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
                     DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
 
@@ -905,7 +906,7 @@ public class DbImporter {
 //            });
 //            System.out.println("++++++++++++++++++++");
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
 //            for(final TronconDigue troncon : importer.importation()){
 //                System.out.println(troncon.getSysteme_reperage_defaut());
 //                troncon.getStuctures().stream().forEach((structure) -> {
