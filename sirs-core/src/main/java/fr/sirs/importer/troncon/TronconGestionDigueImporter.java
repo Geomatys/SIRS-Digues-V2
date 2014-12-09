@@ -55,8 +55,10 @@ implements DocumentsUpdater {
     private final GardienTronconGestionImporter tronconGestionDigueGardienImporter;
     private final ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
     private final TronconGestionDigueCommuneImporter tronconGestionDigueCommuneImporter;
+    private final TronconGestionDigueSyndicatImporter tronconGestionDigueSyndicatImporter;
     private final DigueImporter digueImporter;
     private final BorneDigueImporter borneDigueImporter;
+    private final SyndicatImporter syndicatImporter;
     private final CommuneImporter communeImporter;
     private final ObjetManager objetManager;
     
@@ -93,6 +95,7 @@ implements DocumentsUpdater {
         tronconGestionDigueProprietaireImporter = new ProprietaireTronconGestionImporter(
                 accessDatabase, couchDbConnector, intervenantImporter, 
                 organismeImporter);
+        syndicatImporter = new SyndicatImporter(accessDatabase, couchDbConnector);
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
@@ -101,6 +104,8 @@ implements DocumentsUpdater {
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, communeImporter, 
                 objetManager.getTypeCoteImporter());
+        this.tronconGestionDigueSyndicatImporter = new TronconGestionDigueSyndicatImporter(
+                accessDatabase, couchDbConnector, syndicatImporter);
     }
     
     public ObjetManager getObjetManager(){return objetManager;}
@@ -163,6 +168,7 @@ implements DocumentsUpdater {
         final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
         final Map<Integer, List<ContactTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
         final Map<Integer, List<ContactTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
+        final Map<Integer, List<ContactTroncon>> syndicatsByTroncon = tronconGestionDigueSyndicatImporter.getSyndicatsByTronconId();
         final Map<Integer, List<BorneDigue>> bornesByTroncon = borneDigueImporter.getBorneDigueByTronconId();
         final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
@@ -207,6 +213,10 @@ implements DocumentsUpdater {
             final List<ContactTroncon> proprietaires = propriosByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(contacts != null && proprietaires!=null) contacts.addAll(proprietaires);
             else if (contacts==null) contacts=proprietaires;
+            
+            final List<ContactTroncon> syndicats = syndicatsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(contacts != null && syndicats!=null) contacts.addAll(syndicats);
+            else if (contacts==null) contacts=syndicats;
             
             if(contacts!=null) tronconDigue.setContacts(contacts);
             // Fin des contacts
@@ -263,16 +273,12 @@ implements DocumentsUpdater {
         objetManager.link();
         
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
-//            System.out.println("Je rentre !"+tronconDigue.getId());
             List<Objet> structures = tronconDigue.getStructures();
             
             structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
 
             //Update the repository
-            tronconDigueRepository.update(tronconDigue);
-//            for(Objet o : tronconDigue.getStructures()){
-//                System.out.println("Structures du troncon : ("+tronconDigue.getId()+") "+o);
-//            }
+//            tronconDigueRepository.update(tronconDigue);
         }
         
         //reconstruction des geometries des structures
@@ -280,13 +286,18 @@ implements DocumentsUpdater {
             final TronconDigue troncon = entry.getValue();
             final Geometry tronconGeom = (Geometry) troncon.getGeometry();
             for(final Objet str : troncon.getStructures()){
-                final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
-                str.setGeometry(structGeom);
+                try{
+                    final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
+                    str.setGeometry(structGeom);
+                }catch(IllegalArgumentException e){
+                    System.out.println(e.getMessage());
+                }
             }
             
             //Update the repository
             tronconDigueRepository.update(troncon);
         }
+        couchDbConnector.executeBulk(tronconsDigue.values());
         
     }
 }

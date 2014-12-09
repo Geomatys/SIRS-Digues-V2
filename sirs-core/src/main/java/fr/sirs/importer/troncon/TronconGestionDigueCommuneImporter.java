@@ -39,6 +39,7 @@ import org.opengis.util.FactoryException;
  */
 class TronconGestionDigueCommuneImporter extends GenericImporter {
 
+    private Map<Integer, CommuneTroncon> communesByTronconCommuneId = null;
     private Map<Integer, List<CommuneTroncon>> communesByTronconId = null;
     
     private final SystemeReperageImporter systemeReperageImporter;
@@ -60,7 +61,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
     }
 
     private enum Columns {
-//        ID_TRONCON_COMMUNE,
+        ID_TRONCON_COMMUNE,
         ID_TRONCON_GESTION,
         ID_COMMUNE,
         DATE_DEBUT,
@@ -113,6 +114,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         communesByTronconId = new HashMap<>();
+        communesByTronconCommuneId = new HashMap<>();
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -205,6 +207,8 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 communeTroncon.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), communeTroncon);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<CommuneTroncon> listeCommunes = communesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

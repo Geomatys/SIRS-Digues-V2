@@ -261,7 +261,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
                 voie.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            voie.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+            voie.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
             if (row.getString(Columns.N_SECTEUR.toString()) != null) {
                 try{

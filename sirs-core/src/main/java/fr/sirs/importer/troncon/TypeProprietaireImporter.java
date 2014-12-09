@@ -1,8 +1,8 @@
-package fr.sirs.importer.link.photo;
+package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefOrientationPhoto;
+import fr.sirs.core.model.RefProprietaire;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
@@ -17,17 +17,16 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class OrientationImporter extends GenericTypeImporter<RefOrientationPhoto> {
+class TypeProprietaireImporter extends GenericTypeImporter<RefProprietaire> {
 
-    public OrientationImporter(final Database accessDatabase,
+    TypeProprietaireImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
     private enum Columns {
-        ID_ORIENTATION,
-        LIBELLE_ORIENTATION,
-        ABREGE_TYPE_ORIENTATION,
+        ID_TYPE_PROPRIETAIRE,
+        LIBELLE_TYPE_PROPRIETAIRE,
         DATE_DERNIERE_MAJ
     };
 
@@ -42,7 +41,7 @@ public class OrientationImporter extends GenericTypeImporter<RefOrientationPhoto
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ORIENTATION.toString();
+        return DbImporter.TableName.TYPE_PROPRIETAIRE.toString();
     }
 
     @Override
@@ -52,16 +51,13 @@ public class OrientationImporter extends GenericTypeImporter<RefOrientationPhoto
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrientationPhoto orientation = new RefOrientationPhoto();
-            
-            orientation.setLibelle(row.getString(Columns.LIBELLE_ORIENTATION.toString()));
-            
-            orientation.setAbrege(row.getString(Columns.ABREGE_TYPE_ORIENTATION.toString()));
+            final RefProprietaire typeProprietaire = new RefProprietaire();
+            typeProprietaire.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROPRIETAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                orientation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeProprietaire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_ORIENTATION.toString())), orientation);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())), typeProprietaire);
         }
         couchDbConnector.executeBulk(types.values());
     }

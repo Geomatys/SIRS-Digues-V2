@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.RefProprietaire;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -28,6 +29,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
     private Map<Integer, List<ContactTroncon>> proprietairesByTronconId = null;
     private final IntervenantImporter intervenantImporter;
     private final OrganismeImporter organismeImporter;
+    private final TypeProprietaireImporter typeProprietaireImporter;
 
     ProprietaireTronconGestionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -36,12 +38,14 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
         super(accessDatabase, couchDbConnector);
         this.intervenantImporter = intervenantImporter;
         this.organismeImporter = organismeImporter;
+        typeProprietaireImporter = new TypeProprietaireImporter(accessDatabase, 
+                couchDbConnector);
     }
 
     private enum Columns {
 //        ID_PROPRIETAIRE_TRONCON_GESTION, // Pas dans le nouveau modèle
         ID_TRONCON_GESTION,
-//        ID_TYPE_PROPRIETAIRE, // Pas dans le nouveau modèle
+        ID_TYPE_PROPRIETAIRE,
         DATE_DEBUT,
         DATE_FIN,
         ID_ORGANISME,
@@ -95,22 +99,27 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
 
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, RefProprietaire> typesProprietaires = typeProprietaireImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactTroncon gardien = new ContactTroncon();
+            final ContactTroncon propriete = new ContactTroncon();
             
-            gardien.setTypeContact("Proprietaire");
+            propriete.setTypeContact("Proprietaire");
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                gardien.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                propriete.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                gardien.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                propriete.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gardien.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                propriete.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())!=null){
+                propriete.setTypeProprietaireId(typesProprietaires.get(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())).getId());
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
@@ -118,14 +127,14 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
-            listeGestions.add(gardien);
+            listeGestions.add(propriete);
             proprietairesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
 
             // Set the references.
             if(row.getInt(Columns.ID_INTERVENANT.toString())!=null){
                 final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
                 if (intervenant.getId() != null) {
-                    gardien.setContactId(intervenant.getId());
+                    propriete.setContactId(intervenant.getId());
                 } else {
                     throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
                 }
@@ -133,7 +142,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
             else if (row.getInt(Columns.ID_ORGANISME.toString())!=null){
                 final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
                 if(organisme.getId()!=null){
-                    gardien.setOrganismeId(organisme.getId());
+                    propriete.setOrganismeId(organisme.getId());
                 } else {
                     throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
                 }

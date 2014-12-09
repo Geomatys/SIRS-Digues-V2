@@ -8,6 +8,7 @@ import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.Repository;
 import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.CommuneRepository;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
@@ -21,8 +22,10 @@ import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.component.RefConduiteFermeeRepository;
 import fr.sirs.core.component.RefConventionRepository;
 import fr.sirs.core.component.RefCoteRepository;
+import fr.sirs.core.component.RefDocumentGrandeEchelleRepository;
 import fr.sirs.core.component.RefEcoulementRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
+import fr.sirs.core.component.RefFoncitonMaitreOeuvreRepository;
 import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefImplantationRepository;
@@ -32,6 +35,7 @@ import fr.sirs.core.component.RefMoyenManipBatardeauxRepository;
 import fr.sirs.core.component.RefNatureBatardeauxRepository;
 import fr.sirs.core.component.RefNatureRepository;
 import fr.sirs.core.component.RefOrientationOuvrageRepository;
+import fr.sirs.core.component.RefOrientationPhotoRepository;
 import fr.sirs.core.component.RefOrientationVentRepository;
 import fr.sirs.core.component.RefOrigineProfilLongRepository;
 import fr.sirs.core.component.RefOrigineProfilTraversRepository;
@@ -44,6 +48,7 @@ import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
 import fr.sirs.core.component.RefPositionRepository;
 import fr.sirs.core.component.RefPrestationRepository;
 import fr.sirs.core.component.RefProfilFrancBordRepository;
+import fr.sirs.core.component.RefProprietaireRepository;
 import fr.sirs.core.component.RefRapportEtudeRepository;
 import fr.sirs.core.component.RefReferenceHauteurRepository;
 import fr.sirs.core.component.RefReseauHydroCielOuvertRepository;
@@ -57,6 +62,7 @@ import fr.sirs.core.component.RefTypeDesordreRepository;
 import fr.sirs.core.component.RefTypeDocumentRepository;
 import fr.sirs.core.component.RefTypeGlissiereRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
+import fr.sirs.core.component.RefUrgenceRepository;
 import fr.sirs.core.component.RefUsageVoieRepository;
 import fr.sirs.core.component.RefUtilisationConduiteRepository;
 import fr.sirs.core.component.RefVoieDigueRepository;
@@ -82,7 +88,10 @@ import fr.sirs.importer.link.MonteeDesEauxJournalImporter;
 import fr.sirs.importer.link.PrestationDocumentImporter;
 import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
 import fr.sirs.importer.link.PrestationIntervenantImporter;
+import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
+import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
+import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import java.io.File;
 import java.io.IOException;
@@ -167,6 +176,12 @@ public class DbImporter {
     private final RefPrestationRepository refPrestationRepository;
     private final MarcheRepository marcheRepository;
     private final RefOrientationVentRepository refOrientationVentRepository;
+    private final RefProprietaireRepository refProprietaireRepository;
+    private final RefFoncitonMaitreOeuvreRepository refFoncitonMaitreOeuvreRepository;
+    private final CommuneRepository communeRepository;
+    private final RefOrientationPhotoRepository refOrientationPhotoRepository;
+    private final RefUrgenceRepository refUrgenceRepository;
+    private final RefDocumentGrandeEchelleRepository refDocumentGrandeEchelleRepository;
     private final List<Repository> repositories = new ArrayList<>();
 
     private Database accessDatabase;
@@ -184,6 +199,8 @@ public class DbImporter {
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
     
+    
+    private OrientationImporter orientationImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
     private PrestationEvenementHydrauImporter prestationEvenementHydrauImporter;
     private DesordreJournalImporter desordreJournalImporter;
@@ -202,6 +219,7 @@ public class DbImporter {
     private MarcheFinanceurImporter marcheFinanceurImporter;
     private MarcheMaitreOeuvreImporter marcheMaitreOeuvreImporter;
     private PhotoLocaliseeEnPrImporter photoLocaliseeEnPrImporter;
+    private PhotoLocaliseeEnXyImporter photoLocaliseeEnXyImporter;
     private List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
@@ -298,15 +316,15 @@ public class DbImporter {
      MONTEE_DES_EAUX,
      MONTEE_DES_EAUX_JOURNAL,
      MONTEE_DES_EAUX_MESURES,
-//     observation_urgence_carto, //  Signification ???
+//     observation_urgence_carto, //  Signification ??? / A ignorer
      ORGANISME,
      ORGANISME_DISPOSE_INTERVENANT,
      ORIENTATION,
 //     PARCELLE_CADASTRE, // Plus de parcelles dans le nouveau modèle
 //     PARCELLE_LONGE_DIGUE, // Plus de parcelles dans le nouveau modèle
-//     PHOTO_LAISSE,
+//     PHOTO_LAISSE, // Vide dans les bases de l'Isère et du Rhône. Seble obsolète en comparaison de PHOTO_LOCALISEE_EN_XY et surtout de PHOTO_LOCALISEE_EN_PR
      PHOTO_LOCALISEE_EN_PR,
-//     PHOTO_LOCALISEE_EN_XY,
+     PHOTO_LOCALISEE_EN_XY,
      PRESTATION,
      PRESTATION_DOCUMENT,
      PRESTATION_EVENEMENT_HYDRAU,
@@ -347,7 +365,7 @@ public class DbImporter {
 //     SYNCHRO_JOURNAL,
 //     SYNCHRO_ORGANISME_BD,
 //     SYNCHRO_SUIVI_BD,
-//     SYNDICAT,
+     SYNDICAT,
 //     SYS_DONNEES_LOCALISEES_EN_PR,
      SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE,
 //     SYS_EVT_BRISE_LAME, // Dans le module "ouvrages à la mer" (2015)
@@ -359,7 +377,7 @@ public class DbImporter {
 //     SYS_EVT_DISTANCE_PIED_DE_DIGUE_TRONCON, // Dans le module "berges" (2015)
      SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE,
 //     SYS_EVT_DOCUMENT_MARCHE, // Hypothèse que cette table est remplacée par SYS_EVT_MARCHE 
-//     SYS_EVT_EMPRISE_COMMUNALE,
+//     SYS_EVT_EMPRISE_COMMUNALE, // Inutile : toute l'information est dans TRONCON_GESTION_DIGUE_COMMUNE
 //     SYS_EVT_EMPRISE_SYNDICAT,
      SYS_EVT_EPIS,
 //     SYS_EVT_FICHE_INSPECTION_VISUELLE,
@@ -377,7 +395,7 @@ public class DbImporter {
      SYS_EVT_OUVRAGE_REVANCHE,
      SYS_EVT_OUVRAGE_TELECOMMUNICATION,
      SYS_EVT_OUVRAGE_VOIRIE,
-//     SYS_EVT_PHOTO_LOCALISEE_EN_PR,
+//     SYS_EVT_PHOTO_LOCALISEE_EN_PR, // Inutile : toute l'information est redondante par rapport à PHOTO_LOCALISEE_EN_PR
      SYS_EVT_PIED_DE_DIGUE,
      SYS_EVT_PIED_FRONT_FRANC_BORD,
 //     SYS_EVT_PLAN_TOPO, // Vide en Isère / Inexistante dans le Rhône ?
@@ -438,7 +456,7 @@ public class DbImporter {
      TRONCON_GESTION_DIGUE_COMMUNE,
      TRONCON_GESTION_DIGUE_GESTIONNAIRE,
 //     TRONCON_GESTION_DIGUE_SITUATION_FONCIERE, // Plus dans le modèle
-//     TRONCON_GESTION_DIGUE_SYNDICAT,
+     TRONCON_GESTION_DIGUE_SYNDICAT,
 //     TYPE_COMPOSITION, // Pas dans le nouveau modèle.
      TYPE_CONDUITE_FERMEE,
      TYPE_CONVENTION,
@@ -481,11 +499,11 @@ public class DbImporter {
      TYPE_OUVRAGE_VOIRIE,
      TYPE_POSITION,
      TYPE_POSITION_PROFIL_EN_LONG_SUR_DIGUE,
-//     TYPE_POSITION_SUR_DIGUE,
+//     TYPE_POSITION_SUR_DIGUE, // Semble inutilisé
      TYPE_PRESTATION,
      TYPE_PROFIL_EN_TRAVERS,
      TYPE_PROFIL_FRANC_BORD,
-//     TYPE_PROPRIETAIRE,
+     TYPE_PROPRIETAIRE,
      TYPE_RAPPORT_ETUDE,
      TYPE_REF_HEAU,
      TYPE_RESEAU_EAU,
@@ -663,6 +681,18 @@ public class DbImporter {
         repositories.add(marcheRepository);
         refOrientationVentRepository = new RefOrientationVentRepository(couchDbConnector);
         repositories.add(refOrientationVentRepository);
+        refProprietaireRepository = new RefProprietaireRepository(couchDbConnector);
+        repositories.add(refProprietaireRepository);
+        refFoncitonMaitreOeuvreRepository = new RefFoncitonMaitreOeuvreRepository(couchDbConnector);
+        repositories.add(refFoncitonMaitreOeuvreRepository);
+        communeRepository = new CommuneRepository(couchDbConnector);
+        repositories.add(communeRepository);
+        refOrientationPhotoRepository = new RefOrientationPhotoRepository(couchDbConnector);
+        repositories.add(refOrientationPhotoRepository);
+        refUrgenceRepository = new RefUrgenceRepository(couchDbConnector);
+        repositories.add(refUrgenceRepository);
+        refDocumentGrandeEchelleRepository = new RefDocumentGrandeEchelleRepository(couchDbConnector);
+        repositories.add(refDocumentGrandeEchelleRepository);
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -698,6 +728,9 @@ public class DbImporter {
                 couchDbConnector, borneDigueImporter, intervenantImporter, 
                 organismeImporter, systemeReperageImporter, 
                 evenementHydrauliqueImporter, tronconGestionDigueImporter);
+        
+        orientationImporter = new OrientationImporter(
+                accessDatabase, couchDbConnector);
         
         // Linkers
         desordreEvenementHydrauImporter = new DesordreEvenementHydrauImporter(
@@ -786,8 +819,12 @@ public class DbImporter {
         photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, 
-                intervenantImporter, documentImporter);
+                intervenantImporter, documentImporter, orientationImporter);
         linkers.add(photoLocaliseeEnPrImporter);
+        photoLocaliseeEnXyImporter = new PhotoLocaliseeEnXyImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                intervenantImporter, documentImporter, orientationImporter);
+        linkers.add(photoLocaliseeEnXyImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -855,77 +892,22 @@ public class DbImporter {
             final DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
                     DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
-
-//            importer.getDatabase().getTableNames().stream().forEach((tableName) -> {
-//                System.out.println(tableName);
-//            });
-//            
-//            importer.getCartoDatabase().getTableNames().stream().forEach((tableName) -> {
-//                System.out.println(tableName);
-//            });
-//            
-            //     SYS_EVT_SOMMET_RISBERME
-            System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.ORIENTATION.toString()).iterator();
             
-//            while(it.hasNext()){
-//                Row row = it.next();
-//                System.out.print(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_TRONCON_GESTION.toString())+" || ");
-//                System.out.print(row.getInt(TronconGestionDigueImporter.TronconGestionDigueColumns.ID_DIGUE.toString())+" || ");
-//                System.out.println(row.getString(TronconGestionDigueImporter.TronconGestionDigueColumns.NOM_TRONCON_GESTION.toString()));
-//            }
-            
-            System.out.println("++++++++++++++++++++");   
-//            
-//            for(Row r : importer.getCartoDatabase().getTable("GDB_SpatialRefs")){
-//                System.out.println(r);
-//        }
-//SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.ORIENTATION.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
 
-//            System.out.println(importer.getDatabase().getTable("ILE_TRONCON").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable("SYSTEME_REP_LINEAIRE").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
-//            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.ORIENTATION.toString()).getPrimaryKeyIndex());
-//            
-//            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
-//            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
-            
-            for(final Row row : importer.getDatabase().getTable(TableName.ORIENTATION.toString())){
-//                System.out.println(row);
+            System.out.println(importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex());
+            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){
+                System.out.println(row);
             }
             System.out.println("=======================");
-//            importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getColumns().stream().forEach((column) -> {
-//                System.out.println(column.getName());
-//            });
-//            System.out.println("++++++++++++++++++++");
+            
             importer.cleanDb();
-            importer.importation();
-//            for(final TronconDigue troncon : importer.importation()){
-//                System.out.println(troncon.getSysteme_reperage_defaut());
-//                troncon.getStuctures().stream().forEach((structure) -> {
-//                
-//                    if(structure instanceof Crete){
-//                        System.out.println("======>CRETE<====== : "+structure.getSysteme_rep_id());
-//                    }
-//                    if(structure instanceof Desordre){
-//                        System.out.println("======>DESORDRE<====== : "+ structure.getSysteme_rep_id());
-//                    }
-//                    if(structure instanceof PiedDigue){
-//                        System.out.println("======>PIEDDIGUE<====== : "+structure.getSysteme_rep_id());
-//                    }
-//                    
-//                });
-//                troncon.getBorneIds().stream().forEach((borne) -> {
-//                    System.out.println(borne.getPositionBorne().toText());
-//                });
-//            }
+//            importer.importation();
+            
             System.out.println("fin de l'importation !");
 
         } catch (IOException ex) {

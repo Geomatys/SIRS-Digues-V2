@@ -9,6 +9,8 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Document;
+import fr.sirs.core.model.LaisseCrue;
+import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Prestation;
@@ -19,6 +21,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
@@ -68,12 +71,12 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final IntervenantImporter intervenantImporter,
-            final DocumentImporter documentImporter) {
+            final DocumentImporter documentImporter,
+            final OrientationImporter orientationImporter) {
         super(accessDatabase, couchDbConnector);
-        typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
-                accessDatabase, couchDbConnector);
-        this.orientationImporter = new OrientationImporter(
-                accessDatabase, couchDbConnector);
+        this.typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
+                accessDatabase, couchDbConnector);;
+        this.orientationImporter = orientationImporter;
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.objetManager = tronconGestionDigueImporter.getObjetManager();
         this.systemeReperageImporter = systemeReperageImporter;
@@ -91,9 +94,9 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         ID_ORIENTATION,
         ID_INTERV_PHOTOGRAPH,
         ID_DOC,
-//        REF_PHOTO,
-//        DESCRIPTION_PHOTO,
-//        NOM_FICHIER_PHOTO,
+        REF_PHOTO,
+        DESCRIPTION_PHOTO,
+        NOM_FICHIER_PHOTO,
         ID_TYPE_COTE,
         DATE_PHOTO,
         PR_PHOTO,
@@ -106,11 +109,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
 //        AVANT_APRES, // Pas dans le nouveau modèle
 //        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
     };
-
-//    public Map<Integer, Photo> getPhotos() throws IOException {
-//        if (photos == null) compute();
-//        return photos;
-//    }
+    
 
     @Override
     protected List<String> getUsedColumns() {
@@ -164,9 +163,15 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 photo.setPhotographe(intervenants.get(row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString())).getId());
             }
             
-//            if (row.getInt(Columns.ID_DOC.toString()) != null) {
-//                photo.setPhotoIds(documents.get(row.getInt(Columns.ID_DOC.toString())).getId());
-//            }
+            if (row.getInt(Columns.ID_DOC.toString()) != null) {
+                photo.setDocumentRelated(documents.get(row.getInt(Columns.ID_DOC.toString())).getId());
+            }
+            
+            photo.setReference(cleanNullString(row.getString(Columns.REF_PHOTO.toString())));
+            
+            photo.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PHOTO.toString())));
+            
+            photo.setLibelle(cleanNullString(row.getString(Columns.NOM_FICHIER_PHOTO.toString())));
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
                 photo.setCoteId(cotes.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
@@ -225,11 +230,23 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             }
             
             if (row.getDouble(Columns.ID_BORNEREF.toString()) != null) {
-                photo.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue()).getId());
+                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue());
+                if(b!=null){
+                    photo.setBorneDebutId(b.getId());
+                }
+                else{
+                    System.out.println("Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
+                }
             }
             
             if (row.getDouble(Columns.ID_BORNEREF.toString()) != null) {
-                photo.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue()).getId());
+                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue());
+                if(b!=null){
+                    photo.setBorneFinId(b.getId());
+                }
+                else{
+                    System.out.println("Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
+                }
             }
             
             photo.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL.toString()));
@@ -302,6 +319,16 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 case SYS_EVT_PRESTATION:
                     final Prestation prestation = objetManager.getPrestationImporter().getById().get(id);
                     prestation.getPhoto().add(photo);
+                    break;
+                // MONTEES DES EAUX
+                case SYS_EVT_MONTEE_DES_EAUX_HYDRO:
+                    final MonteeEaux monteeEaux = objetManager.getMonteeDesEauxImporter().getById().get(id);
+                    monteeEaux.getPhoto().add(photo);
+                    break;
+                // LAISSE CRUES
+                case SYS_EVT_LAISSE_CRUE:
+                    final LaisseCrue laisseCrue = objetManager.getLaisseCrueImporter().getById().get(id);
+                    laisseCrue.getPhoto().add(photo);
                     break;
                 default:
                     System.out.println("Autre photo : "+tableName);
