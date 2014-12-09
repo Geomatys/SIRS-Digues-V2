@@ -119,13 +119,16 @@
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="photoIds" upperBound="-1"
         eType="#//Document" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/photo"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="objet" eType="#//Objet"
         eOpposite="#//Objet/photo"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Organisme">
     <eAnnotations source="generation">
@@ -1185,6 +1188,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvre" eType="#//RefFoncitonMaitreOeuvre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"
         eType="#//Organisme"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationPhoto">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
 </ecore:EPackage>
