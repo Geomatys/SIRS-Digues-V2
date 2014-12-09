@@ -117,8 +117,6 @@
         eOpposite="#//ArticleJournal/document"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documentIds" eType="#//Document"
-        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/photo"/>
@@ -127,6 +125,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentRelated" eType="#//Document"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Organisme">
     <eAnnotations source="generation">
