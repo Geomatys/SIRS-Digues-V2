@@ -118,8 +118,7 @@ public class Loader extends Application {
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
-        // new Thread(initTask).start();
-        initTask.run();
+        new Thread(initTask).start();
     }
 
     /**

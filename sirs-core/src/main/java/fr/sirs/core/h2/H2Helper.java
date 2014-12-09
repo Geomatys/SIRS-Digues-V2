@@ -31,8 +31,7 @@ public class H2Helper {
     
     public static void exportDataToRDBMS(CouchDbConnector connector)
             throws IOException {
-        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
-        Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
+        Path file = getDBFile(connector);
 
         if (Files.isDirectory(SirsCore.H2_PATH)) {
             Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
@@ -51,14 +50,25 @@ public class H2Helper {
                 }
             });
         }
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd")) {
+        try (Connection conn = createConnection(connector)) {
             init(conn, connector);
             
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
         }
 
+    }
+
+    public static Connection createConnection(CouchDbConnector connector) throws SQLException {
+        Path file = getDBFile(connector);
+        return DriverManager.getConnection(
+                "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
+    }
+
+    private static Path getDBFile(CouchDbConnector connector) {
+        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
+        Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
+        return file;
     }
     
     public static void init(Connection conn, CouchDbConnector db)
