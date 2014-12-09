@@ -2,16 +2,30 @@ package fr.sirs.importer.link.photo;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefOrientationPhoto;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +33,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -30,39 +52,53 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
     private Map<Integer, Photo> photos = null;
     private final TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter;
     private final ObjetManager objetManager;
+    private final TronconGestionDigueImporter tronconGestionDigueImporter;
+    private final SystemeReperageImporter systemeReperageImporter;
+    private final BorneDigueImporter borneDigueImporter;
+    private final IntervenantImporter intervenantImporter;
+    private final OrientationImporter orientationImporter;
 
     public PhotoLocaliseeEnPrImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ObjetManager objetManager) {
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
+            final SystemeReperageImporter systemeReperageImporter,
+            final BorneDigueImporter borneDigueImporter, 
+            final IntervenantImporter intervenantImporter) {
         super(accessDatabase, couchDbConnector);
         typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
                 accessDatabase, couchDbConnector);
-        this.objetManager = objetManager;
+        this.orientationImporter = new OrientationImporter(
+                accessDatabase, couchDbConnector);
+        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
+        this.objetManager = tronconGestionDigueImporter.getObjetManager();
+        this.systemeReperageImporter = systemeReperageImporter;
+        this.borneDigueImporter = borneDigueImporter;
+        this.intervenantImporter = intervenantImporter;
     }
 
     private enum Columns {
         ID_PHOTO,
         ID_ELEMENT_SOUS_GROUPE,
-//        ID_TRONCON_GESTION,
+        ID_TRONCON_GESTION,
         ID_GROUPE_DONNEES,
         ID_SOUS_GROUPE_DONNEES,
-//        ID_ORIENTATION,
-//        ID_INTERV_PHOTOGRAPH,
+        ID_ORIENTATION,
+        ID_INTERV_PHOTOGRAPH,
 //        ID_DOC,
 //        REF_PHOTO,
 //        DESCRIPTION_PHOTO,
 //        NOM_FICHIER_PHOTO,
-//        ID_TYPE_COTE,
-//        DATE_PHOTO,
-//        PR_PHOTO,
-//        ID_SYSTEME_REP,
-//        X_PHOTO,
-//        Y_PHOTO,
-//        ID_BORNEREF,
-//        AMONT_AVAL,
-//        DIST_BORNEREF,
-//        AVANT_APRES,
-//        DATE_DERNIERE_MAJ
+        ID_TYPE_COTE,
+        DATE_PHOTO,
+        PR_PHOTO,
+        ID_SYSTEME_REP,
+        X_PHOTO,
+        Y_PHOTO,
+        ID_BORNEREF,
+        AMONT_AVAL,
+        DIST_BORNEREF,
+//        AVANT_APRES, // Pas dans le nouveau modèle
+//        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
     };
 
 //    public Map<Integer, Photo> getPhotos() throws IOException {
@@ -88,6 +124,13 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
     protected void compute() throws IOException, AccessDbImporterException {
         photos = new HashMap<>();
         
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
+        final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
+        
+        final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypes();
+        final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypes();
         final Map<Entry<Integer, Integer>, DbImporter.TableName> types = typeDonneesSousGroupeImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
@@ -95,16 +138,96 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             final Row row = it.next();
             final Photo photo = new Photo();
             
-//            photo.setCote(null);
 //            photo.setObjet(null);
-//            photo.setOrientation(null);
 //            photo.setPhotoIds(null);
-//            photo.setPhotographe(null);
-//            photo.setTroncon_digue(null);
-//            photo.setPR_debut(pR_debut);
-//            photo.setPR_fin(pR_fin);
-//            photo.setPositionDebut(null);
-//            photo.setPositionFin(null);
+            
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (troncon.getId() != null) {
+                photo.setTroncon_digue(troncon.getId());
+            } else {
+                throw new AccessDbImporterException("Le tronçon "
+                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+            }
+            
+            if(row.getInt(Columns.ID_ORIENTATION.toString())!=null){
+                photo.setOrientationPhoto(orientations.get(row.getInt(Columns.ID_ORIENTATION.toString())).getId());
+            }
+            
+            if (row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString()) != null) {
+                photo.setPhotographe(intervenants.get(row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString())).getId());
+            }
+            
+            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
+                photo.setCoteId(cotes.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+            }
+            
+            if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
+                photo.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_PHOTO.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (row.getDouble(Columns.PR_PHOTO.toString()) != null) {
+                photo.setPR_debut(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
+            }
+            
+            if (row.getDouble(Columns.PR_PHOTO.toString()) != null) {
+                photo.setPR_fin(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
+            }
+            
+            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+                photo.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+            }
+            
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+
+                try {
+
+                    if (row.getDouble(Columns.X_PHOTO.toString()) != null 
+                            && row.getDouble(Columns.Y_PHOTO.toString()) != null) {
+                        photo.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_PHOTO.toString()),
+                                row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                try {
+
+                    if (row.getDouble(Columns.X_PHOTO.toString()) != null 
+                            && row.getDouble(Columns.Y_PHOTO.toString()) != null) {
+                        photo.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X_PHOTO.toString()),
+                                row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            if (row.getDouble(Columns.ID_BORNEREF.toString()) != null) {
+                photo.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue()).getId());
+            }
+            
+            if (row.getDouble(Columns.ID_BORNEREF.toString()) != null) {
+                photo.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF.toString()).doubleValue()).getId());
+            }
+            
+            photo.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL.toString()));
+            
+            photo.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL.toString()));
+            
+            if (row.getDouble(Columns.DIST_BORNEREF.toString()) != null) {
+                photo.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF.toString()).floatValue());
+            }
+            
+            if (row.getDouble(Columns.DIST_BORNEREF.toString()) != null) {
+                photo.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF.toString()).floatValue());
+            }
 
             final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(
                     row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 
@@ -186,14 +309,6 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
 //            photo.setService(row.getString(Columns.SERVICE_INTERV.toString()));
 //            
 //            photo.setFonction(row.getString(Columns.FONCTION_INTERV.toString()));
-//            
-//            if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-//                photo.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
-//            }
-//            
-//            if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-//                photo.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
-//            }
             
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
