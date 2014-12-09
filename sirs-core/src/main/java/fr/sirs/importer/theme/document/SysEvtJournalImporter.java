@@ -15,7 +15,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;

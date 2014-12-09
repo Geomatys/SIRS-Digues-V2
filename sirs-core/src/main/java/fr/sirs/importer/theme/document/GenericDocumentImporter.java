@@ -6,7 +6,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.Map;
 import org.ektorp.CouchDbConnector;

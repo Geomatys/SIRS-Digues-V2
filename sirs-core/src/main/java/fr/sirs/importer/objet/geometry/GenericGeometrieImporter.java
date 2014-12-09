@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.*;
 import org.ektorp.CouchDbConnector;
 

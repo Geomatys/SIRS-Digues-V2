@@ -20,7 +20,7 @@ import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;

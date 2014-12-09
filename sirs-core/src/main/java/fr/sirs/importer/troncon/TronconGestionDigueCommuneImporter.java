@@ -12,7 +12,6 @@ import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.CommuneImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -38,7 +37,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconGestionDigueCommuneImporter extends GenericImporter {
+class TronconGestionDigueCommuneImporter extends GenericImporter {
 
     private Map<Integer, List<CommuneTroncon>> communesByTronconId = null;
     
@@ -47,7 +46,7 @@ public class TronconGestionDigueCommuneImporter extends GenericImporter {
     private final CommuneImporter communeImporter;
     private final TypeCoteImporter typeCoteImporter;
 
-    public TronconGestionDigueCommuneImporter(final Database accessDatabase,
+    TronconGestionDigueCommuneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 

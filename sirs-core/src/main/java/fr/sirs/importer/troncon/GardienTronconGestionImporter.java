@@ -21,20 +21,15 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class GardienTronconGestionImporter extends GenericImporter {
+class GardienTronconGestionImporter extends GenericImporter {
 
     private Map<Integer, List<ContactTroncon>> gardiensByTronconId = null;
-    private IntervenantImporter intervenantImporter;
+    private final IntervenantImporter intervenantImporter;
 
-    private GardienTronconGestionImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
-
-    public GardienTronconGestionImporter(final Database accessDatabase,
+    GardienTronconGestionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final IntervenantImporter intervenantImporter) {
-        this(accessDatabase, couchDbConnector);
+        super(accessDatabase, couchDbConnector);
         this.intervenantImporter = intervenantImporter;
     }
 

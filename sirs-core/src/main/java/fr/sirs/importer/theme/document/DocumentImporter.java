@@ -19,7 +19,7 @@ import fr.sirs.importer.DocumentsUpdater;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;

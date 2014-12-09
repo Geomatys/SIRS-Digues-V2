@@ -1,9 +1,11 @@
-package fr.sirs.importer;
+package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.component.CommuneRepository;
 import fr.sirs.core.model.Commune;
+import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class CommuneImporter extends GenericImporter {
+class CommuneImporter extends GenericImporter {
 
     private Map<Integer, Commune> communes = null;
 

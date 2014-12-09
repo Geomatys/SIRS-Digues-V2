@@ -1,8 +1,10 @@
-package fr.sirs.importer;
+package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefRive;
+import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.GenericTypeImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeRiveImporter extends GenericTypeImporter<RefRive> {
+class TypeRiveImporter extends GenericTypeImporter<RefRive> {
 
     TypeRiveImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {

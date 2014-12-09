@@ -1,6 +1,5 @@
-package fr.sirs.importer;
+package fr.sirs.importer.troncon;
 
-import fr.sirs.importer.troncon.TronconGestionDigueGestionnaireImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
@@ -17,11 +16,18 @@ import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.DigueImporter;
+import fr.sirs.importer.DocumentsUpdater;
+import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.TronconDigueGeomImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.troncon.GardienTronconGestionImporter;
-import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueCommuneImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,7 +64,7 @@ implements DocumentsUpdater {
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     
-    TronconGestionDigueImporter(final Database accessDatabase,
+    public TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconDigueRepository tronconDigueRepository,
             final DigueRepository digueRepository,

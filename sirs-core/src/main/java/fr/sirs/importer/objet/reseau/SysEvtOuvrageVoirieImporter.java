@@ -11,7 +11,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOuvrageVoirie;
 import fr.sirs.core.model.RefPosition;

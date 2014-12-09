@@ -1,6 +1,6 @@
 package fr.sirs.importer;
 
-import fr.sirs.importer.troncon.TronconGestionDigueGestionnaireImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
@@ -82,9 +82,8 @@ import fr.sirs.importer.link.MonteeDesEauxJournalImporter;
 import fr.sirs.importer.link.PrestationDocumentImporter;
 import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
 import fr.sirs.importer.link.PrestationIntervenantImporter;
+import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
-import fr.sirs.importer.troncon.GardienTronconGestionImporter;
-import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -173,7 +172,6 @@ public class DbImporter {
     private Database accessDatabase;
     private Database accessCartoDatabase;
     
-//    private TypeRiveImporter typeRiveImporter;
     private TronconDigueGeomImporter tronconDigueGeomImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private OrganismeImporter organismeImporter;
@@ -203,6 +201,7 @@ public class DbImporter {
     private PrestationIntervenantImporter prestationIntervenantImporter;
     private MarcheFinanceurImporter marcheFinanceurImporter;
     private MarcheMaitreOeuvreImporter marcheMaitreOeuvreImporter;
+    private PhotoLocaliseeEnPrImporter photoLocaliseeEnPrImporter;
     private List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
@@ -306,7 +305,7 @@ public class DbImporter {
 //     PARCELLE_CADASTRE, // Plus de parcelles dans le nouveau modèle
 //     PARCELLE_LONGE_DIGUE, // Plus de parcelles dans le nouveau modèle
 //     PHOTO_LAISSE,
-//     PHOTO_LOCALISEE_EN_PR,
+     PHOTO_LOCALISEE_EN_PR,
 //     PHOTO_LOCALISEE_EN_XY,
      PRESTATION,
      PRESTATION_DOCUMENT,
@@ -451,7 +450,7 @@ public class DbImporter {
      TYPE_DOCUMENT_A_GRANDE_ECHELLE,
 //     TYPE_DOCUMENT_DECALAGE, // Affichage
 //     TYPE_DONNEES_GROUPE, // Redondance avec les types
-//     TYPE_DONNEES_SOUS_GROUPE, // Redondance avec les types
+     TYPE_DONNEES_SOUS_GROUPE, // Redondance avec les types
 //     TYPE_DVPT_VEGETATION, // Dans le module "vegetation" (2015)
      TYPE_ELEMENT_GEOMETRIE,
      TYPE_ELEMENT_RESEAU,
@@ -784,6 +783,10 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, 
                 documentImporter.getMarcheImporter(), organismeImporter);
         linkers.add(marcheMaitreOeuvreImporter);
+        photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
+                accessDatabase, couchDbConnector, 
+                tronconGestionDigueImporter.getObjetManager());
+        linkers.add(photoLocaliseeEnPrImporter);
     }
     
     public CouchDbConnector getCouchDbConnector(){
@@ -862,7 +865,7 @@ public class DbImporter {
 //            
             //     SYS_EVT_SOMMET_RISBERME
             System.out.println("=======================");
-            Iterator<Row> it = importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_COMMUNE.toString()).iterator();
+            Iterator<Row> it = importer.getDatabase().getTable(TableName.PHOTO_LOCALISEE_EN_PR.toString()).iterator();
             
 //            while(it.hasNext()){
 //                Row row = it.next();
@@ -878,7 +881,7 @@ public class DbImporter {
 //        }
 //SYS_EVT_PIED_DE_DIGUE
             System.out.println("=======================");
-            importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_COMMUNE.toString()).getColumns().stream().forEach((column) -> {
+            importer.getDatabase().getTable(TableName.PHOTO_LOCALISEE_EN_PR.toString()).getColumns().stream().forEach((column) -> {
                 System.out.println(column.getName());
             });
             System.out.println("++++++++++++++++++++");
@@ -888,12 +891,12 @@ public class DbImporter {
 //            System.out.println(importer.getDatabase().getTable("BORNE_PAR_SYSTEME_REP").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("TRONCON_GESTION_DIGUE").getPrimaryKeyIndex());
 //            System.out.println(importer.getDatabase().getTable("BORNE_DIGUE").getPrimaryKeyIndex());
-            System.out.println(importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_COMMUNE.toString()).getPrimaryKeyIndex());
+            System.out.println(importer.getDatabase().getTable(TableName.PHOTO_LOCALISEE_EN_PR.toString()).getPrimaryKeyIndex());
 //            
 //            System.out.println(importer.getDatabase().getTable("ELEMENT_STRUCTURE").getPrimaryKeyIndex());
 //            System.out.println("index size : "+importer.getDatabase().getTable("SYS_EVT_PIED_DE_DIGUE").getForeignKeyIndex(importer.getDatabase().getTable("ELEMENT_STRUCTURE")));
             
-            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_COMMUNE.toString())){
+            for(final Row row : importer.getDatabase().getTable(TableName.PHOTO_LOCALISEE_EN_PR.toString())){
 //                System.out.println(row);
             }
             System.out.println("=======================");

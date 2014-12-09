@@ -7,7 +7,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.TronconGestionDigueImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
