@@ -87,8 +87,11 @@ public final class LinearReferencingUtilities extends Static{
         final double distanceFinal = projection.distanceAlongLinear + distanceAlongLinear;
         final SegmentInfo segment = getSegment(segments, distanceFinal);
         
-        return GO2Utilities.JTS_FACTORY.createPoint(segment.getPoint(
+        final Point pt = GO2Utilities.JTS_FACTORY.createPoint(segment.getPoint(
                 distanceFinal-segment.startDistance, distancePerpendicular));
+        pt.setSRID(geom.getSRID());
+        pt.setUserData(geom.getUserData());
+        return pt;
     }
     
     /**

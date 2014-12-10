@@ -34,7 +34,6 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem;
-import org.geotoolkit.gui.javafx.contexttree.menu.ExportItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;

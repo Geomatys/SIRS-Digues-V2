@@ -49,7 +49,6 @@ import javax.measure.unit.NonSI;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
-import org.geotoolkit.cql.CQL;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
