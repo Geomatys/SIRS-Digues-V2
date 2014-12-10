@@ -2,12 +2,15 @@
 package fr.sirs.core;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.SearchEngine;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.http.HttpClient;
@@ -16,6 +19,8 @@ import org.ektorp.impl.StdCouchDbInstance;
 import org.geotoolkit.internal.io.IOUtilities;
 import org.geotoolkit.internal.io.Installation;
 import org.geotoolkit.referencing.operation.transform.NTv2Transform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -24,6 +29,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Johann Sorel (Geomatys)
  */
 public class CouchDBInit {
+    
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CouchDBInit.class);
     
     public static final String DB_CONNECTOR = "connector";
     public static final String SEARCH_ENGINE = "searchEngine";
@@ -79,6 +87,8 @@ public class CouchDBInit {
         final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
             configFile}, applicationContextParent);
 
+        applicationContext.getBean(SirsDBInfoRepository.class).init().ifPresent(info->LOGGER.info(info.toString()));        
+        
         return applicationContext;
     }
     

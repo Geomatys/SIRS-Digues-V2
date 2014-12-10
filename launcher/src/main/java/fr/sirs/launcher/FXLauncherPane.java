@@ -2,13 +2,14 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
-
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.DatabaseRegistry;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
 import fr.sirs.maj.PluginInstaller;
@@ -305,6 +306,9 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
+        final String epsgCode = "EPSG:2154";
+        final String version = "1.0.0";
+        
         uiCreateButton.setDisable(true);
         new Thread(new Runnable() {
             @Override
@@ -321,6 +325,9 @@ public class FXLauncherPane extends BorderPane {
 
                     final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
                         "classpath:/fr/sirs/spring/couchdb-context.xml"}, applicationContextParent);
+                    
+                    SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
+                    sirsDBInfoRepository.create(version, epsgCode);
                     
                     applicationContext.close();
                     

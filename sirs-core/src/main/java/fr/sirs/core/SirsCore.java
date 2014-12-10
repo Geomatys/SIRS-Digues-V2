@@ -8,6 +8,10 @@ import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import org.apache.sis.util.logging.Logging;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.util.FactoryException;
 
 
 public class SirsCore {
@@ -16,6 +20,9 @@ public class SirsCore {
     public static final String NAME = "sirs";
     
     public static final Path CONFIGURATION_PATH;
+    
+    private static CoordinateReferenceSystem PROJECTION;
+    
     static {
         Path tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
         if (!Files.isDirectory(tmpPath)) {
@@ -58,6 +65,19 @@ public class SirsCore {
     
     public static Path getDatabaseFolder(){
         return DATABASE_PATH;
+    }
+
+    public static void setEpsgCode(String epsgCode) {
+        try {
+            PROJECTION  = CRS.decode(epsgCode);
+        } catch (FactoryException e) {
+            throw new SirsCoreRuntimeExecption(e);
+         }
+        
+    }
+
+    public static CoordinateReferenceSystem getEpsgCode() {
+        return PROJECTION;
     }
     
 }
