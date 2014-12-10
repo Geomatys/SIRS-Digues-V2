@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import jidefx.scene.control.field.*?>
+<?import fr.sirs.*?>
+<?import javafx.scene.*?>
+<?import java.net.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="blue-dark" stylesheets="@../theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
+         <right>
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <GridPane hgap="10.0" styleClass="troncon_info" vgap="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Description de document" textFill="WHITE" GridPane.columnSpan="2">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="Identifiant : " textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                  <Label fx:id="idOrganismeTextField" prefHeight="16.0" prefWidth="43.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="ALWAYS" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+                  <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+               </columnConstraints>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <rowConstraints>
+                  <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+      </BorderPane>
+   </top>
+   <center>
+      <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Organisme" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+            </Label>
+            <Label text="Contact" GridPane.rowIndex="3" />
+            <Label text="Affiliation" GridPane.rowIndex="4" />
+            <Label text="Résiliation" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
+            <DatePicker fx:id="uiDebutDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <DatePicker fx:id="uiFinDatePicker" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <ComboBox fx:id="uiContactChoice" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ComboBox fx:id="uiOrganismeChoice" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Label text="Libellé" />
+            <TextField fx:id="uiLibelleText" GridPane.columnIndex="1" />
+            <Label text="Taille" GridPane.columnIndex="2" />
+            <DoubleField GridPane.columnIndex="3" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" />
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
+            <ColumnConstraints hgrow="ALWAYS" />
+         </columnConstraints>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
+         </rowConstraints>
+      </GridPane>
+   </center>
+</fx:root>
