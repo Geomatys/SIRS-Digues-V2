@@ -5,6 +5,7 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
@@ -28,8 +29,9 @@ public abstract class CouchDBTestCase {
 
     @PostConstruct
     public void init() {
-        sirsDBInfoRepository.init().orElse(
-                sirsDBInfoRepository.create("1.0.1", "EPSG:2154"));
+        Optional<SirsDBInfo> init = sirsDBInfoRepository.init();
+        if (!init.isPresent())
+            sirsDBInfoRepository.create("1.0.1", "EPSG:2154");
     }
 
     public void test() {

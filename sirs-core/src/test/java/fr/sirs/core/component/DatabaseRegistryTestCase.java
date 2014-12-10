@@ -1,4 +1,4 @@
-package fr.sirs.component;
+package fr.sirs.core.component;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
-import fr.sirs.core.DatabaseRegistry;
+import fr.sirs.core.component.DatabaseRegistry;
 
 //@Ignore
 public class DatabaseRegistryTestCase extends CouchDBTestCase {
@@ -16,7 +16,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 	@Test
 	public void databaseList() throws MalformedURLException {
 		List<String> listDatabase = DatabaseRegistry.listSirsDatabase(new URL(
-				"http://127.0.0.1:5984/"));
+				"http://geouser:geopw@127.0.0.1:5984/"));
 		for (String database : listDatabase) {
 			log(database);
 		}
@@ -27,8 +27,8 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 		DatabaseRegistry.newLocalDB("sirs_dup");
 	}
 
-	String src = "http://geouser:geopw@127.0.0.1:5984/sirs/";
-	String dst = "http://geouser:geopw@127.0.0.1:5984/sirs_dup/";
+	String src = "http://geouser:geopw@127.0.0.1:5984/sirs-test/";
+	String dst = "http://geouser:geopw@127.0.0.1:5984/sirs-test-dup/";
 
 	@Test
 	public void dropDatabase() throws MalformedURLException {
@@ -56,9 +56,17 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
 	@Test
 	public void cancelReplication() throws MalformedURLException {
-		String src = "http://geouser:geopw@127.0.0.1:5984/sirs/";
-		String dst = "http://geouser:geopw@127.0.0.1:5984/zozo2/";
-		DatabaseRegistry.cancelReplication(dst);
+		DatabaseRegistry.cancelReplication(connector);
 	}
+	
+	@Test
+    public void startReplication() throws MalformedURLException {
+        DatabaseRegistry.startReplication(connector, dst, true);
+    }
+	
+	@Test
+    public void replicate() throws MalformedURLException {
+        DatabaseRegistry.startReplication(connector, dst, false);
+    }
 
 }

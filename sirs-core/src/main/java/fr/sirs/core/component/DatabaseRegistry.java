@@ -1,4 +1,4 @@
-package fr.sirs.core;
+package fr.sirs.core.component;
 
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 
@@ -21,6 +21,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsDBInfo;
 
 public class DatabaseRegistry {
 
@@ -117,21 +121,38 @@ public class DatabaseRegistry {
         return new StdCouchDbInstance(httpClient);
     }
 
-    public static void cancelReplication(String dst) {
+    public static void startReplication(CouchDbConnector connector,
+            String remoteDatabaseURL, boolean continuous)
+            throws MalformedURLException {
+        String buildDatabaseLocalURL = buildDatabaseLocalURL(connector
+                .getDatabaseName());
+        newLocalDBFromRemote(buildDatabaseLocalURL, remoteDatabaseURL,
+                continuous);
+
+    }
+
+    public static void cancelReplication(CouchDbConnector connector) {
+        String buildDatabaseLocalURL = buildDatabaseLocalURL(connector
+                .getDatabaseName());
+        cancelReplication(buildDatabaseLocalURL);
+    }
+
+    private static String cancelReplication(String databaseURL) {
 
         CouchDbInstance buildLocalInstance = buildLocalInstance();
         DatabaseRegistry
-                .getReplicationTasksBySourceOrTarget(dst)
+                .getReplicationTasksBySourceOrTarget(databaseURL)
                 .map(t -> t.get("replication_id"))
                 .filter(n -> n != null)
                 .map(t -> t.asText())
                 .map(id -> new ReplicationCommand.Builder().id(id).cancel(true)
                         .build())
                 .forEach(cmd -> buildLocalInstance.replicate(cmd));
+        return databaseURL;
 
     }
 
-    public static Stream<JsonNode> getReplicationTasks() {
+    static Stream<JsonNode> getReplicationTasks() {
         CouchDbInstance buildLocalInstance = buildLocalInstance();
         HttpResponse httpResponse = buildLocalInstance.getConnection().get(
                 "/_active_tasks");
@@ -153,8 +174,7 @@ public class DatabaseRegistry {
 
     }
 
-    public static Stream<JsonNode> getReplicationTasksBySourceOrTarget(
-            String dst) {
+    static Stream<JsonNode> getReplicationTasksBySourceOrTarget(String dst) {
         return getReplicationTasks()
                 .filter(t -> match(t.get("target"), dst)
                         || match(t.get("source"), dst));

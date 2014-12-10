@@ -8,7 +8,7 @@ import fr.sirs.Plugins;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.CouchDBInit;
-import fr.sirs.core.DatabaseRegistry;
+import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
