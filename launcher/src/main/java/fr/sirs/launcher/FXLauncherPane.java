@@ -2,7 +2,6 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import fr.sirs.CorePlugin;
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
 
@@ -23,6 +22,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +30,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -50,7 +49,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -59,7 +57,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
@@ -189,7 +186,24 @@ public class FXLauncherPane extends BorderPane {
         
         updateLocalDbList();
         updatePluginList(null);
-        uiMajServerURL.setOnInputMethodTextChanged((event)->{if (event.getCommitted() != null && !event.getCommitted().isEmpty()) updatePluginList(null);});
+        uiMajServerURL.textProperty().addListener(new ChangeListener<Object>() {
+            @Override
+            public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+                if (newValue != null && !((String)newValue).isEmpty() && !newValue.equals(oldValue)) updatePluginList(null);
+            }
+        });
+        
+        final ChangeListener<Object> accentReplacer = new ChangeListener<Object>() {
+            @Override
+            public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+            final String nfdText = Normalizer.normalize((String)newValue, Normalizer.Form.NFD);
+            ((WritableValue)observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
+            }
+        }; 
+        
+        uiDistantName.textProperty().addListener(accentReplacer);
+        uiImportName.textProperty().addListener(accentReplacer);
+        uiNewName.textProperty().addListener(accentReplacer);
     }
     
     /** 
@@ -250,7 +264,6 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        runDesktop(URL_LOCAL, db);
         this.setDisabled(true);
         Window currentWindow = getScene().getWindow();
         if (currentWindow instanceof Stage) {
@@ -258,7 +271,7 @@ public class FXLauncherPane extends BorderPane {
         } else {
             currentWindow.hide();
         }
-        
+        runDesktop(URL_LOCAL, db);
     }
 
     @FXML
