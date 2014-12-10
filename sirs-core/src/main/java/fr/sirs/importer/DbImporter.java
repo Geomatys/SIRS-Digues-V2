@@ -91,12 +91,10 @@ import fr.sirs.importer.link.PrestationIntervenantImporter;
 import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
-import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -906,7 +904,7 @@ public class DbImporter {
             System.out.println("=======================");
             
             importer.cleanDb();
-//            importer.importation();
+            importer.importation();
             
             System.out.println("fin de l'importation !");
 

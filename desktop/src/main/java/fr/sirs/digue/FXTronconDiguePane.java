@@ -263,17 +263,6 @@ public class FXTronconDiguePane extends BorderPane{
                             );
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
-//                        getDigueItems().stream().forEach((item) -> {
-//                            if(((Digue) item.getValue()).equals(oldValue)){
-//                                item.getChildren().remove(troncon);
-//                            }
-//                        });
-//
-//                        getDigueItems().stream().forEach((item) -> {
-//                            if(((Digue) item.getValue()).equals(newValue)){
-//                                item.getChildren().add(troncon);
-//                            }
-//                        });
                         tronconProperty.get().setDigueId(newValue.getId());
                         save(null);
                     }

@@ -10,7 +10,9 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -22,7 +24,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
@@ -35,6 +39,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.ektorp.BulkDeleteDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FXDiguesPane extends SplitPane{
@@ -198,12 +203,13 @@ public class FXDiguesPane extends SplitPane{
             if (obj instanceof SystemeEndiguement) {
                 this.setText(((SystemeEndiguement) obj).nom + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
-                addTronconMenu.getItems().add(new NouvelleDigueMenuItem());
+                addTronconMenu.getItems().add(new NewDigueMenuItem());
                 setContextMenu(addTronconMenu);
             } else if (obj instanceof Digue) {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
-                addTronconMenu.getItems().add(new NouveauTronconMenuItem((Digue) obj));
+                addTronconMenu.getItems().add(new NewTronconMenuItem((Digue) obj));
+                addTronconMenu.getItems().add(new DeleteDigueMenuItem((Digue) obj));
                 setContextMenu(addTronconMenu);
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
@@ -215,9 +221,9 @@ public class FXDiguesPane extends SplitPane{
             }
         }
 
-        private class NouveauTronconMenuItem extends MenuItem {
+        private class NewTronconMenuItem extends MenuItem {
 
-            public NouveauTronconMenuItem(final Digue digue) {
+            public NewTronconMenuItem(final Digue digue) {
                 super("Créer un nouveau tronçon");
 
                 this.setOnAction((ActionEvent t) -> {
@@ -231,9 +237,37 @@ public class FXDiguesPane extends SplitPane{
             }
         }
 
-        private class NouvelleDigueMenuItem extends MenuItem {
+        private class DeleteDigueMenuItem extends MenuItem {
 
-            public NouvelleDigueMenuItem() {
+            public DeleteDigueMenuItem(final Digue digue) {
+                super("Supprimer la digue");
+
+                this.setOnAction((ActionEvent t) -> {
+
+                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "La suppression de la digue supprimera les tronçons qui la composent.",
+                            ButtonType.OK, ButtonType.CANCEL
+                    );
+                    final ButtonType res = alert.showAndWait().get();
+                    if (res == ButtonType.OK) {
+
+                        final List<TronconDigue> tronconsToDelete = FXDiguesPane.this.session.getTronconDigueRepository().getByDigue(digue);
+                        final List<Object> bulkDocs = new ArrayList<>();
+                        for (final TronconDigue troncon : tronconsToDelete) {
+                            bulkDocs.add(BulkDeleteDocument.of(troncon));
+                        }
+                        FXDiguesPane.this.session.getConnector().executeBulk(bulkDocs);
+                        FXDiguesPane.this.session.getDigueRepository().remove(digue);
+                        getTreeItem().getChildren().remove(0, getTreeItem().getChildren().size());
+                        getTreeItem().getParent().getChildren().remove(getTreeItem());
+                    }
+                });
+            }
+        }
+
+        private class NewDigueMenuItem extends MenuItem {
+
+            public NewDigueMenuItem() {
                 super("Créer une nouvelle digue");
 
                 this.setOnAction((ActionEvent t) -> {
