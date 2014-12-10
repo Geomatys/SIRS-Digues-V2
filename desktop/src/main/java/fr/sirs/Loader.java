@@ -256,7 +256,7 @@ public class Loader extends Application {
 
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
-                updateMessage("Chargement et création des indexes ...");
+                updateMessage("Chargement et création des index ...");
                 final ClassPathXmlApplicationContext context = CouchDBInit
                         .create(databaseUrl,
                                 databaseName,
