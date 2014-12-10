@@ -3,10 +3,10 @@
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
+import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static fr.sirs.Session.PROJECTION;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
 import org.geotoolkit.data.bean.BeanStore;
@@ -137,7 +137,7 @@ public class CorePlugin extends Plugin {
             final BeanStore tronconStore = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, repo::getAll)
+                            null, SirsCore.getEpsgCode(), repo::getAll)
             );
             items.addAll(buildLayers(tronconStore,createTronconStyle(),createTronconSelectionStyle(),true));
             
@@ -146,7 +146,7 @@ public class CorePlugin extends Plugin {
             final BeanStore borneStore = new BeanStore(
                     new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, cache::getAll)
+                            null, SirsCore.getEpsgCode(), cache::getAll)
             );
             items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
             
@@ -154,10 +154,10 @@ public class CorePlugin extends Plugin {
             final BeanStore structStore = new BeanStore(
                     new BeanFeatureSupplier(Crete.class, "id", "geometry",
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),  
-                            null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
+                            null, SirsCore.getEpsgCode(), new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
                     new BeanFeatureSupplier(Fondation.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, PROJECTION, new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
+                            null, SirsCore.getEpsgCode(), new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
             );
                         
             final MapItem structLayer = MapBuilder.createItem();

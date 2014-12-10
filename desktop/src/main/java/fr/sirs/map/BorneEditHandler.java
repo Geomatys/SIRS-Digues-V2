@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -310,7 +311,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 
                 final Coordinate coord = helperBorne.toCoord(startX,startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
-                JTS.setCRS(point, Session.PROJECTION);
+                JTS.setCRS(point, SirsCore.getEpsgCode());
                 
                 editPane.createBorne(point);
                 Platform.runLater(map.getCanvas()::repaint);

@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.util.SirsListCell;
 import java.beans.PropertyChangeEvent;
@@ -80,7 +81,7 @@ public class FXImportCoordinate extends BorderPane {
         SIRS.loadFXML(this);
         this.positionable = pos;
         
-        uiCRS.setItems(FXCollections.observableArrayList(FXPositionnablePane.CRS_RGF93, FXPositionnablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionnablePane.CRS_WGS84));
         uiCRS.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new SirsListCell());
         uiCRS.setButtonCell(new SirsListCell());
         uiCRS.getSelectionModel().clearAndSelect(0);
@@ -217,9 +218,9 @@ public class FXImportCoordinate extends BorderPane {
         
         //transform to RGF93 
         try{
-            final MathTransform trs = CRS.findMathTransform(dataCrs, FXPositionnablePane.CRS_RGF93, true);
+            final MathTransform trs = CRS.findMathTransform(dataCrs, SirsCore.getEpsgCode(), true);
             geom = (Point) JTS.transform(geom, trs);
-            JTS.setCRS(geom, FXPositionnablePane.CRS_RGF93);
+            JTS.setCRS(geom, SirsCore.getEpsgCode());
 
         }catch(TransformException | FactoryException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);

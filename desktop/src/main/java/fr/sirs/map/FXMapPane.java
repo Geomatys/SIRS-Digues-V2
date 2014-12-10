@@ -6,6 +6,7 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.SirsCore;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
@@ -170,7 +171,7 @@ public class FXMapPane extends BorderPane {
         //deplacer à la date du jour
         final Date time = new Date();
         try {
-            uiMap1.getCanvas().setObjectiveCRS(Session.PROJECTION);
+            uiMap1.getCanvas().setObjectiveCRS(SirsCore.getEpsgCode());
             uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
             uiMap1.getCanvas().setTemporalRange(time,time);
             uiMap2.getCanvas().setTemporalRange(time,time);

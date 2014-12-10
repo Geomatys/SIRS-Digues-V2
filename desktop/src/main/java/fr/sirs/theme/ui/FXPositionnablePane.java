@@ -3,12 +3,12 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
@@ -77,7 +77,6 @@ public class FXPositionnablePane extends BorderPane {
     private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.#");
     
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
-    public static final CoordinateReferenceSystem CRS_RGF93 = Session.PROJECTION;
     
     public static final Image ICON_IMPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
     public static final Image ICON_VIEWOTHER  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
@@ -113,6 +112,7 @@ public class FXPositionnablePane extends BorderPane {
     private boolean initializing = false;
     private final Map<String,SystemeReperage> cacheSystemeReperage = new HashMap<>();
     private final Map<String,BorneDigue> cacheBorneDigue = new HashMap<>();
+    private final CoordinateReferenceSystem baseCrs = SirsCore.getEpsgCode();
             
     public FXPositionnablePane(){
         try{
@@ -153,7 +153,7 @@ public class FXPositionnablePane extends BorderPane {
         //liste par défaut des systemes de coordonnées
         final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();
         crss.add(CRS_WGS84);
-        crss.add(CRS_RGF93);
+        crss.add(baseCrs);
         uiCRSs.setItems(crss);
         uiCRSs.getSelectionModel().clearAndSelect(1);
         
@@ -268,8 +268,8 @@ public class FXPositionnablePane extends BorderPane {
         page.append("<html><body>");
         
         
-        //RGF93 coord
-        page.append("<h2>Projection française (RGF-93, EPSG:2154)</h2>");
+        //DataBase coord
+        page.append("<h2>Projection de la base ("+baseCrs.getName()+")</h2>");
         page.append("<b>Début</b><br/>");
         page.append("X : ").append(startPoint.getX()).append("<br/>");
         page.append("Y : ").append(startPoint.getY()).append("<br/>");
@@ -278,10 +278,9 @@ public class FXPositionnablePane extends BorderPane {
         page.append("Y : ").append(endPoint.getY()).append("<br/>");
         page.append("<br/>");
         
-        
         //WGS84 coord
         try {
-            final MathTransform trs = CRS.findMathTransform(CRS_RGF93, CRS_WGS84, true);
+            final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
             Point ptStart = (Point) JTS.transform(startPoint, trs);
             Point ptEnd = (Point) JTS.transform(endPoint, trs);
             
@@ -377,16 +376,16 @@ public class FXPositionnablePane extends BorderPane {
         if(crs==CRS_WGS84){
             //conversion vers WGS84
             try {
-                final MathTransform trs = CRS.findMathTransform(CRS_RGF93, CRS_WGS84, true);
+                final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
                 ptStart = (Point) JTS.transform(ptStart, trs);
                 ptEnd = (Point) JTS.transform(ptEnd, trs);
             } catch (FactoryException | TransformException ex) {
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
-        }else if(crs==CRS_RGF93){
-            //conversion vers RGF93
+        }else if(crs==baseCrs){
+            //conversion vers base
             try {
-                final MathTransform trs = CRS.findMathTransform(CRS_WGS84, CRS_RGF93, true);
+                final MathTransform trs = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
                 ptStart = (Point) JTS.transform(ptStart, trs);
                 ptEnd = (Point) JTS.transform(ptEnd, trs);
             } catch (FactoryException | TransformException ex) {
@@ -532,9 +531,9 @@ public class FXPositionnablePane extends BorderPane {
             ));
             
             if(uiCRSs.getSelectionModel().getSelectedItem() == CRS_WGS84){
-                //conversion vers RGF93
+                //conversion vers base crs
                 try {
-                    final MathTransform trs = CRS.findMathTransform(CRS_WGS84, CRS_RGF93, true);
+                    final MathTransform trs = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
                     ptStart = (Point) JTS.transform(ptStart, trs);
                     ptEnd = (Point) JTS.transform(ptEnd, trs);
                 } catch (FactoryException | TransformException ex) {

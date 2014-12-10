@@ -1,23 +1,14 @@
 package fr.sirs;
 
-import fr.sirs.util.json.GeometryDeserializer;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.ContactRepository;
 
-import java.net.URL;
 import java.util.List;
 
-import org.apache.sis.util.iso.SimpleInternationalString;
-import org.geotoolkit.coverage.CoverageReference;
-import org.geotoolkit.coverage.CoverageStore;
-import org.geotoolkit.feature.type.Name;
-import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
-import org.geotoolkit.osmtms.OSMTileMapClient;
-import org.geotoolkit.style.DefaultDescription;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,14 +22,12 @@ import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.property.Internal;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,9 +58,7 @@ public class Session {
         double.class,
         LocalDateTime.class
     };
-    
-    public static final CoordinateReferenceSystem PROJECTION = GeometryDeserializer.PROJECTION;
-    
+        
     private static final Map<String,Map<String,Integer>> SORTED_FIELDS = new HashMap<>();
     static {
         final Properties SORTED_PROPERTIES = new Properties();
@@ -203,7 +190,7 @@ public class Session {
      */
     public synchronized MapContext getMapContext() {
         if(mapContext==null){
-            mapContext = MapBuilder.createContext(PROJECTION);
+            mapContext = MapBuilder.createContext(SirsCore.getEpsgCode());
             mapContext.setName("Carte");
 
             try {

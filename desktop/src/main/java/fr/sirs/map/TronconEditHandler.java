@@ -9,6 +9,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.Point2D;
@@ -240,8 +241,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         try{
                             Geometry geom = EditionHelper.createLine(coord1,coord2);
                             //convertion from RGF93
-                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), Session.PROJECTION, true));
-                            JTS.setCRS(geom, Session.PROJECTION);
+                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), SirsCore.getEpsgCode(), true));
+                            JTS.setCRS(geom, SirsCore.getEpsgCode());
                             if(digue!=null)troncon.setDigueId(digue.getId());
                             troncon.setGeometry(geom);
                             editGeometry.geometry = geom;
