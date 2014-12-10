@@ -96,7 +96,7 @@
                         <Label text="Nom de la nouvelle base" />
                         <TextField fx:id="uiNewName" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                         <Button fx:id="uiCreateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createEmpty" text="Créer une base vide" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <Button fx:id="uiImportButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createFromAccess" text="Importer une base Symadrem V1" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
+                        <Button fx:id="uiImportButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createFromAccess" text="Importer une base SIRS V1" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
                         <Label text="Base de données principale" GridPane.columnSpan="2" GridPane.rowIndex="6" />
                         <Label text="Base de données cartographique" GridPane.columnSpan="2" GridPane.rowIndex="8" />
                         <Button mnemonicParsing="false" onAction="#chooseMainDb" text="..." GridPane.columnIndex="2" GridPane.rowIndex="7" />
