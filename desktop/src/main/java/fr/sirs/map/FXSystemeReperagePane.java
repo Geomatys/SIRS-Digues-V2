@@ -39,9 +39,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -79,7 +77,6 @@ public class FXSystemeReperagePane extends BorderPane {
     @FXML private FXTableView<SystemeReperageBorne> uiBorneTable;
     @FXML private Button uiAddBorne;
     @FXML private ToggleButton uiCreateBorne;
-    @FXML private Button uiCalculatePr;
     @FXML private Button uiProject;
 
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
@@ -94,7 +91,6 @@ public class FXSystemeReperagePane extends BorderPane {
         
         uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
-        uiCalculatePr.setDisable(true);
         uiProject.setDisable(true);
         
         //on active le choix du sr si un troncon est sélectionné
@@ -117,7 +113,6 @@ public class FXSystemeReperagePane extends BorderPane {
             @Override
             public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
                 final int size = uiBorneTable.getSelectionModel().getSelectedItems().size();
-                uiCalculatePr.setDisable(size<3);
                 uiProject.setDisable(size<1);
             }
         });
@@ -128,7 +123,6 @@ public class FXSystemeReperagePane extends BorderPane {
         uiCreateBorne.setOnAction(this::startCreateBorne);
         uiAddSr.setOnAction(this::createSystemeReperage);
         uiProject.setOnAction(this::projectPoints);
-        uiCalculatePr.setOnAction(this::interpolatePR);
         
         //liste des SR sur changement de troncon
         tronconProp.addListener(this::updateSrList);
