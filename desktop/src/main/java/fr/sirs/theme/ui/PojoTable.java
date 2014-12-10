@@ -46,12 +46,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -61,18 +63,21 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebView;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
@@ -124,7 +129,7 @@ public class PojoTable extends BorderPane {
         searchRunning.setStyle("-fx-progress-color: white;");
 //        uiScroll.setFitToHeight(true);
 //        uiScroll.setFitToWidth(true);
-        uiTable.setEditable(true);
+        uiTable.setEditable(isEditable);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         //contruction des colonnes editable
@@ -195,12 +200,19 @@ public class PojoTable extends BorderPane {
         final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
         setTop(top);
         uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        setCenter(uiTable);
-        
+        uiTable.setTableMenuButtonVisible(true);        
         if(repo!=null){
             updateTable();
         }
         
+        final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
+        commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
+        
+        final SplitPane sPane = new SplitPane();
+        sPane.setOrientation(Orientation.VERTICAL);
+        sPane.getItems().addAll(uiTable, commentPhotoView);
+        sPane.setDividerPositions(0.8);
+        setCenter(sPane);
     }
 
     public BooleanProperty editableProperty(){
