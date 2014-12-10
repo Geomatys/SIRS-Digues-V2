@@ -354,6 +354,9 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
+        final String epsgCode = "EPSG:2154";
+        final String version = "1.0.0";
+        
         uiImportButton.setDisable(true);
         new Thread(new Runnable() {
             @Override
@@ -370,6 +373,11 @@ public class FXLauncherPane extends BorderPane {
                             DatabaseBuilder.open(cartoDbFile));
                     importer.cleanDb();
                     importer.importation();
+                    
+                    SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
+                    sirsDBInfoRepository.create(version, epsgCode);
+                    
+                    applicationContext.close();
                     
                     //aller au panneau principale
                     Platform.runLater(() -> {
