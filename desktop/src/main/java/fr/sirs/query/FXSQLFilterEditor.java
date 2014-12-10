@@ -4,6 +4,7 @@ package fr.sirs.query;
 import static fr.sirs.SIRS.CSS_PATH;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -76,6 +77,7 @@ public class FXSQLFilterEditor extends GridPane {
     private final TextField uiPropertyName = new TextField();
     private final TextField uiPropertyValue = new TextField();
     private final GridPane uiPropertyPane = new GridPane();
+    private ObservableList<String> choices = FXCollections.observableArrayList();
     
     private FXSQLFilterEditor uiSub1 = null;
     private FXSQLFilterEditor uiSub2 = null;
@@ -131,13 +133,30 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.add(uiPropertyName, 0, 0);
         uiPropertyPane.add(uiConditionBox, 1, 0);
         uiPropertyPane.add(uiPropertyValue, 2, 0);
-        
+     
+        this.choices = choices;
         
         //autocompletion sur les champs
-        new TextFieldCompletion(uiPropertyName);
+        final TextFieldCompletion textFieldCompletion = new TextFieldCompletion(uiPropertyName){
+
+            @Override
+            protected ObservableList<String> getChoices(String text) {
+                return choices;
+            }
+            
+        };
         
     }
-    
+
+    public ObservableList<String> getChoices() {
+        return choices;
+    }
+
+    public void setChoices(ObservableList<String> choices) {
+        this.choices = choices;
+        uiTypeBox.getSelectionModel().select(Type.NONE);
+    }
+        
     private void typeChanged(ObservableValue<? extends Type> observable, Type oldValue, Type newValue){
         while(getChildren().size()>1){
             getChildren().remove(1);
@@ -148,6 +167,8 @@ public class FXSQLFilterEditor extends GridPane {
         }else if(Type.AND.equals(newValue) || Type.OR.equals(newValue)){
             uiSub1 = new FXSQLFilterEditor();
             uiSub2 = new FXSQLFilterEditor();
+            uiSub1.setChoices(choices);
+            uiSub2.setChoices(choices);
 //            final GridPane pane = new GridPane();
 //            final RowConstraints rc1 = new RowConstraints();
 //            final RowConstraints rc2 = new RowConstraints();

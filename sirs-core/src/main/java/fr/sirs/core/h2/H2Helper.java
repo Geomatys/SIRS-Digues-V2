@@ -24,6 +24,15 @@ import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.sql.SQLHelper;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.sis.storage.DataStoreException;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.db.h2.H2FeatureStore;
+import org.geotoolkit.db.h2.H2FeatureStoreFactory;
+import org.geotoolkit.jdbc.DBCPDataSource;
+import org.geotoolkit.parameter.Parameters;
+import org.opengis.parameter.ParameterValueGroup;
 
 public class H2Helper {
     
@@ -33,7 +42,7 @@ public class H2Helper {
             throws IOException {
         Path file = getDBFile(connector);
 
-        if (Files.isDirectory(SirsCore.H2_PATH)) {
+        if (Files.isDirectory(SirsCore.H2_PATH) && !Files.exists(SirsCore.H2_PATH)) {
             Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc)
@@ -63,6 +72,25 @@ public class H2Helper {
         Path file = getDBFile(connector);
         return DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
+    }
+    
+    public static FeatureStore createStore(CouchDbConnector connector) throws SQLException, DataStoreException {
+        final Path file = getDBFile(connector);
+        final BasicDataSource ds = new BasicDataSource();
+        ds.setUrl("jdbc:h2:" + file.toString());
+        ds.setUsername("sirs$user");
+        ds.setPassword("sirs$pwd");
+        
+        
+        final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
+        Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
+        Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
+        Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
+        Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
+        Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
+        Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
+        
+        return new H2FeatureStoreFactory().create(params);
     }
 
     private static Path getDBFile(CouchDbConnector connector) {

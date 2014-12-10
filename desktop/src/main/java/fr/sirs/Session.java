@@ -219,17 +219,17 @@ public class Session {
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
                 mapContext.items().add(0,backgroundGroup);
-                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
-
-                for (Name n : store.getNames()) {
-                    final CoverageReference cr = store.getCoverageReference(n);
-                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-                    cml.setName("Open Street Map");
-                    cml.setDescription(new DefaultDescription(
-                            new SimpleInternationalString("Open Street Map"),
-                            new SimpleInternationalString("Open Street Map")));
-                    backgroundGroup.items().add(cml);
-                }
+//                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+//
+//                for (Name n : store.getNames()) {
+//                    final CoverageReference cr = store.getCoverageReference(n);
+//                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+//                    cml.setName("Open Street Map");
+//                    cml.setDescription(new DefaultDescription(
+//                            new SimpleInternationalString("Open Street Map"),
+//                            new SimpleInternationalString("Open Street Map")));
+//                    backgroundGroup.items().add(cml);
+//                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
