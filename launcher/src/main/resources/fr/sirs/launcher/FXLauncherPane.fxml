@@ -23,7 +23,7 @@
                       <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                      <children>
-                        <Button fx:id="uiConnectButton" mnemonicParsing="false" onAction="#connectLocal" text="Connection" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                        <Button fx:id="uiConnectButton" mnemonicParsing="false" onAction="#connectLocal" text="Connexion" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                         <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
                            <content>
                               <TableView fx:id="uiLocalBaseTable" prefHeight="200.0" prefWidth="200.0">
