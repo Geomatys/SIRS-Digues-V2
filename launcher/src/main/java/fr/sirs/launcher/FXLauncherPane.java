@@ -65,6 +65,10 @@ import org.ektorp.CouchDbInstance;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
+import org.geotoolkit.gui.javafx.crs.FXCRSButton;
+import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.IdentifiedObjects;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -96,13 +100,16 @@ public class FXLauncherPane extends BorderPane {
     
     // onglet base creation
     @FXML private TextField uiNewName;
+    @FXML private FXCRSButton uiNewCRS;
     @FXML private ProgressBar uiProgressCreate;    
     @FXML private Button uiCreateButton;
     @FXML private TextField uiImportName;
+    @FXML private FXCRSButton uiImportCRS;
     @FXML private TextField uiImportDBData;
     @FXML private TextField uiImportDBCarto;
     @FXML private ProgressBar uiProgressImport;
     @FXML private Button uiImportButton;
+    
     
     // onglet mise à jour
     @FXML private TextField uiMajServerURL;
@@ -205,6 +212,15 @@ public class FXLauncherPane extends BorderPane {
         uiDistantName.textProperty().addListener(accentReplacer);
         uiImportName.textProperty().addListener(accentReplacer);
         uiNewName.textProperty().addListener(accentReplacer);
+        
+        try{
+            final CoordinateReferenceSystem baseCrs = CRS.decode("EPSG:2154");
+            uiNewCRS.crsProperty().set(baseCrs);
+            uiImportCRS.crsProperty().set(baseCrs);
+        }catch(Exception ex){
+            LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        
     }
     
     /** 
@@ -306,7 +322,14 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
-        final String epsgCode = "EPSG:2154";
+        String epsg = "EPSG:2154";
+        try{
+            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiNewCRS.crsProperty().get(),true);
+            epsg = "EPSG:"+epsgNum;
+        }catch(Exception ex){
+            LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        final String epsgCode = epsg;
         final String version = "1.0.0";
         
         uiCreateButton.setDisable(true);
@@ -354,7 +377,14 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
-        final String epsgCode = "EPSG:2154";
+        String epsg = "EPSG:2154";
+        try{
+            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiImportCRS.crsProperty().get(),true);
+            epsg = "EPSG:"+epsgNum;
+        }catch(Exception ex){
+            LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        final String epsgCode = epsg;
         final String version = "1.0.0";
         
         uiImportButton.setDisable(true);
@@ -370,7 +400,7 @@ public class FXLauncherPane extends BorderPane {
                     final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
                     DbImporter importer = new DbImporter(couchDbConnector);
                     importer.setDatabase(DatabaseBuilder.open(mainDbFile),
-                            DatabaseBuilder.open(cartoDbFile));
+                            DatabaseBuilder.open(cartoDbFile),uiImportCRS.crsProperty().get());
                     importer.cleanDb();
                     importer.importation();
                     

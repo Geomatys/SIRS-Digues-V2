@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.geotoolkit.gui.javafx.crs.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.effect.*?>
@@ -75,7 +76,7 @@
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="ALWAYS" />
+                      <ColumnConstraints hgrow="NEVER" />
                       <ColumnConstraints hgrow="ALWAYS" prefWidth="200.0" />
                         <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
@@ -94,9 +95,9 @@
                     </rowConstraints>
                      <children>
                         <Label text="Nom de la nouvelle base" />
-                        <TextField fx:id="uiNewName" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                        <Button fx:id="uiCreateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createEmpty" text="Créer une base vide" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <Button fx:id="uiImportButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createFromAccess" text="Importer une base SIRS V1" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
+                        <TextField fx:id="uiNewName" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                        <Button fx:id="uiCreateButton" mnemonicParsing="false" onAction="#createEmpty" text="Créer une base vide" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                        <Button fx:id="uiImportButton" mnemonicParsing="false" onAction="#createFromAccess" text="Importer une base SIRS V1" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
                         <Label text="Base de données principale" GridPane.columnSpan="2" GridPane.rowIndex="6" />
                         <Label text="Base de données cartographique" GridPane.columnSpan="2" GridPane.rowIndex="8" />
                         <Button mnemonicParsing="false" onAction="#chooseMainDb" text="..." GridPane.columnIndex="2" GridPane.rowIndex="7" />
@@ -105,9 +106,13 @@
                         <TextField fx:id="uiImportDBCarto" GridPane.columnSpan="2" GridPane.rowIndex="9" />
                         <Separator prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="3" />
                         <Label text="Nom de la nouvelle base" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                        <TextField fx:id="uiImportName" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+                        <TextField fx:id="uiImportName" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                         <ProgressBar fx:id="uiProgressImport" maxWidth="1.7976931348623157E308" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
                         <ProgressBar fx:id="uiProgressCreate" maxWidth="1.7976931348623157E308" visible="false" GridPane.rowIndex="2" />
+                        <Label text="Système de coordonnées" GridPane.rowIndex="5" />
+                        <FXCRSButton fx:id="uiImportCRS" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <FXCRSButton fx:id="uiNewCRS" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="Système de coordonnées" GridPane.rowIndex="1" />
                      </children>
                      <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

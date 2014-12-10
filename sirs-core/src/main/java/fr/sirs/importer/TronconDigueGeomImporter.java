@@ -89,7 +89,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
                 final ShapeHandler handler = shapeType.getShapeHandler(false);
                 Geometry geom = (Geometry) handler.read(bb, shapeType);
 
-                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"),true);
+                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(),true);
                 geom = JTS.transform(geom, lambertToRGF);
 
                 tronconDigueGeom.put(row.getInt(String.valueOf(Columns.ID_TRONCON_GESTION.toString())),

@@ -102,6 +102,7 @@ import org.ektorp.BulkDeleteDocument;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.lang.Setup;
 import org.ektorp.CouchDbConnector;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -694,7 +695,8 @@ public class DbImporter {
     }
     
     public void setDatabase(final Database accessDatabase, 
-            final Database accessCartoDatabase) throws IOException{
+            final Database accessCartoDatabase, CoordinateReferenceSystem crs) throws IOException{
+        GenericImporter.outputCrs = crs;
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
         
@@ -889,7 +891,7 @@ public class DbImporter {
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             final DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")));
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")),null);
             
             System.out.println("=======================");
             importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {

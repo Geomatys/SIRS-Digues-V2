@@ -114,7 +114,7 @@ public class BorneDigueImporter extends GenericImporter {
             GeometryFactory geometryFactory = new GeometryFactory();
 
             try {
-                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+                final MathTransform lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
 
                 final Point point;
                 if (row.getDouble(Columns.Z_POINT.toString()) != null) {

@@ -15,12 +15,16 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * An importer is suposed to retrive data from one and only one table of the given database.
  * @author Samuel Andrés (Geomatys)
  */
 public abstract class GenericImporter {
+    
+    public static CoordinateReferenceSystem outputCrs;
     
     protected CouchDbConnector couchDbConnector;
     
@@ -29,6 +33,7 @@ public abstract class GenericImporter {
     protected final DateTimeFormatter dateTimeFormatter;
     private Map<String, Boolean> columnDataFlags;
 
+    
     public GenericImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         this.accessDatabase = accessDatabase;
         this.couchDbConnector = couchDbConnector;
@@ -75,6 +80,10 @@ public abstract class GenericImporter {
         System.out.println("*************************************************\n");
     }
     
+    public CoordinateReferenceSystem getOutputCrs(){
+        return outputCrs;
+    }
+        
     /**
      * 
      * @return the list of the column names used by the importer. This method must

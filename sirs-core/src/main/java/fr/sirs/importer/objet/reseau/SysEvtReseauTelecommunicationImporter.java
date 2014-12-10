@@ -209,7 +209,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
             try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), CRS.decode("EPSG:2154"), true);
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
 
                 try {
 
