@@ -3,15 +3,22 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.Injector;
+import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -71,5 +78,42 @@ public class DefaultTronconPojoTable extends PojoTable{
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         final TronconDigue obj = troncon.get();
         session.getTronconDigueRepository().update(obj);
+    }
+    
+    @Override
+    protected Object createPojo() {
+        Objet pojo = null;
+        try {
+            final TronconDigue trc = troncon.get();
+            final Constructor pojoConstructor = pojoClass.getConstructor();
+            pojo = (Objet) pojoConstructor.newInstance();
+            trc.getStructures().add(pojo);
+            pojo.setTroncon(trc.getId());
+            session.getTronconDigueRepository().update(trc);
+//        if (pojoClass==Crete.class) {
+//            System.out.println("Création d'un nouvel objet");
+//            
+//            final Crete nouvelleCrete = new Crete();
+//            nouvelleCrete.setTroncon(trc.getId());
+//            trc.getStructures().add(nouvelleCrete);
+//            session.getTronconDigueRepository().update(trc);
+//            updateTable();
+//        }else {
+//            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
+//        }
+        } catch (NoSuchMethodException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return pojo;
     }
 }
