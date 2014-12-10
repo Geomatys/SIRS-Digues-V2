@@ -32,6 +32,7 @@ import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.BorneDigueCache;
+import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
@@ -429,7 +430,7 @@ public class CorePlugin extends Plugin {
                 setOnAction((ActionEvent event) -> {
                     final FXDiguePane controller = new FXDiguePane();
                     controller.setDigue(cdt);
-                    final Tab tab = new Tab(text);
+                    final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
                 });
@@ -442,7 +443,7 @@ public class CorePlugin extends Plugin {
                 setOnAction((ActionEvent event) -> {
                     final FXTronconDiguePane controller = new FXTronconDiguePane();
                     controller.setTroncon(cdt);
-                    final Tab tab = new Tab(text);
+                    final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
                 });
@@ -453,7 +454,7 @@ public class CorePlugin extends Plugin {
                 
                 setOnAction((ActionEvent event) -> {
                     final FXStructurePane controller = new FXStructurePane(cdt);
-                    final Tab tab = new Tab(text);
+                    final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
                 });

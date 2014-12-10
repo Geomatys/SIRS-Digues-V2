@@ -6,6 +6,7 @@ import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.query.FXSearchPane;
+import fr.sirs.util.FXFreeTab;
 import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class FXMainFrame extends BorderPane {
         if(subs.isEmpty()){
             item = new MenuItem(theme.getName());
             item.setOnAction((ActionEvent event) -> {
-                final Tab tab = new Tab(theme.getName());
+                final Tab tab = new FXFreeTab(theme.getName());
                 tab.setContent(theme.createPane());
                 addTab(tab);
             });
@@ -99,7 +100,7 @@ public class FXMainFrame extends BorderPane {
             final MenuItem all = new MenuItem("Ouvrir l'ensemble");
             all.setGraphic(new ImageView(ICON_ALL));
             all.setOnAction((ActionEvent event) -> {
-                final Tab tab = new Tab(theme.getName());
+                final Tab tab = new FXFreeTab(theme.getName());
                 tab.setContent(theme.createPane());
                 addTab(tab);
             });

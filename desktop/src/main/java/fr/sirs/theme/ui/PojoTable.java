@@ -25,6 +25,7 @@ import fr.sirs.other.FXContactOrganismePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.query.ElementHit;
+import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
@@ -321,7 +322,7 @@ public class PojoTable extends BorderPane {
             }
         }
 
-        final Tab tab = new Tab();
+        final Tab tab = new FXFreeTab();
 
         try {
             Node content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));

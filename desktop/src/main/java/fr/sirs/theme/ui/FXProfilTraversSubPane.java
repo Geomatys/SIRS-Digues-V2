@@ -8,6 +8,7 @@ import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +107,7 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
         
         @Override
         protected void editPojo(Object pojo){
-            final Tab tab = new Tab();
+            final Tab tab = new FXFreeTab();
 
             Node content = new BorderPane();
             if (pojo instanceof LeveeProfilTravers){

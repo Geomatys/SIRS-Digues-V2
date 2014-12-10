@@ -8,6 +8,7 @@ import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.FXFreeTab;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -137,7 +138,7 @@ public class FXOrganismePane extends BorderPane {
                 return;
             }
             final ContactOrganisme co = (ContactOrganisme) pojo;
-            final Tab tab = new Tab("Rattachement");
+            final Tab tab = new FXFreeTab("Rattachement");
             tab.setContent(new FXContactOrganismePane(co));
             session.getFrame().addTab(tab);
         }
