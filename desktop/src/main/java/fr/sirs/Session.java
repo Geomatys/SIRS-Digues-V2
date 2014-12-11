@@ -201,7 +201,7 @@ public class Session {
                 for(Plugin plugin : Plugins.getPlugins()){
                     sirsGroup.items().addAll(plugin.getMapItems());
                 }
-                mapContext.setAreaOfInterest(mapContext.getBounds());
+                mapContext.setAreaOfInterest(mapContext.getBounds(true));
 
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
