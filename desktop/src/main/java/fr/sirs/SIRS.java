@@ -30,6 +30,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_NEXT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ARROW_RIGHT,22,Color.WHITE),null);
     public static final Image ICON_PLAY = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLAY,22,Color.WHITE),null);
     public static final Image ICON_STOP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_STOP,22,Color.WHITE),null);
+    public static final Image ICON_UNDO_BLACK= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UNDO, 22, Color.BLACK),null);
     
     public static final Logger LOGGER = Logging.getLogger(SIRS.class);
     public static final String CSS_PATH = "/fr/sirs/theme.css";

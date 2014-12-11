@@ -7,6 +7,7 @@ import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.FXPreferenceEditor;
 import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
@@ -25,6 +27,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
@@ -42,6 +45,8 @@ public class FXMainFrame extends BorderPane {
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
+    
+    private Stage prefEditor;
 
     public FXMainFrame() {
         SIRS.loadFXML(this);
@@ -134,7 +139,10 @@ public class FXMainFrame extends BorderPane {
     
     @FXML
     void openPref(ActionEvent event) {
-        System.out.println("TODO");
+        if (prefEditor == null) {
+            prefEditor = new FXPreferenceEditor();            
+        }
+        prefEditor.show();
     }
 
     @FXML
