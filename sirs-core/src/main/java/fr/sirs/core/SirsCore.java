@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.referencing.CRS;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 
