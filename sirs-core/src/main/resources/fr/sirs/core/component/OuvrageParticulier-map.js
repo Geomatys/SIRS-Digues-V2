@@ -1,9 +1,9 @@
 function(doc) {
    if(doc['@class']=='fr.sirs.core.model.TronconDigue') {
-     for(i in doc.stuctures){
-        if(doc.stuctures[i]['@class']=='fr.sirs.core.model.PiedDigue'){
+     for(i in doc.structures){
+        if(doc.structures[i]['@class']=='fr.sirs.core.model.OuvrageParticulier'){
         	var newMap = {};
-        	var myMap = doc.stuctures[i];
+        	var myMap = doc.structures[i];
         	for (var i in myMap)
         	 newMap[i] = myMap[i];
         	 newMap["documentId"] = doc._id;
@@ -12,3 +12,4 @@ function(doc) {
      }
    }
 }
+ 
