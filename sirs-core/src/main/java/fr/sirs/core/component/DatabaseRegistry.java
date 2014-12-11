@@ -89,7 +89,7 @@ public class DatabaseRegistry {
         cancelReplication(buildDatabaseLocalURL(database));
 
         final CouchDbInstance couchsb = buildLocalInstance();
-        couchsb.deleteDatabase(database);
+        couchsb.deleteDatabase(buildDatabaseLocalURL(database));
     }
 
     private static String buildDatabaseLocalURL(String database) {

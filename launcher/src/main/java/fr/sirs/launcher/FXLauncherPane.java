@@ -27,6 +27,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -53,11 +54,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
@@ -66,6 +69,8 @@ import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
+import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -148,6 +153,7 @@ public class FXLauncherPane extends BorderPane {
         column.setCellValueFactory((TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()));
         
         uiLocalBaseTable.getColumns().clear();
+        uiLocalBaseTable.getColumns().add(new DeleteColumn());
         uiLocalBaseTable.getColumns().add(column);
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -618,4 +624,46 @@ public class FXLauncherPane extends BorderPane {
         colDescription.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().descriptionProperty());
         return colDescription;
     }        
+    
+    
+    public class DeleteColumn extends TableColumn<String,String>{
+
+        public DeleteColumn() {
+            super();            
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+            
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
+            });
+            setCellFactory((TableColumn<String, String> param) -> new ButtonTableCell<>(
+                    false,new ImageView(GeotkFX.ICON_DELETE), (String t) -> true, new Function<String, String>() {
+                @Override
+                public String apply(String t) {
+                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
+                            ButtonType.NO, ButtonType.YES).showAndWait().get();
+                    if(ButtonType.YES == res){
+                        deleteDatabase(t);
+                    }
+                    return null;
+                }
+            }));
+        }  
+    }
+    
+    protected void deleteDatabase(final String databaseName){
+        try {
+            DatabaseRegistry.dropLocalDB(databaseName);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        updateLocalDbList();
+    }
 }
