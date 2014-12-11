@@ -25,6 +25,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
@@ -216,23 +217,31 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
      * {@inheritDoc }
      */
     @Override
-    public void uninstall(final FXMap component) {
-        super.uninstall(component);
-        component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
-        component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-        map.removeDecoration(geomlayer);
-        component.setBottom(null);
+    public boolean uninstall(final FXMap component) {
         
+        if(editPane.tronconProperty().get()==null || 
+                ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+                        ButtonType.YES,ButtonType.NO).showAndWait().get())){
         
-        //déselection borne et troncon
-        if(tronconLayer!=null){
-            tronconLayer.setSelectionFilter(null);
+            super.uninstall(component);
+            component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
+            component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+            map.removeDecoration(geomlayer);
+            component.setBottom(null);
+
+            //déselection borne et troncon
+            if(tronconLayer!=null){
+                tronconLayer.setSelectionFilter(null);
+            }
+            if(borneLayer!=null){
+                borneLayer.setSelectionFilter(null);
+            }
+
+            dialog.close();
+            return true;
         }
-        if(borneLayer!=null){
-            borneLayer.setSelectionFilter(null);
-        }
         
-        dialog.close();
+        return false;
     }
     
     private void updateGeometry(){

@@ -200,13 +200,13 @@ public class CorePlugin extends Plugin {
                 Color.BLACK,
                 Color.BLUE,
                 Color.CYAN,
+                Color.RED,
                 Color.DARK_GRAY,
                 Color.GREEN,
                 Color.MAGENTA,
                 Color.ORANGE,
                 Color.PINK,
-                Color.RED,
-                Color.YELLOW
+                Color.RED
             };
             
             final MapItem structLayer = MapBuilder.createItem();

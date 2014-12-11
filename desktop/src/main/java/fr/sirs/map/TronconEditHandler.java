@@ -25,6 +25,7 @@ import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -126,11 +127,18 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
      * {@inheritDoc }
      */
     @Override
-    public void uninstall(final FXMap component) {
-        super.uninstall(component);
-        component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
-        component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-        map.removeDecoration(geomlayer);
+    public boolean uninstall(final FXMap component) {
+        if(troncon==null || 
+                ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+                        ButtonType.YES,ButtonType.NO).showAndWait().get())){
+            super.uninstall(component);
+            component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
+            component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+            map.removeDecoration(geomlayer);
+            return true;
+        }
+        
+        return false;
     }
     
     private void updateGeometry(){
