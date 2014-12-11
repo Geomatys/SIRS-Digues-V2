@@ -66,7 +66,7 @@
                   <Button fx:id="uiAddSr" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="Système de repèrage :" GridPane.rowIndex="2" />
                   <ChoiceBox fx:id="uiSrComboBox" maxWidth="1.7976931348623157E308" GridPane.rowIndex="3" />
-                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.rowIndex="1" />
                </children>
                <padding>

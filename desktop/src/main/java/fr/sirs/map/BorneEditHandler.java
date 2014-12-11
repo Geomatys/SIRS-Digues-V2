@@ -156,8 +156,22 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         //fin de l'edition
         dialog.resultProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
             dialog.close();
+            editPane.reset();
         });
         
+        editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
+            @Override
+            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
+                if(newValue!=null){
+                    dialog.show();
+                }else{
+                    dialog.hide();
+                }
+            }
+        });
+        
+        dialog.setWidth(500);
+        dialog.setHeight(700);
     }
 
     /**
@@ -173,8 +187,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         
         //recuperation du layer de troncon
         tronconLayer = null;
-        editPane.tronconProperty().set(null);
-        editPane.systemeReperageProperty().set(null);
+        
+        //on passe en mode sélection de troncon
+        editPane.reset();
+        
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
@@ -194,10 +210,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         helperBorne = new EditionHelper(map, borneLayer);
         helperBorne.setMousePointerSize(6);
         
-        
-        dialog.show();
-        dialog.setWidth(400);
-        dialog.setHeight(700);
     }
 
     /**

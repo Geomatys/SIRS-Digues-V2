@@ -158,6 +158,12 @@ public class FXSystemeReperagePane extends BorderPane {
                 
     }
 
+    public void reset(){
+        mode.set(Mode.PICK_TRONCON);
+        systemeReperageProperty().set(null);
+        tronconProperty().set(null);
+    }
+    
     public void selectSRB(SystemeReperageBorne srb){
         final int index = uiBorneTable.getItems().indexOf(srb);        
         if(index>=0){
@@ -397,7 +403,7 @@ public class FXSystemeReperagePane extends BorderPane {
     private void updateSrList(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue){
         final TronconDigue troncon = tronconProperty().get();
         if(troncon==null){
-            uiSrComboBox.setItems(null);
+            uiSrComboBox.setItems(FXCollections.emptyObservableList());
         }else{
             mode.set(Mode.NONE);
             final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
