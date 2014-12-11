@@ -12,6 +12,8 @@ public class SirsDBInfo extends CouchDbDocument {
     private String uuid;
     
     private String epsgCode = "EPSG:2154";
+    
+    private String remoteDatabase;
 
     public String getVersion() {
         return version;
@@ -35,5 +37,13 @@ public class SirsDBInfo extends CouchDbDocument {
 
     public void setEpsgCode(String epsgCode) {
         this.epsgCode = epsgCode;
+    }
+
+    public String getRemoteDatabase() {
+        return remoteDatabase;
+    }
+
+    public void setRemoteDatabase(String remoteDatabase) {
+        this.remoteDatabase = remoteDatabase;
     }
 }

@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -18,6 +19,7 @@ import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,17 +49,19 @@ public class DatabaseRegistry {
                 continue;
             CouchDbConnector connector = dbInstance.createConnector(db, false);
             try {
-                if (connector.contains("$sirs")) {
-                    SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
-                    SirsCore.LOGGER.log(Level.FINE, "SIRS database version: "
-                            + sirs.getVersion());
-                    res.add(db);
-                }
+                getInfo(connector).map(info -> res.add(db));
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
         }
         return res;
+    }
+
+    private static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
+        if (connector.contains("$sirs")) {
+            return Optional.of(connector.get(SirsDBInfo.class, "$sirs"));
+        }
+        return Optional.empty();
     }
 
     public static void newLocalDB(String database) throws MalformedURLException {
@@ -94,8 +98,8 @@ public class DatabaseRegistry {
         return BASE_LOCAL_HTTP + database + "/";
     }
 
-    public static void newLocalDBFromRemote(String src, String dest,
-            boolean continuous) throws MalformedURLException {
+    public static String newLocalDBFromRemote(String src, String dest,
+            boolean continuous) {
         final CouchDbInstance couchsb = buildLocalInstance();
 
         ReplicationCommand cmd = new ReplicationCommand.Builder()
@@ -107,7 +111,7 @@ public class DatabaseRegistry {
 
         couchsb.replicate(cmd);
         couchsb.replicate(cmdRev);
-
+        return src;
     }
 
     private static CouchDbInstance buildLocalInstance() {
@@ -128,6 +132,21 @@ public class DatabaseRegistry {
                 .getDatabaseName());
         newLocalDBFromRemote(buildDatabaseLocalURL, remoteDatabaseURL,
                 continuous);
+
+    }
+
+    public static void startReplication(CouchDbConnector connector,
+            boolean continuous) throws MalformedURLException {
+        String buildDatabaseLocalURL = buildDatabaseLocalURL(connector
+                .getDatabaseName());
+
+        getInfo(connector)
+                .filter(info -> StringUtils.hasText(info.getRemoteDatabase()))
+                .map(info -> newLocalDBFromRemote(buildDatabaseLocalURL,
+                        info.getRemoteDatabase(), continuous))
+                .orElseThrow(
+                        () -> new SirsCoreRuntimeExecption(
+                                "Could not start replication. "));
 
     }
 

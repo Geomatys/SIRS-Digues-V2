@@ -301,12 +301,7 @@ public class FXLauncherPane extends BorderPane {
         final String distantUrl = uiDistantUrl.getText();
         final String localUrl = URL_LOCAL+"/"+uiDistantName.getText();
         
-        try {
-            DatabaseRegistry.newLocalDBFromRemote(distantUrl, localUrl, uiDistantSync.isSelected());
-        } catch (MalformedURLException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.OK).showAndWait();
-        }
+        DatabaseRegistry.newLocalDBFromRemote(distantUrl, localUrl, uiDistantSync.isSelected());
         
         //aller au panneau principale
         Platform.runLater(() -> {

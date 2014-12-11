@@ -8,4 +8,8 @@ public class SirsCoreRuntimeExecption extends RuntimeException {
 		super(e);
 	}
 
+    public SirsCoreRuntimeExecption(String message) {
+        super(message);
+    }
+
 }
