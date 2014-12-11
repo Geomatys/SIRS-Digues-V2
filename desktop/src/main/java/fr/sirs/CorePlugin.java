@@ -26,11 +26,29 @@ import fr.sirs.theme.ui.FXStructurePane;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Crete;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
+import fr.sirs.core.model.FrontFrancBord;
+import fr.sirs.core.model.LaisseCrue;
+import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.OuvertureBatardable;
+import fr.sirs.core.model.OuvrageFranchissement;
+import fr.sirs.core.model.OuvrageRevanche;
+import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.PiedDigue;
+import fr.sirs.core.model.PiedFrontFrancBord;
+import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.SommetRisberme;
+import fr.sirs.core.model.TalusDigue;
+import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.VoieAcces;
+import fr.sirs.core.model.VoieDigue;
 import fr.sirs.map.BorneDigueCache;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
@@ -55,7 +73,9 @@ import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.filter.DefaultLiteral;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
@@ -100,6 +120,8 @@ public class CorePlugin extends Plugin {
         long.class,
         float.class,
         double.class,
+        boolean.class,
+        Boolean.class,
         Byte.class,
         Short.class,
         Integer.class,
@@ -152,17 +174,44 @@ public class CorePlugin extends Plugin {
             
             //structures
             final BeanStore structStore = new BeanStore(
-                    new BeanFeatureSupplier(Crete.class, "id", "geometry",
-                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),  
-                            null, SirsCore.getEpsgCode(), new StructSupplier((Predicate) (Object t) -> t instanceof Crete)),
-                    new BeanFeatureSupplier(Fondation.class, "id", "geometry", 
-                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, SirsCore.getEpsgCode(), new StructSupplier((Predicate) (Object t) -> t instanceof Fondation))
+                    new StructBeanSupplier(Crete.class),
+                    new StructBeanSupplier(OuvrageRevanche.class),
+                    new StructBeanSupplier(TalusDigue.class),
+                    new StructBeanSupplier(SommetRisberme.class),
+                    new StructBeanSupplier(TalusRisberme.class),
+                    new StructBeanSupplier(PiedDigue.class),
+                    new StructBeanSupplier(Fondation.class),
+                    new StructBeanSupplier(FrontFrancBord.class),
+                    new StructBeanSupplier(PiedFrontFrancBord.class),
+                    new StructBeanSupplier(VoieAcces.class),
+                    new StructBeanSupplier(OuvrageFranchissement.class),
+                    new StructBeanSupplier(OuvertureBatardable.class),
+                    new StructBeanSupplier(VoieDigue.class),
+                    new StructBeanSupplier(OuvrageVoirie.class),
+                    new StructBeanSupplier(Desordre.class),
+                    new StructBeanSupplier(Prestation.class),
+                    new StructBeanSupplier(LaisseCrue.class),
+                    new StructBeanSupplier(MonteeEaux.class),
+                    new StructBeanSupplier(LigneEau.class),
+                    new StructBeanSupplier(CommuneTroncon.class)
             );
                         
+            final Color[] colors = new Color[]{
+                Color.BLACK,
+                Color.BLUE,
+                Color.CYAN,
+                Color.DARK_GRAY,
+                Color.GREEN,
+                Color.MAGENTA,
+                Color.ORANGE,
+                Color.PINK,
+                Color.RED,
+                Color.YELLOW
+            };
+            
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll(buildLayers(structStore,createStructureStyle(Color.red),createTronconSelectionStyle(),true));
+            structLayer.items().addAll( buildLayers(structStore, colors, createTronconSelectionStyle(),false) );
             items.add(structLayer);
                
             
@@ -173,6 +222,16 @@ public class CorePlugin extends Plugin {
         return items;
     }
 
+    private class StructBeanSupplier extends BeanFeatureSupplier{
+
+        public StructBeanSupplier(final Class clazz) {
+            super(clazz, "id", "geometry", 
+                (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
+                null, SirsCore.getEpsgCode(), new StructSupplier(clazz::isInstance));
+        }
+        
+    }
+    
     private class StructSupplier implements BeanStore.FeatureSupplier{
 
         private final Predicate predicate;
@@ -231,6 +290,34 @@ public class CorePlugin extends Plugin {
         }
         return layers;
     }
+    
+    private List<MapLayer> buildLayers(FeatureStore store, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+        final List<MapLayer> layers = new ArrayList<>();
+        final org.geotoolkit.data.session.Session symSession = store.createSession(false);
+        int i=0;
+        for(Name name : store.getNames()){
+            final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
+            final int d = (int)((i%colors.length)*1.5);
+            final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length],d);
+            final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+            final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+            
+            final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                    CommonCRS.Temporal.JAVA.crs(), 
+                    GO2Utilities.FILTER_FACTORY.property("date_debut"), 
+                    GO2Utilities.FILTER_FACTORY.property("date_fin")
+            );
+            fml.getExtraDimensions().add(datefilter);
+            fml.setVisible(visible);
+            fml.setName(name.getLocalPart());
+            
+            if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
+            
+            layers.add(fml);
+            i++;
+        }
+        return layers;
+    }
 
     @Override
     public List<MenuItem> getMapActions(Object obj) {
@@ -264,47 +351,45 @@ public class CorePlugin extends Plugin {
     }
 
     private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.DARK_GRAY),FF.literal(4),LITERAL_ONE_FLOAT);
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.DARK_GRAY),LITERAL_ONE_FLOAT,FF.literal(4),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
         
-        final Stroke stroke2 = SF.stroke(SF.literal(Color.WHITE),FF.literal(2),LITERAL_ONE_FLOAT);
+        final Stroke stroke2 = SF.stroke(SF.literal(Color.WHITE),LITERAL_ONE_FLOAT,FF.literal(2),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
         
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
-        final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final GraphicalSymbol external = SF.externalGraphic(
-                    SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-white.png").toURI()),
-                    "image/png",null);
-        symbols.add(external);        
-        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
-                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-
-        final Expression initialGap = FF.literal(10);
-        final Expression strokeGap = FF.literal(100);
-        final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
+//        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
+//        final List<GraphicalSymbol> symbols = new ArrayList<>();
+//        final GraphicalSymbol external = SF.externalGraphic(
+//                    SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-white.png").toURI()),
+//                    "image/png",null);
+//        symbols.add(external);        
+//        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
+//                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+//
+//        final Expression initialGap = FF.literal(10);
+//        final Expression strokeGap = FF.literal(100);
+//        final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
+//        
+//        final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
+//                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
+//        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
-        final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
-                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
-        
-        return SF.style(line1,line2,direction);
+        return SF.style(line1,line2);
     }
     
     private static MutableStyle createTronconSelectionStyle() throws URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),FF.literal(5),LITERAL_ONE_FLOAT);
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(2),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
-        
-        
-        final Stroke stroke2 = SF.stroke(SF.literal(Color.GREEN),FF.literal(4),LITERAL_ONE_FLOAT);
-        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
+                
         
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        
         final GraphicalSymbol external = SF.externalGraphic(
                     SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-green.png").toURI()),
                     "image/png",null);
@@ -313,14 +398,33 @@ public class CorePlugin extends Plugin {
                 size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
         final Expression initialGap = FF.literal(10);
-        final Expression strokeGap = FF.literal(100);
+        final Expression strokeGap = FF.literal(200);
         final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
         
         final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
                 STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
-        final MutableStyle style = SF.style(line1,line2,direction);
+        
+        final GraduationSymbolizer grad = new GraduationSymbolizer();
+        //tous les 100metres
+        final GraduationSymbolizer.Graduation g1 = new GraduationSymbolizer.Graduation();
+        g1.setUnit(new DefaultLiteral("m"));
+        g1.setStep(FF.literal(100));
+        g1.setStroke(SF.stroke(Color.RED, 3));
+        g1.setFont(SF.font(12));
+        g1.setSize(FF.literal(12));
+        grad.getGraduations().add(g1);
+        //tous les 10metres
+        final GraduationSymbolizer.Graduation g2 = new GraduationSymbolizer.Graduation();
+        g2.setUnit(new DefaultLiteral("m"));
+        g2.setStep(FF.literal(10));
+        g2.setStroke(SF.stroke(Color.BLACK, 1));
+        g2.setFont(SF.font(10));
+        g2.setSize(FF.literal(4));
+        grad.getGraduations().add(g2);
+        
+        final MutableStyle style = SF.style(line1,direction,grad);
         return style;
     }
     
@@ -328,7 +432,8 @@ public class CorePlugin extends Plugin {
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(7);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = SF.stroke(Color.BLACK, 1);
+        final Stroke stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final Fill fill = SF.fill(Color.WHITE);
         final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
         symbols.add(mark);
@@ -383,11 +488,12 @@ public class CorePlugin extends Plugin {
     }
     
     
-    private static MutableStyle createStructureStyle(Color col){
-        final Expression offset = GO2Utilities.FILTER_FACTORY.literal(6);
+    private static MutableStyle createStructureStyle(Color col, int doffset){
+        final Expression offset = GO2Utilities.FILTER_FACTORY.literal(doffset);
         final Expression color = SF.literal(col);
         final Expression width = GO2Utilities.FILTER_FACTORY.literal(2);
-        final Stroke lineStroke = SF.stroke(color,width,LITERAL_ONE_FLOAT);
+        final Stroke lineStroke = SF.stroke(color,LITERAL_ONE_FLOAT,width,
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer lineSymbolizer = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,lineStroke,offset);
         
@@ -395,7 +501,7 @@ public class CorePlugin extends Plugin {
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(13);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = SF.stroke(Color.WHITE, 0);
+        final Stroke stroke = null;
         final Fill fill = SF.fill(col);
         final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
         symbols.add(mark);
