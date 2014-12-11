@@ -19,7 +19,7 @@ import fr.sirs.core.model.TronconDigue;
  */
 public class StructuresTheme extends AbstractTronconTheme {
 
-    private static final ThemeGroup GROUP1 = new ThemeGroup("Crête", Crete.class,               
+    private static final ThemeGroup GROUP1 = new ThemeGroup("Crête", "Table des crêtes", Crete.class,               
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Crete),
             (TronconDigue t, Object c) -> t.structures.remove(c));
     private static final ThemeGroup GROUP2 = new ThemeGroup("Ouvrage de revanche", OuvrageRevanche.class,       

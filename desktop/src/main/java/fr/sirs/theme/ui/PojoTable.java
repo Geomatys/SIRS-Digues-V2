@@ -99,13 +99,17 @@ public class PojoTable extends BorderPane {
     protected final Session session = Injector.getBean(Session.class);
     
     //valeurs affichées
-    private final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
+    protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
     private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
     private final ProgressIndicator searchRunning = new ProgressIndicator();
     private ObservableList<Element> allValues;
     private ObservableList<Element> filteredValues;
     private final Button uiSearch;
+    protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
+    protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
     private final StringProperty currentSearch = new SimpleStringProperty("");
+    final HBox searchEditionToolbar = new HBox();
+    protected final BorderPane topPane;
     
     public PojoTable(Class pojoClass, String title) {
         this(pojoClass, title, null, false);
@@ -167,17 +171,16 @@ public class PojoTable extends BorderPane {
         
         uiTable.editableProperty().bind(editableProperty);
         
-        final HBox toolbar = new HBox(uiSearch);
-        toolbar.getStyleClass().add("buttonbar");
+        searchEditionToolbar.getChildren().add(uiSearch);
+        searchEditionToolbar.getStyleClass().add("buttonbar");
         
         if (isEditable) {
-            final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
+            
             uiAdd.getStyleClass().add("btn-without-style");
             uiAdd.setOnAction((ActionEvent event) -> {
                 editPojo(createPojo());
             });
 
-            final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
             uiDelete.getStyleClass().add("btn-without-style");
             uiDelete.setOnAction((ActionEvent event) -> {
                 final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
@@ -194,11 +197,11 @@ public class PojoTable extends BorderPane {
             uiAdd.visibleProperty().bind(editableProperty);
             uiDelete.visibleProperty().bind(editableProperty);
 
-            toolbar.getChildren().addAll(uiAdd, uiDelete);
+            searchEditionToolbar.getChildren().addAll(uiAdd, uiDelete);
         }
         
-        final BorderPane top = new BorderPane(uiTitle,null,toolbar,null,null);
-        setTop(top);
+        topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
+        setTop(topPane);
         uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiTable.setTableMenuButtonVisible(true);        
         if(repo!=null){
@@ -214,6 +217,8 @@ public class PojoTable extends BorderPane {
         sPane.setDividerPositions(0.8);
         setCenter(sPane);
     }
+    
+    protected ObservableList<Element> getAllValues(){return allValues;}
 
     public BooleanProperty editableProperty(){
         return editableProperty;
@@ -356,13 +361,14 @@ public class PojoTable extends BorderPane {
                 final FXDiguePane ctrl = new FXDiguePane();
                 ctrl.setDigue((Digue) pojo);
                 content = ctrl;
-            } else if (pojo instanceof Objet) {
-                // Choose the pane adapted to the specific structure.
-                final String className = "fr.sirs.theme.ui.FX" + pojo.getClass().getSimpleName() + "Pane";
-                final Class controllerClass = Class.forName(className);
-                final Constructor cstr = controllerClass.getConstructor(pojo.getClass());
-                content = (Node) cstr.newInstance(pojo);
-            }
+            } 
+//            else if (pojo instanceof Objet) {
+//                // Choose the pane adapted to the specific structure.
+//                final String className = "fr.sirs.theme.ui.FX" + pojo.getClass().getSimpleName() + "Pane";
+//                final Class controllerClass = Class.forName(className);
+//                final Constructor cstr = controllerClass.getConstructor(pojo.getClass());
+//                content = (Node) cstr.newInstance(pojo);
+//            }
 
             tab.setContent(content);
             final Session session = Injector.getSession();
@@ -381,6 +387,7 @@ public class PojoTable extends BorderPane {
             
         }
     }
+    
     
     public class PropertyColumn extends TableColumn<Element,Object>{
 

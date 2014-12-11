@@ -107,6 +107,11 @@
     -fx-background-radius: 5 0 0 0;
 }
 
+.buttonbarleft{
+    -fx-background-color: rgb(109,149,182);
+    -fx-background-radius: 0 5 0 0;
+}
+
 .buttonbar-button{
     -fx-background-color:none;
 }

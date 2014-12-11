@@ -6,3 +6,4 @@ data/
 .project
 .classpath
 .settings/
+sirs-core/src/main/resources/fr/sirs/core/model/Utilisateur.properties
