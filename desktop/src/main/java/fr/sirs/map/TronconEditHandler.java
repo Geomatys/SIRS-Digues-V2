@@ -16,7 +16,9 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.Point2D;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -149,7 +151,52 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
         }
     }
     
-    private void updateSRElementaire(TronconDigue troncon){
+    public static Entry<String,Digue> showTronconDialog(){
+        final Session session = Injector.getBean(Session.class);
+        final List<Digue> digues = session.getDigues();
+        final ChoiceBox<Digue> choiceBox = new ChoiceBox<>(FXCollections.observableList(digues));
+        choiceBox.setConverter(new StringConverter<Digue>() {
+            @Override
+            public String toString(Digue object) {
+                return object.getLibelle();
+            }
+            @Override
+            public Digue fromString(String string) {
+                return null;
+            }
+        });
+
+        final TextField nameField = new TextField();
+        
+        //choix de la digue
+        final GridPane bp = new GridPane();
+        bp.getRowConstraints().setAll(
+                new RowConstraints(),
+                new RowConstraints(),
+                new RowConstraints(),
+                new RowConstraints()
+        );
+        bp.setPadding(new Insets(10, 10, 10, 10));
+        bp.setHgap(10);
+        bp.setVgap(10);
+        bp.add(new Label("Nom du tronçon"), 0, 0);
+        bp.add(nameField, 0, 1);
+        bp.add(new Label("Rattacher à la digue"), 0, 2);
+        bp.add(choiceBox, 0, 3);
+
+        final DialogPane pane = new DialogPane();
+        pane.setContent(bp);
+        pane.getButtonTypes().add(ButtonType.OK);
+
+        final Dialog dialog = new Dialog();
+        dialog.setDialogPane(pane);
+        dialog.showAndWait();
+
+        final Digue digue = choiceBox.getValue();        
+        return new AbstractMap.SimpleImmutableEntry<>(nameField.getText(),digue);
+    }
+    
+    public static void updateSRElementaire(TronconDigue troncon){
         final Session session = Injector.getBean(Session.class);
                 
         final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
@@ -283,49 +330,11 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     
                     final MenuItem createItem = new MenuItem("Créer un nouveau tronçon");
                     createItem.setOnAction((ActionEvent event) -> {
+                        
+                        final Entry<String, Digue> entry = showTronconDialog();
                         final Session session = Injector.getBean(Session.class);
-                        final List<Digue> digues = session.getDigues();
-                        final ChoiceBox<Digue> choiceBox = new ChoiceBox<>(FXCollections.observableList(digues));
-                        choiceBox.setConverter(new StringConverter<Digue>() {
-                            @Override
-                            public String toString(Digue object) {
-                                return object.getLibelle();
-                            }
-                            @Override
-                            public Digue fromString(String string) {
-                                return null;
-                            }
-                        });
-                        
-                        final TextField nameField = new TextField();
-                        
-                        //choix de la digue
-                        final GridPane bp = new GridPane();
-                        bp.getRowConstraints().setAll(
-                                new RowConstraints(),
-                                new RowConstraints(),
-                                new RowConstraints(),
-                                new RowConstraints()
-                        );
-                        bp.setPadding(new Insets(10, 10, 10, 10));
-                        bp.setHgap(10);
-                        bp.setVgap(10);
-                        bp.add(new Label("Nom du tronçon"), 0, 0);
-                        bp.add(nameField, 0, 1);
-                        bp.add(new Label("Rattacher à la digue"), 0, 2);
-                        bp.add(choiceBox, 0, 3);
-                        
-                        final DialogPane pane = new DialogPane();
-                        pane.setContent(bp);
-                        pane.getButtonTypes().add(ButtonType.OK);
-                        
-                        final Dialog dialog = new Dialog();
-                        dialog.setDialogPane(pane);
-                        dialog.showAndWait();
-                        
-                        final Digue digue = choiceBox.getValue();
                         troncon = new TronconDigue();
-                        troncon.setLibelle(nameField.getText());
+                        troncon.setLibelle(entry.getKey());
 
                         final Coordinate coord1 = helper.toCoord(e.getX()-20, e.getY());
                         final Coordinate coord2 = helper.toCoord(e.getX()+20, e.getY());
@@ -334,14 +343,13 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             //convertion from base crs
                             geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), SirsCore.getEpsgCode(), true));
                             JTS.setCRS(geom, SirsCore.getEpsgCode());
-                            if(digue!=null)troncon.setDigueId(digue.getId());
+                            if(entry.getValue()!=null)troncon.setDigueId(entry.getValue().getId());
                             troncon.setGeometry(geom);
                             editGeometry.geometry = geom;
 
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
                             updateGeometry();
-                            
                             updateSRElementaire(troncon);
                             
                         }catch(TransformException | FactoryException ex){

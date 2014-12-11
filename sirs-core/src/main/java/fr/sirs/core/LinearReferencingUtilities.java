@@ -4,9 +4,11 @@ package fr.sirs.core;
 import fr.sirs.util.json.GeometryDeserializer;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -320,17 +322,17 @@ public final class LinearReferencingUtilities extends Static{
     }
     
     public static LineString asLineString(Geometry tronconGeom) {
-        final LineString troncon;
+        LineString troncon = null;
         if (tronconGeom instanceof LineString) {
             troncon = (LineString) tronconGeom;
-        } else if (tronconGeom instanceof MultiLineString) {
-            final MultiLineString mls = (MultiLineString) tronconGeom;
-            if (mls.getNumGeometries() != 1) {
-                throw new IllegalArgumentException("Geometry must be a LineString or a MultilineString with 1 sub-geometry.");
+        } else if (tronconGeom instanceof Polygon) {
+            troncon = ((Polygon)tronconGeom).getExteriorRing();
+        } else if (tronconGeom instanceof GeometryCollection) {
+            final GeometryCollection gc = (GeometryCollection) tronconGeom;
+            final int nb = gc.getNumGeometries();
+            if(nb>0){
+                troncon = asLineString(gc.getGeometryN(0));
             }
-            troncon = (LineString) mls.getGeometryN(0);
-        } else {
-            throw new IllegalArgumentException("Geometry must be a LineString or a MultilineString with 1 sub-geometry.");
         }
         return troncon;
     }
