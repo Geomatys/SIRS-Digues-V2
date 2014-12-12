@@ -113,7 +113,7 @@ public class CorePlugin extends Plugin {
      */
     public static final String NAME = "core";
     
-    private static final Class[] VALID_CLASSES = new Class[]{
+    public static final Class[] VALID_CLASSES = new Class[]{
         byte.class,
         short.class,
         int.class,
@@ -132,7 +132,7 @@ public class CorePlugin extends Plugin {
         LocalDateTime.class
     };
     
-    private static final Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = new Predicate<PropertyDescriptor>(){
+    public static final Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = new Predicate<PropertyDescriptor>(){
 
         @Override
         public boolean test(PropertyDescriptor t) {
@@ -151,7 +151,6 @@ public class CorePlugin extends Plugin {
         final List<MapItem> items = new ArrayList<>();
         
         final TronconDigueRepository repo = getSession().getTronconDigueRepository();
-        final BorneDigueRepository bornesRepo = getSession().getBorneDigueRepository();
         
         try{
             
@@ -165,11 +164,7 @@ public class CorePlugin extends Plugin {
             
             //bornes
             final BorneDigueCache cache = new BorneDigueCache();
-            final BeanStore borneStore = new BeanStore(
-                    new BeanFeatureSupplier(BorneDigue.class, "id", "geometry", 
-                            (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, SirsCore.getEpsgCode(), cache::getAll)
-            );
+            final BeanStore borneStore = new BeanStore(cache.getSupplier());
             items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
             
             //structures

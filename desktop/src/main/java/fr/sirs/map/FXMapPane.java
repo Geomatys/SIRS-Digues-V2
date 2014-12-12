@@ -47,7 +47,6 @@ import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.referencing.operation.TransformException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -83,11 +82,10 @@ public class FXMapPane extends BorderPane {
     private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
     private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
 
-    @Autowired
     private Session session;
     
     public FXMapPane() {
-        Injector.injectDependencies(this);        
+        session = Injector.getSession();
         context = session.getMapContext();
                 
         uiCoordBar2.setCrsButtonVisible(false);
@@ -168,22 +166,29 @@ public class FXMapPane extends BorderPane {
         uiMap1.setHandler(new FXPanHandler(uiMap1, false));
         uiMap2.setHandler(new FXPanHandler(uiMap2, false));
         
-        //deplacer à la date du jour
-        final Date time = new Date();
-        try {
-            uiMap1.getCanvas().setObjectiveCRS(SirsCore.getEpsgCode());
-            uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
-            uiMap1.getCanvas().setTemporalRange(time,time);
-            uiMap2.getCanvas().setTemporalRange(time,time);
-            uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
-            uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
-        } catch (NoninvertibleTransformException | TransformException ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-        }
-        
         //ajout des ecouteurs souris sur click droit
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
         uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
+        
+        
+        //deplacer à la date du jour
+        new Thread(){
+            @Override
+            public void run() {
+                final Date time = new Date();
+                try {
+                    uiMap1.getCanvas().setObjectiveCRS(SirsCore.getEpsgCode());
+                    uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
+                    uiMap1.getCanvas().setTemporalRange(time,time);
+                    uiMap2.getCanvas().setTemporalRange(time,time);
+                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
+                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
+                } catch (NoninvertibleTransformException | TransformException ex) {
+                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                }
+            }
+        }.start();
+        
     }
 
     public MapContext getMapContext() {

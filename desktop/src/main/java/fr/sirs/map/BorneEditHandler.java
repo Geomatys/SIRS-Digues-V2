@@ -333,9 +333,8 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 final Coordinate coord = helperBorne.toCoord(startX,startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
                 JTS.setCRS(point, SirsCore.getEpsgCode());
-                
+                //les event vont induire le repaint de la carte
                 editPane.createBorne(point);
-                Platform.runLater(map.getCanvas()::repaint);
             }
             
         }
@@ -377,7 +376,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 final Session session = Injector.getBean(Session.class);
                 session.getBorneDigueRepository().update(borne);
                 editPane.selectSRB(null);
-                Platform.runLater(map.getCanvas()::repaint);
+                //les event vont induire le repaint de la carte
                 editPane.sortBorneTable();
             }
         }
