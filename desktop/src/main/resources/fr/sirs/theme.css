@@ -59,7 +59,6 @@
 .blue-dark{
     -fx-background-color:  rgb(74,123,165);
     -fx-background-radius:  30 0 0 30;
-    -fx-effect: dropshadow( three-pass-box , black , 10 , 0 , 0 , 0 );
 }
 
 .gray-light{
@@ -138,7 +137,6 @@
     -fx-background-color:rgb(74,123,165);
     -fx-text-fill: white;
     -fx-background-radius:  0 30 30 0;
-    -fx-effect: dropshadow( three-pass-box , black , 10 , 0 , 0 , 0 );
 }
 
 .geobutton:hover{
