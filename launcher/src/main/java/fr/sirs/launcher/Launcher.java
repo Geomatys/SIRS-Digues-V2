@@ -6,10 +6,23 @@ import java.io.PrintStream;
 import java.util.UUID;
 import java.util.logging.Level;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 /**
@@ -34,11 +47,40 @@ public class Launcher extends Application {
             new Alert(Alert.AlertType.ERROR, "Une erreur inattendue est survenue.Code d'erreur : "+errorCode, ButtonType.CLOSE).show();
         });
         
-        final FXLauncherPane pane = new FXLauncherPane();
-        final Scene scene = new Scene(pane);
-        primaryStage.setScene(scene);
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.setBackground(Background.EMPTY);
+        final VBox vbox = new VBox(progressIndicator, new Label("Initialisation de la base EPSG"));
+        vbox.setSpacing(10);
+        vbox.setAlignment(Pos.CENTER);
+        StackPane stackPane = new StackPane(vbox);
+        stackPane.setBackground(Background.EMPTY);
+        final Scene scene = new Scene(stackPane);
+        scene.setFill(null);
+
+        final Stage splashStage = new Stage();
+        splashStage.setTitle("SIRS");
+        splashStage.initStyle(StageStyle.TRANSPARENT);
+        splashStage.setScene(scene);
+        
+        primaryStage.setScene(new Scene(new FXLauncherPane()));
         primaryStage.setTitle("SIRS");
         primaryStage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
-        primaryStage.show();
+        
+        splashStage.show();
+        
+        
+        final Task<Boolean> epsgIniter = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                SirsCore.initEpsgDB();
+                return true;
+            }
+        };
+        epsgIniter.setOnSucceeded((WorkerStateEvent event) -> {
+                    splashStage.close();
+                    primaryStage.show();
+        });
+        new Thread(epsgIniter).start();
+
     }
 }

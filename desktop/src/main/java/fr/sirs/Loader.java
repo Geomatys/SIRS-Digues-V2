@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -28,22 +26,18 @@ import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
-import javax.sql.DataSource;
 
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.image.jai.Registry;
-import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.lang.Setup;
-import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
-import org.opengis.util.FactoryException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import fr.sirs.core.CouchDBInit;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.util.json.GeometryDeserializer;
 
@@ -205,18 +199,8 @@ public class Loader extends Application {
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Creation de la base EPSG...");
-                // create a database in user directory
-                final Path storageFolder = SIRS.CONFIGURATION_PATH
-                        .resolve("EPSG");
-                final String url = "jdbc:derby:" + storageFolder.toString()
-                        + File.separator + "EPSG;create=true";
-                final DataSource ds = new DefaultDataSource(url);
-                Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
-
                 // try to create it, won't do anything if already exist
-                createEpsgDB(storageFolder, url);
-                // force loading epsg
-                CRS.decode("EPSG:3395");
+                SirsCore.initEpsgDB();
 
                 // GEOMETRY / JSON Converter
                 GeometryDeserializer.class.newInstance();
@@ -288,18 +272,5 @@ public class Loader extends Application {
             }
             return null;
         }
-
-      
     }
-
-    private static void createEpsgDB(final Path folder, final String url)
-            throws FactoryException, IOException {
-        Files.createDirectories(folder);
-        final EpsgInstaller installer = new EpsgInstaller();
-        installer.setDatabase(url);
-        if (!installer.exists()) {
-            installer.call();
-        }
-    }
-
 }

@@ -6,9 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 import org.apache.sis.util.logging.Logging;
+import org.geotoolkit.factory.Hints;
+import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 
@@ -49,6 +53,8 @@ public class SirsCore {
     
     public static final Path ERR_LOGS_PATH = CONFIGURATION_PATH.resolve("errors.log");
     
+    public static final Path EPSG_PATH = CONFIGURATION_PATH.resolve("EPSG");
+    
     /**
      * User directory root folder.
      * 
@@ -77,6 +83,32 @@ public class SirsCore {
 
     public static CoordinateReferenceSystem getEpsgCode() {
         return PROJECTION;
-    }
+    } 
     
+    /**
+     * Initialise la base EPSG utilisée par l'application. Si elle n'existe pas, 
+     * elle sera créée. Dans tous les cas, on force le chargement de la base 
+     * dans le système, ce qui permet de lever les potentiels problèmes au 
+     * démarrage.
+     * @throws FactoryException
+     * @throws IOException 
+     */
+    public static void initEpsgDB() throws FactoryException, IOException {
+        // create a database in user directory
+        Files.createDirectories(SirsCore.EPSG_PATH);
+        
+        final String url = "jdbc:derby:" + SirsCore.EPSG_PATH.toString()
+                + File.separator + "EPSG;create=true";
+        
+        final DataSource ds = new DefaultDataSource(url);
+        Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
+        final EpsgInstaller installer = new EpsgInstaller();
+        installer.setDatabase(url);
+        if (!installer.exists()) {
+            installer.call();
+        }
+
+        // force loading epsg
+        CRS.decode("EPSG:3395");
+    }
 }
