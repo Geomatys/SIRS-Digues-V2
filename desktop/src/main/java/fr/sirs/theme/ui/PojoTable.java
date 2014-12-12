@@ -181,7 +181,7 @@ public class PojoTable extends BorderPane {
         
         /* barre d'outils. Si on a un accesseur sur la base, on affiche des
          * boutons de création / suppression.
-         */        
+         */
         uiSearch = new Button(null, searchNone);
         uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add("btn-without-style");        
@@ -227,6 +227,7 @@ public class PojoTable extends BorderPane {
         topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
         setTop(topPane);
         uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
         if(repo!=null){
             updateTable();
