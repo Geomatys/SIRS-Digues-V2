@@ -88,10 +88,7 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
     
     private void reloadLeves() {        
         final List<LeveeProfilTravers> items = this.profilTravers.getLeveeIds();
-        this.leves = FXCollections.observableArrayList();
-        items.stream().forEach((item) -> {
-            this.leves.add(item);
-        });
+        this.leves = FXCollections.observableArrayList(items);
     }    
 
     private class LeveProfilTraversTable extends PojoTable {

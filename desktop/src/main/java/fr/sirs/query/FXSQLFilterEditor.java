@@ -133,17 +133,13 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.add(uiPropertyName, 0, 0);
         uiPropertyPane.add(uiConditionBox, 1, 0);
         uiPropertyPane.add(uiPropertyValue, 2, 0);
-     
-        this.choices = choices;
-        
+             
         //autocompletion sur les champs
         final TextFieldCompletion textFieldCompletion = new TextFieldCompletion(uiPropertyName){
-
             @Override
             protected ObservableList<String> getChoices(String text) {
                 return choices;
             }
-            
         };
         
     }
@@ -169,17 +165,6 @@ public class FXSQLFilterEditor extends GridPane {
             uiSub2 = new FXSQLFilterEditor();
             uiSub1.setChoices(choices);
             uiSub2.setChoices(choices);
-//            final GridPane pane = new GridPane();
-//            final RowConstraints rc1 = new RowConstraints();
-//            final RowConstraints rc2 = new RowConstraints();
-//            rc1.setFillHeight(true);
-//            rc2.setFillHeight(true);
-//            pane.getRowConstraints().add(rc1);
-//            pane.getRowConstraints().add(rc2);
-//            pane.getColumnConstraints().add(new ColumnConstraints());
-//            pane.getColumnConstraints().add(new ColumnConstraints());
-//            pane.add(uiSub1, 1, 0);
-//            pane.add(uiSub2, 1, 1);
             add(uiSub1,2,0,1,2);  
             add(uiSub2,2,2,1,2);
             

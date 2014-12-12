@@ -1,7 +1,11 @@
 
+// FOR ALL WIDGETS
+
 .table-row-cell {
     -fx-cell-size: 35;
 }
+
+//special classes
 
 .list-header{
     -fx-border-width: 0 0 1 0;
@@ -70,10 +74,12 @@
     -fx-border: 0px solid; 
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 10 0 0 10;
+    -fx-text-fill: rgb(34,93,135);
 }
 
 .state-button-left:selected {
-    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #d4d4d4);
+    -fx-text-fill: black;
+    -fx-background-color: white;
 }
 
 .state-button-center {
@@ -83,10 +89,12 @@
     -fx-border: 0px solid; 
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 0 0 0;
+    -fx-text-fill: rgb(34,93,135);
 }
 
 .state-button-center:selected {
-    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #d4d4d4);
+    -fx-text-fill: black;
+    -fx-background-color: white;
 }
 
 .state-button-right {
@@ -96,10 +104,12 @@
     -fx-border: 0px solid; 
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 10 10 0;
+    -fx-text-fill: rgb(34,93,135);
 }
 
 .state-button-right:selected {
-    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #d4d4d4);
+    -fx-text-fill: black;
+    -fx-background-color: white;
 }
 
 .buttonbar{
@@ -118,12 +128,10 @@
 
 .buttonbar-button:hover{
     -fx-background-color:rgb(109,149,182);
-    -fx-text-fill: white;
 }
 
 .buttonbar-button:armed{
     -fx-background-color:rgb(74,123,165);
-    -fx-text-fill: white;
 }
 
 .geobutton{

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="GridPane" vgap="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <columnConstraints>
+    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" prefWidth="400.0" />
+  </columnConstraints>
+  <rowConstraints>
+      <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
+  </rowConstraints>
+   <children>
+      <Label text="Libéllé :" />
+      <Label text="Déscription :" GridPane.rowIndex="2" GridPane.valignment="TOP" />
+      <Label text="SQL :" GridPane.rowIndex="4" GridPane.valignment="TOP" />
+      <TextField fx:id="uiLibelle" GridPane.rowIndex="1" />
+      <TextArea fx:id="uiDesc" prefHeight="70.0" GridPane.rowIndex="3" />
+      <TextArea fx:id="uiSql" prefHeight="70.0" GridPane.rowIndex="5" />
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</fx:root>

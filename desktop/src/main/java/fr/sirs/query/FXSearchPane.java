@@ -8,29 +8,32 @@ import fr.sirs.core.h2.H2Helper;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsTableCell;
+import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
@@ -46,33 +49,30 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import static org.elasticsearch.search.suggest.context.CategoryContextMapping.query;
 import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureIterator;
-import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.query.Query;
+import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
-import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.feature.type.PropertyDescriptor;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
-import org.geotoolkit.gui.javafx.util.FXDialog;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.style.RandomStyleBuilder;
+import org.opengis.filter.Filter;
 
 /**
  *
@@ -80,8 +80,16 @@ import org.geotoolkit.style.RandomStyleBuilder;
  */
 public class FXSearchPane extends BorderPane {
 
+    public static final Image ICON_SAVE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SAVE_ALIAS,22,Color.WHITE),null);
+    public static final Image ICON_OPEN    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FOLDER_OPEN,22,Color.WHITE),null);
+    public static final Image ICON_EXPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UPLOAD,22,Color.WHITE),null);
+    public static final Image ICON_MODEL   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SHARE_ALT_SQUARE,22,Color.WHITE),null);
+    
     @FXML private BorderPane uiTopPane;
-    @FXML private TableView<ElementHit> uiTable;
+    @FXML private Button uiSave;
+    @FXML private Button uiOpen;
+    @FXML private Button uiExport;
+    @FXML private Button uiViewModel;
     
     //Recherche plein texte
     @FXML private ToggleButton uiTogglePlainText;
@@ -93,12 +101,13 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiSimplePane;
     @FXML private ChoiceBox<String> uiDBTable;
     @FXML private BorderPane uiFilterPane;
+    @FXML private TextArea uiSimpleSQL;
     private FXSQLFilterEditor uiFilterEditor;
     
     //recherche SQL
     @FXML private ToggleButton uiToggleSQL;
     @FXML private GridPane uiSQLPane;
-    @FXML private TextArea uiSQL;
+    @FXML private TextArea uiAdvSQL;
     
     private final Session session;
 
@@ -107,9 +116,7 @@ public class FXSearchPane extends BorderPane {
     public FXSearchPane() {
         SIRS.loadFXML(this);
         session = Injector.getSession();
-                
-        uiTable.setPlaceholder(new Label(""));
-        
+               
         uiFilterEditor = new FXSQLFilterEditor();
         uiFilterPane.setCenter(uiFilterEditor);
         
@@ -172,6 +179,17 @@ public class FXSearchPane extends BorderPane {
             }
         });
         
+        uiSave.setGraphic(new ImageView(ICON_SAVE));
+        uiOpen.setGraphic(new ImageView(ICON_OPEN));
+        uiExport.setGraphic(new ImageView(ICON_EXPORT));
+        uiViewModel.setGraphic(new ImageView(ICON_MODEL));
+        
+        uiViewModel.visibleProperty().bind(uiToggleSimple.selectedProperty().or(uiToggleSQL.selectedProperty()));
+        uiSave.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiOpen.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiExport.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        
+        
     }
 
     @FXML
@@ -186,14 +204,72 @@ public class FXSearchPane extends BorderPane {
         
         stage.setScene(scene);
         stage.setTitle("Modèle");
+        stage.setWidth(800);
+        stage.setHeight(600);
         stage.show();
     }
         
     @FXML
+    private void saveSQL(ActionEvent event){
+        final Dialog dialog = new Dialog();
+        final DialogPane pane = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);        
+        final SQLQuery query = new SQLQuery();
+        query.sql.set(uiAdvSQL.getText());
+        pane.setContent(new FXQueryPane(query));
+        
+        dialog.setDialogPane(pane);
+        dialog.setTitle("Information sur la requête");
+        dialog.getDialogPane().setHeader(null);
+        final Optional<String> name = dialog.showAndWait();
+        if(name.isPresent()){
+            try{
+                final List<SQLQuery> queries = SQLQueries.getQueries();
+                queries.add(query);
+                SQLQueries.saveQueries(queries);
+            }catch(IOException ex){
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+        }
+    }
+    
+    @FXML
+    private void openSQL(ActionEvent event){
+        try{
+            final List<SQLQuery> queries = SQLQueries.getQueries();
+            if(queries.isEmpty()){
+                new Alert(Alert.AlertType.INFORMATION,"Aucune requête disponible.",ButtonType.OK).showAndWait();
+            }else{
+                final Dialog dia = new Dialog();
+                final FXQueryTable table = new FXQueryTable(queries);
+                final DialogPane pane = new DialogPane();
+                pane.setPrefSize(700, 400);
+                pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);
+                pane.setContent(table);
+                dia.setDialogPane(pane);
+                dia.setTitle("Liste des requêtes");
+                
+                final Optional res = dia.showAndWait();
+                //sauvegarde s'il y a eu des changements
+                table.save();
+                if(res.isPresent() && ButtonType.OK.equals(res.get())){
+                    final SQLQuery selected = table.getSelection();
+                    if(selected!=null){
+                        uiAdvSQL.setText(selected.sql.get());
+                    }
+                }
+            }
+        }catch(IOException ex){
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+    }
+            
+    @FXML
     private void exportSQL(ActionEvent event) {
         
-        DirectoryChooser chooser = new DirectoryChooser();
-        File file = chooser.showDialog(null);
+        final DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Dossier d'export");
+        final File file = chooser.showDialog(null);
         
         if(file!=null){
             try{
@@ -204,11 +280,11 @@ public class FXSearchPane extends BorderPane {
                 ex.printStackTrace();
             }
         }
-        
     }
     
     @FXML
     private void search(ActionEvent event) {
+        if(h2Connection==null) return;
         
         try{
             if(uiTogglePlainText.isSelected()){
@@ -239,6 +315,8 @@ public class FXSearchPane extends BorderPane {
                     }
                 });
 
+                final TableView<ElementHit> uiTable = new TableView<>();
+                uiTable.setPlaceholder(new Label(""));
                 uiTable.getColumns().add(editCol);
                 uiTable.getColumns().add(typeCol);
                 uiTable.getColumns().add(libelleCol);
@@ -263,33 +341,29 @@ public class FXSearchPane extends BorderPane {
                 }
 
                 uiTable.setItems(FXCollections.observableList(results));
+                
+                final ScrollPane scroll = new ScrollPane(uiTable);
+                scroll.setFitToHeight(true);
+                setCenter(scroll);
+                
             }else if(uiToggleSimple.isSelected()){
-                if(h2Connection==null) return;
+                final String tableName = uiDBTable.getValue();
+                if(tableName==null) return;
+                final Filter filter = uiFilterEditor.toFilter();
+                
+                final FeatureType ft = h2Connection.getFeatureType(tableName);
+                final FilterToSQL filterToSQL = h2Connection.getDialect().getFilterToSQL(ft);
+                final StringBuilder sb = new StringBuilder();
+                filter.accept(filterToSQL, sb);
+                final String condition = sb.toString();
+                
+                final String query = "SELECT * FROM "+tableName+" WHERE "+condition;
+                uiSimpleSQL.setText(query);
+                searchSQL(query);
                 
             }else if(uiToggleSQL.isSelected()){
-                if(h2Connection==null) return;
-                
-                
-                final String query = uiSQL.getText().trim();
-                if(!query.toLowerCase().startsWith("select")){
-                    final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les reqêtes SELECT sont possibles.",ButtonType.CLOSE);
-                    alert.showAndWait();
-                    return;
-                }
-                
-                final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                        JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("search"));
-                
-                final FeatureCollection col = h2Connection.createSession(false).getFeatureCollection(fsquery);
-                
-                final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultRasterStyle());
-                
-                
-                final FXFeatureTable table = new FXFeatureTable();
-                table.setLoadAll(true);
-                table.init(layer);
-                setCenter(table);
-
+                final String query = uiAdvSQL.getText().trim();
+                searchSQL(query);
             }
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -297,5 +371,22 @@ public class FXSearchPane extends BorderPane {
         
     }
 
+    private void searchSQL(String query){
+        if(!query.toLowerCase().startsWith("select")){
+            final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les reqêtes SELECT sont possibles.",ButtonType.CLOSE);
+            alert.showAndWait();
+            return;
+        }
+
+        final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
+                JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("search"));
+        final FeatureCollection col = h2Connection.createSession(false).getFeatureCollection(fsquery);
+        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultRasterStyle());
+
+        final FXFeatureTable table = new FXFeatureTable();
+        table.setLoadAll(true);
+        table.init(layer);
+        setCenter(table);
+    }
     
 }
