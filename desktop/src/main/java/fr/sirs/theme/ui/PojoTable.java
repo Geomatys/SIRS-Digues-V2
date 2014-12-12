@@ -13,6 +13,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
@@ -93,6 +94,7 @@ public class PojoTable extends BorderPane {
     private final Repository repo;
     protected final Session session = Injector.getBean(Session.class);
     protected final TableView<Element> uiTable = new FXTableView<>();
+    private final LabelMapper labelMapper;
     
     // Editabilité du tableau
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
@@ -147,6 +149,7 @@ public class PojoTable extends BorderPane {
     private PojoTable(Class pojoClass, String title, Repository repo, boolean isEditable) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
+        this.labelMapper = new LabelMapper(pojoClass);
         this.repo = repo;
         
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -345,11 +348,11 @@ public class PojoTable extends BorderPane {
         } else if (pojo instanceof TronconDigue) {
             final FXTronconDiguePane ctrl = new FXTronconDiguePane();
             ctrl.setElement((TronconDigue) pojo);
-            content = (FXElementPane) ctrl;
+            content = ctrl;
         } else if (pojo instanceof Digue) {
             final FXDiguePane ctrl = new FXDiguePane();
             ctrl.setElement((Digue) pojo);
-            content = (FXElementPane) ctrl;
+            content = ctrl;
         } else {
             content = null;
         }
@@ -507,7 +510,7 @@ public class PojoTable extends BorderPane {
         private final PropertyDescriptor desc;
 
         public PropertyColumn(final PropertyDescriptor desc) {
-            super(desc.getDisplayName());
+            super(labelMapper.mapPropertyName(desc.getDisplayName()));
             this.desc = desc;
             setEditable(true);
             
