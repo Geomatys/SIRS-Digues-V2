@@ -74,7 +74,7 @@ public class DesordreObservationImporter extends GenericImporter {
             }
             
             if(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())!=null){
-                observation.setUrgenceId(contacts.get(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())).getId());
+                observation.setObservateurId(contacts.get(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())).getId());
             }
             
             if (row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()) != null) {

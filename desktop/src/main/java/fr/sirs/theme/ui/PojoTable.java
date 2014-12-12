@@ -523,7 +523,7 @@ public class PojoTable extends BorderPane {
             tab.setContent(content);
             final Session session = Injector.getSession();
             final Element ele = (Element) pojo;
-            tab.setText(LabelMapper.mapClassName(pojo.getClass()));
+            tab.setText(session.getPreviewLabelRepository().getPreview(ele.getId()));
             tab.setOnSelectionChanged((Event event) -> {
                 if (tab.isSelected()) {
                     session.prepareToPrint(ele);
