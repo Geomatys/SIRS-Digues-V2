@@ -4,10 +4,14 @@ package fr.sirs.theme.ui;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.map.FXMapTab;
+import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
-import java.util.Map;
+import java.util.logging.Level;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -20,45 +24,42 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXThemePane extends BorderPane {
+public class FXThemePane extends BorderPane implements FXElementPane {
     
-    private final Object object;
+    private Object object;
     private Node specificThemePane;
-    protected Map<String, Object> resources;
-//    private TronconDigue troncon;
-//    private TronconDigue newTroncon = null;
     
     @FXML private ScrollPane uiEditDetailTronconTheme;
       
-    @FXML private Label mode;
+//    @FXML private Label mode;
 
     @FXML private FXDateField date_maj;
 
     @FXML private Label id;
 
-    @FXML private BorderPane uiBorderPane;
-
-    @FXML private Label mode1;
+//    @FXML private BorderPane uiBorderPane;
+//
+//    @FXML private Label mode1;
     @FXML private Label uiTitleLabel;
     
     @FXML private ToggleButton uiEdit;
     @FXML private ToggleButton uiConsult;
     @FXML private Button uiSave;
+    @FXML private Button uiShowOnMapButton;
 
-
+    
     public FXThemePane(final Object theme){
         SIRS.loadFXML(this);
-        this.object = theme;
-        
-        initFields();
-        
-        initSubPane();
+        setElement((Element) theme);
         
         final ToggleGroup group = new ToggleGroup();
         uiConsult.setToggleGroup(group);
@@ -68,24 +69,9 @@ public class FXThemePane extends BorderPane {
         });
     }
     
-    public FXThemePane(final Object theme, final Map<String, Object> resources){
-        SIRS.loadFXML(this);
-        this.object = theme;
-        
-        initFields();
-        
-        this.resources=resources;
-        
-        initSubPane();
-        
-        final ToggleGroup group = new ToggleGroup();
-        uiConsult.setToggleGroup(group);
-        uiEdit.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
-        });
+    public void setShowOnMapButton(final boolean isShown){
+        uiShowOnMapButton.setVisible(isShown);
     }
-    
     
     @FXML
     void save(ActionEvent event) {
@@ -93,53 +79,23 @@ public class FXThemePane extends BorderPane {
         
         if(specificThemePane instanceof ThemePane){
             ((ThemePane) specificThemePane).preSave();
-            
-//            if(((ThemePane) specificThemePane).tronconChangedProperty().get()){
-//                ((ThemePane) specificThemePane).tronconChangedProperty().set(false);
-//                for(final Objet str : troncon.getStructures()){
-//                    if(str.getId().equals(structure.getId())){
-//                        troncon.getStructures().remove(str);
-//                        break;
-//                    }
-//                }
-//                newTroncon = session.getTronconDigueRepository().get(structure.getTroncon());
-//                newTroncon.getStructures().add(structure);
-//                structure.setDateMaj(LocalDateTime.now());
-//                newTroncon.setDateMaj(LocalDateTime.now());
-//                session.getTronconDigueRepository().update(newTroncon);
-//            } else{
-//                for(final Objet str : troncon.getStructures()){
-//                    if(str.getId().equals(structure.getId())){
-//                        troncon.getStructures().set(troncon.getStructures().indexOf(str), structure);
-//                        break;
-//                    }
-//                }
-//            }
         }
         else {
             throw new UnsupportedOperationException("The sub-pane must implement "+ThemePane.class.getCanonicalName()+" interface.");
         }
-        
-//        troncon.setDateMaj(LocalDateTime.now());
-//        session.getTronconDigueRepository().update(troncon);
-//        
-//        if(newTroncon!=null){
-//            troncon=newTroncon;
-//            newTroncon=null;
-//        }
     }
     
     @FXML
     private void showOnMap(){
-//        final Session session = Injector.getBean(Session.class);
-//        final FXMapTab tab = session.getFrame().getMapTab();
-//        tab.show();
-//        final FXMap map = tab.getMap().getUiMap();
-//        try {
-//            map.getCanvas().setVisibleArea(JTS.toEnvelope(structure.getGeometry()));
-//        } catch (NoninvertibleTransformException | TransformException ex) {
-//            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-//        }
+        final Session session = Injector.getBean(Session.class);
+        final FXMapTab tab = session.getFrame().getMapTab();
+        tab.show();
+        final FXMap map = tab.getMap().getUiMap();
+        try {
+            map.getCanvas().setVisibleArea(JTS.toEnvelope(((Positionable)object).getGeometry()));
+        } catch (NoninvertibleTransformException | TransformException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+        }
     }
     
     private void initFields(){
@@ -160,14 +116,8 @@ public class FXThemePane extends BorderPane {
             // Choose the pane adapted to the specific structure.
             final String className = "fr.sirs.theme.ui.FX"+object.getClass().getSimpleName()+"SubPane";
             final Class controllerClass = Class.forName(className);
-            final Constructor cstr;
-            if(resources==null){
-                cstr = controllerClass.getConstructor(object.getClass());
-                specificThemePane = (Node) cstr.newInstance(object);
-            } else {
-                cstr = controllerClass.getConstructor(object.getClass(), Map.class);
-                specificThemePane = (Node) cstr.newInstance(object, resources);
-            }
+            final Constructor cstr = controllerClass.getConstructor(object.getClass());
+            specificThemePane = (Node) cstr.newInstance(object);
             
             uiEditDetailTronconTheme.setContent(specificThemePane);
         }catch(Exception ex){
@@ -184,6 +134,16 @@ public class FXThemePane extends BorderPane {
         else {
             throw new UnsupportedOperationException("The sub-pane must implement "+ThemePane.class.getCanonicalName()+" interface.");
         }
+    }
+
+    @Override
+    final public void setElement(Element element) {
+        
+        this.object = element;
+        
+        initFields();
+        
+        initSubPane();
     }
     
 }

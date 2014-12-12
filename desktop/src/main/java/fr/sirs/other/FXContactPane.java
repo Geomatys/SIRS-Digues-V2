@@ -11,6 +11,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
@@ -32,7 +33,7 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXContactPane extends BorderPane {
+public class FXContactPane extends BorderPane implements FXElementPane {
     
     @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
@@ -57,16 +58,13 @@ public class FXContactPane extends BorderPane {
     private final ContactRepository contactRepository;
     private final OrganismeRepository orgRepository;
     
-    final ObservableList orgsOfContact = 
-            FXCollections.observableArrayList();
+    final ObservableList orgsOfContact = FXCollections.observableArrayList();
     
     final HashSet<Organisme> modifiedOrgs = new HashSet<>();
     
     /**
      *
      * @param contact
-     * @param contactRepository
-     * @param orgRepository
      */
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
@@ -93,7 +91,7 @@ public class FXContactPane extends BorderPane {
         organismeTable.editableProperty().bind(editProp);
         
         uiMode.setSaveAction(this::save);
-        setContact(contact);
+        setElement(contact);
         
         orgsOfContact.addListener(new ListChangeListener() {
             @Override
@@ -111,8 +109,10 @@ public class FXContactPane extends BorderPane {
         });
     }
     
-    public void setContact(Contact contact){
-        this.contact = contact;
+    @Override
+    public void setElement(Element element) {
+        
+        this.contact = (Contact) element;
         
         orgsOfContact.clear();
         modifiedOrgs.clear();

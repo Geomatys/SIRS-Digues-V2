@@ -22,7 +22,7 @@
    <top>
           <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
               <left>
-                <Button contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#showOnMap" styleClass="geobutton" BorderPane.alignment="CENTER">
+                <Button fx:id="uiShowOnMapButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#showOnMap" styleClass="geobutton" BorderPane.alignment="CENTER">
                    <graphic>
                       <ImageView pickOnBounds="true" preserveRatio="true">
                          <image>

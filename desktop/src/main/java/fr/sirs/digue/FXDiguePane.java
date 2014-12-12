@@ -7,6 +7,7 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.FXElementPane;
 import java.time.LocalDateTime;
 import java.util.List;
 import javafx.beans.binding.BooleanBinding;
@@ -39,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXDiguePane extends BorderPane {
+public class FXDiguePane extends BorderPane implements FXElementPane {
     
     private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
@@ -88,8 +89,9 @@ public class FXDiguePane extends BorderPane {
         return digueProperty.get();
     }
     
-    public void setDigue(Digue digue){
-        this.digueProperty.set(digue);
+    @Override
+    public void setElement(Element digue){
+        this.digueProperty.set((Digue) digue);
         initFields();
     }
     
@@ -136,7 +138,7 @@ public class FXDiguePane extends BorderPane {
     
     private class TronconPojoTable extends PojoTable {
     
-            public TronconPojoTable() {
+        public TronconPojoTable() {
             super(TronconDigue.class, "Liste des tronçons", true);
 
             final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {

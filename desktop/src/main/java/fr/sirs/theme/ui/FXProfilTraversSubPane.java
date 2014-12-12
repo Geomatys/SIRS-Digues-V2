@@ -113,7 +113,8 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
             if (pojo instanceof LeveeProfilTravers){
                 final Map<String, Object> resources = new HashMap<>();
                 resources.put("profilTravers", profilTravers);
-                content = new FXThemePane((LeveeProfilTravers) pojo, resources);
+                content = new FXThemePane((LeveeProfilTravers) pojo);
+                ((FXThemePane) content).setShowOnMapButton(false);
             }
             tab.setContent(content);
 

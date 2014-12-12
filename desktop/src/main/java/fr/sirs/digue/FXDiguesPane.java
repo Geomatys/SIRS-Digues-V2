@@ -90,14 +90,14 @@ public class FXDiguesPane extends SplitPane{
     
     public final void displayTronconDigue(TronconDigue obj){
         FXTronconDiguePane ctrl = new FXTronconDiguePane();
-        ctrl.setTroncon((TronconDigue) obj);
+        ctrl.setElement((TronconDigue) obj);
         uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
     }
     
     public final void displayDigue(Digue obj){
         FXDiguePane digueController = new FXDiguePane();
-        digueController.setDigue((Digue) obj);
+        digueController.setElement((Digue) obj);
         uiRight.setCenter(digueController);
         this.session.prepareToPrint(obj);
     }

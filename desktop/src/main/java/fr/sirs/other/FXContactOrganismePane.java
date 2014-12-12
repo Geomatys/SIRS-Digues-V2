@@ -8,16 +8,13 @@ import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.util.SirsStringConverter;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,14 +24,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class FXContactOrganismePane extends BorderPane {
+public class FXContactOrganismePane extends BorderPane implements FXElementPane{
 
     private ContactOrganisme contactOrganisme;
     
@@ -71,24 +67,24 @@ public class FXContactOrganismePane extends BorderPane {
         initOrganismes(uiOrganismeChoice);
         
         uiMode.setSaveAction(this::save);
-        setContactOrganisme(co);
+        setElement(co);
     }
     
-    public void setContactOrganisme(final ContactOrganisme co) {
-        contactOrganisme = co;
+    public void setElement(final Element element) {
+        contactOrganisme = (ContactOrganisme) element;
         
-        if (co == null) return;
+        if (contactOrganisme == null) return;
         
         originalOrg = (Organisme) contactOrganisme.getParent();
         
         uiOrganismeChoice.getSelectionModel().select(originalOrg);
         uiContactChoice.getSelectionModel().select(
                 contactRepository.get(contactOrganisme.getContactId()));
-        if (co.getDateDebutIntervenant() != null) {
-            uiDebutDatePicker.valueProperty().set(co.getDateDebutIntervenant().toLocalDate());
+        if (contactOrganisme.getDateDebutIntervenant() != null) {
+            uiDebutDatePicker.valueProperty().set(contactOrganisme.getDateDebutIntervenant().toLocalDate());
         }
-        if (co.getDateFinIntervenant() != null) {
-            uiFinDatePicker.valueProperty().set(co.getDateFinIntervenant().toLocalDate());
+        if (contactOrganisme.getDateFinIntervenant() != null) {
+            uiFinDatePicker.valueProperty().set(contactOrganisme.getDateFinIntervenant().toLocalDate());
         }
     }
        

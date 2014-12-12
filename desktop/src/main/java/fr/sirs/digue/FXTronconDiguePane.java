@@ -12,6 +12,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
@@ -54,7 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXTronconDiguePane extends BorderPane{
+public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     
     private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     
@@ -155,8 +156,9 @@ public class FXTronconDiguePane extends BorderPane{
         return tronconProperty.get();
     }
     
-    public void setTroncon(TronconDigue troncon){
-        this.tronconProperty.set(troncon);
+    @Override
+    public void setElement(Element troncon){
+        this.tronconProperty.set((TronconDigue) troncon);
     }
         
     @FXML
@@ -270,19 +272,7 @@ public class FXTronconDiguePane extends BorderPane{
             }
         });
         this.uiDigue.getValue().getId();
-//        
-//        this.typeRiveChoiceBox.setItems(FXCollections.observableArrayList(TypeRive.getTypes()));
-//        final StringConverter<String> typesRivesStringConverter = new StringConverter<TypeRive>() {
-//        
-//            @Override
-//            public String toString(TypeRive type) {return type.toString();}
-//
-//            // TODO ?
-//            @Override
-//            public TypeRive fromString(String string) {return null;}
-//        };
-//        
-//        this.typeRiveChoiceBox.setConverter(typesRivesStringConverter);
+        
         this.uiRive.setValue(troncon.getTypeRiveId());
                 
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());

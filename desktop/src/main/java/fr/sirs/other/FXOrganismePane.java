@@ -3,17 +3,16 @@ package fr.sirs.other;
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,7 +20,6 @@ import javafx.scene.Node;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -31,7 +29,7 @@ import javafx.scene.layout.GridPane;
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-public class FXOrganismePane extends BorderPane {
+public class FXOrganismePane extends BorderPane implements FXElementPane {
 
     private Organisme organisme;
     
@@ -75,11 +73,11 @@ public class FXOrganismePane extends BorderPane {
         
         coTable = new ContactOrganismeTable();
         uiContactOrganismesTab.setContent(coTable);
-        setOrganisme(organisme);
+        setElement(organisme);
     }
     
-    private void setOrganisme(final Organisme input) {
-        organisme = input;
+    public void setElement(final Element element) {
+        organisme = (Organisme) element;
         if (organisme == null) {
             organisme = Injector.getSession().getOrganismeRepository().create();
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().add(organisme);});

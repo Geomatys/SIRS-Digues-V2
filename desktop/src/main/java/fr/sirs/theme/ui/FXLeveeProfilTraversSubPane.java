@@ -5,7 +5,6 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ProfilTraversRepository;
-import fr.sirs.core.component.RefOrigineProfilTraversRepository;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.RefOrigineProfilTravers;
@@ -37,7 +36,6 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
 public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane {
     
     private LeveeProfilTravers leveProfilTravers;
-    protected Map<String, Object> resources;
     private final Session session;
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
@@ -61,11 +59,11 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
         session = Injector.getBean(Session.class);
     }
     
-    public FXLeveeProfilTraversSubPane(final LeveeProfilTravers leveProfilTravers,
-            final Map<String, Object> resources){
+    public FXLeveeProfilTraversSubPane(final LeveeProfilTravers leveProfilTravers){
+//            final Map<String, Object> resources){
         this();
         this.leveProfilTravers = leveProfilTravers;
-        this.resources = resources;
+//        this.resources = resources;
         initFields();
     }       
             
@@ -247,7 +245,7 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
     public void preSave() {
         this.leveProfilTravers.setDateMaj(LocalDateTime.now());
         leveProfilTravers.setCommentaire(uiComment.getHtmlText());
-        final ProfilTravers profil = (ProfilTravers) resources.get("profilTravers");
+        final ProfilTravers profil = (ProfilTravers) leveProfilTravers.getParent();//resources.get("profilTravers");
         final Session session = Injector.getBean(Session.class);
         final ProfilTraversRepository repo = session.getProfilTraversRepository();
         repo.update(profil);

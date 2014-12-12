@@ -6,6 +6,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.model.Crete;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.NoninvertibleTransformException;
@@ -33,44 +34,29 @@ import org.opengis.referencing.operation.TransformException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXStructurePane extends BorderPane {
+public class FXObjetPane extends BorderPane implements FXElementPane {
     
-    private final Objet structure;
+    private Objet structure;
     private Node specificThemePane;
+    
     private TronconDigue troncon;
     private TronconDigue newTroncon = null;
     
     @FXML private ScrollPane uiEditDetailTronconTheme;
-      
-    @FXML
-    private Label mode;
-
-    @FXML
-    private FXDateField date_maj;
+    @FXML private FXDateField date_maj;
 
     @FXML
     private Label id;
-
-    @FXML
-    private BorderPane uiBorderPane;
-
-    @FXML
-    private Label mode1;
     
     @FXML private ToggleButton uiEdit;
     @FXML private ToggleButton uiConsult;
     @FXML private Button uiSave;
 
 
-    public FXStructurePane(final Objet structure){
+    public FXObjetPane(final Objet structure){
         SIRS.loadFXML(this);
-        this.structure = structure;
-        final Session session = Injector.getBean(Session.class);
-        troncon = session.getTronconDigueRepository().get(structure.getTroncon());
         
-        initFields();
-        
-        initSubPane();
+        setElement(structure);
         
         final ToggleGroup group = new ToggleGroup();
         uiConsult.setToggleGroup(group);
@@ -167,6 +153,15 @@ public class FXStructurePane extends BorderPane {
         else {
             throw new UnsupportedOperationException("The sub-pane must implement "+ThemePane.class.getCanonicalName()+" interface.");
         }
+    }
+
+    @Override
+    final public void setElement(Element element) {
+        structure = (Objet) element;
+        troncon = (TronconDigue) structure.getParent();
+        
+        initFields();
+        initSubPane();
     }
     
 }

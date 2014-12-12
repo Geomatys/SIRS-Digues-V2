@@ -22,7 +22,7 @@ import fr.sirs.theme.ProfilsEnTraversTheme;
 import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
-import fr.sirs.theme.ui.FXStructurePane;
+import fr.sirs.theme.ui.FXObjetPane;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -529,7 +529,7 @@ public class CorePlugin extends Plugin {
                 
                 setOnAction((ActionEvent event) -> {
                     final FXDiguePane controller = new FXDiguePane();
-                    controller.setDigue(cdt);
+                    controller.setElement(cdt);
                     final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
@@ -542,7 +542,7 @@ public class CorePlugin extends Plugin {
                 
                 setOnAction((ActionEvent event) -> {
                     final FXTronconDiguePane controller = new FXTronconDiguePane();
-                    controller.setTroncon(cdt);
+                    controller.setElement(cdt);
                     final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
@@ -553,7 +553,7 @@ public class CorePlugin extends Plugin {
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-                    final FXStructurePane controller = new FXStructurePane(cdt);
+                    final FXObjetPane controller = new FXObjetPane(cdt);
                     final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);
