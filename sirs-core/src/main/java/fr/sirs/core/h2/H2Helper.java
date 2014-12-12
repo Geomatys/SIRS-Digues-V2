@@ -42,7 +42,7 @@ public class H2Helper {
             throws IOException {
         Path file = getDBFile(connector);
 
-        if (Files.isDirectory(SirsCore.H2_PATH) && !Files.exists(SirsCore.H2_PATH)) {
+        if (Files.isDirectory(SirsCore.H2_PATH) && Files.exists(SirsCore.H2_PATH)) {
             Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc)
@@ -124,6 +124,8 @@ public class H2Helper {
             }
 
         }
+        
+        SQLHelper.addForeignKeys(conn);
         
     }
     
