@@ -114,4 +114,30 @@ public class SirsPreferences extends Properties {
         store();
         reload();
     }
+    
+    /**
+     * Override {@link java.util.Properties#getProperty(String)} method to forbid returning null or empty value.
+     * @param key key of the value to retrieve.
+     * @return The value stored for queried property. Never null or empty.
+     * @throws java.lang.IllegalStateException if queried property has no value.
+     */
+    @Override
+    public String getProperty(String key) {
+        final String property = super.getProperty(key);
+        if (property == null || property.isEmpty()) {
+            throw new IllegalStateException("No valid "+key+ " property defined in "+PREFERENCES_PATH);
+        } else {
+            return property;
+        }
+    }
+
+    /**
+     * Override {@linkplain java.util.Properties#getProperty(String)} method to forbid returning null or empty value.
+     * @param key key for the value to retrieve.
+     * @return The value stored for queried property. Never null or empty.
+     * @throws java.lang.IllegalStateException if queried property has no value.
+     */
+    public String getProperty(PROPERTIES key) {
+        return getProperty(key.name());
+    }
 }

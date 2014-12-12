@@ -3,8 +3,14 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
@@ -54,4 +60,35 @@ public final class SIRS extends SirsCore {
         candidate.getStylesheets().add(CSS_PATH);
     }
     
+    /**
+     * 
+     * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
+     * @return Un chemin absolu vers la réference passée en paramètre.
+     * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
+     * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les 
+     * préférences de l'application.
+     * @throws InvalidPathException Si il est impossible de construire un chemin valide avec le paramètre d'entrée.
+     * 
+     * Note : les deux exceptions ci-dessus ne sont pas lancées dans le cas où le 
+     * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement 
+     * si les chemins sont incorrects syntaxiquement.
+     */
+    public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
+        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
+        final Path docRoot;
+        try {
+            docRoot = Paths.get(rootStr);
+        } catch (InvalidPathException e) {
+            throw new IllegalStateException("La preference " + SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name()
+                    + "ne dénote pas un chemin valide. Vous pouvez vérifier sa valeur "
+                    + "depuis les préférences de l'application (Fichier > Preferences).", e);
+        }
+
+        /* HACK : change all separators, because when we use 2 different system 
+         * separator in the same time, it produces invalid paths. We also check
+         * if path starts with file separato, because unix consider it as system
+         * root, and will not resolve image path as relative if we keep it.
+         */
+        return docRoot.resolve(relativeReference.replaceFirst("^(/+|\\\\+)", "").replaceAll("/+|\\\\+", File.separator));
+    }
 }

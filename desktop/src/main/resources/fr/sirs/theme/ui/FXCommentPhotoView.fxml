@@ -13,12 +13,18 @@
          <children>
             <WebView fx:id="uiCommentArea" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children></AnchorPane>
-    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-         <children>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+         <center>
+            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
+               <children>
+                  <ImageView fx:id="uiPhotoView" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+               </children>
+            </AnchorPane>
+         </center>
+         <top>
+            <VBox BorderPane.alignment="CENTER">
                <children>
                   <ScrollBar fx:id="uiPhotoScroll" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
-                  <ImageView fx:id="uiPhotoView" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS" />
                   <Label fx:id="uiPhotoLibelle">
                      <font>
                         <Font name="System Italic" size="13.0" />
@@ -31,6 +37,7 @@
                   </Label>
                </children>
             </VBox>
-         </children></AnchorPane>
+         </top>
+      </BorderPane>
   </items>
 </fx:root>
