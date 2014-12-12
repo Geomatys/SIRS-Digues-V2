@@ -7,6 +7,7 @@ import fr.sirs.Injector;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.NoninvertibleTransformException;
@@ -38,6 +39,7 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
     
     private Objet structure;
     private Node specificThemePane;
+    private LabelMapper labelMapper;
     
     private TronconDigue troncon;
     private TronconDigue newTroncon = null;
@@ -45,8 +47,8 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
     @FXML private ScrollPane uiEditDetailTronconTheme;
     @FXML private FXDateField date_maj;
 
-    @FXML
-    private Label id;
+    @FXML private Label id;
+    @FXML private Label uiTitle;
     
     @FXML private ToggleButton uiEdit;
     @FXML private ToggleButton uiConsult;
@@ -55,7 +57,7 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
 
     public FXObjetPane(final Objet structure){
         SIRS.loadFXML(this);
-        
+        labelMapper = new LabelMapper(structure.getClass());
         setElement(structure);
         
         final ToggleGroup group = new ToggleGroup();
@@ -124,6 +126,9 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
     }
     
     private void initFields(){
+        if(labelMapper.mapPropertyName("class_name")!=null){
+            uiTitle.setText(labelMapper.mapClassName());
+        }
         id.setText(structure.getId());
         date_maj.valueProperty().bindBidirectional(structure.dateMajProperty());
         date_maj.setDisable(true);

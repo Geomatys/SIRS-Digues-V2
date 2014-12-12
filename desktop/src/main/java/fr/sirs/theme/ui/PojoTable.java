@@ -109,17 +109,19 @@ public class PojoTable extends BorderPane {
     private final Button uiSearch;
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
-    protected final ImageView playIcon = new ImageView(SIRS.ICON_EYE);
-    private final ImageView stopIcon = new ImageView(SIRS.ICON_EYE_SLASH);
+    protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE);
+    private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE);
     protected final Button uiPlay = new Button();
     protected final HBox searchEditionToolbar = new HBox();
     
     // Barre de gauche : navigation dans le parcours de fiches
-    private final ImageView previousIcon = new ImageView(SIRS.ICON_STEP_BACKWARD);
+    protected FXElementPane elementPane = null;
+    private int currentFiche = 0;
+    private final ImageView previousIcon = new ImageView(SIRS.ICON_CARET_LEFT);
     private final Button uiPrevious = new Button();
-    private final ImageView nextIcon = new ImageView(SIRS.ICON_STEP_FORWARD);
+    private final ImageView nextIcon = new ImageView(SIRS.ICON_CARET_RIGHT);
     private final Button uiNext = new Button();
-    private final Label uiCurrent = new Label();
+    private final Button uiCurrent = new Button();
     protected final HBox navigationToolbar = new HBox();
     
     
@@ -127,9 +129,7 @@ public class PojoTable extends BorderPane {
     private ObservableList<Element> allValues;
     private ObservableList<Element> filteredValues;
     
-    protected FXElementPane elementPane = null;
     
-    private int currentFiche = 0;
     
     private final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
@@ -248,8 +248,10 @@ public class PojoTable extends BorderPane {
         navigationToolbar.getStyleClass().add("buttonbarleft");
         
         uiCurrent.setFont(Font.font(20));
+        uiCurrent.getStyleClass().add("btn-without-style"); 
         uiCurrent.setAlignment(Pos.CENTER);
         uiCurrent.setTextFill(Color.WHITE);
+        uiCurrent.setOnAction((ActionEvent event) -> {goTo();});
         
         uiPrevious.setGraphic(previousIcon);
         uiPrevious.getStyleClass().add("btn-without-style"); 
@@ -389,6 +391,37 @@ public class PojoTable extends BorderPane {
         
     }
     
+    protected void goTo(){
+        
+        final Popup popup = new Popup();
+        final TextField textField = new TextField();
+        popup.getContent().add(textField);
+        
+        textField.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                int oldCurrentFiche = currentFiche;
+                try{
+                    currentFiche = Integer.valueOf(textField.getText()).intValue()-1;
+                }
+                catch(Exception e){
+                    System.out.println("Message : "+e.getMessage());
+                }
+                finally{
+                    if(currentFiche<0 || currentFiche>uiTable.getItems().size()-1)
+                        currentFiche=oldCurrentFiche;
+                    
+                    elementPane.setElement(uiTable.getItems().get(currentFiche));
+                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                }
+                popup.hide();
+            }
+        });
+        final Point2D sc = uiCurrent.localToScreen(0, 0);
+        popup.show(uiSearch, sc.getX(), sc.getY());
+        
+    }
+    
     public TableView getUiTable() {
         return uiTable;
     }
@@ -490,7 +523,7 @@ public class PojoTable extends BorderPane {
             tab.setContent(content);
             final Session session = Injector.getSession();
             final Element ele = (Element) pojo;
-            tab.setText(pojo.getClass().getSimpleName());
+            tab.setText(LabelMapper.mapClassName(pojo.getClass()));
             tab.setOnSelectionChanged((Event event) -> {
                 if (tab.isSelected()) {
                     session.prepareToPrint(ele);

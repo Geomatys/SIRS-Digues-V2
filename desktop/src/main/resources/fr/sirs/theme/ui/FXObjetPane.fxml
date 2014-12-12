@@ -38,7 +38,7 @@
               <center>
                   <GridPane hgap="10.0" vgap="20.0" BorderPane.alignment="CENTER">
                       <children>
-                          <Label minWidth="-Infinity" text="Informations sur la structure" textFill="WHITE" GridPane.columnSpan="2">
+                          <Label fx:id="uiTitle" minWidth="-Infinity" text="Informations sur la structure" textFill="WHITE" GridPane.columnSpan="2">
                               <font>
                                   <Font name="System Bold" size="14.0" />
                               </font>
