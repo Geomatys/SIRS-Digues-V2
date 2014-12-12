@@ -2,9 +2,14 @@
 package fr.sirs.launcher;
 
 import fr.sirs.core.SirsCore;
+
 import java.io.PrintStream;
 import java.util.UUID;
 import java.util.logging.Level;
+
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import ch.qos.logback.classic.jul.JULHelper;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -37,10 +42,13 @@ public class Launcher extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Redirect uncaught exceptions to error file, and give them an ID.
-        // TODO : use Logger handler instead ?
-        System.setOut(new PrintStream(SirsCore.LOGS_PATH.toFile()));
-        System.setOut(new PrintStream(SirsCore.ERR_LOGS_PATH.toFile()));
+        SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
+        
+        // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
+        // the initialization phase of your application
+        SLF4JBridgeHandler.install();
+
+        
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);

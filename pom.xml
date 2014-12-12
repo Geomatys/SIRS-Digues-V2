@@ -18,8 +18,50 @@
   <organization>
     <name>Geomatys</name>
   </organization>
+  
+  <!-- =========================================================== -->
+  <!-- Global project parameters -->
+  <!-- =========================================================== -->
+  <properties>
+    <!-- Define parent projects versions -->
+    <slf4j.version>1.7.7</slf4j.version>
+    <geoapi.version>3.1-SNAPSHOT</geoapi.version>
+    <sis.version>0.5-jdk7-SNAPSHOT</sis.version>
+    <geotoolkit.version>4.x-SNAPSHOT</geotoolkit.version>
+    <jai.version>1.1.4</jai.version>
+    <jai-io.version>1.1.1</jai-io.version>
+    <project.encoding>UTF-8</project.encoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+  
   <!-- External dependencies inherited by all modules. -->
   <dependencies>
+      <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    
+    
+    <dependency>
+	<groupId>org.slf4j</groupId>
+	<artifactId>jul-to-slf4j</artifactId>
+	<version>${slf4j.version}</version>
+</dependency>
+    
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -30,19 +72,7 @@
 
 
 
-  <!-- =========================================================== -->
-  <!-- Global project parameters -->
-  <!-- =========================================================== -->
-  <properties>
-    <!-- Define parent projects versions -->
-    <geoapi.version>3.1-SNAPSHOT</geoapi.version>
-    <sis.version>0.5-jdk7-SNAPSHOT</sis.version>
-    <geotoolkit.version>4.x-SNAPSHOT</geotoolkit.version>
-    <jai.version>1.1.4</jai.version>
-    <jai-io.version>1.1.1</jai-io.version>
-    <project.encoding>UTF-8</project.encoding>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  
 
 
   <!-- Optional dependencies. These dependencies are not automatically inherited 
@@ -137,7 +167,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.3.4-SNAPSHOT</version>
+          <version>0.3.5-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>
