@@ -18,7 +18,7 @@ package fr.sirs.map;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.theme.ui.FXPositionnablePane;
+import fr.sirs.theme.ui.FXPositionablePane;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -194,13 +194,13 @@ public class ExportItem extends TreeMenuItem {
             
             if(baseBean instanceof Positionable){
                 final Positionable pos = (Positionable) baseBean;
-                final FXPositionnablePane.PosInfo info = new FXPositionnablePane.PosInfo(pos);
+                final FXPositionablePane.PosInfo info = new FXPositionablePane.PosInfo(pos);
                 
                 try{
                     //on calcul les informations au besoin
                     feature.setPropertyValue("positionDebut", info.getGeoPointStart(null));
                     feature.setPropertyValue("positionFin", info.getGeoPointEnd(null));
-                    final FXPositionnablePane.PosSR possr = info.getForSR();
+                    final FXPositionablePane.PosSR possr = info.getForSR();
                     feature.setPropertyValue("systemeRepId", possr.srid);
                     feature.setPropertyValue("borneDebutId", possr.borneStartId);
                     feature.setPropertyValue("borne_debut_distance", (float)possr.distanceStartBorne);

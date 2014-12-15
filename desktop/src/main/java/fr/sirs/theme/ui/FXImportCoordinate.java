@@ -81,7 +81,7 @@ public class FXImportCoordinate extends BorderPane {
         SIRS.loadFXML(this);
         this.positionable = pos;
         
-        uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionnablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionablePane.CRS_WGS84));
         uiCRS.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new SirsListCell());
         uiCRS.setButtonCell(new SirsListCell());
         uiCRS.getSelectionModel().clearAndSelect(0);

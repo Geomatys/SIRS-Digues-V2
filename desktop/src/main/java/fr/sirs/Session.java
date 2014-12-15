@@ -12,6 +12,7 @@ import org.geotoolkit.map.MapItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.PreviewLabelRepository;
@@ -44,7 +45,7 @@ import org.ektorp.CouchDbConnector;
  * @author Johann Sorel
  */
 @Component
-public class Session {
+public class Session extends SessionGen {
 
     private static final Class[] SUPPORTED_TYPES = new Class[]{
         Boolean.class,
@@ -97,40 +98,56 @@ public class Session {
 
     
     private final CouchDbConnector connector;
+    
+    private final PreviewLabelRepository previewLabelRepository;
+    /*
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final SystemeReperageRepository systemeReperageRepository;
     private final ContactRepository contactRepository;
     private final OrganismeRepository organismeRepository;
-    private final PreviewLabelRepository previewLabelRepository;
     private final ProfilTraversRepository profilTraversRepository;
     private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
     private final RefSystemeReleveProfilRepository refSystemeReleveProfilRepository;
     private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
+    */
 
     private FXMainFrame frame = null;
     
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
+        super(couchDbConnector);
         this.connector = couchDbConnector;
+        
+        previewLabelRepository = new PreviewLabelRepository(connector);
+        
+        /*
         digueRepository = new DigueRepository(connector);
         tronconDigueRepository = new TronconDigueRepository(connector);
         systemeReperageRepository = new SystemeReperageRepository(connector);
         borneDigueRepository = new BorneDigueRepository(connector);
         contactRepository = new ContactRepository(connector);
         organismeRepository = new OrganismeRepository(connector);
-        previewLabelRepository = new PreviewLabelRepository(connector);
         profilTraversRepository = new ProfilTraversRepository(connector);
         refOrigineProfilTraversRepository = new RefOrigineProfilTraversRepository(connector);
         refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(connector);
         refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(connector);
+        */
     }
 
     public CouchDbConnector getConnector() {
         return connector;
     }
     
+    public PreviewLabelRepository getPreviewLabelRepository() {
+        return previewLabelRepository;
+    }    
+    
+    public RefSystemeReleveProfilRepository getSystemeReleveProfilRepository(){
+        return refSystemeReleveProfilRepository;
+    }
+    /*
     public DigueRepository getDigueRepository() {
         return digueRepository;
     }
@@ -155,10 +172,6 @@ public class Session {
         return organismeRepository;
     }
     
-    public PreviewLabelRepository getPreviewLabelRepository() {
-        return previewLabelRepository;
-    }
-    
     public ProfilTraversRepository getProfilTraversRepository() {
         return profilTraversRepository;
     }
@@ -167,14 +180,11 @@ public class Session {
         return refOrigineProfilTraversRepository;
     }
     
-    public RefSystemeReleveProfilRepository getSystemeReleveProfilRepository(){
-        return refSystemeReleveProfilRepository;
-    }
     
     public RefTypeProfilTraversRepository getRefTypeProfilTraversRepository(){
         return refTypeProfilTraversRepository;
     }
-    
+    */
     void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }

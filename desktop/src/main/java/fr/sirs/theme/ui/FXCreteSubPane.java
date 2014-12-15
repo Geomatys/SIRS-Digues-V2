@@ -38,7 +38,7 @@ public class FXCreteSubPane extends BorderPane implements ThemePane {
     private final TronconDigueRepository tronconDigueRepository;
     
     // Propriétés de Positionnable
-    @FXML FXPositionnablePane uiPositionnable;
+    @FXML FXPositionablePane uiPositionnable;
     
     // Propriétés de Structure
     @FXML HTMLEditor uiComment;

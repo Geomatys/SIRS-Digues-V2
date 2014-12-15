@@ -10,6 +10,7 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.WithLibelle;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import javafx.util.StringConverter;
@@ -31,14 +32,8 @@ public class SirsStringConverter extends StringConverter {
         }
 
         String text = "";
-        if (item instanceof Digue) {
-            text = ((Digue) item).getLibelle();
-        } else if (item instanceof TronconDigue) {
-            text = ((TronconDigue) item).getLibelle();
-        } else if (item instanceof BorneDigue) {
-            text = ((BorneDigue) item).getLibelle();
-        } else if (item instanceof SystemeReperage) {
-            text = ((SystemeReperage) item).getLibelle();
+        if (item instanceof WithLibelle) {
+            text = ((WithLibelle)item).getLibelle();
         } else if (item instanceof ElementHit) {
             text = ((ElementHit) item).getLibelle();
         } else if (item instanceof Contact) {

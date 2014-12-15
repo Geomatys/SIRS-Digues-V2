@@ -72,7 +72,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXPositionnablePane extends BorderPane {
+public class FXPositionablePane extends BorderPane {
     
     private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.#");
     
@@ -114,7 +114,7 @@ public class FXPositionnablePane extends BorderPane {
     private final Map<String,BorneDigue> cacheBorneDigue = new HashMap<>();
     private final CoordinateReferenceSystem baseCrs = SirsCore.getEpsgCode();
             
-    public FXPositionnablePane(){
+    public FXPositionablePane(){
         try{
             final Class cdtClass = getClass();
             final String fxmlpath = "/fr/sirs/theme/ui/FXPositionnablePane.fxml";
@@ -347,7 +347,7 @@ public class FXPositionnablePane extends BorderPane {
         
         final WebView view = new WebView();        
         view.getEngine().loadContent(page.toString());
-        view.getEngine().userStyleSheetLocationProperty().set(FXPositionnablePane.class.getResource("/fr/sirs/web.css").toString() );
+        view.getEngine().userStyleSheetLocationProperty().set(FXPositionablePane.class.getResource("/fr/sirs/web.css").toString() );
         
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
