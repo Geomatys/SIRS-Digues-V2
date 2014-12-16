@@ -27,8 +27,13 @@ public class ContactsTheme extends Theme {
         final TabPane tabPane = new TabPane();
         
         final Session session = Injector.getSession();
+        final boolean editable = ((session.getRole()==Session.Role.ADMIN) 
+                || (session.getRole()==Session.Role.USER) 
+                || (session.getRole()==Session.Role.EXTERNE));
         final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Liste des contacts");
+        tableContact.editableProperty().set(editable);
         final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Liste des organismes");
+        tableOrganisme.editableProperty().set(editable);
         
         final Tab tabIntervenant = new Tab("Intervenant");
         tabIntervenant.setContent(tableContact);

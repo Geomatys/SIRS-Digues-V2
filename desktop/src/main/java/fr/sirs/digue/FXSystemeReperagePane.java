@@ -50,6 +50,11 @@ public class FXSystemeReperagePane extends BorderPane {
             updateFields();
         });
         
+        this.visibleProperty().bind(srProperty.isNotNull());
+        
+        uiNom.editableProperty().bind(editableProperty);
+        uiComment.disableProperty().bind(editableProperty.not());
+        uiDate.setDisable(true);
         borneTable.editableProperty().bind(editableProperty);
     }
 

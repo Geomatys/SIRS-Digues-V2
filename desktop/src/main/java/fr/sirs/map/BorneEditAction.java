@@ -1,6 +1,8 @@
 
 package fr.sirs.map;
 
+import fr.sirs.Injector;
+import fr.sirs.Session;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
@@ -22,6 +24,9 @@ public class BorneEditAction extends FXMapAction {
     
     public BorneEditAction(FXMap map) {
         super(map,"Système de repèrage","Edition/Création de borne",ICON_SR);
+        
+        final Session session = Injector.getSession();
+        this.disabledProperty().bind(session.geometryEditionProperty().not());
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override

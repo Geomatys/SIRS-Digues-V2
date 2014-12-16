@@ -1,6 +1,8 @@
 
 package fr.sirs.map;
 
+import fr.sirs.Injector;
+import fr.sirs.Session;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
@@ -20,9 +22,11 @@ public class TronconCutAction extends FXMapAction {
         
     public static final Image ICON_CUT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CUT_ALIAS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
-    
     public TronconCutAction(FXMap map) {
         super(map,"MAJ Tronçon","Découpage d'un tronçon",ICON_CUT);
+        
+        final Session session = Injector.getSession();
+        this.disabledProperty().bind(session.geometryEditionProperty().not());
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override

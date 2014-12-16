@@ -1,6 +1,8 @@
 
 package fr.sirs.map;
 
+import fr.sirs.Injector;
+import fr.sirs.Session;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -17,6 +19,9 @@ public class ConvertGeomToTronconAction extends FXMapAction {
         
     public ConvertGeomToTronconAction(FXMap map) {
         super(map,"Géometrie vers tronçon","Convertir une géométrie en tronçon",GeotkFX.ICON_DUPLICATE);
+        
+        final Session session = Injector.getSession();
+        this.disabledProperty().bind(session.geometryEditionProperty().not());
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override

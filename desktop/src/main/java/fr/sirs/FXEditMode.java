@@ -58,16 +58,11 @@ public class FXEditMode extends VBox {
      
     public void setAllowedRoles(Session.Role... allowed){
         boolean editionGranted = false;
-        System.out.println("role : "+session.getRole().toString());
         for(final Role role : allowed){
-            System.out.println("Role examiné : "+role);
             if(session.getRole()==role) {
-                System.out.println("On autorise !");
                 editionGranted=true;
             }
         }
-        
-        System.out.println("Permission d'édition : "+editionGranted);
         uiEdit.setDisable(!editionGranted);
     }
 

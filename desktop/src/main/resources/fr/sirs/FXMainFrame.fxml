@@ -8,7 +8,7 @@
 
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <top>
-        <MenuBar BorderPane.alignment="CENTER">
+        <MenuBar fx:id="uiMenu" BorderPane.alignment="CENTER">
             <menus>
                 <Menu mnemonicParsing="false" text="Fichier">
                     <items>

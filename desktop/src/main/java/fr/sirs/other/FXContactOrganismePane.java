@@ -46,8 +46,6 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
     @FXML DatePicker uiDebutDatePicker;
     @FXML DatePicker uiFinDatePicker;
     
-    @FXML FXEditMode uiEditMode;
-    
     private final OrganismeRepository orgRepository;
     private final ContactRepository contactRepository;
     
@@ -74,6 +72,7 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
         setElement(co);
     }
     
+    @Override
     public void setElement(final Element element) {
         contactOrganisme = (ContactOrganisme) element;
         

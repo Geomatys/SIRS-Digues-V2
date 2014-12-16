@@ -80,6 +80,7 @@ public class FXOrganismePane extends BorderPane implements FXElementPane {
         setElement(organisme);
     }
     
+    @Override
     public void setElement(final Element element) {
         organisme = (Organisme) element;
         if (organisme == null) {
@@ -130,7 +131,7 @@ public class FXOrganismePane extends BorderPane implements FXElementPane {
     private final class ContactOrganismeTable extends PojoTable {
 
         public ContactOrganismeTable() {
-            super(ContactOrganisme.class, "Liste des organismes", true);
+            super(ContactOrganisme.class, "Liste des organismes");
             editableProperty().bind(uiMode.editionState());
         }
 

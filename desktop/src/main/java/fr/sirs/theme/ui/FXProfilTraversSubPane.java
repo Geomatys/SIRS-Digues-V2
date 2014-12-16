@@ -94,7 +94,7 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
     private class LeveProfilTraversTable extends PojoTable {
 
         public LeveProfilTraversTable() {
-            super(LeveeProfilTravers.class, "Liste des levés de profils en travers", true);
+            super(LeveeProfilTravers.class, "Liste des levés de profils en travers");
         }
 
         @Override

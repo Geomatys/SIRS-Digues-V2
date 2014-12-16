@@ -131,7 +131,7 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
     private class TronconPojoTable extends PojoTable {
     
         public TronconPojoTable() {
-            super(TronconDigue.class, "Liste des tronçons", true);
+            super(TronconDigue.class, "Liste des tronçons");
 
             final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
                 updateTable();

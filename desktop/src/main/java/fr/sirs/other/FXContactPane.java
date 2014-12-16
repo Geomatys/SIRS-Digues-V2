@@ -162,7 +162,7 @@ public class FXContactPane extends BorderPane implements FXElementPane {
     private final class ContactOrganismeTable extends PojoTable {
 
         public ContactOrganismeTable() {
-            super(ContactOrganisme.class, "Liste des organismes", true);
+            super(ContactOrganisme.class, "Liste des organismes");
             editableProperty().bind(uiMode.editionState());
             setTableItems(() -> orgsOfContact);          
         }

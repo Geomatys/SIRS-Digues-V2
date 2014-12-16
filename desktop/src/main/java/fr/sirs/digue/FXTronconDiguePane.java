@@ -21,8 +21,11 @@ import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
 import java.util.logging.Level;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -60,26 +63,30 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     
     private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     
-    @Autowired
-    private Session session;
+    @Autowired private Session session;
     
+    // En-tete
+    @FXML private FXEditMode uiMode;
     @FXML private Label uiId;
     @FXML private TextField uiName;
-    @FXML private HTMLEditor uiComment;
     @FXML private ChoiceBox<Digue> uiDigue;
     @FXML private ChoiceBox<Digue> uiSrDefault;
     @FXML private ChoiceBox<String> uiRive;
+    
+    // Onglet "Description"
+    @FXML private HTMLEditor uiComment;
     @FXML private FXDateField uiDateStart;
     @FXML private FXDateField uiDateEnd;
     
-    @FXML private FXEditMode uiMode;
-    @FXML private BorderPane uiSrTab;
+    // Onglet "SR"
+    @FXML private ListView<SystemeReperage> uiSRList;
     @FXML private Button uiSRDelete;
     @FXML private Button uiSRAdd;
-    @FXML private ListView<SystemeReperage> uiSRList;
-    @FXML private Tab uiContactTab;
-    
+    @FXML private BorderPane uiSrTab;
     private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
+    
+    // Onglet "Contacts"
+    @FXML private Tab uiContactTab;
     private final ContactTable uiContactTable = new ContactTable();
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
@@ -93,22 +100,30 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
         uiMode.setSaveAction(this::save);
         final BooleanProperty editBind = uiMode.editionState();
+        final BooleanBinding editSR = Bindings.and(editBind, new SimpleBooleanProperty(session.getRole()!=USER));
+        
+        // Binding
         uiName.editableProperty().bind(editBind);
         uiDigue.disableProperty().bind(editBind.not());
         uiSrDefault.disableProperty().bind(editBind.not());
         uiRive.disableProperty().bind(editBind.not());
+        
         uiDateStart.disableProperty().bind(editBind.not());
         uiDateEnd.disableProperty().bind(editBind.not());
         uiComment.disableProperty().bind(editBind.not());
-        uiContactTable.editableProperty().bind(editBind);
-        srController.editableProperty().bind(editBind);
-        uiSRAdd.disableProperty().bind(editBind.not());
-        uiSRDelete.disableProperty().bind(editBind.not());
         
+        srController.editableProperty().bind(editSR);
+        uiSRAdd.disableProperty().bind(editSR.not());
+        uiSRDelete.disableProperty().bind(editSR.not());
+        
+        uiContactTable.editableProperty().bind(editBind);
+        
+        // Troncon change listener
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
         });
            
+        // Layout
         uiSrTab.setCenter(srController);
         uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
         uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
@@ -285,7 +300,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     private final class ContactTable extends PojoTable{
 
         public ContactTable() {
-            super(ContactTroncon.class, "Liste des contacts", true);
+            super(ContactTroncon.class, "Liste des contacts");
         }
 
         @Override

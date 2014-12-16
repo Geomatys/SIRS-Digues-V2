@@ -23,20 +23,19 @@ import javafx.scene.control.TableColumn;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DefaultTronconPojoTable extends PojoTable{
+public class DefaultTronconPojoTable extends PojoTable {
     
     private final ObjectProperty<TronconDigue> troncon = new SimpleObjectProperty<>();
     private final AbstractTronconTheme.ThemeGroup group;
 
     public DefaultTronconPojoTable(AbstractTronconTheme.ThemeGroup group) {
-        super(group.getDataClass(), group.getTableTitle(), true);
+        super(group.getDataClass(), group.getTableTitle());
         this.group = group;
         
         final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
             updateTable();
-            if(mode==Mode.FICHE){
-                mode = Mode.TABLE;
-//                navigablePanels=null;
+            if(ficheModeProperty.get()){
+                ficheModeProperty.set(false);
                 navigationToolbar.setVisible(false);
                 setCenter(uiTable);
                 editableProperty.setValue(true);

@@ -1,6 +1,8 @@
 
 package fr.sirs.map;
 
+import fr.sirs.Injector;
+import fr.sirs.Session;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -17,6 +19,9 @@ public class TronconEditAction extends FXMapAction {
         
     public TronconEditAction(FXMap map) {
         super(map,"Tronçon","Edition/Création de tronçon",GeotkFX.ICON_EDIT);
+        
+        final Session session = Injector.getSession();
+        this.disabledProperty().bind(session.geometryEditionProperty().not());
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override

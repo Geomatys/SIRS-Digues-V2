@@ -7,6 +7,7 @@ import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.theme.ui.FXReferencesPane;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.awt.Desktop;
@@ -18,10 +19,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
@@ -36,6 +38,7 @@ import org.geotoolkit.font.IconBuilder;
 public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    private final Session session = Injector.getBean(Session.class);
     
     @FXML private MenuItem uiPref;
     @FXML private MenuButton uiThemes;
@@ -45,6 +48,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private Button uiMapButton;
     @FXML private Button uiPrintButton;
     @FXML private MenuItem uiDeconnect;
+    @FXML private MenuBar uiMenu;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -63,6 +67,28 @@ public class FXMainFrame extends BorderPane {
             else{
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
+        }
+        
+        if(session.getRole()==Session.Role.ADMIN){
+            final Menu uiAdmin = new Menu("Administration");
+            final MenuItem uiUserAdmin = new MenuItem("Utilisateurs");
+            uiUserAdmin.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    openUsersTab();
+                }
+            });
+            final MenuItem uiDocsAdmin = new MenuItem("Validation");
+            uiDocsAdmin.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    openDocsTab();
+                }
+            });
+            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);
+            uiMenu.getMenus().add(1, uiAdmin);
         }
     }
     
@@ -163,7 +189,6 @@ public class FXMainFrame extends BorderPane {
     
     @FXML void deconnect(ActionEvent event) throws IOException{
         this.getScene().getWindow().hide();
-        final Session session = Injector.getBean(Session.class);
         session.setUtilisateur(null);
         final Loader loader = new Loader();
         loader.showLoginStage();
@@ -176,7 +201,6 @@ public class FXMainFrame extends BorderPane {
             @Override
             public void run() {
 
-                final Session session = Injector.getBean(Session.class);
                 final Object obj = session.getObjectToPrint();
                 final File fileToPrint;
                 final List avoidFields = new ArrayList<>();
@@ -202,5 +226,18 @@ public class FXMainFrame extends BorderPane {
         };
         t.start();
     }
+    
+    private void openUsersTab(){
+        final Tab usersTab = new Tab("Utilisateurs");
+        
+        final PojoTable usersTable = new PojoTable(session.getUtilisateurRepository(), "Table des utilisateurs");
+        usersTab.setContent(usersTable);
+        addTab(usersTab);
+    }
 
+    private void openDocsTab(){
+        final Tab docsTab = new Tab("Validation");
+//        final PojoTable docsTable = new PojoTable(session.getPreviewLabelRepository(), "Table des documents");
+        addTab(docsTab);
+    }
 }

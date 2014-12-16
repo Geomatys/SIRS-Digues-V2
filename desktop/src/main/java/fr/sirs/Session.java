@@ -1,8 +1,6 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.ContactRepository;
 
 import java.util.List;
 
@@ -13,16 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.sirs.core.component.SessionGen;
-import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.component.PreviewLabelRepository;
-import fr.sirs.core.component.ProfilTraversRepository;
-import fr.sirs.core.component.RefOrigineProfilTraversRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
-import fr.sirs.core.component.RefTypeProfilTraversRepository;
-import fr.sirs.core.component.SystemeReperageRepository;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
@@ -39,6 +29,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import org.ektorp.CouchDbConnector;
 
@@ -57,18 +51,43 @@ public class Session extends SessionGen {
     public void setUtilisateur(final Utilisateur utilisateur){
         this.utilisateur = utilisateur;
         if(utilisateur!=null){
-            this.role = Role.valueOf(utilisateur.getRole());
+            this.role.set(Role.valueOf(utilisateur.getRole()));
+            needValidationProperty.set(false);
+            geometryEditionProperty.set(false);
+            nonGeometryEditionProperty.set(false);
+            if(role.get()==Role.ADMIN || role.get()==Role.EXTERNE){
+                geometryEditionProperty.set(true);
+                nonGeometryEditionProperty.set(true);
+                if(role.get()==Role.EXTERNE){
+                    needValidationProperty.set(true);
+                }
+            }
+            else if(role.get()==Role.USER){
+                geometryEditionProperty.set(false);
+                nonGeometryEditionProperty.set(true);
+            }
+            else if(role.get()==Role.CONSULTANT){
+                geometryEditionProperty.set(false);
+                nonGeometryEditionProperty.set(false);
+            }
         } 
         else{
-            this.role = null;
+            this.role.set(null);
+            geometryEditionProperty.set(false);
+            nonGeometryEditionProperty.set(false);
         }
     }
-    private final UtilisateurRepository utilisateurRepository;
-    public UtilisateurRepository getUtilisateurRepository(){return utilisateurRepository;}
+    
+    private BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
+    public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
+    private BooleanProperty nonGeometryEditionProperty = new SimpleBooleanProperty(false);
+    public BooleanProperty nonGeometryEditionProperty() {return nonGeometryEditionProperty;}
+    private BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
+    public BooleanProperty needValidationProperty() {return needValidationProperty;}
     
     public enum Role{ADMIN, USER, CONSULTANT, EXTERNE};
-    private Role role;
-    public Role getRole(){return role;}
+    private ObjectProperty<Role> role = new SimpleObjectProperty();
+    public Role getRole(){return role.get();}
     ////////////////////////////////////////////////////////////////////////////
 
     private static final Class[] SUPPORTED_TYPES = new Class[]{
@@ -145,20 +164,6 @@ public class Session extends SessionGen {
         this.connector = couchDbConnector;
         
         previewLabelRepository = new PreviewLabelRepository(connector);
-        
-        /*
-        digueRepository = new DigueRepository(connector);
-        tronconDigueRepository = new TronconDigueRepository(connector);
-        systemeReperageRepository = new SystemeReperageRepository(connector);
-        borneDigueRepository = new BorneDigueRepository(connector);
-        contactRepository = new ContactRepository(connector);
-        organismeRepository = new OrganismeRepository(connector);
-        profilTraversRepository = new ProfilTraversRepository(connector);
-        refOrigineProfilTraversRepository = new RefOrigineProfilTraversRepository(connector);
-        refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(connector);
-        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(connector);
-        */
-        utilisateurRepository = new UtilisateurRepository(connector);
     }
 
     public CouchDbConnector getConnector() {
@@ -172,44 +177,7 @@ public class Session extends SessionGen {
     public RefSystemeReleveProfilRepository getSystemeReleveProfilRepository(){
         return refSystemeReleveProfilRepository;
     }
-    /*
-    public DigueRepository getDigueRepository() {
-        return digueRepository;
-    }
-
-    public TronconDigueRepository getTronconDigueRepository() {
-        return tronconDigueRepository;
-    }
     
-    public BorneDigueRepository getBorneDigueRepository(){
-        return borneDigueRepository;
-    }
-
-    public SystemeReperageRepository getSystemeReperageRepository(){
-        return systemeReperageRepository;
-    }
-
-    public ContactRepository getContactRepository() {
-        return contactRepository;
-    }
-
-    public OrganismeRepository getOrganismeRepository() {
-        return organismeRepository;
-    }
-    
-    public ProfilTraversRepository getProfilTraversRepository() {
-        return profilTraversRepository;
-    }
-    
-    public RefOrigineProfilTraversRepository getRefOrigineProfilTraversRepository(){
-        return refOrigineProfilTraversRepository;
-    }
-    
-    
-    public RefTypeProfilTraversRepository getRefTypeProfilTraversRepository(){
-        return refTypeProfilTraversRepository;
-    }
-    */
     void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }
