@@ -2,6 +2,9 @@
 package fr.sirs.query;
 
 import static fr.sirs.SIRS.CSS_PATH;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,6 +21,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.feature.type.AssociationType;
+import org.geotoolkit.feature.type.ComplexType;
+import org.geotoolkit.feature.type.PropertyDescriptor;
+import org.geotoolkit.feature.type.PropertyType;
 import org.geotoolkit.gui.javafx.util.TextFieldCompletion;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -79,6 +86,8 @@ public class FXSQLFilterEditor extends GridPane {
     private final GridPane uiPropertyPane = new GridPane();
     private ObservableList<String> choices = FXCollections.observableArrayList();
     
+    private ComplexType type;
+    
     private FXSQLFilterEditor uiSub1 = null;
     private FXSQLFilterEditor uiSub2 = null;
     
@@ -138,13 +147,38 @@ public class FXSQLFilterEditor extends GridPane {
         final TextFieldCompletion textFieldCompletion = new TextFieldCompletion(uiPropertyName){
             @Override
             protected ObservableList<String> getChoices(String text) {
-                return choices;
+                return FXSQLFilterEditor.this.getChoices();
             }
         };
         
     }
 
     public ObservableList<String> getChoices() {
+        if(type!=null){
+            final String text = uiPropertyName.getText();
+            final String[] parts = text.split("/");
+            
+            final ObservableList<String> candidates = FXCollections.observableArrayList();
+            
+            final StringBuilder sb = new StringBuilder();
+            
+            ComplexType ct = type;
+            for(int i=0;i<parts.length;i++){
+                PropertyDescriptor desc = ct.getDescriptor(parts[i]);
+                if(desc==null) break;
+                final PropertyType propType = desc.getType();
+                if(propType instanceof AssociationType){
+                    ct = (ComplexType) ((AssociationType) propType).getRelatedType();
+                    sb.append(parts[i]).append('/');
+                }
+            }
+            
+            if(ct!=null){
+                candidates.addAll(listProps(sb.toString(), ct));
+            }
+            return candidates;
+        }
+        
         return choices;
     }
 
@@ -152,7 +186,24 @@ public class FXSQLFilterEditor extends GridPane {
         this.choices = choices;
         uiTypeBox.getSelectionModel().select(Type.NONE);
     }
-        
+
+    public ComplexType getType() {
+        return type;
+    }
+
+    public void setType(ComplexType type) {
+        this.type = type;
+    }
+    
+    private static List<String> listProps(String base, ComplexType ct){
+        final List<String> lst = new ArrayList<>();
+        for(PropertyDescriptor desc : ct.getDescriptors()){
+            lst.add(base+desc.getName().getLocalPart());
+        }
+        Collections.sort(lst);
+        return lst;
+    }
+    
     private void typeChanged(ObservableValue<? extends Type> observable, Type oldValue, Type newValue){
         while(getChildren().size()>1){
             getChildren().remove(1);
@@ -165,6 +216,8 @@ public class FXSQLFilterEditor extends GridPane {
             uiSub2 = new FXSQLFilterEditor();
             uiSub1.setChoices(choices);
             uiSub2.setChoices(choices);
+            uiSub1.setType(type);
+            uiSub2.setType(type);
             add(uiSub1,2,0,1,2);  
             add(uiSub2,2,2,1,2);
             

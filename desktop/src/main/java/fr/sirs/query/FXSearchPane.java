@@ -111,7 +111,7 @@ public class FXSearchPane extends BorderPane {
     
     private final Session session;
 
-    private H2FeatureStore h2Connection;
+    private H2FeatureStore h2Store;
     
     public FXSearchPane() {
         SIRS.loadFXML(this);
@@ -146,9 +146,9 @@ public class FXSearchPane extends BorderPane {
 
         try {
             //h2 connection
-            h2Connection = (H2FeatureStore) H2Helper.createStore(session.getConnector());
+            h2Store = (H2FeatureStore) H2Helper.createStore(session.getConnector());
             
-            final Set<Name> names = h2Connection.getNames();
+            final Set<Name> names = h2Store.getNames();
             final ObservableList lst = FXCollections.observableArrayList();
             for(Name n : names) lst.add(n.getLocalPart());
             Collections.sort(lst);
@@ -164,14 +164,8 @@ public class FXSearchPane extends BorderPane {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if(newValue!=null){
                     try {
-                        FeatureType type = h2Connection.getFeatureType(newValue);
-                        final ObservableList<String> choices = FXCollections.observableArrayList();
-                        for(PropertyDescriptor desc : type.getDescriptors()){
-                            final String propName = desc.getName().getLocalPart();
-                            choices.add(propName);
-                        }
-                        Collections.sort(choices);
-                        uiFilterEditor.setChoices(choices);
+                        FeatureType type = h2Store.getFeatureType(newValue);
+                        uiFilterEditor.setType(type);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -273,7 +267,7 @@ public class FXSearchPane extends BorderPane {
         
         if(file!=null){
             try{
-                final Connection cnx = h2Connection.getDataSource().getConnection();
+                final Connection cnx = h2Store.getDataSource().getConnection();
                 H2Helper.dumbSchema(cnx, file.toPath());
                 cnx.close();
             }catch(Exception ex){
@@ -284,7 +278,7 @@ public class FXSearchPane extends BorderPane {
     
     @FXML
     private void search(ActionEvent event) {
-        if(h2Connection==null) return;
+        if(h2Store==null) return;
         
         try{
             if(uiTogglePlainText.isSelected()){
@@ -351,8 +345,8 @@ public class FXSearchPane extends BorderPane {
                 if(tableName==null) return;
                 final Filter filter = uiFilterEditor.toFilter();
                 
-                final FeatureType ft = h2Connection.getFeatureType(tableName);
-                final FilterToSQL filterToSQL = h2Connection.getDialect().getFilterToSQL(ft);
+                final FeatureType ft = h2Store.getFeatureType(tableName);
+                final FilterToSQL filterToSQL = h2Store.getDialect().getFilterToSQL(ft);
                 final StringBuilder sb = new StringBuilder();
                 filter.accept(filterToSQL, sb);
                 final String condition = sb.toString();
@@ -380,7 +374,7 @@ public class FXSearchPane extends BorderPane {
 
         final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
                 JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("search"));
-        final FeatureCollection col = h2Connection.createSession(false).getFeatureCollection(fsquery);
+        final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultRasterStyle());
 
         final FXFeatureTable table = new FXFeatureTable();

@@ -83,6 +83,7 @@ public class H2Helper {
         Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
         Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
         Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
+        Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
         Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
         
         return new H2FeatureStoreFactory().create(params);
