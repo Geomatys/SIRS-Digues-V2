@@ -1,7 +1,5 @@
 package fr.sirs.core;
 
-import java.util.UUID;
-
 import org.ektorp.support.CouchDbDocument;
 
 @SuppressWarnings("serial")

@@ -1,12 +1,10 @@
 package fr.sirs.core.h2;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
@@ -15,8 +13,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.sis.storage.DataStoreException;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.db.h2.H2FeatureStoreFactory;
+import org.geotoolkit.parameter.Parameters;
 import org.h2.util.JdbcUtils;
+import org.opengis.parameter.ParameterValueGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +28,6 @@ import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.sql.SQLHelper;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.sis.storage.DataStoreException;
-import org.geotoolkit.data.FeatureStore;
-import org.geotoolkit.db.h2.H2FeatureStore;
-import org.geotoolkit.db.h2.H2FeatureStoreFactory;
-import org.geotoolkit.jdbc.DBCPDataSource;
-import org.geotoolkit.parameter.Parameters;
-import org.opengis.parameter.ParameterValueGroup;
 
 public class H2Helper {
     
