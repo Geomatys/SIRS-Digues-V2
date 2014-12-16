@@ -284,38 +284,7 @@ public final class LinearReferencingUtilities extends Static{
                 distanceFin = temp;
             }
             
-            //on s"assure de ne pas sortir du troncon
-            final double tronconLength = troncon.getLength();
-            distanceDebut = XMath.clamp(distanceDebut, 0, tronconLength);
-            distanceFin = XMath.clamp(distanceFin, 0, tronconLength);
-            
-            //create du tracé de la structure le long du troncon
-            final PathIterator ite = new JTSLineIterator(troncon, null);
-            final PathWalker walker = new PathWalker(ite);
-            walker.walk((float)distanceDebut);
-            float remain = (float) (distanceFin-distanceDebut);
-            
-            final List<Coordinate> structureCoords = new ArrayList<>();
-            Point2D point = walker.getPosition(null);
-            structureCoords.add(new Coordinate(point.getX(), point.getY()));
-            
-            while(!walker.isFinished() && remain>0){
-                final float advance = Math.min(walker.getSegmentLengthRemaining(), remain);
-                remain -= advance;
-                walker.walk(advance);
-                point = walker.getPosition(point);
-                structureCoords.add(new Coordinate(point.getX(), point.getY()));
-            }
-            
-            if(structureCoords.size()==1){
-                //point unique, on le duplique pour obtenir on moins un segment
-                structureCoords.add(new Coordinate(structureCoords.get(0)));
-            }
-            
-            final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));
-            JTS.setCRS(geom, GeometryDeserializer.PROJECTION);
-            
-            return geom;
+            return cut(troncon, distanceDebut, distanceFin);
         }
         
         return null;
@@ -335,6 +304,41 @@ public final class LinearReferencingUtilities extends Static{
             }
         }
         return troncon;
+    }
+    
+    public static LineString cut(LineString linear, double distanceDebut, double distanceFin){
+        
+        //on s"assure de ne pas sortir du troncon
+        final double tronconLength = linear.getLength();
+        distanceDebut = XMath.clamp(distanceDebut, 0, tronconLength);
+        distanceFin = XMath.clamp(distanceFin, 0, tronconLength);
+
+        //create du tracé de la structure le long du troncon
+        final PathIterator ite = new JTSLineIterator(linear, null);
+        final PathWalker walker = new PathWalker(ite);
+        walker.walk((float)distanceDebut);
+        float remain = (float) (distanceFin-distanceDebut);
+
+        final List<Coordinate> structureCoords = new ArrayList<>();
+        Point2D point = walker.getPosition(null);
+        structureCoords.add(new Coordinate(point.getX(), point.getY()));
+
+        while(!walker.isFinished() && remain>0){
+            final float advance = Math.min(walker.getSegmentLengthRemaining(), remain);
+            remain -= advance;
+            walker.walk(advance);
+            point = walker.getPosition(point);
+            structureCoords.add(new Coordinate(point.getX(), point.getY()));
+        }
+
+        if(structureCoords.size()==1){
+            //point unique, on le duplique pour obtenir on moins un segment
+            structureCoords.add(new Coordinate(structureCoords.get(0)));
+        }
+
+        final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));
+        JTS.setCRS(geom, GeometryDeserializer.PROJECTION);
+        return geom;
     }
     
 }
