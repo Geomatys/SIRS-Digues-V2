@@ -2,12 +2,15 @@ package fr.sirs.importer.theme.document.related.convention;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+
+import fr.sirs.core.model.ContactConvention;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -23,7 +27,7 @@ import org.ektorp.CouchDbConnector;
  */
 class ConventionSignataireOrganismeImporter extends GenericImporter {
 
-    private Map<Integer, List<ContactTroncon>> signatairesByConventionId = null;
+    private Map<Integer, List<ContactConvention>> signatairesByConventionId = null;
     private OrganismeImporter organismeImporter;
 
     private ConventionSignataireOrganismeImporter(final Database accessDatabase,
@@ -51,7 +55,7 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    public Map<Integer, List<ContactTroncon>> getOrganisationSignataire() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<ContactConvention>> getOrganisationSignataire() throws IOException, AccessDbImporterException {
         if (signatairesByConventionId == null) compute();
         return signatairesByConventionId;
     }
@@ -79,7 +83,7 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactTroncon signataire = new ContactTroncon();
+            final ContactConvention signataire = new ContactConvention();
             
             signataire.setTypeContact("Signataire");
 
@@ -88,7 +92,7 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeSignataires = signatairesByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            List<ContactConvention> listeSignataires = signatairesByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(listeSignataires == null){
                 listeSignataires = new ArrayList<>();
             }

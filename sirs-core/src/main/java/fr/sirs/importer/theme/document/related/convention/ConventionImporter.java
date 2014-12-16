@@ -1,12 +1,16 @@
 package fr.sirs.importer.theme.document.related.convention;
 
 import fr.sirs.importer.*;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+
+import fr.sirs.core.model.ContactConvention;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefConvention;
 import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -71,8 +76,8 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
         related = new HashMap<>();
         
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypes();
-        final Map<Integer, List<ContactTroncon>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
-        final Map<Integer, List<ContactTroncon>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
+        final Map<Integer, List<ContactConvention>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
+        final Map<Integer, List<ContactConvention>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -101,12 +106,12 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
                 convention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-             List<ContactTroncon> contacts;
+             List<ContactConvention> contacts;
             
-            final List<ContactTroncon> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            final List<ContactConvention> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             contacts=organisationsSignataires;
             
-            final List<ContactTroncon> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            final List<ContactConvention> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
             else if(contacts==null) contacts=intervenantsSignataires;
             
