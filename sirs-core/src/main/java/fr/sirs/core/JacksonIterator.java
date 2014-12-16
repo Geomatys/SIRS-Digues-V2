@@ -35,8 +35,7 @@ public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
             return null;
         Row next = iterator.next();
         try {
-            return objectMapper.reader(clazz).readValue(
-                    next.getValue());
+            return objectMapper.reader(clazz).readValue(next.getValueAsNode());
         } catch (IOException e) {
             throw new SirsCoreRuntimeExecption(e);
         }
