@@ -346,12 +346,12 @@ public class FXSearchPane extends BorderPane {
                 final Filter filter = uiFilterEditor.toFilter();
                 
                 final FeatureType ft = h2Store.getFeatureType(tableName);
-                final FilterToSQL filterToSQL = h2Store.getDialect().getFilterToSQL(ft);
+                final FilterToSQL filterToSQL = new SirsFilterToSQL(ft);
                 final StringBuilder sb = new StringBuilder();
                 filter.accept(filterToSQL, sb);
                 final String condition = sb.toString();
                 
-                final String query = "SELECT * FROM "+tableName+" WHERE "+condition;
+                final String query = "SELECT * FROM \""+tableName+"\" WHERE "+condition;
                 uiSimpleSQL.setText(query);
                 searchSQL(query);
                 

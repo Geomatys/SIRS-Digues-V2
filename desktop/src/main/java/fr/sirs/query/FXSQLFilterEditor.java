@@ -20,6 +20,8 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import static org.geotoolkit.db.JDBCFeatureStore.JDBC_PROPERTY_RELATION;
+import org.geotoolkit.db.reverse.RelationMetaModel;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.AssociationType;
 import org.geotoolkit.feature.type.ComplexType;
@@ -198,7 +200,10 @@ public class FXSQLFilterEditor extends GridPane {
     private static List<String> listProps(String base, ComplexType ct){
         final List<String> lst = new ArrayList<>();
         for(PropertyDescriptor desc : ct.getDescriptors()){
-            lst.add(base+desc.getName().getLocalPart());
+            final RelationMetaModel relation = (RelationMetaModel)desc.getUserData().get(JDBC_PROPERTY_RELATION);
+            if(relation==null || relation.isImported()){
+                lst.add(base+desc.getName().getLocalPart());
+            }
         }
         Collections.sort(lst);
         return lst;
