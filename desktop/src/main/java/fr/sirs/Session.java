@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
@@ -143,18 +144,6 @@ public class Session extends SessionGen {
     private final CouchDbConnector connector;
     
     private final PreviewLabelRepository previewLabelRepository;
-    /*
-    private final DigueRepository digueRepository;
-    private final TronconDigueRepository tronconDigueRepository;
-    private final BorneDigueRepository borneDigueRepository;
-    private final SystemeReperageRepository systemeReperageRepository;
-    private final ContactRepository contactRepository;
-    private final OrganismeRepository organismeRepository;
-    private final ProfilTraversRepository profilTraversRepository;
-    private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
-    private final RefSystemeReleveProfilRepository refSystemeReleveProfilRepository;
-    private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
-    */
 
     private FXMainFrame frame = null;
     

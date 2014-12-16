@@ -22,10 +22,7 @@ public class SirsCore {
     public static final Logger LOGGER = Logging.getLogger(SirsCore.class);
     public static final String NAME = "sirs";
     
-    public static final Path CONFIGURATION_PATH;
-    
-    private static CoordinateReferenceSystem PROJECTION;
-    
+    public static final Path CONFIGURATION_PATH;    
     static {
         Path tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
         if (!Files.isDirectory(tmpPath)) {
@@ -54,6 +51,8 @@ public class SirsCore {
     public static final Path ERR_LOGS_PATH = CONFIGURATION_PATH.resolve("errors.log");
     
     public static final Path EPSG_PATH = CONFIGURATION_PATH.resolve("EPSG");
+    
+    private static CoordinateReferenceSystem PROJECTION;
     
     /**
      * User directory root folder.

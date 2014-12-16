@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +45,17 @@ public final class SIRS extends SirsCore {
         
     private SIRS(){};
     
-    public static void loadFXML(Parent candidate){
+    public static void loadFXML(Parent candidate) {
+        loadFXML(candidate, null);
+    }
+    
+    /**
+     * Load FXML document matching input controller. If a model class is given, 
+     * we'll try to load a bundle for text internationalization.
+     * @param candidate The controller object to get FXMl for.
+     * @param modelClass A class which will be used for bundle loading.
+     */
+    public static void loadFXML(Parent candidate, final Class modelClass) {
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
         final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
@@ -53,11 +64,18 @@ public final class SIRS extends SirsCore {
         //in special environement like osgi or other, we must use the proper class loaders
         //not necessarly the one who loaded the FXMLLoader class
         loader.setClassLoader(cdtClass.getClassLoader());
+        
+        // If possible, initialize traduction bundle.
+        if (modelClass != null) {
+            loader.setResources(ResourceBundle.getBundle(modelClass.getName()));
+        }
+        
         try {
             loader.load();
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
+        
         candidate.getStylesheets().add(CSS_PATH);
     }
     

@@ -341,7 +341,7 @@ public class Loader extends Application {
 
                 updateMessage("Exporting data to RDBMS");
 
-                H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class));
+                //H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class));
 
                 updateProgress(inc++, total);
 
