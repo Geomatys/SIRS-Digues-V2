@@ -1,5 +1,9 @@
 package fr.sirs;
 
+import static fr.sirs.Session.Role.ADMIN;
+import static fr.sirs.Session.Role.CONSULTANT;
+import static fr.sirs.Session.Role.EXTERNE;
+import static fr.sirs.Session.Role.USER;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -38,8 +42,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.json.GeometryDeserializer;
+import java.util.List;
 
 /**
  *
@@ -153,7 +160,7 @@ public class Loader extends Application {
                         public void handle(ActionEvent actionEvent) {
                             splashStage.hide();
                             try {
-                                showMainStage();
+                                showLoginStage();
                             } catch (IOException ex) {
                                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                             }
@@ -169,11 +176,88 @@ public class Loader extends Application {
         });
 
     }
+    /**
+     * Display login screen.
+     *
+     * @param task
+     * @throws IOException
+     */
+    public void showLoginStage() throws IOException {
+
+        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXLoginscreen.fxml"));
+        final Parent root = loader.load();
+        final FXLoginscreen controller = loader.getController();
+
+        final Scene scene = new Scene(root);
+        scene.setFill(null);
+        scene.getStylesheets().add("/fr/sirs/splashscreen.css");
+
+        final Stage splashStage = new Stage();
+        splashStage.setTitle("SIRS-Digues V2");
+        splashStage.initStyle(StageStyle.TRANSPARENT);
+        splashStage.setScene(scene);
+        splashStage.show();
+        
+        final Session session = Injector.getBean(Session.class);
+        final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
+        
+        controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                controller.uiProgressLabel.setText("Recherche…");
+                final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
+                Utilisateur user = null;
+                
+                for(final Utilisateur candidate : candidateUsers){
+                    if(candidate.getPassword().equals(controller.uiPassword.getText())){
+                        user = candidate; break;
+                    }
+                }
+                
+                // Accès provisoire comme Admin sans identifiants
+                if("".equals(controller.uiLogin.getText())
+                        && "".equals(controller.uiPassword.getText())){
+                    user = new Utilisateur();
+                    user.setRole(Session.Role.ADMIN.toString());
+                }
+                
+                if(user==null){
+                    controller.uiProgressLabel.setText("Identifiants erronés.");
+                    controller.uiLogin.setText("");
+                    controller.uiPassword.setText("");
+                }
+                else{
+                    session.setUtilisateur(user);
+                    if(session.getRole()==ADMIN 
+                            || session.getRole()==USER 
+                            || session.getRole()==CONSULTANT 
+                            || session.getRole()==EXTERNE){
+                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                        fadeSplash.setFromValue(1.0);
+                        fadeSplash.setToValue(0.0);
+                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent actionEvent) {
+                                splashStage.hide();
+                                try {
+                                    showMainStage();
+                                } catch (IOException ex) {
+                                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                                }
+                            }
+                        });
+                        fadeSplash.play();
+                    }
+                }
+            }
+        });
+    }
 
     /**
      * Display the main frame.
      */
-    private void showMainStage() throws IOException {
+    private static void showMainStage() throws IOException {
                 
         final FXMainFrame frame = new FXMainFrame();
         final Session session = Injector.getBean(Session.class);

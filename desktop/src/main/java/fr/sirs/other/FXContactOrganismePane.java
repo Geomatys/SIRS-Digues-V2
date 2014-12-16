@@ -4,6 +4,9 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import static fr.sirs.Session.Role.ADMIN;
+import static fr.sirs.Session.Role.EXTERNE;
+import static fr.sirs.Session.Role.USER;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
@@ -57,6 +60,7 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
         orgRepository = session.getOrganismeRepository();
         contactRepository = session.getContactRepository();
         
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
         final BooleanBinding editProp = uiMode.editionState().not();
         uiContactChoice.disableProperty().bind(editProp);
         uiOrganismeChoice.disableProperty().bind(editProp);

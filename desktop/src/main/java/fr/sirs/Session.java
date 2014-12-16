@@ -22,8 +22,10 @@ import fr.sirs.core.component.RefSystemeReleveProfilRepository;
 import fr.sirs.core.component.RefTypeProfilTraversRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.property.Internal;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -46,6 +48,28 @@ import org.ektorp.CouchDbConnector;
  */
 @Component
 public class Session extends SessionGen {
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // GESTION DES DROITS
+    ////////////////////////////////////////////////////////////////////////////
+    private Utilisateur utilisateur = null;
+    public Utilisateur getUtilisateur() {return utilisateur;}
+    public void setUtilisateur(final Utilisateur utilisateur){
+        this.utilisateur = utilisateur;
+        if(utilisateur!=null){
+            this.role = Role.valueOf(utilisateur.getRole());
+        } 
+        else{
+            this.role = null;
+        }
+    }
+    private final UtilisateurRepository utilisateurRepository;
+    public UtilisateurRepository getUtilisateurRepository(){return utilisateurRepository;}
+    
+    public enum Role{ADMIN, USER, CONSULTANT, EXTERNE};
+    private Role role;
+    public Role getRole(){return role;}
+    ////////////////////////////////////////////////////////////////////////////
 
     private static final Class[] SUPPORTED_TYPES = new Class[]{
         Boolean.class,
@@ -134,6 +158,7 @@ public class Session extends SessionGen {
         refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(connector);
         refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(connector);
         */
+        utilisateurRepository = new UtilisateurRepository(connector);
     }
 
     public CouchDbConnector getConnector() {

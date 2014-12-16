@@ -11,6 +11,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
+import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -135,18 +136,18 @@ public class PojoTable extends BorderPane {
     protected final BorderPane topPane;
     
     public PojoTable(Class pojoClass, String title) {
-        this(pojoClass, title, null, false);
+        this(pojoClass, title, null, false, true);
     }
         
     public PojoTable(Class pojoClass, String title, boolean isEditable) {
-        this(pojoClass, title, null, isEditable);
+        this(pojoClass, title, null, isEditable, true);
     }
     
     public PojoTable(Repository repo, String title) {
-        this(repo.getModelClass(), title, repo, true);
+        this(repo.getModelClass(), title, repo, true, true);
     }
     
-    private PojoTable(Class pojoClass, String title, Repository repo, boolean isEditable) {
+    private PojoTable(Class pojoClass, String title, Repository repo, boolean isEditable, boolean isFichable) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
         this.labelMapper = new LabelMapper(pojoClass);
@@ -247,92 +248,95 @@ public class PojoTable extends BorderPane {
         navigationToolbar.setVisible(false);
         navigationToolbar.getStyleClass().add("buttonbarleft");
         
-        uiCurrent.setFont(Font.font(20));
-        uiCurrent.getStyleClass().add("btn-without-style"); 
-        uiCurrent.setAlignment(Pos.CENTER);
-        uiCurrent.setTextFill(Color.WHITE);
-        uiCurrent.setOnAction((ActionEvent event) -> {goTo();});
-        
-        uiPrevious.setGraphic(previousIcon);
-        uiPrevious.getStyleClass().add("btn-without-style"); 
-        uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
-        uiPrevious.setOnAction(new EventHandler<ActionEvent>() {
+        if(isFichable){
+            uiCurrent.setFont(Font.font(20));
+            uiCurrent.getStyleClass().add("btn-without-style"); 
+            uiCurrent.setAlignment(Pos.CENTER);
+            uiCurrent.setTextFill(Color.WHITE);
+            uiCurrent.setOnAction((ActionEvent event) -> {goTo();});
 
-            @Override
-            public void handle(ActionEvent event) {
-                if(uiTable.getItems().size()>0){
-                    if(currentFiche>0)
-                        currentFiche--;
-                    else
-                        currentFiche=uiTable.getItems().size()-1;
-                    elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
-                }
-            }
-        });
-        
-        uiNext.setGraphic(nextIcon);
-        uiNext.getStyleClass().add("btn-without-style"); 
-        uiNext.setTooltip(new Tooltip("Fiche suivante."));
-        uiNext.setOnAction(new EventHandler<ActionEvent>() {
+            uiPrevious.setGraphic(previousIcon);
+            uiPrevious.getStyleClass().add("btn-without-style"); 
+            uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
+            uiPrevious.setOnAction(new EventHandler<ActionEvent>() {
 
-            @Override
-            public void handle(ActionEvent event) {
-                if(uiTable.getItems().size()>0){
-                    if(currentFiche<uiTable.getItems().size()-1)
-                        currentFiche++;
-                    else
-                        currentFiche=0;
-                    elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
-                }
-            }
-        });
-        navigationToolbar.getChildren().addAll(uiPrevious, uiCurrent, uiNext);
-        
-        uiPlay.setGraphic(playIcon);
-        uiPlay.getStyleClass().add("btn-without-style"); 
-        uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
-        uiPlay.setOnAction(new  EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                if(mode==Mode.FICHE){
-                    mode = Mode.TABLE;
-                    navigationToolbar.setVisible(false);
-                    setCenter(uiTable);
-                    if(!editableProperty.isBound())
-                        editableProperty.setValue(true);
-                    uiPlay.setGraphic(playIcon);
-                    uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
-                }
-                else{
-                    mode = Mode.FICHE;
-                    navigationToolbar.setVisible(true);
+                @Override
+                public void handle(ActionEvent event) {
                     if(uiTable.getItems().size()>0){
-                        currentFiche=0;
-                        elementPane = generateEditionPane(uiTable.getItems().get(currentFiche));
-                        setCenter((Node) elementPane);
+                        if(currentFiche>0)
+                            currentFiche--;
+                        else
+                            currentFiche=uiTable.getItems().size()-1;
+                        elementPane.setElement(uiTable.getItems().get(currentFiche));
                         uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
                     }
-                    else{
-                        uiCurrent.setText(0+" / "+0);
-                    }
-                    if(!editableProperty.isBound())
-                        editableProperty.setValue(false);
-                    uiPlay.setGraphic(stopIcon);
-                    uiPlay.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
                 }
-            }
-        });
-        
-        searchEditionToolbar.getChildren().add(0, uiPlay);
+            });
+
+            uiNext.setGraphic(nextIcon);
+            uiNext.getStyleClass().add("btn-without-style"); 
+            uiNext.setTooltip(new Tooltip("Fiche suivante."));
+            uiNext.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    if(uiTable.getItems().size()>0){
+                        if(currentFiche<uiTable.getItems().size()-1)
+                            currentFiche++;
+                        else
+                            currentFiche=0;
+                        elementPane.setElement(uiTable.getItems().get(currentFiche));
+                        uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                    }
+                }
+            });
+            navigationToolbar.getChildren().addAll(uiPrevious, uiCurrent, uiNext);
+
+            uiPlay.setGraphic(playIcon);
+            uiPlay.getStyleClass().add("btn-without-style"); 
+            uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+            uiPlay.setOnAction(new  EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    if(mode==Mode.FICHE){
+                        mode = Mode.TABLE;
+                        navigationToolbar.setVisible(false);
+                        setCenter(uiTable);
+                        if(!editableProperty.isBound())
+                            editableProperty.setValue(true);
+                        uiPlay.setGraphic(playIcon);
+                        uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+                    }
+                    else{
+                        mode = Mode.FICHE;
+                        navigationToolbar.setVisible(true);
+                        if(uiTable.getItems().size()>0){
+                            currentFiche=0;
+                            elementPane = generateEditionPane(uiTable.getItems().get(currentFiche));
+                            setCenter((Node) elementPane);
+                            uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                        }
+                        else{
+                            uiCurrent.setText(0+" / "+0);
+                        }
+                        if(!editableProperty.isBound())
+                            editableProperty.setValue(false);
+                        uiPlay.setGraphic(stopIcon);
+                        uiPlay.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
+                    }
+                }
+            });
+
+            searchEditionToolbar.getChildren().add(0, uiPlay);
+        }
         
         topPane.setLeft(navigationToolbar);
     }
     
     
     private static FXElementPane generateEditionPane(final Object pojo) {
+        System.out.println("GENERATION DU PANNEAU");
         final FXElementPane content;
         if (pojo instanceof Objet) {
             content = new FXObjetPane((Objet) pojo);
@@ -342,6 +346,9 @@ public class PojoTable extends BorderPane {
             content = new FXOrganismePane((Organisme) pojo);
         } else if (pojo instanceof ContactOrganisme) {
             content = new FXContactOrganismePane((ContactOrganisme) pojo);
+        } else if (pojo instanceof ContactTroncon) {
+            System.out.println("Pas de panneau pour les contact/tronçons.");
+            content = null;
         } else if (pojo instanceof ProfilTravers) {
             content = new FXThemePane((ProfilTravers) pojo);
             ((FXThemePane) content).setShowOnMapButton(false);
@@ -359,6 +366,7 @@ public class PojoTable extends BorderPane {
         } else {
             content = null;
         }
+        System.out.println("On en est là !!!!");
         return content;
     }
     

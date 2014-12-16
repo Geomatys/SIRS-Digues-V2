@@ -4,8 +4,10 @@ package fr.sirs.theme.ui;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import static fr.sirs.Session.Role.ADMIN;
+import static fr.sirs.Session.Role.EXTERNE;
+import static fr.sirs.Session.Role.USER;
 import fr.sirs.map.FXMapTab;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
@@ -37,6 +39,7 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class FXObjetPane extends BorderPane implements FXElementPane {
     
+    private final Session session = Injector.getBean(Session.class);
     private Objet structure;
     private Node specificThemePane;
     private LabelMapper labelMapper;
@@ -66,13 +69,19 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(newValue==null) group.selectToggle(uiConsult);
         });
+        
+        if(session.getRole()!=ADMIN 
+                || session.getRole()!=USER 
+                || session.getRole()!=EXTERNE){
+            uiEdit.setDisable(true);
+        }
     }
     
     
     @FXML
     void save(ActionEvent event) {
         
-        final Session session = Injector.getBean(Session.class);
+//        final Session session = Injector.getBean(Session.class);
         
         if(specificThemePane instanceof ThemePane){
             ((ThemePane) specificThemePane).preSave();
@@ -114,7 +123,7 @@ public class FXObjetPane extends BorderPane implements FXElementPane {
     
     @FXML
     private void showOnMap(){
-        final Session session = Injector.getBean(Session.class);
+//        final Session session = Injector.getBean(Session.class);
         final FXMapTab tab = session.getFrame().getMapTab();
         tab.show();
         final FXMap map = tab.getMap().getUiMap();

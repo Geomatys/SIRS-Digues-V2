@@ -1,8 +1,12 @@
 package fr.sirs.digue;
 
+import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
+import static fr.sirs.Session.Role.ADMIN;
+import static fr.sirs.Session.Role.EXTERNE;
+import static fr.sirs.Session.Role.USER;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -10,7 +14,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXElementPane;
 import java.time.LocalDateTime;
 import java.util.List;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -21,15 +25,11 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
@@ -45,16 +45,14 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
     private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
     
-    @Autowired
-    private Session session;
+    @Autowired private Session session;
 
     @FXML private TextField libelle;
     @FXML private Label id;
     @FXML private FXDateField date_maj;
     @FXML private HTMLEditor uiComment;
-    @FXML private ToggleButton uiEdit;
-    @FXML private ToggleButton uiConsult;
-    @FXML private Button uiSave;
+    
+    @FXML private FXEditMode uiMode;
 
     private final TronconPojoTable table = new TronconPojoTable();
 
@@ -63,21 +61,15 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
         Injector.injectDependencies(this);
         
         //mode edition
-        final BooleanBinding editBind = uiEdit.selectedProperty().not();
-        uiSave.disableProperty().bind(editBind);
-        libelle.disableProperty().bind(editBind);
-        uiComment.disableProperty().bind(editBind);
-        table.editableProperty().bind(uiEdit.selectedProperty());
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setSaveAction(this::save);
+        final BooleanProperty editBind = uiMode.editionState();
+        libelle.editableProperty().bind(editBind);
+        uiComment.disableProperty().bind(editBind.not());
+        table.editableProperty().bind(editBind);
         
         digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
-        });
-        
-        final ToggleGroup group = new ToggleGroup();
-        uiConsult.setToggleGroup(group);
-        uiEdit.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
         });
     }
     
@@ -95,11 +87,10 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
         initFields();
     }
     
-    @FXML
-    private void save(ActionEvent event){
+    private void save(){
         digueProperty.get().setCommentaire(uiComment.getHtmlText());
-        this.session.update(this.digueProperty.get());
-        this.session.update(this.troncons);
+        session.update(this.digueProperty.get());
+        session.update(this.troncons);
     }
     
     private void reloadTroncons(){
@@ -116,10 +107,11 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
      */
     public void initFields() {
         this.setCenter(table);
+//        final BooleanProperty editBind = uiMode.editionState();
         
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
-        this.libelle.editableProperty().bindBidirectional(this.uiEdit.selectedProperty());
+//        this.libelle.editableProperty().bindBidirectional(editBind);
         
         // Display levee's id.--------------------------------------------------
         this.id.setText(this.digueProperty.get().getId());

@@ -13,6 +13,8 @@
                 <Menu mnemonicParsing="false" text="Fichier">
                     <items>
                         <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="Préférences" />
+                  <MenuItem fx:id="uiRefs" mnemonicParsing="false" onAction="#openRefs" text="Références" />
+                  <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="Se déconnecter" />
                         <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="Quitter" />
                     </items>
                 </Menu>

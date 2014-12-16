@@ -2,9 +2,13 @@
 
 package fr.sirs.digue;
 
+import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
+import static fr.sirs.Session.Role.ADMIN;
+import static fr.sirs.Session.Role.EXTERNE;
+import static fr.sirs.Session.Role.USER;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.ContactTroncon;
@@ -17,7 +21,7 @@ import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
 import java.util.logging.Level;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -37,9 +41,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
@@ -70,9 +71,8 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     @FXML private ChoiceBox<String> uiRive;
     @FXML private FXDateField uiDateStart;
     @FXML private FXDateField uiDateEnd;
-    @FXML private ToggleButton uiConsult;
-    @FXML private ToggleButton uiEdit;
-    @FXML private Button uiSave;
+    
+    @FXML private FXEditMode uiMode;
     @FXML private BorderPane uiSrTab;
     @FXML private Button uiSRDelete;
     @FXML private Button uiSRAdd;
@@ -90,29 +90,23 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         Injector.injectDependencies(this);
         
         //mode edition
-        final BooleanBinding editBind = uiEdit.selectedProperty().not();
-        uiSave.disableProperty().bind(editBind);
-        uiName.disableProperty().bind(editBind);
-        uiDigue.disableProperty().bind(editBind);
-        uiSrDefault.disableProperty().bind(editBind);
-        uiRive.disableProperty().bind(editBind);
-        uiDateStart.disableProperty().bind(editBind);
-        uiDateEnd.disableProperty().bind(editBind);
-        uiComment.disableProperty().bind(editBind);
-        uiContactTable.editableProperty().bind(uiEdit.selectedProperty());
-        srController.editableProperty().bind(uiEdit.selectedProperty());
-        uiSRAdd.visibleProperty().bind(uiEdit.selectedProperty());
-        uiSRDelete.visibleProperty().bind(uiEdit.selectedProperty());
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setSaveAction(this::save);
+        final BooleanProperty editBind = uiMode.editionState();
+        uiName.editableProperty().bind(editBind);
+        uiDigue.disableProperty().bind(editBind.not());
+        uiSrDefault.disableProperty().bind(editBind.not());
+        uiRive.disableProperty().bind(editBind.not());
+        uiDateStart.disableProperty().bind(editBind.not());
+        uiDateEnd.disableProperty().bind(editBind.not());
+        uiComment.disableProperty().bind(editBind.not());
+        uiContactTable.editableProperty().bind(editBind);
+        srController.editableProperty().bind(editBind);
+        uiSRAdd.disableProperty().bind(editBind.not());
+        uiSRDelete.disableProperty().bind(editBind.not());
         
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
-        });
-        
-        final ToggleGroup group = new ToggleGroup();
-        uiConsult.setToggleGroup(group);
-        uiEdit.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
         });
            
         uiSrTab.setCenter(srController);
@@ -207,11 +201,10 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         }
     }
     
-    @FXML
-    private void save(final ActionEvent event){
+    private void save(){
         tronconProperty.get().setCommentaire(uiComment.getHtmlText());
         srController.save();
-        this.session.update(getTroncon());
+        session.update(getTroncon());
     }
     
     private void initFields(){
@@ -266,7 +259,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
                         tronconProperty.get().setDigueId(newValue.getId());
-                        save(null);
+                        save();
                     }
                 }
             }
@@ -315,7 +308,5 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
             troncon.contacts.add(contact);
             return contact;
         }
-        
     }
-    
 }

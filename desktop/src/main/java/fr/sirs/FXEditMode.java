@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.Session.Role;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -19,6 +20,8 @@ import javafx.scene.layout.VBox;
  * @author Johann Sorel (Geomatys)
  */
 public class FXEditMode extends VBox {
+    
+    private final Session session = Injector.getBean(Session.class);
     
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
@@ -52,6 +55,21 @@ public class FXEditMode extends VBox {
             if(newValue==null) group.selectToggle(uiConsult);
         });
     }
+     
+    public void setAllowedRoles(Session.Role... allowed){
+        boolean editionGranted = false;
+        System.out.println("role : "+session.getRole().toString());
+        for(final Role role : allowed){
+            System.out.println("Role examiné : "+role);
+            if(session.getRole()==role) {
+                System.out.println("On autorise !");
+                editionGranted=true;
+            }
+        }
+        
+        System.out.println("Permission d'édition : "+editionGranted);
+        uiEdit.setDisable(!editionGranted);
+    }
 
     public void setSaveAction(Runnable saveAction) {
         this.saveAction = saveAction;
@@ -65,5 +83,4 @@ public class FXEditMode extends VBox {
     public void save(ActionEvent event) {
         if(saveAction!=null) saveAction.run();
     }
-    
 }

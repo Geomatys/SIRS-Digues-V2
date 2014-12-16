@@ -6,10 +6,12 @@ import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.query.FXSearchPane;
+import fr.sirs.theme.ui.FXReferencesPane;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -42,6 +44,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuItem uiExit;
     @FXML private Button uiMapButton;
     @FXML private Button uiPrintButton;
+    @FXML private MenuItem uiDeconnect;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -144,10 +147,26 @@ public class FXMainFrame extends BorderPane {
         }
         prefEditor.show();
     }
+    
+    @FXML
+    void openRefs(ActionEvent event){
+        final FXReferencesPane referencesPane = new FXReferencesPane();
+        final Tab tab = new FXFreeTab("Références");
+        tab.setContent(referencesPane);
+        addTab(tab);
+    }
 
     @FXML
     void exit(ActionEvent event) {
         System.exit(0);
+    }
+    
+    @FXML void deconnect(ActionEvent event) throws IOException{
+        this.getScene().getWindow().hide();
+        final Session session = Injector.getBean(Session.class);
+        session.setUtilisateur(null);
+        final Loader loader = new Loader();
+        loader.showLoginStage();
     }
     
     @FXML
