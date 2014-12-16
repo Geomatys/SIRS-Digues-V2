@@ -3,11 +3,13 @@ package fr.sirs.core.component;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
+import org.ektorp.StreamingViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
@@ -49,6 +51,7 @@ import fr.sirs.core.model.VoieDigue;
  */
 @Views({
         @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
+        @View(name = "stream", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
         @View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
 public class TronconDigueRepository extends
         CouchDbRepositorySupport<TronconDigue> implements
@@ -123,6 +126,11 @@ public class TronconDigueRepository extends
     @View(name = FONDATION, map = "classpath:Fondation-map.js")
     public List<Fondation> getAllFondations() {
         return db.queryView(createQuery(FONDATION), Fondation.class);
+    }
+
+    @View(name = FONDATION, map = "classpath:Fondation-map.js")
+    public StreamingViewResult getAllFondationsIterator() {
+        return db.queryForStreamingView(createQuery(FONDATION));
     }
 
     public static final String PIEDDIGUE = "PiedDigue";
@@ -301,6 +309,11 @@ public class TronconDigueRepository extends
     public List<PiedFrontFrancBord> getAllPiedFrontFrancBords() {
         return db.queryView(createQuery(PIEDFRONTFRANCBORD),
                 PiedFrontFrancBord.class);
+    }
+
+    public JacksonIterator<TronconDigue> getAllIterator() {
+        return JacksonIterator.create(TronconDigue.class,
+                db.queryForStreamingView(createQuery("stream")));
     }
 
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.model.Element;
 
 public class DocHelper {
@@ -75,7 +74,7 @@ public class DocHelper {
         }
     }
     
-    private static Optional<Class<?>> asClass(String clazz) {
+    public static Optional<Class<?>> asClass(String clazz) {
         try {
             return Optional.of(Class.forName(clazz));
         } catch (ClassNotFoundException e) {

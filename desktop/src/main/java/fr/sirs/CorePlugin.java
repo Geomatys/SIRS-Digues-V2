@@ -3,13 +3,17 @@
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
+
 import fr.sirs.core.SirsCore;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
+
 import org.geotoolkit.data.bean.BeanStore;
+
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.DocumentsTheme;
@@ -49,6 +53,7 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.map.BorneDigueCache;
 import fr.sirs.util.FXFreeTab;
+
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
@@ -58,10 +63,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+
 import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
+
 import javax.measure.unit.NonSI;
+
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
@@ -84,7 +92,9 @@ import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
+
 import static org.geotoolkit.style.StyleConstants.*;
+
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.style.Fill;
@@ -156,7 +166,13 @@ public class CorePlugin extends Plugin {
             final BeanStore tronconStore = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
                             (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                            null, SirsCore.getEpsgCode(), repo::getAll)
+                            null, SirsCore.getEpsgCode(), new BeanStore.FeatureSupplier() {
+                                
+                                @Override
+                                public Iterable get() {
+                                    return repo::getAllIterator;
+                                }
+                            })
             );
             items.addAll(buildLayers(tronconStore,createTronconStyle(),createTronconSelectionStyle(),true));
             
