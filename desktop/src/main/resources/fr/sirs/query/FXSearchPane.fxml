@@ -91,12 +91,13 @@
                   <ColumnConstraints hgrow="NEVER" />
                   <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
                 <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints vgrow="NEVER" />
               </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" onAction="#search" style="-fx-border-color: white; -fx-border-radius: 5;" text="EXECUTER" GridPane.columnIndex="5" GridPane.halignment="RIGHT">
+                  <Button mnemonicParsing="false" onAction="#search" style="-fx-border-color: white; -fx-border-radius: 5;" text="EXECUTER" GridPane.columnIndex="6" GridPane.halignment="RIGHT">
                      <styleClass>
                         <String fx:value="buttonbar-button" />
                         <String fx:value="label-header" />
@@ -118,6 +119,12 @@
                      </styleClass>
                   </Button>
                   <Button fx:id="uiOpen" mnemonicParsing="false" onAction="#openSQL" text="Ouvrir" GridPane.columnIndex="2">
+                     <styleClass>
+                        <String fx:value="buttonbar-button" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </Button>
+                  <Button fx:id="uiCarto" mnemonicParsing="false" onAction="#exportMap" style="-fx-border-color: white; -fx-border-radius: 5;" text="Afficher sur la carte" GridPane.columnIndex="5">
                      <styleClass>
                         <String fx:value="buttonbar-button" />
                         <String fx:value="label-header" />
