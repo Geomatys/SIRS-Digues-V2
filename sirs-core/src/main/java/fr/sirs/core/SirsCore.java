@@ -6,12 +6,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
@@ -109,5 +111,13 @@ public class SirsCore {
 
         // force loading epsg
         CRS.decode("EPSG:3395");
+    }
+
+    public static int getSrid() {
+        try {
+            return IdentifiedObjects.lookupEpsgCode(SirsCore.getEpsgCode(), true);
+        } catch (FactoryException e) {
+            throw new SirsCoreRuntimeExecption(e);
+        }
     }
 }

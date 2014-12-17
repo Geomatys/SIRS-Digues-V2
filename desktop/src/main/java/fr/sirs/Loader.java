@@ -4,6 +4,7 @@ import static fr.sirs.Session.Role.ADMIN;
 import static fr.sirs.Session.Role.CONSULTANT;
 import static fr.sirs.Session.Role.EXTERNE;
 import static fr.sirs.Session.Role.USER;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,6 +43,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Utilisateur;
@@ -351,7 +353,7 @@ public class Loader extends Application {
 
                 updateMessage("Exporting data to RDBMS");
 
-                //H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class));
+                H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
 
                 updateProgress(inc++, total);
 

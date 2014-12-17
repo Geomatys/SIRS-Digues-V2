@@ -19,22 +19,32 @@ import org.ektorp.CouchDbConnector;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStoreFactory;
 import org.geotoolkit.parameter.Parameters;
+import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.IdentifiedObjects;
 import org.h2.util.JdbcUtils;
+import org.h2gis.h2spatial.CreateSpatialExtension;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.util.FactoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.SirsDBInfo;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.sql.SQLHelper;
 
 public class H2Helper {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
     
-    public static void exportDataToRDBMS(CouchDbConnector connector)
+    public static void exportDataToRDBMS(CouchDbConnector connector, SirsDBInfoRepository sirsDBInfoRepository)
             throws IOException {
+        
+        int srid = SirsCore.getSrid();
+        
+        
         Path file = getDBFile(connector);
 
         if (Files.isDirectory(SirsCore.H2_PATH) && Files.exists(SirsCore.H2_PATH)) {
@@ -55,7 +65,7 @@ public class H2Helper {
             });
         }
         try (Connection conn = createConnection(connector)) {
-            init(conn, connector);
+            init(conn, connector, srid);
             
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
@@ -65,8 +75,10 @@ public class H2Helper {
 
     public static Connection createConnection(CouchDbConnector connector) throws SQLException {
         Path file = getDBFile(connector);
-        return DriverManager.getConnection(
+        Connection connection = DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
+        CreateSpatialExtension.initSpatialExtension(connection);
+        return connection;
     }
     
     public static FeatureStore createStore(CouchDbConnector connector) throws SQLException, DataStoreException {
@@ -95,9 +107,9 @@ public class H2Helper {
         return file;
     }
     
-    public static void init(Connection conn, CouchDbConnector db)
+    public static void init(Connection conn, CouchDbConnector db, int srid)
             throws SQLException {
-        SQLHelper.createTables(conn);
+        SQLHelper.createTables(conn, srid);
 
         List<String> allDocIds = db.getAllDocIds();
 
