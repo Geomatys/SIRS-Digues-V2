@@ -25,6 +25,7 @@ import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +72,7 @@ public class ObjetManager {
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
+            final MarcheImporter marcheImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter
             ){
         
@@ -112,8 +114,8 @@ public class ObjetManager {
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter,sourceInfoImporter, 
-                typeCoteImporter, typePositionImporter);
+                systemeReperageImporter, borneDigueImporter, marcheImporter, 
+                sourceInfoImporter, typeCoteImporter, typePositionImporter);
         importers.add(prestationImporter);
         laisseCrueImporter = new LaisseCrueImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 

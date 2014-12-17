@@ -22,6 +22,7 @@ import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -54,17 +55,18 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final MarcheImporter marcheImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
-                typePositionImporter, typeCoteImporter);
+                systemeReperageImporter, borneDigueImporter, marcheImporter, 
+                typeSourceImporter, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
                 couchDbConnector);
         this.sysEvtPrestationImporter = new SysEvtPrestationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, marcheImporter,
                 typePositionImporter, typeCoteImporter, typePrestationImporter);
     }
 

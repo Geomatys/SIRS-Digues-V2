@@ -28,6 +28,7 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconDigueGeomImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ implements DocumentsUpdater {
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
+            final MarcheImporter marcheImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
@@ -99,7 +101,7 @@ implements DocumentsUpdater {
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, evenementHydrauliqueImporter);
+                intervenantImporter, marcheImporter, evenementHydrauliqueImporter);
         this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, communeImporter, 

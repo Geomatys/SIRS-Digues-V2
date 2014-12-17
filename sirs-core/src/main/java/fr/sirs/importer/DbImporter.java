@@ -92,6 +92,7 @@ import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -194,6 +195,7 @@ public class DbImporter {
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
+    private MarcheImporter marcheImporter;
     private DocumentImporter documentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
@@ -718,16 +720,19 @@ public class DbImporter {
                 accessDatabase, couchDbConnector);
         tronconDigueGeomImporter = new TronconDigueGeomImporter(
                 accessCartoDatabase, couchDbConnector);
+        marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
+                organismeImporter);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector, tronconDigueRepository, 
                 digueRepository, borneDigueRepository, digueImporter, 
                 tronconDigueGeomImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter, 
-                evenementHydrauliqueImporter);
+                marcheImporter, evenementHydrauliqueImporter);
         documentImporter = new DocumentImporter(accessDatabase, 
                 couchDbConnector, borneDigueImporter, intervenantImporter, 
                 organismeImporter, systemeReperageImporter, 
-                evenementHydrauliqueImporter, tronconGestionDigueImporter);
+                evenementHydrauliqueImporter, marcheImporter, 
+                tronconGestionDigueImporter);
         
         orientationImporter = new OrientationImporter(
                 accessDatabase, couchDbConnector);

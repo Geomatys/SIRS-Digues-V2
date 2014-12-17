@@ -46,6 +46,8 @@ import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.json.GeometryDeserializer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -179,7 +181,6 @@ public class Loader extends Application {
     /**
      * Display login screen.
      *
-     * @param task
      * @throws IOException
      */
     public void showLoginStage() throws IOException {
@@ -209,8 +210,17 @@ public class Loader extends Application {
                 final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
                 Utilisateur user = null;
                 
+                MessageDigest messageDigest=null;
+                String encryptedPassword = null;
+                try {
+                    messageDigest = MessageDigest.getInstance("MD5");
+                    encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
+                } catch (NoSuchAlgorithmException ex) {
+                    Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
                 for(final Utilisateur candidate : candidateUsers){
-                    if(candidate.getPassword().equals(controller.uiPassword.getText())){
+                    if(candidate.getPassword().equals(encryptedPassword)){
                         user = candidate; break;
                     }
                 }

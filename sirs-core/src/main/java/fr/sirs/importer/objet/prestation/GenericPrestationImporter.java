@@ -6,6 +6,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.*;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -15,11 +16,14 @@ import org.ektorp.CouchDbConnector;
  */
 abstract class GenericPrestationImporter<T extends Objet> extends GenericObjetImporter<T> {
     
+    protected final MarcheImporter marcheImporter;
+    
     public GenericPrestationImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter,
+            final MarcheImporter marcheImporter,
             final SourceInfoImporter sourceInfoImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
@@ -27,5 +31,6 @@ abstract class GenericPrestationImporter<T extends Objet> extends GenericObjetIm
                 systemeReperageImporter, borneDigueImporter,
                 sourceInfoImporter, typeCoteImporter, typePositionImporter, 
                 null, null, null);
+        this.marcheImporter = marcheImporter;
     }
 }

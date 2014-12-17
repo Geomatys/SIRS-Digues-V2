@@ -76,6 +76,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
             final OrganismeImporter organismeImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final MarcheImporter marcheImporter,
             final TronconGestionDigueImporter tronconGestionDigueImporter){
         super(accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, tronconGestionDigueImporter);
@@ -110,8 +111,9 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
                 couchDbConnector);
         documentRelated.add(journalArticleImporter);
         
-        marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
-                organismeImporter);
+        this.marcheImporter = marcheImporter;
+//        marcheImporter = new MarcheImporter(accessDatabase, couchDbConnector, 
+//                organismeImporter);
         documentRelated.add(marcheImporter);
         
         documentAGrandeEchelleImporter = new DocumentAGrandeEchelleImporter(

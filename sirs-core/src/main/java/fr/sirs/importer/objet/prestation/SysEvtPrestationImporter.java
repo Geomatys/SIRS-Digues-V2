@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
@@ -20,6 +21,7 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
+import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,19 +48,20 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
     private static final String OUI = "Oui";
     private static final String NON = "Non";
     
-    protected final TypePrestationImporter typePrestationImporter;
+    private final TypePrestationImporter typePrestationImporter;
 
     SysEvtPrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
+            final MarcheImporter marcheImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePrestationImporter typePrestationImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter,  null,
-                typePositionImporter, typeCoteImporter);
+                systemeReperageImporter, borneDigueImporter,  marcheImporter, 
+                null, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = typePrestationImporter;
     }
 
@@ -75,8 +78,8 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
 //        LIBELLE_SYSTEME_REP, // Redondance avec l'importation des SR
 //        NOM_BORNE_DEBUT, // Redondance avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondance avec l'importation des bornes
-//        ID_MARCHE, // ????
-//        LIBELLE_MARCHE, // ????
+        ID_MARCHE,
+//        LIBELLE_MARCHE, // Redondance avec l'importation des marchés
         REALISATION_INTERNE_OUI_NON,
 //        ID_INTERV_REALISATEUR, // Ne sert à rien (l'association N/N est gérée via la table prestation/intervenant
 //        NOM_INTERVENANT_REALISATEUR, // Redondance avec l'importation des intervenants
@@ -134,6 +137,8 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
         
         final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
         
+        final Map<Integer, Marche> marches = marcheImporter.getRelated();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
@@ -142,6 +147,10 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
             
             if (row.getInt(Columns.ID_TYPE_PRESTATION.toString()) != null) {
                 prestation.setTypePrestationId(typesPrestation.get(row.getInt(Columns.ID_TYPE_PRESTATION.toString())).getId());
+            }
+            
+            if (row.getInt(Columns.ID_MARCHE.toString()) != null) {
+                prestation.setMarche(marches.get(row.getInt(Columns.ID_MARCHE.toString())).getId());
             }
             
             if(row.getString(Columns.REALISATION_INTERNE_OUI_NON.toString())!=null){

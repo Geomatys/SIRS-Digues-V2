@@ -33,6 +33,8 @@ import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -66,6 +69,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -82,6 +86,7 @@ import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.FXPasswordStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -555,10 +560,27 @@ public class PojoTable extends BorderPane {
                 final Class type = desc.getReadMethod().getReturnType();  
                 
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                
                 if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
                 }else if(String.class.isAssignableFrom(type)){
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+                    if(desc.getDisplayName().equals("password")){
+                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
+                        
+                        @Override
+                        public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
+                            MessageDigest messageDigest=null;
+                            try {
+                                messageDigest = MessageDigest.getInstance("MD5");
+                            } catch (NoSuchAlgorithmException ex) {
+                                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            return new FXPasswordStringCell(messageDigest);
+                        }
+                    });
+                    } else {
+                        setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+                    }
                 }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
                 }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
