@@ -19,18 +19,14 @@ import org.ektorp.CouchDbConnector;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStoreFactory;
 import org.geotoolkit.parameter.Parameters;
-import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.IdentifiedObjects;
 import org.h2.util.JdbcUtils;
 import org.h2gis.h2spatial.CreateSpatialExtension;
 import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.util.FactoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -39,41 +35,43 @@ public class H2Helper {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
     
+    private static final Object LOCK = new Object();
+    
     public static void exportDataToRDBMS(CouchDbConnector connector, SirsDBInfoRepository sirsDBInfoRepository)
             throws IOException {
         
-        int srid = SirsCore.getSrid();
-        
-        
-        Path file = getDBFile(connector);
+        synchronized(LOCK){
+            int srid = SirsCore.getSrid();
+            Path file = getDBFile(connector);
 
-        if (Files.isDirectory(SirsCore.H2_PATH) && Files.exists(SirsCore.H2_PATH)) {
-            Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                        throws IOException {
-                    Files.delete(dir);
-                    return super.postVisitDirectory(dir, exc);
-                }
+            if (Files.isDirectory(SirsCore.H2_PATH) && Files.exists(SirsCore.H2_PATH)) {
+                Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                            throws IOException {
+                        Files.delete(dir);
+                        return super.postVisitDirectory(dir, exc);
+                    }
 
-                @Override
-                public FileVisitResult visitFile(Path file,
-                        BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return super.visitFile(file, attrs);
-                }
-            });
-        }
-        try (Connection conn = createConnection(connector)) {
-            init(conn, connector, srid);
-            
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage(), e);
+                    @Override
+                    public FileVisitResult visitFile(Path file,
+                            BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return super.visitFile(file, attrs);
+                    }
+                });
+            }
+            try (Connection conn = createConnection(connector)) {
+                init(conn, connector, srid);
+
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
 
     }
 
-    public static Connection createConnection(CouchDbConnector connector) throws SQLException {
+    private static Connection createConnection(CouchDbConnector connector) throws SQLException {
         Path file = getDBFile(connector);
         Connection connection = DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
@@ -82,23 +80,25 @@ public class H2Helper {
     }
     
     public static FeatureStore createStore(CouchDbConnector connector) throws SQLException, DataStoreException {
-        final Path file = getDBFile(connector);
-        final BasicDataSource ds = new BasicDataSource();
-        ds.setUrl("jdbc:h2:" + file.toString());
-        ds.setUsername("sirs$user");
-        ds.setPassword("sirs$pwd");
-        
-        
-        final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
-        Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
-        Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
-        Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
-        Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
-        Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
-        Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
-        Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
-        
-        return new H2FeatureStoreFactory().create(params);
+        synchronized(LOCK){
+            final Path file = getDBFile(connector);
+            final BasicDataSource ds = new BasicDataSource();
+            ds.setUrl("jdbc:h2:" + file.toString());
+            ds.setUsername("sirs$user");
+            ds.setPassword("sirs$pwd");
+
+
+            final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
+            Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
+            Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
+            Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
+            Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
+            Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
+            Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
+            Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
+
+            return new H2FeatureStoreFactory().create(params);
+        }
     }
 
     private static Path getDBFile(CouchDbConnector connector) {
@@ -107,7 +107,7 @@ public class H2Helper {
         return file;
     }
     
-    public static void init(Connection conn, CouchDbConnector db, int srid)
+    private static void init(Connection conn, CouchDbConnector db, int srid)
             throws SQLException {
         SQLHelper.createTables(conn, srid);
 
@@ -138,16 +138,16 @@ public class H2Helper {
     }
     
     public static void dumbSchema(Connection connection, Path file) throws SQLException {
-            Statement stat = null;
-            String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
-            try {
-                stat = connection.createStatement();
-                stat.execute(create);
-                
-            } finally {
-                JdbcUtils.closeSilently(stat);
-                JdbcUtils.closeSilently(connection);
-            }
-        }    
-   
+        Statement stat = null;
+        String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
+        try {
+            stat = connection.createStatement();
+            stat.execute(create);
+
+        } finally {
+            JdbcUtils.closeSilently(stat);
+            JdbcUtils.closeSilently(connection);
+        }
+    }
+
 }

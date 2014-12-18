@@ -280,6 +280,7 @@ public class Loader extends Application {
         stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
         stage.setMaximized(true);
         stage.show();
+        frame.getMapTab().show();
     }
 
     private final class LoadingTask extends Task {
@@ -351,9 +352,17 @@ public class Loader extends Application {
                     plugin.load();
                 }
 
-                updateMessage("Exporting data to RDBMS");
-
-                H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
+                updateMessage("Export vers la base RDBMS");
+                new Thread(()->{
+                    try {
+                        H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
+                    } catch (IOException ex) {
+                        SIRS.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                }
+                ).start();
+                Thread.sleep(5000);
+                
 
                 updateProgress(inc++, total);
 

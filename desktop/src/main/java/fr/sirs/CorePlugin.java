@@ -492,14 +492,31 @@ public class CorePlugin extends Plugin {
 
         final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
         
-        final MutableRule ruleClose = SF.rule(lineSymbolizer);
-        ruleClose.setMaxScaleDenominator(500000);
+        final MutableRule ruleLongObjects = SF.rule(lineSymbolizer);
+        ruleLongObjects.setFilter(
+                FF.greater(
+                        FF.function("length", FF.property("geometry")),
+                        FF.literal(2.0)
+                )
+        );
+        ruleLongObjects.setMaxScaleDenominator(500000);
+        
+        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
+        ruleSmallObjects.setFilter(
+                FF.less(
+                        FF.function("length", FF.property("geometry")),
+                        FF.literal(2.0)
+                )
+        );
+        ruleSmallObjects.setMaxScaleDenominator(500000);
+        
         final MutableRule ruleFar = SF.rule(pointSymbolizer);
         ruleFar.setMinScaleDenominator(500000);
         
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
-        fts.rules().add(ruleClose);
+        fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleFar);
+        fts.rules().add(ruleSmallObjects);
         
         final MutableStyle style = SF.style();
         style.featureTypeStyles().add(fts);

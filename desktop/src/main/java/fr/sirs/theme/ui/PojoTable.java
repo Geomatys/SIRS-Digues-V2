@@ -9,23 +9,9 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
-import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.ContactTroncon;
-import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LeveeProfilTravers;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.digue.FXDiguePane;
-import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.index.SearchEngine;
-import fr.sirs.other.FXContactOrganismePane;
-import fr.sirs.other.FXContactPane;
-import fr.sirs.other.FXOrganismePane;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsTableCell;
@@ -221,7 +207,7 @@ public class PojoTable extends BorderPane {
         
         topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
         setTop(topPane);
-        uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
         if(repo!=null){

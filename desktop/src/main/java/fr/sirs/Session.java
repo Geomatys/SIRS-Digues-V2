@@ -214,6 +214,7 @@ public class Session extends SessionGen {
                     cml.setDescription(new DefaultDescription(
                             new SimpleInternationalString("Open Street Map"),
                             new SimpleInternationalString("Open Street Map")));
+                    cml.setVisible(false);
                     backgroundGroup.items().add(cml);
                 }
             } catch (Exception ex) {

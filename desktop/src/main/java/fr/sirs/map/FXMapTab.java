@@ -16,7 +16,7 @@ public class FXMapTab extends Tab {
     public FXMapTab(TabPane tabs) {
         this.tabs = tabs;
         this.map = new FXMapPane();
-        setText("Map");
+        setText("Carte");
         setContent(map);
     }    
 
