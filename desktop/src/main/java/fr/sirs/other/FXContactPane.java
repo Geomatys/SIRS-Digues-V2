@@ -14,7 +14,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.theme.ui.FXElementPane;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
@@ -30,13 +30,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXContactPane extends BorderPane implements FXElementPane {
+public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
@@ -57,7 +56,6 @@ public class FXContactPane extends BorderPane implements FXElementPane {
     
     private final PojoTable organismeTable;
     
-    private Contact contact;
     private final ContactRepository contactRepository;
     private final OrganismeRepository orgRepository;
     
@@ -86,13 +84,13 @@ public class FXContactPane extends BorderPane implements FXElementPane {
         uiFax.editableProperty().bind(editProp);
         uiEmail.editableProperty().bind(editProp);
         uiAdresse.editableProperty().bind(editProp);
-//        uiComplement.editableProperty().bind(editProp);
         uiCodePostale.editableProperty().bind(editProp);
         uiCommune.editableProperty().bind(editProp);
         
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
-        organismeTable.editableProperty().bind(editProp);
+        // /!\ If you remove "and" condition, you must add null check in below ContactOrganismeTable.
+        organismeTable.editableProperty().bind(editProp.and(elementProperty.isNotNull()));
         
         uiMode.setSaveAction(this::save);
         setElement(contact);
@@ -113,10 +111,17 @@ public class FXContactPane extends BorderPane implements FXElementPane {
         });
     }
     
+    private void save(){
+        if (elementProperty.get() != null) {
+            contactRepository.update(elementProperty.get());
+        }
+        modifiedOrgs.stream().forEach((org) -> orgRepository.update(org));
+        modifiedOrgs.clear();
+    }
+
     @Override
-    public void setElement(Element element) {
-        
-        this.contact = (Contact) element;
+    public void preSave() {        
+        final Contact contact = elementProperty.get();
         
         orgsOfContact.clear();
         modifiedOrgs.clear();
@@ -145,13 +150,6 @@ public class FXContactPane extends BorderPane implements FXElementPane {
                 }));
             }
         }
-           
-    }
-    
-    private void save(){
-        contactRepository.update(contact);
-        modifiedOrgs.stream().forEach((org) -> orgRepository.update(org));
-        modifiedOrgs.clear();
     }
  
     /**
@@ -174,7 +172,7 @@ public class FXContactPane extends BorderPane implements FXElementPane {
             }
             final ContactOrganisme co = (ContactOrganisme) pojo;
             co.contactIdProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                if (!contact.getId().equals(newValue)) {
+                if (!elementProperty.get().getId().equals(newValue)) {
                     orgsOfContact.remove(co);
                 }
             });
@@ -201,7 +199,7 @@ public class FXContactPane extends BorderPane implements FXElementPane {
         @Override
         protected Object createPojo() {
             final ContactOrganisme co = new ContactOrganisme();
-            co.setContactId(contact.getId());
+            co.setContactId(elementProperty.get().getId());
             co.setDateDebutIntervenant(LocalDateTime.now());
             orgsOfContact.add(co);
             return co;

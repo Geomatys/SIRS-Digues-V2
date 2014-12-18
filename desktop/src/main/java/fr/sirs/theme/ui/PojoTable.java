@@ -302,7 +302,7 @@ public class PojoTable extends BorderPane {
                     ficheModeProperty.set(true);
                     if(uiTable.getItems().size()>0){
                         currentFiche=0;
-                        elementPane = generateEditionPane(uiTable.getItems().get(currentFiche));
+                        elementPane = SIRS.generateEditionPane(uiTable.getItems().get(currentFiche));
                         setCenter((Node) elementPane);
                         uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
                     }
@@ -318,42 +318,6 @@ public class PojoTable extends BorderPane {
         searchEditionToolbar.getChildren().add(0, uiPlay);
         
         topPane.setLeft(navigationToolbar);
-    }
-    
-    
-    private static FXElementPane generateEditionPane(final Object pojo) {
-        System.out.println("GENERATION DU PANNEAU");
-        final FXElementPane content;
-        if (pojo instanceof Objet) {
-            content = new FXObjetPane((Objet) pojo);
-        } else if (pojo instanceof Contact) {
-            content = new FXContactPane((Contact) pojo);
-        } else if (pojo instanceof Organisme) {
-            content = new FXOrganismePane((Organisme) pojo);
-        } else if (pojo instanceof ContactOrganisme) {
-            content = new FXContactOrganismePane((ContactOrganisme) pojo);
-        } else if (pojo instanceof ContactTroncon) {
-            System.out.println("Pas de panneau pour les contact/tronçons.");
-            content = null;
-        } else if (pojo instanceof ProfilTravers) {
-            content = new FXThemePane((ProfilTravers) pojo);
-            ((FXThemePane) content).setShowOnMapButton(false);
-        } else if (pojo instanceof LeveeProfilTravers){
-            content = new FXThemePane((LeveeProfilTravers) pojo);
-            ((FXThemePane) content).setShowOnMapButton(false);
-        } else if (pojo instanceof TronconDigue) {
-            final FXTronconDiguePane ctrl = new FXTronconDiguePane();
-            ctrl.setElement((TronconDigue) pojo);
-            content = ctrl;
-        } else if (pojo instanceof Digue) {
-            final FXDiguePane ctrl = new FXDiguePane();
-            ctrl.setElement((Digue) pojo);
-            content = ctrl;
-        } else {
-            content = null;
-        }
-        System.out.println("On en est là !!!!");
-        return content;
     }
     
     protected ObservableList<Element> getAllValues(){return allValues;}
@@ -511,7 +475,7 @@ public class PojoTable extends BorderPane {
         final Tab tab = new FXFreeTab();
 
         try {
-            Node content = (Node) generateEditionPane(pojo);
+            Node content = (Node) SIRS.generateEditionPane((Element)pojo);
             if (content==null) content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
 
             tab.setContent(content);
@@ -540,7 +504,6 @@ public class PojoTable extends BorderPane {
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
             this.desc = desc;
-            setEditable(true);
             
             final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
                         
@@ -557,6 +520,7 @@ public class PojoTable extends BorderPane {
                 setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());
                 
             }else{
+                editableProperty().bind(editableProperty);
                 final Class type = desc.getReadMethod().getReturnType();  
                 
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));

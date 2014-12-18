@@ -11,7 +11,6 @@ import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
 import java.time.LocalDateTime;
-import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -23,7 +22,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.StringConverter;
@@ -33,12 +31,11 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane {
+public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveeProfilTravers> {
     
     private LeveeProfilTravers leveProfilTravers;
     private final Session session;
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
-    private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
     
     private boolean initializing = false;
     
@@ -54,12 +51,12 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
     @FXML private TextField uiReferenceCalque;
     @FXML private TextField uiReferenceNumerique;
     
-    private FXLeveeProfilTraversSubPane(){
+    private FXLeveeProfilTraversPane(){
         SIRS.loadFXML(this);
         session = Injector.getBean(Session.class);
     }
     
-    public FXLeveeProfilTraversSubPane(final LeveeProfilTravers leveProfilTravers){
+    public FXLeveeProfilTraversPane(final LeveeProfilTravers leveProfilTravers){
 //            final Map<String, Object> resources){
         this();
         this.leveProfilTravers = leveProfilTravers;
@@ -234,12 +231,6 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
 //        uiCouches.disableProperty().bind(disableFields);
         initializing = false;
     }
-    
-    
-    @Override
-    public BooleanProperty disableFieldsProperty() {
-        return disableFields;
-    }
 
     @Override
     public void preSave() {
@@ -249,10 +240,5 @@ public class FXLeveeProfilTraversSubPane extends BorderPane implements ThemePane
         final Session session = Injector.getBean(Session.class);
         final ProfilTraversRepository repo = session.getProfilTraversRepository();
         repo.update(profil);
-    }
-
-    @Override
-    public BooleanProperty tronconChangedProperty() {
-        return this.tronconChanged;
     }
 }

@@ -2,8 +2,25 @@
 
 package fr.sirs;
 
+import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.ContactOrganisme;
+import fr.sirs.core.model.ContactTroncon;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.digue.FXDiguePane;
+import fr.sirs.digue.FXTronconDiguePane;
+import fr.sirs.other.FXContactOrganismePane;
+import fr.sirs.other.FXContactPane;
+import fr.sirs.other.FXOrganismePane;
+import fr.sirs.theme.ui.FXElementPane;
+import fr.sirs.theme.ui.FXThemePane;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
 import java.io.File;
@@ -11,8 +28,12 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -109,5 +130,78 @@ public final class SIRS extends SirsCore {
          * root, and will not resolve image path as relative if we keep it.
          */
         return docRoot.resolve(relativeReference.replaceFirst("^(/+|\\\\+)", "").replaceAll("/+|\\\\+", File.separator));
+    }
+    
+    /**
+     * Reconstruit une liste d'éléments depuis la liste en entrée et le {@link Repository} donné.
+     * Si la liste en paramètre est nulle ou vide, une liste vide est renvoyée.
+     * Si elle contient des éléments, elle est renvoyée telle quel.
+     * Si c'est une liste d'ID, on construit une liste des élements correspondants.
+     * 
+     * @param sourceList La liste depuis laquelle on doit reconstruire la liste des éléments.
+     * @param repo Le repository servant à retrouver les éléments depuis leur ID.
+     * @return Une liste d'éléments. Peut être vide, mais jamais nulle.
+     */
+    public static ObservableList<Element> toElementList(final List sourceList, final Repository repo) {
+        if (sourceList == null || sourceList.isEmpty()) {
+            if (sourceList instanceof ObservableList) {
+                return (ObservableList) sourceList;
+            } else {
+                return FXCollections.observableArrayList();
+            }
+        } else if (sourceList.get(0) instanceof Element) {
+            if (sourceList instanceof ObservableList) {
+                return (ObservableList) sourceList;
+            } else {
+                return FXCollections.observableArrayList(sourceList);
+            }
+        } else if (repo == null) {
+            return FXCollections.observableArrayList();
+        } else {
+            ObservableList resultList = FXCollections.observableArrayList();
+            final Iterator<String> it = sourceList.iterator();
+            while (it.hasNext()) {
+                resultList.add(repo.get(it.next()));
+            }
+            return resultList;
+        }
+    }
+    
+    /**
+     * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
+     * @param pojo
+     * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être 
+     * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
+     */
+    public static FXElementPane generateEditionPane(final Element pojo) {
+        final FXElementPane content;
+        if (pojo instanceof Objet) {
+            content = new FXThemePane((Objet) pojo);
+        } else if (pojo instanceof Contact) {
+            content = new FXContactPane((Contact) pojo);
+        } else if (pojo instanceof Organisme) {
+            content = new FXOrganismePane((Organisme) pojo);
+        } else if (pojo instanceof ContactOrganisme) {
+            content = new FXContactOrganismePane((ContactOrganisme) pojo);
+        } else if (pojo instanceof ContactTroncon) {
+            content = null;
+        } else if (pojo instanceof ProfilTravers) {
+            content = new FXThemePane((ProfilTravers) pojo);
+            ((FXThemePane) content).setShowOnMapButton(false);
+        } else if (pojo instanceof LeveeProfilTravers){
+            content = new FXThemePane((LeveeProfilTravers) pojo);
+            ((FXThemePane) content).setShowOnMapButton(false);
+        } else if (pojo instanceof TronconDigue) {
+            final FXTronconDiguePane ctrl = new FXTronconDiguePane();
+            ctrl.setElement((TronconDigue) pojo);
+            content = ctrl;
+        } else if (pojo instanceof Digue) {
+            final FXDiguePane ctrl = new FXDiguePane();
+            ctrl.setElement((Digue) pojo);
+            content = ctrl;
+        } else {
+            content = null;
+        }
+        return content;
     }
 }

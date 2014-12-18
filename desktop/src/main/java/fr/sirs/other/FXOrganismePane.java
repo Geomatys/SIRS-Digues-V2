@@ -9,6 +9,7 @@ import static fr.sirs.Session.Role.USER;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
@@ -24,7 +25,6 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
 /**
@@ -32,9 +32,7 @@ import javafx.scene.layout.GridPane;
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-public class FXOrganismePane extends BorderPane implements FXElementPane {
-
-    private Organisme organisme;
+public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML
     private FXEditMode uiMode;
@@ -80,13 +78,13 @@ public class FXOrganismePane extends BorderPane implements FXElementPane {
         setElement(organisme);
     }
     
-    @Override
-    public void setElement(final Element element) {
-        organisme = (Organisme) element;
-        if (organisme == null) {
+    public void initPane() {
+        final Organisme organisme;
+        if (elementProperty.get() == null) {
             organisme = Injector.getSession().getOrganismeRepository().create();
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().add(organisme);});
         } else {
+            organisme = elementProperty.get();
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().update(organisme);});
         }
         
@@ -122,6 +120,11 @@ public class FXOrganismePane extends BorderPane implements FXElementPane {
         
         coTable.setTableItems(()-> (ObservableList) organisme.contactOrganisme);
     }
+
+    @Override
+    public void preSave() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     /**
      * Table listant les rattachement de l'organisme courant aux contacts connus.
@@ -148,13 +151,13 @@ public class FXOrganismePane extends BorderPane implements FXElementPane {
         
         @Override
         protected void deletePojos(Element... pojos) {
-            ((ObservableList)organisme.contactOrganisme).removeAll(pojos);
+            ((ObservableList)elementProperty.get().contactOrganisme).removeAll(pojos);
         }
 
         @Override
         protected Object createPojo() {
             final ContactOrganisme co = new ContactOrganisme();
-            co.setParent(organisme);
+            co.setParent(elementProperty.get());
             co.setDateDebutIntervenant(LocalDateTime.now());
             
             return co;

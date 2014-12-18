@@ -11,12 +11,11 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.FXElementPane;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -30,7 +29,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -40,9 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXDiguePane extends BorderPane implements FXElementPane {
+public class FXDiguePane extends AbstractFXElementPane<Digue> {
     
-    private final ObjectProperty<Digue> digueProperty = new SimpleObjectProperty<>();
     private ObservableList<TronconDigue> troncons;
     
     @Autowired private Session session;
@@ -68,34 +65,28 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
         uiComment.disableProperty().bind(editBind.not());
         table.editableProperty().bind(editBind);
         
-        digueProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
+        elementProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
         });
     }
     
     public ObjectProperty<Digue> tronconProperty(){
-        return digueProperty;
+        return elementProperty;
     }
     
     public Digue getDigue(){
-        return digueProperty.get();
-    }
-    
-    @Override
-    public void setElement(Element digue){
-        this.digueProperty.set((Digue) digue);
-        initFields();
+        return elementProperty.get();
     }
     
     private void save(){
-        digueProperty.get().setCommentaire(uiComment.getHtmlText());
-        session.update(this.digueProperty.get());
+        elementProperty.get().setCommentaire(uiComment.getHtmlText());
+        session.update(this.elementProperty.get());
         session.update(this.troncons);
     }
     
     private void reloadTroncons(){
         
-        final List<TronconDigue> items = session.getTronconDigueByDigue(digueProperty.get());
+        final List<TronconDigue> items = session.getTronconDigueByDigue(elementProperty.get());
         this.troncons = FXCollections.observableArrayList();
         items.stream().forEach((item) -> {
             this.troncons.add(item);
@@ -110,22 +101,27 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
 //        final BooleanProperty editBind = uiMode.editionState();
         
         // Binding levee's name.------------------------------------------------
-        this.libelle.textProperty().bindBidirectional(digueProperty.get().libelleProperty());
+        this.libelle.textProperty().bindBidirectional(elementProperty.get().libelleProperty());
 //        this.libelle.editableProperty().bindBidirectional(editBind);
         
         // Display levee's id.--------------------------------------------------
-        this.id.setText(this.digueProperty.get().getId());
+        this.id.setText(this.elementProperty.get().getId());
         
         // Display levee's update date.-----------------------------------------
-        this.date_maj.setValue(this.digueProperty.get().getDateMaj());
+        this.date_maj.setValue(this.elementProperty.get().getDateMaj());
         this.date_maj.setDisable(true);
-        this.date_maj.valueProperty().bindBidirectional(this.digueProperty.get().dateMajProperty());
+        this.date_maj.valueProperty().bindBidirectional(this.elementProperty.get().dateMajProperty());
 
         // Binding levee's comment.---------------------------------------------
-        this.uiComment.setHtmlText(digueProperty.get().getCommentaire());
+        this.uiComment.setHtmlText(elementProperty.get().getCommentaire());
         
         table.updateTable();
         
+    }
+
+    @Override
+    public void preSave() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     private class TronconPojoTable extends PojoTable {
@@ -137,7 +133,7 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
                 updateTable();
             };
 
-            digueProperty.addListener(listener);
+            elementProperty.addListener(listener);
         }
 
         private void updateTable() {
@@ -176,7 +172,7 @@ public class FXDiguePane extends BorderPane implements FXElementPane {
         @Override
         protected Object createPojo() {
             TronconDigue troncon = new TronconDigue();
-            troncon.setDigueId(digueProperty.get().getId());
+            troncon.setDigueId(elementProperty.get().getId());
             session.add(troncon);
             System.out.println("Id du nouveau tronçon : "+troncon.getId());
             troncons.add(troncon);

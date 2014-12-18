@@ -10,14 +10,11 @@ import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -31,13 +28,11 @@ import javafx.scene.layout.VBox;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
+public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
     
-    private ProfilTravers profilTravers;
-    private ObservableList<LeveeProfilTravers> leves;
+    private final ObservableList<LeveeProfilTravers> leves = FXCollections.observableArrayList();
     
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
-    private final BooleanProperty tronconChanged = new SimpleBooleanProperty(false);
     
     private final ProfilTraversRepository profilTraversRepository;
     private final LeveProfilTraversTable levesTable = new LeveProfilTraversTable();
@@ -46,55 +41,51 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
     @FXML private TextField uiLibelle;
     @FXML private VBox uiVbox;
     
-    private FXProfilTraversSubPane(){
+    private FXProfilTraversPane(){
         SIRS.loadFXML(this);
         final Session session = Injector.getBean(Session.class);
         profilTraversRepository = session.getProfilTraversRepository();
     }
     
-    public FXProfilTraversSubPane(final ProfilTravers profilTravers){
+    public FXProfilTraversPane(final ProfilTravers profilTravers){
         this();
-        this.profilTravers = profilTravers;
-        initFields();
+        uiVbox.getChildren().add(levesTable);
+        levesTable.editableProperty().bind(disableProperty().not().and(elementProperty.isNotNull()));
+        
+        elementProperty.addListener((ObservableValue<? extends ProfilTravers> observable, ProfilTravers oldValue, ProfilTravers newValue) -> {
+            initFields();
+        });
+        setElement(profilTravers);
     }       
             
     private void initFields(){
-        
-        uiLibelle.textProperty().bindBidirectional(profilTravers.libelleProperty());
-        uiLibelle.disableProperty().bind(disableFields);
-        
-        final List<LeveeProfilTravers> leves = profilTravers.getLeveeIds();
-        uiVbox.getChildren().add(levesTable);
-        levesTable.updateTable();
-        levesTable.editableProperty().bind(disableFields.not());
-        
+        if (elementProperty.get() != null) {
+            uiLibelle.textProperty().bindBidirectional(elementProperty.get().libelleProperty());
+            leves.setAll(elementProperty.get().getLeveeIds());
+        } else {
+            uiLibelle.textProperty().unbind();
+            uiLibelle.textProperty().set("");
+        }
     }
 
-    @Override
     public BooleanProperty disableFieldsProperty() {
         return disableFields;
     }
 
     @Override
     public void preSave() {
-        profilTravers.setDateMaj(LocalDateTime.now());
-        profilTraversRepository.update(profilTravers);
+        final ProfilTravers profilTravers = elementProperty.get();
+        if (profilTravers != null) {
+            profilTravers.setDateMaj(LocalDateTime.now());
+            profilTraversRepository.update(profilTravers);
+        }
     }
-
-    @Override
-    public BooleanProperty tronconChangedProperty() {
-        return this.tronconChanged;
-    }
-    
-    private void reloadLeves() {        
-        final List<LeveeProfilTravers> items = this.profilTravers.getLeveeIds();
-        this.leves = FXCollections.observableArrayList(items);
-    }    
 
     private class LeveProfilTraversTable extends PojoTable {
 
         public LeveProfilTraversTable() {
             super(LeveeProfilTravers.class, "Liste des levés de profils en travers");
+            setTableItems(()-> (ObservableList) leves);
         }
 
         @Override
@@ -108,13 +99,10 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
 
             Node content = new BorderPane();
             if (pojo instanceof LeveeProfilTravers){
-                final Map<String, Object> resources = new HashMap<>();
-                resources.put("profilTravers", profilTravers);
                 content = new FXThemePane((LeveeProfilTravers) pojo);
                 ((FXThemePane) content).setShowOnMapButton(false);
             }
             tab.setContent(content);
-
 
             tab.setText(pojo.getClass().getSimpleName());
             tab.setOnSelectionChanged(new EventHandler<Event>() {
@@ -128,26 +116,10 @@ public class FXProfilTraversSubPane extends BorderPane implements ThemePane {
             session.getFrame().addTab(tab);
         }
         
-        
-        private void updateTable() {
-            reloadLeves();
-            if (leves == null) {
-                setTableItems(FXCollections::emptyObservableList);
-            } else {
-            //JavaFX bug : sortable is not possible on filtered list
-                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
-                // https://javafx-jira.kenai.com/browse/RT-32091
-                final SortedList sortedList = new SortedList(leves);
-                setTableItems(()->sortedList);
-                sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
-            }
-        }
-        
         @Override
         protected Object createPojo() {
             final LeveeProfilTravers leve = new LeveeProfilTravers();
-            profilTravers.getLeveeIds().add(leve);
-            updateTable();
+            elementProperty.get().getLeveeIds().add(leve);
             return leve;
         }
     }

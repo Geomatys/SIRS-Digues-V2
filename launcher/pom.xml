@@ -56,7 +56,7 @@
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
-                        <jvmArg>-Xmx512m</jvmArg>
+                        <jvmArg>-Xmx1G</jvmArg>
                     </jvmArgs>
                 </configuration>
             </plugin>

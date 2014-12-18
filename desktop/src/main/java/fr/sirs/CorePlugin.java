@@ -26,7 +26,6 @@ import fr.sirs.theme.ProfilsEnTraversTheme;
 import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
-import fr.sirs.theme.ui.FXObjetPane;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Crete;
@@ -53,6 +52,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.map.BorneDigueCache;
+import fr.sirs.theme.ui.FXThemePane;
 import fr.sirs.util.FXFreeTab;
 
 import java.awt.Color;
@@ -577,7 +577,7 @@ public class CorePlugin extends Plugin {
                 setText(text);
                 
                 setOnAction((ActionEvent event) -> {
-                    final FXObjetPane controller = new FXObjetPane(cdt);
+                    final FXThemePane controller = new FXThemePane(cdt);
                     final Tab tab = new FXFreeTab(text);
                     tab.setContent(controller);
                     Injector.getBean(Session.class).getFrame().addTab(tab);

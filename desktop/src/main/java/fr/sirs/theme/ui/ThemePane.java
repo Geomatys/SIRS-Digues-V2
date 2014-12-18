@@ -1,7 +1,7 @@
 
 package fr.sirs.theme.ui;
 
-import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 
 /**
  *
@@ -10,19 +10,9 @@ import javafx.beans.property.BooleanProperty;
 public interface ThemePane {
     
     /**
-     * Binds enabling/disabling state of Pane edition elements.
+     * Detects if the troncon has changed. Read-only, because external components
+     * should not be able to modify it.
      * @return 
      */
-    BooleanProperty disableFieldsProperty();
-    
-    /**
-     * Detects if the troncon has changed.
-     * @return 
-     */
-    BooleanProperty tronconChangedProperty();
-    
-    /**
-     * Record unbinded fields changes before saving.
-     */
-    void preSave();
+    ReadOnlyBooleanProperty tronconChangedProperty();
 }

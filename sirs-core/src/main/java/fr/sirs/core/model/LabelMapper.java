@@ -1,5 +1,6 @@
 package fr.sirs.core.model;
 
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -25,11 +26,10 @@ public class LabelMapper {
     public Class getModelClass() {return this.modelClass;}
     
     public String mapPropertyName(final String property) {
-        String result = bundle.getString(property);
-        if (result == null) {
+        try {
+            return bundle.getString(property);
+        } catch (NullPointerException | MissingResourceException e) {
             return property;
-        } else {
-            return result;
         }
     }
     

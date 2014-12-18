@@ -11,13 +11,13 @@ import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.theme.ui.FXElementPane;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,16 +26,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class FXContactOrganismePane extends BorderPane implements FXElementPane{
-
-    private ContactOrganisme contactOrganisme;
+public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganisme> {
     
     @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
@@ -69,12 +66,14 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
         initOrganismes(uiOrganismeChoice);
         
         uiMode.setSaveAction(this::save);
+        elementProperty.addListener((ObservableValue<? extends ContactOrganisme> observable, ContactOrganisme oldValue, ContactOrganisme newValue) -> {
+            initPane();
+        });
         setElement(co);
     }
     
-    @Override
-    public void setElement(final Element element) {
-        contactOrganisme = (ContactOrganisme) element;
+    public void initPane() {
+        final ContactOrganisme contactOrganisme = elementProperty.get();
         
         if (contactOrganisme == null) return;
         
@@ -91,7 +90,40 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
         }
     }
        
-    private void save() {
+    private void save() {        
+        if (originalOrg != null) {
+            orgRepository.update(originalOrg);
+        }
+        
+        final ContactOrganisme contactOrganisme = elementProperty.get();
+        if (contactOrganisme != null) {
+            final Organisme newOrg = (Organisme) contactOrganisme.getParent();
+            if (newOrg != null && !newOrg.equals(originalOrg)) {
+                orgRepository.update(newOrg);
+            }
+
+            originalOrg = newOrg;
+        }
+    }
+
+    private void initContacts(ComboBox contactComboBox) {
+        ObservableList<Contact> allContacts = FXCollections.observableArrayList(contactRepository.getAll());
+        contactComboBox.setItems(allContacts);
+        new ComboBoxCompletion(contactComboBox);
+        contactComboBox.setConverter(new SirsStringConverter());
+    }
+    
+    private void initOrganismes(ComboBox orgComboBox) {
+        ObservableList<Organisme> allOrganisms = FXCollections.observableArrayList(orgRepository.getAll());
+        orgComboBox.setItems(allOrganisms);
+        new ComboBoxCompletion(orgComboBox);
+        orgComboBox.setConverter(new SirsStringConverter());
+    }
+
+    @Override
+    public void preSave() {
+        final ContactOrganisme contactOrganisme = elementProperty().get();
+        if (contactOrganisme == null) return;
         if (uiOrganismeChoice.getValue() == null) {
             new Alert(Alert.AlertType.ERROR, "Le champs Organisme ne doit pas être vide !", ButtonType.OK).showAndWait();
             return;
@@ -112,30 +144,5 @@ public class FXContactOrganismePane extends BorderPane implements FXElementPane{
             contactOrganisme.setDateFinIntervenant(LocalDateTime.of(
                     uiFinDatePicker.getValue(), LocalTime.MIN));
         }
-        
-        if (originalOrg != null) {
-            orgRepository.update(originalOrg);
-        }
-        
-        final Organisme newOrg = (Organisme) contactOrganisme.getParent();
-        if (newOrg != null && !newOrg.equals(originalOrg)) {
-            orgRepository.update(newOrg);
-        }
-        
-        originalOrg = newOrg;
-    }
-
-    private void initContacts(ComboBox contactComboBox) {
-        ObservableList<Contact> allContacts = FXCollections.observableArrayList(contactRepository.getAll());
-        contactComboBox.setItems(allContacts);
-        new ComboBoxCompletion(contactComboBox);
-        contactComboBox.setConverter(new SirsStringConverter());
-    }
-    
-    private void initOrganismes(ComboBox orgComboBox) {
-        ObservableList<Organisme> allOrganisms = FXCollections.observableArrayList(orgRepository.getAll());
-        orgComboBox.setItems(allOrganisms);
-        new ComboBoxCompletion(orgComboBox);
-        orgComboBox.setConverter(new SirsStringConverter());
     }
 }

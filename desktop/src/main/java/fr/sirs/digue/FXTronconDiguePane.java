@@ -16,7 +16,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.FXElementPane;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
@@ -26,7 +26,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -59,9 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXTronconDiguePane extends BorderPane implements FXElementPane{
-    
-    private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
+public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     
     @Autowired private Session session;
     
@@ -119,7 +116,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         uiContactTable.editableProperty().bind(editBind);
         
         // Troncon change listener
-        tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
+        elementProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             initFields();
         });
            
@@ -158,23 +155,18 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     }
     
     public ObjectProperty<TronconDigue> tronconProperty(){
-        return tronconProperty;
+        return elementProperty;
     }
     
     public TronconDigue getTroncon(){
-        return tronconProperty.get();
-    }
-    
-    @Override
-    public void setElement(Element troncon){
-        this.tronconProperty.set((TronconDigue) troncon);
+        return elementProperty.get();
     }
         
     @FXML
     private void srAdd(ActionEvent event) {
         final SystemeReperageRepository repo = session.getSystemeReperageRepository();
         
-        final TronconDigue troncon = tronconProperty.get();
+        final TronconDigue troncon = elementProperty.get();
         final SystemeReperage sr = new SystemeReperage();
         sr.setLibelle("Nouveau SR");
         sr.setTronconId(troncon.getId());
@@ -199,7 +191,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         repo.remove(sr);
         
         //maj de la liste
-        final TronconDigue troncon = tronconProperty.get();
+        final TronconDigue troncon = elementProperty.get();
         final List<SystemeReperage> srs = repo.getByTroncon(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
@@ -210,14 +202,14 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         tab.show();
         final FXMap map = tab.getMap().getUiMap();
         try {
-            map.getCanvas().setVisibleArea(JTS.toEnvelope(tronconProperty.get().getGeometry()));
+            map.getCanvas().setVisibleArea(JTS.toEnvelope(elementProperty.get().getGeometry()));
         } catch (NoninvertibleTransformException | TransformException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
         }
     }
     
     private void save(){
-        tronconProperty.get().setCommentaire(uiComment.getHtmlText());
+        elementProperty.get().setCommentaire(uiComment.getHtmlText());
         srController.save();
         session.update(getTroncon());
     }
@@ -225,7 +217,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
     private void initFields(){
         initializing = true;
         
-        final TronconDigue troncon = tronconProperty.get();
+        final TronconDigue troncon = elementProperty.get();
         final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
         final Digue digue = session.getDigueById(troncon.getDigueId());
         
@@ -273,7 +265,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
                             );
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
-                        tronconProperty.get().setDigueId(newValue.getId());
+                        elementProperty.get().setDigueId(newValue.getId());
                         save();
                     }
                 }
@@ -296,6 +288,11 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         
         initializing = false;
     }
+
+    @Override
+    public void preSave() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
     private final class ContactTable extends PojoTable{
 
@@ -305,7 +302,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
 
         @Override
         protected void deletePojos(Element... pojos) {
-            final TronconDigue troncon = tronconProperty.get();
+            final TronconDigue troncon = elementProperty.get();
             for(Element ele : pojos){
                 troncon.contacts.remove(ele);
             }
@@ -319,7 +316,7 @@ public class FXTronconDiguePane extends BorderPane implements FXElementPane{
         @Override
         protected Object createPojo() {
             final ContactTroncon contact = new ContactTroncon();
-            final TronconDigue troncon = tronconProperty.get();
+            final TronconDigue troncon = elementProperty.get();
             troncon.contacts.add(contact);
             return contact;
         }
