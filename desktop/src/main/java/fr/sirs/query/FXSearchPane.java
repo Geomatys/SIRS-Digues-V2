@@ -425,7 +425,7 @@ public class FXSearchPane extends BorderPane {
                 JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("requete"));
         final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
-        layer.setName("Requête "+ query);
+        layer.setName(query);
         return layer;
     }
     

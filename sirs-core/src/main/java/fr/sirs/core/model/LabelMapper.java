@@ -39,6 +39,7 @@ public class LabelMapper {
     }
 
     public String mapClassName() {
-        return  modelClass.getSimpleName();
+        final String name = bundle.getString("class");
+        return name!=null ? name : modelClass.getSimpleName();
     }
 }

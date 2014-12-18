@@ -34,6 +34,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MonteeEaux;
@@ -59,8 +60,10 @@ import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
@@ -161,7 +164,6 @@ public class CorePlugin extends Plugin {
         final TronconDigueRepository repo = getSession().getTronconDigueRepository();
         
         try{
-            
             //troncons
             final BeanStore tronconStore = new BeanStore(
                     new BeanFeatureSupplier(TronconDigue.class, "id", "geometry", 
@@ -174,12 +176,12 @@ public class CorePlugin extends Plugin {
                                 }
                             })
             );
-            items.addAll(buildLayers(tronconStore,createTronconStyle(),createTronconSelectionStyle(),true));
+            items.addAll(buildLayers(tronconStore,"Tronçons",createTronconStyle(),createTronconSelectionStyle(),true));
             
             //bornes
             final BorneDigueCache cache = new BorneDigueCache();
             final BeanStore borneStore = new BeanStore(cache.getSupplier());
-            items.addAll(buildLayers(borneStore,createBorneStyle(),createBorneSelectionStyle(),true));
+            items.addAll(buildLayers(borneStore,"Bornes",createBorneStyle(),createBorneSelectionStyle(),true));
             
             //structures
             final BeanStore structStore = new BeanStore(
@@ -205,6 +207,12 @@ public class CorePlugin extends Plugin {
                     new StructBeanSupplier(CommuneTroncon.class)
             );
                         
+            final Map<String,String> nameMap = new HashMap<>();
+            for(BeanFeatureSupplier s : structStore.getBeanSuppliers()){
+                final LabelMapper mapper = new LabelMapper(s.getBeanClass());
+                nameMap.put(s.getBeanClass().getSimpleName(), mapper.mapClassName());
+            }
+            
             final Color[] colors = new Color[]{
                 Color.BLACK,
                 Color.BLUE,
@@ -220,7 +228,7 @@ public class CorePlugin extends Plugin {
             
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll( buildLayers(structStore, colors, createTronconSelectionStyle(),false) );
+            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createTronconSelectionStyle(),false) );
             items.add(structLayer);
                
             
@@ -276,7 +284,7 @@ public class CorePlugin extends Plugin {
         
     }
     
-    private List<MapLayer> buildLayers(FeatureStore store, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         for(Name name : store.getNames()){
@@ -291,7 +299,7 @@ public class CorePlugin extends Plugin {
             );
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
-            fml.setName(name.getLocalPart());
+            fml.setName(layerName);
             
             if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
             
@@ -300,7 +308,7 @@ public class CorePlugin extends Plugin {
         return layers;
     }
     
-    private List<MapLayer> buildLayers(FeatureStore store, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    private List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
@@ -318,7 +326,9 @@ public class CorePlugin extends Plugin {
             );
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
-            fml.setName(name.getLocalPart());
+            
+            final String str = nameMap.get(name.getLocalPart());
+            fml.setName(str!=null ? str : name.getLocalPart());
             
             if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
             
