@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
+import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -91,10 +92,12 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
     private TronconDigue troncon = null;
     private EditionHelper helper;
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
+    private final Session session;
         
     
     public TronconEditHandler(final FXMap map) {
         super(map);
+        session = Injector.getSession();
     }
 
     /**
@@ -115,7 +118,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase("TronconDigue")){
+            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }
@@ -314,7 +317,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     if(feature !=null){
                         final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof TronconDigue){
-                            troncon = (TronconDigue) bean;
+                            troncon = ((TronconDigue) bean);
+                            //on recupere le troncon complet, celui ci n'est qu'une mise a plat
+                            troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
                         }
                     }
 
@@ -332,7 +337,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     createItem.setOnAction((ActionEvent event) -> {
                         
                         final Entry<String, Digue> entry = showTronconDialog();
-                        final Session session = Injector.getBean(Session.class);
                         troncon = new TronconDigue();
                         troncon.setLibelle(entry.getKey());
 
@@ -403,7 +407,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                     saveItem.setOnAction((ActionEvent event) -> {
                         troncon.setGeometry(editGeometry.geometry);
-                        final Session session = Injector.getBean(Session.class);
                         session.getTronconDigueRepository().update(troncon);
                         
                         updateSRElementaire(troncon);
@@ -429,7 +432,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     popup.getItems().add(new SeparatorMenuItem());
                     final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        final Session session = Injector.getBean(Session.class);
                         session.getTronconDigueRepository().remove(troncon);
                         troncon = null;
                         editGeometry.reset();

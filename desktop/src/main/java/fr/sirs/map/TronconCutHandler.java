@@ -1,10 +1,12 @@
 
 package fr.sirs.map;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.CorePlugin;
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.TronconDigue;
@@ -13,12 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -44,6 +43,7 @@ import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
@@ -78,33 +78,38 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     //edition variables
     private FeatureMapLayer tronconLayer = null;
     private EditionHelper helper;
-    private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     
     private final Dialog dialog = new Dialog();
     private final FXTronconCut editPane;
     private final FeatureType featureType;
+    private final Session session;
     
     public TronconCutHandler(final FXMap map) {
         super(map);
+        session = Injector.getSession();
         geomlayer.setMap2D(map);
-        
         editPane = new FXTronconCut();
         
         final DialogPane subpane = new DialogPane();
         subpane.setContent(editPane);
-        subpane.getButtonTypes().add(ButtonType.FINISH);
+        subpane.getButtonTypes().addAll(ButtonType.CANCEL,ButtonType.FINISH);
         dialog.setResizable(true);
-        dialog.setOnCloseRequest(new EventHandler() {
-            @Override
-            public void handle(Event event) {
-                dialog.hide();
-            }
-        });
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
         dialog.setDialogPane(subpane);
         dialog.setWidth(500);
         dialog.setHeight(700);
+        
+        dialog.resultProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if(newValue == ButtonType.FINISH){
+                    processCut();
+                }
+                dialog.hide();
+                map.setHandler(new FXPanHandler(map, false));
+            }
+        });
         
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
             @Override
@@ -193,6 +198,10 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         
     }
     
+    private void processCut(){
+        
+    }
+    
     /**
      * {@inheritDoc }
      */
@@ -210,7 +219,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase("TronconDigue")){
+            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }
@@ -244,8 +253,6 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         private final ContextMenu popup = new ContextMenu();
         private double startX;
         private double startY;
-        private double diffX;
-        private double diffY;
         private MouseButton mousebutton;
 
         public MouseListen() {
@@ -278,8 +285,10 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     //selection d'un troncon
                     final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
-                        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
+                        Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof TronconDigue){
+                            //on recupere le troncon complet, celui ci n'est qu'une mise a plat
+                            bean = session.getTronconDigueRepository().get(((TronconDigue)bean).getDocumentId());
                             editPane.tronconProperty().set((TronconDigue)bean);
                         }
                     }
@@ -323,10 +332,6 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         public void mouseDragged(MouseEvent me) {
             //do not use getX/getY to calculate difference
             //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-            
-            //calcul du deplacement
-            diffX = getMouseX(me)-startX;
-            diffY = getMouseY(me)-startY;
             startX = getMouseX(me);
             startY = getMouseY(me);
         }

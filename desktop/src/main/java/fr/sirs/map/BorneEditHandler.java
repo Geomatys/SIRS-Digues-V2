@@ -3,6 +3,7 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
@@ -15,7 +16,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -73,6 +73,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         }
     };
     private final double zoomFactor = 2;
+    private final Session session;
     
     //edition variables
     private FeatureMapLayer tronconLayer = null;
@@ -88,6 +89,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     
     public BorneEditHandler(final FXMap map) {
         super(map);
+        session = Injector.getSession();
         
         editPane = new FXSystemeReperagePane(map);
         
@@ -143,7 +145,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 if(ids.size()==1){
                     //borne edition mode
                     final String borneId = lst.get(0).getBorneId();
-                    final Session session = Injector.getSession();
                     borne = session.getBorneDigueRepository().get(borneId);
                     updateGeometry();
                 }else{
@@ -196,10 +197,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase("TronconDigue")){
+            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
-            }else if(layer.getName().equalsIgnoreCase("BorneDigue")){
+            }else if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
                 borneLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }
@@ -297,8 +298,9 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
-                        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
+                        Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof TronconDigue){
+                            bean = session.getTronconDigueRepository().get(((TronconDigue)bean).getDocumentId());
                             editPane.tronconProperty().set((TronconDigue)bean);
                         }
                     }
@@ -373,7 +375,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             mouseDragged(me);
             if(borne!=null && editGeometry.selectedNode[0]>=0){
                 borne.setGeometry((Point) editGeometry.geometry);
-                final Session session = Injector.getBean(Session.class);
                 session.getBorneDigueRepository().update(borne);
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte

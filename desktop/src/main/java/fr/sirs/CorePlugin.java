@@ -3,17 +3,13 @@
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import fr.sirs.core.SirsCore;
-
 import java.io.IOException;
 import java.sql.SQLException;
-
-import fr.sirs.digue.FXDiguePane;
-import fr.sirs.digue.FXTronconDiguePane;
-
 import org.geotoolkit.data.bean.BeanStore;
 
+import fr.sirs.core.SirsCore;
+import fr.sirs.digue.FXDiguePane;
+import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.DocumentsTheme;
@@ -27,7 +23,6 @@ import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
@@ -61,10 +56,10 @@ import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import javafx.event.ActionEvent;
@@ -116,6 +111,8 @@ import org.opengis.style.TextSymbolizer;
  */
 public class CorePlugin extends Plugin {
     
+    public static final String TRONCON_LAYER_NAME = "Tronçons";
+    public static final String BORNE_LAYER_NAME = "Bornes";
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     
@@ -176,35 +173,36 @@ public class CorePlugin extends Plugin {
                                 }
                             })
             );
-            items.addAll(buildLayers(tronconStore,"Tronçons",createTronconStyle(),createTronconSelectionStyle(),true));
+            items.addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(),true));
             
             //bornes
             final BorneDigueCache cache = new BorneDigueCache();
             final BeanStore borneStore = new BeanStore(cache.getSupplier());
-            items.addAll(buildLayers(borneStore,"Bornes",createBorneStyle(),createBorneSelectionStyle(),true));
+            items.addAll(buildLayers(borneStore,BORNE_LAYER_NAME,createBorneStyle(),createBorneSelectionStyle(),true));
             
             //structures
+            final TronconDigueRepository tronconRepo = getSession().getTronconDigueRepository();
             final BeanStore structStore = new BeanStore(
-                    new StructBeanSupplier(Crete.class),
-                    new StructBeanSupplier(OuvrageRevanche.class),
-                    new StructBeanSupplier(TalusDigue.class),
-                    new StructBeanSupplier(SommetRisberme.class),
-                    new StructBeanSupplier(TalusRisberme.class),
-                    new StructBeanSupplier(PiedDigue.class),
-                    new StructBeanSupplier(Fondation.class),
-                    new StructBeanSupplier(FrontFrancBord.class),
-                    new StructBeanSupplier(PiedFrontFrancBord.class),
-                    new StructBeanSupplier(VoieAcces.class),
-                    new StructBeanSupplier(OuvrageFranchissement.class),
-                    new StructBeanSupplier(OuvertureBatardable.class),
-                    new StructBeanSupplier(VoieDigue.class),
-                    new StructBeanSupplier(OuvrageVoirie.class),
-                    new StructBeanSupplier(Desordre.class),
-                    new StructBeanSupplier(Prestation.class),
-                    new StructBeanSupplier(LaisseCrue.class),
-                    new StructBeanSupplier(MonteeEaux.class),
-                    new StructBeanSupplier(LigneEau.class),
-                    new StructBeanSupplier(CommuneTroncon.class)
+                    new StructBeanSupplier(Crete.class,tronconRepo::getAllCretes),
+                    new StructBeanSupplier(OuvrageRevanche.class,tronconRepo::getAllOuvrageRevanches),
+                    new StructBeanSupplier(TalusDigue.class,tronconRepo::getAllTalusDigues),
+                    new StructBeanSupplier(SommetRisberme.class,tronconRepo::getAllSommetRisbermes),
+                    new StructBeanSupplier(TalusRisberme.class,tronconRepo::getAllTalusRisbermes),
+                    new StructBeanSupplier(PiedDigue.class,tronconRepo::getAllPiedDigues),
+                    new StructBeanSupplier(Fondation.class,tronconRepo::getAllFondations),
+                    new StructBeanSupplier(FrontFrancBord.class,tronconRepo::getAllFrontFrancBords),
+                    new StructBeanSupplier(PiedFrontFrancBord.class,tronconRepo::getAllPiedFrontFrancBords),
+                    new StructBeanSupplier(VoieAcces.class,tronconRepo::getAllVoieAccess),
+                    new StructBeanSupplier(OuvrageFranchissement.class,tronconRepo::getAllOuvrageFranchissements),
+                    new StructBeanSupplier(OuvertureBatardable.class,tronconRepo::getAllOuvertureBatardables),
+                    new StructBeanSupplier(VoieDigue.class,tronconRepo::getAllVoieDigues),
+                    new StructBeanSupplier(OuvrageVoirie.class,tronconRepo::getAllOuvrageVoiries),
+                    new StructBeanSupplier(Desordre.class,tronconRepo::getAllDesordres),
+                    new StructBeanSupplier(Prestation.class,tronconRepo::getAllPrestations),
+                    new StructBeanSupplier(LaisseCrue.class,tronconRepo::getAllLaisseCrues),
+                    new StructBeanSupplier(MonteeEaux.class,tronconRepo::getAllMonteeEaux),
+                    new StructBeanSupplier(LigneEau.class,tronconRepo::getAllLigneEaus)
+                    //new StructBeanSupplier(CommuneTroncon.class,tronconRepo::getAll)
             );
                         
             final Map<String,String> nameMap = new HashMap<>();
@@ -241,45 +239,10 @@ public class CorePlugin extends Plugin {
 
     private class StructBeanSupplier extends BeanFeatureSupplier{
 
-        public StructBeanSupplier(final Class clazz) {
+        public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
             super(clazz, "id", "geometry", 
                 (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
-                null, SirsCore.getEpsgCode(), new StructSupplier(clazz::isInstance));
-        }
-        
-    }
-    
-    private class StructSupplier implements BeanStore.FeatureSupplier{
-
-        private final Predicate predicate;
-        
-        public StructSupplier(Predicate predicate) {
-            this.predicate = predicate;
-        }
-        
-        @Override
-        public Iterable get() {
-            return new SubIterable(predicate);
-        }
-        
-    }
-    
-    private class SubIterable implements Iterable{
-
-        private final Predicate predicate;
-
-        public SubIterable(Predicate predicate) {
-            this.predicate = predicate;
-        }
-        
-        public Iterator iterator() {
-            final TronconDigueRepository repo = getSession().getTronconDigueRepository();
-            final List<TronconDigue> troncons = repo.getAll();
-            final List col = new ArrayList();
-            for(TronconDigue td : troncons){
-                col.addAll(td.structures.filtered(predicate));
-            }
-            return col.iterator();
+                null, SirsCore.getEpsgCode(), callable::get);
         }
         
     }
