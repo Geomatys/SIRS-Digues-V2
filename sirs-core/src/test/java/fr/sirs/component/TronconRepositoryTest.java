@@ -81,6 +81,32 @@ public class TronconRepositoryTest extends CouchDBTestCase {
             e.printStackTrace();
         }
     }
+    
+    
+    /**
+     * Test of getAll method, of class TronconDigueRepository.
+     */
+    @Test
+    public void testGetAllLightAsStream() {
+        System.out.println("getAllAsStream");
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
+                couchDbConnector);
+        try (JacksonIterator<TronconDigue> allAsStream = tronconRepository
+                .getAllLightIterator()) {
+            while (allAsStream.hasNext()) {
+                TronconDigue troncon = allAsStream.next();
+                System.out.println(troncon);
+                for (Objet struct : troncon.getStructures()) {
+                    System.out
+                            .println("DocuumentId: " + struct.getDocumentId());
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void listAllFondations() {

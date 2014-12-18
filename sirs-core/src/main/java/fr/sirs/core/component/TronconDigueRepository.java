@@ -52,6 +52,7 @@ import fr.sirs.core.model.VoieDigue;
 @Views({
         @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
         @View(name = "stream", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
+        @View(name = "streamLight", map = "classpath:TronconDigueLight-map.js"),
         @View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
 public class TronconDigueRepository extends
         CouchDbRepositorySupport<TronconDigue> implements
@@ -314,6 +315,11 @@ public class TronconDigueRepository extends
     public JacksonIterator<TronconDigue> getAllIterator() {
         return JacksonIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery("stream")));
+    }
+    
+    public JacksonIterator<TronconDigue> getAllLightIterator() {
+        return JacksonIterator.create(TronconDigue.class,
+                db.queryForStreamingView(createQuery("streamLight")));
     }
 
 }
