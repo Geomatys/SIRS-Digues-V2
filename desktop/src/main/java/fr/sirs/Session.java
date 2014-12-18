@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
-import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
@@ -22,6 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,8 +34,15 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.apache.sis.util.iso.SimpleInternationalString;
 
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.coverage.CoverageReference;
+import org.geotoolkit.coverage.CoverageStore;
+import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.osmtms.OSMTileMapClient;
+import org.geotoolkit.style.DefaultDescription;
 
 /**
  *
@@ -79,11 +86,11 @@ public class Session extends SessionGen {
         }
     }
     
-    private BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
     public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
-    private BooleanProperty nonGeometryEditionProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty nonGeometryEditionProperty = new SimpleBooleanProperty(false);
     public BooleanProperty nonGeometryEditionProperty() {return nonGeometryEditionProperty;}
-    private BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
+    private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
     
     public enum Role{ADMIN, USER, CONSULTANT, EXTERNE};
@@ -198,17 +205,17 @@ public class Session extends SessionGen {
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
                 mapContext.items().add(0,backgroundGroup);
-//                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
-//
-//                for (Name n : store.getNames()) {
-//                    final CoverageReference cr = store.getCoverageReference(n);
-//                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-//                    cml.setName("Open Street Map");
-//                    cml.setDescription(new DefaultDescription(
-//                            new SimpleInternationalString("Open Street Map"),
-//                            new SimpleInternationalString("Open Street Map")));
-//                    backgroundGroup.items().add(cml);
-//                }
+                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+
+                for (Name n : store.getNames()) {
+                    final CoverageReference cr = store.getCoverageReference(n);
+                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+                    cml.setName("Open Street Map");
+                    cml.setDescription(new DefaultDescription(
+                            new SimpleInternationalString("Open Street Map"),
+                            new SimpleInternationalString("Open Street Map")));
+                    backgroundGroup.items().add(cml);
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

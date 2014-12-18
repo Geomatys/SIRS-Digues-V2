@@ -39,7 +39,12 @@ public class LabelMapper {
     }
 
     public String mapClassName() {
-        final String name = bundle.getString("class");
+        String name = null;
+        try{
+            name = bundle.getString("class");
+        }catch(MissingResourceException ex){
+            //not important
+        }
         return name!=null ? name : modelClass.getSimpleName();
     }
 }

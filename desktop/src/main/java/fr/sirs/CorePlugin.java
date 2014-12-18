@@ -169,7 +169,7 @@ public class CorePlugin extends Plugin {
                                 
                                 @Override
                                 public Iterable get() {
-                                    return repo::getAllIterator;
+                                    return repo::getAllLightIterator;
                                 }
                             })
             );
