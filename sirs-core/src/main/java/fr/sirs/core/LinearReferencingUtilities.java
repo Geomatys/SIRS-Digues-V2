@@ -64,6 +64,7 @@ public final class LinearReferencingUtilities extends Static{
         public double distancePerpendicularAbs;
         public double distancePerpendicular;
         public double distanceAlongLinear;
+        public boolean perpendicularProjection;
     }
     
     /**
@@ -150,7 +151,6 @@ public final class LinearReferencingUtilities extends Static{
         projection.distancePerpendicular = Double.MAX_VALUE;
         
         for(SegmentInfo segment : segments){
-            
             final Coordinate[] candidateNearests = DistanceOp.nearestPoints(segment.geometry, reference);
             final double candidateDistance = candidateNearests[0].distance(candidateNearests[1]);
             if(candidateDistance<projection.distancePerpendicularAbs){
@@ -161,6 +161,11 @@ public final class LinearReferencingUtilities extends Static{
                 projection.segment = segment;
                 projection.distanceAlongLinear = segment.startDistance + 
                         segment.segmentCoords[0].distance(candidateNearests[0]);
+                
+                //find if point projects on segment
+                projection.perpendicularProjection = projectsPerpendicular(
+                        segment.segmentCoords[0], segment.segmentCoords[1], reference.getCoordinate());
+                
             }
         }
         
@@ -238,6 +243,37 @@ public final class LinearReferencingUtilities extends Static{
         return (segment.segmentCoords[1].x-segment.segmentCoords[0].x) * (c.y-segment.segmentCoords[0].y) - 
                (c.x-segment.segmentCoords[0].x) * (segment.segmentCoords[1].y-segment.segmentCoords[0].y);
     }
+    
+    private static boolean projectsPerpendicular(final Coordinate segmentStart, final Coordinate segmentEnd, final Coordinate point){
+        final Coordinate ab = subtract(segmentEnd, segmentStart,null);
+        final Coordinate ac = subtract(point,segmentStart,null);
+        final double e = dot(ac, ab);
+        // cases where point is outside segment
+        if (e <= 0.0f) return false;
+        final double f = dot(ab, ab);
+        if (e >= f) return false;
+        // cases where point projects onto segment
+        return true;
+    }
+    
+    private static double dot(final Coordinate vector, final Coordinate other){
+        double dot = 0;
+        for(int i=0;i<2;i++){
+            dot += vector.getOrdinate(i)*other.getOrdinate(i);
+        }
+        return dot;
+    }
+        
+    private static Coordinate subtract(final Coordinate vector, Coordinate other, Coordinate buffer){
+        if( buffer == null ){
+            buffer = new Coordinate();
+        }
+        for(int i=0;i<2;i++){
+            buffer.setOrdinate(i, vector.getOrdinate(i)-other.getOrdinate(i));
+        }
+        return buffer;
+    }
+    
     
     public static LineString buildGeometry(Geometry tronconGeom, Objet structure, BorneDigueRepository repo){
         

@@ -1,6 +1,7 @@
 
 package fr.sirs.map;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.CorePlugin;
@@ -9,15 +10,27 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.FXPositionablePane;
 import java.awt.geom.Point2D;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -50,6 +63,7 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableStyleFactory;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.style.LineSymbolizer;
@@ -71,6 +85,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     
     
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+    private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXMapContainerPane geomlayer= new FXMapContainerPane();
     private final double zoomFactor = 2;
@@ -199,7 +214,215 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     }
     
     private void processCut(){
+        final TronconDigue troncon = editPane.tronconProperty().get();
+        if(troncon==null) return;
         
+        final ObservableList<FXTronconCut.CutPoint> cutpoints = editPane.getCutpoints();
+        final ObservableList<FXTronconCut.Segment> segments = editPane.getSegments();
+        if(cutpoints.isEmpty()) return;
+        
+        TronconDigue aggregate = null;
+        
+        for(FXTronconCut.Segment segment : segments){
+            final TronconDigue cut = cutTroncon(troncon, segment);
+            
+            final FXTronconCut.SegmentType type = segment.typeProp.get();
+            if(FXTronconCut.SegmentType.CONSERVER.equals(type)){
+                //on aggrege le morceau
+                if(aggregate==null){
+                    aggregate = cut;
+                }else{
+                    aggregate = mergeTroncon(aggregate, cut);
+                }                
+                
+            }else if(FXTronconCut.SegmentType.ARCHIVER.equals(type)){
+                //on marque comme terminé le troncon et ses structures
+                cut.dateMajProperty().set(LocalDateTime.now());
+                cut.date_finProperty().set(LocalDateTime.now());                
+                for(Objet obj : cut.structures){
+                    obj.dateMajProperty().set(LocalDateTime.now());
+                    obj.date_finProperty().set(LocalDateTime.now());
+                }
+                //on le sauvegarde
+                session.getTronconDigueRepository().update(cut);
+                
+            }else if(FXTronconCut.SegmentType.SECTIONNER.equals(type)){
+                //rien a faire
+            }else{
+                throw new IllegalArgumentException("Type de coupe inconnue : "+type);
+            }
+        }
+                
+        //on supprime l'ancien troncon
+        session.getTronconDigueRepository().remove(troncon);
+    }
+    
+    private TronconDigue cutTroncon(TronconDigue troncon, FXTronconCut.Segment segment){
+        
+        final TronconDigue tronconCp = troncon.copy();
+        tronconCp.setGeometry(segment.geometryProp.get());
+        
+        
+        final LinearReferencingUtilities.SegmentInfo[] parts = LinearReferencingUtilities.buildSegments((LineString) tronconCp.geometryProperty().get());
+        
+        //on recupere les bornes qui sont sur le troncon
+        tronconCp.getBorneIds().clear();
+        for(String borneId : troncon.getBorneIds()){
+            final BorneDigue borne = session.getBorneDigueRepository().get(borneId);
+            final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(parts, borne.getGeometry());
+            if(proj.perpendicularProjection){
+                tronconCp.getBorneIds().add(borneId);
+            }
+        }
+        
+        //on sauvegarde maintenant car on va avoir besoin de la reference du nouveau troncon
+        session.getTronconDigueRepository().add(tronconCp);
+        
+        //on copie et on enleve les bornes des SR et les SR vide
+        final Map<String,SystemeReperage> mapSrs = new HashMap<>();
+        for(SystemeReperage sr : session.getSystemeReperageRepository().getByTroncon(troncon)){
+            final SystemeReperage srCp = sr.copy();
+            srCp.systemereperageborneId.clear();
+            srCp.setTronconId(tronconCp.getDocumentId());
+            final List<SystemeReperageBorne> lst = sr.getSystemereperageborneId();
+            for(int i=lst.size()-1;i>=0;i--){
+                final SystemeReperageBorne srb = lst.get(i);
+                if(tronconCp.getBorneIds().contains(srb.getBorneId())){
+                    srCp.systemereperageborneId.add(srb);
+                }
+            }
+            if(!srCp.systemereperageborneId.isEmpty()){
+                session.getSystemeReperageRepository().add(srCp);
+                mapSrs.put(sr.getDocumentId(), srCp);
+            }
+        }
+        
+        //on coupe les differents objets
+        tronconCp.structures.clear();
+                
+        for(Objet obj : troncon.structures){
+            final Objet objCp = obj.copy();
+            
+            //on vérifie que cet objet intersect le segment
+            if(!tronconCp.getGeometry().intersects(objCp.getGeometry())){
+                continue;
+            }
+            
+            try{                
+                if(mapSrs.containsKey(objCp.getSystemeRepId())){
+                    //le systeme de reperage existe toujours, on recalcule les positions relatives
+                    final SystemeReperage sr = mapSrs.get(objCp.getSystemeRepId());
+                    objCp.setSystemeRepId(sr.getDocumentId());
+                    
+                    //on sort les positions geographique
+                    final FXPositionablePane.PosInfo infoOrig = new FXPositionablePane.PosInfo(obj,troncon);                    
+                    objCp.setBorneDebutId(null);
+                    objCp.setBorneFinId(null);
+                    objCp.setPositionDebut(infoOrig.getGeoPointStart(null));
+                    objCp.setPositionFin(infoOrig.getGeoPointEnd(null));
+                    
+                    //on recalcule les positions relatives
+                    final FXPositionablePane.PosInfo info = new FXPositionablePane.PosInfo(objCp,tronconCp);
+                    final FXPositionablePane.PosSR posSr = info.getForSR(sr);
+                    objCp.setBorneDebutId(posSr.borneStartId);
+                    objCp.setBorne_debut_distance((float)posSr.distanceStartBorne);
+                    objCp.setBorne_debut_aval(posSr.startAval);
+                    objCp.setBorneFinId(posSr.borneEndId);
+                    objCp.setBorne_fin_distance((float)posSr.distanceEndBorne);
+                    objCp.setBorne_fin_aval(posSr.endAval);
+                    objCp.setPositionDebut(null);
+                    objCp.setPositionFin(null);
+                    
+                }else{
+                    //on utilise les coordonnées géo reprojetées afin de s'assurer qu'ils sont sur le troncon
+                    final FXPositionablePane.PosInfo info = new FXPositionablePane.PosInfo(obj,troncon);
+                    final Point start = info.getGeoPointStart(null);
+                    final Point end = info.getGeoPointEnd(null);
+                    
+                    final LinearReferencingUtilities.ProjectedReference projectStart = LinearReferencingUtilities.projectReference(parts, start);
+                    final LinearReferencingUtilities.ProjectedReference projectEnd = LinearReferencingUtilities.projectReference(parts, end);   
+                    objCp.setSystemeRepId(null);              
+                    objCp.setBorneDebutId(null);
+                    objCp.setBorneFinId(null);
+                    objCp.setPositionDebut(GF.createPoint(projectStart.nearests[0]));
+                    objCp.setPositionFin(GF.createPoint(projectEnd.nearests[0]));
+                }
+                
+            }catch(FactoryException | MismatchedDimensionException | TransformException ex){
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+            
+        }
+        
+        //on sauvegarde les modifications
+        session.getTronconDigueRepository().update(tronconCp);
+        
+        return tronconCp;
+    }
+    
+    /**
+     * 
+     * @param troncon1 merger et retourner
+     * @param troncon2 merger et supprimer
+     * @return troncon1
+     */
+    private TronconDigue mergeTroncon(TronconDigue troncon1, TronconDigue troncon2){
+        
+        //on merge les bornes
+        final Set<String> borneIds = new HashSet<>();
+        borneIds.addAll(troncon1.getBorneIds());
+        borneIds.addAll(troncon2.getBorneIds());
+        troncon1.setBorneIds(new ArrayList<>(borneIds));
+        
+        final SystemeReperageRepository srrepo = session.getSystemeReperageRepository();
+        
+        //on merge les SR 
+        for(SystemeReperage sr2 : srrepo.getByTroncon(troncon2)){
+            
+            //on cherche le SR du meme nom
+            SystemeReperage sibling = null;
+            for(SystemeReperage sr1 : srrepo.getByTroncon(troncon1)){
+                if(sr1.getLibelle().equals(sr2.getLibelle())){
+                    sibling = sr1;
+                    break;
+                }
+            }
+            
+            if(sibling==null){
+                //on copy le SR
+                final SystemeReperage srCp = sr2.copy();
+                srCp.setTronconId(troncon1.getDocumentId());
+                //sauvegarde du sr
+                srrepo.add(srCp);
+            }else{
+                //on merge les bornes
+                final List<SystemeReperageBorne> srbs1 = sibling.getSystemereperageborneId();
+                final List<SystemeReperageBorne> srbs2 = sr2.getSystemereperageborneId();
+                    
+                loop:
+                for(SystemeReperageBorne srb2 : srbs2){
+                    for(SystemeReperageBorne srb1 : srbs1){
+                        if(srb1.getBorneId().equals(srb2.getBorneId())){
+                            continue loop;
+                        }
+                    }
+                          
+                    //cette borne n'existe pas dans l'autre SR, on la copie
+                    srbs1.add(srb2.copy());
+                }
+                //maj du sr
+                srrepo.update(sibling);
+            }
+        }
+        
+        //on ajoute les structures
+        troncon1.structures.addAll(troncon2.structures);
+        
+        //on sauvegarde les modifications
+        session.getTronconDigueRepository().update(troncon1);
+        session.getTronconDigueRepository().remove(troncon2);
+        
+        return troncon1;
     }
     
     /**
@@ -305,6 +528,11 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
                     final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(segments, pt);
                 
+                    //si le point de coupe est avant le debut ou apres la fin on ne le fait pas
+                    if(proj.distanceAlongLinear<=0 || proj.distanceAlongLinear>=linear.getLength()){
+                        return;
+                    }
+                    
                     final List<FXTronconCut.CutPoint> cuts = new ArrayList<>(editPane.getCutpoints());
                     
                     final FXTronconCut.CutPoint cutPoint = new FXTronconCut.CutPoint();

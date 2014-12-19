@@ -586,6 +586,12 @@ public class FXPositionablePane extends BorderPane {
             this.pos = pos;
             
         }
+        
+        public PosInfo(Positionable pos, TronconDigue troncon) {
+            this.pos = pos;
+            this.troncon = troncon;
+            
+        }
 
         public TronconDigue getTroncon() {
             if(troncon==null){

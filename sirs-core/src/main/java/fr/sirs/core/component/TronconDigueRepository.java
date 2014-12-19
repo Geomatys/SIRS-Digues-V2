@@ -39,6 +39,7 @@ import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.StationPompage;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
@@ -66,6 +67,17 @@ public class TronconDigueRepository extends
 
     public List<TronconDigue> getByDigue(final Digue digue) {
         return this.queryView("byDigueId", digue.getId());
+    }
+
+    @Override
+    public void remove(TronconDigue entity) {
+        //on supprime tous les SR associés
+        final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
+        final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
+        for(SystemeReperage sr : srs){
+            srrepo.remove(sr);
+        }
+        super.remove(entity);
     }
 
     @Override
