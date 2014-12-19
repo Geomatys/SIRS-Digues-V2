@@ -5,6 +5,8 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.map.FXMapPane;
+import fr.sirs.owc.OwcUtilities;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.theme.ui.FXReferencesPane;
 import fr.sirs.theme.ui.PojoTable;
@@ -12,6 +14,8 @@ import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +36,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javax.xml.bind.JAXBException;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.map.MapContext;
+import org.opengis.util.FactoryException;
 
 public class FXMainFrame extends BorderPane {
 
@@ -87,7 +94,23 @@ public class FXMainFrame extends BorderPane {
                     openDocsTab();
                 }
             });
-            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);
+            final MenuItem uiSaveContext = new MenuItem("Sauvegerder le contexte");
+            uiSaveContext.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    saveContext();
+                }
+            });
+            final MenuItem uiLoadContext = new MenuItem("Charger le contexte");
+            uiLoadContext.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    loadContext();
+                }
+            });
+            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin, uiSaveContext, uiLoadContext);
             uiMenu.getMenus().add(1, uiAdmin);
         }
     }
@@ -233,6 +256,22 @@ public class FXMainFrame extends BorderPane {
         final PojoTable usersTable = new PojoTable(session.getUtilisateurRepository(), "Table des utilisateurs");
         usersTab.setContent(usersTable);
         addTab(usersTab);
+    }
+    
+    private void saveContext(){
+        try {
+            OwcUtilities.toOwc(new FileOutputStream(new File("src/main/resources/saveContext.owc")), getMapTab().getMap().getMapContext());
+        } catch (FileNotFoundException | JAXBException | FactoryException ex) {
+            Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void loadContext(){
+        try {
+            getMapTab().getMap().setMapContext(OwcUtilities.fromOwc(new File("src/main/resources/saveContext.owc")));
+        } catch (JAXBException ex) {
+            Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void openDocsTab(){

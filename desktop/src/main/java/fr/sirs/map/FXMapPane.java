@@ -7,11 +7,17 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
+import fr.sirs.owc.OwcUtilities;
+import static fr.sirs.owc.OwcUtilities.fromOwc;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
@@ -27,6 +33,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javax.xml.bind.JAXBException;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.factory.Hints;
@@ -47,6 +54,7 @@ import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -64,7 +72,7 @@ public class FXMapPane extends BorderPane {
         MAPHINTS.put(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
     }
     
-    private final MapContext context;
+    private MapContext context;
     private final SplitPane mapsplit = new SplitPane();
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
@@ -87,7 +95,7 @@ public class FXMapPane extends BorderPane {
     public FXMapPane() {
         session = Injector.getSession();
         context = session.getMapContext();
-                
+        
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getContainer().setContext(context);
         uiMap2.getContainer().setContext(context);
@@ -188,11 +196,17 @@ public class FXMapPane extends BorderPane {
                 }
             }
         }.start();
-        
     }
 
     public MapContext getMapContext() {
         return context;
+    }
+    
+    public void setMapContext(final MapContext mapContext){
+        context = mapContext;
+        uiMap1.getContainer().setContext(context);
+        uiMap2.getContainer().setContext(context);
+        uiTree.setMapItem(mapContext);
     }
 
     public FXMap getUiMap() {

@@ -96,6 +96,21 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-xml-owc</artifactId>
+      <version>4.x-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-xml-gml</artifactId>
+      <version>4.x-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-xml-ows</artifactId>
+      <version>4.x-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-render2d</artifactId>
       <version>4.x-SNAPSHOT</version>
     </dependency>
@@ -160,6 +175,12 @@
       <artifactId>postgresql</artifactId>
       <version>9.3-1101-jdbc41</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-jaxp-core</artifactId>
+      <version>4.x-SNAPSHOT</version>
+      <type>jar</type>
     </dependency>
   </dependencies>
 
