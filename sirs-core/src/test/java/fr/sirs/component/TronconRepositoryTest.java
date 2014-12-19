@@ -54,7 +54,11 @@ public class TronconRepositoryTest extends CouchDBTestCase {
                 System.out.println("DocuumentId: " + struct.getDocumentId());
 
             }
+            TronconDigue copy = troncon.copy();
+            System.out.println(copy.getCommentaire());
+            tronconRepository.add(copy);
         }
+        
     }
 
     /**
