@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public interface Element extends Serializable {
 
+    Element getCouchDBDocument();
+    
 	String getDocumentId();
 	
 	String getId();
