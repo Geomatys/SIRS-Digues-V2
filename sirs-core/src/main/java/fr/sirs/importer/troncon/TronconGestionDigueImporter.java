@@ -243,7 +243,7 @@ implements DocumentsUpdater {
                     systemesRepIds.add(systemeRep.getId());
                     systemeRep.setTronconId(tronconDigue.getId());
                     });
-                tronconDigue.setSystemeReperageIds(systemesRepIds);
+                //tronconDigue.setSystemeReperageIds(systemesRepIds);
                 tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
             
