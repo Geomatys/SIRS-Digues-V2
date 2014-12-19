@@ -20,8 +20,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="communeTroncon" upperBound="-1"
         eType="#//CommuneTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRiveId" eType="#//RefRive"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageIds" upperBound="-1"
-        eType="#//Systeme_reperage" eOpposite="#//Systeme_reperage/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//Borne_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Document"
@@ -30,6 +28,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
         eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//Systeme_reperage"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="classement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -57,7 +56,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="classement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Positionable" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="borne_debut_aval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -80,10 +78,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"
-        eOpposite="#//Troncon_Digue/systemeReperageIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemereperageborneId"
         upperBound="-1" eType="#//SystemeReperageBorne" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Document" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
