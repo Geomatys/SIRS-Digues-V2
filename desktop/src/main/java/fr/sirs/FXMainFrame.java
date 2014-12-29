@@ -6,7 +6,7 @@ import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.FXMapPane;
-import fr.sirs.owc.OwcUtilities;
+import org.geotoolkit.owc.xml.OwcXmlIO;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.theme.ui.FXReferencesPane;
 import fr.sirs.theme.ui.PojoTable;
@@ -37,9 +37,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javax.xml.bind.JAXBException;
+import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-import org.geotoolkit.map.MapContext;
 import org.opengis.util.FactoryException;
 
 public class FXMainFrame extends BorderPane {
@@ -260,7 +260,7 @@ public class FXMainFrame extends BorderPane {
     
     private void saveContext(){
         try {
-            OwcUtilities.toOwc(new FileOutputStream(new File("src/main/resources/saveContext.owc")), getMapTab().getMap().getMapContext());
+            OwcXmlIO.write(new FileOutputStream(new File("src/main/resources/saveContext.owc")), getMapTab().getMap().getMapContext());
         } catch (FileNotFoundException | JAXBException | FactoryException ex) {
             Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -268,8 +268,8 @@ public class FXMainFrame extends BorderPane {
     
     private void loadContext(){
         try {
-            getMapTab().getMap().setMapContext(OwcUtilities.fromOwc(new File("src/main/resources/saveContext.owc")));
-        } catch (JAXBException ex) {
+            getMapTab().getMap().setMapContext(OwcXmlIO.read(new File("src/main/resources/saveContext.owc")));
+        } catch (JAXBException | FactoryException | DataStoreException ex) {
             Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

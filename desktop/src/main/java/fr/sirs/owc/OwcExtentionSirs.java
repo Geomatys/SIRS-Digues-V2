@@ -1,117 +1,129 @@
 package fr.sirs.owc;
 
+import fr.sirs.CorePlugin;
+import org.geotoolkit.owc.xml.OwcExtension;
 import fr.sirs.Plugin;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.imageio.spi.ServiceRegistry;
 import javax.xml.bind.JAXBElement;
+import org.apache.sis.storage.DataStoreException;
+import org.geotoolkit.coverage.CoverageReference;
+import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.bean.BeanFeatureSupplier;
+import org.geotoolkit.data.bean.BeanStore;
+import org.geotoolkit.data.query.Selector;
+import org.geotoolkit.data.query.Source;
+import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.owc.xml.v10.ContentType;
+import org.geotoolkit.owc.gtkext.ParameterType;
+import static org.geotoolkit.owc.xml.OwcMarshallerPool.*;
 import org.geotoolkit.owc.xml.v10.OfferingType;
-import org.geotoolkit.owc.xml.v10.StyleSetType;
-import org.geotoolkit.sld.xml.StyleXmlIO;
-import org.geotoolkit.sld.xml.v110.UserStyle;
-import org.geotoolkit.style.MutableStyle;
 
 /**
- *
+ * Extension OWC pour SIRS.
+ * 
  * @author Samuel Andrés (Geomatys)
+ * @author Johann Sorel (Geomatys)
  */
-public class OwcExtentionSirs implements OwcExtension {
+public class OwcExtentionSirs extends OwcExtension {
     
     public static final String CODE = "http://www.france-digues.fr/owc";
-    private static final org.geotoolkit.owc.xml.v10.ObjectFactory OWC_FACTORY = new org.geotoolkit.owc.xml.v10.ObjectFactory();
+    public static final String KEY_BEANCLASS = "beanClass";
 
     private static final List<MapItem> mapItems = new ArrayList();
     
-    
-    
     static {
         final Iterator<Plugin> ite = ServiceRegistry.lookupProviders(Plugin.class);
-//            final List<Plugin> candidates = new ArrayList<>();
-            while(ite.hasNext()){
-                mapItems.addAll(ite.next().getMapItems());
-//                candidates.add(ite.next());
-            }    
-            System.out.println(mapItems);
-    }
-    
-    
-    @Override
-    public String getCode() {
-        return CODE;
+        while(ite.hasNext()){
+            mapItems.addAll(ite.next().getMapItems());
+        }
+        System.out.println(mapItems);
     }
 
+    public OwcExtentionSirs() {
+        super(CODE,10);
+    }
+    
     @Override
-    public MapLayer createLayer(OfferingType offering) {
-//        System.out.println(mapItems);
-        final String type = fromContent(offering);
-        if(type!=null){
-            for(final MapItem mapItem : mapItems){
-                if(type.equals(mapItem.getName()) 
-                        && mapItem instanceof MapLayer){
-                    return (MapLayer) mapItem;
-                }
-                else{
-                    System.out.println("Autre item : "+mapItem.getName());
+    public boolean canHandle(MapLayer layer) {
+        if(layer instanceof FeatureMapLayer){
+            final FeatureMapLayer fml = (FeatureMapLayer) layer;
+            final FeatureCollection collection = fml.getCollection();
+            final FeatureStore store = collection.getSession().getFeatureStore();
+            return store instanceof BeanStore && getTypeName(layer) != null;
+        }
+        return false;
+    }
+    
+    @Override
+    public MapLayer createLayer(OfferingType offering) throws DataStoreException {
+        final List<Object> fields = offering.getOperationOrContentOrStyleSet();
+        
+        //rebuild parameters map
+        String beanClassName = null;
+        for(Object o : fields){
+            if(o instanceof JAXBElement){
+                o = ((JAXBElement)o).getValue();
+            }
+            if(o instanceof ParameterType){
+                final ParameterType param = (ParameterType) o;
+                if(KEY_BEANCLASS.equals(param.getKey())){
+                    beanClassName = param.getValue();
                 }
             }
         }
-        return null;
+        
+        final Class clazz;
+        try {
+            clazz = Class.forName(beanClassName);
+        } catch (ClassNotFoundException ex) {
+            throw new DataStoreException(ex.getMessage(),ex);
+        }
+        return CorePlugin.createLayer(clazz);
     }
     
-    private static String fromContent(final OfferingType offering){
-        final List<Object> offeringContent = offering.getOperationOrContentOrStyleSet();
-        for(final Object o : offeringContent){
-            if(o instanceof JAXBElement 
-                    && ((JAXBElement)o).getValue() instanceof ContentType){
-                return ((ContentType) ((JAXBElement)o).getValue()).getType();
-            }
-        }
-        return null;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
     @Override
     public OfferingType createOffering(MapLayer mapLayer) {
         final OfferingType offering = OWC_FACTORY.createOfferingType();
         offering.setCode(CODE);
-        if(mapLayer.getName()!=null){
-            offering.getOperationOrContentOrStyleSet().add(OWC_FACTORY.createOfferingTypeContent(toContent(mapLayer)));
+        
+        final FeatureMapLayer fml = (FeatureMapLayer) mapLayer;
+        final FeatureCollection collection = fml.getCollection();
+        final BeanStore store = (BeanStore) collection.getSession().getFeatureStore();
+        final Name typeName = getTypeName(fml);
+        final BeanFeatureSupplier supplier;
+        try {
+            supplier = store.getBeanSupplier(typeName);
+        } catch (DataStoreException ex) {
+            throw new IllegalStateException(ex.getMessage(),ex);
         }
-        if(mapLayer.getStyle()!=null){
-            offering.getOperationOrContentOrStyleSet().add(OWC_FACTORY.createOfferingTypeStyleSet(toStyleSet(mapLayer.getStyle(), false)));
-        }
-        if(mapLayer.getSelectionStyle()!=null){
-            offering.getOperationOrContentOrStyleSet().add(OWC_FACTORY.createOfferingTypeStyleSet(toStyleSet(mapLayer.getStyle(), true)));
-        }
+        final Class beanClass = supplier.getBeanClass();
+        //write the blean class name
+        final List<Object> fieldList = offering.getOperationOrContentOrStyleSet();
+        fieldList.add(new ParameterType(KEY_BEANCLASS,String.class.getName(),beanClass.getName()));
         return offering;
     }
-    
-    private static StyleSetType toStyleSet(final MutableStyle style, final boolean selection){
-        final StyleSetType styleSet = OWC_FACTORY.createStyleSetType();
-        styleSet.setDefault(selection);
         
-        styleSet.getNameOrTitleOrAbstract().add(OWC_FACTORY.createStyleSetTypeContent(toContent(style)));
-        
-        return styleSet;
-    }
-    
-    private static ContentType toContent(final MutableStyle style){
-        final ContentType content = OWC_FACTORY.createContentType();
-        
-        StyleXmlIO io = new StyleXmlIO();
-        UserStyle jaxbStyle = io.getTransformerXMLv110().visit(style, null);
-        content.getContent().add(jaxbStyle);
-        return content;
-    }
-    
-    private static ContentType toContent(final MapLayer mapLayer){
-        final ContentType content = OWC_FACTORY.createContentType();
-        content.setType(mapLayer.getName());
-        return content;
+    private static Name getTypeName(MapLayer layer){
+        if(layer instanceof FeatureMapLayer){
+            final FeatureMapLayer fml = (FeatureMapLayer) layer;
+            final Source source = fml.getCollection().getSource();
+            if(source instanceof Selector){
+                final Selector selector = (Selector)source;
+                return selector.getFeatureTypeName();
+            }
+        }else if(layer instanceof CoverageMapLayer){
+            final CoverageMapLayer cml = (CoverageMapLayer) layer;
+            final CoverageReference covref = cml.getCoverageReference();
+            return covref.getName();
+        }
+        return null;
     }
     
 }

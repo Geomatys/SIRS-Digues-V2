@@ -7,17 +7,14 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
-import fr.sirs.owc.OwcUtilities;
-import static fr.sirs.owc.OwcUtilities.fromOwc;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
@@ -33,9 +30,9 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javax.xml.bind.JAXBException;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
+import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -46,15 +43,16 @@ import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
+import org.geotoolkit.gui.javafx.render2d.FXContextBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
 import org.geotoolkit.gui.javafx.render2d.FXGeoToolBar;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
+import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -74,6 +72,7 @@ public class FXMapPane extends BorderPane {
     
     private MapContext context;
     private final SplitPane mapsplit = new SplitPane();
+    private final FXContextBar uiCtxBar;
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
@@ -104,13 +103,14 @@ public class FXMapPane extends BorderPane {
         synchronizer.addCanvas(uiMap1.getCanvas(),true,true);
         synchronizer.addCanvas(uiMap2.getCanvas(),true,true);
         
-        uiAddBar = new FXAddDataBar(uiMap1);
+        uiCtxBar = new FXContextBar(uiMap1);
+        uiAddBar = new FXAddDataBar(uiMap1,true);
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
         uiEditBar = new FXTronconEditBar(uiMap1);
         uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
-        uiTree = new FXMapContextTree(context);
+        uiTree = new FXMapContextTree();
         uiTree.getTreetable().setShowRoot(false);
         uiTree.getMenuItems().add(new OpacityItem());
         uiTree.getMenuItems().add(new SeparatorMenuItem());
@@ -121,7 +121,16 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
         uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());
-                
+        final Property<MapContext> prop1 = FXUtilities.beanProperty(uiMap1.getContainer(),ContextContainer2D.CONTEXT_PROPERTY, MapContext.class);
+        uiTree.mapItemProperty().bind(prop1);
+        prop1.addListener(new ChangeListener<MapContext>() {
+            @Override
+            public void changed(ObservableValue<? extends MapContext> observable, MapContext oldValue, MapContext newValue) {
+                uiMap2.getContainer().setContext(newValue);
+            }
+        });
+        
+        
         splitButton.setOnAction((ActionEvent event) -> {
             if(mapsplit.getItems().contains(paneMap2)){
                 mapsplit.getItems().remove(paneMap2);
@@ -133,15 +142,17 @@ public class FXMapPane extends BorderPane {
         
         
         final GridPane topgrid = new GridPane();
+        uiCtxBar.setMaxHeight(Double.MAX_VALUE);
         uiAddBar.setMaxHeight(Double.MAX_VALUE);
         uiNavBar.setMaxHeight(Double.MAX_VALUE);
         uiToolBar.setMaxHeight(Double.MAX_VALUE);
         uiEditBar.setMaxHeight(Double.MAX_VALUE);
         uiSplitBar.setMaxHeight(Double.MAX_VALUE);
-        topgrid.add(uiAddBar,  0, 0);
-        topgrid.add(uiNavBar,  1, 0);
-        topgrid.add(uiToolBar, 2, 0);
-        topgrid.add(uiEditBar, 3, 0);
+        topgrid.add(uiCtxBar,  0, 0);
+        topgrid.add(uiAddBar,  1, 0);
+        topgrid.add(uiNavBar,  2, 0);
+        topgrid.add(uiToolBar, 3, 0);
+        topgrid.add(uiEditBar, 4, 0);
         topgrid.add(uiSplitBar, 5, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
@@ -150,10 +161,11 @@ public class FXMapPane extends BorderPane {
         final ColumnConstraints col3 = new ColumnConstraints();
         final ColumnConstraints col4 = new ColumnConstraints();
         final ColumnConstraints col5 = new ColumnConstraints();
-        col3.setHgrow(Priority.ALWAYS);
+        final ColumnConstraints col6 = new ColumnConstraints();
+        col4.setHgrow(Priority.ALWAYS);
         final RowConstraints row0 = new RowConstraints();
         row0.setVgrow(Priority.ALWAYS);
-        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3,col4,col5);
+        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3,col4,col5,col6);
         topgrid.getRowConstraints().addAll(row0);
         
         mapsplit.getItems().add(paneMap1);

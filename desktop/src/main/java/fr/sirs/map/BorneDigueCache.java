@@ -25,11 +25,20 @@ import org.opengis.filter.Id;
  */
 public class BorneDigueCache implements DocumentListener{
     
+    private static BorneDigueCache INSTANCE;
+    
     private final BorneDigueRepository bornesRepo;
     private final Map<String,BorneDigue> cache = new ConcurrentHashMap<>();
     private final Supplier supplier;
 
-    public BorneDigueCache() {
+    public static synchronized BorneDigueCache getInstance() {
+        if(INSTANCE ==null){
+            INSTANCE = new BorneDigueCache();
+        }
+        return INSTANCE;
+    }
+
+    private BorneDigueCache() {
         final Session session = Injector.getSession();
         bornesRepo = session.getBorneDigueRepository();
         Injector.getDocumentChangeEmiter().addListener(this);
