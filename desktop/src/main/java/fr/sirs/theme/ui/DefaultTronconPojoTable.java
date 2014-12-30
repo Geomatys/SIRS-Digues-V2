@@ -34,13 +34,13 @@ public class DefaultTronconPojoTable extends PojoTable {
         
         final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
             updateTable();
-            if(ficheModeProperty.get()){
-                ficheModeProperty.set(false);
-                navigationToolbar.setVisible(false);
-                setCenter(uiTable);
-                editableProperty.setValue(true);
-                uiPlay.setGraphic(playIcon);
-            }
+//            if(uiFicheMode.isSelected()){
+//                ficheModeProperty.set(false);
+//                navigationToolbar.setVisible(false);
+//                setCenter(uiTable);
+//                editableProperty.setValue(true);
+//                uiFicheMode.setGraphic(playIcon);
+//            }
         };
         
         troncon.addListener(listener);

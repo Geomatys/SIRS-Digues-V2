@@ -36,6 +36,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,6 +61,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
@@ -90,10 +92,7 @@ public class PojoTable extends BorderPane {
     
     // Editabilité du tableau
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
-    
-    // Mode tableau / parcours de fiches
-    protected final BooleanProperty ficheModeProperty = new SimpleBooleanProperty(false);
-    
+        
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
     private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
@@ -102,16 +101,14 @@ public class PojoTable extends BorderPane {
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
     protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE);
     private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE);
-    protected final Button uiPlay = new Button();
+    protected final ToggleButton uiFicheMode = new ToggleButton();
     protected final HBox searchEditionToolbar = new HBox();
     
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
     private int currentFiche = 0;
-    private final ImageView previousIcon = new ImageView(SIRS.ICON_CARET_LEFT);
-    private final Button uiPrevious = new Button();
-    private final ImageView nextIcon = new ImageView(SIRS.ICON_CARET_RIGHT);
-    private final Button uiNext = new Button();
+    private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
+    private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
     protected final HBox navigationToolbar = new HBox();
     
@@ -231,77 +228,73 @@ public class PojoTable extends BorderPane {
         uiCurrent.getStyleClass().add("btn-without-style"); 
         uiCurrent.setAlignment(Pos.CENTER);
         uiCurrent.setTextFill(Color.WHITE);
-        uiCurrent.setOnAction((ActionEvent event) -> {goTo();});
+        uiCurrent.setOnAction(this::goTo);
 
-        uiPrevious.setGraphic(previousIcon);
         uiPrevious.getStyleClass().add("btn-without-style"); 
         uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
         uiPrevious.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                if(uiTable.getItems().size()>0){
+                final ObservableList<Element> items = uiTable.getItems();
+                if(!items.isEmpty()){
                     if(currentFiche>0)
                         currentFiche--;
                     else
-                        currentFiche=uiTable.getItems().size()-1;
-                    elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                        currentFiche=items.size()-1;
+                    elementPane.setElement(items.get(currentFiche));
+                    uiCurrent.setText((currentFiche+1)+" / "+items.size());
                 }
             }
         });
 
-        uiNext.setGraphic(nextIcon);
         uiNext.getStyleClass().add("btn-without-style"); 
         uiNext.setTooltip(new Tooltip("Fiche suivante."));
         uiNext.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                if(uiTable.getItems().size()>0){
-                    if(currentFiche<uiTable.getItems().size()-1)
+                final ObservableList<Element> items = uiTable.getItems();
+                if(!items.isEmpty()){
+                    if(currentFiche<items.size()-1)
                         currentFiche++;
                     else
                         currentFiche=0;
-                    elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                    elementPane.setElement(items.get(currentFiche));
+                    uiCurrent.setText((currentFiche+1)+" / "+items.size());
                 }
             }
         });
         navigationToolbar.getChildren().addAll(uiPrevious, uiCurrent, uiNext);
-        navigationToolbar.visibleProperty().bind(ficheModeProperty);
+        navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
-        uiPlay.setGraphic(playIcon);
-        uiPlay.getStyleClass().add("btn-without-style"); 
-        uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
-        uiPlay.setOnAction(new  EventHandler<ActionEvent>() {
-
+        uiFicheMode.setGraphic(playIcon);
+        uiFicheMode.getStyleClass().add("btn-without-style"); 
+        uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+        uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void handle(ActionEvent event) {
-                if(ficheModeProperty.get()){
-                    ficheModeProperty.set(false);
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(!newValue){
                     setCenter(uiTable);
-                    uiPlay.setGraphic(playIcon);
-                    uiPlay.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
-                }
-                else{
-                    ficheModeProperty.set(true);
-                    if(uiTable.getItems().size()>0){
+                    uiFicheMode.setGraphic(playIcon);
+                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+                }else{
+                    final ObservableList<Element> items = uiTable.getItems();
+                    if(!items.isEmpty()){
                         currentFiche=0;
-                        elementPane = SIRS.generateEditionPane(uiTable.getItems().get(currentFiche));
+                        elementPane = SIRS.generateEditionPane(items.get(currentFiche));
                         setCenter((Node) elementPane);
-                        uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
-                    }
-                    else{
+                        uiCurrent.setText((currentFiche+1)+" / "+items.size());
+                    }else{
                         uiCurrent.setText(0+" / "+0);
                     }
-                    uiPlay.setGraphic(stopIcon);
-                    uiPlay.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
+                    uiFicheMode.setGraphic(stopIcon);
+                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
                 }
             }
         });
 
-        searchEditionToolbar.getChildren().add(0, uiPlay);
+        searchEditionToolbar.getChildren().add(0, uiFicheMode);
         
         topPane.setLeft(navigationToolbar);
     }
@@ -335,7 +328,7 @@ public class PojoTable extends BorderPane {
         
     }
     
-    protected void goTo(){
+    protected void goTo(ActionEvent event){
         
         final Popup popup = new Popup();
         final TextField textField = new TextField();

@@ -161,7 +161,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
 
         public ContactOrganismeTable() {
             super(ContactOrganisme.class, "Liste des organismes");
-            editableProperty().bind(uiMode.editionState());
+            editableProperty().bind(uiFicheMode.selectedProperty());
             setTableItems(() -> orgsOfContact);          
         }
 
