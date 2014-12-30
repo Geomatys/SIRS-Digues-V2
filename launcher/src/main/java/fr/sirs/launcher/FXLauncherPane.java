@@ -318,8 +318,14 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void createEmpty(ActionEvent event) {
-        if(uiNewName.getText().trim().isEmpty()){
+        final String dbName = cleanDbName(uiNewName.getText());
+        if(dbName.isEmpty()){
             new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            return;
+        }
+        
+        if(listLocalDatabase().contains(dbName)){
+            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé",ButtonType.OK).showAndWait();
             return;
         }
         
@@ -341,7 +347,7 @@ public class FXLauncherPane extends BorderPane {
                    
                     final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
                     final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-                    final CouchDbConnector connector = couchsb.createConnector(uiNewName.getText(),true);
+                    final CouchDbConnector connector = couchsb.createConnector(dbName,true);
 
                     final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
                     applicationContextParent.refresh();
@@ -373,8 +379,13 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void createFromAccess(ActionEvent event) {
-        if(uiImportName.getText().trim().isEmpty()){
+        final String dbName = cleanDbName(uiImportName.getText());
+        if(dbName.isEmpty()){
             new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            return;
+        }
+        if(listLocalDatabase().contains(dbName)){
+            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé",ButtonType.OK).showAndWait();
             return;
         }
         
@@ -397,7 +408,7 @@ public class FXLauncherPane extends BorderPane {
                     final File cartoDbFile = new File(uiImportDBCarto.getText());
                     
                     final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
-                            URL_LOCAL, uiImportName.getText().trim(), "classpath:/fr/sirs/spring/couchdb-context.xml",true,false);
+                            URL_LOCAL, dbName, "classpath:/fr/sirs/spring/couchdb-context.xml",true,false);
                     final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
                     DbImporter importer = new DbImporter(couchDbConnector);
                     importer.setDatabase(DatabaseBuilder.open(mainDbFile),
@@ -478,6 +489,11 @@ public class FXLauncherPane extends BorderPane {
             errorLabel.setText("Le plugin " + input.getName() + "ne peut être désinstallé : Erreur inattendue.");
             LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + input.getName(), e);
         }
+    }
+    
+    
+    private static String cleanDbName(String name){
+        return name.trim();
     }
     
     private static void runDesktop(final String serverUrl, final String database){
