@@ -66,8 +66,7 @@ public class OwcExtentionSirs extends OwcExtension {
             final FeatureMapLayer fml = (FeatureMapLayer) layer;
             final FeatureCollection collection = fml.getCollection();
             final FeatureStore store = collection.getSession().getFeatureStore();
-            return store instanceof BeanStore 
-                    && (getTypeName(layer) != null || getSQLQuery(layer)!=null);
+            return (store instanceof BeanStore && getTypeName(layer) != null) || getSQLQuery(layer)!=null;
         }
         return false;
     }
@@ -124,7 +123,7 @@ public class OwcExtentionSirs extends OwcExtension {
         
         final FeatureMapLayer fml = (FeatureMapLayer) mapLayer;
         final FeatureCollection collection = fml.getCollection();
-        final BeanStore store = (BeanStore) collection.getSession().getFeatureStore();
+        final FeatureStore store = collection.getSession().getFeatureStore();
         final Name typeName = getTypeName(fml);
         final String sqlQuery = getSQLQuery(mapLayer);
         
@@ -135,7 +134,7 @@ public class OwcExtentionSirs extends OwcExtension {
         }else{
             final BeanFeatureSupplier supplier;
             try {
-                supplier = store.getBeanSupplier(typeName);
+                supplier = ((BeanStore)store).getBeanSupplier(typeName);
             } catch (DataStoreException ex) {
                 throw new IllegalStateException(ex.getMessage(),ex);
             }

@@ -51,6 +51,8 @@ import org.geotoolkit.style.DefaultDescription;
 @Component
 public class Session extends SessionGen {
     
+    public static String FLAG_SIRSLAYER = "SirsLayer";
+    
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
@@ -160,6 +162,8 @@ public class Session extends SessionGen {
         this.connector = couchDbConnector;
         
         previewLabelRepository = new PreviewLabelRepository(connector);
+        
+        sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
     }
 
     public CouchDbConnector getConnector() {

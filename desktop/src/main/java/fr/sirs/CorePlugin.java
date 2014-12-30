@@ -245,6 +245,7 @@ public class CorePlugin extends Plugin {
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
             structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createTronconSelectionStyle(),false) );
+            structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(structLayer);
                
             
@@ -281,6 +282,7 @@ public class CorePlugin extends Plugin {
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
             fml.setName(layerName);
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             
             if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
             
@@ -307,6 +309,7 @@ public class CorePlugin extends Plugin {
             );
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             
             final String str = nameMap.get(name.getLocalPart());
             fml.setName(str!=null ? str : name.getLocalPart());
@@ -356,6 +359,7 @@ public class CorePlugin extends Plugin {
         
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
                 .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
+        layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         return layer;
     }
     
