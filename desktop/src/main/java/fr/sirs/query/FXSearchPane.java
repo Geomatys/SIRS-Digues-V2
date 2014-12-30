@@ -150,7 +150,7 @@ public class FXSearchPane extends BorderPane {
 
         try {
             //h2 connection
-            h2Store = (H2FeatureStore) H2Helper.createStore(session.getConnector());
+            h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
             
             final Set<Name> names = h2Store.getNames();
             final ObservableList lst = FXCollections.observableArrayList();

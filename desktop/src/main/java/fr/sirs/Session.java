@@ -202,6 +202,11 @@ public class Session extends SessionGen {
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds(true));
 
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            
+            try{
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
                 mapContext.items().add(0,backgroundGroup);
@@ -217,9 +222,10 @@ public class Session extends SessionGen {
                     cml.setVisible(false);
                     backgroundGroup.items().add(cml);
                 }
-            } catch (Exception ex) {
+            }catch(Exception ex){
                 ex.printStackTrace();
             }
+            
         }
         return mapContext;
     }

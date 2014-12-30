@@ -36,6 +36,7 @@ public class H2Helper {
     private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
     
     private static final Object LOCK = new Object();
+    private static FeatureStore STORE = null;
     
     public static void exportDataToRDBMS(CouchDbConnector connector, SirsDBInfoRepository sirsDBInfoRepository)
             throws IOException {
@@ -79,25 +80,29 @@ public class H2Helper {
         return connection;
     }
     
-    public static FeatureStore createStore(CouchDbConnector connector) throws SQLException, DataStoreException {
+    public static FeatureStore getStore(CouchDbConnector connector) throws SQLException, DataStoreException {
         synchronized(LOCK){
-            final Path file = getDBFile(connector);
-            final BasicDataSource ds = new BasicDataSource();
-            ds.setUrl("jdbc:h2:" + file.toString());
-            ds.setUsername("sirs$user");
-            ds.setPassword("sirs$pwd");
+            if(STORE==null){
+                final Path file = getDBFile(connector);
+                final BasicDataSource ds = new BasicDataSource();
+                ds.setUrl("jdbc:h2:" + file.toString());
+                ds.setUsername("sirs$user");
+                ds.setPassword("sirs$pwd");
 
 
-            final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
-            Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
-            Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
-            Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
-            Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
-            Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
-            Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
-            Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
+                final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
+                Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
+                Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
+                Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
+                Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
+                Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
+                Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
+                Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
 
-            return new H2FeatureStoreFactory().create(params);
+                STORE = new H2FeatureStoreFactory().create(params);
+            }
+
+            return STORE;
         }
     }
 
