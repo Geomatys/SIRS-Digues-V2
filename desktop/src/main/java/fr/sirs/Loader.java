@@ -51,6 +51,8 @@ import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -126,20 +128,11 @@ public class Loader extends Application {
         new Thread(initTask).start();
     }
 
-    /**
-     * Display splash screen.
-     *
-     * @param task
-     * @throws IOException
-     */
-    private void showLoadingStage(Task task) throws IOException {
-
+    public void showLoginStage() throws IOException{
+        
         final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXSplashscreen.fxml"));
         final Parent root = loader.load();
         final FXSplashscreen controller = loader.getController();
-        controller.uiCancel.setVisible(false);
-        controller.uiProgressLabel.textProperty().bind(task.messageProperty());
-        controller.uiProgressBar.progressProperty().bind(task.progressProperty());
 
         final Scene scene = new Scene(root);
         scene.setFill(null);
@@ -151,67 +144,19 @@ public class Loader extends Application {
         splashStage.setScene(scene);
         splashStage.show();
 
-        task.stateProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if (newValue == Worker.State.SUCCEEDED) {
-                    splashStage.toFront();
-                    final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                    fadeSplash.setFromValue(1.0);
-                    fadeSplash.setToValue(0.0);
-                    fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent) {
-                            splashStage.hide();
-                            try {
-                                showLoginStage();
-                            } catch (IOException ex) {
-                                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                            }
-                        }
-                    });
-                    fadeSplash.play();
-                } else if (newValue == Worker.State.CANCELLED) {
-                    controller.uiProgressLabel.getStyleClass().remove("label");
-                    controller.uiProgressLabel.getStyleClass().add("label-error");
-                    controller.uiCancel.setVisible(true);
-                }
-            }
-        });
-
-    }
-    /**
-     * Display login screen.
-     *
-     * @throws IOException
-     */
-    public void showLoginStage() throws IOException {
-
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXLoginscreen.fxml"));
-        final Parent root = loader.load();
-        final FXLoginscreen controller = loader.getController();
-
-        final Scene scene = new Scene(root);
-        scene.setFill(null);
-        scene.getStylesheets().add("/fr/sirs/splashscreen.css");
-
-        final Stage splashStage = new Stage();
-        splashStage.setTitle("SIRS-Digues V2");
-        splashStage.initStyle(StageStyle.TRANSPARENT);
-        splashStage.setScene(scene);
-        splashStage.show();
-        
-        final Session session = Injector.getBean(Session.class);
-        final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
-        
+        controller.uiLoadingPane.setVisible(false);
+        controller.uiLoginPane.setVisible(true);
+                
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent event) {
-                controller.uiProgressLabel.setText("Recherche…");
+                final Session session = Injector.getBean(Session.class);
+                final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
+
+                controller.uiLogInfo.setText("Recherche…");
                 final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
                 Utilisateur user = null;
-                
+
                 MessageDigest messageDigest=null;
                 String encryptedPassword = null;
                 try {
@@ -220,22 +165,22 @@ public class Loader extends Application {
                 } catch (NoSuchAlgorithmException ex) {
                     Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
+
                 for(final Utilisateur candidate : candidateUsers){
                     if(candidate.getPassword().equals(encryptedPassword)){
                         user = candidate; break;
                     }
                 }
-                
+
                 // Accès provisoire comme Admin sans identifiants
                 if("".equals(controller.uiLogin.getText())
                         && "".equals(controller.uiPassword.getText())){
                     user = new Utilisateur();
                     user.setRole(Session.Role.ADMIN.toString());
                 }
-                
+
                 if(user==null){
-                    controller.uiProgressLabel.setText("Identifiants erronés.");
+                    controller.uiLogInfo.setText("Identifiants erronés.");
                     controller.uiLogin.setText("");
                     controller.uiPassword.setText("");
                 }
@@ -265,7 +210,112 @@ public class Loader extends Application {
             }
         });
     }
+    
+    /**
+     * Display splash screen.
+     *
+     * @param task
+     * @throws IOException
+     */
+    private void showLoadingStage(Task task) throws IOException {
 
+        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXSplashscreen.fxml"));
+        final GridPane root = loader.load();
+        final FXSplashscreen controller = loader.getController();
+        controller.uiCancel.setVisible(false);
+        controller.uiProgressLabel.textProperty().bind(task.messageProperty());
+        controller.uiProgressBar.progressProperty().bind(task.progressProperty());
+
+        final Scene scene = new Scene(root);
+        scene.getStylesheets().add("/fr/sirs/splashscreen.css");
+        scene.setFill(new Color(0, 0, 0, 0));
+
+        final Stage splashStage = new Stage(StageStyle.TRANSPARENT);
+        splashStage.setTitle("SIRS-Digues V2");
+        splashStage.initStyle(StageStyle.TRANSPARENT);
+        splashStage.setScene(scene);
+        splashStage.show();
+
+        task.stateProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if (newValue == Worker.State.SUCCEEDED) {
+                    splashStage.toFront();
+                    controller.uiLoadingPane.setVisible(false);
+                    controller.uiLoginPane.setVisible(true);
+                } else if (newValue == Worker.State.CANCELLED) {
+                    controller.uiProgressLabel.getStyleClass().remove("label");
+                    controller.uiProgressLabel.getStyleClass().add("label-error");
+                    controller.uiCancel.setVisible(true);
+                }
+            }
+        });
+        
+        controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final Session session = Injector.getBean(Session.class);
+                final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
+
+                controller.uiLogInfo.setText("Recherche…");
+                final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
+                Utilisateur user = null;
+
+                MessageDigest messageDigest=null;
+                String encryptedPassword = null;
+                try {
+                    messageDigest = MessageDigest.getInstance("MD5");
+                    encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
+                } catch (NoSuchAlgorithmException ex) {
+                    Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                for(final Utilisateur candidate : candidateUsers){
+                    if(candidate.getPassword().equals(encryptedPassword)){
+                        user = candidate; break;
+                    }
+                }
+
+                // Accès provisoire comme Admin sans identifiants
+                if("".equals(controller.uiLogin.getText())
+                        && "".equals(controller.uiPassword.getText())){
+                    user = new Utilisateur();
+                    user.setRole(Session.Role.ADMIN.toString());
+                }
+
+                if(user==null){
+                    controller.uiLogInfo.setText("Identifiants erronés.");
+                    controller.uiLogin.setText("");
+                    controller.uiPassword.setText("");
+                }else{
+                    session.setUtilisateur(user);
+                    if(session.getRole()==ADMIN 
+                            || session.getRole()==USER 
+                            || session.getRole()==CONSULTANT 
+                            || session.getRole()==EXTERNE){
+                        controller.uiLogInfo.setText("Identifiants valides.");
+                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                        fadeSplash.setFromValue(1.0);
+                        fadeSplash.setToValue(0.0);
+                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent actionEvent) {
+                                splashStage.hide();
+                                try {
+                                    showMainStage();
+                                } catch (IOException ex) {
+                                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                                }
+                            }
+                        });
+                        fadeSplash.play();
+                    }
+                }
+            }
+        });
+
+    }
+    
     /**
      * Display the main frame.
      */
