@@ -81,6 +81,8 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
@@ -96,6 +98,7 @@ import static org.geotoolkit.style.StyleConstants.*;
 
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.style.ExternalMark;
 import org.opengis.style.Fill;
 import org.opengis.style.Graphic;
 import org.opengis.style.GraphicStroke;
@@ -364,15 +367,20 @@ public class CorePlugin extends Plugin {
     }
     
     private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.DARK_GRAY),LITERAL_ONE_FLOAT,FF.literal(4),
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
         
-        final Stroke stroke2 = SF.stroke(SF.literal(Color.WHITE),LITERAL_ONE_FLOAT,FF.literal(2),
+        final Stroke stroke2 = SF.stroke(SF.literal(new Color(0.9f, 0.9f,0.9f)),LITERAL_ONE_FLOAT,FF.literal(7),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
+        
+        final Stroke stroke3 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(1),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line3 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke3,LITERAL_ONE_FLOAT);
         
 //        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
 //        final List<GraphicalSymbol> symbols = new ArrayList<>();
@@ -391,7 +399,7 @@ public class CorePlugin extends Plugin {
 //                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
 //        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
-        return SF.style(line1,line2);
+        return SF.style(line1,line2,line3);
     }
     
     private static MutableStyle createTronconSelectionStyle() throws URISyntaxException{
@@ -441,14 +449,20 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static MutableStyle createBorneStyle(){
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(7);
+    private static MutableStyle createBorneStyle() throws URISyntaxException{
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(10);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
+        final Stroke stroke = SF.stroke(SF.literal(Color.DARK_GRAY),LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
-        final Fill fill = SF.fill(Color.WHITE);
-        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        final Fill fill = SF.fill(Color.LIGHT_GRAY);
+        
+        //final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        final Expression external = FF.literal("ttf:Dialog?char=0x2A");
+//        final ExternalMark external = SF.externalMark(
+//                    SF.onlineResource(IconBuilder.FONTAWESOME.toURI()),
+//                    "ttf",FontAwesomeIcons.ICON_ASTERISK.codePointAt(0));
+        final Mark mark = SF.mark(external, fill, stroke);
         symbols.add(mark);
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
                 size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
@@ -462,7 +476,7 @@ public class CorePlugin extends Plugin {
                 SF.pointPlacement(SF.anchorPoint(0, 0.25), SF.displacement(5, 0), FF.literal(0)), null);
         
         final MutableRule ruleClose = SF.rule(pointSymbolizer, ts);
-        ruleClose.setMaxScaleDenominator(50000);
+        ruleClose.setMaxScaleDenominator(25000);
         
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleClose);
@@ -501,16 +515,19 @@ public class CorePlugin extends Plugin {
     }
     
     private static MutableStyle createStructureStyle(Color col, int doffset){
-        final Expression offset = GO2Utilities.FILTER_FACTORY.literal(doffset);
-        final Expression color = SF.literal(col);
-        final Expression width = GO2Utilities.FILTER_FACTORY.literal(2);
-        final Stroke lineStroke = SF.stroke(color,LITERAL_ONE_FLOAT,width,
+        final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer lineSymbolizer = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,lineStroke,offset);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,line1Stroke,LITERAL_ZERO_FLOAT);
+        
+        
+        final Stroke line2Stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(1),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,line2Stroke,LITERAL_ZERO_FLOAT);
         
         //the visual element
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(13);
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
         final Stroke stroke = null;
@@ -522,7 +539,7 @@ public class CorePlugin extends Plugin {
 
         final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
         
-        final MutableRule ruleLongObjects = SF.rule(lineSymbolizer);
+        final MutableRule ruleLongObjects = SF.rule(line1,line2);
         ruleLongObjects.setFilter(
                 FF.greater(
                         FF.function("length", FF.property("geometry")),
