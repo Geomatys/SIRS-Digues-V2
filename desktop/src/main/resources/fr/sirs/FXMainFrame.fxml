@@ -46,7 +46,7 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" styleClass="buttonbar-button" text="Gestion des digues" translateX="5.0">
+                                <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" styleClass="buttonbar-button" text="Ouvrages" translateX="5.0">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -65,10 +65,10 @@
                            </graphic></Button>
                                 <VBox translateX="10.0">
                                     <children>
-                                        <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Thèmes" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Description des ouvrages" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Autres" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Autres thématiques" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
                                     </children>

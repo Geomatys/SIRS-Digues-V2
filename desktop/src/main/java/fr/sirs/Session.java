@@ -198,7 +198,7 @@ public class Session extends SessionGen {
 
             try {
                 //sirs layers
-                sirsGroup.setName("Systeme de digue");
+                sirsGroup.setName("Système de digue");
                 mapContext.items().add(0,sirsGroup);
 
                 for(Plugin plugin : Plugins.getPlugins()){
