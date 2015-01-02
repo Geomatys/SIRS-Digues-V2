@@ -1,279 +1,35 @@
 
 package fr.sirs.core;
 
+import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Objet;
 import fr.sirs.util.json.GeometryDeserializer;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
-
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
-import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Objet;
+
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import javax.vecmath.Vector2d;
-import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.Static;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.PathWalker;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.math.XMath;
+import org.geotoolkit.referencing.LinearReferencing;
 
 /**
  * Methodes de calculs utilitaire pour le référencement linéaire.
  * 
  * @author Johann Sorel (Geomatys)
  */
-public final class LinearReferencingUtilities extends Static{
-
-    public static final class SegmentInfo{
-        public int startCoordIndex;
-        public double startDistance;
-        public double endDistance;
-        public double length;
-        public Coordinate[] segmentCoords;
-        public LineString geometry;
-        public Vector2d forward;
-        public Vector2d right;
-        
-        public Coordinate getPoint(double distanceAlongLinear, double distancePerpendicular){
-            final Vector2d tempForward = new Vector2d();
-            final Vector2d tempPerpendicular = new Vector2d();
-            tempForward.scale(distanceAlongLinear, forward);
-            tempPerpendicular.scale(distancePerpendicular, right);
-            return new Coordinate(
-                segmentCoords[0].x+tempForward.x+tempPerpendicular.x, 
-                segmentCoords[0].y+tempForward.y+tempPerpendicular.y);
-        }
-        
-    }
-    
-    public static final class ProjectedReference{
-        public Point reference;
-        public SegmentInfo segment;
-        public Coordinate[] nearests;
-        public double distancePerpendicularAbs;
-        public double distancePerpendicular;
-        public double distanceAlongLinear;
-        public boolean perpendicularProjection;
-    }
-    
-    /**
-     * Calcul de coordonée en fonction d'une position relative
-     * 
-     * @param geom geometrie du tronçon
-     * @param reference position de la borne
-     * @param distanceAlongLinear distance le long du troncon 
-     * @param distancePerpendicular distance par rapport au troncon
-     * @return position 
-     */
-    public static Point calculateCoordinate(Geometry geom, Point reference, 
-            double distanceAlongLinear, double distancePerpendicular){
-        ArgumentChecks.ensureNonNull("linear", geom);
-        ArgumentChecks.ensureNonNull("reference", reference);
-                
-        //project reference 
-        final LineString linear = asLineString(geom);
-        final SegmentInfo[] segments = buildSegments(linear);
-        final ProjectedReference projection = projectReference(segments, reference);
-                
-        //find segment at given distance
-        final double distanceFinal = projection.distanceAlongLinear + distanceAlongLinear;
-        final SegmentInfo segment = getSegment(segments, distanceFinal);
-        
-        final Point pt = GO2Utilities.JTS_FACTORY.createPoint(segment.getPoint(
-                distanceFinal-segment.startDistance, distancePerpendicular));
-        pt.setSRID(geom.getSRID());
-        pt.setUserData(geom.getUserData());
-        return pt;
-    }
-    
-    /**
-     * 
-     * @param geom geometrie du tronçon
-     * @param references position des bornes
-     * @param position position géographique
-     * @return Entry : index de la reference la plus proche 
-     *       double[0] = distance le long du linéaire
-     *       double[1] = distance sur le coté du linéaire
-     */
-    public static Entry<Integer,double[]> calculateRelative(Geometry geom, Point[] references, Point position){
-        ArgumentChecks.ensureNonNull("linear", geom);
-        ArgumentChecks.ensureNonNull("position", position);
-        ArgumentChecks.ensureNonNull("references", references);
-        ArgumentChecks.ensurePositive("references", references.length);
-        
-        final LineString linear = asLineString(geom);
-        final SegmentInfo[] segments = buildSegments(linear);
-        
-        //project target
-        final ProjectedReference positionProj = projectReference(segments, position);
-        
-        //project references and find nearest
-        double distanceAlongLinear = Double.MAX_VALUE;
-        int index = 0;
-        
-        for(int i=0;i<references.length;i++){
-            final ProjectedReference projection = projectReference(segments, references[i]);
-            final double candidateDistance = positionProj.distanceAlongLinear-projection.distanceAlongLinear;
-            if(Math.abs(candidateDistance) < Math.abs(distanceAlongLinear)){
-                index = i;
-                distanceAlongLinear = candidateDistance;
-            }
-        }
-        
-        return new AbstractMap.SimpleImmutableEntry<>(index, new double[]{
-            distanceAlongLinear, positionProj.distancePerpendicular});        
-    }
-    
-    /**
-     * Projection d'une borne sur le troncon et calcule de diverses informations.
-     * 
-     * @param segments segment du tronçon
-     * @param reference position de la borne
-     * @return ProjectedReference
-     */
-    public static ProjectedReference projectReference(SegmentInfo[] segments, Point reference){
-        final ProjectedReference projection = new ProjectedReference();
-        projection.reference = reference;
-        
-        //find the nearest segment
-        projection.distancePerpendicularAbs = Double.MAX_VALUE;
-        projection.distancePerpendicular = Double.MAX_VALUE;
-        
-        for(SegmentInfo segment : segments){
-            final Coordinate[] candidateNearests = DistanceOp.nearestPoints(segment.geometry, reference);
-            final double candidateDistance = candidateNearests[0].distance(candidateNearests[1]);
-            if(candidateDistance<projection.distancePerpendicularAbs){
-                final double side = -lineSide(segment, candidateNearests[1]);
-                projection.distancePerpendicularAbs = candidateDistance;
-                projection.distancePerpendicular = candidateDistance * Math.signum(side);
-                projection.nearests = candidateNearests;
-                projection.segment = segment;
-                projection.distanceAlongLinear = segment.startDistance + 
-                        segment.segmentCoords[0].distance(candidateNearests[0]);
-                
-                //find if point projects on segment
-                projection.perpendicularProjection = projectsPerpendicular(
-                        segment.segmentCoords[0], segment.segmentCoords[1], reference.getCoordinate());
-                
-            }
-        }
-        
-        return projection;
-    }
-    
-    /**
-     * Analyze segment a segment du lineaire.
-     * 
-     * @param linear geometry du troncon
-     * @return SegmentInfo[] segments du troncon
-     */
-    public static SegmentInfo[] buildSegments(final LineString linear){
-        
-        //find the nearest segment
-        final Coordinate[] coords = linear.getCoordinates();
-        final SegmentInfo[] segments = new SegmentInfo[coords.length-1];
-                
-        double cumulativeDistance = 0;
-        
-        for(int i=0;i<coords.length-1;i++){
-            
-            final SegmentInfo segment = new SegmentInfo();
-            segment.startCoordIndex = i;
-            segment.segmentCoords = new Coordinate[]{coords[i],coords[i+1]};
-            segment.geometry = GO2Utilities.JTS_FACTORY.createLineString(segment.segmentCoords);
-            segment.length = segment.segmentCoords[0].distance(segment.segmentCoords[1]);
-            segment.startDistance = cumulativeDistance;
-            cumulativeDistance += segment.length;
-            segment.endDistance = cumulativeDistance;
-            
-            //calculate direction vectors
-            segment.forward = new Vector2d(
-                    segment.segmentCoords[1].x-segment.segmentCoords[0].x, 
-                    segment.segmentCoords[1].y-segment.segmentCoords[0].y);
-            segment.forward.normalize();
-            segment.right = new Vector2d(segment.forward.y,-segment.forward.x);
-            
-            segments[i] = segment;
-        }
-                
-        return segments;
-    }
-    
-    /**
-     * Trouve le segment qui contient ou est le plus proche de la distance donnée.
-     * 
-     * @param segments
-     * @param distance
-     * @return SegmentInfo
-     */
-    private static SegmentInfo getSegment(SegmentInfo[] segments, double distance){
-        SegmentInfo segment = segments[0];
-        for(int i=1;i<segments.length;i++){
-            
-            if(segments[i].startDistance < distance){
-                segment = segments[i];
-            }else{
-                break;
-            }
-        }
-        return segment;
-    }
-    
-    /**
-     * Test the side of a point compare to a line.
-     *
-     * @param SegmentInfo segment
-     * @param c to test
-     * @return > 0 if point is on the left side
-     *          = 0 if point is on the line
-     *          < 0 if point is on the right side
-     */
-    private static double lineSide(SegmentInfo segment, Coordinate c) {
-        return (segment.segmentCoords[1].x-segment.segmentCoords[0].x) * (c.y-segment.segmentCoords[0].y) - 
-               (c.x-segment.segmentCoords[0].x) * (segment.segmentCoords[1].y-segment.segmentCoords[0].y);
-    }
-    
-    private static boolean projectsPerpendicular(final Coordinate segmentStart, final Coordinate segmentEnd, final Coordinate point){
-        final Coordinate ab = subtract(segmentEnd, segmentStart,null);
-        final Coordinate ac = subtract(point,segmentStart,null);
-        final double e = dot(ac, ab);
-        // cases where point is outside segment
-        if (e <= 0.0f) return false;
-        final double f = dot(ab, ab);
-        if (e >= f) return false;
-        // cases where point projects onto segment
-        return true;
-    }
-    
-    private static double dot(final Coordinate vector, final Coordinate other){
-        double dot = 0;
-        for(int i=0;i<2;i++){
-            dot += vector.getOrdinate(i)*other.getOrdinate(i);
-        }
-        return dot;
-    }
-        
-    private static Coordinate subtract(final Coordinate vector, Coordinate other, Coordinate buffer){
-        if( buffer == null ){
-            buffer = new Coordinate();
-        }
-        for(int i=0;i<2;i++){
-            buffer.setOrdinate(i, vector.getOrdinate(i)-other.getOrdinate(i));
-        }
-        return buffer;
-    }
-    
+public final class LinearReferencingUtilities extends LinearReferencing{
     
     public static LineString buildGeometry(Geometry tronconGeom, Objet structure, BorneDigueRepository repo){
         
@@ -325,23 +81,7 @@ public final class LinearReferencingUtilities extends Static{
         
         return null;
     }
-    
-    public static LineString asLineString(Geometry tronconGeom) {
-        LineString troncon = null;
-        if (tronconGeom instanceof LineString) {
-            troncon = (LineString) tronconGeom;
-        } else if (tronconGeom instanceof Polygon) {
-            troncon = ((Polygon)tronconGeom).getExteriorRing();
-        } else if (tronconGeom instanceof GeometryCollection) {
-            final GeometryCollection gc = (GeometryCollection) tronconGeom;
-            final int nb = gc.getNumGeometries();
-            if(nb>0){
-                troncon = asLineString(gc.getGeometryN(0));
-            }
-        }
-        return troncon;
-    }
-    
+        
     public static LineString cut(LineString linear, double distanceDebut, double distanceFin){
         
         //on s"assure de ne pas sortir du troncon

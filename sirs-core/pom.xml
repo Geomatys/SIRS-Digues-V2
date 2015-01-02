@@ -161,8 +161,13 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-epsg-javadb</artifactId>
+      <artifactId>geotk-epsg</artifactId>
       <version>${geotoolkit.version}</version>
+    </dependency>
+     <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.2.8</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>

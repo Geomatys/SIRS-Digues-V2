@@ -98,8 +98,7 @@ public class SirsCore {
         // create a database in user directory
         Files.createDirectories(SirsCore.EPSG_PATH);
         
-        final String url = "jdbc:derby:" + SirsCore.EPSG_PATH.toString()
-                + File.separator + "EPSG;create=true";
+        final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.toString()+"/db";
         
         final DataSource ds = new DefaultDataSource(url);
         Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
