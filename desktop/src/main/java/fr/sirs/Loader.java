@@ -276,13 +276,6 @@ public class Loader extends Application {
                     }
                 }
 
-                // Accès provisoire comme Admin sans identifiants
-                if("".equals(controller.uiLogin.getText())
-                        && "".equals(controller.uiPassword.getText())){
-                    user = new Utilisateur();
-                    user.setRole(Session.Role.ADMIN.toString());
-                }
-
                 if(user==null){
                     controller.uiLogInfo.setText("Identifiants erronés.");
                     controller.uiLogin.setText("");

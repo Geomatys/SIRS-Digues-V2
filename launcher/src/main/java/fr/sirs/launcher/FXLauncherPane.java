@@ -12,6 +12,9 @@ import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
+import fr.sirs.Session.Role;
+import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 
@@ -23,6 +26,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +53,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TabPane;
@@ -108,13 +114,20 @@ public class FXLauncherPane extends BorderPane {
     @FXML private FXCRSButton uiNewCRS;
     @FXML private ProgressBar uiProgressCreate;    
     @FXML private Button uiCreateButton;
+    @FXML private TextField uiCreateLogin;
+    @FXML private PasswordField uiCreatePassword;
+    @FXML private PasswordField uiCreateConfirmPassword;
+    
+    // onglet base importation
     @FXML private TextField uiImportName;
     @FXML private FXCRSButton uiImportCRS;
     @FXML private TextField uiImportDBData;
     @FXML private TextField uiImportDBCarto;
     @FXML private ProgressBar uiProgressImport;
     @FXML private Button uiImportButton;
-    
+    @FXML private TextField uiImportLogin;
+    @FXML private PasswordField uiImportPassword;
+    @FXML private PasswordField uiImportConfirmPassword;
     
     // onglet mise à jour
     @FXML private TextField uiMajServerURL;
@@ -300,7 +313,7 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectDistant(ActionEvent event) {
         if(uiDistantName.getText().trim().isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
             return;
         }
         
@@ -320,12 +333,18 @@ public class FXLauncherPane extends BorderPane {
     void createEmpty(ActionEvent event) {
         final String dbName = cleanDbName(uiNewName.getText());
         if(dbName.isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
             return;
         }
         
         if(listLocalDatabase().contains(dbName)){
-            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé",ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
+            return;
+        }
+        
+        if("".equals(uiCreatePassword.getText())
+                || !uiCreatePassword.getText().equals(uiCreateConfirmPassword.getText())){
+            new Alert(Alert.AlertType.ERROR,"Veuillez entrer, puis confirmer un mot de passe administrateur.",ButtonType.OK).showAndWait();
             return;
         }
         
@@ -359,6 +378,19 @@ public class FXLauncherPane extends BorderPane {
                     SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                     sirsDBInfoRepository.create(version, epsgCode);
                     
+                    final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
+                    final Utilisateur administrateur = utilisateurRepository.create();
+                    administrateur.setLogin(uiCreateLogin.getText());
+                    MessageDigest messageDigest=null;
+                    try {
+                        messageDigest = MessageDigest.getInstance("MD5");
+                    } catch (NoSuchAlgorithmException ex) {
+                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
+                    administrateur.setRole(Role.ADMIN.toString());
+                    utilisateurRepository.add(administrateur);
+                    
                     applicationContext.close();
                     
                     //aller au panneau principale
@@ -381,11 +413,18 @@ public class FXLauncherPane extends BorderPane {
     void createFromAccess(ActionEvent event) {
         final String dbName = cleanDbName(uiImportName.getText());
         if(dbName.isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée",ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
             return;
         }
+        
         if(listLocalDatabase().contains(dbName)){
-            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé",ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
+            return;
+        }
+        
+        if("".equals(uiImportPassword.getText())
+                || !uiImportPassword.getText().equals(uiImportConfirmPassword.getText())){
+            new Alert(Alert.AlertType.ERROR,"Veuillez entrer, puis confirmer un mot de passe administrateur.",ButtonType.OK).showAndWait();
             return;
         }
         
@@ -418,6 +457,19 @@ public class FXLauncherPane extends BorderPane {
                     
                     SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                     sirsDBInfoRepository.create(version, epsgCode);
+                    
+                    final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
+                    final Utilisateur administrateur = utilisateurRepository.create();
+                    administrateur.setLogin(uiImportLogin.getText());
+                    MessageDigest messageDigest=null;
+                    try {
+                        messageDigest = MessageDigest.getInstance("MD5");
+                    } catch (NoSuchAlgorithmException ex) {
+                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
+                    administrateur.setRole(Role.ADMIN.toString());
+                    utilisateurRepository.add(administrateur);
                     
                     applicationContext.close();
                     
