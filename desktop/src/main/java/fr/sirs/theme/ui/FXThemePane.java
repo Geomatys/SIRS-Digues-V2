@@ -1,6 +1,7 @@
 
 package fr.sirs.theme.ui;
 
+import fr.sirs.FXEditMode;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -28,9 +29,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -46,21 +44,14 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     protected Node specificThemePane;
     
     @FXML protected ScrollPane uiEditDetailTronconTheme;
-      
-//    @FXML private Label mode;
 
     @FXML private FXDateField date_maj;
 
     @FXML private Label id;
-
-//    @FXML private BorderPane uiBorderPane;
-//
-//    @FXML private Label mode1;
+    
     @FXML private Label uiTitleLabel;
     
-    @FXML private ToggleButton uiEdit;
-    @FXML private ToggleButton uiConsult;
-    @FXML private Button uiSave;
+    @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 
     private TronconDigue troncon;
@@ -70,29 +61,16 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         
         date_maj.setDisable(true);
         
-        final ToggleGroup group = new ToggleGroup();
-        uiConsult.setToggleGroup(group);
-        uiEdit.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
-        });
-        
-        BooleanBinding NotEdit = uiEdit.selectedProperty().not();
-        uiEditDetailTronconTheme.disableProperty().bind(NotEdit);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setSaveAction(this::save);
+        BooleanBinding NotEdit = uiMode.editionState().not();
+        uiEditDetailTronconTheme.disableProperty().bind(NotEdit); // Provisoire car limite la lisibilité et bloque le défilement du ScrollPane.
         uiEditDetailTronconTheme.getStyleClass().add("element-pane");
-        uiSave.disableProperty().bind(NotEdit);
         
         elementProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
             initPane();
         });
         setElement((T) theme);
-        
-        final Session session = Injector.getSession();
-        if(session.getRole()!=ADMIN 
-                || session.getRole()!=USER 
-                || session.getRole()!=EXTERNE) {
-//            uiEdit.setDisable(true);
-        }
     }
     
     public void setShowOnMapButton(final boolean isShown){
@@ -100,7 +78,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     }
     
     @FXML
-    void save(ActionEvent event) {
+    void save() {
         preSave();
         
         // If we've got an object, troncon is updated.
@@ -186,7 +164,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 final Class controllerClass = Class.forName(className);
                 final Constructor cstr = controllerClass.getConstructor(object.getClass());
                 specificThemePane = (Node) cstr.newInstance(object);
-
+//                ((FXElementPane) specificThemePane).editableProperty().bind(uiMode.editionState());
+                ((AbstractFXElementPane) specificThemePane).editableProperty().bind(uiMode.editionState());
                 uiEditDetailTronconTheme.setContent(specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);

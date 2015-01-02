@@ -29,8 +29,11 @@ public class FXTronconThemePane extends BorderPane {
     public FXTronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
         SIRS.loadFXML(this);
         
+        final Session session = Injector.getBean(Session.class);
+        
         if(groups.length==1){
             final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[0]);
+            table.editableProperty.bind(session.nonGeometryEditionProperty());
             table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
             uiCenter.setCenter(table);
         }else{
@@ -47,7 +50,6 @@ public class FXTronconThemePane extends BorderPane {
         }
         
         //chargement de la liste des troncons disponibles
-        final Session session = Injector.getBean(Session.class);
         final List<TronconDigue> troncons = session.getTronconDigueRepository().getAll();
         uiTronconChoice.setItems(FXCollections.observableList(troncons));        
         uiTronconChoice.setConverter(new StringConverter<TronconDigue>() {

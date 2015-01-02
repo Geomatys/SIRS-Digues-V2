@@ -147,7 +147,7 @@ public class PojoTable extends BorderPane {
         
         final EditColumn editCol = new EditColumn(this::editPojo);
         editCol.editableProperty().bind(editableProperty);
-        editCol.visibleProperty().bind(editableProperty);
+//        editCol.visibleProperty().bind(editableProperty);
         
         uiTable.getColumns().add((TableColumn)editCol);
         for(PropertyDescriptor desc : properties){

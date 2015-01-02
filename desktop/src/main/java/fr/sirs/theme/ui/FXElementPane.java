@@ -1,6 +1,7 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.core.model.Element;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 
 /**
@@ -22,6 +23,12 @@ public interface FXElementPane<T extends Element> {
      * @return 
      */
     ObjectProperty<T> elementProperty();
+    
+    /**
+     * Set the pane fields editable or not.
+     * @return 
+     */
+//    BooleanProperty editableProperty();
     
     /**
      * Record unbound field changes before saving.

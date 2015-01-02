@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import fr.sirs.*?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
 <?import jfxtras.scene.control.*?>
@@ -62,45 +63,9 @@
                       </rowConstraints>
                   </GridPane>
               </center>
-              <right>
-                  <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="blue-dark" BorderPane.alignment="CENTER">
-                      <children>
-                                  <Label fx:id="mode" alignment="CENTER" styleClass="label-header" text="Mode">
-                                      <font>
-                                          <Font name="System Bold" size="14.0" />
-                                      </font>
-                                      <VBox.margin>
-                                          <Insets />
-                                      </VBox.margin>
-                                  </Label>
-                    <HBox>
-                       <children>
-                                        <ToggleButton fx:id="uiConsult" ellipsisString="" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" selected="true" styleClass="state-button-left" text="Consultation" textOverrun="WORD_ELLIPSIS" />
-                          <ToggleButton fx:id="uiEdit" maxWidth="110.0" minWidth="110.0" mnemonicParsing="false" prefWidth="110.0" styleClass="state-button-right" text="Edition" />
-                       </children>
-                    </HBox>
-                                  <Label fx:id="mode1" alignment="CENTER" styleClass="label-header" text="Sauvegarde">
-                                      <font>
-                                          <Font name="System Bold" size="14.0" />
-                                      </font>
-                                      <VBox.margin>
-                                          <Insets />
-                                      </VBox.margin>
-                                  </Label>
-                                  <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" text="Enregistrer">
-                                      <VBox.margin>
-                                          <Insets />
-                                      </VBox.margin>
-                                  </Button>
-                      </children>
-                 <BorderPane.margin>
-                    <Insets />
-                 </BorderPane.margin>
-                 <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                 </padding>
-                  </VBox>
-              </right>
+         <right>
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
+         </right>
           </BorderPane>
    </top>
 </fx:root>

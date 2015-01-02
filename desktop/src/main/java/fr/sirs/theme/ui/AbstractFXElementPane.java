@@ -1,7 +1,9 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.core.model.Element;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.layout.BorderPane;
 
@@ -13,6 +15,7 @@ import javafx.scene.layout.BorderPane;
 public abstract class AbstractFXElementPane<T extends Element> extends BorderPane implements FXElementPane<T> {
 
     protected final SimpleObjectProperty<T> elementProperty = new SimpleObjectProperty<>();
+    protected final BooleanProperty editableProperty = new SimpleBooleanProperty();
     
     @Override
     public void setElement(T element) {
@@ -22,5 +25,11 @@ public abstract class AbstractFXElementPane<T extends Element> extends BorderPan
     @Override
     public ObjectProperty<T> elementProperty() {
         return elementProperty;
+    }
+    
+//    @Override
+    public BooleanProperty editableProperty() {
+        System.out.println("L'éditabilité des panneaux spécifiques n'est pas encore générée.");
+        return editableProperty;
     }
 }

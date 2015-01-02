@@ -94,7 +94,7 @@ public class FXMainFrame extends BorderPane {
                     openDocsTab();
                 }
             });
-            final MenuItem uiSaveContext = new MenuItem("Sauvegerder le contexte");
+            final MenuItem uiSaveContext = new MenuItem("Sauvegarder le contexte");
             uiSaveContext.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
