@@ -9,5 +9,7 @@ public interface Element extends Serializable {
 	String getDocumentId();
 	
 	String getId();
+	
+	void setParent(Element parent);
 		
 }
