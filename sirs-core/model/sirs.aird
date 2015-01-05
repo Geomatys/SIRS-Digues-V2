@@ -10382,7 +10382,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_8GzkEJS_EeS5QfnEPnUuCg" name="populationProtegee : EInt = 0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3c6b67dc{platform:/resource/fr.sirs.sirs-core/model/sirs.ecore#//SystemeEndiguement/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_8GzkEJS_EeS5QfnEPnUuCg" name="populationProtegee : EInt = 0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SystemeEndiguement/populationProtegee"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SystemeEndiguement/populationProtegee"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="__eTrYJS_EeS5QfnEPnUuCg" labelAlignment="LEFT">
