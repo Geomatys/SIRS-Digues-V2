@@ -20,7 +20,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  */
 public class BorneEditAction extends FXMapAction {
         
-    public static final Image ICON_SR = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CODE_FORK,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    public static final Image ICON_SR = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ASTERISK,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
     public BorneEditAction(FXMap map) {
         super(map,"Système de repèrage","Edition/Création de borne",ICON_SR);

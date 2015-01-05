@@ -18,12 +18,12 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconCutAction extends FXMapAction {
+public class TronconMergeAction extends FXMapAction {
         
-    public static final Image ICON_CUT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXPAND,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    public static final Image ICON_CUT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPRESS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
-    public TronconCutAction(FXMap map) {
-        super(map,"MAJ Tronçon","Découpage d'un tronçon",ICON_CUT);
+    public TronconMergeAction(FXMap map) {
+        super(map,"MAJ Tronçon","Fusionner des tronçons",ICON_CUT);
         
         final Session session = Injector.getSession();
         this.disabledProperty().bind(session.geometryEditionProperty().not());
@@ -31,7 +31,7 @@ public class TronconCutAction extends FXMapAction {
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof TronconCutHandler);
+                selectedProperty().set(newValue instanceof TronconMergeHandler);
             }
         });
     }
@@ -39,7 +39,7 @@ public class TronconCutAction extends FXMapAction {
     @Override
     public void accept(ActionEvent event) {
         if (map != null) {
-            map.setHandler(new TronconCutHandler(map));
+            map.setHandler(new TronconMergeHandler(map));
         }
     }
     

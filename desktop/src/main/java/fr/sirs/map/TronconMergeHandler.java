@@ -64,7 +64,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconCutHandler extends FXAbstractNavigationHandler {
+public class TronconMergeHandler extends FXAbstractNavigationHandler {
     
     private static final Color[] PALETTE = new Color[]{
         Color.BLUE,
@@ -89,7 +89,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     private final FeatureType featureType;
     private final Session session;
     
-    public TronconCutHandler(final FXMap map) {
+    public TronconMergeHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
         geomlayer.setMap2D(map);
