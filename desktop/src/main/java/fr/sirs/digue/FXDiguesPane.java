@@ -164,7 +164,7 @@ public class FXDiguesPane extends SplitPane{
                 final TreeItem treeRootItem = new TreeItem("root");
                         
                 final SystemeEndiguement systemeEndiguement = new SystemeEndiguement();
-                systemeEndiguement.nom = "Un systeme d'endiguement";
+                systemeEndiguement.setLibelle("Un systeme d'endiguement");
 
                 final TreeItem systemeEndiguementItem = new TreeItem(systemeEndiguement);
                 treeRootItem.getChildren().add(systemeEndiguementItem);
@@ -214,7 +214,7 @@ public class FXDiguesPane extends SplitPane{
             }
 
             if (obj instanceof SystemeEndiguement) {
-                this.setText(((SystemeEndiguement) obj).nom + " (" + getTreeItem().getChildren().size() + ") ");
+                this.setText(((SystemeEndiguement) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
                 addTronconMenu.getItems().add(new NewDigueMenuItem());
                 setContextMenu(addTronconMenu);

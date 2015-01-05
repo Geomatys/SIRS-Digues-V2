@@ -4,18 +4,23 @@ package fr.sirs.theme.ui;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import java.util.List;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
-import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  *
@@ -24,24 +29,24 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 public class FXTronconThemePane extends BorderPane {
 
     @FXML private BorderPane uiCenter;
-    @FXML private ComboBox<TronconDigue> uiTronconChoice;
+    @FXML private ComboBox<PreviewLabel> uiTronconChoice;
+    private final ObjectProperty<TronconDigue> currentTroncon = new SimpleObjectProperty<>();
+    private final Session session = Injector.getBean(Session.class);
         
     public FXTronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
         SIRS.loadFXML(this);
         
-        final Session session = Injector.getBean(Session.class);
-        
         if(groups.length==1){
             final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[0]);
             table.editableProperty.bind(session.nonGeometryEditionProperty());
-            table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
+            table.tronconPropoerty().bindBidirectional(currentTroncon);
             uiCenter.setCenter(table);
         }else{
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-            for(int i=0;i<groups.length;i++){
+            for(int i=0; i<groups.length; i++){
                 final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[i]);
-                table.tronconPropoerty().bindBidirectional(uiTronconChoice.valueProperty());
+                table.tronconPropoerty().bindBidirectional(currentTroncon);
                 final Tab tab = new Tab(groups[i].getName());
                 tab.setContent(table);
                 pane.getTabs().add(tab);
@@ -49,21 +54,21 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
         
-        //chargement de la liste des troncons disponibles
-        final List<TronconDigue> troncons = session.getTronconDigueRepository().getAll();
-        uiTronconChoice.setItems(FXCollections.observableList(troncons));        
-        uiTronconChoice.setConverter(new StringConverter<TronconDigue>() {
+        final List<PreviewLabel> tronconPreviews = session.getPreviewLabelRepository().getPreviewLabels(TronconDigue.class);
+        uiTronconChoice.setItems(FXCollections.observableList(tronconPreviews));        
+        uiTronconChoice.setConverter(new StringConverter<PreviewLabel>() {
             @Override
-            public String toString(TronconDigue object) {
+            public String toString(PreviewLabel object) {
                 if(object==null) return "";
-                else return object.getLibelle();
+                else return object.getLabel();
             }
+            
             @Override
-            public TronconDigue fromString(String string) {
+            public PreviewLabel fromString(String string) {
                 if(string==null) return null;
-                final ObservableList<TronconDigue> items = uiTronconChoice.getItems();
-                for(TronconDigue troncon : items){
-                    if(troncon!=null && troncon.getLibelle().toLowerCase().startsWith(string.toLowerCase())){
+                final ObservableList<PreviewLabel> items = uiTronconChoice.getItems();
+                for(PreviewLabel troncon : items){
+                    if(troncon!=null && troncon.getLabel().toLowerCase().startsWith(string.toLowerCase())){
                         return troncon;
                     }
                 }
@@ -71,13 +76,18 @@ public class FXTronconThemePane extends BorderPane {
             }
         });
         
-        new ComboBoxCompletion(uiTronconChoice);
+
+        uiTronconChoice.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                final TronconDigueRepository tronconDigueRepository = session.getTronconDigueRepository();
+                currentTroncon.set(tronconDigueRepository.get(uiTronconChoice.getSelectionModel().getSelectedItem().getObjectId()));
+            }
+        });
         
-        if(!troncons.isEmpty()){
-            uiTronconChoice.getSelectionModel().select(troncons.get(0));
+        if(!tronconPreviews.isEmpty()){
+            uiTronconChoice.getSelectionModel().select(tronconPreviews.get(0));
         }
     }
-    
-    
-    
 }
