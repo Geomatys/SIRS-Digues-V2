@@ -14,18 +14,29 @@
                 <GridPane styleClass="buttonbar" BorderPane.alignment="CENTER">
                     <columnConstraints>
                         <ColumnConstraints hgrow="ALWAYS" />
+                  <ColumnConstraints hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                     <children>
-                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" styleClass="btn-without-style" GridPane.columnIndex="1" GridPane.hgrow="NEVER" />
-                        <Label layoutX="10.0" layoutY="14.0" styleClass="label-header" text="Liste des systèmes d'endiguement" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
+                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="2" GridPane.hgrow="NEVER">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass></Button>
+                        <Label layoutX="10.0" layoutY="14.0" maxWidth="1.7976931348623157E308" styleClass="label-header" text="Systèmes d'endiguement" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                      <padding>
                         <Insets left="5.0" right="5.0" />
                      </padding>
                         </Label>
+                  <MenuButton fx:id="uiAdd" mnemonicParsing="false" GridPane.columnIndex="1">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </MenuButton>
                     </children>
                 </GridPane>
             </top>

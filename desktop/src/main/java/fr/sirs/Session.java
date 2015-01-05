@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
+import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
