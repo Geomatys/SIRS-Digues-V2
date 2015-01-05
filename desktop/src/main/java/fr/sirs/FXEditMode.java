@@ -1,7 +1,6 @@
 
 package fr.sirs;
 
-import fr.sirs.Session.Role;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -20,8 +19,6 @@ import javafx.scene.layout.VBox;
  * @author Johann Sorel (Geomatys)
  */
 public class FXEditMode extends VBox {
-    
-    private final Session session = Injector.getBean(Session.class);
     
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
@@ -56,7 +53,8 @@ public class FXEditMode extends VBox {
         });
     }
      
-    public void setAllowedRoles(Session.Role... allowed){
+    public void setAllowedRoles(Role... allowed){
+        final Session session = Injector.getBean(Session.class);
         boolean editionGranted = false;
         for(final Role role : allowed){
             if(session.getRole()==role) {

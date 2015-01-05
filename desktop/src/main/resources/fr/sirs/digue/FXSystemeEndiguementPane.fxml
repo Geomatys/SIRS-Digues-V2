@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
+         <right>
+            <FXEditMode fx:id="uiEditMode" BorderPane.alignment="CENTER" />
+         </right>
+      </BorderPane>
+   </top>
+</fx:root>

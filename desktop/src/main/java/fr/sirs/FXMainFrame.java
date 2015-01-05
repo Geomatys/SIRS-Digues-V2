@@ -76,7 +76,7 @@ public class FXMainFrame extends BorderPane {
             }
         }
         
-        if(session.getRole()==Session.Role.ADMIN){
+        if(session.getRole()==Role.ADMIN){
             final Menu uiAdmin = new Menu("Administration");
             final MenuItem uiUserAdmin = new MenuItem("Utilisateurs");
             uiUserAdmin.setOnAction(new EventHandler<ActionEvent>() {

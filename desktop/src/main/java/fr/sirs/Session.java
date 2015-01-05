@@ -95,8 +95,8 @@ public class Session extends SessionGen {
     private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
     
-    public enum Role{ADMIN, USER, CONSULTANT, EXTERNE};
-    private ObjectProperty<Role> role = new SimpleObjectProperty();
+    
+    private final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
     ////////////////////////////////////////////////////////////////////////////
 

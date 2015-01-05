@@ -45,6 +45,7 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import java.util.ArrayList;
 
 /**
  *
@@ -90,6 +91,13 @@ public class TronconDigueRepository extends
         return new TronconDigue();
     }
 
+    public List<TronconDigue> getAllLight() {
+        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class,db.queryForStreamingView(createQuery("streamLight")));
+        final List<TronconDigue> lst = new ArrayList<>();
+        while(ite.hasNext()) lst.add(ite.next());
+        return lst;
+    }
+    
     public static final String CRETE = "Crete";
 
     @View(name = CRETE, map = "classpath:Crete-map.js")

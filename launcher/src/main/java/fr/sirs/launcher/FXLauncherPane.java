@@ -12,7 +12,7 @@ import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
-import fr.sirs.Session.Role;
+import fr.sirs.Role;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;

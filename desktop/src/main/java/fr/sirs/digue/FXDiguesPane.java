@@ -69,10 +69,15 @@ public class FXDiguesPane extends SplitPane{
                 obj = ((TreeItem) obj).getValue();
             }
 
-            if (obj instanceof Digue) {
-                displayDigue((Digue) obj);
+            if (obj instanceof SystemeEndiguement) {
+                displaySystemeEndiguement((SystemeEndiguement)obj);
+            }else if (obj instanceof Digue) {
+                displayDigue((Digue)obj);
             } else if (obj instanceof TronconDigue) {
-                displayTronconDigue((TronconDigue) obj);
+                //le troncon dans l'arbre est une version 'light'
+                TronconDigue td = (TronconDigue)obj;
+                td = session.getTronconDigueRepository().get(td.getDocumentId());
+                displayTronconDigue(td);
             }
         });
         
@@ -99,6 +104,13 @@ public class FXDiguesPane extends SplitPane{
         FXDiguePane digueController = new FXDiguePane();
         digueController.setElement((Digue) obj);
         uiRight.setCenter(digueController);
+        this.session.prepareToPrint(obj);
+    }
+    
+    public final void displaySystemeEndiguement(SystemeEndiguement obj){
+        FXSystemeEndiguementPane pane = new FXSystemeEndiguementPane();
+        pane.systemeEndiguementProp().set(obj);
+        uiRight.setCenter(pane);
         this.session.prepareToPrint(obj);
     }
 
@@ -149,9 +161,8 @@ public class FXDiguesPane extends SplitPane{
                     filter = (Element t) -> {return result.contains(t.getDocumentId());};
                 }
                 
-                
                 final TreeItem treeRootItem = new TreeItem("root");
-        
+                        
                 final SystemeEndiguement systemeEndiguement = new SystemeEndiguement();
                 systemeEndiguement.nom = "Un systeme d'endiguement";
 
@@ -159,18 +170,20 @@ public class FXDiguesPane extends SplitPane{
                 treeRootItem.getChildren().add(systemeEndiguementItem);
                 systemeEndiguementItem.setExpanded(true);
 
-                session.getDigues().stream().forEach((digue) -> {
+                //on recupere tous les troncons
+                final List<TronconDigue> troncons = session.getTronconDigueRepository().getAllLight();
+                
+                for(Digue digue : session.getDigues()){
                     final TreeItem digueItem = new TreeItem(digue);
-
-                    session.getTronconDigueByDigue(digue).stream().forEach((troncon) -> {
-                        if(filter==null || filter.test(troncon)){
-                            final TreeItem tronconItem = new TreeItem(troncon);
+                    for(TronconDigue td : troncons){
+                        if(td.getDigueId().equals(digue.getDocumentId()) && (filter==null || filter.test(td))){
+                            final TreeItem tronconItem = new TreeItem(td);
                             digueItem.getChildren().add(tronconItem);
                         }
-                    });
+                    }
                     systemeEndiguementItem.getChildren().add(digueItem);
-                });
-
+                }
+                
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {

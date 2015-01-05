@@ -1,9 +1,9 @@
 package fr.sirs;
 
-import static fr.sirs.Session.Role.ADMIN;
-import static fr.sirs.Session.Role.CONSULTANT;
-import static fr.sirs.Session.Role.EXTERNE;
-import static fr.sirs.Session.Role.USER;
+import static fr.sirs.Role.ADMIN;
+import static fr.sirs.Role.CONSULTANT;
+import static fr.sirs.Role.EXTERNE;
+import static fr.sirs.Role.USER;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -176,7 +176,7 @@ public class Loader extends Application {
                 if("".equals(controller.uiLogin.getText())
                         && "".equals(controller.uiPassword.getText())){
                     user = new Utilisateur();
-                    user.setRole(Session.Role.ADMIN.toString());
+                    user.setRole(Role.ADMIN.toString());
                 }
 
                 if(user==null){
