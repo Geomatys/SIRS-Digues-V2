@@ -17,6 +17,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.Point2D;
+import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -120,6 +121,11 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
             layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
+                try {
+                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(true));
+                } catch (URISyntaxException ex) {
+                    SIRS.LOGGER.log(Level.FINE, ex.getMessage(), ex);
+                }
                 layer.setSelectable(true);
             }
         }

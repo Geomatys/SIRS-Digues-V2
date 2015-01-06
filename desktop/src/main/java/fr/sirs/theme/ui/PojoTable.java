@@ -74,6 +74,7 @@ import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.FXDeleteTableColumn;
 import org.geotoolkit.gui.javafx.util.FXPasswordStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -143,7 +144,7 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
-        uiTable.getColumns().add(new DeleteColumn());
+        uiTable.getColumns().add(new FXDeleteTableColumn(true));
         
         final EditColumn editCol = new EditColumn(this::editPojo);
         editCol.editableProperty().bind(editableProperty);
@@ -568,41 +569,7 @@ public class PojoTable extends BorderPane {
         }
         
     }
-    
-    public class DeleteColumn extends TableColumn<Element,Element>{
-
-        public DeleteColumn() {
-            super("Suppression");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            DeleteColumn.this.editableProperty().bind(editableProperty);
-            DeleteColumn.this.visibleProperty().bind(editableProperty);
-            
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
-                @Override
-                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-            setCellFactory((TableColumn<Element, Element> param) -> new ButtonTableCell<>(
-                    false,new ImageView(GeotkFX.ICON_DELETE), (Element t) -> true, new Function<Element, Element>() {
-                @Override
-                public Element apply(Element t) {
-                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
-                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                    if(ButtonType.YES == res){
-                        deletePojos(t);
-                    }
-                    return null;
-                }
-            }));
-        }  
-    }
-    
+        
     public static class EditColumn extends TableColumn<Object,Object>{
 
         public EditColumn(Consumer editFct) {

@@ -196,7 +196,7 @@ public class CorePlugin extends Plugin {
         try{
             //troncons
             final BeanStore tronconStore = new BeanStore(getSupplier(TronconDigue.class));
-            items.addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(),true));
+            items.addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
             
             //bornes
             final BeanStore borneStore = new BeanStore(getSupplier(BorneDigue.class));
@@ -247,7 +247,7 @@ public class CorePlugin extends Plugin {
             
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createTronconSelectionStyle(),false) );
+            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createTronconSelectionStyle(false),false) );
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(structLayer);
                
@@ -402,7 +402,7 @@ public class CorePlugin extends Plugin {
         return SF.style(line1,line2,line3);
     }
     
-    private static MutableStyle createTronconSelectionStyle() throws URISyntaxException{
+    public static MutableStyle createTronconSelectionStyle(boolean graduation) throws URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(2),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
@@ -426,27 +426,29 @@ public class CorePlugin extends Plugin {
                 STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
+        if(graduation){
+            final GraduationSymbolizer grad = new GraduationSymbolizer();
+            //tous les 100metres
+            final GraduationSymbolizer.Graduation g1 = new GraduationSymbolizer.Graduation();
+            g1.setUnit(new DefaultLiteral("m"));
+            g1.setStep(FF.literal(100));
+            g1.setStroke(SF.stroke(Color.RED, 3));
+            g1.setFont(SF.font(12));
+            g1.setSize(FF.literal(12));
+            grad.getGraduations().add(g1);
+            //tous les 10metres
+            final GraduationSymbolizer.Graduation g2 = new GraduationSymbolizer.Graduation();
+            g2.setUnit(new DefaultLiteral("m"));
+            g2.setStep(FF.literal(10));
+            g2.setStroke(SF.stroke(Color.BLACK, 1));
+            g2.setFont(SF.font(10));
+            g2.setSize(FF.literal(4));
+            grad.getGraduations().add(g2);
         
-        final GraduationSymbolizer grad = new GraduationSymbolizer();
-        //tous les 100metres
-        final GraduationSymbolizer.Graduation g1 = new GraduationSymbolizer.Graduation();
-        g1.setUnit(new DefaultLiteral("m"));
-        g1.setStep(FF.literal(100));
-        g1.setStroke(SF.stroke(Color.RED, 3));
-        g1.setFont(SF.font(12));
-        g1.setSize(FF.literal(12));
-        grad.getGraduations().add(g1);
-        //tous les 10metres
-        final GraduationSymbolizer.Graduation g2 = new GraduationSymbolizer.Graduation();
-        g2.setUnit(new DefaultLiteral("m"));
-        g2.setStep(FF.literal(10));
-        g2.setStroke(SF.stroke(Color.BLACK, 1));
-        g2.setFont(SF.font(10));
-        g2.setSize(FF.literal(4));
-        grad.getGraduations().add(g2);
-        
-        final MutableStyle style = SF.style(line1,direction,grad);
-        return style;
+            return SF.style(line1,direction,grad);
+        }else{
+            return SF.style(line1,direction);
+        }
     }
     
     private static MutableStyle createBorneStyle() throws URISyntaxException{
