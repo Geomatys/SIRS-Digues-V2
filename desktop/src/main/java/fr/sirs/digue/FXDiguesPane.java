@@ -217,7 +217,7 @@ public class FXDiguesPane extends SplitPane{
         final TreeItem digueItem = new TreeItem(digue);
         for(int i=troncons.size()-1;i>=0;i--){
             final TronconDigue td = troncons.get(i);
-            if(!td.getDigueId().equals(digue.getDocumentId())) continue;
+            if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
             troncons.remove(i);
             if(filter==null || filter.test(td)){
                 final TreeItem tronconItem = new TreeItem(td);

@@ -15,7 +15,7 @@ import javafx.scene.layout.BorderPane;
 public abstract class AbstractFXElementPane<T extends Element> extends BorderPane implements FXElementPane<T> {
 
     protected final SimpleObjectProperty<T> elementProperty = new SimpleObjectProperty<>();
-    protected final BooleanProperty editableProperty = new SimpleBooleanProperty();
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty();
     
     @Override
     public void setElement(T element) {
@@ -27,9 +27,8 @@ public abstract class AbstractFXElementPane<T extends Element> extends BorderPan
         return elementProperty;
     }
     
-//    @Override
-    public BooleanProperty editableProperty() {
-        System.out.println("L'éditabilité des panneaux spécifiques n'est pas encore générée.");
+    public BooleanProperty disableFieldsProperty(){
         return editableProperty;
     }
+    
 }

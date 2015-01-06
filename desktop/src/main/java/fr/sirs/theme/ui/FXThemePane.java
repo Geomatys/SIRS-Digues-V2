@@ -64,7 +64,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
         uiMode.setSaveAction(this::save);
         BooleanBinding NotEdit = uiMode.editionState().not();
-        uiEditDetailTronconTheme.disableProperty().bind(NotEdit); // Provisoire car limite la lisibilité et bloque le défilement du ScrollPane.
         uiEditDetailTronconTheme.getStyleClass().add("element-pane");
         
         elementProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
@@ -165,7 +164,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 final Constructor cstr = controllerClass.getConstructor(object.getClass());
                 specificThemePane = (Node) cstr.newInstance(object);
 //                ((FXElementPane) specificThemePane).editableProperty().bind(uiMode.editionState());
-                ((AbstractFXElementPane) specificThemePane).editableProperty().bind(uiMode.editionState());
+                ((AbstractFXElementPane) specificThemePane).disableFieldsProperty().bind(uiMode.editionState().not());
                 uiEditDetailTronconTheme.setContent(specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
