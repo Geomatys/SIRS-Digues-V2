@@ -431,7 +431,7 @@ public class FXSystemeReperagePane extends BorderPane {
     public class DeleteColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
 
         public DeleteColumn() {
-            super();            
+            super("Suppression");
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);

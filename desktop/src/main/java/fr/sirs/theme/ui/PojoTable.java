@@ -572,7 +572,7 @@ public class PojoTable extends BorderPane {
     public class DeleteColumn extends TableColumn<Element,Element>{
 
         public DeleteColumn() {
-            super();            
+            super("Suppression");
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);
@@ -606,7 +606,7 @@ public class PojoTable extends BorderPane {
     public static class EditColumn extends TableColumn<Object,Object>{
 
         public EditColumn(Consumer editFct) {
-            super();            
+            super("Edition");        
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);

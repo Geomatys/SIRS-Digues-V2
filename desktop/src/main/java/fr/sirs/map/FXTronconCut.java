@@ -105,7 +105,7 @@ public class FXTronconCut extends VBox{
     private class DeleteColumn extends TableColumn{
 
         public DeleteColumn() {
-            super();            
+            super("Suppression");          
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);

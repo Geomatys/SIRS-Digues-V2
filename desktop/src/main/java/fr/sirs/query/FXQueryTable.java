@@ -90,7 +90,7 @@ public class FXQueryTable extends BorderPane{
     public class DeleteColumn extends TableColumn{
 
         public DeleteColumn() {
-            super();            
+            super("Suppression");         
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);
