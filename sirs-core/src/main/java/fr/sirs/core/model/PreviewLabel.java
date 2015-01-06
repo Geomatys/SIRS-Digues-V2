@@ -4,13 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PreviewLabel {
 
-    
-//    @JsonProperty("_id")
-//    private String id;
-//    
-//    @JsonProperty("_rev")
-//    private String rev;
-    
     @JsonProperty("libelle")
     private String label;
     
@@ -19,14 +12,6 @@ public class PreviewLabel {
     
     @JsonProperty("objectId")
     private String objectId;
-
-//    public String getId() {
-//        return id;
-//    }
-//
-//    public void setId(String id) {
-//        this.id = id;
-//    }
 
     public String getLabel() {
         return label;

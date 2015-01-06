@@ -569,7 +569,53 @@ public class PojoTable extends BorderPane {
         }
         
     }
-        
+    
+    public class DeleteColumn extends TableColumn<Element,Element>{
+
+        public DeleteColumn() {
+            super();            
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+            DeleteColumn.this.editableProperty().bind(editableProperty);
+            DeleteColumn.this.visibleProperty().bind(editableProperty);
+            
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
+                @Override
+                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
+            });
+            setCellFactory(new Callback<TableColumn<Element, Element>, TableCell<Element, Element>>() {
+
+                @Override
+                public TableCell<Element, Element> call(TableColumn<Element, Element> param) {
+                    return new ButtonTableCell<>(
+                            false, new ImageView(GeotkFX.ICON_DELETE), new Function<Element, Boolean>() {
+
+                        public Boolean apply(Element t) {
+                            return true;
+                        }
+                    }, new Function<Element, Element>() {
+                                @Override
+                                public Element apply(Element t) {
+                                    
+                                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                            ButtonType.NO, ButtonType.YES).showAndWait().get();
+                                    if (ButtonType.YES == res) {
+                                        deletePojos(t);
+                                    }
+                                    return null;
+                                }
+                            });
+                }
+            });
+        }  
+    }
+    
     public static class EditColumn extends TableColumn<Object,Object>{
 
         public EditColumn(Consumer editFct) {
