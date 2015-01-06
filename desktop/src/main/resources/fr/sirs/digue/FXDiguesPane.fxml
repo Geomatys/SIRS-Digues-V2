@@ -15,13 +15,14 @@
                     <columnConstraints>
                         <ColumnConstraints hgrow="ALWAYS" />
                   <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                     <children>
-                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="2" GridPane.hgrow="NEVER">
+                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="3" GridPane.hgrow="NEVER">
                      <styleClass>
                         <String fx:value="btn-without-style" />
                         <String fx:value="label-header" />
@@ -37,6 +38,12 @@
                         <String fx:value="label-header" />
                      </styleClass>
                   </MenuButton>
+                  <Button fx:id="uiDelete" mnemonicParsing="false" GridPane.columnIndex="2">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </Button>
                     </children>
                 </GridPane>
             </top>

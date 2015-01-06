@@ -20,6 +20,7 @@ import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -219,7 +220,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         
         final TronconDigue troncon = elementProperty.get();
         final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
-        final Digue digue = session.getDigueById(troncon.getDigueId());
+        allDigues.add(0,null);
+        Digue digue = null;
+        if(troncon.getDigueId()!=null){
+            digue = session.getDigueById(troncon.getDigueId());
+        }
         
         this.uiId.setText(troncon.getId());
         this.uiName.textProperty().bindBidirectional(troncon.libelleProperty());
@@ -228,53 +233,38 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         this.uiDigue.setItems(allDigues);
         final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
             @Override
-            public String toString(Digue digue) {return digue.getLibelle();}
+            public String toString(Digue digue) {
+                if(digue==null) return "-";
+                return digue.getLibelle();
+            }
             @Override
-            public Digue fromString(String string) {return null;}
+            public Digue fromString(String string) {
+                return null;
+            }
         };
         
         this.uiDigue.setConverter(digueStringConverter);
         this.uiDigue.setValue(digue);
         this.uiDigue.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
-
             @Override
             public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
                 if(initializing) return;
-                /* TODO ?
-                Le changement de digue d'un tronçon a des implication immédiates
-                sur la mise à jour de l'arbre de navigation des entités. Il 
-                entraîne a priori le changement d'élément de l'arbre en cours de
-                sélection et donc le chargement de la vue d'un nouvel élément 
-                avant d'avoir eu la possibilité d'enregistrer les changements
-                apportés au modèle manuellement dans la base.
-                Il y a donc deux possibilités :
-                1- Ouvrir ici une fenêtre d'avertissement expliquant que cette 
-                modification est sauvegardée d'office car elle provoque un 
-                changement de vue de digue. (choix pour le moment).
-                2- Rester sur la vue du bon tronçon en sélectionnant le bon 
-                élément de l'arbre et en contournant le rechargement de la page
-                (plus compliqué mais plus léger pour l'utilisateur).
-                */
-                
+                Digue digue = null;
+                if(troncon.getDigueId()!=null){
+                    digue = session.getDigueById(troncon.getDigueId());
+                }
                 // Do not open dialog if the levee list is reset to the old value.
-                if (!newValue.equals(digue)){
-                    
-                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                            "Le changement de digue est enregistré d'office.",
-                            ButtonType.OK,ButtonType.CANCEL
-                            );
-                    final ButtonType res = alert.showAndWait().get();
-                    if(res==ButtonType.OK){
+                if(!Objects.equals(newValue,digue)){
+                    if(newValue==null){
+                        elementProperty.get().setDigueId(null);
+                    }else{
                         elementProperty.get().setDigueId(newValue.getId());
-                        save();
                     }
                 }
             }
         });
-        this.uiDigue.getValue().getId();
         
         this.uiRive.setValue(troncon.getTypeRiveId());
-                
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
                 

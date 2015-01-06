@@ -4,6 +4,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.DocumentListener;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -43,7 +44,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.ektorp.BulkDeleteDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FXDiguesPane extends SplitPane{
+public class FXDiguesPane extends SplitPane implements DocumentListener{
 
     @Autowired
     private Session session;
@@ -51,11 +52,11 @@ public class FXDiguesPane extends SplitPane{
     @FXML private TreeView uiTree;
     @FXML private BorderPane uiRight;
     @FXML private Button uiSearch;
+    @FXML private Button uiDelete;
     @FXML private MenuButton uiAdd;
 
     //etat de la recherche
     private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
-    private final ImageView iconAdd = new ImageView(SIRS.ICON_ADD_WHITE);
     private final ProgressIndicator searchRunning = new ProgressIndicator();
     private final StringProperty currentSearch = new SimpleStringProperty("");
 
@@ -91,12 +92,19 @@ public class FXDiguesPane extends SplitPane{
         uiSearch.setGraphic(searchNone);
         uiSearch.textProperty().bind(currentSearch);
         
-        uiAdd.setGraphic(iconAdd);
+        uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
+        uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
         uiAdd.getItems().add(new NewSystemeMenuItem(null));
         uiAdd.getItems().add(new NewDigueMenuItem(null));
         uiAdd.getItems().add(new NewTronconMenuItem(null));
+        uiDelete.setOnAction(this::deleteSelection);
         
-        this.buildTreeView();
+        this.updateTree();
+        
+        
+        //listen to changes in the db to update tree
+        Injector.getDocumentChangeEmiter().addListener(this);
+        
     }
     
     public final void displayTronconDigue(TronconDigue obj){
@@ -120,6 +128,17 @@ public class FXDiguesPane extends SplitPane{
         this.session.prepareToPrint(obj);
     }
 
+    private void deleteSelection(ActionEvent event) {
+        final Object obj = uiTree.getSelectionModel().getSelectedItem();
+        if(obj instanceof SystemeEndiguement){
+            //TODO
+        }else if(obj instanceof Digue){
+            //TODO
+        }else if(obj instanceof TronconDigue){
+            //TODO
+        }
+    }
+    
     @FXML
     private void openSearchPopup(ActionEvent event) {
         if(uiSearch.getGraphic()!= searchNone){
@@ -136,19 +155,26 @@ public class FXDiguesPane extends SplitPane{
             public void handle(ActionEvent event) {
                 currentSearch.set(textField.getText());
                 popup.hide();
-                buildTreeView();
+                updateTree();
             }
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
 
-    private void buildTreeView() {
-        uiSearch.setGraphic(searchRunning);
+    public void updateTree() {
         
         new Thread(){
             @Override
             public void run() {
+                Platform.runLater(() -> {
+                    uiSearch.setGraphic(searchRunning);
+                });
+                
+                //on stoque les noeuds ouverts
+                final Set extendeds = new HashSet();
+                searchExtended(uiTree.getRoot(),extendeds);
+                
                 //creation du filtre
                 final String str = currentSearch.get();
                 final Predicate<Element> filter;
@@ -179,13 +205,14 @@ public class FXDiguesPane extends SplitPane{
                 for(SystemeEndiguement sd : sds){
                     final TreeItem sdItem = new TreeItem(sd);
                     treeRootItem.getChildren().add(sdItem);
-                    sdItem.setExpanded(true);
+                    sdItem.setExpanded(extendeds.contains(sd));
 
                     final List<String> digueIds = sd.getDigue();
                     for(Digue digue : digues){
                         if(!digueIds.contains(digue.getDocumentId())) continue;
                         diguesFound.add(digue);
                         final TreeItem digueItem = toNode(digue, troncons, filter);
+                        digueItem.setExpanded(extendeds.contains(digue));
                         sdItem.getChildren().add(digueItem);
                     }
                 }
@@ -193,12 +220,13 @@ public class FXDiguesPane extends SplitPane{
                 //on place toute les digues et troncons non trouvé dans un group a part
                 digues.removeAll(diguesFound);
                 final TreeItem ncItem = new TreeItem("Non classés"); 
-                ncItem.setExpanded(true);
+                ncItem.setExpanded(extendeds.contains(ncItem.getValue()));
                 treeRootItem.getChildren().add(ncItem);
                 
                 for(Digue digue : digues){
                     final TreeItem digueItem = toNode(digue, troncons, filter);
                     ncItem.getChildren().add(digueItem);
+                    digueItem.setExpanded(extendeds.contains(digue));
                 }
                 for(TronconDigue tc : troncons){
                     ncItem.getChildren().add(new TreeItem(tc));
@@ -213,6 +241,16 @@ public class FXDiguesPane extends SplitPane{
         
     }
 
+    private static void searchExtended(TreeItem<?> ti, Set objects){
+        if(ti==null) return;
+        if(ti.isExpanded()){
+            objects.add(ti.getValue());
+        }
+        for(TreeItem t : ti.getChildren()){
+            searchExtended(t, objects);
+        }
+    }
+    
     private static TreeItem toNode(Digue digue, List<TronconDigue> troncons, Predicate<Element> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(int i=troncons.size()-1;i>=0;i--){
@@ -225,6 +263,33 @@ public class FXDiguesPane extends SplitPane{
             }
         }
         return digueItem;
+    }
+
+    @Override
+    public void documentCreated(Element candidate) {
+        if(candidate instanceof SystemeEndiguement ||
+           candidate instanceof Digue ||
+           candidate instanceof TronconDigue){
+            updateTree();
+        }
+    }
+
+    @Override
+    public void documentChanged(Element candidate) {
+        if(candidate instanceof SystemeEndiguement ||
+           candidate instanceof Digue ||
+           candidate instanceof TronconDigue){
+            updateTree();
+        }
+    }
+
+    @Override
+    public void documentDeleted(Element candidate) {
+        if(candidate instanceof SystemeEndiguement ||
+           candidate instanceof Digue ||
+           candidate instanceof TronconDigue){
+            updateTree();
+        }
     }
     
     private class NewTronconMenuItem extends MenuItem {
@@ -240,12 +305,6 @@ public class FXDiguesPane extends SplitPane{
                     troncon.setDigueId(digue.getId());
                 }
                 FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
-                if(parent != null){
-                    final TreeItem newTroncon = new TreeItem<>(troncon);
-                    parent.getChildren().add(newTroncon);
-                }else{
-                    buildTreeView();
-                }
             });
         }
     }
@@ -259,12 +318,6 @@ public class FXDiguesPane extends SplitPane{
                 final Digue digue = new Digue();
                 digue.setLibelle("Digue vide");
                 FXDiguesPane.this.session.getDigueRepository().add(digue);
-                if(parent!=null){
-                    final TreeItem newDigue = new TreeItem<>(digue);
-                    parent.getChildren().add(newDigue);
-                }else{
-                    buildTreeView();
-                }
             });
         }
     }
@@ -278,12 +331,6 @@ public class FXDiguesPane extends SplitPane{
                 final SystemeEndiguement candidate = new SystemeEndiguement();
                 candidate.setLibelle("Système vide");
                 FXDiguesPane.this.session.getSystemeEndiguementRepository().add(candidate);
-                if(parent!=null){
-                    final TreeItem newDigue = new TreeItem<>(candidate);
-                    parent.getChildren().add(newDigue);
-                }else{
-                    buildTreeView();
-                }
             });
         }
     }

@@ -81,8 +81,7 @@ public class Session extends SessionGen {
                 geometryEditionProperty.set(false);
                 nonGeometryEditionProperty.set(false);
             }
-        } 
-        else{
+        }else{
             this.role.set(null);
             geometryEditionProperty.set(false);
             nonGeometryEditionProperty.set(false);
