@@ -170,7 +170,7 @@ public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveeProfilT
         
         
         // TYPES DE SYSTEMES DE RELEVES
-        final ObservableList<RefSystemeReleveProfil> allSystemesReleves = FXCollections.observableList(session.getSystemeReleveProfilRepository().getAll());
+        final ObservableList<RefSystemeReleveProfil> allSystemesReleves = FXCollections.observableList(session.getRefSystemeReleveProfilRepository().getAll());
         RefSystemeReleveProfil systemeReleve = null;
         for(final RefSystemeReleveProfil rsrp : allSystemesReleves){
             if(rsrp.getId().equals(leveProfilTravers.getTypeSystemesReleveId())){

@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.DigueRepository;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.RefSystemeReleveProfilRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
@@ -174,10 +176,6 @@ public class Session extends SessionGen {
         return previewLabelRepository;
     }    
     
-    public RefSystemeReleveProfilRepository getSystemeReleveProfilRepository(){
-        return refSystemeReleveProfilRepository;
-    }
-    
     void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }
@@ -245,24 +243,24 @@ public class Session extends SessionGen {
     }
     
     public List<Digue> getDigues() {
-        return this.digueRepository.getAll();
+        return ((DigueRepository) repositories.get("DigueRepository")).getAll();
     }
     
     public Digue getDigueById(final String digueId){
-        return this.digueRepository.get(digueId);
+        return ((DigueRepository) repositories.get("DigueRepository")).get(digueId);
     }
 
     public List<TronconDigue> getTroncons() {
-        return this.tronconDigueRepository.getAll();
+        return ((TronconDigueRepository) repositories.get("TronconDigueRepository")).getAll();
     }
 
     public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
-        return this.tronconDigueRepository.getByDigue(digue);
+        return ((TronconDigueRepository) repositories.get("TronconDigueRepository")).getByDigue(digue);
     }
     
     public void update(final Digue digue){
         digue.setDateMaj(LocalDateTime.now());
-        this.digueRepository.update(digue);
+        this.repositories.get("DigueRepository").update(digue);
     }
     
     /**
@@ -272,7 +270,7 @@ public class Session extends SessionGen {
     public void update(final TronconDigue tronconDigue){
         tronconDigue.setDateMaj(LocalDateTime.now());
         System.out.println("enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
-        this.tronconDigueRepository.update(tronconDigue);
+        repositories.get("TronconDigueRepository").update(tronconDigue);
     }
     
     /**
@@ -291,7 +289,7 @@ public class Session extends SessionGen {
      */
     public void add(final TronconDigue tronconDigue){
         tronconDigue.setDateMaj(LocalDateTime.now());
-        this.tronconDigueRepository.add(tronconDigue);
+        repositories.get("TronconDigueRepository").add(tronconDigue);
     }
     
     /**
@@ -299,7 +297,7 @@ public class Session extends SessionGen {
      * @param tronconDigue 
      */
     public void delete(final TronconDigue tronconDigue){
-        this.tronconDigueRepository.remove(tronconDigue);
+        repositories.get("TronconDigueRepository").remove(tronconDigue);
     }
 
     /**
