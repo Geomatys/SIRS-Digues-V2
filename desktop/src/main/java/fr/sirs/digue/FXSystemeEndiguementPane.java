@@ -3,14 +3,17 @@ package fr.sirs.digue;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
+import static fr.sirs.Role.ADMIN;
+import static fr.sirs.Role.EXTERNE;
+import static fr.sirs.Role.USER;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.theme.ui.PojoTable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import javafx.beans.binding.BooleanBinding;
@@ -31,7 +34,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
+import jidefx.scene.control.field.NumberField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
 /**
  *
@@ -42,6 +49,11 @@ public class FXSystemeEndiguementPane extends BorderPane {
     @FXML private FXEditMode uiEditMode;
     @FXML private TextField uiLibelle;
     @FXML private Tab uiTabDigues;
+    @FXML private FXDateField uiMaj;
+    @FXML private TextField uiClassement;
+    @FXML private FXNumberSpinner uiProtection;
+    @FXML private FXNumberSpinner uiPopulation;
+    @FXML private HTMLEditor uiComment;
     
     private final DigueTable uiDigueTable = new DigueTable(Digue.class, "Liste des digues");
     
@@ -51,10 +63,26 @@ public class FXSystemeEndiguementPane extends BorderPane {
     public FXSystemeEndiguementPane() {
         SIRS.loadFXML(this);
         endiguementProp.addListener(this::changed);
+        uiEditMode.setAllowedRoles(ADMIN, USER, EXTERNE);
         uiEditMode.setSaveAction(this::save);
         
+        uiMaj.disableProperty().set(true);
         final BooleanBinding binding = uiEditMode.editionState().not();
         uiLibelle.disableProperty().bind(binding);
+        uiClassement.disableProperty().bind(binding);
+        uiComment.disableProperty().bind(binding);
+        uiProtection.disableProperty().bind(binding);
+        uiPopulation.disableProperty().bind(binding);
+        SystemeEndiguement s = endiguementProp.get();
+        
+       uiProtection.numberTypeProperty().set(NumberField.NumberType.Normal);
+       uiProtection.minValueProperty().set(0);
+       
+       uiPopulation.numberTypeProperty().set(NumberField.NumberType.Integer);
+       uiPopulation.minValueProperty().set(0);
+        
+//        s.getGestionnaireDecret();
+//        s.getGestionnaireTechnique();
         
         uiTabDigues.setContent(uiDigueTable);
         uiDigueTable.editableProperty().bind(uiEditMode.editionState());
@@ -64,6 +92,12 @@ public class FXSystemeEndiguementPane extends BorderPane {
         uiLibelle.textProperty().unbind();
         if(newValue!=null){
             uiLibelle.textProperty().bindBidirectional(newValue.libelleProperty());
+            uiMaj.valueProperty().bindBidirectional(newValue.dateMajProperty());
+            uiClassement.textProperty().bindBidirectional(newValue.classementProperty());
+            uiProtection.valueProperty().bindBidirectional(newValue.niveauProtectionProperty());
+            uiPopulation.valueProperty().bindBidirectional(newValue.populationProtegeeProperty());
+            uiComment.setHtmlText(newValue.getCommentaire());
+            
             uiDigueTable.updateTable();
         }
     }
@@ -73,6 +107,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
     }
 
     private void save(){
+        endiguementProp.get().setCommentaire(uiComment.getHtmlText());
+        endiguementProp.get().setDateMaj(LocalDateTime.now());
         session.getSystemeEndiguementRepository().update(systemeEndiguementProp().get());
     }
 

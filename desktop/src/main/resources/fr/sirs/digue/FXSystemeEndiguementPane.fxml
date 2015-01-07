@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.web.*?>
+<?import org.geotoolkit.gui.javafx.util.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -32,6 +34,8 @@
                         <Font name="System Bold" size="13.0" />
                      </font>
                   </Label>
+                  <Label styleClass="label-header" text="Mise à jour" GridPane.rowIndex="2" />
+                  <FXDateField fx:id="uiMaj" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -49,9 +53,44 @@
           <RowConstraints vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+            <TabPane tabClosingPolicy="UNAVAILABLE">
               <tabs>
-                <Tab text="Propriétés" />
+                <Tab fx:id="uiTabProperties" text="Propriétés">
+                     <content>
+                        <VBox>
+                           <children>
+                              <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="NEVER" minWidth="-Infinity" />
+                                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                                    <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                                  <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Classement" />
+                                    <TextField fx:id="uiClassement" GridPane.columnIndex="1" />
+                                    <Label text="Commentaire" GridPane.rowIndex="3" GridPane.valignment="TOP" />
+                                    <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label text="Protection" GridPane.rowIndex="1" />
+                                    <Label text="Population" GridPane.rowIndex="2" />
+                                    <FXNumberSpinner fx:id="uiProtection" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <FXNumberSpinner fx:id="uiPopulation" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </GridPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </VBox>
+                     </content></Tab>
                 <Tab fx:id="uiTabDigues" text="Digues" />
               </tabs>
             </TabPane>
