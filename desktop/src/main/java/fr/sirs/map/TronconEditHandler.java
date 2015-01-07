@@ -11,11 +11,9 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.TronconUtils;
 import java.awt.geom.Point2D;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
@@ -49,7 +47,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
-import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.geometry.jts.JTS;
@@ -72,7 +69,6 @@ import org.opengis.util.FactoryException;
  */
 public class TronconEditHandler extends FXAbstractNavigationHandler {
 
-    private static final String SR_ELEMENTAIRE = "Elémentaire";
     private static final int CROSS_SIZE = 5;
     
     private final MouseListen mouseInputListener = new MouseListen();
@@ -205,84 +201,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
         return new AbstractMap.SimpleImmutableEntry<>(nameField.getText(),digue);
     }
     
-    public static void updateSRElementaire(TronconDigue troncon){
-        final Session session = Injector.getBean(Session.class);
-                
-        final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
-        
-        SystemeReperage sr = null;
-        for(SystemeReperage csr : srs){
-            if(SR_ELEMENTAIRE.equalsIgnoreCase(csr.getLibelle())){
-                sr = csr;
-                break;
-            }
-        }
-        
-        //on le crée s'il n'existe pas
-        if(sr==null){
-            sr = new SystemeReperage();
-            sr.setLibelle(SR_ELEMENTAIRE);
-            sr.setTronconId(troncon.getDocumentId());
-            session.getSystemeReperageRepository().add(sr);
-        }
-        
-        SystemeReperageBorne srbStart = null;
-        SystemeReperageBorne srbEnd = null;
-        
-        if(sr.systemereperageborneId.size()>0){
-            srbStart = sr.systemereperageborneId.get(0);
-        }
-        if(sr.systemereperageborneId.size()>1){
-            srbEnd = sr.systemereperageborneId.get(sr.systemereperageborneId.size()-1);
-        }
-        
-        BorneDigue bdStart = null;
-        BorneDigue bdEnd = null;
-        if(srbStart==null){
-            //creation de la borne de début
-            bdStart = new BorneDigue();
-            bdStart.setLibelle("Début du tronçon");
-            bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
-            session.getBorneDigueRepository().add(bdStart);
-            
-            srbStart = new SystemeReperageBorne();
-            srbStart.setBorneId(bdStart.getDocumentId());
-            sr.systemereperageborneId.add(srbStart);
-        }else{
-            bdStart = session.getBorneDigueRepository().get(srbStart.getBorneId());
-        }
-        
-        if(srbEnd==null){
-            //creation de la borne de début
-            bdEnd = new BorneDigue();
-            bdEnd.setLibelle("Fin du tronçon");
-            bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
-            session.getBorneDigueRepository().add(bdEnd);
-            
-            srbEnd = new SystemeReperageBorne();
-            srbEnd.setBorneId(bdEnd.getDocumentId());
-            sr.systemereperageborneId.add(srbEnd);
-        }else{
-            bdEnd = session.getBorneDigueRepository().get(srbEnd.getBorneId());
-        }
-        
-
-        //calcul des nouvelles valeurs pour les bornes
-        final double length = troncon.getGeometry().getLength();
-        final Coordinate[] coords = troncon.getGeometry().getCoordinates();
-        
-        bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
-        bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
-
-        session.getBorneDigueRepository().update(bdStart);
-        session.getBorneDigueRepository().update(bdEnd);
-        
-        srbStart.setValeurPR(0);
-        srbEnd.setValeurPR((float)length);
-        
-        session.getSystemeReperageRepository().update(sr);
-    }
-    
     private class MouseListen extends AbstractMouseHandler {
 
         private final ContextMenu popup = new ContextMenu();
@@ -360,7 +278,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
                             updateGeometry();
-                            updateSRElementaire(troncon);
+                            TronconUtils.updateSRElementaire(troncon);
                             
                         }catch(TransformException | FactoryException ex){
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -415,7 +333,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         troncon.setGeometry(editGeometry.geometry);
                         session.getTronconDigueRepository().update(troncon);
                         
-                        updateSRElementaire(troncon);
+                        TronconUtils.updateSRElementaire(troncon);
                         
                         troncon = null;
                         editGeometry.reset();

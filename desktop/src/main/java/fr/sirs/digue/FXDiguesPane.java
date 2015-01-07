@@ -14,6 +14,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
+import fr.sirs.util.TronconUtils;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -279,7 +280,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 
                 //on place toute les digues et troncons non trouvé dans un group a part
                 digues.removeAll(diguesFound);
-                troncons.removeAll(tronconsFound);
                 final TreeItem ncItem = new TreeItem("Non classés"); 
                 ncItem.setExpanded(extendeds.contains(ncItem.getValue()));
                 treeRootItem.getChildren().add(ncItem);
@@ -289,6 +289,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                     ncItem.getChildren().add(digueItem);
                     digueItem.setExpanded(extendeds.contains(digue));
                 }
+                troncons.removeAll(tronconsFound);
                 for(TronconDigue tc : troncons){
                     ncItem.getChildren().add(new TreeItem(tc));
                 }
@@ -375,6 +376,8 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 }
 
                 FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
+                //mise en place du SR élémentaire
+                TronconUtils.updateSRElementaire(troncon);
             });
         }
     }
@@ -387,6 +390,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 final Digue digue = new Digue();
                 digue.setLibelle("Digue vide");
                 FXDiguesPane.this.session.getDigueRepository().add(digue);
+                
+                if(parent!=null){
+                    final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
+                    se.getDigue().add(digue.getDocumentId());
+                    FXDiguesPane.this.session.getSystemeEndiguementRepository().update(se);
+                }
+                
             });
         }
     }

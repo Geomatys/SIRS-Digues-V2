@@ -3,6 +3,7 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
@@ -10,6 +11,8 @@ import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -558,6 +561,13 @@ public class FXPositionablePane extends BorderPane {
             pos.setPositionDebut(null);
             pos.setPositionFin(null);
         }
+        
+        //maj de la geometrie du positionable
+        final TronconDigue troncon = (TronconDigue) pos.getParent();
+        final LineString structGeom = LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), 
+                (Objet)pos, Injector.getSession().getBorneDigueRepository());
+        pos.setGeometry(structGeom);
+        
     }
     
     private final class ObjectListCell extends SirsListCell{
