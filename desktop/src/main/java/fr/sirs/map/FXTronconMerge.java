@@ -1,8 +1,11 @@
 
 package fr.sirs.map;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.TronconUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -43,8 +46,18 @@ public class FXTronconMerge extends VBox{
     }
  
     public void processMerge(){
+        if(troncons.size()<=1) return;
         
+        final TronconDigue merge = troncons.get(0).copy();
+        final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
+        for(int i=1,n=troncons.size();i<n;i++){
+            TronconUtils.mergeTroncon(merge, troncons.get(i));
+            sb.append(" + ").append(troncons.get(i).getLibelle());
+        }
+        merge.setLibelle(sb.toString());
+        
+        final Session session = Injector.getSession();
+        session.getTronconDigueRepository().add(merge);
     }
-    
     
 }

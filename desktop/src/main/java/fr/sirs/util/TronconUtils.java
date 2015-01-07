@@ -10,6 +10,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Objet;
@@ -91,17 +92,20 @@ public class TronconUtils {
         //on coupe les differents objets
         tronconCp.structures.clear();
                 
+        Geometry linear = tronconCp.getGeometry();
+        final BorneDigueRepository borneRepo = session.getBorneDigueRepository();
+        
         for(Objet obj : troncon.structures){
             
             //on vérifie que cet objet intersect le segment
-            if(!tronconCp.getGeometry().intersects(obj.getGeometry())){
+            if(!linear.intersects(obj.getGeometry())){
                 continue;
             }
             
             final Objet objCp = obj.copy();
             tronconCp.structures.add(objCp);
             
-            try{                
+            try{
                 if(mapSrs.containsKey(objCp.getSystemeRepId())){
                     //le systeme de reperage existe toujours, on recalcule les positions relatives
                     final SystemeReperage sr = mapSrs.get(objCp.getSystemeRepId());
@@ -140,6 +144,9 @@ public class TronconUtils {
                     objCp.setPositionDebut(GF.createPoint(projectStart.nearests[0]));
                     objCp.setPositionFin(GF.createPoint(projectEnd.nearests[0]));
                 }
+                
+                final LineString geom = LinearReferencingUtilities.buildGeometry(linear, objCp, borneRepo);
+                objCp.setGeometry(geom);
                 
             }catch(FactoryException | MismatchedDimensionException | TransformException ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
