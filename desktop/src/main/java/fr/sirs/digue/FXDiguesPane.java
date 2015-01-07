@@ -111,11 +111,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         uiSearch.textProperty().bind(currentSearch);
         
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
+        uiDelete.setOnAction(this::deleteSelection);
+        uiDelete.setDisable(!session.nonGeometryEditionProperty().get());
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
         uiAdd.getItems().add(new NewSystemeMenuItem(null));
         uiAdd.getItems().add(new NewDigueMenuItem(null));
         uiAdd.getItems().add(new NewTronconMenuItem(null));
-        uiDelete.setOnAction(this::deleteSelection);
+        uiAdd.setDisable(!session.nonGeometryEditionProperty().get());
         
         this.updateTree();
         
@@ -354,7 +356,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
 
         public NewTronconMenuItem(TreeItem parent) {
             super("Créer un nouveau tronçon",new ImageView(SIRS.ICON_ADD_WHITE));
-
             this.setOnAction((ActionEvent t) -> {
                 final TronconDigue troncon = new TronconDigue();
                 troncon.setLibelle("Tronçon vide");
@@ -362,7 +363,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                     final Digue digue = (Digue) parent.getValue();
                     troncon.setDigueId(digue.getId());
                 }
-                
+
                 try {
                     //on crée un géométrie au centre de la france
                     final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84, 
@@ -372,7 +373,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                     troncon.setGeometry((Geometry) TRONCON_GEOM_WGS84.clone());
                 }
-                
+
                 FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
             });
         }
@@ -382,7 +383,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
 
         public NewDigueMenuItem(TreeItem parent) {
             super("Créer une nouvelle digue",new ImageView(SIRS.ICON_ADD_WHITE));
-
             this.setOnAction((ActionEvent t) -> {
                 final Digue digue = new Digue();
                 digue.setLibelle("Digue vide");
@@ -395,7 +395,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
 
         public NewSystemeMenuItem(TreeItem parent) {
             super("Créer un nouveau système d'endiguement",new ImageView(SIRS.ICON_ADD_WHITE));
-
             this.setOnAction((ActionEvent t) -> {
                 final SystemeEndiguement candidate = new SystemeEndiguement();
                 candidate.setLibelle("Système vide");
@@ -424,13 +423,17 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
             if (obj instanceof SystemeEndiguement) {
                 this.setText(((SystemeEndiguement) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
-                addTronconMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
-                setContextMenu(addTronconMenu);
+                if(session.nonGeometryEditionProperty().get()){
+                    addTronconMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
+                    setContextMenu(addTronconMenu);
+                }
             } else if (obj instanceof Digue) {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
-                addTronconMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
-                setContextMenu(addTronconMenu);
+                if(session.nonGeometryEditionProperty().get()){
+                    addTronconMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
+                    setContextMenu(addTronconMenu);
+                }
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 setContextMenu(null);
