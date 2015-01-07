@@ -298,4 +298,19 @@ public class TronconUtils {
         session.getSystemeReperageRepository().update(sr);
     }
     
+    /**
+     * Recalcule des geometries des differents positionnables apres que
+     * la géometrie ou que les SR du troncon aient changés.
+     * 
+     * @param troncon 
+     */
+    public static void updatePositionableGeometry(TronconDigue troncon){
+        for(Objet obj : troncon.getStructures()){
+            final LineString structGeom = LinearReferencingUtilities.buildGeometry(
+                    troncon.getGeometry(), obj, Injector.getSession().getBorneDigueRepository());
+            obj.setGeometry(structGeom);
+        }     
+        Injector.getSession().getTronconDigueRepository().update(troncon);
+    }
+    
 }

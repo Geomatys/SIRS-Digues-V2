@@ -334,6 +334,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         session.getTronconDigueRepository().update(troncon);
                         
                         TronconUtils.updateSRElementaire(troncon);
+                        //on recalcule les geometries des positionables du troncon.
+                        TronconUtils.updatePositionableGeometry(troncon);
                         
                         troncon = null;
                         editGeometry.reset();

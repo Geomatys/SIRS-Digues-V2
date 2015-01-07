@@ -11,6 +11,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.TronconUtils;
 import java.awt.geom.Point2D;
 import java.util.Collections;
 import java.util.HashSet;
@@ -157,6 +158,11 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         
         //fin de l'edition
         dialog.resultProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
+            final TronconDigue troncon = editPane.tronconProperty().get();
+            if(troncon!=null){
+                //on recalcule les geometries des positionables du troncon.
+                TronconUtils.updatePositionableGeometry(troncon);
+            }
             dialog.close();
             editPane.reset();
         });
@@ -379,6 +385,12 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte
                 editPane.sortBorneTable();
+                
+                final TronconDigue troncon = editPane.tronconProperty().get();
+                if(troncon!=null){
+                    //on recalcule les geometries des positionables du troncon.
+                    TronconUtils.updatePositionableGeometry(troncon);
+                }
             }
         }
         
