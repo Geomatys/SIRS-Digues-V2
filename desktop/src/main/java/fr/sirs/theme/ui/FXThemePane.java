@@ -63,7 +63,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         
         uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
         uiMode.setSaveAction(this::save);
-        BooleanBinding NotEdit = uiMode.editionState().not();
+        disableFieldsProperty().bind(uiMode.editionState().not());
         uiEditDetailTronconTheme.getStyleClass().add("element-pane");
         
         elementProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
@@ -163,8 +163,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 final Class controllerClass = Class.forName(className);
                 final Constructor cstr = controllerClass.getConstructor(object.getClass());
                 specificThemePane = (Node) cstr.newInstance(object);
-//                ((FXElementPane) specificThemePane).editableProperty().bind(uiMode.editionState());
-                ((AbstractFXElementPane) specificThemePane).disableFieldsProperty().bind(uiMode.editionState().not());
+                ((AbstractFXElementPane) specificThemePane).disableFieldsProperty().bind(disableFieldsProperty());
                 uiEditDetailTronconTheme.setContent(specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);

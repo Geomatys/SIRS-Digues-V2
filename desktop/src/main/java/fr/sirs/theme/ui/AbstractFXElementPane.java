@@ -27,7 +27,8 @@ public abstract class AbstractFXElementPane<T extends Element> extends BorderPan
         return elementProperty;
     }
     
-    public BooleanProperty disableFieldsProperty(){
+    @Override
+    public BooleanProperty disableFieldsProperty() {
         return editableProperty;
     }
     

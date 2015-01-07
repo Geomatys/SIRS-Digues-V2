@@ -144,7 +144,9 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
-        uiTable.getColumns().add(new FXDeleteTableColumn(true));
+        FXDeleteTableColumn deleteColumn = new FXDeleteTableColumn(true);
+        uiTable.getColumns().add(deleteColumn);
+        deleteColumn.editableProperty().bind(editableProperty);
         
         final EditColumn editCol = new EditColumn(this::editPojo);
         editCol.editableProperty().bind(editableProperty);

@@ -28,7 +28,7 @@ public interface FXElementPane<T extends Element> {
      * Set the pane fields editable or not.
      * @return 
      */
-//    BooleanProperty editableProperty();
+    BooleanProperty disableFieldsProperty();
     
     /**
      * Record unbound field changes before saving.
