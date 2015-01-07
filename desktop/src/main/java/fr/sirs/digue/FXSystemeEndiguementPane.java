@@ -11,9 +11,13 @@ import fr.sirs.Session;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import javafx.beans.binding.BooleanBinding;
@@ -24,6 +28,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListCell;
@@ -37,6 +42,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
+import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
@@ -46,6 +52,8 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
  */
 public class FXSystemeEndiguementPane extends BorderPane {
 
+    private final Session session = Injector.getSession();
+    
     @FXML private FXEditMode uiEditMode;
     @FXML private TextField uiLibelle;
     @FXML private Tab uiTabDigues;
@@ -53,12 +61,13 @@ public class FXSystemeEndiguementPane extends BorderPane {
     @FXML private TextField uiClassement;
     @FXML private FXNumberSpinner uiProtection;
     @FXML private FXNumberSpinner uiPopulation;
+    @FXML private ComboBox<PreviewLabel> uiDecret;
+    @FXML private ComboBox<PreviewLabel> uiTechnique;
     @FXML private HTMLEditor uiComment;
     
     private final DigueTable uiDigueTable = new DigueTable(Digue.class, "Liste des digues");
     
     private final ObjectProperty<SystemeEndiguement> endiguementProp = new SimpleObjectProperty<>();
-    private final Session session = Injector.getSession();
     
     public FXSystemeEndiguementPane() {
         SIRS.loadFXML(this);
@@ -73,19 +82,33 @@ public class FXSystemeEndiguementPane extends BorderPane {
         uiComment.disableProperty().bind(binding);
         uiProtection.disableProperty().bind(binding);
         uiPopulation.disableProperty().bind(binding);
-        SystemeEndiguement s = endiguementProp.get();
+        uiDecret.disableProperty().bind(binding);
+        uiTechnique.disableProperty().bind(binding);
         
-       uiProtection.numberTypeProperty().set(NumberField.NumberType.Normal);
-       uiProtection.minValueProperty().set(0);
-       
-       uiPopulation.numberTypeProperty().set(NumberField.NumberType.Integer);
-       uiPopulation.minValueProperty().set(0);
-        
-//        s.getGestionnaireDecret();
-//        s.getGestionnaireTechnique();
+        uiProtection.numberTypeProperty().set(NumberField.NumberType.Normal);
+        uiProtection.minValueProperty().set(0);
+
+        uiPopulation.numberTypeProperty().set(NumberField.NumberType.Integer);
+        uiPopulation.minValueProperty().set(0);
         
         uiTabDigues.setContent(uiDigueTable);
         uiDigueTable.editableProperty().bind(uiEditMode.editionState());
+    }
+    
+    private void initCombo(ComboBox comboBox, final ObservableList items, final String currentId) {
+        comboBox.setItems(items);
+        if (currentId != null && !currentId.isEmpty()) {
+            final Iterator<PreviewLabel> it = items.iterator();
+            while (it.hasNext()) {
+                final PreviewLabel e = it.next();
+                if (e.getObjectId().equals(currentId)) {
+                    comboBox.getSelectionModel().select(e);
+                    break;
+                }
+            }
+        }
+        new ComboBoxCompletion(comboBox);
+        comboBox.setConverter(new SirsStringConverter());
     }
     
     private void changed(ObservableValue<? extends SystemeEndiguement> observable, SystemeEndiguement oldValue, SystemeEndiguement newValue) {
@@ -97,7 +120,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
             uiProtection.valueProperty().bindBidirectional(newValue.niveauProtectionProperty());
             uiPopulation.valueProperty().bindBidirectional(newValue.populationProtegeeProperty());
             uiComment.setHtmlText(newValue.getCommentaire());
-            
+            initCombo(uiDecret, FXCollections.observableArrayList(session.getPreviewLabelRepository().getPreviewLabels(Organisme.class)), newValue.getGestionnaireDecret());
+            initCombo(uiTechnique, FXCollections.observableArrayList(session.getPreviewLabelRepository().getPreviewLabels(Organisme.class)), newValue.getGestionnaireTechnique());
             uiDigueTable.updateTable();
         }
     }
@@ -108,6 +132,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
 
     private void save(){
         endiguementProp.get().setCommentaire(uiComment.getHtmlText());
+        endiguementProp.get().setGestionnaireDecret(uiDecret.getValue().getObjectId());
+        endiguementProp.get().setGestionnaireTechnique(uiTechnique.getValue().getObjectId());
         endiguementProp.get().setDateMaj(LocalDateTime.now());
         session.getSystemeEndiguementRepository().update(systemeEndiguementProp().get());
     }

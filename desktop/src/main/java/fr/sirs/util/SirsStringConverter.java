@@ -7,6 +7,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
@@ -43,6 +44,8 @@ public class SirsStringConverter extends StringConverter {
             text = ((Organisme)item).getNom();
         } else if (item instanceof String) {
             text = (String) item;
+        } else if (item instanceof PreviewLabel) {
+            text = ((PreviewLabel) item).getLabel();
         }
         
         if (text != null && !text.isEmpty()) {
