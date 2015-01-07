@@ -20,10 +20,10 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  */
 public class TronconMergeAction extends FXMapAction {
         
-    public static final Image ICON_CUT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPRESS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    public static final Image ICON_MERGE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPRESS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
     public TronconMergeAction(FXMap map) {
-        super(map,"MAJ Tronçon","Fusionner des tronçons",ICON_CUT);
+        super(map,"MAJ Tronçon","Fusionner des tronçons",ICON_MERGE);
         
         final Session session = Injector.getSession();
         this.disabledProperty().bind(session.geometryEditionProperty().not());

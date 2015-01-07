@@ -2,6 +2,7 @@
 package fr.sirs.util;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
@@ -17,6 +18,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXPositionablePane;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -211,6 +213,19 @@ public class TronconUtils {
         
         //on ajoute les structures
         troncon1.structures.addAll(troncon2.structures);
+        
+        //on combine les geometries
+        final LineString line1 = (LineString) troncon1.getGeometry();
+        final LineString line2 = (LineString) troncon2.getGeometry();
+        
+        final List<Coordinate> coords = new  ArrayList<>();
+        coords.addAll(Arrays.asList(line1.getCoordinates()));
+        coords.addAll(Arrays.asList(line2.getCoordinates()));
+        
+        final LineString serie = GF.createLineString(coords.toArray(new Coordinate[0]));
+        serie.setSRID(line1.getSRID());
+        serie.setUserData(line1.getUserData());
+        troncon1.setGeometry(serie);        
         
         return troncon1;
     }

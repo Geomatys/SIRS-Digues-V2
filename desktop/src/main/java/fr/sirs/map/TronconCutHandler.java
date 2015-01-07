@@ -215,8 +215,10 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         
         TronconDigue aggregate = null;
         
-        for(FXTronconCut.Segment segment : segments){
+        for(int i=0,n=segments.size();i<n;i++){
+            final FXTronconCut.Segment segment = segments.get(i);
             final TronconDigue cut = TronconUtils.cutTroncon(troncon, segment.geometryProp.get());
+            cut.setLibelle(troncon.getLibelle()+" ("+i+")");
             
             final FXTronconCut.SegmentType type = segment.typeProp.get();
             if(FXTronconCut.SegmentType.CONSERVER.equals(type)){

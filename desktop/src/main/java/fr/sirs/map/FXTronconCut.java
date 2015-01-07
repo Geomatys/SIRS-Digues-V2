@@ -19,6 +19,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -182,17 +183,17 @@ public class FXTronconCut extends VBox{
         }
     }
     
-    private class TypeColumn extends TableColumn<Segment,SegmentType>{
+    private class TypeColumn extends TableColumn<Segment,Segment>{
 
         public TypeColumn() {
             setSortable(false);
             setEditable(true);
-            setCellValueFactory((CellDataFeatures<Segment, SegmentType> param) -> param.getValue().typeProp);
+            setCellValueFactory((CellDataFeatures<Segment, Segment> param) -> new SimpleObjectProperty(param.getValue()));
             
-            setCellFactory(new Callback<TableColumn<Segment, SegmentType>, TableCell<FXTronconCut.Segment, FXTronconCut.SegmentType>>() {
+            setCellFactory(new Callback<TableColumn<Segment, Segment>, TableCell<FXTronconCut.Segment, FXTronconCut.Segment>>() {
 
                 @Override
-                public TableCell<Segment, SegmentType> call(TableColumn<Segment, SegmentType> param) {
+                public TableCell<Segment, Segment> call(TableColumn<Segment, Segment> param) {
                     return new EnumTableCell();
                 }
             });
@@ -201,7 +202,7 @@ public class FXTronconCut extends VBox{
         
     }
     
-    private static class EnumTableCell extends FXTableCell<Segment, SegmentType>{
+    private static class EnumTableCell extends FXTableCell<Segment, Segment>{
 
         private final ChoiceBox<SegmentType> choiceBox = new ChoiceBox<>();
 
@@ -210,48 +211,54 @@ public class FXTronconCut extends VBox{
             choiceBox.setItems(lst);
             
             choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SegmentType>() {
-
                 @Override
                 public void changed(ObservableValue<? extends SegmentType> observable, SegmentType oldValue, SegmentType newValue) {
                     if(isEditing()){
-                        commitEdit(newValue);
+                        getItem().typeProp.set(newValue);
+                        commitEdit(getItem());
                     }
                 }
             });
         }
         
         @Override
-        protected void updateItem(SegmentType item, boolean empty) {
+        protected void updateItem(Segment item, boolean empty) {
             super.updateItem(item, empty);
                         
             setText(null);
+            setGraphic(null);
             if(item !=null && !empty){
-                setGraphic(choiceBox);
-                choiceBox.getSelectionModel().select(item);
-            }else{
-                setGraphic(null);
+                setText(item.typeProp.get().name());
             }
         }
 
         @Override
         public void startEdit() {
+            choiceBox.getSelectionModel().select(getItem().typeProp.get());
             super.startEdit();
-            
+            setText(null);
+            setGraphic(choiceBox);
         }
 
         @Override
-        public void commitEdit(SegmentType newValue) {
+        public void commitEdit(Segment newValue) {
             super.commitEdit(newValue);
+            setText(getItem().typeProp.get().name());
+            setGraphic(null);
         }
 
         @Override
         public void cancelEdit() {
             super.cancelEdit();
+            setText(getItem().typeProp.get().name());
+            setGraphic(null);
         }
 
         @Override
         public void terminateEdit() {
             super.terminateEdit();
+            setText(getItem().typeProp.get().name());
+            setGraphic(null);
         }
         
     }
