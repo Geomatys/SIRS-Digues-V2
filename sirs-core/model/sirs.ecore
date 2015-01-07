@@ -1222,14 +1222,16 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireDecret" upperBound="-1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="digue" upperBound="-1"
         eType="#//Digue" eOpposite="#//Digue/SystemeEndiguement"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="populationProtegee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="classement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="niveauProtection" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="zoneProtegee" eType="ecore:EDataType jts.ecore#//Geometry"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="niveauProtection" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireTechnique"
+        upperBound="-1" eType="#//Organisme"/>
   </eClassifiers>
 </ecore:EPackage>
