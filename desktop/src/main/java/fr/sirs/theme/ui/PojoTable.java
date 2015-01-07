@@ -184,7 +184,7 @@ public class PojoTable extends BorderPane {
             
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
-            editPojo(createPojo());
+            createPojo();
         });
         uiAdd.disableProperty().bind(editableProperty.not());
 

@@ -1,9 +1,13 @@
 package fr.sirs.digue;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.Digue;
@@ -11,7 +15,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,11 +44,26 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.ektorp.BulkDeleteDocument;
+import org.apache.sis.referencing.CommonCRS;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FXDiguesPane extends SplitPane implements DocumentListener{
 
+    /** Cette géométrie sert de base pour tous les nouveaux troncons */
+    private static final Geometry TRONCON_GEOM_WGS84;
+    static {
+        TRONCON_GEOM_WGS84 = new GeometryFactory().createLineString(new Coordinate[]{
+            new Coordinate(0, 48),
+            new Coordinate(5, 48)
+        });
+        JTS.setCRS(TRONCON_GEOM_WGS84, CommonCRS.WGS84.normalizedGeographic());
+    }
+    
     @Autowired
     private Session session;
 
@@ -129,13 +147,52 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
     }
 
     private void deleteSelection(ActionEvent event) {
-        final Object obj = uiTree.getSelectionModel().getSelectedItem();
+        Object obj = uiTree.getSelectionModel().getSelectedItem();
+        if(obj instanceof TreeItem){
+            obj = ((TreeItem)obj).getValue();
+        }
+        
         if(obj instanceof SystemeEndiguement){
-            //TODO
+            final SystemeEndiguement se = (SystemeEndiguement) obj;
+            
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                    "La suppression de la digue "+se.getLibelle()+" ne supprimera pas les digues qui la compose, "
+                   +"celles ci seront déplacées dans le groupe 'Non classés. Confirmer la suppression ?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            final ButtonType res = alert.showAndWait().get();
+            if (res == ButtonType.YES) {
+                FXDiguesPane.this.session.getSystemeEndiguementRepository().remove(se);
+            }
+                        
         }else if(obj instanceof Digue){
-            //TODO
+            final Digue digue = (Digue) obj;
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                    "La suppression de la digue "+digue.getLibelle()+" ne supprimera pas les tronçons qui la compose, "
+                   +"ceux ci seront déplacés dans le groupe 'Non classés. Confirmer la suppression ?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            final ButtonType res = alert.showAndWait().get();
+            if (res == ButtonType.YES) {
+                //on enleve la reference a la digue dans les troncons
+                final List<TronconDigue> troncons = session.getTronconDigueByDigue(digue);
+                for(TronconDigue td : troncons){
+                    td.setDigueId(null);
+                    FXDiguesPane.this.session.getTronconDigueRepository().update(td);
+                }
+                //on supprime la digue
+                FXDiguesPane.this.session.getDigueRepository().remove(digue);
+            }
         }else if(obj instanceof TronconDigue){
-            //TODO
+            final TronconDigue td = (TronconDigue) obj;
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Confirmer la suppression du tronçon "+td.getLibelle()+" ?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            final ButtonType res = alert.showAndWait().get();
+            if (res == ButtonType.YES) {
+                FXDiguesPane.this.session.getTronconDigueRepository().remove(td);
+            }
         }
     }
     
@@ -199,8 +256,9 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 //on recupere tous les elements
                 final List<SystemeEndiguement> sds = session.getSystemeEndiguementRepository().getAll();
                 final Set<Digue> digues = new HashSet<>(session.getDigues());
-                final List<TronconDigue> troncons = session.getTronconDigueRepository().getAllLight();
+                final Set<TronconDigue> troncons = new HashSet<>(session.getTronconDigueRepository().getAllLight());
                 final Set<Digue> diguesFound = new HashSet<>();
+                final Set<TronconDigue> tronconsFound = new HashSet<>();
                 
                 for(SystemeEndiguement sd : sds){
                     final TreeItem sdItem = new TreeItem(sd);
@@ -211,7 +269,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                     for(Digue digue : digues){
                         if(!digueIds.contains(digue.getDocumentId())) continue;
                         diguesFound.add(digue);
-                        final TreeItem digueItem = toNode(digue, troncons, filter);
+                        final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
                         digueItem.setExpanded(extendeds.contains(digue));
                         sdItem.getChildren().add(digueItem);
                     }
@@ -219,12 +277,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 
                 //on place toute les digues et troncons non trouvé dans un group a part
                 digues.removeAll(diguesFound);
+                troncons.removeAll(tronconsFound);
                 final TreeItem ncItem = new TreeItem("Non classés"); 
                 ncItem.setExpanded(extendeds.contains(ncItem.getValue()));
                 treeRootItem.getChildren().add(ncItem);
                 
                 for(Digue digue : digues){
-                    final TreeItem digueItem = toNode(digue, troncons, filter);
+                    final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
                     ncItem.getChildren().add(digueItem);
                     digueItem.setExpanded(extendeds.contains(digue));
                 }
@@ -251,12 +310,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         }
     }
     
-    private static TreeItem toNode(Digue digue, List<TronconDigue> troncons, Predicate<Element> filter){
+    private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<Element> filter){
         final TreeItem digueItem = new TreeItem(digue);
-        for(int i=troncons.size()-1;i>=0;i--){
-            final TronconDigue td = troncons.get(i);
+        for(TronconDigue td : troncons){
             if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
-            troncons.remove(i);
+            tronconsFound.add(td);
             if(filter==null || filter.test(td)){
                 final TreeItem tronconItem = new TreeItem(td);
                 digueItem.getChildren().add(tronconItem);
@@ -304,6 +362,17 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                     final Digue digue = (Digue) parent.getValue();
                     troncon.setDigueId(digue.getId());
                 }
+                
+                try {
+                    //on crée un géométrie au centre de la france
+                    final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84, 
+                            CRS.findMathTransform(CommonCRS.WGS84.normalizedGeographic(),SirsCore.getEpsgCode(),true));
+                    troncon.setGeometry(geom);
+                } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
+                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                    troncon.setGeometry((Geometry) TRONCON_GEOM_WGS84.clone());
+                }
+                
                 FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
             });
         }
@@ -361,7 +430,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
                 addTronconMenu.getItems().clear();
                 addTronconMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
-                addTronconMenu.getItems().add(new DeleteDigueMenuItem((Digue) obj));
                 setContextMenu(addTronconMenu);
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
@@ -372,35 +440,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 setText((String)obj);
             } else {
                 setText(null);
-            }
-        }
-
-
-        private class DeleteDigueMenuItem extends MenuItem {
-
-            public DeleteDigueMenuItem(final Digue digue) {
-                super("Supprimer la digue");
-
-                this.setOnAction((ActionEvent t) -> {
-
-                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                            "La suppression de la digue supprimera les tronçons qui la composent.",
-                            ButtonType.OK, ButtonType.CANCEL
-                    );
-                    final ButtonType res = alert.showAndWait().get();
-                    if (res == ButtonType.OK) {
-
-                        final List<TronconDigue> tronconsToDelete = FXDiguesPane.this.session.getTronconDigueRepository().getByDigue(digue);
-                        final List<Object> bulkDocs = new ArrayList<>();
-                        for (final TronconDigue troncon : tronconsToDelete) {
-                            bulkDocs.add(BulkDeleteDocument.of(troncon));
-                        }
-                        FXDiguesPane.this.session.getConnector().executeBulk(bulkDocs);
-                        FXDiguesPane.this.session.getDigueRepository().remove(digue);
-                        getTreeItem().getChildren().remove(0, getTreeItem().getChildren().size());
-                        getTreeItem().getParent().getChildren().remove(getTreeItem());
-                    }
-                });
             }
         }
 

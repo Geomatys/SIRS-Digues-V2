@@ -40,4 +40,22 @@
          </center>
       </BorderPane>
    </top>
+   <center>
+      <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Propriétés" />
+                <Tab fx:id="uiTabDigues" text="Digues" />
+              </tabs>
+            </TabPane>
+         </children>
+      </GridPane>
+   </center>
 </fx:root>
