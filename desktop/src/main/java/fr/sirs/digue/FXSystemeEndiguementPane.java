@@ -12,10 +12,13 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
+import java.awt.geom.NoninvertibleTransformException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +30,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -42,9 +46,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -136,6 +143,19 @@ public class FXSystemeEndiguementPane extends BorderPane {
         endiguementProp.get().setGestionnaireTechnique(uiTechnique.getValue().getObjectId());
         endiguementProp.get().setDateMaj(LocalDateTime.now());
         session.getSystemeEndiguementRepository().update(systemeEndiguementProp().get());
+    }
+    
+    @FXML
+    private void showOnMap(){
+        final SystemeEndiguement object = endiguementProp.get();
+        final FXMapTab tab = session.getFrame().getMapTab();
+        tab.show();
+        final FXMap map = tab.getMap().getUiMap();
+        try {
+            map.getCanvas().setVisibleArea(JTS.toEnvelope(object.getZoneProtegee()));
+        } catch (NoninvertibleTransformException | TransformException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private class DigueTable extends PojoTable {

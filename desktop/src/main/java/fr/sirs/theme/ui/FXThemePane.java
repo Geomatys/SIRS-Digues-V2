@@ -41,16 +41,13 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
+    private final Session session = Injector.getSession();
     protected Node specificThemePane;
     
     @FXML protected ScrollPane uiEditDetailTronconTheme;
-
     @FXML private FXDateField date_maj;
-
     @FXML private Label id;
-    
     @FXML private Label uiTitleLabel;
-    
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 
@@ -91,7 +88,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 return;
             }
             
-            Session session = Injector.getBean(Session.class);
             TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
             
             if (!tronconId.equals(troncon.getId())) {
@@ -114,7 +110,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     private void showOnMap(){
         final Element object = elementProperty.get();
         if (object instanceof Positionable) {
-            final Session session = Injector.getBean(Session.class);
             final FXMapTab tab = session.getFrame().getMapTab();
             tab.show();
             final FXMap map = tab.getMap().getUiMap();
