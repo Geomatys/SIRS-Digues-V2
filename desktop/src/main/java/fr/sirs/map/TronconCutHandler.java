@@ -11,7 +11,7 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.TronconUtils;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.util.json.GeometryDeserializer;
 import java.awt.geom.Point2D;
 import java.time.LocalDateTime;
@@ -217,8 +217,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         
         for(int i=0,n=segments.size();i<n;i++){
             final FXTronconCut.Segment segment = segments.get(i);
-            final TronconDigue cut = TronconUtils.cutTroncon(troncon, segment.geometryProp.get());
-            cut.setLibelle(troncon.getLibelle()+" ("+i+")");
+            final TronconDigue cut = TronconUtils.cutTroncon(troncon, segment.geometryProp.get(),troncon.getLibelle()+"["+i+"]", session);
             
             final FXTronconCut.SegmentType type = segment.typeProp.get();
             if(FXTronconCut.SegmentType.CONSERVER.equals(type)){
@@ -226,7 +225,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 if(aggregate==null){
                     aggregate = cut;
                 }else{
-                    aggregate = TronconUtils.mergeTroncon(aggregate, cut);
+                    aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
                     
                     //on sauvegarde les modifications
                     session.getTronconDigueRepository().update(aggregate);

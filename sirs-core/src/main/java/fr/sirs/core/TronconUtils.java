@@ -1,23 +1,21 @@
 
-package fr.sirs.util;
+package fr.sirs.core;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
-import fr.sirs.SIRS;
-import fr.sirs.Session;
-import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.FXPositionablePane;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +25,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -47,12 +49,15 @@ public class TronconUtils {
      * @param segment partie du troncon a garder
      * @return nouveau troncon découpé
      */
-    public static TronconDigue cutTroncon(TronconDigue troncon, LineString segment){
+    public static TronconDigue cutTroncon(TronconDigue troncon, LineString segment, String newName, SessionGen session){
         
-        final Session session = Injector.getSession();
+        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
+        final BorneDigueRepository bdRepo = session.getBorneDigueRepository(); 
+        final TronconDigueRepository tdRepo = session.getTronconDigueRepository();
         
         final TronconDigue tronconCp = troncon.copy();
         tronconCp.setGeometry(segment);
+        tronconCp.setLibelle(newName);
         
         
         final LinearReferencingUtilities.SegmentInfo[] parts = LinearReferencingUtilities.buildSegments((LineString) tronconCp.geometryProperty().get());
@@ -60,7 +65,7 @@ public class TronconUtils {
         //on recupere les bornes qui sont sur le troncon
         tronconCp.getBorneIds().clear();
         for(String borneId : troncon.getBorneIds()){
-            final BorneDigue borne = session.getBorneDigueRepository().get(borneId);
+            final BorneDigue borne = bdRepo.get(borneId);
             final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(parts, borne.getGeometry());
             if(proj.perpendicularProjection){
                 tronconCp.getBorneIds().add(borneId);
@@ -68,11 +73,11 @@ public class TronconUtils {
         }
         
         //on sauvegarde maintenant car on va avoir besoin de la reference du nouveau troncon
-        session.getTronconDigueRepository().add(tronconCp);
+        tdRepo.add(tronconCp);
         
         //on copie et on enleve les bornes des SR et les SR vide
         final Map<String,SystemeReperage> mapSrs = new HashMap<>();
-        for(SystemeReperage sr : session.getSystemeReperageRepository().getByTroncon(troncon)){
+        for(SystemeReperage sr : srRepo.getByTroncon(troncon)){
             final SystemeReperage srCp = sr.copy();
             srCp.systemereperageborneId.clear();
             srCp.setTronconId(tronconCp.getDocumentId());
@@ -84,7 +89,7 @@ public class TronconUtils {
                 }
             }
             if(!srCp.systemereperageborneId.isEmpty()){
-                session.getSystemeReperageRepository().add(srCp);
+                srRepo.add(srCp);
                 mapSrs.put(sr.getDocumentId(), srCp);
             }
         }
@@ -93,7 +98,6 @@ public class TronconUtils {
         tronconCp.structures.clear();
                 
         Geometry linear = tronconCp.getGeometry();
-        final BorneDigueRepository borneRepo = session.getBorneDigueRepository();
         
         for(Objet obj : troncon.structures){
             
@@ -112,15 +116,15 @@ public class TronconUtils {
                     objCp.setSystemeRepId(sr.getDocumentId());
                     
                     //on sort les positions geographique
-                    final FXPositionablePane.PosInfo infoOrig = new FXPositionablePane.PosInfo(obj,troncon);                    
+                    final PosInfo infoOrig = new PosInfo(obj,troncon,session);                    
                     objCp.setBorneDebutId(null);
                     objCp.setBorneFinId(null);
                     objCp.setPositionDebut(infoOrig.getGeoPointStart(null));
                     objCp.setPositionFin(infoOrig.getGeoPointEnd(null));
                     
                     //on recalcule les positions relatives
-                    final FXPositionablePane.PosInfo info = new FXPositionablePane.PosInfo(objCp,tronconCp);
-                    final FXPositionablePane.PosSR posSr = info.getForSR(sr);
+                    final PosInfo info = new PosInfo(objCp,tronconCp,session);
+                    final PosSR posSr = info.getForSR(sr);
                     objCp.setBorneDebutId(posSr.borneStartId);
                     objCp.setBorne_debut_distance((float)posSr.distanceStartBorne);
                     objCp.setBorne_debut_aval(posSr.startAval);
@@ -132,7 +136,7 @@ public class TronconUtils {
                     
                 }else{
                     //on utilise les coordonnées géo reprojetées afin de s'assurer qu'ils sont sur le troncon
-                    final FXPositionablePane.PosInfo info = new FXPositionablePane.PosInfo(obj,troncon);
+                    final PosInfo info = new PosInfo(obj,troncon,session);
                     final Point start = info.getGeoPointStart(null);
                     final Point end = info.getGeoPointEnd(null);
                     
@@ -145,17 +149,17 @@ public class TronconUtils {
                     objCp.setPositionFin(GF.createPoint(projectEnd.nearests[0]));
                 }
                 
-                final LineString geom = LinearReferencingUtilities.buildGeometry(linear, objCp, borneRepo);
+                final LineString geom = LinearReferencingUtilities.buildGeometry(linear, objCp, bdRepo);
                 objCp.setGeometry(geom);
                 
             }catch(FactoryException | MismatchedDimensionException | TransformException ex){
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
             
         }
         
         //on sauvegarde les modifications
-        session.getTronconDigueRepository().update(tronconCp);
+        tdRepo.update(tronconCp);
         
         return tronconCp;
     }
@@ -167,24 +171,22 @@ public class TronconUtils {
      * @param troncon2 a merger
      * @return troncon1
      */
-    public static TronconDigue mergeTroncon(TronconDigue troncon1, TronconDigue troncon2){
+    public static TronconDigue mergeTroncon(TronconDigue troncon1, TronconDigue troncon2, SessionGen session){
         
-        final Session session = Injector.getSession();
+        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
         
         //on merge les bornes
         final Set<String> borneIds = new HashSet<>();
         borneIds.addAll(troncon1.getBorneIds());
         borneIds.addAll(troncon2.getBorneIds());
         troncon1.setBorneIds(new ArrayList<>(borneIds));
-        
-        final SystemeReperageRepository srrepo = session.getSystemeReperageRepository();
-        
+                
         //on merge les SR 
-        for(SystemeReperage sr2 : srrepo.getByTroncon(troncon2)){
+        for(SystemeReperage sr2 : srRepo.getByTroncon(troncon2)){
             
             //on cherche le SR du meme nom
             SystemeReperage sibling = null;
-            for(SystemeReperage sr1 : srrepo.getByTroncon(troncon1)){
+            for(SystemeReperage sr1 : srRepo.getByTroncon(troncon1)){
                 if(sr1.getLibelle().equals(sr2.getLibelle())){
                     sibling = sr1;
                     break;
@@ -196,7 +198,7 @@ public class TronconUtils {
                 final SystemeReperage srCp = sr2.copy();
                 srCp.setTronconId(troncon1.getDocumentId());
                 //sauvegarde du sr
-                srrepo.add(srCp);
+                srRepo.add(srCp);
             }else{
                 //on merge les bornes
                 final List<SystemeReperageBorne> srbs1 = sibling.getSystemereperageborneId();
@@ -214,7 +216,7 @@ public class TronconUtils {
                     srbs1.add(srb2.copy());
                 }
                 //maj du sr
-                srrepo.update(sibling);
+                srRepo.update(sibling);
             }
         }
         
@@ -242,10 +244,12 @@ public class TronconUtils {
      * 
      * @param troncon 
      */
-    public static void updateSRElementaire(TronconDigue troncon){
-        final Session session = Injector.getBean(Session.class);
+    public static void updateSRElementaire(TronconDigue troncon, SessionGen session){
                 
-        final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
+        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
+        final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
+        
+        final List<SystemeReperage> srs = srRepo.getByTroncon(troncon);
         
         SystemeReperage sr = null;
         for(SystemeReperage csr : srs){
@@ -260,7 +264,7 @@ public class TronconUtils {
             sr = new SystemeReperage();
             sr.setLibelle(SR_ELEMENTAIRE);
             sr.setTronconId(troncon.getDocumentId());
-            session.getSystemeReperageRepository().add(sr);
+            srRepo.add(sr);
         }
         
         SystemeReperageBorne srbStart = null;
@@ -280,13 +284,13 @@ public class TronconUtils {
             bdStart = new BorneDigue();
             bdStart.setLibelle("Début du tronçon");
             bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
-            session.getBorneDigueRepository().add(bdStart);
+            bdRepo.add(bdStart);
             
             srbStart = new SystemeReperageBorne();
             srbStart.setBorneId(bdStart.getDocumentId());
             sr.systemereperageborneId.add(srbStart);
         }else{
-            bdStart = session.getBorneDigueRepository().get(srbStart.getBorneId());
+            bdStart = bdRepo.get(srbStart.getBorneId());
         }
         
         if(srbEnd==null){
@@ -294,13 +298,13 @@ public class TronconUtils {
             bdEnd = new BorneDigue();
             bdEnd.setLibelle("Fin du tronçon");
             bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
-            session.getBorneDigueRepository().add(bdEnd);
+            bdRepo.add(bdEnd);
             
             srbEnd = new SystemeReperageBorne();
             srbEnd.setBorneId(bdEnd.getDocumentId());
             sr.systemereperageborneId.add(srbEnd);
         }else{
-            bdEnd = session.getBorneDigueRepository().get(srbEnd.getBorneId());
+            bdEnd = bdRepo.get(srbEnd.getBorneId());
         }
         
 
@@ -311,13 +315,13 @@ public class TronconUtils {
         bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
-        session.getBorneDigueRepository().update(bdStart);
-        session.getBorneDigueRepository().update(bdEnd);
+        bdRepo.update(bdStart);
+        bdRepo.update(bdEnd);
         
         srbStart.setValeurPR(0);
         srbEnd.setValeurPR((float)length);
         
-        session.getSystemeReperageRepository().update(sr);
+        srRepo.update(sr);
     }
     
     /**
@@ -326,13 +330,193 @@ public class TronconUtils {
      * 
      * @param troncon 
      */
-    public static void updatePositionableGeometry(TronconDigue troncon){
+    public static void updatePositionableGeometry(TronconDigue troncon, SessionGen session){
         for(Objet obj : troncon.getStructures()){
             final LineString structGeom = LinearReferencingUtilities.buildGeometry(
-                    troncon.getGeometry(), obj, Injector.getSession().getBorneDigueRepository());
+                    troncon.getGeometry(), obj, session.getBorneDigueRepository());
             obj.setGeometry(structGeom);
         }     
-        Injector.getSession().getTronconDigueRepository().update(troncon);
+        session.getTronconDigueRepository().update(troncon);
+    }
+    
+    
+    public static final class PosInfo{
+
+        private final Positionable pos;
+        private final SessionGen session;
+        private Map<String,BorneDigue> cacheBorne;
+        private TronconDigue troncon;
+        private Geometry linear;
+        
+        public PosInfo(Positionable pos, SessionGen session) {
+            this(pos,null,session);
+        }
+        
+        public PosInfo(Positionable pos, TronconDigue troncon, SessionGen session) {
+            this.pos = pos;
+            this.troncon = troncon;
+            this.session = session;
+        }
+
+        public TronconDigue getTroncon() {
+            if(troncon==null){
+                troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
+            }
+            return troncon;
+        }
+        
+        public Geometry getTronconLinear(){
+            if(linear==null){
+                linear = getTroncon().getGeometry();
+            }
+            return linear;
+        }
+        
+        public Map<String,BorneDigue> getBorneCache(){
+            if(cacheBorne==null){
+                cacheBorne = new HashMap<>();
+                if(pos.getSystemeRepId()!=null && !pos.getSystemeRepId().isEmpty()){
+                    final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
+                    if(sr!=null){
+                        for(SystemeReperageBorne srb : sr.systemereperageborneId){
+                            final String bid = srb.getBorneId();
+                            final BorneDigue bd = session.getBorneDigueRepository().get(bid);
+                            if(bd!=null){
+                                cacheBorne.put(bid, bd);
+                            }
+                        }
+                    }
+                }
+            }
+            return cacheBorne;
+        }
+        
+        public Point getGeoPointStart(CoordinateReferenceSystem crs) throws 
+                FactoryException, MismatchedDimensionException, TransformException{
+            //calcule de la position geographique
+            Point point = pos.getPositionDebut();
+            if(point==null){
+                //calcule a partir des bornes
+                final Map<String,BorneDigue> cacheBorneDigue = getBorneCache();
+                final BorneDigue borne = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
+                final Point bornePoint = borne.getGeometry();
+                double dist = pos.getBorne_debut_distance();
+                if(pos.getBorne_debut_aval()) dist *= -1;
+
+                point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+            }
+            
+            final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
+            if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
+                final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
+                point = (Point) JTS.transform(point, trs);
+            }
+            
+            return point;
+        }
+        
+        public Point getGeoPointEnd(CoordinateReferenceSystem crs) throws 
+                FactoryException, MismatchedDimensionException, TransformException{
+            //calcule de la position geographique
+            Point point = pos.getPositionFin();
+            if(point==null){
+                //calcule a partir des bornes
+                final Map<String,BorneDigue> cacheBorneDigue = getBorneCache();
+                final BorneDigue borne = cacheBorneDigue.get(pos.borneFinIdProperty().get());
+                final Point bornePoint = borne.getGeometry();
+                double dist = pos.getBorne_fin_distance();
+                if(pos.getBorne_debut_aval()) dist *= -1;
+
+                point = LinearReferencingUtilities.calculateCoordinate(linear, bornePoint, dist, 0);
+            }
+            
+            final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
+            if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
+                final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
+                point = (Point) JTS.transform(point, trs);
+            }
+            
+            return point;
+        }
+        
+        public PosSR getForSR() throws FactoryException, MismatchedDimensionException, TransformException{
+            String srid = pos.getSystemeRepId();
+            if(srid==null){
+                //On utilise le SR du troncon
+                srid = getTroncon().getSystemeRepDefautId();
+                if(srid==null) return new PosSR();
+                final SystemeReperage sr = session.getSystemeReperageRepository().get(srid);
+                if(sr==null) return new PosSR();
+                return getForSR(sr);
+            }else{
+                //valeur deja présente
+                final PosSR possr = new PosSR();
+                possr.srid = srid;
+                possr.borneStartId = pos.getBorneDebutId();
+                possr.distanceStartBorne = pos.getBorne_debut_distance();
+                possr.startAval = pos.getBorne_debut_aval();
+                
+                possr.borneEndId = pos.getBorneFinId();
+                possr.distanceEndBorne = pos.getBorne_fin_distance();                
+                possr.endAval = pos.getBorne_fin_aval();
+                return possr;
+            }
+        }
+        
+        public PosSR getForSR(SystemeReperage sr) throws FactoryException, MismatchedDimensionException, TransformException{
+            final Point startPoint = getGeoPointStart(null);
+            final Point endPoint = getGeoPointStart(null);
+            
+            
+            final List<BorneDigue> bornes = new ArrayList<>();
+            final List<Point> references = new ArrayList<>();
+            for(SystemeReperageBorne srb : sr.systemereperageborneId){
+                final String bid = srb.getBorneId();
+                final BorneDigue bd = session.getBorneDigueRepository().get(bid);
+                if(bd!=null){ 
+                    bornes.add(bd);
+                    references.add(bd.getGeometry());
+                }
+            }
+            
+            final PosSR possr = new PosSR();
+            possr.srid = sr.getDocumentId();
+            
+            final Geometry linear = getTronconLinear();
+            
+            final Map.Entry<Integer,double[]> startRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), startPoint);
+            final BorneDigue startBorne = bornes.get(startRef.getKey());
+            possr.borneStartId = startBorne.getDocumentId();
+            possr.distanceStartBorne = startRef.getValue()[0];
+            possr.startAval = false;
+            if(possr.distanceStartBorne<0){
+                possr.distanceStartBorne = -possr.distanceStartBorne;
+                possr.startAval = true;
+            }
+            
+            final Map.Entry<Integer,double[]> endRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), endPoint);
+            final BorneDigue endBorne = bornes.get(endRef.getKey());
+            possr.borneEndId = endBorne.getDocumentId();
+            possr.distanceEndBorne = endRef.getValue()[0];
+            possr.endAval = false;
+            if(possr.distanceEndBorne<0){
+                possr.distanceEndBorne = -possr.distanceEndBorne;
+                possr.endAval = true;
+            }
+            
+            return possr;
+        }
+        
+    }
+    
+    public static final class PosSR{
+        public String srid = "";
+        public String borneStartId = "";
+        public double distanceStartBorne;
+        public boolean startAval;
+        public String borneEndId = "";
+        public double distanceEndBorne;
+        public boolean endAval;
     }
     
 }

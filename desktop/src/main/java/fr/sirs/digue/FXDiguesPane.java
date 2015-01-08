@@ -14,7 +14,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
-import fr.sirs.util.TronconUtils;
+import fr.sirs.core.TronconUtils;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -377,7 +377,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
 
                 FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
                 //mise en place du SR élémentaire
-                TronconUtils.updateSRElementaire(troncon);
+                TronconUtils.updateSRElementaire(troncon,session);
             });
         }
     }

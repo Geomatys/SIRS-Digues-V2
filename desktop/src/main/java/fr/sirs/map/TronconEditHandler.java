@@ -13,7 +13,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.TronconUtils;
+import fr.sirs.core.TronconUtils;
 import java.awt.geom.Point2D;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
@@ -278,7 +278,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
                             updateGeometry();
-                            TronconUtils.updateSRElementaire(troncon);
+                            TronconUtils.updateSRElementaire(troncon,session);
                             
                         }catch(TransformException | FactoryException ex){
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -333,9 +333,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                         troncon.setGeometry(editGeometry.geometry);
                         session.getTronconDigueRepository().update(troncon);
                         
-                        TronconUtils.updateSRElementaire(troncon);
+                        TronconUtils.updateSRElementaire(troncon,session);
                         //on recalcule les geometries des positionables du troncon.
-                        TronconUtils.updatePositionableGeometry(troncon);
+                        TronconUtils.updatePositionableGeometry(troncon,session);
                         
                         troncon = null;
                         editGeometry.reset();

@@ -12,7 +12,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.map.TronconEditHandler.showTronconDialog;
-import fr.sirs.util.TronconUtils;
+import fr.sirs.core.TronconUtils;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
@@ -146,7 +146,7 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
 
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
-                            TronconUtils.updateSRElementaire(troncon);
+                            TronconUtils.updateSRElementaire(troncon,session);
                             
                             map.getCanvas().repaint();
                         }catch(TransformException | FactoryException ex){
