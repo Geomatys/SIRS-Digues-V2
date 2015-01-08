@@ -8,7 +8,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.FXMapPane;
 import org.geotoolkit.owc.xml.OwcXmlIO;
 import fr.sirs.query.FXSearchPane;
-import fr.sirs.theme.ui.FXReferencesPane;
+import fr.sirs.theme.ui.FXReferencePane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
@@ -47,15 +47,11 @@ public class FXMainFrame extends BorderPane {
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     private final Session session = Injector.getBean(Session.class);
     
-    @FXML private MenuItem uiPref;
     @FXML private MenuButton uiThemes;
     @FXML private MenuButton uiPlugins;
     @FXML private TabPane uiTabs;
-    @FXML private MenuItem uiExit;
-    @FXML private Button uiMapButton;
-    @FXML private Button uiPrintButton;
-    @FXML private MenuItem uiDeconnect;
     @FXML private MenuBar uiMenu;
+    @FXML private Menu uiRefs;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -74,6 +70,11 @@ public class FXMainFrame extends BorderPane {
             else{
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
+        }
+        
+        // Load references
+        for(final Class reference : Session.getReferences()){
+            uiRefs.getItems().add(toMenuItem(reference));
         }
         
         if(session.getRole()==Role.ADMIN){
@@ -139,6 +140,21 @@ public class FXMainFrame extends BorderPane {
         uiTabs.getSelectionModel().clearAndSelect(index);
     }
     
+    private MenuItem toMenuItem(final Class reference){
+        final MenuItem item = new MenuItem(reference.getSimpleName());
+        item.setOnAction( new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                final FXReferencePane referencesPane = new FXReferencePane(reference);
+                final Tab tab = new FXFreeTab("Référence "+reference.getSimpleName());
+                tab.setContent(referencesPane);
+                addTab(tab);
+            }
+        });
+        return item;
+    }
+    
     private MenuItem toMenuItem(final Theme theme){
         
         final List<Theme> subs = theme.getSubThemes();
@@ -195,14 +211,6 @@ public class FXMainFrame extends BorderPane {
             prefEditor = new FXPreferenceEditor();            
         }
         prefEditor.show();
-    }
-    
-    @FXML
-    void openRefs(ActionEvent event){
-        final FXReferencesPane referencesPane = new FXReferencesPane();
-        final Tab tab = new FXFreeTab("Références");
-        tab.setContent(referencesPane);
-        addTab(tab);
     }
 
     @FXML

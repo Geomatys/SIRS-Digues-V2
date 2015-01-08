@@ -74,7 +74,6 @@ import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.gui.javafx.util.FXDeleteTableColumn;
 import org.geotoolkit.gui.javafx.util.FXPasswordStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -91,8 +90,14 @@ public class PojoTable extends BorderPane {
     protected final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
     
-    // Editabilité du tableau
+    // Editabilité du tableau (possibilité d'ajout et de suppression des éléments
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
+    // Parcours fiche par fiche
+    protected final BooleanProperty fichableProperty = new SimpleBooleanProperty(true);
+    // Accès à la fiche détaillée d'un élément particulier
+    protected final BooleanProperty detaillableProperty = new SimpleBooleanProperty(true);
+    // Possibilité de faire une recherche sur le contenu de la table
+    protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
         
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
@@ -118,20 +123,18 @@ public class PojoTable extends BorderPane {
     private ObservableList<Element> allValues;
     private ObservableList<Element> filteredValues;
     
-    
-    
     private final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
     
     public PojoTable(final Class pojoClass, final String title) {
-        this(pojoClass, title, null, true);
+        this(pojoClass, title, null);
     }
     
     public PojoTable(final Repository repo, final String title) {
-        this(repo.getModelClass(), title, repo, true);
+        this(repo.getModelClass(), title, repo);
     }
     
-    private PojoTable(final Class pojoClass, final String title, final Repository repo, final boolean isFichable) {
+    private PojoTable(final Class pojoClass, final String title, final Repository repo) {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
         this.labelMapper = new LabelMapper(pojoClass);
@@ -144,12 +147,11 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
-        DeleteColumn deleteColumn = new DeleteColumn();
-        uiTable.getColumns().add(deleteColumn);
+        uiTable.getColumns().add(new DeleteColumn());
         
         final EditColumn editCol = new EditColumn(this::editPojo);
         editCol.editableProperty().bind(editableProperty);
-//        editCol.visibleProperty().bind(editableProperty);
+        editCol.visibleProperty().bind(detaillableProperty);
         
         uiTable.getColumns().add((TableColumn)editCol);
         for(PropertyDescriptor desc : properties){
@@ -161,6 +163,7 @@ public class PojoTable extends BorderPane {
              });
         }
         
+        uiTable.editableProperty().bind(editableProperty);
         
         /* barre d'outils. Si on a un accesseur sur la base, on affiche des
          * boutons de création / suppression.
@@ -171,15 +174,14 @@ public class PojoTable extends BorderPane {
         uiSearch.setOnAction((ActionEvent event) -> {search();});
         uiSearch.getStyleClass().add("label-header");
         uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
+        uiSearch.disableProperty().bind(searchableProperty.not());
         
         final Label uiTitle = new Label(title);
         uiTitle.getStyleClass().add("pojotable-header");   
         uiTitle.setAlignment(Pos.CENTER);
         
-        uiTable.editableProperty().bind(editableProperty);
-        
-        searchEditionToolbar.getChildren().add(uiSearch);
         searchEditionToolbar.getStyleClass().add("buttonbar");
+        searchEditionToolbar.getChildren().add(uiSearch);
             
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
@@ -221,7 +223,6 @@ public class PojoTable extends BorderPane {
         sPane.getItems().addAll(uiTable, commentPhotoView);
         sPane.setDividerPositions(0.8);
         setCenter(sPane);
-        
         
         // NAVIGABILITE FICHE PAR FICHE
         navigationToolbar.getStyleClass().add("buttonbarleft");
@@ -295,6 +296,7 @@ public class PojoTable extends BorderPane {
                 }
             }
         });
+        uiFicheMode.disableProperty().bind(fichableProperty.not());
 
         searchEditionToolbar.getChildren().add(0, uiFicheMode);
         
@@ -305,6 +307,15 @@ public class PojoTable extends BorderPane {
 
     public BooleanProperty editableProperty(){
         return editableProperty;
+    }
+    public BooleanProperty detaillableProperty(){
+        return detaillableProperty;
+    }
+    public BooleanProperty fichableProperty(){
+        return fichableProperty;
+    }
+    public BooleanProperty searchableProperty(){
+        return searchableProperty;
     }
     
     protected void search(){
