@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoire;
@@ -46,6 +47,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import java.util.ArrayList;
+import org.ektorp.DocumentNotFoundException;
 
 /**
  *
@@ -72,12 +74,7 @@ public class TronconDigueRepository extends
 
     @Override
     public void remove(TronconDigue entity) {
-        //on supprime tous les SR associés
-        final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
-        final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
-        for(SystemeReperage sr : srs){
-            srrepo.remove(sr);
-        }
+        constraintDeleteBorneAndSR(entity);
         super.remove(entity);
     }
 
@@ -342,4 +339,28 @@ public class TronconDigueRepository extends
                 db.queryForStreamingView(createQuery("streamLight")));
     }
 
+    /**
+     * Cette contraint s'assure de supprimer les SR et bornes associées au troncon
+     * en cas de suppression.
+     * 
+     */
+    private void constraintDeleteBorneAndSR(TronconDigue entity){
+        //on supprime tous les SR associés
+        final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
+        final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
+        for(SystemeReperage sr : srs){
+            srrepo.remove(sr);
+        }
+        //on supprime toutes les bornes du troncon
+        final BorneDigueRepository bdrepo = new BorneDigueRepository(db);
+        for(String bdid : entity.getBorneIds()){
+            try{
+                final BorneDigue bd = bdrepo.get(bdid);
+                bdrepo.remove(bd);
+            }catch(DocumentNotFoundException ex){
+                //la borne n'existe pas.
+            }
+        }
+    }
+    
 }

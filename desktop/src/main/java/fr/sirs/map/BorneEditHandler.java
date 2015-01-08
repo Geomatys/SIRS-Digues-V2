@@ -158,8 +158,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         
         //fin de l'edition
         dialog.resultProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
-            final TronconDigue troncon = editPane.tronconProperty().get();
+            TronconDigue troncon = editPane.tronconProperty().get();
             if(troncon!=null){
+                //on recupere la derniere version, la maj des sr entraine la maj des troncons
+                troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
                 //on recalcule les geometries des positionables du troncon.
                 TronconUtils.updatePositionableGeometry(troncon);
             }

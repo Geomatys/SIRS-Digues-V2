@@ -210,21 +210,17 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage csr = systemeReperageProperty().get();
         if(csr==null || troncon==null) return;
         
-        
         final BorneDigueRepository repo = session.getBorneDigueRepository();
         
         //liste de toutes les bornes
         final SortedSet<BorneDigue> bornes = new TreeSet<>(new Comparator<BorneDigue>() {
-
             @Override
             public int compare(BorneDigue o1, BorneDigue o2) {
                 return o1.getLibelle().compareToIgnoreCase(o2.getLibelle());
             }
         });
-        for(SystemeReperage sr : uiSrComboBox.getItems()){
-            for(SystemeReperageBorne srb : sr.systemereperageborneId){
-                bornes.add(repo.get(srb.borneIdProperty().get()));
-            }
+        for(String bid : troncon.getBorneIds()){
+            bornes.add(repo.get(bid));
         }
         
         final ListView<BorneDigue> bornesView = new ListView<>();
