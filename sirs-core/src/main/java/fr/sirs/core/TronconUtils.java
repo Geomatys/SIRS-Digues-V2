@@ -63,12 +63,17 @@ public class TronconUtils {
         final LinearReferencingUtilities.SegmentInfo[] parts = LinearReferencingUtilities.buildSegments((LineString) tronconCp.geometryProperty().get());
         
         //on recupere les bornes qui sont sur le troncon
+        final Map<String,BorneDigue> newBornes = new HashMap<>();
         tronconCp.getBorneIds().clear();
         for(String borneId : troncon.getBorneIds()){
             final BorneDigue borne = bdRepo.get(borneId);
             final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(parts, borne.getGeometry());
             if(proj.perpendicularProjection){
-                tronconCp.getBorneIds().add(borneId);
+                //on copie la borne
+                final BorneDigue cp = borne.copy();
+                bdRepo.add(cp);
+                tronconCp.getBorneIds().add(cp.getDocumentId());
+                newBornes.put(borneId, cp);
             }
         }
         
@@ -84,8 +89,11 @@ public class TronconUtils {
             final List<SystemeReperageBorne> lst = sr.getSystemereperageborneId();
             for(int i=lst.size()-1;i>=0;i--){
                 final SystemeReperageBorne srb = lst.get(i);
-                if(tronconCp.getBorneIds().contains(srb.getBorneId())){
-                    srCp.systemereperageborneId.add(srb);
+                final BorneDigue borne = newBornes.get(srb.getBorneId());
+                if(newBornes.containsKey(srb.getBorneId())){
+                    final SystemeReperageBorne cp = srb.copy();
+                    cp.setBorneId(borne.getDocumentId());
+                    srCp.systemereperageborneId.add(cp);
                 }
             }
             if(!srCp.systemereperageborneId.isEmpty()){
@@ -271,7 +279,7 @@ public class TronconUtils {
             sr = new SystemeReperage();
             sr.setLibelle(SR_ELEMENTAIRE);
             sr.setTronconId(troncon.getDocumentId());
-            srRepo.add(sr);
+            srRepo.add(sr,troncon);
         }
         
         SystemeReperageBorne srbStart = null;
@@ -328,7 +336,7 @@ public class TronconUtils {
         srbStart.setValeurPR(0);
         srbEnd.setValeurPR((float)length);
         
-        srRepo.update(sr);
+        srRepo.update(sr,troncon);
     }
     
     /**

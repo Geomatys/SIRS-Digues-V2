@@ -45,14 +45,22 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
 
     @Override
     public void update(SystemeReperage entity) {
+        update(entity,null);
+    }
+    
+    public void update(SystemeReperage entity, TronconDigue troncon) {
         super.update(entity);
-        constraintBorneInTronconListBorne(entity);
+        constraintBorneInTronconListBorne(entity,troncon);
     }
 
     @Override
     public void add(SystemeReperage entity) {
+        add(entity,null);
+    }
+    
+    public void add(SystemeReperage entity, TronconDigue troncon) {
         super.add(entity);
-        constraintBorneInTronconListBorne(entity);
+        constraintBorneInTronconListBorne(entity,troncon);
     }
    
     /**
@@ -61,21 +69,22 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
      * 
      * @param entity 
      */
-    private void constraintBorneInTronconListBorne(SystemeReperage entity){
+    private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon){
         final String tcId = entity.getTronconId();
         if(tcId==null) return;
         if(entity.getSystemereperageborneId().isEmpty()) return;
         
         final TronconDigueRepository tcRepo = new TronconDigueRepository(db);
-        final TronconDigue tc;
-        try{
-            tc = tcRepo.get(tcId);
-        }catch(DocumentNotFoundException ex){
-            //le troncon n'existe pas
-            return;
+        if(troncon==null){
+            try{
+                troncon = tcRepo.get(tcId);
+            }catch(DocumentNotFoundException ex){
+                //le troncon n'existe pas
+                return;
+            }
         }
         
-        final List<String> borneIds = tc.getBorneIds();
+        final List<String> borneIds = troncon.getBorneIds();
         
         boolean needSave = false;
         for(SystemeReperageBorne srb : entity.getSystemereperageborneId()){
@@ -87,7 +96,7 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
         }
         
         if(needSave){
-            tcRepo.update(tc);
+            tcRepo.update(troncon);
         }
         
     }
