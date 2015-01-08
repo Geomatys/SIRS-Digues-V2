@@ -102,7 +102,14 @@ public class TronconUtils {
         for(Objet obj : troncon.structures){
             
             //on vérifie que cet objet intersect le segment
-            if(!linear.intersects(obj.getGeometry())){
+            Geometry objGeom = obj.getGeometry();
+            if(objGeom==null){
+                //on la calcule
+                objGeom = LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), obj, bdRepo);
+                obj.setGeometry(objGeom);
+            }
+            
+            if(!linear.intersects(objGeom)){
                 continue;
             }
             
@@ -401,7 +408,7 @@ public class TronconUtils {
                 final BorneDigue borne = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
                 final Point bornePoint = borne.getGeometry();
                 double dist = pos.getBorne_debut_distance();
-                if(pos.getBorne_debut_aval()) dist *= -1;
+                if(!pos.getBorne_debut_aval()) dist *= -1;
 
                 point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
             }
@@ -425,7 +432,7 @@ public class TronconUtils {
                 final BorneDigue borne = cacheBorneDigue.get(pos.borneFinIdProperty().get());
                 final Point bornePoint = borne.getGeometry();
                 double dist = pos.getBorne_fin_distance();
-                if(pos.getBorne_debut_aval()) dist *= -1;
+                if(!pos.getBorne_fin_aval()) dist *= -1;
 
                 point = LinearReferencingUtilities.calculateCoordinate(linear, bornePoint, dist, 0);
             }
@@ -465,8 +472,7 @@ public class TronconUtils {
         
         public PosSR getForSR(SystemeReperage sr) throws FactoryException, MismatchedDimensionException, TransformException{
             final Point startPoint = getGeoPointStart(null);
-            final Point endPoint = getGeoPointStart(null);
-            
+            final Point endPoint = getGeoPointEnd(null);
             
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
@@ -488,21 +494,15 @@ public class TronconUtils {
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneStartId = startBorne.getDocumentId();
             possr.distanceStartBorne = startRef.getValue()[0];
-            possr.startAval = false;
-            if(possr.distanceStartBorne<0){
-                possr.distanceStartBorne = -possr.distanceStartBorne;
-                possr.startAval = true;
-            }
+            possr.startAval = possr.distanceStartBorne>=0;
+            possr.distanceStartBorne = Math.abs(possr.distanceStartBorne);
             
             final Map.Entry<Integer,double[]> endRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneEndId = endBorne.getDocumentId();
             possr.distanceEndBorne = endRef.getValue()[0];
-            possr.endAval = false;
-            if(possr.distanceEndBorne<0){
-                possr.distanceEndBorne = -possr.distanceEndBorne;
-                possr.endAval = true;
-            }
+            possr.endAval = possr.distanceEndBorne>=0;
+            possr.distanceEndBorne = Math.abs(possr.distanceEndBorne);
             
             return possr;
         }

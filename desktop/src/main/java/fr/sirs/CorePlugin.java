@@ -301,7 +301,7 @@ public class CorePlugin extends Plugin {
         for(Name name : store.getNames()){
             final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
             final int d = (int)((i%colors.length)*1.5);
-            final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length],d);
+            final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
@@ -516,7 +516,7 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static MutableStyle createStructureStyle(Color col, int doffset){
+    private static MutableStyle createStructureStyle(Color col){
         final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
@@ -548,7 +548,6 @@ public class CorePlugin extends Plugin {
                         FF.literal(2.0)
                 )
         );
-        ruleLongObjects.setMaxScaleDenominator(500000);
         
         final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
         ruleSmallObjects.setFilter(
@@ -557,14 +556,9 @@ public class CorePlugin extends Plugin {
                         FF.literal(2.0)
                 )
         );
-        ruleSmallObjects.setMaxScaleDenominator(500000);
-        
-        final MutableRule ruleFar = SF.rule(pointSymbolizer);
-        ruleFar.setMinScaleDenominator(500000);
         
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleLongObjects);
-        fts.rules().add(ruleFar);
         fts.rules().add(ruleSmallObjects);
         
         final MutableStyle style = SF.style();
