@@ -3,14 +3,10 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PreviewLabel;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.WithLibelle;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
@@ -37,6 +33,8 @@ public class SirsStringConverter extends StringConverter {
             text = ((WithLibelle)item).getLibelle();
         } else if (item instanceof ElementHit) {
             text = ((ElementHit) item).getLibelle();
+        } else if (item instanceof PreviewLabel) {
+            text = ((PreviewLabel) item).getLabel();
         } else if (item instanceof Contact) {
             final Contact c = (Contact) item;
             text = c.getNom() + " " + c.getPrenom();

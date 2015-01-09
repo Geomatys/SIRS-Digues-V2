@@ -19,6 +19,9 @@ public class PreviewLabelRepository extends
     }
 
     public String getPreview(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
         List<PreviewLabel> res = db.queryView(createQuery("all").includeDocs(false)
                 .key(id), PreviewLabel.class);
         if (res.isEmpty())
@@ -27,6 +30,9 @@ public class PreviewLabelRepository extends
     }
     
     public PreviewLabel getPreviewLabel(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
         List<PreviewLabel> res = db.queryView(createQuery("all").includeDocs(false)
                 .key(id), PreviewLabel.class);
         if (res.isEmpty())

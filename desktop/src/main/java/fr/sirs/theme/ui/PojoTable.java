@@ -138,7 +138,11 @@ public class PojoTable extends BorderPane {
         getStylesheets().add(SIRS.CSS_PATH);
         this.pojoClass = pojoClass;
         this.labelMapper = new LabelMapper(pojoClass);
-        this.repo = repo;
+        if (repo == null) {
+            this.repo = Injector.getSession().getRepositoryForClass(pojoClass);
+        } else {
+            this.repo = repo;
+        }
         
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
@@ -185,7 +189,10 @@ public class PojoTable extends BorderPane {
             
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
-            createPojo();
+            final Object p = createPojo();
+            if (p != null) {
+                editPojo(createPojo());
+            }
         });
         uiAdd.disableProperty().bind(editableProperty.not());
 
@@ -491,11 +498,8 @@ public class PojoTable extends BorderPane {
     
     public class PropertyColumn extends TableColumn<Element,Object>{
 
-        private final PropertyDescriptor desc;
-
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
-            this.desc = desc;
             
             final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
                         
@@ -508,7 +512,7 @@ public class PojoTable extends BorderPane {
             if(ref!=null){
                 //reference vers un autre objet
                 setEditable(false);
-                setCellValueFactory(new CellLinkValueFactory(desc, ref.ref()));
+                setCellValueFactory(new CellLinkValueFactory(desc));
                 setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());
                 
             }else{
@@ -547,18 +551,15 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
                 }
             }
-            
         }  
     }
     
     public class CellLinkValueFactory implements Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>{
 
         private final PropertyDescriptor desc;
-        private final Class refClass;
 
-        public CellLinkValueFactory(PropertyDescriptor desc, Class refClass) {
+        public CellLinkValueFactory(PropertyDescriptor desc) {
             this.desc = desc;
-            this.refClass = refClass;
         }
         
         @Override

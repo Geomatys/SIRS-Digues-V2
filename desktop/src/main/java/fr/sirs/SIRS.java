@@ -176,8 +176,8 @@ public final class SIRS extends SirsCore {
      */
     public static FXElementPane generateEditionPane(final Element pojo) {
         final FXElementPane content;
-        if (pojo instanceof Objet) {
-            content = new FXThemePane((Objet) pojo);
+        if (pojo instanceof Element) {
+            content = new FXThemePane((Element) pojo);
         } else if (pojo instanceof Contact) {
             content = new FXContactPane((Contact) pojo);
         } else if (pojo instanceof Organisme) {
