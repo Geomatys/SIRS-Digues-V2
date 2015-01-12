@@ -92,27 +92,27 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-store</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-xml-owc</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-xml-gml</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-xml-ows</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-render2d</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -184,7 +184,7 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-jaxp-core</artifactId>
-      <version>4.x-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
       <type>jar</type>
     </dependency>
   </dependencies>
