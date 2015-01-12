@@ -8,21 +8,16 @@ import fr.sirs.Injector;
 import static fr.sirs.Role.ADMIN;
 import static fr.sirs.Role.EXTERNE;
 import static fr.sirs.Role.USER;
-import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.FXMapTab;
 import java.awt.geom.NoninvertibleTransformException;
-import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -30,7 +25,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.web.HTMLEditor;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -44,7 +38,7 @@ import org.opengis.referencing.operation.TransformException;
 public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     private final Session session = Injector.getSession();
-    protected Node specificThemePane;
+    protected FXElementPane specificThemePane;
     
     @FXML protected ScrollPane uiEditDetailTronconTheme;
     @FXML private FXDateField date_maj;
@@ -53,7 +47,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 
-    private TronconDigue troncon;
+    private Element couchDbDocument;
     
     public FXThemePane(final T theme) {
         SIRS.loadFXML(this);
@@ -79,33 +73,24 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     void save() {
         preSave();
         
-        // If we've got an object, troncon is updated.
-        if (troncon != null) {
-            LocalDateTime now = LocalDateTime.now();
-            final Objet structure = (Objet) elementProperty.get();
-            final String tronconId = structure.getTroncon();
-            
-            if (tronconId == null) {
-                new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
-                return;
-            }
-            
-            TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
-            
-            if (!tronconId.equals(troncon.getId())) {
-                troncon.getStructures().remove(structure);
-                final TronconDigue newTroncon = tronconRepo.get(tronconId);
-                newTroncon.getStructures().add(structure);
-                // Update old troncon to remove current object
-                troncon.setDateMaj(now);
-                tronconRepo.update(troncon);
-                // Say that current troncon is the new one.
-                troncon = newTroncon;
-            }
-            
-            troncon.setDateMaj(now);
-            tronconRepo.update(troncon);
+        LocalDateTime now = LocalDateTime.now();
+        
+        Element elementDocument = elementProperty.get().getCouchDBDocument();
+        if (elementDocument == null) {
+            new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
+            return;
         }
+        
+        final Repository repo = session.getRepositoryForClass(elementDocument.getClass());
+        if (couchDbDocument == null) {
+            couchDbDocument = elementDocument;
+        } else if (!couchDbDocument.equals(elementDocument)) {
+            // TODO : manage following case : edited element has been moved to another document.
+            repo.update(couchDbDocument);
+            couchDbDocument = elementDocument;
+        }
+        
+        repo.update(couchDbDocument);
     }
     
     @FXML
@@ -127,11 +112,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     protected void initPane() {
         final Element object = elementProperty.get();
-        if (object instanceof Objet) {
-            troncon = (TronconDigue) ((Objet) elementProperty.get()).getParent();
-        } else {
-            troncon = null;
-        }
+        couchDbDocument = object.getCouchDBDocument();
+        
         if (object == null) {
             uiTitleLabel.setText("Aucune information à afficher");
             id.setText("");
@@ -156,12 +138,9 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             
             try {
                 // Choose the pane adapted to the specific structure.
-                final String className = "fr.sirs.theme.ui.FX" + object.getClass().getSimpleName() + "Pane";
-                final Class controllerClass = Class.forName(className);
-                final Constructor cstr = controllerClass.getConstructor(object.getClass());
-                specificThemePane = (Node) cstr.newInstance(object);
-                ((AbstractFXElementPane) specificThemePane).disableFieldsProperty().bind(disableFieldsProperty());
-                uiEditDetailTronconTheme.setContent(specificThemePane);
+                specificThemePane = SIRS.generateEditionPane(object);
+                specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
+                uiEditDetailTronconTheme.setContent((Node)specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             }
@@ -178,7 +157,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     @Override
     public void preSave() {
         if (specificThemePane instanceof FXElementPane) {
-            ((FXElementPane) specificThemePane).preSave();
+            specificThemePane.preSave();
         }
     }
 }

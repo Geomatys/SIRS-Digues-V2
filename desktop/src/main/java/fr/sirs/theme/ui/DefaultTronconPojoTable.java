@@ -18,6 +18,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableColumn;
+import org.apache.sis.util.logging.Logging;
 
 /**
  *
@@ -93,7 +94,7 @@ public class DefaultTronconPojoTable extends PojoTable {
             final Constructor pojoConstructor = pojoClass.getConstructor();
             pojo = (Objet) pojoConstructor.newInstance();
             trc.getStructures().add(pojo);
-            pojo.setTroncon(trc.getId());
+            pojo.setParent(trc);
             session.getTronconDigueRepository().update(trc);
 //        if (pojoClass==Crete.class) {
 //            System.out.println("Création d'un nouvel objet");
@@ -106,18 +107,8 @@ public class DefaultTronconPojoTable extends PojoTable {
 //        }else {
 //            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
 //        }
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(DefaultTronconPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logging.getLogger(DefaultTronconPojoTable.class).log(Level.SEVERE, null, ex);
         }
         return pojo;
     }

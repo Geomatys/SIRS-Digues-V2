@@ -37,7 +37,7 @@ import org.geotoolkit.map.MapItem;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DeleteItem extends TreeMenuItem{
+public class DeleteItem extends TreeMenuItem {
 
     private static final Image ICON = SwingFXUtils.toFXImage(
             IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
