@@ -131,13 +131,13 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
             final Row row = it.next();
             final LigneEau ligneEau = new LigneEau();
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                ligneEau.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                ligneEau.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 ligneEau.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());

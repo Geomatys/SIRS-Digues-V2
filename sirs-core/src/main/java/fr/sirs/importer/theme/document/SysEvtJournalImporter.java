@@ -148,7 +148,7 @@ class SysEvtJournalImporter extends GenericDocumentImporter {
             final Row row = it.next();
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
+            //document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());

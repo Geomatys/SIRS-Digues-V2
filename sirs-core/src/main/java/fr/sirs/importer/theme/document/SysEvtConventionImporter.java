@@ -147,7 +147,7 @@ class SysEvtConventionImporter extends GenericDocumentImporter {
             final Row row = it.next();
             final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
-            document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
+            //document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;

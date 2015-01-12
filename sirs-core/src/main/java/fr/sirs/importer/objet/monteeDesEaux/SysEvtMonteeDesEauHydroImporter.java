@@ -113,13 +113,13 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
             final Row row = it.next();
             final MonteeEaux monteeEaux = new MonteeEaux();
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                monteeEaux.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                monteeEaux.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 monteeEaux.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());

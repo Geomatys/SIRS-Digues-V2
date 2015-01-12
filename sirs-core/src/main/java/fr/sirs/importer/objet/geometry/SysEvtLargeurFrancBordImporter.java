@@ -117,13 +117,13 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
             final Row row = it.next();
             final LargeurFrancBord largeur = new LargeurFrancBord();
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                largeur.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                largeur.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
                 largeur.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

@@ -169,13 +169,13 @@ class SysEvtPrestationImporter extends GenericPrestationImporter<Prestation> {
                 prestation.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                prestation.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                prestation.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 prestation.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));

@@ -148,17 +148,17 @@ public class LaisseCrueImporter extends GenericLaisseCrueImporter {
                 }
             }
             
-            if (row.getInt(Columns.ID_TRONCON_GESTION.toString()) != null) {
-                final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-                if (troncon.getId() != null && laisseCrue.getTroncon()==null) {
-                    laisseCrue.setTroncon(troncon.getId());
-                } else if(troncon.getId()==null) {
-                    throw new AccessDbImporterException("Le tronçon "
-                            + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-                } else if(!laisseCrue.getTroncon().equals(troncon.getId())){
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
-            }
+//            if (row.getInt(Columns.ID_TRONCON_GESTION.toString()) != null) {
+//                final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//                if (troncon.getId() != null && laisseCrue.getTroncon()==null) {
+//                    laisseCrue.setTroncon(troncon.getId());
+//                } else if(troncon.getId()==null) {
+//                    throw new AccessDbImporterException("Le tronçon "
+//                            + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//                } else if(!laisseCrue.getTroncon().equals(troncon.getId())){
+//                    throw new AccessDbImporterException("Inconsistent data.");
+//                }
+//            }
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 final float v = row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue();

@@ -137,13 +137,13 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
             final Row row = it.next();
             final LaisseCrue laisseCrue = new LaisseCrue();
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                laisseCrue.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                laisseCrue.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
                 laisseCrue.setPosition_structure(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

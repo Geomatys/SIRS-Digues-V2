@@ -117,13 +117,13 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
             final Row row = it.next();
             final ProfilFrontFrancBord profil = new ProfilFrontFrancBord();
             
-            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (troncon.getId() != null) {
-                profil.setTroncon(troncon.getId());
-            } else {
-                throw new AccessDbImporterException("Le tronçon "
-                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-            }
+//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (troncon.getId() != null) {
+//                profil.setTroncon(troncon.getId());
+//            } else {
+//                throw new AccessDbImporterException("Le tronçon "
+//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//            }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
                 profil.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

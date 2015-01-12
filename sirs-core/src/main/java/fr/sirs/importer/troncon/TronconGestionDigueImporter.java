@@ -241,7 +241,7 @@ implements DocumentsUpdater {
                 final List<String> systemesRepIds = new ArrayList<>();
                 systemesRep.stream().forEach((systemeRep) -> {
                     systemesRepIds.add(systemeRep.getId());
-                    systemeRep.setTronconId(tronconDigue.getId());
+                    //systemeRep.setTronconId(tronconDigue.getId());
                     });
                 //tronconDigue.setSystemeReperageIds(systemesRepIds);
                 tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());

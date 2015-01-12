@@ -149,15 +149,15 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
             }
             
             if (row.getInt(Columns.ID_TRONCON_GESTION.toString()) != null) {
-                final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-                if (troncon.getId() != null && prestation.getTroncon()==null) {
-                    prestation.setTroncon(troncon.getId());
-                } else if(troncon.getId()==null) {
-                    throw new AccessDbImporterException("Le tronçon "
-                            + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-                } else if(!prestation.getTroncon().equals(troncon.getId())){
-                    throw new AccessDbImporterException("Inconsistent data.");
-                }
+//                final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//                if (troncon.getId() != null && prestation.getTroncon()==null) {
+//                    prestation.setTroncon(troncon.getId());
+//                } else if(troncon.getId()==null) {
+//                    throw new AccessDbImporterException("Le tronçon "
+//                            + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
+//                } else if(!prestation.getTroncon().equals(troncon.getId())){
+//                    throw new AccessDbImporterException("Inconsistent data.");
+//                }
             }
             
             {
