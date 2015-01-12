@@ -80,8 +80,8 @@ public class FXMapPane extends BorderPane {
     private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
         
-    private final FXMap uiMap1 = new FXMap(false,MAPHINTS);
-    private final FXMap uiMap2 = new FXMap(false,MAPHINTS);
+    private final FXMap uiMap1 = new FXMap(false, MAPHINTS);
+    private final FXMap uiMap2 = new FXMap(false, MAPHINTS);
     private final FXCoordinateBar uiCoordBar1 = new FXCoordinateBar(uiMap1);
     private final FXCoordinateBar uiCoordBar2 = new FXCoordinateBar(uiMap2);
     private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
@@ -116,7 +116,7 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
-        uiTree.getMenuItems().add(new ExportItem());
+        uiTree.getMenuItems().add(new ExportMenu());
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
         uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());

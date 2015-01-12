@@ -68,30 +68,32 @@ import org.opengis.geometry.Geometry;
  * 
  * @author Johann Sorel (Geomatys)
  */
-public class ExportItem extends TreeMenuItem {
+public class ExportMenu extends TreeMenuItem {
 
     private static final Image ICON = SwingFXUtils.toFXImage(
             IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
     
-    private final Map<FileChooser.ExtensionFilter,FileFeatureStoreFactory> index = new HashMap<>();
+    private final Map<FileChooser.ExtensionFilter, FileFeatureStoreFactory> index = new HashMap<>();
     private WeakReference<TreeItem> itemRef;
     
-    public ExportItem() {
+    public ExportMenu() {
         
-        item = new Menu(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class,"export"));
-        item.setGraphic(new ImageView(ICON));
+        menuItem = new Menu(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class,"export"));
+        menuItem.setGraphic(new ImageView(ICON));
         
         //select file factories which support writing
         final Set<FileFeatureStoreFactory> factories = FeatureStoreFinder.getAvailableFactories(FileFeatureStoreFactory.class);
-        for(FileFeatureStoreFactory ff : factories){
-            final FactoryMetadata metadata = ff.getMetadata();
-            if(metadata.supportStoreCreation() && metadata.supportStoreWriting() && metadata.supportedGeometryTypes().length>0){
-                final String[] exts = ff.getFileExtensions();
-                final String name = ff.getDisplayName().toString();
+        for(final FileFeatureStoreFactory factory : factories){
+            final FactoryMetadata metadata = factory.getMetadata();
+            if(metadata.supportStoreCreation() 
+                    && metadata.supportStoreWriting() 
+                    && metadata.supportedGeometryTypes().length>0){
+                final String[] exts = factory.getFileExtensions();
+                final String name = factory.getDisplayName().toString();
                 final FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(name, exts);
-                index.put(filter, ff);
+                index.put(filter, factory);
                 
-                ((Menu)item).getItems().add(new ExportSub(ff));
+                ((Menu)menuItem).getItems().add(new ExportMenuItem(factory));
             }
         }
         
@@ -101,33 +103,30 @@ public class ExportItem extends TreeMenuItem {
     public MenuItem init(List<? extends TreeItem> selection) {
         boolean valid = uniqueAndType(selection,FeatureMapLayer.class) && !index.isEmpty();
         if(valid && selection.get(0).getParent()!=null){
-            final FeatureMapLayer layer = (FeatureMapLayer) (selection.get(0)).getValue();
             itemRef = new WeakReference<>(selection.get(0));
-            return item;
+            return menuItem;
         }
         return null;
     }
     
-    private class ExportSub extends MenuItem{
-        
-        private final FileFeatureStoreFactory factory;
+    private class ExportMenuItem extends MenuItem {
 
-        public ExportSub(FileFeatureStoreFactory factory) {
+        public ExportMenuItem(FileFeatureStoreFactory factory) {
             super(factory.getDisplayName().toString());
-            this.factory = factory;
-            
             
             setOnAction(new EventHandler<javafx.event.ActionEvent>() {
                 @Override
                 public void handle(javafx.event.ActionEvent event) {
                     if(itemRef == null) return;                
-                    final TreeItem ti = itemRef.get();
-                    if(ti == null) return;
-                    final FeatureMapLayer layer = (FeatureMapLayer) ti.getValue();
+                    final TreeItem treeItem = itemRef.get();
+                    if(treeItem == null) return;
+                    
+                    final FeatureMapLayer layer = (FeatureMapLayer) treeItem.getValue();
 
                     final DirectoryChooser chooser = new DirectoryChooser();
                     chooser.setTitle(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class, "folder"));
-                    File folder = chooser.showDialog(null);
+                    
+                    final File folder = chooser.showDialog(null);
 
                     if(folder!=null){                    
                         try {

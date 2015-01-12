@@ -51,6 +51,7 @@ import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
@@ -147,6 +148,14 @@ public class Loader extends Application {
         controller.uiLoadingPane.setVisible(false);
         controller.uiLoginPane.setVisible(true);
                 
+        // Ne fonctionne pas ?
+        controller.uiPassword.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                controller.uiConnexion.fire();
+            }
+        });
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {

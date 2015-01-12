@@ -48,10 +48,10 @@ public class DeleteItem extends TreeMenuItem{
      * delete item for contexttree
      */
     public DeleteItem(){
-        item = new MenuItem(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem.class,"delete"));
-        item.setGraphic(new ImageView(ICON));
+        menuItem = new MenuItem(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.DeleteItem.class,"delete"));
+        menuItem.setGraphic(new ImageView(ICON));
 
-        item.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
+        menuItem.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
 
             @Override
             public void handle(javafx.event.ActionEvent event) {
@@ -94,7 +94,7 @@ public class DeleteItem extends TreeMenuItem{
         
         if(itemRefs.isEmpty()) return null;
         
-        return item;
+        return menuItem;
     }
 
 }

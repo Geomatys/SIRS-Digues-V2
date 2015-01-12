@@ -11,8 +11,8 @@ import javafx.scene.layout.BorderPane;
  */
 public class FXReferencePane extends BorderPane {
     
-    private PojoTable references;
-    private Session session = Injector.getSession();
+    private final PojoTable references;
+    private final Session session = Injector.getSession();
         
     public FXReferencePane(final Class type) {
         references = new PojoTable(Injector.getSession().getRepositoryForClass(type), type.getSimpleName());
