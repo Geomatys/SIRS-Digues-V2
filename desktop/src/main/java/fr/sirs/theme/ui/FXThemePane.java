@@ -16,6 +16,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.map.FXMapTab;
 import java.awt.geom.NoninvertibleTransformException;
+import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -85,7 +86,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         if (couchDbDocument == null) {
             couchDbDocument = elementDocument;
         } else if (!couchDbDocument.equals(elementDocument)) {
-            // TODO : manage following case : edited element has been moved to another document.
+            couchDbDocument.removeChild(elementProperty.get());
             repo.update(couchDbDocument);
             couchDbDocument = elementDocument;
         }
@@ -138,7 +139,10 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             
             try {
                 // Choose the pane adapted to the specific structure.
-                specificThemePane = SIRS.generateEditionPane(object);
+                final String className = "fr.sirs.theme.ui.FX" + object.getClass().getSimpleName() + "Pane";
+                final Class controllerClass = Class.forName(className);
+                final Constructor cstr = controllerClass.getConstructor(object.getClass());
+                specificThemePane = (FXElementPane) cstr.newInstance(object);
                 specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
                 uiEditDetailTronconTheme.setContent((Node)specificThemePane);
             } catch (Exception ex) {
@@ -156,8 +160,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
     @Override
     public void preSave() {
-        if (specificThemePane instanceof FXElementPane) {
-            specificThemePane.preSave();
-        }
+        specificThemePane.preSave();
     }
 }
