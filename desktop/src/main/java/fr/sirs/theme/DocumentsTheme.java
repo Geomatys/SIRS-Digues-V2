@@ -2,6 +2,8 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.Injector;
+import fr.sirs.Session;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
@@ -31,27 +33,21 @@ public class DocumentsTheme extends Theme {
         final BorderPane uiCenter = new BorderPane();
         final TabPane tabPane = new TabPane();
         
-        final PojoTable tablePhotos = new PhotoTable(Photo.class);
-        final PojoTable tableConventions = new ConventionTable(Convention.class);
-        final PojoTable tableJournal = new JournalTable(ArticleJournal.class);
-        final PojoTable tableMarches = new MarcheTable(Marche.class);
-        final PojoTable tableRapport = new RapportTable(RapportEtude.class);
-        final PojoTable tableDocGrandeEchelle = new DocGrandeEchelleTable(DocumentGrandeEchelle.class);
+        final Session session = Injector.getSession();
+//        final Tab tabPhoto = new Tab("Photo");
+//        tabPhoto.setContent(tablePhotos);
+        final Tab tabConvention = new Tab("Conventions");
+        tabConvention.setContent(new PojoTable(session.getConventionRepository(), "Conventions"));
+        final Tab tabJournal = new Tab("Articles de journal");
+        tabJournal.setContent(new PojoTable(session.getArticleJournalRepository(), "Articles de journal"));
+        final Tab tabMarche = new Tab("Marchés");
+        tabMarche.setContent(new PojoTable(session.getMarcheRepository(), "Marchés"));
+        final Tab tabRapport = new Tab("Rapports d'étude");
+        tabRapport.setContent(new PojoTable(session.getRapportEtudeRepository(), "Rapports d'étude"));
+        final Tab tabDocGrandeEchelle = new Tab("Documents à grande échelle");
+        tabDocGrandeEchelle.setContent(new PojoTable(session.getDocumentGrandeEchelleRepository(), "Documents à grande échelle"));
         
-        final Tab tabPhoto = new Tab("Photo");
-        tabPhoto.setContent(tablePhotos);
-        final Tab tabConvention = new Tab("Convention");
-        tabConvention.setContent(tableConventions);
-        final Tab tabJournal = new Tab("Article de journal");
-        tabJournal.setContent(tableJournal);
-        final Tab tabMarche = new Tab("Marché");
-        tabMarche.setContent(tableMarches);
-        final Tab tabRapport = new Tab("Rapport d'étude");
-        tabRapport.setContent(tableRapport);
-        final Tab tabDocGrandeEchelle = new Tab("Document à grande échelle");
-        tabDocGrandeEchelle.setContent(tableDocGrandeEchelle);
-        
-        tabPane.getTabs().add(tabPhoto);
+//        tabPane.getTabs().add(tabPhoto);
         tabPane.getTabs().add(tabConvention);
         tabPane.getTabs().add(tabJournal);
         tabPane.getTabs().add(tabMarche);
@@ -60,73 +56,6 @@ public class DocumentsTheme extends Theme {
         
         uiCenter.setCenter(tabPane);
         return tabPane;
-    }
-
-    private static class PhotoTable extends PojoTable {
-
-        public PhotoTable(Class pojoClass) {
-            super(pojoClass,"Liste des photos");
-        }
-    }
-
-    private static class ConventionTable extends PojoTable {
-
-        public ConventionTable(Class pojoClass) {
-            super(pojoClass,"Liste des conventions");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
-    private static class JournalTable extends PojoTable {
-
-        public JournalTable(Class pojoClass) {
-            super(pojoClass,"Liste des journaux");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
-    private static class MarcheTable extends PojoTable {
-
-        public MarcheTable(Class pojoClass) {
-            super(pojoClass,"Liste des Marchés");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
-    private static class RapportTable extends PojoTable {
-
-        public RapportTable(Class pojoClass) {
-            super(pojoClass,"Liste des rapports");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
-    private static class DocGrandeEchelleTable extends PojoTable {
-
-        public DocGrandeEchelleTable(Class pojoClass) {
-            super(pojoClass,"Liste des documents");
-        }
-
-        @Override
-        protected void deletePojos(Element ... pojo) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
     }
     
 }

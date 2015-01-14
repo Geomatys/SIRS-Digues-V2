@@ -87,7 +87,9 @@ public class FXCommentPhotoView extends SplitPane {
     }
 
     public void updatePhoto() {
+        uiPhotoLibelle.textProperty().unbind();
         uiPhotoLibelle.setText("Pas de photo associée");
+        uiPhotoDate.textProperty().unbind();
         uiPhotoDate.setText("");
         if (!(valueProperty.get() instanceof Objet)) {
             return;

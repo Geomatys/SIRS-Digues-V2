@@ -58,4 +58,12 @@ public interface Element extends Serializable {
      * object contained structures. False otherwise.
      */
     boolean removeChild(final Element toRemove);
+    
+    /**
+     * Add an element as child of the current one.
+     * @param toAdd The element to be referenced as a child of the current one.
+     * @return True if we succeed at referencing given element as a child, false
+     * otherwise.
+     */
+    public boolean addChild(final Element toAdd);
 }

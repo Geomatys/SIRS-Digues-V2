@@ -141,7 +141,14 @@ public class PojoTable extends BorderPane {
         this.pojoClass = pojoClass;
         this.labelMapper = new LabelMapper(pojoClass);
         if (repo == null) {
-            this.repo = Injector.getSession().getRepositoryForClass(pojoClass);
+            Repository tmpRepo;
+            try {
+                tmpRepo = Injector.getSession().getRepositoryForClass(pojoClass);
+            } catch (IllegalArgumentException e) {
+                SIRS.LOGGER.log(Level.FINE, e.getMessage());
+                tmpRepo = null;
+            }
+            this.repo = tmpRepo;
         } else {
             this.repo = repo;
         }

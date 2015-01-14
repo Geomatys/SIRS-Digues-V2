@@ -86,7 +86,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         if (couchDbDocument == null) {
             couchDbDocument = elementDocument;
         } else if (!couchDbDocument.equals(elementDocument)) {
-            couchDbDocument.removeChild(elementProperty.get());
             repo.update(couchDbDocument);
             couchDbDocument = elementDocument;
         }
