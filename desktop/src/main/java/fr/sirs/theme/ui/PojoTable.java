@@ -98,6 +98,8 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty detaillableProperty = new SimpleBooleanProperty(true);
     // Possibilité de faire une recherche sur le contenu de la table
     protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
+    // Ouvrir l'editeur sur creation d'un nouvel objet
+    protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
         
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
@@ -190,8 +192,8 @@ public class PojoTable extends BorderPane {
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
             final Object p = createPojo();
-            if (p != null) {
-                editPojo(createPojo());
+            if (p != null && openEditorOnNewProperty.get()) {
+                editPojo(p);
             }
         });
         uiAdd.disableProperty().bind(editableProperty.not());
@@ -323,6 +325,10 @@ public class PojoTable extends BorderPane {
     }
     public BooleanProperty searchableProperty(){
         return searchableProperty;
+    }
+
+    public BooleanProperty openEditorOnNewProperty() {
+        return openEditorOnNewProperty;
     }
     
     protected void search(){

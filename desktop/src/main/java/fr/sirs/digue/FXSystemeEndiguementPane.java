@@ -138,11 +138,14 @@ public class FXSystemeEndiguementPane extends BorderPane {
     }
 
     private void save(){
-        endiguementProp.get().setCommentaire(uiComment.getHtmlText());
-        endiguementProp.get().setGestionnaireDecret(uiDecret.getValue().getObjectId());
-        endiguementProp.get().setGestionnaireTechnique(uiTechnique.getValue().getObjectId());
-        endiguementProp.get().setDateMaj(LocalDateTime.now());
-        session.getSystemeEndiguementRepository().update(systemeEndiguementProp().get());
+        final SystemeEndiguement se = endiguementProp.get();
+        se.setCommentaire(uiComment.getHtmlText());
+        final PreviewLabel decret = uiDecret.getValue();
+        se.setGestionnaireDecret( decret==null ? null : decret.getObjectId());
+        final PreviewLabel tech = uiTechnique.getValue();
+        se.setGestionnaireTechnique( tech==null ? null : tech.getObjectId());
+        se.setDateMaj(LocalDateTime.now());
+        session.getSystemeEndiguementRepository().update(se);
     }
     
     @FXML
@@ -162,6 +165,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
 
         public DigueTable(Class pojoClass, String title) {
             super(pojoClass, title);
+            openEditorOnNewProperty.set(false);
         }
 
         @Override
