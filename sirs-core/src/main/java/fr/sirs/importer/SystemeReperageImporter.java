@@ -3,6 +3,7 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,14 +17,36 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class SystemeReperageImporter extends GenericImporter {
+public class SystemeReperageImporter extends GenericImporter implements DocumentsUpdatable {
 
     private Map<Integer, SystemeReperage> systemesReperage = null;
     private Map<Integer, List<SystemeReperage>> systemesReperageByTronconId = null;
+    private TronconGestionDigueImporter tronconGestionDigueImporter = null;
 
     SystemeReperageImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
+    }
+    
+    /**
+     * Set the TronconGestionDigueImporter necessary to update operation in 
+     * order to set the troncon id to the SRs.
+     * @param tronconGestionDigueImporter 
+     */
+    public void setTronconGestionDigueImporter(final TronconGestionDigueImporter tronconGestionDigueImporter){
+        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
+    }
+
+    @Override
+    public void update() throws IOException, AccessDbImporterException {
+        if(tronconGestionDigueImporter==null) throw new AccessDbImporterException("Needs a "+TronconGestionDigueImporter.class.getCanonicalName());
+        for(final Map.Entry<Integer, List<SystemeReperage>> srsByTroncon : systemesReperageByTronconId.entrySet()){
+            final Integer internalTronconId = srsByTroncon.getKey();
+            for(final SystemeReperage sr : srsByTroncon.getValue()){
+                sr.setTronconId(tronconGestionDigueImporter.getTronconsDigues().get(internalTronconId).getId());
+            }
+        }
+        couchDbConnector.executeBulk(systemesReperage.values());
     }
     
     private enum Columns {

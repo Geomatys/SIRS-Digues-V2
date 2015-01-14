@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public abstract class GenericDocumentRelatedImporter<T extends Object> extends GenericImporter  implements DocumentsUpdater {
+public abstract class GenericDocumentRelatedImporter<T extends Object> extends GenericImporter  implements DocumentsUpdatable {
 
     protected Map<Integer, T> related = null;
     

@@ -15,7 +15,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.DocumentsUpdater;
+import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -42,7 +42,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericDocumentImporter  implements DocumentsUpdater {
+public class DocumentImporter extends GenericDocumentImporter  implements DocumentsUpdatable {
     
     private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     

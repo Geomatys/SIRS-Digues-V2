@@ -8,7 +8,7 @@ import java.io.IOException;
  * 
  * @author Samuel Andrés
  */
-public interface DocumentsUpdater {
+public interface DocumentsUpdatable {
     
     /**
      * This method purpose is to allow modifications to be registered into 

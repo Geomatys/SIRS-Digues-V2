@@ -20,7 +20,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.DigueImporter;
-import fr.sirs.importer.DocumentsUpdater;
+import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -44,7 +44,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class TronconGestionDigueImporter 
 extends GenericImporter 
-implements DocumentsUpdater {
+implements DocumentsUpdatable {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
     private Map<String, Integer> tronconsIds = null;

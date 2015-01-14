@@ -871,11 +871,18 @@ public class DbImporter {
         => documents
 */
         tronconGestionDigueImporter.getTronconsDigues();
+        
+        // Once TronconGestionDigue has been imported, SRs needs to be updated
+        // with TronconGestionDigue IDs.
+        systemeReperageImporter.setTronconGestionDigueImporter(tronconGestionDigueImporter);
+        systemeReperageImporter.update();
+        
         systemeReperageBorneImporter.getByBorneId();
         documentImporter.getDocuments();
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();
+        
         // Normalement les documents et les pièces reliées aux documents ne sont 
         // pas affectées par les linkers car les liaisons sont en sens unique 
         // depuis les objets des troncons. Mais au cas où des associations 

@@ -8,7 +8,7 @@ import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.DocumentsUpdater;
+import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.meteo.MeteoImporter;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class EvenementHydrauliqueImporter 
 extends GenericImporter 
-implements DocumentsUpdater {
+implements DocumentsUpdatable {
 
     private Map<Integer, EvenementHydraulique> evenements = null;
     private final TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
