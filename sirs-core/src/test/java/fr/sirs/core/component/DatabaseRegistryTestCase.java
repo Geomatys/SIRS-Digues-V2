@@ -4,17 +4,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
-import fr.sirs.core.component.DatabaseRegistry;
+import java.io.IOException;
 
 //@Ignore
 public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
     @Test
-    public void databaseList() throws MalformedURLException {
+    public void databaseList() throws IOException {
         List<String> listDatabase = DatabaseRegistry.listSirsDatabase(new URL(
                 "http://geouser:geopw@127.0.0.1:5984/"));
         for (String database : listDatabase) {

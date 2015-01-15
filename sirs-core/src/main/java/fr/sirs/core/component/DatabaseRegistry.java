@@ -27,6 +27,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.SirsDBInfo;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.ektorp.DbAccessException;
+import org.ektorp.http.RestTemplate;
+import org.geotoolkit.util.FileUtilities;
 
 public class DatabaseRegistry {
 
@@ -38,13 +43,20 @@ public class DatabaseRegistry {
     private DatabaseRegistry() {
     }
 
-    public static List<String> listSirsDatabase(URL base) {
+    public static List<String> listSirsDatabase(URL base) throws IOException {
 
         HttpClient client = new StdHttpClient.Builder().url(base).build();
         CouchDbInstance dbInstance = new StdCouchDbInstance(client);
 
+        List<String> dbList;
+        try {
+            dbList = dbInstance.getAllDatabases();
+        } catch (DbAccessException e) {
+            createUser(base.toExternalForm());
+            dbList = dbInstance.getAllDatabases();
+        }
         List<String> res = new ArrayList<>();
-        for (String db : dbInstance.getAllDatabases()) {
+        for (String db : dbList) {
             if (db.startsWith("_"))
                 continue;
             CouchDbConnector connector = dbInstance.createConnector(db, false);
@@ -206,5 +218,27 @@ public class DatabaseRegistry {
         int i = dst.indexOf('@');
         int j = dst2.indexOf('@');
         return dst.substring(i).equals(dst2.substring(j));
+    }
+    
+    /**
+     * Creates a CouchDb user using login and password given in input URL.
+     * 
+     * @param urlWithBasicAuth URL to target database, embedding login as : 
+     * http://$USER:$PASSWORD@$HOST:$PORT
+     * @throws IOException If an error occurs while querying CouchDb
+     */
+    private static void createUser(final String urlWithBasicAuth) throws IOException {
+        Matcher matcher = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@").matcher(urlWithBasicAuth);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Input URL does not contain valid basic authentication login : "+urlWithBasicAuth);
+        }
+        final String username = matcher.group(1);
+        final String password = matcher.group(2);
+        RestTemplate template = new RestTemplate(new StdHttpClient.Builder().url(matcher.replaceFirst("")).build());
+        String userContent = FileUtilities.getStringFromStream(DatabaseRegistry.class.getResourceAsStream("/fr/sirs/launcher/user-put.json"));
+        
+        template.put("/_users/org.couchdb.user:"+username, 
+                userContent.replaceAll("\\$ID", username)
+                .replaceAll("\\$PASSWORD", password == null? "" : password));
     }
 }
