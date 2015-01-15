@@ -108,7 +108,7 @@ public class SirsPreferences extends Properties {
      * @throws java.lang.IllegalStateException if queried property has no value.
      */
     @Override
-    public String getProperty(String key) {
+    public String getProperty(String key) throws IllegalStateException {
         final String property = super.getProperty(key);
         if (property == null || property.isEmpty()) {
             throw new IllegalStateException("No valid "+key+ " property defined in "+PREFERENCES_PATH);
@@ -123,7 +123,23 @@ public class SirsPreferences extends Properties {
      * @return The value stored for queried property. Never null or empty.
      * @throws java.lang.IllegalStateException if queried property has no value.
      */
-    public String getProperty(PROPERTIES key) {
+    public String getProperty(PROPERTIES key) throws IllegalStateException {
         return getProperty(key.name());
+    }
+    
+    /**
+     * @param key key of the value to retrieve.
+     * @return The value stored for queried property. Can be null or empty.
+     */
+    public String getPropertySafe(String key) {
+        return super.getProperty(key);
+    }
+
+    /**
+     * @param key key for the value to retrieve.
+     * @return The value stored for queried property. Can be null or empty
+     */
+    public String getPropertySafe(PROPERTIES key) {
+        return getPropertySafe(key.name());
     }
 }

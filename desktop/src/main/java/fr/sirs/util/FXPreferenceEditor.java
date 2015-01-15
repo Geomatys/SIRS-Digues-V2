@@ -87,7 +87,7 @@ public class FXPreferenceEditor extends Stage {
                 propEditor.setMinWidth(16);
                 propEditor.setMaxWidth(500);
             }
-            propEditor.textProperty().setValue(SirsPreferences.INSTANCE.getProperty(p.name()));
+            propEditor.textProperty().setValue(SirsPreferences.INSTANCE.getPropertySafe(p.name()));
             propEditor.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
                 if (!newValue.equals(SirsPreferences.INSTANCE.getProperty(p.name()))) {
                     editedProperties.put(p, newValue);

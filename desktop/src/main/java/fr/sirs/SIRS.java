@@ -25,6 +25,7 @@ import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +39,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -78,9 +80,14 @@ public final class SIRS extends SirsCore {
      * @param modelClass A class which will be used for bundle loading.
      */
     public static void loadFXML(Parent candidate, final Class modelClass) {
+        ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
+        URL resource = cdtClass.getResource(fxmlpath);
+        if (resource == null) {
+            throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
+        }
+        final FXMLLoader loader = new FXMLLoader(resource);
         loader.setController(candidate);
         loader.setRoot(candidate);
         //in special environement like osgi or other, we must use the proper class loaders

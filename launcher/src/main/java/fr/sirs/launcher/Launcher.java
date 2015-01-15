@@ -3,26 +3,20 @@ package fr.sirs.launcher;
 
 import fr.sirs.core.SirsCore;
 
-import java.io.PrintStream;
 import java.util.UUID;
 import java.util.logging.Level;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import ch.qos.logback.classic.jul.JULHelper;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -76,7 +70,10 @@ public class Launcher extends Application {
         
         splashStage.show();
         
-        
+        /*
+         * Initialize / create EPSG db. A loader is displayed while the task is 
+         * running, preventing application launch.
+         */
         final Task<Boolean> epsgIniter = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
