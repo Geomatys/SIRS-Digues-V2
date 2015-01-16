@@ -484,7 +484,7 @@ public class PojoTable extends BorderPane {
             }
         }
 
-        final Tab tab = new FXFreeTab();
+        final FXFreeTab tab = new FXFreeTab();
 
         try {
             Node content = (Node) SIRS.generateEditionPane((Element)pojo);
@@ -493,7 +493,7 @@ public class PojoTable extends BorderPane {
             tab.setContent(content);
             final Session session = Injector.getSession();
             final Element ele = (Element) pojo;
-            tab.setText(session.getPreviewLabelRepository().getPreview(ele.getId()));
+            tab.setTextAbrege(session.getPreviewLabelRepository().getPreview(ele.getId()));
             tab.setOnSelectionChanged((Event event) -> {
                 if (tab.isSelected()) {
                     session.prepareToPrint(ele);

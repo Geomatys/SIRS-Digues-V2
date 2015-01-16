@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.embed.swing.SwingFXUtils;
@@ -141,13 +142,14 @@ public class FXMainFrame extends BorderPane {
     }
     
     private MenuItem toMenuItem(final Class reference){
-        final MenuItem item = new MenuItem(reference.getSimpleName());
-        item.setOnAction( new EventHandler<ActionEvent>() {
+        final ResourceBundle bundle = ResourceBundle.getBundle(reference.getName());
+        final MenuItem item = new MenuItem(bundle.getString("class"));
+        item.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
                 final FXReferencePane referencesPane = new FXReferencePane(reference);
-                final Tab tab = new FXFreeTab("Référence "+reference.getSimpleName());
+                final Tab tab = new FXFreeTab(bundle.getString("class"));
                 tab.setContent(referencesPane);
                 addTab(tab);
             }
