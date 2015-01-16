@@ -3,12 +3,16 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.query.ElementHit;
 import fr.sirs.theme.AbstractTronconTheme;
+import fr.sirs.util.FXFreeTab;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
@@ -17,7 +21,15 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
+import javafx.event.Event;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
+import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.logging.Logging;
 
 /**
@@ -111,5 +123,63 @@ public class DefaultTronconPojoTable extends PojoTable {
             Logging.getLogger(DefaultTronconPojoTable.class).log(Level.SEVERE, null, ex);
         }
         return pojo;
+    }
+    
+    
+    
+    @Override
+    protected void editPojo(Object pojo){
+        editElement(pojo, troncon.get().getId());
+    }
+    
+    
+        
+    public static void editElement(Object pojo, final String tronconId){
+        if (pojo instanceof ElementHit) {
+            final ElementHit hit = (ElementHit) pojo;
+            try {
+                pojo = (Element) Injector.getSession().getConnector().get(hit.geteElementClass(), hit.getDocumentId());
+            } catch (ClassNotFoundException ex) {
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+        }
+        
+        try {
+            Injector.getSession().getFrame().addTab(openEditionTab(pojo, tronconId));
+        } catch (Exception ex) {
+            Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
+            d.showAndWait();
+            throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
+            
+        }
+    }
+    
+    private static Tab openEditionTab(final Object pojo, final String tronconId){
+        final FXFreeTab tab = new FXFreeTab();
+        Node content = (Node) SIRS.generateEditionPane((Element)pojo);
+        if (content==null) content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
+
+        tab.setContent(content);
+        final Element ele = (Element) pojo;
+        tab.setTextAbrege(generateEditionTabTitle(ele, tronconId));
+        tab.setOnSelectionChanged((Event event) -> {
+            if (tab.isSelected()) {
+                 Injector.getSession().prepareToPrint(ele);
+            }
+        });
+        return tab;
+    }
+    
+    private static String generateEditionTabTitle(final Element element, final String tronconId){
+        String title =  Injector.getSession().getPreviewLabelRepository().getPreview(element.getId());
+        if(title==null){
+            final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+            title = bundle.getString("class");
+        }
+        String tronconTitle = Injector.getSession().getPreviewLabelRepository().getPreview(tronconId);
+        if(tronconTitle!=null){
+            title+=" ("+tronconTitle+")";
+        }
+        return title;
     }
 }

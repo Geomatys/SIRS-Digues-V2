@@ -9,6 +9,7 @@ import fr.sirs.map.FXMapPane;
 import org.geotoolkit.owc.xml.OwcXmlIO;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.theme.ui.FXReferencePane;
+import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
@@ -22,11 +23,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.Parent;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
@@ -165,8 +168,18 @@ public class FXMainFrame extends BorderPane {
         if(subs.isEmpty()){
             item = new MenuItem(theme.getName());
             item.setOnAction((ActionEvent event) -> {
-                final Tab tab = new FXFreeTab(theme.getName());
-                tab.setContent(theme.createPane());
+                final FXFreeTab tab = new FXFreeTab(theme.getName());
+                Parent parent = theme.createPane();
+                tab.setContent(parent);
+                if(parent instanceof FXTronconThemePane){
+                    ((FXTronconThemePane) parent).currentTronconProperty().addListener(new ChangeListener<TronconDigue>() {
+
+                        @Override
+                        public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
+                            tab.setTextAbrege(theme.getName()+" ("+session.getPreviewLabelRepository().getPreview(newValue.getId())+")");
+                        }
+                    });
+                }
                 addTab(tab);
             });
         } else{

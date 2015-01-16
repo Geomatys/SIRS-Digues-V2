@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -483,23 +484,9 @@ public class PojoTable extends BorderPane {
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
         }
-
-        final FXFreeTab tab = new FXFreeTab();
-
+        
         try {
-            Node content = (Node) SIRS.generateEditionPane((Element)pojo);
-            if (content==null) content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
-
-            tab.setContent(content);
-            final Session session = Injector.getSession();
-            final Element ele = (Element) pojo;
-            tab.setTextAbrege(session.getPreviewLabelRepository().getPreview(ele.getId()));
-            tab.setOnSelectionChanged((Event event) -> {
-                if (tab.isSelected()) {
-                    session.prepareToPrint(ele);
-                }
-            });
-            session.getFrame().addTab(tab);
+            Injector.getSession().getFrame().addTab(openEditionTab(pojo));
         } catch (Exception ex) {
             Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
             d.showAndWait();
@@ -508,6 +495,31 @@ public class PojoTable extends BorderPane {
         }
     }
     
+    private static Tab openEditionTab(final Object pojo){
+        final FXFreeTab tab = new FXFreeTab();
+        Node content = (Node) SIRS.generateEditionPane((Element)pojo);
+        if (content==null) content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
+
+        tab.setContent(content);
+        final Element ele = (Element) pojo;
+        tab.setTextAbrege(generateEditionTabTitle(ele));
+        tab.setOnSelectionChanged((Event event) -> {
+            if (tab.isSelected()) {
+                 Injector.getSession().prepareToPrint(ele);
+            }
+        });
+        return tab;
+    }
+    
+    private static String generateEditionTabTitle(final Element element){
+        String title =  Injector.getSession().getPreviewLabelRepository().getPreview(element.getId());
+        if(title==null){
+            final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+            title = bundle.getString("class");
+        }
+        System.out.println(" 1 TITLE = "+title);
+        return title;
+    }
     
     public class PropertyColumn extends TableColumn<Element,Object>{
 

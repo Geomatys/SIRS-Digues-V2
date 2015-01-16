@@ -25,7 +25,7 @@ import javafx.stage.WindowEvent;
 public class FXFreeTab extends Tab implements FXTextAbregeable{
     
     private static boolean DEFAULT_ABREGEABLE = true;
-    private static int DEFAULT_NB_AFFICHABLE = 15;
+    private static int DEFAULT_NB_AFFICHABLE = 25;
     
     private FXFreeTab(String text, boolean abregeable, int nbAffichable) {
         super();
