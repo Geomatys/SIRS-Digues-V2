@@ -409,16 +409,6 @@ public class Session extends SessionGen {
         repositories.get("TronconDigueRepository").remove(tronconDigue);
     }
 
-    /**
-     * Levee can contain Sections.
-     *
-     * @param digue
-     * @return
-     */
-    public List<?> getChildren(final Digue digue) {
-        return this.getTronconDigueByDigue(digue);
-    }
-
     public void prepareToPrint(final Object object){
         objectToPrint=object;
     }
