@@ -2,6 +2,7 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import fr.sirs.Injector;
 
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
@@ -13,6 +14,8 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
 import fr.sirs.Role;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
@@ -300,13 +303,13 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        this.setDisabled(true);
-        Window currentWindow = getScene().getWindow();
+        System.out.println("SELECTED DATABASE : "+db);
+        final Window currentWindow = getScene().getWindow();
+        
         if (currentWindow instanceof Stage) {
-            ((Stage)currentWindow).close();
-        } else {
-            currentWindow.hide();
+            SIRS.setLauncher((Stage) currentWindow);
         }
+        currentWindow.hide();
         runDesktop(URL_LOCAL, db);
     }
 

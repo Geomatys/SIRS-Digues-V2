@@ -17,6 +17,7 @@
 package fr.sirs.util;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
@@ -26,6 +27,7 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
  * @author Johann Sorel (Geomatys)
  */
 public class FXEnumTableCell<S> extends FXTableCell<S, Object> {
+    private final ComboBox<S> comboField = new ComboBox<>();
     private final TextField field = new TextField();
 
     public FXEnumTableCell() {

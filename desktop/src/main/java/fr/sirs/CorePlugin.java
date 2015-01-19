@@ -162,29 +162,27 @@ public class CorePlugin extends Plugin {
 
     private static synchronized BeanFeatureSupplier getSupplier(Class clazz){
         if(SUPPLIERS.isEmpty()){
-            final Session session = Injector.getSession();
-            final TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
-            SUPPLIERS.put(TronconDigue.class,           new StructBeanSupplier(TronconDigue.class,() -> tronconRepo::getAllLightIterator));
+            SUPPLIERS.put(TronconDigue.class,           new StructBeanSupplier(TronconDigue.class,() -> Injector.getSession().getTronconDigueRepository()::getAllLightIterator));
             SUPPLIERS.put(BorneDigue.class,             BorneDigueCache.getInstance().getSupplier());
-            SUPPLIERS.put(Crete.class,                  new StructBeanSupplier(Crete.class,tronconRepo::getAllCretes));
-            SUPPLIERS.put(OuvrageRevanche.class,        new StructBeanSupplier(OuvrageRevanche.class,tronconRepo::getAllOuvrageRevanches));
-            SUPPLIERS.put(TalusDigue.class,             new StructBeanSupplier(TalusDigue.class,tronconRepo::getAllTalusDigues));
-            SUPPLIERS.put(SommetRisberme.class,         new StructBeanSupplier(SommetRisberme.class,tronconRepo::getAllSommetRisbermes));
-            SUPPLIERS.put(TalusRisberme.class,          new StructBeanSupplier(TalusRisberme.class,tronconRepo::getAllTalusRisbermes));
-            SUPPLIERS.put(PiedDigue.class,              new StructBeanSupplier(PiedDigue.class,tronconRepo::getAllPiedDigues));
-            SUPPLIERS.put(Fondation.class,              new StructBeanSupplier(Fondation.class,tronconRepo::getAllFondations));
-            SUPPLIERS.put(FrontFrancBord.class,         new StructBeanSupplier(FrontFrancBord.class,tronconRepo::getAllFrontFrancBords));
-            SUPPLIERS.put(PiedFrontFrancBord.class,     new StructBeanSupplier(PiedFrontFrancBord.class,tronconRepo::getAllPiedFrontFrancBords));
-            SUPPLIERS.put(VoieAcces.class,              new StructBeanSupplier(VoieAcces.class,tronconRepo::getAllVoieAccess));
-            SUPPLIERS.put(OuvrageFranchissement.class,  new StructBeanSupplier(OuvrageFranchissement.class,tronconRepo::getAllOuvrageFranchissements));
-            SUPPLIERS.put(OuvertureBatardable.class,    new StructBeanSupplier(OuvertureBatardable.class,tronconRepo::getAllOuvertureBatardables));
-            SUPPLIERS.put(VoieDigue.class,              new StructBeanSupplier(VoieDigue.class,tronconRepo::getAllVoieDigues));
-            SUPPLIERS.put(OuvrageVoirie.class,          new StructBeanSupplier(OuvrageVoirie.class,tronconRepo::getAllOuvrageVoiries));
-            SUPPLIERS.put(Desordre.class,               new StructBeanSupplier(Desordre.class,tronconRepo::getAllDesordres));
-            SUPPLIERS.put(Prestation.class,             new StructBeanSupplier(Prestation.class,tronconRepo::getAllPrestations));
-            SUPPLIERS.put(LaisseCrue.class,             new StructBeanSupplier(LaisseCrue.class,tronconRepo::getAllLaisseCrues));
-            SUPPLIERS.put(MonteeEaux.class,             new StructBeanSupplier(MonteeEaux.class,tronconRepo::getAllMonteeEaux));
-            SUPPLIERS.put(LigneEau.class,               new StructBeanSupplier(LigneEau.class,tronconRepo::getAllLigneEaus));
+            SUPPLIERS.put(Crete.class,                  new StructBeanSupplier(Crete.class,Injector.getSession().getTronconDigueRepository()::getAllCretes));
+            SUPPLIERS.put(OuvrageRevanche.class,        new StructBeanSupplier(OuvrageRevanche.class,Injector.getSession().getTronconDigueRepository()::getAllOuvrageRevanches));
+            SUPPLIERS.put(TalusDigue.class,             new StructBeanSupplier(TalusDigue.class,Injector.getSession().getTronconDigueRepository()::getAllTalusDigues));
+            SUPPLIERS.put(SommetRisberme.class,         new StructBeanSupplier(SommetRisberme.class,Injector.getSession().getTronconDigueRepository()::getAllSommetRisbermes));
+            SUPPLIERS.put(TalusRisberme.class,          new StructBeanSupplier(TalusRisberme.class,Injector.getSession().getTronconDigueRepository()::getAllTalusRisbermes));
+            SUPPLIERS.put(PiedDigue.class,              new StructBeanSupplier(PiedDigue.class,Injector.getSession().getTronconDigueRepository()::getAllPiedDigues));
+            SUPPLIERS.put(Fondation.class,              new StructBeanSupplier(Fondation.class,Injector.getSession().getTronconDigueRepository()::getAllFondations));
+            SUPPLIERS.put(FrontFrancBord.class,         new StructBeanSupplier(FrontFrancBord.class,Injector.getSession().getTronconDigueRepository()::getAllFrontFrancBords));
+            SUPPLIERS.put(PiedFrontFrancBord.class,     new StructBeanSupplier(PiedFrontFrancBord.class,Injector.getSession().getTronconDigueRepository()::getAllPiedFrontFrancBords));
+            SUPPLIERS.put(VoieAcces.class,              new StructBeanSupplier(VoieAcces.class,Injector.getSession().getTronconDigueRepository()::getAllVoieAccess));
+            SUPPLIERS.put(OuvrageFranchissement.class,  new StructBeanSupplier(OuvrageFranchissement.class,Injector.getSession().getTronconDigueRepository()::getAllOuvrageFranchissements));
+            SUPPLIERS.put(OuvertureBatardable.class,    new StructBeanSupplier(OuvertureBatardable.class,Injector.getSession().getTronconDigueRepository()::getAllOuvertureBatardables));
+            SUPPLIERS.put(VoieDigue.class,              new StructBeanSupplier(VoieDigue.class,Injector.getSession().getTronconDigueRepository()::getAllVoieDigues));
+            SUPPLIERS.put(OuvrageVoirie.class,          new StructBeanSupplier(OuvrageVoirie.class,Injector.getSession().getTronconDigueRepository()::getAllOuvrageVoiries));
+            SUPPLIERS.put(Desordre.class,               new StructBeanSupplier(Desordre.class,Injector.getSession().getTronconDigueRepository()::getAllDesordres));
+            SUPPLIERS.put(Prestation.class,             new StructBeanSupplier(Prestation.class,Injector.getSession().getTronconDigueRepository()::getAllPrestations));
+            SUPPLIERS.put(LaisseCrue.class,             new StructBeanSupplier(LaisseCrue.class,Injector.getSession().getTronconDigueRepository()::getAllLaisseCrues));
+            SUPPLIERS.put(MonteeEaux.class,             new StructBeanSupplier(MonteeEaux.class,Injector.getSession().getTronconDigueRepository()::getAllMonteeEaux));
+            SUPPLIERS.put(LigneEau.class,               new StructBeanSupplier(LigneEau.class,Injector.getSession().getTronconDigueRepository()::getAllLigneEaus));
         }
         return SUPPLIERS.get(clazz);
     }
@@ -223,7 +221,7 @@ public class CorePlugin extends Plugin {
                     getSupplier(LaisseCrue.class),
                     getSupplier(MonteeEaux.class),
                     getSupplier(LigneEau.class)
-                    //new StructBeanSupplier(CommuneTroncon.class,tronconRepo::getAll)
+                    //new StructBeanSupplier(CommuneTroncon.class,session.getTronconDigueRepository()::getAll)
             );
                         
             final Map<String,String> nameMap = new HashMap<>();

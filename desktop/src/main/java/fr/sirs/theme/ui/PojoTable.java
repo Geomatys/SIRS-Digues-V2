@@ -517,7 +517,6 @@ public class PojoTable extends BorderPane {
             final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
             title = bundle.getString("class");
         }
-        System.out.println(" 1 TITLE = "+title);
         return title;
     }
     
@@ -574,6 +573,8 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
                 }else if(LocalDateTime.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+                }else if(type.isEnum()){
+                    
                 }
             }
         }  

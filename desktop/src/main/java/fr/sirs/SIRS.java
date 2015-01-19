@@ -10,7 +10,6 @@ import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
@@ -39,6 +38,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -66,6 +66,15 @@ public final class SIRS extends SirsCore {
     
     public static final Logger LOGGER = Logging.getLogger(SIRS.class);
     public static final String CSS_PATH = "/fr/sirs/theme.css";
+
+    private static Stage LAUNCHER;
+    public static void setLauncher(Stage currentWindow) {
+        LAUNCHER=currentWindow;
+    }
+    public static Stage getLauncher() {
+        return LAUNCHER;
+    }
+    
         
     private SIRS(){};
     

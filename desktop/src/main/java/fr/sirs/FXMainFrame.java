@@ -236,8 +236,14 @@ public class FXMainFrame extends BorderPane {
     @FXML void deconnect(ActionEvent event) throws IOException{
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
-        final Loader loader = new Loader();
-        loader.showLoginStage();
+        if(SIRS.getLauncher()!=null){
+            session.getApplicationContext().close();
+            SIRS.getLauncher().show();
+        }
+        else{
+            final Loader loader = new Loader();
+            loader.showLoginStage();
+        }
     }
     
     @FXML

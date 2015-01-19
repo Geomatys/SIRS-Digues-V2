@@ -51,7 +51,6 @@ import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
@@ -76,6 +75,7 @@ public class Loader extends Application {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
         this.databaseUrl = databaseUrl;
         this.databaseName = databaseName;
+        System.out.println(this.databaseName);
     }
     
     /**
@@ -127,6 +127,7 @@ public class Loader extends Application {
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
         new Thread(initTask).start();
+        
     }
 
     public void showLoginStage() throws IOException{
@@ -395,6 +396,7 @@ public class Loader extends Application {
                                 databaseName,
                                 "classpath:/fr/sirs/spring/application-context.xml",
                                 false, true);
+                Injector.getSession().setApplicationContext(context);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for (Plugin plugin : plugins) {

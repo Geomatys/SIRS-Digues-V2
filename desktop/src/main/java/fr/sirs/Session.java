@@ -93,6 +93,8 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.style.DefaultDescription;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -148,6 +150,12 @@ public class Session extends SessionGen {
     private final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
     ////////////////////////////////////////////////////////////////////////////
+    
+    private ClassPathXmlApplicationContext applicationContext;
+    public ClassPathXmlApplicationContext getApplicationContext(){return applicationContext;}
+    public void setApplicationContext(final ClassPathXmlApplicationContext applicationContext){
+        this.applicationContext=applicationContext;
+    }
 
     private static final Class[] SUPPORTED_TYPES = new Class[]{
         Boolean.class,
