@@ -229,7 +229,7 @@ public class PojoTable extends BorderPane {
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
         if(repo!=null){
-            updateTable();
+            setTableItems(()-> FXCollections.observableList(repo.getAll()));
         }
         
         final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
@@ -434,14 +434,13 @@ public class PojoTable extends BorderPane {
     }
         
     
-    protected void deletePojos(Element ... pojos){
-        if (repo!=null) {
-            for(Element pojo : pojos){
+    protected void deletePojos(Element... pojos) {
+        ObservableList<Element> items = uiTable.getItems();
+        for (Element pojo : pojos) {
+            if (repo != null) {
                 repo.remove(pojo);
             }
-            updateTable(); 
-        } else {
-            new Alert(Alert.AlertType.INFORMATION, "L'entrée ne peut pas être supprimée.").showAndWait();
+            items.remove(pojo);
         }
     }
     
@@ -462,17 +461,22 @@ public class PojoTable extends BorderPane {
         if (repo != null) {
             result = repo.create();
             repo.add(result);
-            updateTable();
+        } else if (pojoClass != null) {
+            try {
+                result = pojoClass.newInstance();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        if (result instanceof Element) {
+            uiTable.getItems().add((Element)result);
         } else {
             new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
         }
         return result;
-    }
-        
-    private void updateTable(){
-        if(repo!=null){
-            setTableItems(()-> FXCollections.observableList(repo.getAll()));
-        }
     }
         
     public static void editElement(Object pojo){

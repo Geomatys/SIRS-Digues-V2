@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.Repository;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoire;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -47,6 +49,10 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ektorp.DocumentNotFoundException;
 
 /**
@@ -62,10 +68,43 @@ public class TronconDigueRepository extends
         CouchDbRepositorySupport<TronconDigue> implements
         Repository<TronconDigue> {
 
+    private final HashMap<String, Callable<List<? extends Element>>> viewMap = new HashMap();
+    
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
         super(TronconDigue.class, db);
         initStandardDesignDocument();
+        viewMap.put(CRETE, this::getAllCretes);
+        viewMap.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
+        viewMap.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
+        viewMap.put(TALUSDIGUE, this::getAllTalusDigues);
+        viewMap.put(TALUSRISBERME, this::getAllTalusRisbermes);
+        viewMap.put(SOMMETRISBERME, this::getAllSommetRisbermes);
+        viewMap.put(FONDATION, this::getAllFondations);
+        viewMap.put(PIEDDIGUE, this::getAllPiedDigues);
+        viewMap.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
+        viewMap.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
+        viewMap.put(VOIEACCES, this::getAllVoieAccess);
+        viewMap.put(VOIEDIGUE, this::getAllVoieDigues);
+        viewMap.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
+        viewMap.put(STATIONPOMPAGE, this::getAllStationPompages);
+        viewMap.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
+        viewMap.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
+        viewMap.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
+        viewMap.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
+        viewMap.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
+        viewMap.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
+        viewMap.put(PRESTATION, this::getAllPrestations);
+        viewMap.put(DESORDRE, this::getAllDesordres);
+        viewMap.put(LAISSECRUE, this::getAllLaisseCrues);
+        viewMap.put(MONTEEEAUX, this::getAllMonteeEaux);
+        viewMap.put(LIGNEEAU, this::getAllLigneEaus);
+        viewMap.put(DEVERSOIRE, this::getAllDeversoires);
+        viewMap.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
+        viewMap.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
+        viewMap.put(EPI, this::getAllEpis);
+        viewMap.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
+        viewMap.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -339,6 +378,29 @@ public class TronconDigueRepository extends
                 db.queryForStreamingView(createQuery("streamLight")));
     }
 
+    /**
+     * Get all elements of the queried view. The view identifiers can be found as
+     * public static variables of the current class. It generally is the name of 
+     * a structure (Ex : Crete, Desordre, etc.).
+     * @param view The view to query.
+     * @return The result of the executed view, or null if there's no view with 
+     * the given name.
+     */
+    public List<? extends Element> getAllFromView(String view) {
+        final Callable<List<? extends Element>> callable = viewMap.get(view);
+        if (callable != null) {
+            try {
+                return callable.call();
+            } catch (RuntimeException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            } 
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * Cette contraint s'assure de supprimer les SR et bornes associées au troncon
      * en cas de suppression.
