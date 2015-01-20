@@ -9,6 +9,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +66,8 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
                 ouvrageHydrauliqueAssocie.getReseau_hydraulique_ferme().add(reseauHydrau.getId());
                 reseauHydrau.getOuvrage_hydraulique_associe().add(ouvrageHydrauliqueAssocie.getId());
+                
+                associations.add(new AbstractMap.SimpleEntry<>(ouvrageHydrauliqueAssocie, reseauHydrau));
             }
         }
     }

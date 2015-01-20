@@ -33,5 +33,5 @@ public interface FXElementPane<T extends Element> {
     /**
      * Record unbound field changes before saving.
      */
-    void preSave();
+    void preSave() throws Exception;
 }

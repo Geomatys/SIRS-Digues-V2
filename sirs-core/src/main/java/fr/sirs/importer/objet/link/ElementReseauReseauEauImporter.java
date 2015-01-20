@@ -14,6 +14,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +74,8 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
                     final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
                     reseauFerme.getReseau_hydro_ciel_ouvert().add(reseauCielOuvert.getId());
                     reseauCielOuvert.getReseau_hydraulique_ferme().add(reseauFerme.getId());
+                
+                    associations.add(new AbstractMap.SimpleEntry<>(reseauCielOuvert, reseauFerme));
                 }
                 else {
                     throw new AccessDbImporterException("Bad type");

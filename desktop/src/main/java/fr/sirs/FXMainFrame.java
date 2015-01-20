@@ -233,7 +233,8 @@ public class FXMainFrame extends BorderPane {
         System.exit(0);
     }
     
-    @FXML void deconnect(ActionEvent event) throws IOException{
+    @FXML 
+    void deconnect(ActionEvent event) throws IOException{
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
         if(SIRS.getLauncher()!=null){
@@ -242,6 +243,13 @@ public class FXMainFrame extends BorderPane {
         } else {
             SIRS.LOADER.showSplashStage();
         }
+    }
+    
+    @FXML 
+    void changeUser(ActionEvent event) throws IOException{
+        this.getScene().getWindow().hide();
+        session.setUtilisateur(null);
+        SIRS.LOADER.showSplashStage();
     }
     
     @FXML

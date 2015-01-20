@@ -9,6 +9,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +65,8 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjetLinker {
             if(ouvrage!=null && reseau!=null){
                 ouvrage.getReseau_telecom_energie().add(reseau.getId());
                 reseau.getOuvrage_telecom_energie().add(ouvrage.getId());
+                
+                associations.add(new AbstractMap.SimpleEntry<>(ouvrage, reseau));
             }
         }
     }

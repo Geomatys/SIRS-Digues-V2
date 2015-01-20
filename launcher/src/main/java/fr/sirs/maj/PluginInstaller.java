@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.CorePlugin;
-import fr.sirs.Loader;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;

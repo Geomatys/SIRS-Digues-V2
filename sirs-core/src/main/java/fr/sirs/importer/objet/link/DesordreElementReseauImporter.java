@@ -21,6 +21,7 @@ import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.reseau.TypeElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -110,6 +111,8 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
                 else {
                     throw new AccessDbImporterException("Bad referenced type. Incoherent data.");
                 }
+                
+                associations.add(new AbstractMap.SimpleEntry<>(elementReseau, desordre));
             }
         }
     }

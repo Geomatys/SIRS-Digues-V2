@@ -3,13 +3,7 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.query.ElementHit;
-import java.awt.Color;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;

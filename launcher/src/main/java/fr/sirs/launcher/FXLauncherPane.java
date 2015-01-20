@@ -2,7 +2,6 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import fr.sirs.Injector;
 
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
@@ -15,7 +14,6 @@ import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
 import fr.sirs.Role;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;

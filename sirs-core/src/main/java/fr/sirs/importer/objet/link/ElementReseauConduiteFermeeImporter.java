@@ -9,6 +9,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +67,8 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjetLinker {
                 
                 conduiteFermee.getStation_pompage().add(stationPompage.getId());
                 stationPompage.getReseau_hydraulique_ferme().add(conduiteFermee.getId());
+                
+                associations.add(new AbstractMap.SimpleEntry<>(conduiteFermee, stationPompage));
             }
         }
     }

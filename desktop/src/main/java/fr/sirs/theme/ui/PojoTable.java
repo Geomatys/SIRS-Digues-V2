@@ -76,6 +76,7 @@ import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXPasswordStringCell;
+import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -532,7 +533,47 @@ public class PojoTable extends BorderPane {
         return title;
     }
     
+    // Matérieau à utiliser quand le role des utilisateurs sera devenu une énumération
+//        public enum role{ADMIN, USER, CONSULTANT, EXTERNE};
+//        private class EnumColumn extends TableColumn<Element, role>{
+//            private EnumColumn(){
+//                setCellValueFactory(new PropertyValueFactory<>("role"));
+//                setCellFactory(new Callback<TableColumn<Element, role>, TableCell<Element, role>>() {
+//
+//                    @Override
+//                    public TableCell<Element, role> call(TableColumn<Element, role> param) {
+//                        return new FXEnumTableCell<Element, role>();
+//                    }
+//
+//                });
+//            }
+//        }
+    
+//        private class PasswordColumn extends TableColumn<Element, String>{
+//            private PasswordColumn(){
+//                setCellValueFactory(new PropertyValueFactory<>("password"));
+//                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
+//
+//                    @Override
+//                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
+//                        MessageDigest messageDigest = null;
+//                        try {
+//                            messageDigest = MessageDigest.getInstance("MD5");
+//                        } catch (NoSuchAlgorithmException ex) {
+//                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                        return new FXPasswordTableCell<Element>(messageDigest);
+//                    }
+//
+//                });
+//            }
+//        }
+        
+        
+        
+        
     public class PropertyColumn extends TableColumn<Element,Object>{
+        
 
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
@@ -560,6 +601,10 @@ public class PojoTable extends BorderPane {
                 if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
                 }else if(String.class.isAssignableFrom(type)){
+                    
+                    
+                    System.out.println(desc.getDisplayName());
+//                    // Cas des cellules de mots de passe.
                     if(desc.getDisplayName().equals("password")){
                         setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
                         
@@ -574,7 +619,21 @@ public class PojoTable extends BorderPane {
                             return new FXPasswordStringCell(messageDigest);
                         }
                     });
-                    } else {
+                    } 
+                    
+//                    // Cas provisoire des roles
+//                    else if(desc.getDisplayName().equals("role")){
+//                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
+//
+//                            @Override
+//                            public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
+//                                return new FXEnumTableCell<Element, role>();
+//                            }
+//                            
+//                        });
+//                    }
+                    // Cas des autres chaînes de caractère par défaut.
+                    else {
                         setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
                     }
                 }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
@@ -585,7 +644,10 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
                 }else if(LocalDateTime.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
-                }else if(type.isEnum()){
+                }
+                
+                
+                else if(type.isEnum()){
                     
                 }
             }

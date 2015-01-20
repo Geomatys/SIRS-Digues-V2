@@ -275,8 +275,6 @@ implements DocumentsUpdatable {
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
         
-        objetManager.link();
-        
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
             List<Objet> structures = tronconDigue.getStructures();
             
@@ -285,6 +283,8 @@ implements DocumentsUpdatable {
             //Update the repository
 //            tronconDigueRepository.update(tronconDigue);
         }
+        
+        objetManager.link();
         
         //reconstruction des geometries des structures
         for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){

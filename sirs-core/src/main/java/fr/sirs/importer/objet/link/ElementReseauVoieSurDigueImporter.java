@@ -8,13 +8,12 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
-import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,6 +75,8 @@ DATE_DERNIERE_MAJ
                     if(reseau instanceof ReseauHydrauliqueFerme){
                         final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
                         reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
+                
+                        associations.add(new AbstractMap.SimpleEntry<>(reseauVoieDigue, reseauFerme));
                     }
                     if(reseau instanceof OuvrageFranchissement){
                         SirsCore.LOGGER.log(Level.FINE, "Supprimé du modèle.");

@@ -9,6 +9,7 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +61,8 @@ public class DesordrePrestationImporter extends GenericObjetLinker {
             if(prestation!=null && desordre!=null){
                 prestation.getDesordre().add(desordre.getId());
                 desordre.getPrestation().add(prestation.getId());
+                
+                associations.add(new AbstractMap.SimpleEntry<>(prestation, desordre));
             }
         }
     }

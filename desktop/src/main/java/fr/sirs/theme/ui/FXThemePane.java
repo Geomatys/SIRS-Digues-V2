@@ -18,6 +18,7 @@ import fr.sirs.map.FXMapTab;
 import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -72,25 +73,29 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     @FXML
     void save() {
-        preSave();
-        
-        LocalDateTime now = LocalDateTime.now();
-        
-        Element elementDocument = elementProperty.get().getCouchDBDocument();
-        if (elementDocument == null) {
-            new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
-            return;
-        }
-        
-        final Repository repo = session.getRepositoryForClass(elementDocument.getClass());
-        if (couchDbDocument == null) {
-            couchDbDocument = elementDocument;
-        } else if (!couchDbDocument.equals(elementDocument)) {
+        try {
+            preSave();
+
+            LocalDateTime now = LocalDateTime.now();
+
+            Element elementDocument = elementProperty.get().getCouchDBDocument();
+            if (elementDocument == null) {
+                new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
+                return;
+            }
+
+            final Repository repo = session.getRepositoryForClass(elementDocument.getClass());
+            if (couchDbDocument == null) {
+                couchDbDocument = elementDocument;
+            } else if (!couchDbDocument.equals(elementDocument)) {
+                repo.update(couchDbDocument);
+                couchDbDocument = elementDocument;
+            }
+
             repo.update(couchDbDocument);
-            couchDbDocument = elementDocument;
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.INFO, e.getMessage(), e);
         }
-        
-        repo.update(couchDbDocument);
     }
     
     @FXML
@@ -158,7 +163,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     }
 
     @Override
-    public void preSave() {
+    public void preSave() throws Exception {
         specificThemePane.preSave();
     }
 }
