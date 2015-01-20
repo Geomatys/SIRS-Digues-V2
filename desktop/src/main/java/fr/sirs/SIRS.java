@@ -10,6 +10,7 @@ import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
@@ -28,11 +29,13 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
@@ -167,7 +170,7 @@ public final class SIRS extends SirsCore {
                 return FXCollections.observableArrayList();
             }
         } else if (sourceList.get(0) instanceof Element) {
-            if (sourceList instanceof ObservableList) {
+            if (sourceList instanceof ModifiableObservableListBase) {
                 return (ObservableList) sourceList;
             } else {
                 return FXCollections.observableArrayList(sourceList);
@@ -182,6 +185,71 @@ public final class SIRS extends SirsCore {
             }
             return resultList;
         }
+    }
+    
+    /**
+     * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
+     * le {@link HashSet} d'entrée. La recherche s'effectue uniquement sur le 
+     * tronçon donné en paramètre.
+     * 
+     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
+     * 
+     * @param objetIds Les identifiants des objets à retrouver.
+     * @param sourceTroncon Le tronçon où chercher les objets.
+     * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
+     */
+    public static ObservableList<Objet> getStructures(final HashSet<String> objetIds, final Element sourceTroncon) {
+        ObservableList<Objet> result = FXCollections.observableArrayList();
+        if (objetIds == null || objetIds.isEmpty()) {
+            return result;
+        }
+        
+        if (sourceTroncon instanceof TronconDigue && ((TronconDigue)sourceTroncon).getStructures() !=  null) {
+            final Iterator<Objet> it = ((TronconDigue)sourceTroncon).getStructures().iterator();
+            Objet o;
+            while (objetIds.size() > 0 && it.hasNext()) {
+                o = it.next();
+                if (objetIds.remove(o.getId())) {
+                    result.add(o);
+                }
+            }
+        }
+        
+        return result;
+    }
+        
+    /**
+     * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
+     * le {@link HashSet} d'entrée. La recherche s'effectue sur tous les tronçons
+     * de la base de donnée chargée. Pour éviter un surcoût mémoire et processeur
+     * trop important, la recherche se limite aux objets du type passé en paramètre.
+     * 
+     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
+     * 
+     * @param objetIds Les identifiants des objets à retrouver.
+     * @param objetClass L'implémentation d'Objet sur laquelle se concentrer.
+     * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
+     */
+    public static ObservableList<Objet> getStructures(final HashSet<String> objetIds, final Class objetClass) {
+        ObservableList<Objet> result = FXCollections.observableArrayList();
+        if (objetClass == null || !Objet.class.isAssignableFrom(objetClass)
+                || objetIds == null || objetIds.isEmpty()) {
+            return result;
+        }
+        
+        List<? extends Objet> allFromView = Injector.getSession().getTronconDigueRepository().getAllFromView(objetClass.getSimpleName());
+        if (allFromView != null) {
+            final Iterator<? extends Objet> it = allFromView.iterator();
+            Objet o;
+            while (objetIds.size() > 0 && it.hasNext()) {
+                o = it.next();
+                if (objetIds.remove(o.getId())) {
+                    result.add(o);
+                }
+            }
+        }
+        
+        return result;
     }
     
     /**

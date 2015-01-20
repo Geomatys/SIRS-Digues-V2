@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.Repository;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoire;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -25,6 +23,7 @@ import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MonteeEaux;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
@@ -51,8 +50,6 @@ import fr.sirs.core.model.VoieDigue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.DocumentNotFoundException;
 
 /**
@@ -68,7 +65,7 @@ public class TronconDigueRepository extends
         CouchDbRepositorySupport<TronconDigue> implements
         Repository<TronconDigue> {
 
-    private final HashMap<String, Callable<List<? extends Element>>> viewMap = new HashMap();
+    private final HashMap<String, Callable<List<? extends Objet>>> viewMap = new HashMap();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
@@ -386,8 +383,8 @@ public class TronconDigueRepository extends
      * @return The result of the executed view, or null if there's no view with 
      * the given name.
      */
-    public List<? extends Element> getAllFromView(String view) {
-        final Callable<List<? extends Element>> callable = viewMap.get(view);
+    public List<? extends Objet> getAllFromView(String view) {
+        final Callable<List<? extends Objet>> callable = viewMap.get(view);
         if (callable != null) {
             try {
                 return callable.call();

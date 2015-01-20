@@ -138,9 +138,16 @@ public class PojoTable extends BorderPane {
     }
     
     private PojoTable(final Class pojoClass, final String title, final Repository repo) {
+        if (pojoClass == null && repo == null) {
+            throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
+        }
+        if (pojoClass == null) {
+            this.pojoClass = repo.getModelClass();
+        } else {
+            this.pojoClass = pojoClass;
+        }
         getStylesheets().add(SIRS.CSS_PATH);
-        this.pojoClass = pojoClass;
-        this.labelMapper = new LabelMapper(pojoClass);
+        this.labelMapper = new LabelMapper(this.pojoClass);
         if (repo == null) {
             Repository tmpRepo;
             try {
@@ -159,15 +166,20 @@ public class PojoTable extends BorderPane {
         searchRunning.setStyle("-fx-progress-color: white;");
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
-        //contruction des colonnes editable
-        final List<PropertyDescriptor> properties = Session.listSimpleProperties(pojoClass);
-        uiTable.getColumns().add(new DeleteColumn());
-        
+        // Colonnes de suppression et d'ouverture d'éditeur.
+        final DeleteColumn deleteColumn = new DeleteColumn();
         final EditColumn editCol = new EditColumn(this::editPojo);
-        editCol.editableProperty().bind(editableProperty);
-        editCol.visibleProperty().bind(detaillableProperty);
         
+        editableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            deleteColumn.setVisible(newValue);
+            editCol.setVisible(newValue && detaillableProperty.get());
+        });
+        
+        uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn)editCol);
+        
+        //contruction des colonnes editable
+        final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
         for(PropertyDescriptor desc : properties){
             final PropertyColumn col = new PropertyColumn(desc); 
              uiTable.getColumns().add(col);
@@ -184,14 +196,14 @@ public class PojoTable extends BorderPane {
          */
         uiSearch = new Button(null, searchNone);
         uiSearch.textProperty().bind(currentSearch);
-        uiSearch.getStyleClass().add("btn-without-style");        
+        uiSearch.getStyleClass().add("btn-without-style");
         uiSearch.setOnAction((ActionEvent event) -> {search();});
         uiSearch.getStyleClass().add("label-header");
         uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
         uiSearch.disableProperty().bind(searchableProperty.not());
         
-        final Label uiTitle = new Label(title);
-        uiTitle.getStyleClass().add("pojotable-header");   
+        final Label uiTitle = new Label(title==null? labelMapper.mapClassName() : title);
+        uiTitle.getStyleClass().add("pojotable-header");
         uiTitle.setAlignment(Pos.CENTER);
         
         searchEditionToolbar.getStyleClass().add("buttonbar");
@@ -225,10 +237,11 @@ public class PojoTable extends BorderPane {
         
         topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
         setTop(topPane);
-        uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        uiTable.setMaxWidth(Double.MAX_VALUE);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
-        if(repo!=null){
+        if (repo!=null) {
             setTableItems(()-> FXCollections.observableList(repo.getAll()));
         }
         
@@ -616,15 +629,13 @@ public class PojoTable extends BorderPane {
     public class DeleteColumn extends TableColumn<Element,Element>{
 
         public DeleteColumn() {
-            super();            
+            super("Suppression");            
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            DeleteColumn.this.editableProperty().bind(editableProperty);
-            DeleteColumn.this.visibleProperty().bind(editableProperty);
             
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
                 @Override
