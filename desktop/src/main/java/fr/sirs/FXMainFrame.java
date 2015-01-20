@@ -239,10 +239,8 @@ public class FXMainFrame extends BorderPane {
         if(SIRS.getLauncher()!=null){
             session.getApplicationContext().close();
             SIRS.getLauncher().show();
-        }
-        else{
-            final Loader loader = new Loader();
-            loader.showLoginStage();
+        } else {
+            SIRS.LOADER.showSplashStage();
         }
     }
     

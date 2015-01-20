@@ -77,7 +77,8 @@ public final class SIRS extends SirsCore {
     public static Stage getLauncher() {
         return LAUNCHER;
     }
-    
+
+    public static Loader LOADER;
         
     private SIRS(){};
     

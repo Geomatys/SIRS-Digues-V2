@@ -7,7 +7,6 @@ import static fr.sirs.Role.USER;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
@@ -23,7 +22,6 @@ import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -66,6 +64,8 @@ public class Loader extends Application {
     private String databaseUrl;
     private String databaseName;
     
+    private final Stage splashStage;
+    
     public Loader() {
         this(DATABASE_URL, DATABASE_NAME);
     }
@@ -76,6 +76,11 @@ public class Loader extends Application {
         this.databaseUrl = databaseUrl;
         this.databaseName = databaseName;
         SIRS.LOGGER.log(Level.INFO, "Chosen database : "+this.databaseName);
+        
+        // Initialize splash screen
+        splashStage = new Stage(StageStyle.TRANSPARENT);
+        splashStage.setTitle("SIRS-Digues V2");
+        splashStage.initStyle(StageStyle.TRANSPARENT);
     }
     
     /**
@@ -114,98 +119,10 @@ public class Loader extends Application {
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
         new Thread(initTask).start();
-        
     }
-
-    public void showLoginStage() throws IOException{
-        
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/sirs/FXSplashscreen.fxml"));
-        final Parent root = loader.load();
-        final FXSplashscreen controller = loader.getController();
-
-        final Scene scene = new Scene(root);
-        scene.setFill(null);
-        scene.getStylesheets().add("/fr/sirs/splashscreen.css");
-
-        final Stage splashStage = new Stage();
-        splashStage.setTitle("SIRS-Digues V2");
-        splashStage.initStyle(StageStyle.TRANSPARENT);
-        splashStage.setScene(scene);
+    
+    public void showSplashStage() {
         splashStage.show();
-
-        controller.uiLoadingPane.setVisible(false);
-        controller.uiLoginPane.setVisible(true);
-                
-        // Ne fonctionne pas ?
-        controller.uiPassword.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                controller.uiConnexion.fire();
-            }
-        });
-        controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Session session = Injector.getBean(Session.class);
-                final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
-
-                controller.uiLogInfo.setText("Recherche…");
-                final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
-                Utilisateur user = null;
-
-                MessageDigest messageDigest=null;
-                String encryptedPassword = null;
-                try {
-                    messageDigest = MessageDigest.getInstance("MD5");
-                    encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                for(final Utilisateur candidate : candidateUsers){
-                    if(candidate.getPassword().equals(encryptedPassword)){
-                        user = candidate; break;
-                    }
-                }
-
-                // Accès provisoire comme Admin sans identifiants
-                if("".equals(controller.uiLogin.getText())
-                        && "".equals(controller.uiPassword.getText())){
-                    user = new Utilisateur();
-                    user.setRole(Role.ADMIN.toString());
-                }
-
-                if(user==null){
-                    controller.uiLogInfo.setText("Identifiants erronés.");
-                    controller.uiLogin.setText("");
-                    controller.uiPassword.setText("");
-                }
-                else{
-                    session.setUtilisateur(user);
-                    if(session.getRole()==ADMIN 
-                            || session.getRole()==USER 
-                            || session.getRole()==CONSULTANT 
-                            || session.getRole()==EXTERNE){
-                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                        fadeSplash.setFromValue(1.0);
-                        fadeSplash.setToValue(0.0);
-                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent actionEvent) {
-                                splashStage.hide();
-                                try {
-                                    showMainStage();
-                                } catch (IOException ex) {
-                                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                                }
-                            }
-                        });
-                        fadeSplash.play();
-                    }
-                }
-            }
-        });
     }
     
     /**
@@ -227,9 +144,6 @@ public class Loader extends Application {
         scene.getStylesheets().add("/fr/sirs/splashscreen.css");
         scene.setFill(new Color(0, 0, 0, 0));
 
-        final Stage splashStage = new Stage(StageStyle.TRANSPARENT);
-        splashStage.setTitle("SIRS-Digues V2");
-        splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
         splashStage.show();
 
@@ -248,6 +162,7 @@ public class Loader extends Application {
             }
         });
         
+        controller.uiPassword.setOnAction((ActionEvent e)-> controller.uiConnexion.fire());
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -310,7 +225,6 @@ public class Loader extends Application {
      * Display the main frame.
      */
     private static void showMainStage() throws IOException {
-                
         final FXMainFrame frame = new FXMainFrame();
         final Session session = Injector.getBean(Session.class);
         session.setFrame(frame);

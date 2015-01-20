@@ -553,7 +553,7 @@ public class FXLauncherPane extends BorderPane {
     private static void runDesktop(final String serverUrl, final String database){
         try {
             Plugins.loadPlugins();
-            new Loader(serverUrl, database).start(null);
+            (SIRS.LOADER = new Loader(serverUrl, database)).start(null);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Cannot run desktop application with database " + serverUrl + ":" + database, ex);
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
