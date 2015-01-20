@@ -2,6 +2,7 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -80,7 +82,7 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
                     try{
                         contactStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
                     } catch (DateTimeParseException e) {
-                        System.out.println(e.getMessage());
+                        SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                     }
                 }
 

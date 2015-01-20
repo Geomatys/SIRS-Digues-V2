@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.reseau;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.BorneDigue;
@@ -330,7 +333,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
-                        System.out.println(gsi.getClass());
+                        SirsCore.LOGGER.log(Level.FINE, gsi.getClass().toGenericString());
                         throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
                     }
                     else {

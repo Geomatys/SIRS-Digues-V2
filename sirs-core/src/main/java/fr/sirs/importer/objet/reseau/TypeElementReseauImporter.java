@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.reseau;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.OuvertureBatardable;
@@ -108,7 +111,7 @@ public class TypeElementReseauImporter extends GenericTypeImporter<Class> {
                 }
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ELEMENT_RESEAU.toString())), classe);
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }
         }
     }

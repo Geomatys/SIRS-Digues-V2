@@ -168,7 +168,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
             final Objet structure;
             
             if(typeStructure==null){
-//                System.out.println("Type de structure non pris en charge !");
+//                SirsCore.LOGGER.log(Level.FINE, "Type de structure non pris en charge !");
                 structure = null;
             }
             else if(typeStructure == Crete.class){
@@ -206,7 +206,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 //                structure = null;
 
             } else {
-//                System.out.println("Type de structure inconnu !");
+//                SirsCore.LOGGER.log(Level.FINE, "Type de structure inconnu !");
                 structure = null;
             }
 

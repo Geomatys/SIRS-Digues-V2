@@ -1,5 +1,8 @@
 package fr.sirs.importer.troncon;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
@@ -292,7 +295,7 @@ implements DocumentsUpdatable {
                     final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                     str.setGeometry(structGeom);
                 }catch(IllegalArgumentException e){
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             

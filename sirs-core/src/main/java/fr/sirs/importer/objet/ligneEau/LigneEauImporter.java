@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.ligneEau;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -133,7 +136,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
                 nouvelleLigneEau=false;
             }
             else{
-                System.out.println("Nouvelle ligne eau !!");
+                SirsCore.LOGGER.log(Level.FINE, "Nouvelle ligne eau !!");
                 ligneEau = new LigneEau();
                 nouvelleLigneEau=true;
             }

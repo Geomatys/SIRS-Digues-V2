@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.monteeDesEaux;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -121,7 +124,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
                 nouvelleLaisseCrue=false;
             }
             else{
-                System.out.println("Nouvelle montee des eaux !!");
+                SirsCore.LOGGER.log(Level.FINE, "Nouvelle montee des eaux !!");
                 monteeEaux = new MonteeEaux();
                 nouvelleLaisseCrue=true;
             }

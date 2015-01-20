@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
@@ -181,7 +182,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 try{
                     photo.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_PHOTO.toString()).toString(), dateTimeFormatter));
                 } catch (DateTimeParseException e){
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             
@@ -235,7 +236,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                     photo.setBorneDebutId(b.getId());
                 }
                 else{
-                    System.out.println("Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
+                    SirsCore.LOGGER.log(Level.FINE, "Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
                 }
             }
             
@@ -245,7 +246,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                     photo.setBorneFinId(b.getId());
                 }
                 else{
-                    System.out.println("Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
+                    SirsCore.LOGGER.log(Level.FINE, "Borne inconnue : "+row.getDouble(Columns.ID_BORNEREF.toString()));
                 }
             }
             
@@ -312,7 +313,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                     if(desordre!=null){
                         desordre.getPhoto().add(photo);
                     } else {
-                        System.out.println("Désordre null : "+id);
+                        SirsCore.LOGGER.log(Level.FINE, "Désordre null : "+id);
                     }
                     break;
                 // PRESTATIONS
@@ -331,7 +332,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                     laisseCrue.getPhoto().add(photo);
                     break;
                 default:
-                    System.out.println("Autre photo : "+tableName);
+                    SirsCore.LOGGER.log(Level.FINE, "Autre photo : "+tableName);
             }
             }
             

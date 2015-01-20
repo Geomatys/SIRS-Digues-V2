@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
+import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -44,40 +45,40 @@ public abstract class GenericImporter {
         // Set the data flags to false for all the columns used by the importer. 
         this.getUsedColumns().stream().forEach((column) -> {this.columnDataFlags.put(column, Boolean.FALSE);});
         
-        System.out.println("=================================================");
-        System.out.println("======== IMPORTER CHECK for table : "+tableName+"====");
+        SirsCore.LOGGER.log(Level.FINE, "=================================================");
+        SirsCore.LOGGER.log(Level.FINE, "======== IMPORTER CHECK for table : "+tableName+"====");
         try {
             // Detect the empty fields.
             final List<String> emptyFields = this.getEmptyUsedFields();
             if (!emptyFields.isEmpty()) {
-                System.out.println("Empty used fields for table " + tableName + " : ");
+                SirsCore.LOGGER.log(Level.FINE, "Empty used fields for table " + tableName + " : ");
                 emptyFields.stream().forEach((field) -> {
-                    System.out.println(field);
+                    SirsCore.LOGGER.log(Level.FINE, field);
                 });
             }
 
             // Detect the coluns used by the importer that do not exist in the table.
             final List<String> erroneousFields = this.getErroneousUsedFields();
             if (!erroneousFields.isEmpty()) {
-                System.out.println("Erroneous fields for table " + tableName + " : ");
+                SirsCore.LOGGER.log(Level.FINE, "Erroneous fields for table " + tableName + " : ");
                 erroneousFields.stream().forEach((field) -> {
-                    System.out.println(field);
+                    SirsCore.LOGGER.log(Level.FINE, field);
                 });
             }
 
             // Detect the coluns forgotten by the importer but containing data;
             final List<String> forgottenFields = this.getForgottenFields();
             if (!forgottenFields.isEmpty()) {
-                System.out.println("Forgotten fields for table " + tableName + " : ");
+                SirsCore.LOGGER.log(Level.FINE, "Forgotten fields for table " + tableName + " : ");
                 forgottenFields.stream().forEach((field) -> {
-                    System.out.println(field);
+                    SirsCore.LOGGER.log(Level.FINE, field);
                 });
             }
             
         } catch (IOException ex) {
             Logger.getLogger(GenericImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("*************************************************\n");
+        SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
     }
     
     public CoordinateReferenceSystem getOutputCrs(){

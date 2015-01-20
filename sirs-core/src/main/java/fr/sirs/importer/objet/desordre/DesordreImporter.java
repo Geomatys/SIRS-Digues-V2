@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.desordre;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
@@ -138,7 +141,7 @@ public class DesordreImporter extends GenericDesordreImporter {
                 nouveauDesordre=false;
             }
             else{
-                System.out.println("Nouveau désordre !!");
+                SirsCore.LOGGER.log(Level.FINE, "Nouveau désordre !!");
                 desordre = new Desordre();
                 nouveauDesordre=true;
             }
@@ -317,7 +320,7 @@ public class DesordreImporter extends GenericDesordreImporter {
                 try {
                     final Date date = row.getDate(Columns.DATE_FIN_VAL.toString());
                     if (date != null) {
-//                        System.out.println("desordre Id : "+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
+//                        SirsCore.LOGGER.log(Level.FINE, "desordre Id : "+row.getInt(DesordreColumns.ID_DESORDRE.toString()));
                         final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
                         if (desordre.getDate_fin() == null) {
                             desordre.setDate_fin(localDate);
@@ -326,7 +329,7 @@ public class DesordreImporter extends GenericDesordreImporter {
                         }
                     }
                 } catch (DateTimeParseException e) {
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             
@@ -338,7 +341,7 @@ public class DesordreImporter extends GenericDesordreImporter {
                     } 
 //                    else if(!desordre.getCommentaire().equals(commentaire)){ 
 // Les commentaires peuvent différer pour les désordres (ex : désordre 325 de l'Isère
-//                        System.out.println(row.getInt(Columns.ID_DESORDRE.toString()));
+//                        SirsCore.LOGGER.log(Level.FINE, row.getInt(Columns.ID_DESORDRE.toString()));
 //                        throw new AccessDbImporterException("Inconsistent data.");
 //                    }
                 }

@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -386,7 +387,7 @@ public class Session extends SessionGen {
      */
     public void update(final TronconDigue tronconDigue){
         tronconDigue.setDateMaj(LocalDateTime.now());
-        System.out.println("enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
+        SIRS.LOGGER.log(Level.FINE, "enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
         repositories.get("TronconDigueRepository").update(tronconDigue);
     }
     

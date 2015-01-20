@@ -271,7 +271,6 @@ public class FXMainFrame extends BorderPane {
                     final Desktop desktop = Desktop.getDesktop();
                     desktop.open(fileToPrint);
                 } catch (Exception e) {
-                    System.out.println(e);
                     Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
                 }
             }

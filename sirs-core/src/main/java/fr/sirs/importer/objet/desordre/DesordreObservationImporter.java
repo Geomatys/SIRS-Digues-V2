@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.desordre;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
@@ -82,7 +85,7 @@ public class DesordreObservationImporter extends GenericImporter {
                     observation.setDate_observation(LocalDateTime.parse(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()).toString(), dateTimeFormatter));
                 }
                 catch(DateTimeParseException e){
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             

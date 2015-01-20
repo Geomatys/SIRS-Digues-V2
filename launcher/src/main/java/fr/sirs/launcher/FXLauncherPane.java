@@ -303,7 +303,6 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        System.out.println("SELECTED DATABASE : "+db);
         final Window currentWindow = getScene().getWindow();
         
         if (currentWindow instanceof Stage) {

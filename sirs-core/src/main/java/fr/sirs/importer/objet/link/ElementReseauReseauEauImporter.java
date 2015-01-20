@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.link;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
@@ -77,7 +80,7 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
             }
             else if(reseau==null){
                 
-            System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            SirsCore.LOGGER.log(Level.FINE, reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             }
         }
     }

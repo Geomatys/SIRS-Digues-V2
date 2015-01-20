@@ -376,34 +376,29 @@ public class PojoTable extends BorderPane {
     }
     
     protected void goTo(ActionEvent event){
-        
         final Popup popup = new Popup();
         final TextField textField = new TextField();
         popup.getContent().add(textField);
-        
+
         textField.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 int oldCurrentFiche = currentFiche;
-                try{
-                    currentFiche = Integer.valueOf(textField.getText()).intValue()-1;
-                }
-                catch(Exception e){
-                    System.out.println("Message : "+e.getMessage());
-                }
-                finally{
-                    if(currentFiche<0 || currentFiche>uiTable.getItems().size()-1)
-                        currentFiche=oldCurrentFiche;
-                    
+                try {
+                    currentFiche = Integer.valueOf(textField.getText()).intValue() - 1;
+                } finally {
+                    if (currentFiche < 0 || currentFiche > uiTable.getItems().size() - 1) {
+                        currentFiche = oldCurrentFiche;
+                    }
+
                     elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+uiTable.getItems().size());
+                    uiCurrent.setText((currentFiche + 1) + " / " + uiTable.getItems().size());
                 }
                 popup.hide();
             }
         });
         final Point2D sc = uiCurrent.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
-        
     }
     
     public TableView getUiTable() {

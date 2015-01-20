@@ -53,7 +53,6 @@ public class OwcExtentionSirs extends OwcExtension {
         while(ite.hasNext()){
             mapItems.addAll(ite.next().getMapItems());
         }
-        System.out.println(mapItems);
     }
 
     public OwcExtentionSirs() {

@@ -1,12 +1,14 @@
 
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -271,8 +273,8 @@ public class JRDomWriter {
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = method.getName().substring(3, 4).toLowerCase()
                             + method.getName().substring(4);
-                if(!avoidFields.contains(fieldName)){
-                    System.out.println(fieldName);
+                if (!avoidFields.contains(fieldName)) {
+                    SIRS.LOGGER.log(Level.FINE, fieldName);
                     this.writeField(method);
                 }
             }

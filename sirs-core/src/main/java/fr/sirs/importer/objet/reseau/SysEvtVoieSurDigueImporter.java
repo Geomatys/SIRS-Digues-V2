@@ -273,7 +273,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
 //                try{
 //                    voie.setNumero_secteur(Integer.parseInt(row.getString(Columns.N_SECTEUR.toString())));
 //                } catch (NumberFormatException e){
-//                    System.out.println(e.getMessage());
+//                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
 //                }
 //            }
             

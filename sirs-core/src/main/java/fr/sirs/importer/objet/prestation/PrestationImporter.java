@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.prestation;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -143,7 +146,7 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
                 nouvellePrestation=false;
             }
             else{
-                System.out.println("Nouvelle prestation !!");
+                SirsCore.LOGGER.log(Level.FINE, "Nouvelle prestation !!");
                 prestation = new Prestation();
                 nouvellePrestation=true;
             }
@@ -242,7 +245,7 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
                 try {
                     final Date date = row.getDate(Columns.DATE_FIN_VAL.toString());
                     if (date != null) {
-//                        System.out.println("prestation Id : "+row.getInt(Columns.ID_PRESTATION.toString()));
+//                        SirsCore.LOGGER.log(Level.FINE, "prestation Id : "+row.getInt(Columns.ID_PRESTATION.toString()));
                         // Dates de fin de prestation incohérentes sur la prestation 1356 en Isère.
                         final LocalDateTime localDate = LocalDateTime.parse(date.toString(), dateTimeFormatter);
                         if (prestation.getDate_fin() == null) {
@@ -253,7 +256,7 @@ public class PrestationImporter extends GenericPrestationImporter<Prestation> {
 //                        }
                     }
                 } catch (DateTimeParseException e) {
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             

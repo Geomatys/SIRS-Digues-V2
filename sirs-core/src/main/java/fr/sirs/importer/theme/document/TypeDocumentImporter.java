@@ -1,5 +1,8 @@
 package fr.sirs.importer.theme.document;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
@@ -139,7 +142,7 @@ public class TypeDocumentImporter extends GenericImporter {
                 classesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())), classe);
                 typesDocument.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())), typeDocument);
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }
         }
         couchDbConnector.executeBulk(typesDocument.values());

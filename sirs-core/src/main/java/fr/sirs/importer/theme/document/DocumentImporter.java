@@ -315,7 +315,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
                 nouveauDocument=false;
             }
             else{
-//                System.out.println("Nouveau document !!");
+//                SirsCore.LOGGER.log(Level.FINE, "Nouveau document !!");
                 document = new Document();
                 nouveauDocument=true;
             }
@@ -418,10 +418,10 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
                     
                 }
                 else {
-//                    System.out.println("Type de document non pris en charge : ID = " + row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
+//                    SirsCore.LOGGER.log(Level.FINE, "Type de document non pris en charge : ID = " + row.getInt(DocumentColumns.ID_TYPE_DOCUMENT.toString()));
                 }
             } else {
-//                System.out.println("Type de document inconnu !");
+//                SirsCore.LOGGER.log(Level.FINE, "Type de document inconnu !");
             }
                 
             document.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());

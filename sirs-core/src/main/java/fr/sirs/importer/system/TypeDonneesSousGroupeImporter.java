@@ -1,5 +1,8 @@
 package fr.sirs.importer.system;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
@@ -65,7 +68,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
             try{
                 types.put(entry, DbImporter.TableName.valueOf(row.getString(String.valueOf(Columns.NOM_TABLE_EVT.toString()))));
             } catch(IllegalArgumentException e){
-                System.out.println(e.getMessage());
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }
         }
     }

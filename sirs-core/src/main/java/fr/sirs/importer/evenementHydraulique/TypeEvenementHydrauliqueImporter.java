@@ -2,6 +2,7 @@ package fr.sirs.importer.evenementHydraulique;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeImporter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -75,7 +77,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEvenementH
 //                classesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), classe);
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())), typeEvenement);
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }
         }
         couchDbConnector.executeBulk(types.values());

@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.geometry;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
@@ -75,7 +78,7 @@ class TypeElementGeometryImporter extends GenericTypeImporter<Class> {
                 }
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString())), classe);
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }
         }
     }

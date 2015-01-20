@@ -14,6 +14,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -174,7 +175,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             TronconDigue troncon = new TronconDigue();
             troncon.setDigueId(elementProperty.get().getId());
             session.add(troncon);
-            System.out.println("Id du nouveau tronçon : "+troncon.getId());
+            SIRS.LOGGER.log(Level.FINE, "Id du nouveau tronçon : "+troncon.getId());
             troncons.add(troncon);
             updateTable();
             return troncon;

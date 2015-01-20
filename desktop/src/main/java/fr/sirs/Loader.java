@@ -75,7 +75,7 @@ public class Loader extends Application {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
         this.databaseUrl = databaseUrl;
         this.databaseName = databaseName;
-        System.out.println(this.databaseName);
+        SIRS.LOGGER.log(Level.INFO, "Chosen database : "+this.databaseName);
     }
     
     /**
@@ -88,33 +88,20 @@ public class Loader extends Application {
      * Launcher module.
      * 
      * @param args the command line arguments
+     * @throws java.io.IOException If configuration file cannot be read.
      */
-    public static void main(String[] args) {
-        
-        if(args.length==0){
-             try{
-                final File propFile = new File("params.run");
-                final Properties prop = new Properties();
-                prop.load(new FileInputStream(propFile));
-                args = new String[]{
-                    prop.getProperty("url"),
-                    prop.getProperty("database")
-                };
-            }catch(FileNotFoundException ex){
-                 System.out.println(ex.getMessage());
-            }catch(IOException ex){
-                ex.printStackTrace();
-            }
+    public static void main(String[] args) throws IOException {
+        if (args.length == 0) {
+            final File propFile = new File("params.run");
+            final Properties prop = new Properties();
+            prop.load(new FileInputStream(propFile));
+            args = new String[]{
+                prop.getProperty("url"),
+                prop.getProperty("database")
+            };
         }
         
-        try {
-            //wait a little in case the launcher is a bit long to close and release the derby database
-            Thread.sleep(1500);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        System.out.println("Starting application with : "+Arrays.toString(args));
+        SIRS.LOGGER.log(Level.INFO, "Starting application with : "+Arrays.toString(args));
         if(args.length>0 && args[0]!=null) DATABASE_URL = args[0];
         if(args.length>1 && args[1]!=null) DATABASE_NAME = args[1];
         

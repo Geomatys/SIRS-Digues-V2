@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.reseau;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -267,7 +270,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
                 try{
                     voie.setNumero_secteur(Integer.parseInt(row.getString(Columns.N_SECTEUR.toString())));
                 } catch (NumberFormatException e){
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             

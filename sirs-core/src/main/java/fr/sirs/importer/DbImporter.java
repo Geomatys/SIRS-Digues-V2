@@ -6,6 +6,7 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.Repository;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.CommuneRepository;
@@ -905,22 +906,22 @@ public class DbImporter {
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
                     DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")),null);
             
-            System.out.println("=======================");
+            SirsCore.LOGGER.log(Level.FINE, "=======================");
             importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {
-                System.out.println(column.getName());
+                SirsCore.LOGGER.log(Level.FINE, column.getName());
             });
-            System.out.println("++++++++++++++++++++");
+            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
 
-            System.out.println(importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex());
+            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
             for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){
-                System.out.println(row);
+                SirsCore.LOGGER.log(Level.FINE, row.toString());
             }
-            System.out.println("=======================");
+            SirsCore.LOGGER.log(Level.FINE, "=======================");
             
             importer.cleanDb();
             importer.importation();
             
-            System.out.println("fin de l'importation !");
+            SirsCore.LOGGER.log(Level.FINE, "fin de l'importation !");
 
         } catch (IOException ex) {
             Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);

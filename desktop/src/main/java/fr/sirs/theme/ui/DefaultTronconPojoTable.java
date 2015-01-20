@@ -108,19 +108,8 @@ public class DefaultTronconPojoTable extends PojoTable {
             trc.getStructures().add(pojo);
             pojo.setParent(trc);
             session.getTronconDigueRepository().update(trc);
-//        if (pojoClass==Crete.class) {
-//            System.out.println("Création d'un nouvel objet");
-//            
-//            final Crete nouvelleCrete = new Crete();
-//            nouvelleCrete.setTroncon(trc.getId());
-//            trc.getStructures().add(nouvelleCrete);
-//            session.getTronconDigueRepository().update(trc);
-//            updateTable();
-//        }else {
-//            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
-//        }
         } catch (Exception ex) {
-            Logging.getLogger(DefaultTronconPojoTable.class).log(Level.SEVERE, null, ex);
+            Logging.getLogger(DefaultTronconPojoTable.class).log(Level.WARNING, null, ex);
         }
         return pojo;
     }

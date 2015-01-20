@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.link;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
@@ -75,17 +78,17 @@ DATE_DERNIERE_MAJ
                         reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
                     }
                     if(reseau instanceof OuvrageFranchissement){
-                        System.out.println("Supprimé du modèle.");
+                        SirsCore.LOGGER.log(Level.FINE, "Supprimé du modèle.");
                     }
                     else {
                         throw new AccessDbImporterException("Bad type");
                     }
                 }
 //                else if(reseau==null){
-//                    System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+//                    SirsCore.LOGGER.log(Level.FINE, reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
 //                }
 //                else if(voieDigue==null){
-//                    System.out.println(reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
+//                    SirsCore.LOGGER.log(Level.FINE, reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString()));
 //                }
             }
         }

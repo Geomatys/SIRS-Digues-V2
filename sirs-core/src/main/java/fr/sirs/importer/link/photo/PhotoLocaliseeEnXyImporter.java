@@ -5,37 +5,28 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Document;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOrientationPhoto;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
@@ -153,7 +144,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
                 try{
                     photo.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_PHOTO.toString()).toString(), dateTimeFormatter));
                 } catch (DateTimeParseException e){
-                    System.out.println(e.getMessage());
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
             

@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.laisseCrue;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -137,7 +140,7 @@ public class LaisseCrueImporter extends GenericLaisseCrueImporter {
                 nouvelleLaisseCrue=false;
             }
             else{
-                System.out.println("Nouvelle laisse crue !!");
+                SirsCore.LOGGER.log(Level.FINE, "Nouvelle laisse crue !!");
                 laisseCrue = new LaisseCrue();
                 nouvelleLaisseCrue=true;
             }

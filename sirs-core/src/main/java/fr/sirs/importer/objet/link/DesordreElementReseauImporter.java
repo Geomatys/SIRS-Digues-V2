@@ -1,5 +1,8 @@
 package fr.sirs.importer.objet.link;
 
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
@@ -100,7 +103,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
                         desordre.getReseau_hydraulique_ferme().add(elementReseau.getId());
                     }
                     else {
-                        System.out.println(elementReseau.getClass().getSimpleName());
+                        SirsCore.LOGGER.log(Level.FINE, elementReseau.getClass().getSimpleName());
                         throw new AccessDbImporterException("Bad type.");
                     }
                 }
