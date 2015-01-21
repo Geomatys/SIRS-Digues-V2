@@ -240,6 +240,14 @@ public class Session extends SessionGen {
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 1, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 1, false);
     
+    /**
+     * Clear session cache.
+     */
+    public void clearCache(){
+        openEditors.clear();
+        openThemes.clear();
+    }
+    
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);

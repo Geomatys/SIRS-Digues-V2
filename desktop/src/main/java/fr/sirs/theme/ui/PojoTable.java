@@ -188,17 +188,18 @@ public class PojoTable extends BorderPane {
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
         for(final PropertyDescriptor desc : properties) {
-            if("password".equals(desc.getDisplayName())) {
-                final PasswordColumn col = new PasswordColumn();
-                uiTable.getColumns().add(col);
-                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
-            }
-            else{
+            // Colonne de mots de passe simplifiée : ne marche pas très bien.
+//            if("password".equals(desc.getDisplayName())) {
+//                final PasswordColumn col = new PasswordColumn();
+//                uiTable.getColumns().add(col);
+//                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
+//            }
+//            else{
                 final PropertyColumn col = new PropertyColumn(desc); 
                 uiTable.getColumns().add(col);
                 //sauvegarde sur chaque changement dans la table
                 col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
-            }
+//            }
         }
         
         uiTable.editableProperty().bind(editableProperty);
@@ -535,27 +536,27 @@ public class PojoTable extends BorderPane {
 //            }
 //        }
     
-        private class PasswordColumn extends TableColumn<Element, String>{
-            private PasswordColumn(){
-                setEditable(true);
-                setCellValueFactory(new PropertyValueFactory<>("password"));
-                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
-
-                    @Override
-                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
-                        MessageDigest messageDigest = null;
-                        try {
-                            messageDigest = MessageDigest.getInstance("MD5");
-                        } catch (NoSuchAlgorithmException ex) {
-                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
-                        cell.setEditable(true);
-                        return cell;
-                    }
-                });
-            }
-        }
+//        private class PasswordColumn extends TableColumn<Element, String>{
+//            private PasswordColumn(){
+//                setEditable(true);
+//                setCellValueFactory(new PropertyValueFactory<>("password"));
+//                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
+//
+//                    @Override
+//                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
+//                        MessageDigest messageDigest = null;
+//                        try {
+//                            messageDigest = MessageDigest.getInstance("MD5");
+//                        } catch (NoSuchAlgorithmException ex) {
+//                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                        final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
+//                        cell.setEditable(true);
+//                        return cell;
+//                    }
+//                });
+//            }
+//        }
         
         
     public class PropertyColumn extends TableColumn<Element,Object>{

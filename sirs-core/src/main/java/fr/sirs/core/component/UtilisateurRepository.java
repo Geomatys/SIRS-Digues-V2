@@ -29,6 +29,7 @@ public class UtilisateurRepository extends CouchDbRepositorySupport<Utilisateur>
         return Utilisateur.class;
     }
     
+    @Override
     public Utilisateur create(){
         return new Utilisateur();
     }

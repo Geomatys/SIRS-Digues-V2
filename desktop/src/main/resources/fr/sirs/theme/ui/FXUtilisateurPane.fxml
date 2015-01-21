@@ -30,7 +30,7 @@
               </rowConstraints-->
                <children>
                   <!-- EString -->                 
-                  <Label text="%login" GridPane.rowIndex="0" />
+                  <Label fx:id="ui_labelLogin" text="%login" GridPane.rowIndex="0" />
                   <TextField fx:id="ui_login" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                   <!-- EString -->                 
                   <Label text="%password" GridPane.rowIndex="1" />

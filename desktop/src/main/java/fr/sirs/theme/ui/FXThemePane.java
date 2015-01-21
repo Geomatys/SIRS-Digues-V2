@@ -19,6 +19,7 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -148,6 +149,9 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 final Constructor cstr = controllerClass.getConstructor(object.getClass());
                 specificThemePane = (FXElementPane) cstr.newInstance(object);
                 specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
+                if(specificThemePane instanceof FXUtilisateurPane){
+                    ((FXUtilisateurPane) specificThemePane).setAdministrable(session.getRole()==ADMIN);
+                }
                 uiEditDetailTronconTheme.setContent((Node)specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);

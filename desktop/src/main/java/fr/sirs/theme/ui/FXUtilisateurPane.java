@@ -1,9 +1,11 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -24,15 +26,12 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     private final BooleanProperty administrableProperty = new SimpleBooleanProperty(this, "administrableProperty", false);
 
     // Propriétés de Utilisateur
-    @FXML
-    TextField ui_login;
-    @FXML
-    PasswordField ui_password;
-    @FXML
-    PasswordField ui_passwordConfirm;
+    @FXML TextField ui_login;
+    @FXML Label ui_labelLogin;
+    @FXML PasswordField ui_password;
+    @FXML PasswordField ui_passwordConfirm;
     @FXML Label ui_labelConfirm;
-    @FXML
-    TextField ui_role;
+    @FXML TextField ui_role;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when
@@ -103,6 +102,28 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
     @Override
     public void preSave() throws Exception {
+        
+        // Vérification de l'identifiant.
+        if(ui_login == null 
+                || ui_login.getText()==null 
+                || "".equals(ui_login.getText())){
+            ui_labelLogin.setTextFill(Color.RED);
+            new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE).showAndWait();
+            throw new Exception("L'identifiant utilisateur n'a pas été renseigné ! Modification non enregistrée.");
+        }
+        else{
+            final List<Utilisateur> utilisateurs = Injector.getSession().getUtilisateurRepository().getAll();
+            for(final Utilisateur utilisateur : utilisateurs){
+                if(ui_login.getText().equals(utilisateur.getLogin())){
+                    ui_labelLogin.setTextFill(Color.RED);
+                    new Alert(Alert.AlertType.INFORMATION, "L'identifiant "+ui_login.getText()+" existe déjà dans la base locale.", ButtonType.CLOSE).showAndWait();
+                    throw new Exception("L'identifiant "+ui_login.getText()+" existe déjà dans la base locale. ! Modification non enregistrée.");
+                }
+            }
+            ui_labelLogin.setTextFill(Color.BLACK);
+        }
+        
+        // Vérification du mot de passe.
         if(ui_password == null
                 || ui_passwordConfirm == null
                 || !ui_password.getText().equals(ui_passwordConfirm.getText())){
