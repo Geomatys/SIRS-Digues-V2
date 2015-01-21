@@ -1,24 +1,16 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.Injector;
-import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
-import fr.sirs.util.SirsStringConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
-import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  *
@@ -29,6 +21,7 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
     private final MessageDigest messageDigest;
+    private final BooleanProperty administrableProperty = new SimpleBooleanProperty(this, "administrableProperty", false);
 
     // Propriétés de Utilisateur
     @FXML
@@ -55,8 +48,19 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     }
 
     public FXUtilisateurPane(final Utilisateur utilisateur) throws NoSuchAlgorithmException {
+        this(utilisateur, false);
+    }
+
+    public FXUtilisateurPane(final Utilisateur utilisateur, final boolean administrable) throws NoSuchAlgorithmException {
         this();
         this.elementProperty().set(utilisateur);
+        this.administrableProperty().set(administrable);
+    }
+    
+    public BooleanProperty administrableProperty(){return administrableProperty;}
+    public boolean isAdministrable(){return administrableProperty.get();}
+    public void setAdministrable(final boolean administrable){
+        administrableProperty.set(administrable);
     }
 
     /**
@@ -72,8 +76,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         // Propriétés de Utilisateur
         // * login
         ui_login.textProperty().bindBidirectional(element.loginProperty());
-
         ui_login.disableProperty().bind(disableFieldsProperty());
+        ui_login.editableProperty().bind(administrableProperty());
 
         // * password
         ui_password.setText("");
@@ -84,8 +88,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
         // * role
         ui_role.textProperty().bindBidirectional(element.roleProperty());
-
         ui_role.disableProperty().bind(disableFieldsProperty());
+        ui_role.editableProperty().bind(administrableProperty());
 
     }
 

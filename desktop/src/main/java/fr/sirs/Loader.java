@@ -123,7 +123,6 @@ public class Loader extends Application {
     
     public void showSplashStage() {
         splashStage.show();
-        splashStage.toFront();
     }
     
     /**
@@ -172,50 +171,57 @@ public class Loader extends Application {
 
                 controller.uiLogInfo.setText("Recherche…");
                 final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
-                Utilisateur user = null;
-
-                MessageDigest messageDigest=null;
-                String encryptedPassword = null;
-                try {
-                    messageDigest = MessageDigest.getInstance("MD5");
-                    encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                for(final Utilisateur candidate : candidateUsers){
-                    if(candidate.getPassword().equals(encryptedPassword)){
-                        user = candidate; break;
-                    }
-                }
-
-                if(user==null){
+                
+                if(candidateUsers.isEmpty()){
                     controller.uiLogInfo.setText("Identifiants erronés.");
                     controller.uiLogin.setText("");
                     controller.uiPassword.setText("");
                 }else{
-                    session.setUtilisateur(user);
-                    if(session.getRole()==ADMIN 
-                            || session.getRole()==USER 
-                            || session.getRole()==CONSULTANT 
-                            || session.getRole()==EXTERNE){
-                        controller.uiLogInfo.setText("Identifiants valides.");
-                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                        fadeSplash.setFromValue(1.0);
-                        fadeSplash.setToValue(0.0);
-                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent actionEvent) {
-                                splashStage.hide();
-                                root.setOpacity(1.0);
-                                try {
-                                    showMainStage();
-                                } catch (IOException ex) {
-                                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                
+                    Utilisateur user = null;
+                    MessageDigest messageDigest = null;
+                    String encryptedPassword = null;
+                    try {
+                        messageDigest = MessageDigest.getInstance("MD5");
+                        encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
+                    } catch (NoSuchAlgorithmException ex) {
+                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    for (final Utilisateur candidate : candidateUsers) {
+                        if (candidate.getPassword().equals(encryptedPassword)) {
+                            user = candidate;
+                            break;
+                        }
+                    }
+
+                    if (user == null) {
+                        controller.uiLogInfo.setText("Identifiants erronés.");
+                        controller.uiPassword.setText("");
+                    } else {
+                        session.setUtilisateur(user);
+                        if (session.getRole() == ADMIN
+                                || session.getRole() == USER
+                                || session.getRole() == CONSULTANT
+                                || session.getRole() == EXTERNE) {
+                            controller.uiLogInfo.setText("Identifiants valides.");
+                            final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                            fadeSplash.setFromValue(1.0);
+                            fadeSplash.setToValue(0.0);
+                            fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent actionEvent) {
+                                    splashStage.hide();
+                                    root.setOpacity(1.0);
+                                    try {
+                                        showMainStage();
+                                    } catch (IOException ex) {
+                                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                                    }
                                 }
-                            }
-                        });
-                        fadeSplash.play();
+                            });
+                            fadeSplash.play();
+                        }
                     }
                 }
             }
