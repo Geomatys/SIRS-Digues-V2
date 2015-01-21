@@ -123,6 +123,7 @@ public class Loader extends Application {
     
     public void showSplashStage() {
         splashStage.show();
+        splashStage.toFront();
     }
     
     /**
@@ -206,6 +207,7 @@ public class Loader extends Application {
                             @Override
                             public void handle(ActionEvent actionEvent) {
                                 splashStage.hide();
+                                root.setOpacity(1.0);
                                 try {
                                     showMainStage();
                                 } catch (IOException ex) {

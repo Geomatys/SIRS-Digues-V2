@@ -12,11 +12,12 @@
             <menus>
                 <Menu mnemonicParsing="false" text="Fichier">
                     <items>
-                        <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="Préférences" />
-                  <Menu fx:id="uiRefs" mnemonicParsing="false" text="Références" />
-                  <MenuItem mnemonicParsing="false" onAction="#changeUser" text="Changer d'utilisateur" />
-                  <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="Se déconnecter" />
-                        <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="Quitter" />
+                        <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="%preferences" />
+                  <MenuItem fx:id="uiCompte" mnemonicParsing="false" onAction="#openCompte" text="%count" />
+                  <Menu fx:id="uiRefs" mnemonicParsing="false" text="%references" />
+                  <MenuItem mnemonicParsing="false" onAction="#changeUser" text="%changeUser" />
+                  <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="%changeDB" />
+                        <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="%exit" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Aide">
