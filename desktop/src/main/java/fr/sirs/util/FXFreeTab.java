@@ -1,10 +1,15 @@
 
 package fr.sirs.util;
 
+import fr.sirs.Injector;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.FXTronconThemePane;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -43,18 +48,13 @@ public class FXFreeTab extends Tab implements FXTextAbregeable{
                 
                 final Stage stage = new Stage();
                 stage.setTitle(getText());
-                
-                final Node content = getContent();
-                setContent(null);
-                
-                final BorderPane pane = new BorderPane(content);                
-                final Scene scene = new Scene(pane);
+                final TabPane newPane = new TabPane();
+                newPane.getTabs().add(FXFreeTab.this);
+                final Scene scene = new Scene(newPane);
                 stage.setScene(scene);
-                stage.setOnHidden(new EventHandler<WindowEvent>() {
-                    @Override
-                    public void handle(WindowEvent event) {
-                        setContent(content);
-                    }
+                stage.setOnHidden((WindowEvent event1) -> {
+                    newPane.getTabs().remove(FXFreeTab.this);
+                    tabs.getTabs().add(FXFreeTab.this);
                 });
                 
                 stage.show();

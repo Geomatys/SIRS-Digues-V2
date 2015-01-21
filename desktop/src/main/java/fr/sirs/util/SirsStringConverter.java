@@ -42,8 +42,6 @@ public class SirsStringConverter extends StringConverter {
             text = ((Organisme)item).getNom();
         } else if (item instanceof String) {
             text = (String) item;
-        } else if (item instanceof PreviewLabel) {
-            text = ((PreviewLabel) item).getLabel();
         }
         
         if (text != null && !text.isEmpty()) {

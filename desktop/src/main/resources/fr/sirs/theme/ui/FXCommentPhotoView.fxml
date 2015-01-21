@@ -15,7 +15,7 @@
          </children></AnchorPane>
       <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
          <center>
-            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
+            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                <children>
                   <ImageView fx:id="uiPhotoView" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
                </children>

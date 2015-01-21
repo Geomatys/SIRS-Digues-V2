@@ -170,9 +170,15 @@ public class PojoTable extends BorderPane {
         // Colonnes de suppression et d'ouverture d'éditeur.
         final DeleteColumn deleteColumn = new DeleteColumn();
         final EditColumn editCol = new EditColumn(this::editPojo);
-        
+                
+        /* We cannot bind visible properties of those columns, because TableView 
+         * will set their value when user will request to hide them.
+         */
         editableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             deleteColumn.setVisible(newValue);
+            editCol.setVisible(newValue && detaillableProperty.get());
+        });
+        detaillableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             editCol.setVisible(newValue && detaillableProperty.get());
         });
         
@@ -181,29 +187,17 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
-        for(final PropertyDescriptor desc : properties){
-            if("password".equals(desc.getDisplayName())){
+        for(final PropertyDescriptor desc : properties) {
+            if("password".equals(desc.getDisplayName())) {
                 final PasswordColumn col = new PasswordColumn();
                 uiTable.getColumns().add(col);
-                col.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<Element, Object>>() {
-
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<Element, Object> event) {
-                        System.out.println("édition !!");
-                        elementEdited(event);
-                    }
-                });
+                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
             }
             else{
                 final PropertyColumn col = new PropertyColumn(desc); 
                 uiTable.getColumns().add(col);
                 //sauvegarde sur chaque changement dans la table
-                col.addEventHandler(TableColumn.editCommitEvent(), new EventHandler<TableColumn.CellEditEvent<Element, Object>>() {
-
-                    public void handle(TableColumn.CellEditEvent<Element, Object> event) {
-                        elementEdited(event);
-                    }
-                });
+                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
             }
         }
         
@@ -269,7 +263,7 @@ public class PojoTable extends BorderPane {
         final SplitPane sPane = new SplitPane();
         sPane.setOrientation(Orientation.VERTICAL);
         sPane.getItems().addAll(uiTable, commentPhotoView);
-        sPane.setDividerPositions(0.8);
+        sPane.setDividerPositions(0.9);
         setCenter(sPane);
         
         // NAVIGABILITE FICHE PAR FICHE
@@ -516,38 +510,13 @@ public class PojoTable extends BorderPane {
         }
         
         try {
-            Injector.getSession().getFrame().addTab(openEditionTab(pojo));
+            Injector.getSession().getFrame().addTab(Injector.getSession().getOrCreateElementTab((Element)pojo));
         } catch (Exception ex) {
             Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
             d.showAndWait();
             throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             
         }
-    }
-    
-    private static Tab openEditionTab(final Object pojo){
-        final FXFreeTab tab = new FXFreeTab();
-        Node content = (Node) SIRS.generateEditionPane((Element)pojo);
-        if (content==null) content = new BorderPane(new Label("Pas d'éditeur pour le type : " + pojo.getClass().getSimpleName()));
-
-        tab.setContent(content);
-        final Element ele = (Element) pojo;
-        tab.setTextAbrege(generateEditionTabTitle(ele));
-        tab.setOnSelectionChanged((Event event) -> {
-            if (tab.isSelected()) {
-                 Injector.getSession().prepareToPrint(ele);
-            }
-        });
-        return tab;
-    }
-    
-    private static String generateEditionTabTitle(final Element element){
-        String title =  Injector.getSession().getPreviewLabelRepository().getPreview(element.getId());
-        if(title==null){
-            final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
-            title = bundle.getString("class");
-        }
-        return title;
     }
     
     // Matérieau à utiliser quand le role des utilisateurs sera devenu une énumération
@@ -589,11 +558,8 @@ public class PojoTable extends BorderPane {
         }
         
         
-        
-        
     public class PropertyColumn extends TableColumn<Element,Object>{
         
-
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
             
@@ -619,10 +585,8 @@ public class PojoTable extends BorderPane {
                 
                 if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
+                    
                 }else if(String.class.isAssignableFrom(type)){
-                    
-                    
-                    System.out.println(desc.getDisplayName());
 //                    // Cas des cellules de mots de passe.
                     if(desc.getDisplayName().equals("password")){
                         setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {

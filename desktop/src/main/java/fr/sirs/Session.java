@@ -15,6 +15,7 @@ import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.RefConvention;
 import fr.sirs.core.model.RefCote;
@@ -66,6 +67,11 @@ import fr.sirs.core.model.RefUtilisationConduite;
 import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.model.WithLibelle;
+import fr.sirs.theme.Theme;
+import fr.sirs.theme.ui.FXTronconThemePane;
+import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Internal;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -80,11 +86,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
+import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.layout.BorderPane;
+import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
 import org.ektorp.CouchDbConnector;
@@ -94,11 +111,18 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.style.DefaultDescription;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- *
+ * La session contient toutes les données chargées dans l'instance courante de 
+ * l'application.
+ * 
+ * Notamment, elle doit réferencer l'ensemble des thèmes ouvert, ainsi que les 
+ * onglets associés. De même pour les {@link Element}s et leurs éditeurs.
+ * 
+ * La session fournit également un point d'accès centralisé à tous les documents
+ * de la base CouchDB.
+ * 
  * @author Johann Sorel
  */
 @Component
@@ -207,12 +231,14 @@ public class Session extends SessionGen {
     private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
-    
     private final CouchDbConnector connector;
     
     private final PreviewLabelRepository previewLabelRepository;
 
     private FXMainFrame frame = null;
+    
+    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 1, false);
+    private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 1, false);
     
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
@@ -465,4 +491,68 @@ public class Session extends SessionGen {
         return properties;
     }
     
+    public FXFreeTab getOrCreateThemeTab(final Theme theme) {
+        try {
+            return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
+                @Override
+                public FXFreeTab call() throws Exception {
+                    final FXFreeTab tab = new FXFreeTab(theme.getName());
+                    Parent parent = theme.createPane();
+                    tab.setContent(parent);
+                    if (parent instanceof FXTronconThemePane) {
+                        ((FXTronconThemePane) parent).currentTronconProperty().addListener(new ChangeListener<TronconDigue>() {
+                            @Override
+                            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
+                                tab.setTextAbrege(theme.getName() + " (" + getPreviewLabelRepository().getPreview(newValue.getId()) + ")");
+                            }
+                        });
+                    }
+                    return tab;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public FXFreeTab getOrCreateElementTab(final Element element) {
+        try {
+            return openEditors.getOrCreate(element, new Callable<FXFreeTab>() {
+                @Override
+                public FXFreeTab call() throws Exception {
+                    final FXFreeTab tab = new FXFreeTab();
+                    Node content = (Node) SIRS.generateEditionPane(element);
+                    if (content == null) {
+                        content = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+                    }
+
+                    tab.setContent(content);
+                    tab.setTextAbrege(generateElementTitle(element));
+                    tab.setOnSelectionChanged((Event event) -> {
+                        if (tab.isSelected()) {
+                            prepareToPrint(element);
+                        }
+                    });
+                    return tab;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    
+    public String generateElementTitle(final Element element) {
+        String title =  new SirsStringConverter().toString(element);
+        if(title==null || title.isEmpty()){
+            final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+            title = bundle.getString("class");
+        }
+        
+        final Element parent = element.getParent();
+        if (parent instanceof WithLibelle) {
+            title+=" ("+((WithLibelle)parent).getLibelle()+")";
+        }
+        return title;
+    }
 }

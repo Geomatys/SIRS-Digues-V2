@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
@@ -46,6 +48,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javax.xml.bind.JAXBException;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.collection.Cache;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.opengis.util.FactoryException;
@@ -64,6 +67,12 @@ public class FXMainFrame extends BorderPane {
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
+    private Tab searchTab;
+    
+    /** A cache to get back tab as long as their displayed in application, 
+     * allowing fast search on Theme keys.
+     */ 
+    //private final Cache<Theme, Tab> themeTabs = new Cache<>(12, 1, false);
     
     private Stage prefEditor;
 
@@ -146,9 +155,10 @@ public class FXMainFrame extends BorderPane {
     }
         
     public synchronized void addTab(Tab tab){
-        uiTabs.getTabs().add(tab);
-        final int index = uiTabs.getTabs().indexOf(tab);
-        uiTabs.getSelectionModel().clearAndSelect(index);
+        if (!uiTabs.equals(tab.getTabPane())) {
+            uiTabs.getTabs().add(tab);
+        }
+        uiTabs.getSelectionModel().select(tab);
     }
     
     private MenuItem toMenuItem(final Class reference){
@@ -167,45 +177,27 @@ public class FXMainFrame extends BorderPane {
         return item;
     }
     
-    private MenuItem toMenuItem(final Theme theme){
-        
+    private MenuItem toMenuItem(final Theme theme) {
         final List<Theme> subs = theme.getSubThemes();
         final MenuItem item;
-        
-        if(subs.isEmpty()){
+        // Atomic case
+        if (subs.isEmpty()) {
             item = new MenuItem(theme.getName());
-            item.setOnAction((ActionEvent event) -> {
-                final FXFreeTab tab = new FXFreeTab(theme.getName());
-                Parent parent = theme.createPane();
-                tab.setContent(parent);
-                if(parent instanceof FXTronconThemePane){
-                    ((FXTronconThemePane) parent).currentTronconProperty().addListener(new ChangeListener<TronconDigue>() {
-
-                        @Override
-                        public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-                            tab.setTextAbrege(theme.getName()+" ("+session.getPreviewLabelRepository().getPreview(newValue.getId())+")");
-                        }
-                    });
-                }
-                addTab(tab);
-            });
-        } else{
+            item.setOnAction(new DisplayTheme(theme));
+        // container case
+        } else {
             item = new Menu(theme.getName());
-            //action avec tous les sous panneaux
+            //action avec tous les sous-panneaux
             final MenuItem all = new MenuItem("Ouvrir l'ensemble");
             all.setGraphic(new ImageView(ICON_ALL));
-            all.setOnAction((ActionEvent event) -> {
-                final Tab tab = new FXFreeTab(theme.getName());
-                tab.setContent(theme.createPane());
-                addTab(tab);
-            });
+            all.setOnAction(new DisplayTheme(theme));
             ((Menu) item).getItems().add(all);
-            
-            for(final Theme sub : subs){
+
+            for (final Theme sub : subs) {
                 ((Menu) item).getItems().add(toMenuItem(sub));
             }
         }
-                
+
         return item;
     }
   
@@ -219,21 +211,26 @@ public class FXMainFrame extends BorderPane {
         getDiguesTab().show();
     }
 
+    /**
+     * Get or create search tab. If it has been previously closed, we reset it, 
+     * so user won't be bothered with an old request.
+     * @param event 
+     */
     @FXML
     void openSearchTab(ActionEvent event) {
-        final Tab tab = new Tab(bundle.getString("search"));
-        final FXSearchPane pane = new FXSearchPane();
-        tab.setContent(pane);
-        uiTabs.getTabs().add(tab);
+        if (searchTab == null || !uiTabs.equals(searchTab.getTabPane())) {
+            searchTab = new Tab("Recherche");
+            final FXSearchPane pane = new FXSearchPane();
+            searchTab.setContent(pane);
+            uiTabs.getTabs().add(searchTab);
+        }
+        uiTabs.getSelectionModel().select(searchTab);
     }
     
     @FXML
     void openCompte(ActionEvent event){
-        if(session.getUtilisateur()!=null){
-            final Tab tab = new Tab(bundle.getString("count"));
-            tab.setContent((Node) SIRS.generateEditionPane(session.getUtilisateur()));
-            uiTabs.getTabs().add(tab);
-            uiTabs.getSelectionModel().select(tab);
+        if (session.getUtilisateur()!=null) {
+            addTab(session.getOrCreateElementTab(session.getUtilisateur()));
         }
     }
     
@@ -343,5 +340,19 @@ public class FXMainFrame extends BorderPane {
         final Tab docsTab = new Tab("Validation");
 //        final PojoTable docsTable = new PojoTable(session.getPreviewLabelRepository(), "Table des documents");
         addTab(docsTab);
+    }
+    
+    private class DisplayTheme implements EventHandler<ActionEvent> {
+
+        private final Theme theme;
+
+        public DisplayTheme(Theme theme) {
+            this.theme = theme;
+        }
+
+        public void handle(ActionEvent event) {
+            final Tab result = Injector.getSession().getOrCreateThemeTab(theme);
+            addTab(result);
+        }
     }
 }

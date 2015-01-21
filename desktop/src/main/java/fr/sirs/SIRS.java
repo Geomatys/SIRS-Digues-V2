@@ -260,33 +260,36 @@ public final class SIRS extends SirsCore {
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
     public static FXElementPane generateEditionPane(final Element pojo) {
-        final FXElementPane content;
-        if (pojo instanceof Element) {
-            content = new FXThemePane((Element) pojo);
-        } else if (pojo instanceof Contact) {
+        final FXElementPane content;        
+        if (pojo instanceof Contact) {
             content = new FXContactPane((Contact) pojo);
+            
         } else if (pojo instanceof Organisme) {
             content = new FXOrganismePane((Organisme) pojo);
+            
         } else if (pojo instanceof ContactOrganisme) {
             content = new FXContactOrganismePane((ContactOrganisme) pojo);
-        } else if (pojo instanceof ContactTroncon) {
-            content = null;
+            
         } else if (pojo instanceof ProfilTravers) {
             content = new FXThemePane((ProfilTravers) pojo);
             ((FXThemePane) content).setShowOnMapButton(false);
+            
         } else if (pojo instanceof LeveeProfilTravers){
             content = new FXThemePane((LeveeProfilTravers) pojo);
             ((FXThemePane) content).setShowOnMapButton(false);
+            
         } else if (pojo instanceof TronconDigue) {
             final FXTronconDiguePane ctrl = new FXTronconDiguePane();
             ctrl.setElement((TronconDigue) pojo);
             content = ctrl;
+            
         } else if (pojo instanceof Digue) {
             final FXDiguePane ctrl = new FXDiguePane();
             ctrl.setElement((Digue) pojo);
             content = ctrl;
+            
         } else {
-            content = null;
+            content = new FXThemePane((Element) pojo);
         }
         return content;
     }

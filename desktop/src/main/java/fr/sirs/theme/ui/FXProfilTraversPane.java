@@ -8,20 +8,14 @@ import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveeProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -92,30 +86,7 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
         protected void deletePojos(Element ... pojo) {
             // TODO
         }
-        
-        @Override
-        protected void editPojo(Object pojo){
-            final Tab tab = new FXFreeTab();
-
-            Node content = new BorderPane();
-            if (pojo instanceof LeveeProfilTravers){
-                content = new FXThemePane((LeveeProfilTravers) pojo);
-                ((FXThemePane) content).setShowOnMapButton(false);
-            }
-            tab.setContent(content);
-
-            tab.setText(pojo.getClass().getSimpleName());
-            tab.setOnSelectionChanged(new EventHandler<Event>() {
-                @Override
-                public void handle(Event event) {
-                    if(tab.isSelected()){
-                        session.prepareToPrint(pojo);
-                    }
-                }
-            });
-            session.getFrame().addTab(tab);
-        }
-        
+                
         @Override
         protected Object createPojo() {
             final LeveeProfilTravers leve = new LeveeProfilTravers();
