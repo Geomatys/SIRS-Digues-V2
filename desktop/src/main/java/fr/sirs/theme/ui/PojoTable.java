@@ -188,18 +188,15 @@ public class PojoTable extends BorderPane {
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
         for(final PropertyDescriptor desc : properties) {
+            final TableColumn col;
             // Colonne de mots de passe simplifiée : ne marche pas très bien.
-//            if("password".equals(desc.getDisplayName())) {
-//                final PasswordColumn col = new PasswordColumn();
-//                uiTable.getColumns().add(col);
-//                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
-//            }
-//            else{
-                final PropertyColumn col = new PropertyColumn(desc); 
-                uiTable.getColumns().add(col);
-                //sauvegarde sur chaque changement dans la table
-                col.addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<Element, Object> event) -> elementEdited(event));
-//            }
+            if("password".equals(desc.getDisplayName())) {
+                col = new PasswordColumn();
+            }
+            else{
+                col = new PropertyColumn(desc); 
+            }
+            uiTable.getColumns().add(col);
         }
         
         uiTable.editableProperty().bind(editableProperty);
@@ -536,27 +533,36 @@ public class PojoTable extends BorderPane {
 //            }
 //        }
     
-//        private class PasswordColumn extends TableColumn<Element, String>{
-//            private PasswordColumn(){
-//                setEditable(true);
-//                setCellValueFactory(new PropertyValueFactory<>("password"));
-//                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
-//
-//                    @Override
-//                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
-//                        MessageDigest messageDigest = null;
-//                        try {
-//                            messageDigest = MessageDigest.getInstance("MD5");
-//                        } catch (NoSuchAlgorithmException ex) {
-//                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                        final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
-//                        cell.setEditable(true);
-//                        return cell;
-//                    }
-//                });
-//            }
-//        }
+        private class PasswordColumn extends TableColumn<Element, String>{
+            private PasswordColumn(){
+                setEditable(true);
+                setCellValueFactory(new PropertyValueFactory<>("password"));
+                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
+
+                    @Override
+                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
+                        MessageDigest messageDigest = null;
+                        try {
+                            messageDigest = MessageDigest.getInstance("MD5");
+                        } catch (NoSuchAlgorithmException ex) {
+                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
+                        cell.setEditable(true);
+                        return cell;
+                    }
+                });
+                addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+
+                    @Override
+                    public void handle(CellEditEvent<Element, Object> event) {
+                        final Element rowElement = event.getRowValue();
+                        new PropertyReference<>(rowElement.getClass(), "password").set(rowElement, event.getNewValue());
+                        elementEdited(event);
+                    }
+                });
+            }
+        }
         
         
     public class PropertyColumn extends TableColumn<Element,Object>{
@@ -566,9 +572,14 @@ public class PojoTable extends BorderPane {
             
             final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
                         
-            addEventHandler(TableColumn.editCommitEvent(), (CellEditEvent<Object, Object> event) -> {
-                final Object rowElement = event.getRowValue();
-                new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
+            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+
+                @Override
+                public void handle(CellEditEvent<Element, Object> event) {
+                    final Object rowElement = event.getRowValue();
+                    new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
+                    elementEdited(event);
+                }
             });
             
             //choix de l'editeur en fonction du type de données          
@@ -589,22 +600,22 @@ public class PojoTable extends BorderPane {
                     
                 }else if(String.class.isAssignableFrom(type)){
 //                    // Cas des cellules de mots de passe.
-                    if(desc.getDisplayName().equals("password")){
-                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
-                        
-                        @Override
-                        public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
-                            MessageDigest messageDigest=null;
-                            try {
-                                messageDigest = MessageDigest.getInstance("MD5");
-                            } catch (NoSuchAlgorithmException ex) {
-                                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            return new FXPasswordStringCell(messageDigest);
-                        }
-                    });
-                    } 
-                    
+//                    if(desc.getDisplayName().equals("password")){
+//                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
+//                        
+//                        @Override
+//                        public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
+//                            MessageDigest messageDigest=null;
+//                            try {
+//                                messageDigest = MessageDigest.getInstance("MD5");
+//                            } catch (NoSuchAlgorithmException ex) {
+//                                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//                            return new FXPasswordStringCell(messageDigest);
+//                        }
+//                    });
+//                    } 
+//                    
 //                    // Cas provisoire des roles
 //                    else if(desc.getDisplayName().equals("role")){
 //                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
@@ -617,9 +628,9 @@ public class PojoTable extends BorderPane {
 //                        });
 //                    }
                     // Cas des autres chaînes de caractère par défaut.
-                    else {
+//                    else {
                         setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
-                    }
+//                    }
                 }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
                 }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
