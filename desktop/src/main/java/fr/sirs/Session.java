@@ -69,7 +69,7 @@ import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
-import fr.sirs.core.model.WithLibelle;
+import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
@@ -563,8 +563,8 @@ public class Session extends SessionGen {
         }
         
         final Element parent = element.getParent();
-        if (parent instanceof WithLibelle) {
-            title+=" ("+((WithLibelle)parent).getLibelle()+")";
+        if (parent instanceof AvecLibelle) {
+            title+=" ("+((AvecLibelle)parent).getLibelle()+")";
         }
         return title;
     }

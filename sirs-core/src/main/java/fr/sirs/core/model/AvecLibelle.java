@@ -6,7 +6,7 @@ import javafx.beans.property.StringProperty;
  *
  * @author Alexis Manin (Geomatys)
  */
-public interface WithLibelle {
+public interface AvecLibelle {
     
     StringProperty libelleProperty();
     

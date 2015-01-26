@@ -7,7 +7,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeReperageBorne;
-import fr.sirs.core.model.WithLibelle;
+import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import javafx.util.StringConverter;
@@ -29,8 +29,8 @@ public class SirsStringConverter extends StringConverter {
         }
 
         String text = "";
-        if (item instanceof WithLibelle) {
-            text = ((WithLibelle)item).getLibelle();
+        if (item instanceof AvecLibelle) {
+            text = ((AvecLibelle)item).getLibelle();
         } else if (item instanceof ElementHit) {
             text = ((ElementHit) item).getLibelle();
         } else if (item instanceof PreviewLabel) {
