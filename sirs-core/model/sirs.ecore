@@ -22,8 +22,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRiveId" eType="#//RefRive"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//Borne_digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Document"
-        eOpposite="#//Document/tronconId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//DocumentTroncon"
+        eOpposite="#//DocumentTroncon/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
         eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
@@ -83,7 +83,7 @@
         upperBound="-1" eType="#//SystemeReperageBorne" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Document" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentTroncon" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
       <details key="document" value="true "/>
     </eAnnotations>
@@ -123,7 +123,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documentRelated" eType="#//Document"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentRelated" eType="#//DocumentTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Organisme">
@@ -526,7 +526,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefConvention"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
-        eType="#//Document" eOpposite="#//Document/convention"/>
+        eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/convention"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -545,8 +545,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//Document"
-        eOpposite="#//Document/marche"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//DocumentTroncon"
+        eOpposite="#//DocumentTroncon/marche"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="financeur" upperBound="-1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOeuvre" upperBound="-1"
@@ -561,7 +561,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRapportEtudeId" eType="#//RefRapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
-        eType="#//Document" eOpposite="#//Document/RapportEtude"/>
+        eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/RapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -578,8 +578,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentGrandeEchelleId"
         eType="#//RefDocumentGrandeEchelle"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//Document"
-        eOpposite="#//Document/documentgrandeechelle"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//DocumentTroncon"
+        eOpposite="#//DocumentTroncon/documentgrandeechelle"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -953,8 +953,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomJournal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//Document"
-        eOpposite="#//Document/articlejournal"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//DocumentTroncon"
+        eOpposite="#//DocumentTroncon/articlejournal"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1024,7 +1024,7 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
-        eType="#//Document" eOpposite="#//Document/profilTravers"/>
+        eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/profilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1083,7 +1083,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="documentProfilTraversId"
-        eType="#//Document"/>
+        eType="#//DocumentTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTraversEvenementHydraulique">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1111,7 +1111,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
-        eType="#//Document" eOpposite="#//Document/profilLong"/>
+        eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/profilLong"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

@@ -4507,9 +4507,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_LF6KsEffEeSoXJiONqf-1A" name="Document" tooltipText="" outgoingEdges="_tSq8sEfkEeSoXJiONqf-1A _5HRPEEr4EeSShKVOxlfrCQ _wX6c0Er5EeSShKVOxlfrCQ _JwkfQGW2EeSQeooBaRDqog _P49ckGsWEeSz0bikHziHTg _rNiFIGvTEeSz0bikHziHTg _zsTBMGvTEeSz0bikHziHTg _Rs92EHGTEeS-n5RTdhPTFw _c7RsIHGUEeS-n5RTdhPTFw _dYzVoHGUEeS-n5RTdhPTFw" incomingEdges="_p4xKIF64EeSu4tBL7n5h2g _NTVbYGW2EeSQeooBaRDqog __jORcH-TEeSOeabJ-GPliw" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//Document"/>
-        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//Document"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_LF6KsEffEeSoXJiONqf-1A" name="DocumentTroncon" tooltipText="" outgoingEdges="_tSq8sEfkEeSoXJiONqf-1A _5HRPEEr4EeSShKVOxlfrCQ _wX6c0Er5EeSShKVOxlfrCQ _JwkfQGW2EeSQeooBaRDqog _P49ckGsWEeSz0bikHziHTg _rNiFIGvTEeSz0bikHziHTg _zsTBMGvTEeSz0bikHziHTg _Rs92EHGTEeS-n5RTdhPTFw _c7RsIHGUEeS-n5RTdhPTFw _dYzVoHGUEeS-n5RTdhPTFw" incomingEdges="_p4xKIF64EeSu4tBL7n5h2g _NTVbYGW2EeSQeooBaRDqog __jORcH-TEeSOeabJ-GPliw" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//DocumentTroncon"/>
+        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//DocumentTroncon"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
@@ -4523,8 +4523,8 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_UabDAEffEeSoXJiONqf-1A" name="libelle : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/libelle"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/libelle"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/libelle"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/libelle"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_Vu0qIEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Vu0qIUffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4534,8 +4534,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_WBfugEffEeSoXJiONqf-1A" name="taille : EFloat = 0.0" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/taille"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/taille"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/taille"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/taille"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_YGaMkEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_YGaMkUffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4545,8 +4545,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_ZQs1cEffEeSoXJiONqf-1A" name="commentaire : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/commentaire"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/commentaire"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/commentaire"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/commentaire"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_ai-8sEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_ai_jwEffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4556,8 +4556,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_dH0Q8EffEeSoXJiONqf-1A" name="chemin : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/chemin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/chemin"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/chemin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/chemin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_d-CuUEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_d-CuUUffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4567,8 +4567,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_eVZeYEffEeSoXJiONqf-1A" name="contenu : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/contenu"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/contenu"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/contenu"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/contenu"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_f3UkIEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_f3UkIUffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4578,8 +4578,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gK0H4EffEeSoXJiONqf-1A" name="date_document : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/date_document"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/date_document"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/date_document"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/date_document"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_hTsbgEffEeSoXJiONqf-1A" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_hTsbgUffEeSoXJiONqf-1A"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -4589,8 +4589,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Fa_AsFQ_EeSV8-H6esGTsg" name="dateMaj : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/dateMaj"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Document/dateMaj"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/dateMaj"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//DocumentTroncon/dateMaj"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_Fa_AsVQ_EeSV8-H6esGTsg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Fa_AslQ_EeSV8-H6esGTsg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -5023,8 +5023,8 @@
         </ownedElements>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_tSq8sEfkEeSoXJiONqf-1A" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_D2iPYEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//Document"/>
-        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//Document/@eGenericSuperTypes.0"/>
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//DocumentTroncon"/>
+        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//DocumentTroncon/@eGenericSuperTypes.0"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_e9YwMHuMEeSMvKjasgWS-Q" targetArrow="InputClosedArrow" routingStyle="tree">
           <customFeatures>strokeColor</customFeatures>
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']/@style"/>
@@ -7327,8 +7327,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_5HRPEEr4EeSShKVOxlfrCQ" name="[0..1] digueId" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DeVKwEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/digueId"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/digueId"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/digueId"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/digueId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_5HRPEUr4EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_5HRPEkr4EeSShKVOxlfrCQ"/>
@@ -7359,8 +7359,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_wX6c0Er5EeSShKVOxlfrCQ" name="[0..1] structureId" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_DOmFoEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/structureId"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/structureId"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/structureId"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/structureId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_wX6c0Ur5EeSShKVOxlfrCQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_wX6c0kr5EeSShKVOxlfrCQ"/>
@@ -9111,8 +9111,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_JwkfQGW2EeSQeooBaRDqog" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_QqWzMEi6EeSShKVOxlfrCQ" beginLabel="[0..*] document" endLabel="[0..1] convention">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/convention"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/convention"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/convention"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/convention"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Convention/document"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_JwltYGW2EeSQeooBaRDqog" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
@@ -9129,7 +9129,7 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_NTVbYGW2EeSQeooBaRDqog" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_LF6KsEffEeSoXJiONqf-1A" beginLabel="[0..1] tronconId" endLabel="[0..1] tronconId">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Troncon_Digue/tronconId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Troncon_Digue/tronconId"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/tronconId"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/tronconId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_NTWCcGW2EeSQeooBaRDqog" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_NTWCcWW2EeSQeooBaRDqog"/>
@@ -9194,8 +9194,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_P49ckGsWEeSz0bikHziHTg" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_zOLzoEi6EeSShKVOxlfrCQ" beginLabel="[0..*] document" endLabel="[0..1] RapportEtude">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/RapportEtude"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/RapportEtude"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/RapportEtude"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/RapportEtude"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//RapportEtude/document"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_P4-DoGsWEeSz0bikHziHTg" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
@@ -9210,9 +9210,9 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_rNiFIGvTEeSz0bikHziHTg" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_uNwtEF67EeSu4tBL7n5h2g" beginLabel="[0..*] document" endLabel="[0..1] profilLong">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/profilLong"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/profilLong"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/document"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/profilLong"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/profilLong"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_rNiFIWvTEeSz0bikHziHTg" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_rNiFImvTEeSz0bikHziHTg"/>
@@ -9226,9 +9226,9 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_zsTBMGvTEeSz0bikHziHTg" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_XLb7YF6DEeSu4tBL7n5h2g" beginLabel="[0..*] document" endLabel="[0..1] profilTravers">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/profilTravers"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/profilTravers"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilTravers/document"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/profilTravers"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/profilTravers"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_zsTBMWvTEeSz0bikHziHTg" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_zsTBMmvTEeSz0bikHziHTg"/>
@@ -9432,9 +9432,9 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Rs92EHGTEeS-n5RTdhPTFw" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_nJ0C0Ei6EeSShKVOxlfrCQ" beginLabel="[0..1] document" endLabel="[0..1] marche">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/marche"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/marche"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Marche/document"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/marche"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/marche"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Rs-dIHGTEeS-n5RTdhPTFw" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Rs-dIXGTEeS-n5RTdhPTFw"/>
@@ -9448,9 +9448,9 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_c7RsIHGUEeS-n5RTdhPTFw" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_8e6YIEi6EeSShKVOxlfrCQ" beginLabel="[0..1] document" endLabel="[0..1] documentgrandeechelle">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/documentgrandeechelle"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/documentgrandeechelle"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentGrandeEchelle/document"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/documentgrandeechelle"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/documentgrandeechelle"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_c7STMHGUEeS-n5RTdhPTFw" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_c7STMXGUEeS-n5RTdhPTFw"/>
@@ -9464,8 +9464,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_dYzVoHGUEeS-n5RTdhPTFw" sourceNode="_LF6KsEffEeSoXJiONqf-1A" targetNode="_eAmcAFR1EeSyt_5RCl16VA" beginLabel="[0..1] document" endLabel="[0..1] articlejournal">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Document/articlejournal"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Document/articlejournal"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/articlejournal"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//DocumentTroncon/articlejournal"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ArticleJournal/document"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_dYzVoXGUEeS-n5RTdhPTFw" sourceArrow="InputArrow" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='Bi-directional%20EC_EReference%20']/@style"/>
