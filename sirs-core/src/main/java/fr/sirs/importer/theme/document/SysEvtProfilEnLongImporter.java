@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -123,13 +123,13 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
     @Override
     protected void preCompute() throws IOException {
         
-        documents = new HashMap<>();
+        documentTronconAssociations = new HashMap<>();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = new Document();
-            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
+            final DocumentTroncon document = new DocumentTroncon();
+            documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -144,7 +144,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
+            final DocumentTroncon document = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
             
             //document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
 
@@ -233,7 +233,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
                 document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
+            documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), document);
             
         }
         computed=true;

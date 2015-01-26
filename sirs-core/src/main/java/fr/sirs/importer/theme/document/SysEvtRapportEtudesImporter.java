@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -123,13 +123,13 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
     @Override
     protected void preCompute() throws IOException {
         
-        documents = new HashMap<>();
+        documentTronconAssociations = new HashMap<>();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = new Document();
-            documents.put(row.getInt(Columns.ID_DOC.toString()), document);
+            final DocumentTroncon document = new DocumentTroncon();
+            documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), document);
         }
     }
 
@@ -144,7 +144,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final Document document = documents.get(row.getInt(Columns.ID_DOC.toString()));
+            final DocumentTroncon document = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
             
             //document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
             

@@ -2,7 +2,7 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.ProfilTraversTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -72,7 +72,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         profilTraversTronconsByLeve = new HashMap<>();
         
-        final Map<Integer, Document> documents = documentImporter.getPrecomputedDocuments();
+        final Map<Integer, DocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){

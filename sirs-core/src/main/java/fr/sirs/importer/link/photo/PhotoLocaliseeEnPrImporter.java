@@ -9,7 +9,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
@@ -134,7 +134,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, Document> documents = documentImporter.getDocuments();
+        final Map<Integer, DocumentTroncon> documents = documentImporter.getDocuments();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypes();
         final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypes();

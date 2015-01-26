@@ -3,11 +3,11 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.component.DocumentTronconRepository;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.core.model.SystemeReperage;
@@ -168,8 +168,8 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         for(final GenericDocumentRelatedImporter related : documentRelated){
             related.update();
         }
-        if(documents==null) compute();
-        couchDbConnector.executeBulk(documents.values());
+        if(documentTronconAssociations==null) compute();
+        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
     
     private enum Columns {
@@ -227,17 +227,17 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
 
     @Override
     protected void preCompute() throws IOException, AccessDbImporterException {
-        documents = new HashMap<>();
+        documentTronconAssociations = new HashMap<>();
         
         for (final GenericDocumentImporter gdi : documentImporters){
-            final Map<Integer, Document> objets = gdi.getPrecomputedDocuments();
+            final Map<Integer, DocumentTroncon> objets = gdi.getPrecomputedDocuments();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
-                    if(documents.get(key)!=null){
-                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documents.get(key).getClass().getCanonicalName());
+                    if(documentTronconAssociations.get(key)!=null){
+                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+documentTronconAssociations.get(key).getClass().getCanonicalName());
                     }
                     else {
-                        documents.put(key, objets.get(key));
+                        documentTronconAssociations.put(key, objets.get(key));
                     }
                 }
             }
@@ -252,7 +252,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
 //                documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
 //            }
 //        }
-        couchDbConnector.executeBulk(documents.values());
+        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
 
     @Override
@@ -264,7 +264,7 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         
         
         for (final GenericDocumentImporter gdi : documentImporters){
-            final Map<Integer, Document> objets = gdi.getDocuments();
+            final Map<Integer, DocumentTroncon> objets = gdi.getDocuments();
 //            if(objets!=null){
 //                for (final Integer key : objets.keySet()){
 //                    if(documents.get(key)!=null){
@@ -308,15 +308,15 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final Document document;
+            final DocumentTroncon document;
             final boolean nouveauDocument;
-            if(documents.get(row.getInt(Columns.ID_DOC.toString()))!=null){
-                document = documents.get(row.getInt(Columns.ID_DOC.toString()));
+            if(documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()))!=null){
+                document = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
                 nouveauDocument=false;
             }
             else{
 //                SirsCore.LOGGER.log(Level.FINE, "Nouveau document !!");
-                document = new Document();
+                document = new DocumentTroncon();
                 nouveauDocument=true;
             }
             
@@ -427,9 +427,9 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
             document.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
 
             if(nouveauDocument){
-               documents.put(row.getInt(Columns.ID_DOC.toString()), document);
+               documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), document);
             }
         }
-        couchDbConnector.executeBulk(documents.values());
+        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
 }

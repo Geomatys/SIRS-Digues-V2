@@ -1,7 +1,7 @@
 package fr.sirs.importer.theme.document;
 
 import com.healthmarketscience.jackcess.Database;
-import fr.sirs.core.model.Document;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  */
 abstract class GenericDocumentImporter extends GenericImporter {
     
-    protected Map<Integer, Document> documents = null;
+    protected Map<Integer, DocumentTroncon> documentTronconAssociations = null;
     
 //    protected DocumentRepository documentRepository;
     
@@ -50,9 +50,9 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, Document> getPrecomputedDocuments() throws IOException, AccessDbImporterException {
-        if (documents == null)  preCompute();
-        return documents;
+    public Map<Integer, DocumentTroncon> getPrecomputedDocuments() throws IOException, AccessDbImporterException {
+        if (documentTronconAssociations == null)  preCompute();
+        return documentTronconAssociations;
     }
     
     /**
@@ -62,10 +62,10 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, Document> getDocuments() throws IOException, AccessDbImporterException {
-        if (documents == null)  preCompute();
+    public Map<Integer, DocumentTroncon> getDocuments() throws IOException, AccessDbImporterException {
+        if (documentTronconAssociations == null)  preCompute();
         if (!computed)  compute();
-        return documents;
+        return documentTronconAssociations;
     }
     
     /**

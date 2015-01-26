@@ -13,7 +13,7 @@ import fr.sirs.core.component.CommuneRepository;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.DocumentRepository;
+import fr.sirs.core.component.DocumentTronconRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.MarcheRepository;
 import fr.sirs.core.component.OrganismeRepository;
@@ -128,7 +128,7 @@ public class DbImporter {
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final RefRiveRepository refRiveRepository;
-    private final DocumentRepository documentRepository;
+    private final DocumentTronconRepository documentTronconRepository;
     private final ConventionRepository conventionRepository; 
     private final RefConventionRepository refConventionRepository;
     private final ProfilTraversRepository profilTraversRepository;
@@ -580,8 +580,8 @@ public class DbImporter {
         repositories.add(borneDigueRepository);
         refRiveRepository = new RefRiveRepository(couchDbConnector);
         repositories.add(refRiveRepository);
-        documentRepository = new DocumentRepository(couchDbConnector);
-        repositories.add(documentRepository);
+        documentTronconRepository = new DocumentTronconRepository(couchDbConnector);
+        repositories.add(documentTronconRepository);
         conventionRepository = new ConventionRepository(couchDbConnector);
         repositories.add(conventionRepository);
         refConventionRepository = new RefConventionRepository(couchDbConnector);
