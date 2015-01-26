@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.h2.H2Helper;
+import fr.sirs.core.model.Digue;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsTableCell;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
@@ -153,10 +155,10 @@ public class FXSearchPane extends BorderPane {
             h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
             
             final Set<Name> names = h2Store.getNames();
-            final ObservableList lst = FXCollections.observableArrayList();
-            for(Name n : names) lst.add(n.getLocalPart());
-            Collections.sort(lst);
-            uiDBTable.setItems(lst);
+            final ObservableList observableNames = FXCollections.observableArrayList();
+            for(Name n : names) observableNames.add(n.getLocalPart());
+            Collections.sort(observableNames);
+            uiDBTable.setItems(observableNames);
             
         } catch (Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -387,6 +389,7 @@ public class FXSearchPane extends BorderPane {
                 
                 final ScrollPane scroll = new ScrollPane(uiTable);
                 scroll.setFitToHeight(true);
+                scroll.setFitToWidth(true);
                 setCenter(scroll);
                 
             }else if(uiToggleSimple.isSelected()){                
@@ -408,7 +411,7 @@ public class FXSearchPane extends BorderPane {
         final FeatureMapLayer layer = searchSQLLayer(query);
         if(layer==null) return;
         
-        final FXFeatureTable table = new FXFeatureTable();
+        final FXFeatureTable table = new FXFeatureTable("fr.sirs.core.model.");
         table.setLoadAll(true);
         table.init(layer);
         setCenter(table);
@@ -416,7 +419,7 @@ public class FXSearchPane extends BorderPane {
     
     private FeatureMapLayer searchSQLLayer(String query){
         if(!query.toLowerCase().startsWith("select")){
-            final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les reqêtes SELECT sont possibles.",ButtonType.CLOSE);
+            final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les requêtes SELECT sont possibles.",ButtonType.CLOSE);
             alert.showAndWait();
             return null;
         }

@@ -219,18 +219,19 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         initializing = true;
         
         final TronconDigue troncon = elementProperty.get();
-        final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
-        allDigues.add(0,null);
-        Digue digue = null;
-        if(troncon.getDigueId()!=null){
-            digue = session.getDigueById(troncon.getDigueId());
-        }
         
         this.uiId.setText(troncon.getId());
         this.uiName.textProperty().bindBidirectional(troncon.libelleProperty());
         this.uiComment.setHtmlText(troncon.getCommentaire());
                 
+        final ObservableList<Digue> allDigues = FXCollections.observableList(session.getDigueRepository().getAll());
+        allDigues.add(0,null);
         this.uiDigue.setItems(allDigues);
+        
+        Digue digue = null;
+        if(troncon.getDigueId()!=null){
+            digue = session.getDigueById(troncon.getDigueId());
+        }
         final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
             @Override
             public String toString(Digue digue) {

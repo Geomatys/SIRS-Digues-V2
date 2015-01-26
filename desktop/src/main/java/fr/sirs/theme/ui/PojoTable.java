@@ -13,7 +13,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.query.ElementHit;
-import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
@@ -24,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,7 +40,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
@@ -56,7 +53,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -75,7 +71,6 @@ import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.gui.javafx.util.FXPasswordStringCell;
 import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -597,40 +592,8 @@ public class PojoTable extends BorderPane {
                 
                 if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
-                    
                 }else if(String.class.isAssignableFrom(type)){
-//                    // Cas des cellules de mots de passe.
-//                    if(desc.getDisplayName().equals("password")){
-//                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
-//                        
-//                        @Override
-//                        public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
-//                            MessageDigest messageDigest=null;
-//                            try {
-//                                messageDigest = MessageDigest.getInstance("MD5");
-//                            } catch (NoSuchAlgorithmException ex) {
-//                                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-//                            }
-//                            return new FXPasswordStringCell(messageDigest);
-//                        }
-//                    });
-//                    } 
-//                    
-//                    // Cas provisoire des roles
-//                    else if(desc.getDisplayName().equals("role")){
-//                        setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
-//
-//                            @Override
-//                            public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
-//                                return new FXEnumTableCell<Element, role>();
-//                            }
-//                            
-//                        });
-//                    }
-                    // Cas des autres chaînes de caractère par défaut.
-//                    else {
-                        setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
-//                    }
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
                 }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
                 }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){

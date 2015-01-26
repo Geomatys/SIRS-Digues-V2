@@ -6,34 +6,23 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.map.FXMapPane;
-import org.geotoolkit.owc.xml.OwcXmlIO;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.theme.ui.FXReferencePane;
-import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
@@ -46,12 +35,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javax.xml.bind.JAXBException;
-import org.apache.sis.storage.DataStoreException;
-import org.apache.sis.util.collection.Cache;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-import org.opengis.util.FactoryException;
 
 public class FXMainFrame extends BorderPane {
 
@@ -217,11 +202,11 @@ public class FXMainFrame extends BorderPane {
      * @param event 
      */
     @FXML
-    void openSearchTab(ActionEvent event) {
+    private void openSearchTab(ActionEvent event) {
         if (searchTab == null || !uiTabs.equals(searchTab.getTabPane())) {
-            searchTab = new Tab("Recherche");
-            final FXSearchPane pane = new FXSearchPane();
-            searchTab.setContent(pane);
+            searchTab = new Tab(bundle.getString("search"));
+            final FXSearchPane searchPane = new FXSearchPane();
+            searchTab.setContent(searchPane);
             uiTabs.getTabs().add(searchTab);
         }
         uiTabs.getSelectionModel().select(searchTab);

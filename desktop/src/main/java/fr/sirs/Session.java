@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -65,6 +66,7 @@ import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.RefUsageVoie;
 import fr.sirs.core.model.RefUtilisationConduite;
 import fr.sirs.core.model.RefVoieDigue;
+import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.WithLibelle;
@@ -99,7 +101,6 @@ import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -400,6 +401,10 @@ public class Session extends SessionGen {
     
     public Digue getDigueById(final String digueId){
         return ((DigueRepository) repositories.get("DigueRepository")).get(digueId);
+    }
+    
+    public SystemeEndiguement getSystemeEndiguementById(final String systemeEndiguementId){
+        return ((SystemeEndiguementRepository) repositories.get("SystemeEndiguementRepository")).get(systemeEndiguementId);
     }
 
     public List<TronconDigue> getTroncons() {

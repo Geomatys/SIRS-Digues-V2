@@ -98,6 +98,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
      * 
      */
     public void initFields() {
+        
         this.setCenter(table);
 //        final BooleanProperty editBind = uiMode.editionState();
         
@@ -117,7 +118,6 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         this.uiComment.setHtmlText(elementProperty.get().getCommentaire());
         
         table.updateTable();
-        
     }
 
     @Override

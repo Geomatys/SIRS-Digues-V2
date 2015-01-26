@@ -222,7 +222,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
 
-    public void updateTree() {
+    private void updateTree() {
         
         new Thread(){
             @Override
