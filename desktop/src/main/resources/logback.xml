@@ -35,9 +35,7 @@
     </encoder>
   </appender>
 
- 
-
-  <logger name="org.constellation" level="INFO" />
+  <logger name="fr.sirs" level="INFO" />
   <logger name="org.geotoolkit" level="INFO" />
 
   <root level="WARN">
