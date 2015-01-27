@@ -8,6 +8,7 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
 import java.util.function.Predicate;
+import org.apache.sis.util.ArgumentChecks;
 
 @View(name = "all", map = "classpath:PreviewLabel-map.js")
 public class PreviewLabelRepository extends
@@ -44,22 +45,16 @@ public class PreviewLabelRepository extends
         return db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
     }
 
-    public List<PreviewLabel> getPreviewLabels(Class type){
-        if(type!=null){
-            final List<PreviewLabel> previews = db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
-            
-            previews.removeIf(new Predicate<PreviewLabel>() {
+    public List<PreviewLabel> getPreviewLabels(Class type) {
+        ArgumentChecks.ensureNonNull("Element type", type);
+        return getPreviewLabels(type.getCanonicalName());
+    }
 
-                @Override
-                public boolean test(PreviewLabel t) {
-                    return !type.getCanonicalName().equals(t.getType());
-                }
-            });
-            return previews;
-        }
-        else{
-            return null;
-        }
+    public List<PreviewLabel> getPreviewLabels(final String type) {
+        ArgumentChecks.ensureNonNull("Element type", type);
+        final List<PreviewLabel> previews = db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
+        previews.removeIf((PreviewLabel t) -> !type.equals(t.getType()));
+        return previews;
     }
     
     
