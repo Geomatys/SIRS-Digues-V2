@@ -37,7 +37,7 @@
     
     <build>
         <!-- Override final name for jfx:native command to create a friendly-named package -->
-	<finalName>SIRS2-${project.artifactId}-${project.version}</finalName>
+	<finalName>SIRS2</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -53,6 +53,7 @@
                 <groupId>com.zenjava</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
+                    <nativeReleaseVersion>0.1</nativeReleaseVersion>
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
