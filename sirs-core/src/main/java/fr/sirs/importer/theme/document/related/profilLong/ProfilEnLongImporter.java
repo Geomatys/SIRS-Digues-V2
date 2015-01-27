@@ -71,8 +71,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
 //        ID_DOC_RAPPORT_ETUDES,
         COMMENTAIRE,
 //        ID_SYSTEME_REP_DZ,
-//        NOM_FICHIER_PLAN_ENSEMBLE,
-//        NOM_FICHIER_COUPE_IMAGE,
+        NOM_FICHIER_PLAN_ENSEMBLE,
+        NOM_FICHIER_COUPE_IMAGE,
         DATE_DERNIERE_MAJ,
     }
     
@@ -125,11 +125,15 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            profil.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
+            profil.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            profil.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            profil.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
-            profil.setReference_calque(row.getString(Columns.REFERENCE_CALQUE.toString()));
+            profil.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
+            
+            profil.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
+            
+            profil.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
             
             if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())!=null){
                 profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());

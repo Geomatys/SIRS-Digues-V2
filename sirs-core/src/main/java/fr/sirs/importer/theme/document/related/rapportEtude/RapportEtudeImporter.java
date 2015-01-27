@@ -8,6 +8,7 @@ import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,14 +33,14 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
 
     private enum Columns {
         ID_RAPPORT_ETUDE,
-//        TITRE_RAPPORT_ETUDE, // Pas dans le nouveau modèle
+        TITRE_RAPPORT_ETUDE,
         ID_TYPE_RAPPORT_ETUDE,
         AUTEUR_RAPPORT,
-//        DATE_RAPPORT, // Pas dans le nouveau modèle
+        DATE_RAPPORT,
         REFERENCE_PAPIER,
         REFERENCE_NUMERIQUE,
-//        COMMENTAIRE, // Pas dans le nouveau modèle
-//        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
+        COMMENTAIRE,
+        DATE_DERNIERE_MAJ
     };
     
     @Override
@@ -69,11 +70,23 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
             
             rapport.setAuteur(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
+            rapport.setLibelle(cleanNullString(row.getString(Columns.TITRE_RAPPORT_ETUDE.toString())));
+            
+            rapport.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
+            
             rapport.setTypeRapportEtudeId(typesRapport.get(row.getInt(Columns.ID_TYPE_RAPPORT_ETUDE.toString())).getId());
             
-            rapport.setReference_papier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
+            rapport.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
-            rapport.setReference_numerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+            rapport.setReferenceNumerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+            
+            if (row.getDate(Columns.DATE_RAPPORT.toString()) != null) {
+                rapport.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_RAPPORT.toString()).toString(), dateTimeFormatter));
+            }
+            
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                rapport.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
             
             related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }

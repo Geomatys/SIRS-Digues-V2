@@ -112,9 +112,9 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
 
                 documentGrandeEchelle.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
 
-                documentGrandeEchelle.setReference_papier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
+                documentGrandeEchelle.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
 
-                documentGrandeEchelle.setReference_numerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+                documentGrandeEchelle.setReferenceNumerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
 
                 documentGrandeEchelle.setReference_calque(cleanNullString(row.getString(Columns.REFERENCE_CALQUE.toString())));
 

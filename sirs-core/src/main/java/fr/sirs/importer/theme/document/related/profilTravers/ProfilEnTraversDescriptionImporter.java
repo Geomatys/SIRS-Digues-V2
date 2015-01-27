@@ -17,6 +17,7 @@ import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.DocumentImporter;
 import fr.sirs.importer.theme.document.related.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -89,8 +90,8 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS,
 //        ID_DOC_RAPPORT_ETUDES,
         COMMENTAIRE,
-//        NOM_FICHIER_PLAN_ENSEMBLE, // Pas dans le nouveau modèle
-//        NOM_FICHIER_COUPE_IMAGE, // Pas dans le nouveau modèle
+        NOM_FICHIER_PLAN_ENSEMBLE,
+        NOM_FICHIER_COUPE_IMAGE,
         DATE_DERNIERE_MAJ
     }
     
@@ -139,11 +140,15 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
                 leve.setTypeSystemesReleveId(systemesReleve.get(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())).getId());
             }
             
-            leve.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
+            leve.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            leve.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            leve.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
-            leve.setReference_calque(row.getString(Columns.REFERENCE_CALQUE.toString()));
+            leve.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
+            
+            leve.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
+            
+            leve.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
             
             if(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())!=null){
                 leve.setTypeProfilId(typesProfil.get(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());

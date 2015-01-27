@@ -96,9 +96,9 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
                 convention.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
             }
             
-            convention.setReference_papier(row.getString(Columns.REFERENCE_PAPIER.toString()));
+            convention.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            convention.setReference_numerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            convention.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
             convention.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             

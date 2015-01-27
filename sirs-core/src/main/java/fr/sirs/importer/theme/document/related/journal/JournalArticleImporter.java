@@ -76,9 +76,9 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
                 articleJournal.setDateArticle(LocalDateTime.parse(row.getDate(Columns.DATE_ARTICLE.toString()).toString(), dateTimeFormatter));
             }
             
-            articleJournal.setReference_papier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
+            articleJournal.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
-            articleJournal.setReference_numerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+            articleJournal.setReferenceNumerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
             articleJournal.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             

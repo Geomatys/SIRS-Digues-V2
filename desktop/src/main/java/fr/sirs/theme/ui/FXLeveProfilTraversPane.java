@@ -31,7 +31,7 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveProfilTravers> {
+public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTravers> {
     
     private LeveProfilTravers leveProfilTravers;
     private final Session session;
@@ -51,12 +51,12 @@ public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveProfilTr
     @FXML private TextField uiReferenceCalque;
     @FXML private TextField uiReferenceNumerique;
     
-    private FXLeveeProfilTraversPane(){
+    private FXLeveProfilTraversPane(){
         SIRS.loadFXML(this);
         session = Injector.getBean(Session.class);
     }
     
-    public FXLeveeProfilTraversPane(final LeveProfilTravers leveProfilTravers){
+    public FXLeveProfilTraversPane(final LeveProfilTravers leveProfilTravers){
 //            final Map<String, Object> resources){
         this();
         this.leveProfilTravers = leveProfilTravers;
@@ -213,11 +213,11 @@ public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveProfilTr
         uiTypeSystemeReleve.disableProperty().bind(disableFields);
         
         
-        uiReferenceCalque.textProperty().bindBidirectional(leveProfilTravers.reference_calqueProperty());
+        uiReferenceCalque.textProperty().bindBidirectional(leveProfilTravers.referenceCalqueProperty());
         uiReferenceCalque.disableProperty().bind(disableFields);
-        uiReferenceNumerique.textProperty().bindBidirectional(leveProfilTravers.reference_numeriqueProperty());
+        uiReferenceNumerique.textProperty().bindBidirectional(leveProfilTravers.referenceNumeriqueProperty());
         uiReferenceNumerique.disableProperty().bind(disableFields);
-        uiReferencePapier.textProperty().bindBidirectional(leveProfilTravers.reference_papierProperty());
+        uiReferencePapier.textProperty().bindBidirectional(leveProfilTravers.referencePapierProperty());
         uiReferencePapier.disableProperty().bind(disableFields);
         
 //        leveProfilTravers.getProfilTraversEvenementHydraulique();
