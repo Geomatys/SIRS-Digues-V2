@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Utilitaire de creation de la connection a la base CouchDB.
+ * Utilitaire de creation de la connexion a la base CouchDB.
  * 
  * @author Johann Sorel (Geomatys)
  */
@@ -56,10 +57,15 @@ public class CouchDBInit {
     public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, 
             String configFile, boolean createIfNotExists, boolean setupListener) throws MalformedURLException, IOException {
         
+        final URL dbURL = new URL(databaseUrl);
         //http://user:password@address.com
-        final String userpass = databaseUrl.split("@")[0].substring(7);
-        final String user = userpass.split(":")[0];
-        final String password = userpass.split(":")[1];
+        final String userPass = dbURL.getUserInfo();
+        final String[] loginInfo;
+        if (userPass == null || (loginInfo = userPass.split(":")).length < 2) {
+            throw new IllegalArgumentException("Missing user and password in database URL : "+dbURL.toExternalForm());
+        }
+        final String user = loginInfo[0];
+        final String password = loginInfo[1];
         
         final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
@@ -70,8 +76,8 @@ public class CouchDBInit {
         ElasticSearchEngine elasticEngine = null;
         if(setupListener){
             changeEmmiter = new DocumentChangeEmiter(connector);
-            searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
-            elasticEngine = new ElasticSearchEngine(connector, databaseName, user, password);
+            //searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
+            elasticEngine = new ElasticSearchEngine(dbURL.getHost(), (dbURL.getPort() < 0)? 5984 : dbURL.getPort(), databaseName, user, password);
             changeEmmiter.start();
         }
         

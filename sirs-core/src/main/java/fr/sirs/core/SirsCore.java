@@ -48,11 +48,9 @@ public class SirsCore {
     
     public static final Path PLUGINS_PATH = CONFIGURATION_PATH.resolve("plugins");
     
-    public static final Path LOGS_PATH = CONFIGURATION_PATH.resolve("logs.txt");
-    
-    public static final Path ERR_LOGS_PATH = CONFIGURATION_PATH.resolve("errors.log");
-    
     public static final Path EPSG_PATH = CONFIGURATION_PATH.resolve("EPSG");
+    
+    public static final Path ELASTIC_SEARCH_PATH = CONFIGURATION_PATH.resolve("elasticSearch");
     
     private static CoordinateReferenceSystem PROJECTION;
     

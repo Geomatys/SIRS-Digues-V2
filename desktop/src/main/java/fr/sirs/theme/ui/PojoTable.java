@@ -11,6 +11,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
@@ -22,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -70,6 +72,11 @@ import javafx.stage.Popup;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.elasticsearch.action.ActionFuture;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
@@ -421,13 +428,15 @@ public class PojoTable extends BorderPane {
                 if(str == null || str.isEmpty()){
                     filteredValues = allValues;
                 }else{
-                    final SearchEngine searchEngine = Injector.getSearchEngine();
+                    final Client searchEngine = Injector.getElasticEngine().getClient();
                     final String type = pojoClass.getSimpleName();
                     final Set<String> result = new HashSet<>();
-                    try {
-                        result.addAll(searchEngine.search(type, str.split(" ")));
-                    } catch (ParseException | IOException ex) {
-                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    
+                    ActionFuture<SearchResponse> search = searchEngine.search(
+                            searchEngine.prepareSearch(Injector.getElasticEngine().indexName).setTypes(type).addField("*").setQuery(QueryBuilders.queryString(str)).request());
+                    Iterator<SearchHit> iterator = search.actionGet().getHits().iterator();
+                    while (iterator.hasNext()) {
+                        result.add(iterator.next().getId());
                     }
 
                     filteredValues = allValues.filtered((Element t) -> {

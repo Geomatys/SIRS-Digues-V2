@@ -374,7 +374,7 @@ public class FXSearchPane extends BorderPane {
                 final SearchResponse response = client.prepareSearch("sirs")
                         .setQuery(qb)
                         .setSize(10000)
-                        .addFields("@class","libelle")
+                        .addFields("*")
                         .execute()
                         .actionGet();
                 final List<ElementHit> results = new ArrayList<>();
