@@ -514,11 +514,10 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefConvention"/>
@@ -530,11 +529,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="contacts" upperBound="-1"
         eType="#//ContactConvention" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="maitre_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -550,11 +548,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOeuvre" upperBound="-1"
         eType="#//MaitreOeuvreMarche" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRapportEtudeId" eType="#//RefRapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
@@ -566,11 +563,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/rapportEtude"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentGrandeEchelleId"
         eType="#//RefDocumentGrandeEchelle"/>
@@ -940,11 +936,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_rapport" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomJournal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1014,11 +1009,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers" eSuperTypes="#//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/profilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1089,11 +1083,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//SIRSDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
@@ -1235,4 +1228,5 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierCoupeImage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true"/>
 </ecore:EPackage>
