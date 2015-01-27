@@ -514,7 +514,7 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -532,7 +532,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="contacts" upperBound="-1"
         eType="#//ContactConvention" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -552,7 +552,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOeuvre" upperBound="-1"
         eType="#//MaitreOeuvreMarche" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -946,7 +946,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1035,7 +1035,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveeIds" upperBound="-1"
         eType="#//LeveProfilTravers" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//SIRSReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1100,7 +1100,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//Reference">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1238,7 +1238,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireTechnique"
         eType="#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Reference" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceNumerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
