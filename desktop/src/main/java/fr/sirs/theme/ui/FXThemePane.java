@@ -10,7 +10,7 @@ import static fr.sirs.Role.EXTERNE;
 import static fr.sirs.Role.USER;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilTravers;
@@ -19,7 +19,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -134,8 +133,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             // TODO : make a "WithDateMaj" interface, or something similar.
             if (object instanceof ProfilTravers) {
                 date_maj.valueProperty().bindBidirectional(((ProfilTravers) object).dateMajProperty());
-            } else if (object instanceof LeveeProfilTravers) {
-                date_maj.valueProperty().bindBidirectional(((LeveeProfilTravers) object).dateMajProperty());
+            } else if (object instanceof LeveProfilTravers) {
+                date_maj.valueProperty().bindBidirectional(((LeveProfilTravers) object).dateMajProperty());
             } else if (object instanceof Objet) {
                 date_maj.valueProperty().bindBidirectional(((Objet) object).dateMajProperty());
             } else {

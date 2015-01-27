@@ -6,7 +6,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import java.time.LocalDateTime;
 import javafx.beans.property.BooleanProperty;
@@ -24,7 +24,7 @@ import javafx.scene.layout.VBox;
  */
 public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
     
-    private final ObservableList<LeveeProfilTravers> leves = FXCollections.observableArrayList();
+    private final ObservableList<LeveProfilTravers> leves = FXCollections.observableArrayList();
     
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     
@@ -78,7 +78,7 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
     private class LeveProfilTraversTable extends PojoTable {
 
         public LeveProfilTraversTable() {
-            super(LeveeProfilTravers.class, "Liste des levés de profils en travers");
+            super(LeveProfilTravers.class, "Liste des levés de profils en travers");
             setTableItems(()-> (ObservableList) leves);
         }
 
@@ -89,7 +89,7 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
                 
         @Override
         protected Object createPojo() {
-            final LeveeProfilTravers leve = new LeveeProfilTravers();
+            final LeveProfilTravers leve = new LeveProfilTravers();
             elementProperty.get().getLeveeIds().add(leve);
             return leve;
         }

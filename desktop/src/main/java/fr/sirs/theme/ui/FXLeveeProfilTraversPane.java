@@ -5,7 +5,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ProfilTraversRepository;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
@@ -31,9 +31,9 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveeProfilTravers> {
+public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveProfilTravers> {
     
-    private LeveeProfilTravers leveProfilTravers;
+    private LeveProfilTravers leveProfilTravers;
     private final Session session;
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     
@@ -56,7 +56,7 @@ public class FXLeveeProfilTraversPane extends AbstractFXElementPane<LeveeProfilT
         session = Injector.getBean(Session.class);
     }
     
-    public FXLeveeProfilTraversPane(final LeveeProfilTravers leveProfilTravers){
+    public FXLeveeProfilTraversPane(final LeveProfilTravers leveProfilTravers){
 //            final Map<String, Object> resources){
         this();
         this.leveProfilTravers = leveProfilTravers;

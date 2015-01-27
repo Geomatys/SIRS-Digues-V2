@@ -3,7 +3,7 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LeveePoints;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
 import fr.sirs.core.model.ProfilTraversTroncon;
@@ -32,8 +32,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class ProfilEnTraversDescriptionImporter extends GenericImporter {
 
-    private Map<Integer, LeveeProfilTravers> leves = null;
-    private Map<Integer, List<LeveeProfilTravers>> levesByProfil = null;
+    private Map<Integer, LeveProfilTravers> leves = null;
+    private Map<Integer, List<LeveProfilTravers>> levesByProfil = null;
     
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypeProfilTraversImporter typeProfilTraversImporter;
@@ -66,12 +66,12 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         profilTraversPointXYZImporter = new ProfilTraversPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, LeveeProfilTravers> getLeveeProfilTravers() throws IOException, AccessDbImporterException{
+    public Map<Integer, LeveProfilTravers> getLeveeProfilTravers() throws IOException, AccessDbImporterException{
         if(leves==null) compute();
         return leves;
     }
     
-    public Map<Integer, List<LeveeProfilTravers>> getLeveeProfilTraversByProfilId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<LeveProfilTravers>> getLeveeProfilTraversByProfilId() throws IOException, AccessDbImporterException{
         if(levesByProfil==null) compute();
         return levesByProfil;
     }
@@ -124,7 +124,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LeveeProfilTravers leve = new LeveeProfilTravers();
+            final LeveProfilTravers leve = new LeveProfilTravers();
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
                 leve.setDateLevee(LocalDateTime.parse(row.getDate(Columns.DATE_LEVE.toString()).toString(), dateTimeFormatter));
@@ -173,7 +173,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             
             leves.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             
-            List<LeveeProfilTravers> listByProfil = levesByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+            List<LeveProfilTravers> listByProfil = levesByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();
                 levesByProfil.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);

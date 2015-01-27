@@ -2,7 +2,7 @@ package fr.sirs.importer.theme.document.related.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -60,7 +60,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Map<Integer, List<LeveeProfilTravers>> levesImport = 
+        final Map<Integer, List<LeveProfilTravers>> levesImport = 
                 profilTraversDescriptionImporter.getLeveeProfilTraversByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
@@ -74,7 +74,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            final List<LeveeProfilTravers> leve = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+            final List<LeveProfilTravers> leve = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if(leve!=null) profil.setLeveeIds(leve);
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);

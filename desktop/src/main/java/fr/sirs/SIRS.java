@@ -6,10 +6,9 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveeProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTravers;
@@ -275,8 +274,8 @@ public final class SIRS extends SirsCore {
             content = new FXThemePane((ProfilTravers) pojo);
             ((FXThemePane) content).setShowOnMapButton(false);
             
-        } else if (pojo instanceof LeveeProfilTravers){
-            content = new FXThemePane((LeveeProfilTravers) pojo);
+        } else if (pojo instanceof LeveProfilTravers){
+            content = new FXThemePane((LeveProfilTravers) pojo);
             ((FXThemePane) content).setShowOnMapButton(false);
             
         } else if (pojo instanceof TronconDigue) {
