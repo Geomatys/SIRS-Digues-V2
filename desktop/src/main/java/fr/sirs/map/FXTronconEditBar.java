@@ -33,8 +33,10 @@ public class FXTronconEditBar extends ToolBar {
         final ToggleButton butEditSr = new BorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditSr.getStyleClass().add(CENTER);
         final ToggleButton butEditConvert = new ConvertGeomToTronconAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
-        butEditConvert.getStyleClass().add(RIGHT);
-        final HBox hboxAction = new HBox(butEditTroncon, butCut, butMerge, butEditSr, butEditConvert);
+        butEditConvert.getStyleClass().add(CENTER);
+        final ToggleButton butInfo = new FXOpenElementEditorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        butInfo.getStyleClass().add(RIGHT);
+        final HBox hboxAction = new HBox(butEditTroncon, butCut, butMerge, butEditSr, butEditConvert, butInfo);
 
         getItems().add(hboxAction);
 
