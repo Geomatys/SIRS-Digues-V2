@@ -41,7 +41,6 @@ public class Launcher extends Application {
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
         // the initialization phase of your application
         SLF4JBridgeHandler.install();
-
         
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();

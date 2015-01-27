@@ -119,6 +119,9 @@ public class FXMainFrame extends BorderPane {
             uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);//, uiSaveContext, uiLoadContext);
             uiMenu.getMenus().add(1, uiAdmin);
         }
+        
+        
+        SIRS.LOGGER.log(Level.INFO, org.apache.sis.setup.About.configuration().toString());
     }
     
     public TabPane getUiTabs() {

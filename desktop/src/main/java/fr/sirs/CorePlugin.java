@@ -27,6 +27,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.LabelMapper;
@@ -327,11 +328,8 @@ public class CorePlugin extends Plugin {
     public List<MenuItem> getMapActions(Object obj) {
         final List<MenuItem> lst = new ArrayList<>();
         
-        if(obj instanceof TronconDigue){
-            lst.add(new ViewFormItem(obj));
-            
-        }else if(obj instanceof Objet){
-            lst.add(new ViewFormItem(obj));
+        if(obj instanceof Element) {
+            lst.add(new ViewFormItem((Element)obj));
         }
         
         return lst;
@@ -564,50 +562,16 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static class ViewFormItem extends MenuItem{
+    private static class ViewFormItem extends MenuItem {
 
-        public ViewFormItem(Object candidate) {
-            if(candidate instanceof Digue){
-                final Digue cdt = (Digue) candidate;
-                final String text = "Digue : "+cdt.getLibelle();
-                setText(text);
-                
-                setOnAction((ActionEvent event) -> {
-                    final FXDiguePane controller = new FXDiguePane();
-                    controller.setElement(cdt);
-                    final Tab tab = new FXFreeTab(text);
-                    tab.setContent(controller);
-                    Injector.getBean(Session.class).getFrame().addTab(tab);
-                });
-                
-            }else if(candidate instanceof TronconDigue){
-                final TronconDigue cdt = (TronconDigue) candidate;
-                final String text = "Tronçon : "+cdt.getLibelle();
-                setText(text);
-                
-                setOnAction((ActionEvent event) -> {
-                    final FXTronconDiguePane controller = new FXTronconDiguePane();
-                    controller.setElement(cdt);
-                    final Tab tab = new FXFreeTab(text);
-                    tab.setContent(controller);
-                    Injector.getBean(Session.class).getFrame().addTab(tab);
-                });
-            }else if(candidate instanceof Objet){
-                final Objet cdt = (Objet) candidate;
-                final String text = "Objet "+cdt.getClass().getSimpleName()+" : "+cdt.getId();
-                setText(text);
-                
-                setOnAction((ActionEvent event) -> {
-                    final FXThemePane controller = new FXThemePane(cdt);
-                    final Tab tab = new FXFreeTab(text);
-                    tab.setContent(controller);
-                    Injector.getBean(Session.class).getFrame().addTab(tab);
-                });
-            }
-            
-            
+        public ViewFormItem(Element candidate) {
+            setText(Injector.getSession().generateElementTitle(candidate));
+
+            setOnAction((ActionEvent event) -> {
+                Injector.getSession().getFrame().addTab(
+                        Injector.getSession().getOrCreateElementTab(candidate));
+            });
         }
-        
     }
     
 }

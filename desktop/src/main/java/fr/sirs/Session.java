@@ -238,8 +238,8 @@ public class Session extends SessionGen {
 
     private FXMainFrame frame = null;
     
-    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 1, false);
-    private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 1, false);
+    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
+    private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
     
     /**
      * Clear session cache.
@@ -554,7 +554,6 @@ public class Session extends SessionGen {
         }
     }
     
-    
     public String generateElementTitle(final Element element) {
         String title =  new SirsStringConverter().toString(element);
         if(title==null || title.isEmpty()){
@@ -567,5 +566,15 @@ public class Session extends SessionGen {
             title+=" ("+((AvecLibelle)parent).getLibelle()+")";
         }
         return title;
+    }
+    
+    public Element getCompleteElement(Element e) {
+        if (e.getCouchDBDocument() != null) {
+            return e;
+        } else {
+            String documentId = e.getDocumentId();
+            
+        }
+        throw new IllegalArgumentException("Complete element cannot be rebuilt for : "+e);
     }
 }
