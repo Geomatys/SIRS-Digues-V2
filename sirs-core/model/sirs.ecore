@@ -519,8 +519,6 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eAnnotations source="sirsDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefConvention"/>
@@ -558,8 +556,6 @@
     </eAnnotations>
     <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRapportEtudeId" eType="#//RefRapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" upperBound="-1"
         eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/RapportEtude"/>
@@ -570,13 +566,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/rapportEtude"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle">
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
     <eAnnotations source="sirsDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentGrandeEchelleId"
         eType="#//RefDocumentGrandeEchelle"/>
@@ -953,8 +947,6 @@
     <eAnnotations source="sirsDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type_rapport" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomJournal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="document" eType="#//DocumentTroncon"
         eOpposite="#//DocumentTroncon/articlejournal"/>
@@ -1035,11 +1027,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveeIds" upperBound="-1"
         eType="#//LeveProfilTravers" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//SIRSReferenceProfil">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilId" eType="#//RefTypeProfilTravers"/>
@@ -1100,7 +1089,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReference">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1108,9 +1097,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_numerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_papier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="origineProfilLongId" eType="#//RefOrigineProfilLong"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
@@ -1241,5 +1227,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceNumerique" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSReferenceProfil" abstract="true"
+      eSuperTypes="#//SIRSReference">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierPlanEnsemble"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierCoupeImage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
