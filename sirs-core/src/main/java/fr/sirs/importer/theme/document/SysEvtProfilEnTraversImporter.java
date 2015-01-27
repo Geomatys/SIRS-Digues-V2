@@ -144,7 +144,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final DocumentTroncon document = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
+            final DocumentTroncon docTroncon = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
             
             //document.setTronconId(troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())).getId());
 
@@ -158,7 +158,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
                 try {
 
                     if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        document.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        docTroncon.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_DEBUT.toString()),
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
@@ -169,7 +169,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
                 try {
 
                     if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        document.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        docTroncon.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_FIN.toString()),
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
@@ -181,16 +181,16 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
             }
             
             if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                document.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
+                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
             }
             
-            document.setLibelle(row.getString(Columns.NOM.toString()));
+            docTroncon.setLibelle(row.getString(Columns.NOM.toString()));
             
-            document.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+            docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()) != null) {
                 if (profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())) != null) {
-                    document.setProfilTravers(profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())).getId());
+                    docTroncon.setSirsdocument(profilsTravers.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())).getId());
                 }
             }
             
@@ -200,31 +200,31 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
             
             
             if(row.getDouble(Columns.ID_BORNEREF_DEBUT.toString())!=null){
-                document.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                docTroncon.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
             if(row.getDouble(Columns.ID_BORNEREF_FIN.toString())!=null){
-                document.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                docTroncon.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
-            document.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
-            document.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            docTroncon.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
+            docTroncon.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                document.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                docTroncon.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                document.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+                docTroncon.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
             if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                document.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+                docTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
 
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                document.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                docTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                document.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
         }

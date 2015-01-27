@@ -3,7 +3,6 @@ package fr.sirs.importer.theme.document;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.DocumentTronconRepository;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
@@ -308,15 +307,15 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final DocumentTroncon document;
+            final DocumentTroncon docTroncon;
             final boolean nouveauDocument;
             if(documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()))!=null){
-                document = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
+                docTroncon = documentTronconAssociations.get(row.getInt(Columns.ID_DOC.toString()));
                 nouveauDocument=false;
             }
             else{
 //                SirsCore.LOGGER.log(Level.FINE, "Nouveau document !!");
-                document = new DocumentTroncon();
+                docTroncon = new DocumentTroncon();
                 nouveauDocument=true;
             }
             
@@ -402,12 +401,12 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
             final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
 
             if (classeDocument != null) {
-                document.setTypeDocumentId(classeDocument.getCanonicalName());
+                docTroncon.setTypeDocumentId(classeDocument.getCanonicalName());
                 if (classeDocument.equals(Convention.class)) {
                     // Pour les conventions !
                     if (row.getInt(Columns.ID_CONVENTION.toString()) != null) {
                         if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
-                            document.setConvention(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
+                            docTroncon.setSirsdocument(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
                         }
                     }
                 } 
@@ -424,10 +423,10 @@ public class DocumentImporter extends GenericDocumentImporter  implements Docume
 //                SirsCore.LOGGER.log(Level.FINE, "Type de document inconnu !");
             }
                 
-            document.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
+            docTroncon.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
 
             if(nouveauDocument){
-               documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), document);
+               documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
             }
         }
         couchDbConnector.executeBulk(documentTronconAssociations.values());

@@ -71,7 +71,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, DocumentTroncon> documents = documentImporter.getDocuments();
         final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
-        final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
+//        final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -81,15 +81,17 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             final DocumentTroncon document = documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             if(prestation!=null && document!=null){
-                if(document.getDocumentgrandeechelle()!=null){
-                    final DocumentGrandeEchelle documentGrandeEchelle = documentsGrandeEchelle.get(document.getDocumentgrandeechelle());
-                    documentGrandeEchelle.getPrestation().add(prestation.getId());
-                    prestation.getDocumentGrandeEchelle().add(documentGrandeEchelle.getId());
-                }
-                if(document.getRapportEtude()!=null){
-                    final RapportEtude rapport = rapportsEtude.get(document.getRapportEtude());
-                    rapport.getPrestation().add(prestation.getId());
-                    prestation.getRapportEtude().add(rapport.getId());
+                if(document.getSirsdocument()!=null){
+                    /*if(documentsGrandeEchelle.get(document.getSirsdocument())!=null){
+                        final DocumentGrandeEchelle documentGrandeEchelle = documentsGrandeEchelle.get(document.getSirsdocument());
+                        documentGrandeEchelle.getPrestation().add(prestation.getId());
+                        prestation.getDocumentGrandeEchelle().add(documentGrandeEchelle.getId());
+                    } 
+                    else*/ if (rapportsEtude.get(document.getSirsdocument())!=null){
+                        final RapportEtude rapport = rapportsEtude.get(document.getSirsdocument());
+                        rapport.getPrestation().add(prestation.getId());
+                        prestation.getRapportEtude().add(rapport.getId());
+                    }
                 }
             }
         }
@@ -104,12 +106,12 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         return rapports;
     }
     
-    private Map<String, DocumentGrandeEchelle> documentGrandeEchelleByCouchDbId() 
-            throws IOException, AccessDbImporterException{
-        final Map<String, DocumentGrandeEchelle> documents = new HashMap<>();
-        for(final DocumentGrandeEchelle document : documentAGrandeEchelleImporter.getRelated().values()){
-            documents.put(document.getId(), document);
-        }
-        return documents;
-    }
+//    private Map<String, DocumentGrandeEchelle> documentGrandeEchelleByCouchDbId() 
+//            throws IOException, AccessDbImporterException{
+//        final Map<String, DocumentGrandeEchelle> documents = new HashMap<>();
+//        for(final DocumentGrandeEchelle document : documentAGrandeEchelleImporter.getRelated().values()){
+//            documents.put(document.getId(), document);
+//        }
+//        return documents;
+//    }
 }
