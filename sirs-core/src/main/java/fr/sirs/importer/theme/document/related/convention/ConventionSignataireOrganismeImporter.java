@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 
 import fr.sirs.core.model.ContactConvention;
-import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;

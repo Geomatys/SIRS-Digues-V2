@@ -118,8 +118,6 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
 
                 documentGrandeEchelle.setReference_calque(cleanNullString(row.getString(Columns.REFERENCE_CALQUE.toString())));
 
-                documentGrandeEchelle.setTypeDocumentGrandeEchelleId(null);
-
                 documentGrandeEchelle.setTypeDocumentGrandeEchelleId(types.get(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())).getId());
     
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

@@ -28,9 +28,9 @@ class JournalImporter extends GenericImporter {
     private enum Columns {
         ID_JOURNAL,
         NOM_JOURNAL,
-//        DATE_JOURNAL, // ?
-//        ID_CRUE, // ???
-//        DATE_DERNIERE_MAJ // ?
+//        DATE_JOURNAL, // Pas dans le nouveau modèle
+//        ID_CRUE, // Pas dans le nouveau modèle
+//        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
     };
     
     @Override

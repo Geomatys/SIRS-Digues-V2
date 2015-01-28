@@ -2,7 +2,6 @@ package fr.sirs.importer.theme.document.related.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
@@ -12,7 +11,6 @@ import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.theme.document.related.GenericDocumentRelatedImporter;
@@ -68,7 +66,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
         REFERENCE_CALQUE,
         ID_TYPE_POSITION_PROFIL_EN_LONG,
         ID_TYPE_ORIGINE_PROFIL_EN_LONG,
-//        ID_DOC_RAPPORT_ETUDES,
+//        ID_DOC_RAPPORT_ETUDES, // Mettre une référence vers UN rapport d'études
         COMMENTAIRE,
 //        ID_SYSTEME_REP_DZ,
         NOM_FICHIER_PLAN_ENSEMBLE,

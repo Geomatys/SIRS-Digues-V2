@@ -60,39 +60,44 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Marche marche = new Marche();
-            
-            marche.setLibelle(row.getString(Columns.LIBELLE_MARCHE.toString()));
-            
-            marche.setMaitre_ouvrage(organismes.get(row.getInt(Columns.ID_MAITRE_OUVRAGE.toString())).getId());
-            
-            if (row.getDate(Columns.DATE_DEBUT_MARCHE.toString()) != null) {
-                marche.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_MARCHE.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_MARCHE.toString()) != null) {
-                marche.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_MARCHE.toString()).toString(), dateTimeFormatter));
-            }
-
-            if (row.getDouble(Columns.MONTANT_MARCHE.toString()) != null) {
-                marche.setMontant(row.getDouble(Columns.MONTANT_MARCHE.toString()).floatValue());
-            }
-
-            if (row.getInt(Columns.N_OPERATION.toString()) != null) {
-                marche.setNum_operation(row.getInt(Columns.N_OPERATION.toString()));
-            }
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                marche.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
-
-            related.put(row.getInt(Columns.ID_MARCHE.toString()), marche);
+            related.put(row.getInt(Columns.ID_MARCHE.toString()), importRow(row));
         }
         couchDbConnector.executeBulk(related.values());
+    }
+    
+    public Marche importRow(final Row row) throws IOException{
+        
+        final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        
+        final Marche marche = new Marche();
+            
+        marche.setLibelle(row.getString(Columns.LIBELLE_MARCHE.toString()));
+
+        marche.setMaitre_ouvrage(organismes.get(row.getInt(Columns.ID_MAITRE_OUVRAGE.toString())).getId());
+
+        if (row.getDate(Columns.DATE_DEBUT_MARCHE.toString()) != null) {
+            marche.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_MARCHE.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_FIN_MARCHE.toString()) != null) {
+            marche.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_MARCHE.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.MONTANT_MARCHE.toString()) != null) {
+            marche.setMontant(row.getDouble(Columns.MONTANT_MARCHE.toString()).floatValue());
+        }
+
+        if (row.getInt(Columns.N_OPERATION.toString()) != null) {
+            marche.setNum_operation(row.getInt(Columns.N_OPERATION.toString()));
+        }
+
+        if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+            marche.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+        }
+        
+        return marche;
     }
 }

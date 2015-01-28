@@ -179,7 +179,7 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
 //        REFERENCE_PAPIER, // Pas dans le nouveau modèle
 //        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
 //        REFERENCE_CALQUE, // Pas dans le nouveau modèle
-        DATE_DOCUMENT,
+//        DATE_DOCUMENT,
 //        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
 //        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
@@ -196,7 +196,7 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE, 
-        NOM,
+//        NOM,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
 //        ID_ORG_CREATEUR,
@@ -205,7 +205,7 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
 //        ID_PROFIL_EN_LONG, // Utilisation interdite ! C'est ID_DOC qui est utilisé par les profils en long !
 //        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         ID_CONVENTION,
-        DATE_DERNIERE_MAJ,
+//        DATE_DERNIERE_MAJ,
 //        AUTEUR_RAPPORT,
         ID_RAPPORT_ETUDE
     }
