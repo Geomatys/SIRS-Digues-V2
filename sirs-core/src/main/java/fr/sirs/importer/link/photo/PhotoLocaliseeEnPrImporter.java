@@ -134,7 +134,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, DocumentTroncon> documents = documentImporter.getDocuments();
+        final Map<Integer, DocumentTroncon> docTroncons = documentImporter.getDocuments();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypes();
         final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypes();
@@ -165,7 +165,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             }
             
             if (row.getInt(Columns.ID_DOC.toString()) != null) {
-                photo.setDocumentRelated(documents.get(row.getInt(Columns.ID_DOC.toString())).getId());
+                photo.setDocumentRelated(docTroncons.get(row.getInt(Columns.ID_DOC.toString())).getId());
             }
             
             photo.setLibelle(cleanNullString(row.getString(Columns.REF_PHOTO.toString())));

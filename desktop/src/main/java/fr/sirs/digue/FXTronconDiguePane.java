@@ -7,6 +7,7 @@ import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import static fr.sirs.Role.ADMIN;
+import static fr.sirs.Role.CONSULTANT;
 import static fr.sirs.Role.EXTERNE;
 import static fr.sirs.Role.USER;
 import fr.sirs.map.FXMapTab;
@@ -14,6 +15,7 @@ import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
@@ -32,6 +34,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -68,8 +71,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML private Label uiId;
     @FXML private TextField uiName;
     @FXML private ChoiceBox<Digue> uiDigue;
-    @FXML private ChoiceBox<Digue> uiSrDefault;
-    @FXML private ChoiceBox<String> uiRive;
+    @FXML private ChoiceBox<SystemeReperage> uiSrDefault;
+    @FXML private ChoiceBox<RefRive> uiRive;
     
     // Onglet "Description"
     @FXML private HTMLEditor uiComment;
@@ -228,11 +231,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         allDigues.add(0,null);
         this.uiDigue.setItems(allDigues);
         
-        Digue digue = null;
+        Digue currentDigue = null;
         if(troncon.getDigueId()!=null){
-            digue = session.getDigueById(troncon.getDigueId());
+            currentDigue = session.getDigueById(troncon.getDigueId());
         }
-        final StringConverter<Digue> digueStringConverter = new StringConverter<Digue>() {
+        this.uiDigue.setConverter(new StringConverter<Digue>() {
             @Override
             public String toString(Digue digue) {
                 if(digue==null) return "-";
@@ -242,10 +245,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             public Digue fromString(String string) {
                 return null;
             }
-        };
-        
-        this.uiDigue.setConverter(digueStringConverter);
-        this.uiDigue.setValue(digue);
+        });
+        this.uiDigue.setValue(currentDigue);
         this.uiDigue.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Digue>() {
             @Override
             public void changed(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
@@ -257,23 +258,85 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 // Do not open dialog if the levee list is reset to the old value.
                 if(!Objects.equals(newValue,digue)){
                     if(newValue==null){
-                        elementProperty.get().setDigueId(null);
+                        troncon.setDigueId(null);
                     }else{
-                        elementProperty.get().setDigueId(newValue.getId());
+                        troncon.setDigueId(newValue.getId());
                     }
                 }
             }
         });
         
-        this.uiRive.setValue(troncon.getTypeRiveId());
+        
+        final ObservableList<RefRive> allRives = FXCollections.observableArrayList(session.getRefRiveRepository().getAll());
+        allRives.add(0, null);
+        uiRive.setItems(allRives);
+        uiRive.setConverter(new StringConverter<RefRive>() {
+
+            @Override
+            public String toString(RefRive object) {
+                return object==null ? "-" : object.getLibelle();
+            }
+
+            @Override
+            public RefRive fromString(String string) {
+                return null;
+            }
+        });
+        RefRive currentRive = null;
+        if(troncon.getTypeRiveId()!=null){
+            currentRive = session.getRefRiveRepository().get(troncon.getTypeRiveId());
+        }
+        uiRive.setValue(currentRive);
+        uiRive.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<RefRive>() {
+            @Override
+            public void changed(ObservableValue<? extends RefRive> observable, RefRive oldValue, RefRive newValue) {
+                if(initializing) return;
+                
+                if(newValue==null) troncon.setTypeRiveId(null);
+                else if(!Objects.equals(newValue.getId(),troncon.getTypeRiveId())){
+                    troncon.setTypeRiveId(newValue.getId());
+                }
+            }
+        });
+        
+        final List<SystemeReperage> allSrs = session.getSystemeReperageRepository().getByTroncon(troncon);
+        allSrs.add(0, null);
+        uiSrDefault.setItems(FXCollections.observableArrayList(allSrs));
+        uiSrDefault.setConverter(new StringConverter<SystemeReperage>() {
+
+            @Override
+            public String toString(SystemeReperage object) {
+                return object==null ? "-" : object.getLibelle();
+            }
+
+            @Override
+            public SystemeReperage fromString(String string) {
+                return null;
+            }
+        });
+        final SystemeReperage srDefault = session.getSystemeReperageRepository().get(troncon.getSystemeRepDefautId());
+        uiSrDefault.setValue(srDefault);
+        uiSrDefault.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SystemeReperage>() {
+
+            @Override
+            public void changed(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+                if(initializing) return;
+                
+                if(newValue==null) troncon.setSystemeRepDefautId(null);
+                else if(!Objects.equals(newValue.getId(),troncon.getSystemeRepDefautId())){
+                    troncon.setSystemeRepDefautId(newValue.getId());
+                }
+            }
+        });
+        
+        
+        
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
                 
         
         //liste des systemes de reperage
-        final SystemeReperageRepository repo = session.getSystemeReperageRepository();
-        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
-        uiSRList.setItems(FXCollections.observableArrayList(srs));
+        uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByTroncon(troncon)));
         
         uiContactTable.setTableItems(() -> (ObservableList)troncon.contacts);
         

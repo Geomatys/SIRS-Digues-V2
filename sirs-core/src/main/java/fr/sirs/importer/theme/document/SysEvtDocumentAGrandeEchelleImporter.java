@@ -17,7 +17,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +91,8 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
 //        REFERENCE_CALQUE,
-        DATE_DOCUMENT,
-        NOM,
+//        DATE_DOCUMENT,
+//        NOM,
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
@@ -213,12 +212,6 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
             }
             
             docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
-            }
-            
-            docTroncon.setLibelle(row.getString(Columns.NOM.toString()));
             
             // Pas d'identifiant vers des documents à grande échelle ???
             // Comme pour les profils en long on se base sur l'identifiant du document relatif

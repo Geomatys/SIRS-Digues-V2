@@ -17,7 +17,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.profilLong.ProfilEnLongImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +91,8 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
 //        REFERENCE_CALQUE,
-        DATE_DOCUMENT,
-        NOM,
+//        DATE_DOCUMENT,
+//        NOM,
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
@@ -187,12 +186,6 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
             }
             
             docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
-            }
-            
-            docTroncon.setLibelle(row.getString(Columns.NOM.toString()));
             
             /*
             1- La base du Rhône indique que tous les ID_PROFIL_EN_LONG de la table

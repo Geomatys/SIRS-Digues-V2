@@ -18,7 +18,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,8 +92,8 @@ class SysEvtJournalImporter extends GenericDocumentImporter {
 //        REFERENCE_PAPIER,
 //        REFERENCE_NUMERIQUE,
 //        REFERENCE_CALQUE,
-        DATE_DOCUMENT,
-        NOM,
+//        DATE_DOCUMENT,
+//        NOM,
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
@@ -188,10 +187,6 @@ class SysEvtJournalImporter extends GenericDocumentImporter {
                 Logger.getLogger(SysEvtJournalImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
-            }
-            
             if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
                 docTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
@@ -217,8 +212,6 @@ class SysEvtJournalImporter extends GenericDocumentImporter {
             }
             
             docTroncon.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
-            
-            docTroncon.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
             if (row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()) != null) {
                 if (articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())) != null) {

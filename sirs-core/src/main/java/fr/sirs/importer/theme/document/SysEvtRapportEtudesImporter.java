@@ -17,7 +17,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +91,8 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
 //        REFERENCE_PAPIER, // Pas dans le nouveau modèle
 //        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
 //        REFERENCE_CALQUE, // Pas dans le nouveau modèle
-        DATE_DOCUMENT,
-        NOM,
+//        DATE_DOCUMENT,
+//        NOM,
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE, // Non pertinent pour le rapport d'études
 //        ID_INTERV_CREATEUR,
@@ -188,10 +187,6 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
                 Logger.getLogger(SysEvtRapportEtudesImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
-            }
-            
             if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
                 docTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
@@ -215,14 +210,6 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 docTroncon.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
-            
-            docTroncon.setLibelle(row.getString(Columns.NOM.toString()));
-            
-            
-            
-            
-            
-            
             
             if (row.getInt(Columns.ID_RAPPORT_ETUDE.toString()) != null) {
                 if (rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())) != null) {

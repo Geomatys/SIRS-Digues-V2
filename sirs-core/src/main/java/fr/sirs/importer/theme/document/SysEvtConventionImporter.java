@@ -17,7 +17,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +91,8 @@ class SysEvtConventionImporter extends GenericDocumentImporter {
 //        REFERENCE_PAPIER, // Pas dans le nouveau modèle
 //        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
 //        REFERENCE_CALQUE, // Pas dans le nouveau modèle
-        DATE_DOCUMENT,
-        NOM,
+//        DATE_DOCUMENT, // Pas dans le nouveau modèle
+//        NOM, // Pas dans le nouveau modèle
 //        TM_AUTEUR_RAPPORT,
 //        ID_MARCHE,
 //        ID_INTERV_CREATEUR,
@@ -178,12 +177,6 @@ class SysEvtConventionImporter extends GenericDocumentImporter {
             } catch (FactoryException ex) {
                 Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            if (row.getDate(Columns.DATE_DOCUMENT.toString()) != null) {
-                docTroncon.setDate_document(LocalDateTime.parse(row.getDate(Columns.DATE_DOCUMENT.toString()).toString(), dateTimeFormatter));
-            }
-            
-            docTroncon.setLibelle(row.getString(Columns.NOM.toString()));
             
             docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             

@@ -41,7 +41,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericDocumentImporter  implements DocumentsUpdatable {
+public class DocumentImporter extends GenericDocumentImporter implements DocumentsUpdatable {
     
     private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     
