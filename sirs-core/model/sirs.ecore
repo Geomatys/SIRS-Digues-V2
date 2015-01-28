@@ -28,6 +28,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
         eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//Systeme_reperage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentTroncon" upperBound="-1"
+        eType="#//DocumentTroncon" containment="true" eOpposite="#//DocumentTroncon/troncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -96,6 +98,8 @@
         eOpposite="#//Troncon_Digue/tronconId"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDocument"
         eOpposite="#//SIRSDocument/documenttroncon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
+        eOpposite="#//Troncon_Digue/documentTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
