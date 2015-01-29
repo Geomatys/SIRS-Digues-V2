@@ -7010,7 +7010,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_QqWzMEi6EeSShKVOxlfrCQ" name="Convention" tooltipText="&#xA;WARNING : There should not be a feature named 'referenceNumerique' as well a feature named 'reference_numerique'&#xA;WARNING : There should not be a feature named 'referencePapier' as well a feature named 'reference_papier'" outgoingEdges="_Xb3FAIU7EeS9Qr7oirN1zA _Apa8YKYTEeSphvtX4JgPaw _TGi50KYlEeSphvtX4JgPaw" incomingEdges="_hp7cEEihEeSShKVOxlfrCQ" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_QqWzMEi6EeSShKVOxlfrCQ" name="Convention" tooltipText="" outgoingEdges="_Xb3FAIU7EeS9Qr7oirN1zA _Apa8YKYTEeSphvtX4JgPaw _TGi50KYlEeSphvtX4JgPaw" incomingEdges="_hp7cEEihEeSShKVOxlfrCQ" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//Convention"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//Convention"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -7185,7 +7185,7 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_zOLzoEi6EeSShKVOxlfrCQ" name="RapportEtude" tooltipText="&#xA;WARNING : There should not be a feature named 'referenceNumerique' as well a feature named 'reference_numerique'&#xA;WARNING : There should not be a feature named 'referencePapier' as well a feature named 'reference_papier'" outgoingEdges="_9K_tsKYSEeSphvtX4JgPaw _L4YqAKYlEeSphvtX4JgPaw" incomingEdges="_fCCdcF9CEeSu4tBL7n5h2g _htJY0F9CEeSu4tBL7n5h2g _pdgu4HxvEeSaK9lUa8ruuA" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_zOLzoEi6EeSShKVOxlfrCQ" name="RapportEtude" tooltipText="" outgoingEdges="_9K_tsKYSEeSphvtX4JgPaw _L4YqAKYlEeSphvtX4JgPaw" incomingEdges="_fCCdcF9CEeSu4tBL7n5h2g _htJY0F9CEeSu4tBL7n5h2g _pdgu4HxvEeSaK9lUa8ruuA" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//RapportEtude"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//RapportEtude"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -7691,7 +7691,7 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_eAmcAFR1EeSyt_5RCl16VA" name="ArticleJournal" tooltipText="&#xA;WARNING : There should not be a feature named 'referenceNumerique' as well a feature named 'reference_numerique'&#xA;WARNING : There should not be a feature named 'referencePapier' as well a feature named 'reference_papier'" outgoingEdges="_CUsycKYTEeSphvtX4JgPaw _WJ9AcKYlEeSphvtX4JgPaw" incomingEdges="_NVj94HuMEeSMvKjasgWS-Q _tbIMIHuMEeSMvKjasgWS-Q _zHPaYHuMEeSMvKjasgWS-Q _29f6QHuMEeSMvKjasgWS-Q" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_eAmcAFR1EeSyt_5RCl16VA" name="ArticleJournal" tooltipText="" outgoingEdges="_CUsycKYTEeSphvtX4JgPaw _WJ9AcKYlEeSphvtX4JgPaw" incomingEdges="_NVj94HuMEeSMvKjasgWS-Q _tbIMIHuMEeSMvKjasgWS-Q _zHPaYHuMEeSMvKjasgWS-Q _29f6QHuMEeSMvKjasgWS-Q" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//ArticleJournal"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//ArticleJournal"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -8477,7 +8477,7 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_dsIoQF6DEeSu4tBL7n5h2g" name="LeveProfilTravers" tooltipText="&#xA;WARNING : There should not be a feature named 'referenceNumerique' as well a feature named 'reference_numerique'&#xA;WARNING : There should not be a feature named 'referencePapier' as well a feature named 'reference_papier'" outgoingEdges="_zeYMkF6DEeSu4tBL7n5h2g _m8ipkF64EeSu4tBL7n5h2g _fCCdcF9CEeSu4tBL7n5h2g _kNC_kHCiEeS-n5RTdhPTFw _XWA7kHDKEeS-n5RTdhPTFw _kdSJAHFoEeS-n5RTdhPTFw _oaP7QKYVEeSphvtX4JgPaw" incomingEdges="_0QRh0G8REeSEv-ffZp85jw" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_dsIoQF6DEeSu4tBL7n5h2g" name="LeveProfilTravers" tooltipText="" outgoingEdges="_zeYMkF6DEeSu4tBL7n5h2g _m8ipkF64EeSu4tBL7n5h2g _fCCdcF9CEeSu4tBL7n5h2g _kNC_kHCiEeS-n5RTdhPTFw _XWA7kHDKEeS-n5RTdhPTFw _kdSJAHFoEeS-n5RTdhPTFw _oaP7QKYVEeSphvtX4JgPaw" incomingEdges="_0QRh0G8REeSEv-ffZp85jw" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//LeveProfilTravers"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//LeveProfilTravers"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -8781,7 +8781,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_uNwtEF67EeSu4tBL7n5h2g" name="ProfilLong" tooltipText="&#xA;WARNING : There should not be a feature named 'referenceNumerique' as well a feature named 'reference_numerique'&#xA;WARNING : There should not be a feature named 'referencePapier' as well a feature named 'reference_papier'" outgoingEdges="_FrhYAF68EeSu4tBL7n5h2g _htJY0F9CEeSu4tBL7n5h2g _JlL5YHSCEeSFwdJ1zkiD8w _Ih06wHSJEeSFwdJ1zkiD8w _u3ymcKYVEeSphvtX4JgPaw _XbVv0KYlEeSphvtX4JgPaw" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_uNwtEF67EeSu4tBL7n5h2g" name="ProfilLong" tooltipText="" outgoingEdges="_FrhYAF68EeSu4tBL7n5h2g _htJY0F9CEeSu4tBL7n5h2g _JlL5YHSCEeSFwdJ1zkiD8w _Ih06wHSJEeSFwdJ1zkiD8w _u3ymcKYVEeSphvtX4JgPaw _XbVv0KYlEeSphvtX4JgPaw" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//ProfilLong"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//ProfilLong"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
