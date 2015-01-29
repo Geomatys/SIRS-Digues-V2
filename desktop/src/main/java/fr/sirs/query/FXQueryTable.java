@@ -44,7 +44,7 @@ public class FXQueryTable extends BorderPane{
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefSize(200, 400);
-        FXUtilities.hideTableColumn(table);
+        FXUtilities.hideTableHeader(table);
         setLeft(scroll);
         
         table.setItems(FXCollections.observableList(queries));

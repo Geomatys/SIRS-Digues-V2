@@ -46,7 +46,7 @@ public abstract class GenericObjetLinker extends GenericLinker {
 //                System.out.println("====================");
 //                System.out.println(a);
 //                System.out.println(b);
-                System.out.println(intoSameParent(a, b));
+//                System.out.println(intoSameParent(a, b));
             } else {
                 throw new AccessDbImporterException("Anomalie sur les objets enregistrés !");
             }

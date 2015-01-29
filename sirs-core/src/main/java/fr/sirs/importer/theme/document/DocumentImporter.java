@@ -168,7 +168,7 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
             related.update();
         }
         if(documentTronconAssociations==null) compute();
-        couchDbConnector.executeBulk(documentTronconAssociations.values());
+//        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
     
     private enum Columns {
@@ -251,7 +251,7 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
 //                documents.put(row.getInt(DocumentColumns.ID_DOC.toString()), document);
 //            }
 //        }
-        couchDbConnector.executeBulk(documentTronconAssociations.values());
+//        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
 
     @Override
@@ -429,6 +429,6 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
                documentTronconAssociations.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
             }
         }
-        couchDbConnector.executeBulk(documentTronconAssociations.values());
+//        couchDbConnector.executeBulk(documentTronconAssociations.values());
     }
 }
