@@ -7,7 +7,7 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
-import fr.sirs.importer.theme.document.related.convention.ConventionImporter;
+import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;

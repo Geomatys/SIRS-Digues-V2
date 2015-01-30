@@ -1,6 +1,7 @@
 package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;

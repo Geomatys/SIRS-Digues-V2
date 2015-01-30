@@ -25,7 +25,7 @@ import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
-import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
+import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

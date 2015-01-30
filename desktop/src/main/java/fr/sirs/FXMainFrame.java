@@ -340,6 +340,7 @@ public class FXMainFrame extends BorderPane {
             this.theme = theme;
         }
 
+        @Override
         public void handle(ActionEvent event) {
             final Tab result = Injector.getSession().getOrCreateThemeTab(theme);
             addTab(result);

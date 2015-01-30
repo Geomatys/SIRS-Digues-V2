@@ -1,11 +1,14 @@
 package fr.sirs.importer.objet.desordre;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.*;
+import java.io.IOException;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -28,4 +31,13 @@ abstract class GenericDesordreImporter extends GenericObjetImporter<Desordre> {
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 null, null, null);
     }
+    
+    /**
+     * 
+     * @param row
+     * @return The POJO mapping the row.
+     * @throws IOException
+     * @throws AccessDbImporterException 
+     */
+    public abstract Desordre importRow(final Row row) throws IOException, AccessDbImporterException;
 }

@@ -16,7 +16,6 @@ import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -123,120 +122,10 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        
-        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
-        final Map<Integer, List<ObservationSuivi>> observations = desordreObservationImporter.getObservationsByDesordreId();
-        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Desordre desordre = new Desordre();
-            
-            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
-                if(b!=null) desordre.setBorneDebutId(b.getId());
-            }
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                desordre.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                desordre.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) desordre.setBorneFinId(b.getId());
-            }
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                desordre.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                desordre.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                desordre.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-
-            desordre.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
-            desordre.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            desordre.setLieu_dit(row.getString(Columns.LIEU_DIT_DESORDRE.toString()));
-            
-            if(row.getInt(Columns.ID_TYPE_DESORDRE.toString())!=null){
-                desordre.setTypeDesordreId(typesDesordre.get(row.getInt(Columns.ID_TYPE_DESORDRE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                desordre.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                desordre.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                desordre.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                desordre.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                desordre.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {
-                desordre.setCommentaire(row.getString(Columns.DESCRIPTION_DESORDRE.toString()));
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        desordre.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        desordre.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if(observations.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
-                desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
-            }
+            final Desordre desordre = importRow(row);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
@@ -249,6 +138,119 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             listByTronconId.add(desordre);
             structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
+    }
+
+    @Override
+    public Desordre importRow(Row row) throws IOException, AccessDbImporterException {
+
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+
+        final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypes();
+        final Map<Integer, List<ObservationSuivi>> observations = desordreObservationImporter.getObservationsByDesordreId();
+
+        final Desordre desordre = new Desordre();
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
+            if (b != null) {
+                desordre.setBorneDebutId(b.getId());
+            }
+        }
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            desordre.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            desordre.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
+            if (b != null) {
+                desordre.setBorneFinId(b.getId());
+            }
+        }
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            desordre.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            desordre.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            desordre.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        desordre.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+        desordre.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+        desordre.setLieu_dit(row.getString(Columns.LIEU_DIT_DESORDRE.toString()));
+
+        if (row.getInt(Columns.ID_TYPE_DESORDRE.toString()) != null) {
+            desordre.setTypeDesordreId(typesDesordre.get(row.getInt(Columns.ID_TYPE_DESORDRE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            desordre.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
+            desordre.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            desordre.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            desordre.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {
+            desordre.setCommentaire(row.getString(Columns.DESCRIPTION_DESORDRE.toString()));
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    desordre.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    desordre.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (observations.get(row.getInt(Columns.ID_DESORDRE.toString())) != null) {
+            desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
+        }
+
+        return desordre;
     }
 
     @Override

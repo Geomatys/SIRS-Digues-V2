@@ -7,7 +7,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
-import fr.sirs.importer.theme.document.related.journal.JournalArticleImporter;
+import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;

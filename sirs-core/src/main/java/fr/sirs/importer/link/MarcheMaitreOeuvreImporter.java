@@ -9,7 +9,7 @@ import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
+import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

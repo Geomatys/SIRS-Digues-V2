@@ -15,6 +15,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
@@ -29,9 +30,9 @@ import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconDigueGeomImporter;
+import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.theme.document.related.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ implements DocumentsUpdatable {
     private final SyndicatImporter syndicatImporter;
     private final CommuneImporter communeImporter;
     private final ObjetManager objetManager;
+    private final DocumentImporter documentImporter;
     
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
@@ -81,7 +83,7 @@ implements DocumentsUpdatable {
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
-            final MarcheImporter marcheImporter,
+            final DocumentImporter documentImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
@@ -102,9 +104,10 @@ implements DocumentsUpdatable {
                 organismeImporter);
         syndicatImporter = new SyndicatImporter(accessDatabase, couchDbConnector);
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
+        this.documentImporter = documentImporter;
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, marcheImporter, evenementHydrauliqueImporter);
+                intervenantImporter, documentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter);
         this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, communeImporter, 
@@ -179,20 +182,29 @@ implements DocumentsUpdatable {
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
         final Map<Integer, List<CommuneTroncon>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
+        final Map<Integer, List<DocumentTroncon>> documents = documentImporter.getDocumentsByTronconId();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final TronconDigue tronconDigue = new TronconDigue();
-
+            
+            if(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()))!=null){
+                tronconDigue.setDocumentTroncon(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
+            }
+            
             tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
+            
             tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
+            
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
             if (row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()) != null) {
                 tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
+            
             if (row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()) != null) {
                 tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }

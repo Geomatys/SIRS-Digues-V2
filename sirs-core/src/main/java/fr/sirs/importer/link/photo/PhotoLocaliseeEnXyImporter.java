@@ -18,7 +18,7 @@ import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.theme.document.DocumentImporter;
+import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;

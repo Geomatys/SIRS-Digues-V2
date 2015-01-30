@@ -3,15 +3,14 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DocumentTroncon;
-import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
-import fr.sirs.importer.theme.document.DocumentImporter;
-import fr.sirs.importer.theme.document.related.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
-import fr.sirs.importer.theme.document.related.rapportEtude.RapportEtudeImporter;
+import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
+import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +40,8 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         this.prestationImporter = prestationImporter;
         this.documentImporter = documentImporter;
         
-        documentAGrandeEchelleImporter = documentImporter.getDocumentAGrandeEchelleImporter();
-        rapportEtudeImporter = documentImporter.getRapportEtudeImporter();
+        documentAGrandeEchelleImporter = documentImporter.getDocumentManager().getDocumentAGrandeEchelleImporter();
+        rapportEtudeImporter = documentImporter.getDocumentManager().getRapportEtudeImporter();
     }
 
     private enum Columns {
