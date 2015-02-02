@@ -371,17 +371,17 @@ public class FXSearchPane extends BorderPane {
                 final Client client = engine.getClient();
                 final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
 
-                final SearchResponse response = client.prepareSearch("sirs")
+                final SearchResponse response = client.prepareSearch(engine.indexName)
                         .setQuery(qb)
                         .setSize(10000)
-                        .addFields("*")
+                        //.addFields("*")
                         .execute()
                         .actionGet();
                 final List<ElementHit> results = new ArrayList<>();
                 final SearchHits hits = response.getHits();
                 final Iterator<SearchHit> ite = hits.iterator();
                 while(ite.hasNext()){
-                    final SearchHit hit = ite.next();     
+                    final SearchHit hit = ite.next();
                     results.add(new ElementHit(hit));
                 }
 
@@ -392,7 +392,7 @@ public class FXSearchPane extends BorderPane {
                 scroll.setFitToWidth(true);
                 setCenter(scroll);
                 
-            }else if(uiToggleSimple.isSelected()){                
+            }else if(uiToggleSimple.isSelected()){
                 final String query = getCurrentSQLQuery();
                 uiSimpleSQL.setText(query);
                 searchSQL(query);

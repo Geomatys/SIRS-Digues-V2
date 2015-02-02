@@ -281,10 +281,10 @@ public class Loader extends Application {
                 // GEOTK ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement de Geotoolkit...");
-                // Geotoolkit startup
-                Setup.initialize(null);
                 // work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
+                // Geotoolkit startup
+                Setup.initialize(null);
 
                 // DATABASE ////////////////////////////////////////////////////
                 updateProgress(inc++, total);
