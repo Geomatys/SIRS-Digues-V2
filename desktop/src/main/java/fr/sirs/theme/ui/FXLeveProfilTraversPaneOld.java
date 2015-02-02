@@ -4,9 +4,15 @@ package fr.sirs.theme.ui;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LeveProfilTravers;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
@@ -21,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
@@ -31,7 +38,7 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTravers> {
+public class FXLeveProfilTraversPaneOld extends AbstractFXElementPane<LeveProfilTravers> {
     
     private LeveProfilTravers leveProfilTravers;
     private final Session session;
@@ -44,19 +51,27 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
     @FXML FXDateField uiDateMiseAJour;
     @FXML FXDateField uiDateLeve;
     
-    @FXML private ChoiceBox<RefOrigineProfilTravers>  uiTypeOrigine;
+    @FXML private ChoiceBox<PreviewLabel>  uiTypeOrigine;
     @FXML private ChoiceBox<RefTypeProfilTravers> uiTypeProfil;
-    @FXML private ChoiceBox<RefSystemeReleveProfil> uiTypeSystemeReleve;
+    @FXML private ChoiceBox<PreviewLabel> uiTypeSystemeReleve;
     @FXML private TextField uiReferencePapier;
     @FXML private TextField uiReferenceCalque;
     @FXML private TextField uiReferenceNumerique;
     
-    private FXLeveProfilTraversPane(){
+    @FXML private ComboBox<PreviewLabel> uiEvenementHydro;
+    @FXML private ComboBox<PreviewLabel> uiTroncon;
+    @FXML private ComboBox<DocumentTroncon> uiDocumentTroncon;
+    
+    private TronconDigueRepository tronconDigueRepository;
+    private EvenementHydrauliqueRepository evenementHydrauliqueRepository;
+    
+    
+    private FXLeveProfilTraversPaneOld(){
         SIRS.loadFXML(this);
         session = Injector.getBean(Session.class);
     }
     
-    public FXLeveProfilTraversPane(final LeveProfilTravers leveProfilTravers){
+    public FXLeveProfilTraversPaneOld(final LeveProfilTravers leveProfilTravers){
 //            final Map<String, Object> resources){
         this();
         this.leveProfilTravers = leveProfilTravers;
@@ -69,39 +84,39 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
         
         // Propriétés propres à la Crête
         uiDateLeve.valueProperty().bindBidirectional(leveProfilTravers.dateLeveeProperty());
-        uiDateLeve.disableProperty().bind(disableFields);
+        uiDateLeve.disableProperty().bind(disableFieldsProperty());
         
         uiDateMiseAJour.valueProperty().bindBidirectional(leveProfilTravers.dateMajProperty());
         uiDateMiseAJour.setDisable(true);
         
         uiComment.setHtmlText(leveProfilTravers.getCommentaire());
-        uiComment.disableProperty().bind(disableFields);
+        uiComment.disableProperty().bind(disableFieldsProperty());
         
         
         // ORIGINES
-        final ObservableList<RefOrigineProfilTravers> allOrigines = FXCollections.observableList(session.getRefOrigineProfilTraversRepository().getAll());
-        RefOrigineProfilTravers origine = null;
-        for(final RefOrigineProfilTravers ropt : allOrigines){
-            if(ropt.getId().equals(leveProfilTravers.getOrigineProfil())){
+        final ObservableList<PreviewLabel> allOrigines = FXCollections.observableList(session.getPreviewLabelRepository().getPreviewLabels(RefOrigineProfilTravers.class));
+        PreviewLabel origine = null;
+        for(final PreviewLabel ropt : allOrigines){
+            if(ropt.getObjectId().equals(leveProfilTravers.getOrigineProfil())){
                 origine = ropt;
                 break;
             }
         }
                 
         this.uiTypeOrigine.setItems(allOrigines);
-        final StringConverter<RefOrigineProfilTravers> originesConverter = new StringConverter<RefOrigineProfilTravers>() {
+        final StringConverter<PreviewLabel> originesConverter = new StringConverter<PreviewLabel>() {
             @Override
-            public String toString(RefOrigineProfilTravers or) {return or.getLibelle();}
+            public String toString(PreviewLabel or) {return or.getLabel();}
             @Override
-            public RefOrigineProfilTravers fromString(String string) {return null;}
+            public PreviewLabel fromString(String string) {return null;}
         };
         
         uiTypeOrigine.setConverter(originesConverter);
         uiTypeOrigine.setValue(origine);
-        uiTypeOrigine.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<RefOrigineProfilTravers>() {
+        uiTypeOrigine.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<PreviewLabel>() {
             
             @Override
-            public void changed(ObservableValue<? extends RefOrigineProfilTravers> observable, RefOrigineProfilTravers oldValue, RefOrigineProfilTravers newValue) {
+            public void changed(ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) {
                 if(initializing) return;
                 // Do not open dialog if the levee list is reset to the old value.
                 if (!newValue.equals(oldValue)){
@@ -112,20 +127,20 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
                             );
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
-                        leveProfilTravers.setOrigineProfil(newValue.getId());
+                        leveProfilTravers.setOrigineProfil(newValue.getObjectId());
                         preSave();
                     }
                 }
             }
         });
-        uiTypeOrigine.disableProperty().bind(disableFields);
+        uiTypeOrigine.disableProperty().bind(disableFieldsProperty());
         
         
         
         
         
         
-        // TYPES DE PROFILS DEN ETRAVERS
+        // TYPES DE PROFILS EN TRAVERS
         final ObservableList<RefTypeProfilTravers> allProfilTypes = FXCollections.observableList(session.getRefTypeProfilTraversRepository().getAll());
         RefTypeProfilTravers profilType = null;
         for(final RefTypeProfilTravers rtpt : allProfilTypes){
@@ -170,29 +185,14 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
         
         
         // TYPES DE SYSTEMES DE RELEVES
-        final ObservableList<RefSystemeReleveProfil> allSystemesReleves = FXCollections.observableList(session.getRefSystemeReleveProfilRepository().getAll());
-        RefSystemeReleveProfil systemeReleve = null;
-        for(final RefSystemeReleveProfil rsrp : allSystemesReleves){
-            if(rsrp.getId().equals(leveProfilTravers.getTypeSystemesReleveId())){
-                systemeReleve = rsrp;
-                break;
-            }
-        }
-                
-        this.uiTypeSystemeReleve.setItems(allSystemesReleves);
-        final StringConverter<RefSystemeReleveProfil> systemesRelevesConverter = new StringConverter<RefSystemeReleveProfil>() {
-            @Override
-            public String toString(RefSystemeReleveProfil srp) {return srp.getLibelle();}
-            @Override
-            public RefSystemeReleveProfil fromString(String string) {return null;}
-        };
-        
-        uiTypeSystemeReleve.setConverter(systemesRelevesConverter);
-        uiTypeSystemeReleve.setValue(systemeReleve);
-        uiTypeSystemeReleve.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<RefSystemeReleveProfil>() {
+        final ObservableList<PreviewLabel> allSystemesReleves = FXCollections.observableList(session.getPreviewLabelRepository().getPreviewLabels(RefSystemeReleveProfil.class));
+        uiTypeSystemeReleve.setItems(allSystemesReleves);
+        uiTypeSystemeReleve.setConverter(new PreviewLabelStringConverter());
+        uiTypeSystemeReleve.setValue(findPreviewLabel(allSystemesReleves, leveProfilTravers.getTypeSystemesReleveId()));
+        uiTypeSystemeReleve.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<PreviewLabel>() {
             
             @Override
-            public void changed(ObservableValue<? extends RefSystemeReleveProfil> observable, RefSystemeReleveProfil oldValue, RefSystemeReleveProfil newValue) {
+            public void changed(ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) {
                 if(initializing) return;
                 // Do not open dialog if the levee list is reset to the old value.
                 if (!newValue.equals(oldValue)){
@@ -203,13 +203,12 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
                             );
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
-                        leveProfilTravers.setTypeSystemesReleveId(newValue.getId());
+                        leveProfilTravers.setTypeSystemesReleveId(newValue.getObjectId());
                         preSave();
                     }
                 }
             }
         });
-//        uiTypeSystemeReleve.textProperty().bindBidirectional(leveProfilTravers.typeSystemesReleveIdProperty());
         uiTypeSystemeReleve.disableProperty().bind(disableFields);
         
         
@@ -219,6 +218,35 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
         uiReferenceNumerique.disableProperty().bind(disableFields);
         uiReferencePapier.textProperty().bindBidirectional(leveProfilTravers.referencePapierProperty());
         uiReferencePapier.disableProperty().bind(disableFields);
+        
+        
+        
+        //EVENEMENTS HYDRAULIQUES : il faut mettre une table view et non pas une combobox car il ne s'agit pas d'ID vers des événements hydrauliques directement, mais des
+//        final ObservableList<PreviewLabel> allEvenementsHydro = FXCollections.observableArrayList(session.getPreviewLabelRepository().getPreviewLabels(EvenementHydraulique.class));
+//        uiEvenementHydro.setItems(allEvenementsHydro);
+//        uiEvenementHydro.setConverter(new PreviewLabelStringConverter());
+//        uiEvenementHydro.setValue(findPreviewLabel(allEvenementsHydro, null));
+//        uiEvenementHydro.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<PreviewLabel>() {
+//            
+//            @Override
+//            public void changed(ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) {
+//                if(initializing) return;
+//                // Do not open dialog if the levee list is reset to the old value.
+//                if (!newValue.equals(oldValue)){
+//                    
+//                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+//                            "Le changement de système de relevé est enregistré d'office.",
+//                            ButtonType.OK,ButtonType.CANCEL
+//                            );
+//                    final ButtonType res = alert.showAndWait().get();
+//                    if(res==ButtonType.OK){
+//                        leveProfilTravers.setProfilTraversEvenementHydraulique(newValue.getObjectId());
+//                        preSave();
+//                        ProfilTraversEvenementHydraulique pe;
+//                    }
+//                }
+//            }
+//        });
         
 //        leveProfilTravers.getProfilTraversEvenementHydraulique();
 //        leveProfilTravers.getProfilTraversTroncon();
@@ -230,6 +258,29 @@ public class FXLeveProfilTraversPane extends AbstractFXElementPane<LeveProfilTra
 //        uiCouches.valueProperty().bindBidirectional(crete.num_coucheProperty());
 //        uiCouches.disableProperty().bind(disableFields);
         initializing = false;
+    }
+    
+    private PreviewLabel findPreviewLabel(final ObservableList<PreviewLabel> labels, final String id){
+        for(final PreviewLabel label : labels){
+            if(label.getObjectId().equals(id)){
+                return label;
+            }
+        }
+        return null;
+    }
+    
+    private class PreviewLabelStringConverter extends StringConverter<PreviewLabel>{
+
+        @Override
+        public String toString(PreviewLabel object) {
+            return object.getLabel();
+        }
+
+        @Override
+        public PreviewLabel fromString(String string) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
     }
 
     @Override
