@@ -162,7 +162,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
     @Override
     final public void setElement(T element) {
-        elementProperty.set(element);       
+        elementProperty.set(element);    
+        Injector.getSession().prepareToPrint(element);
     }
 
     @Override

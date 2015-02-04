@@ -168,7 +168,10 @@ public class PojoTable extends BorderPane {
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        
+        uiTable.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
+            Injector.getSession().prepareToPrint(newValue);
+        });
+                
         // Colonnes de suppression et d'ouverture d'éditeur.
         final DeleteColumn deleteColumn = new DeleteColumn();
         final EditColumn editCol = new EditColumn(this::editPojo);
@@ -328,6 +331,9 @@ public class PojoTable extends BorderPane {
                     if(!items.isEmpty()){
                         currentFiche=0;
                         elementPane = SIRS.generateEditionPane(items.get(currentFiche));
+                        elementPane.elementProperty().addListener((ObservableValue observable1, Object oldValue1, Object newValue1) -> {
+                            Injector.getSession().prepareToPrint(newValue1);
+                        });
                         setCenter((Node) elementPane);
                         uiCurrent.setText((currentFiche+1)+" / "+items.size());
                     }else{

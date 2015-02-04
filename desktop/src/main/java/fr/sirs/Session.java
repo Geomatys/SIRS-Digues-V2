@@ -102,6 +102,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
@@ -459,6 +460,10 @@ public class Session extends SessionGen {
 
     public void prepareToPrint(final Object object){
         objectToPrint=object;
+        // TODO : make in asynchronous task ?
+        if (object instanceof Element) {
+            focusOnMap((Element) object);
+        }
     }
     
     public Object getObjectToPrint(){return objectToPrint;}
@@ -576,5 +581,12 @@ public class Session extends SessionGen {
             
         }
         throw new IllegalArgumentException("Complete element cannot be rebuilt for : "+e);
+    }
+    
+    public void focusOnMap(Element target) {
+        if (target == null || frame == null || frame.getMapTab() == null || frame.getMapTab().getMap() == null) {
+            return;
+        }
+        frame.getMapTab().getMap().focusOnElement(target);
     }
 }

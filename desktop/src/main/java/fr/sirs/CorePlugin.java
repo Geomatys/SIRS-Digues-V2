@@ -246,7 +246,7 @@ public class CorePlugin extends Plugin {
             
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createTronconSelectionStyle(false),false) );
+            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createStructureSelectionStyle(),false) );
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(structLayer);
                
@@ -399,7 +399,7 @@ public class CorePlugin extends Plugin {
     }
     
     public static MutableStyle createTronconSelectionStyle(boolean graduation) throws URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(2),
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(7),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
@@ -507,6 +507,49 @@ public class CorePlugin extends Plugin {
         
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleClose);
+        final MutableStyle style = SF.style();
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
+    
+    private static MutableStyle createStructureSelectionStyle(){
+        // Stroke to use for lines and point perimeter
+        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(7),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke,LITERAL_ONE_FLOAT);
+                
+        // Definition of point symbolizer
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(24);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final Fill fill = SF.fill(new Color(0, 0, 0, 0));
+        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
+                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
+        
+        final MutableRule ruleLongObjects = SF.rule(line1);
+        ruleLongObjects.setFilter(
+                FF.greater(
+                        FF.function("length", FF.property("geometry")),
+                        FF.literal(2.0)
+                )
+        );
+        
+        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
+        ruleSmallObjects.setFilter(
+                FF.less(
+                        FF.function("length", FF.property("geometry")),
+                        FF.literal(2.0)
+                )
+        );
+        
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        fts.rules().add(ruleLongObjects);
+        fts.rules().add(ruleSmallObjects);
+        
         final MutableStyle style = SF.style();
         style.featureTypeStyles().add(fts);
         return style;

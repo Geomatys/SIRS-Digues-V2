@@ -2,14 +2,16 @@
 package fr.sirs.map;
 
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
-import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
 import javafx.beans.property.Property;
@@ -30,10 +32,18 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.apache.sis.util.iso.Names;
+import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Hints;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.display2d.container.ContextContainer2D;
+import org.geotoolkit.display2d.container.fx.FXMapContainerPane;
 import org.geotoolkit.factory.Hints;
+import org.geotoolkit.feature.Feature;
+import org.geotoolkit.feature.type.DefaultName;
+import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
@@ -49,9 +59,14 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
+import org.opengis.filter.Id;
+import org.opengis.geometry.Envelope;
 import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -222,6 +237,44 @@ public class FXMapPane extends BorderPane {
 
     public FXMap getUiMap() {
         return uiMap1;
+    }
+
+    public void focusOnElement(Element target) {
+        if (context == null) return;
+        
+        final MapLayer container = getMapLayerForElement(target.getClass());
+        if (!(container instanceof FeatureMapLayer)) return;
+
+        final FeatureMapLayer fLayer = (FeatureMapLayer) container;
+        final Id filter = GO2Utilities.FILTER_FACTORY.id(
+                Collections.singleton(new DefaultFeatureId(target.getId())));
+        fLayer.setSelectionFilter(filter);
+        fLayer.setVisible(true);
+        try {
+            final GenericName typeName = fLayer.getCollection().getFeatureType().getName();
+            FeatureCollection<? extends Feature> subCollection = fLayer.getCollection().subCollection(
+                    QueryBuilder.filtered(new DefaultName(typeName.scope().toString(), typeName.head().toString()), filter));
+            Envelope selectionEnvelope = subCollection.getEnvelope();
+            uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+//            uiMap2.getCanvas().setVisibleArea(selectionEnvelope);
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.WARNING, "Error on zoom at layer selection.", e);
+        }
+    }
+
+    public MapLayer getMapLayerForElement(Class elementClass) {
+        final LabelMapper mapper = new LabelMapper(elementClass);
+        return getMapLayerForElement(mapper.mapClassName());
+    }
+    
+    public MapLayer getMapLayerForElement(String layerName) {
+        if (context == null) return null;
+        for (MapLayer layer : context.layers()) {
+            if (layer.getName().equalsIgnoreCase(layerName)) {
+                return layer;
+            }
+        }
+        return null;
     }
             
 }
