@@ -64,7 +64,7 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
     }
    
     /**
-     * Cette contraint s'assure que les bornes du systeme de reperage sont
+     * Cette contrainte s'assure que les bornes du systeme de reperage sont
      * dans la liste des bornes du troncon.
      * 
      * @param entity 
