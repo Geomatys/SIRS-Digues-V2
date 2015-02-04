@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeRiveImporter extends GenericTypeImporter<RefRive> {
+class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
 
     TypeRiveImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -52,8 +52,9 @@ class TypeRiveImporter extends GenericTypeImporter<RefRive> {
         while (it.hasNext()) {
             final Row row = it.next();
             final RefRive typeRive = new RefRive();
-            typeRive.setLibelle(row.getString(Columns.LIBELLE_TYPE_RIVE.toString()));
             
+            typeRive.setId(typeRive.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())));
+            typeRive.setLibelle(row.getString(Columns.LIBELLE_TYPE_RIVE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeRive.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }

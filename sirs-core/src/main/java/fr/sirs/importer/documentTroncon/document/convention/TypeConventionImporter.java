@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefConvention;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeConventionImporter extends GenericTypeImporter<RefConvention> {
+class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention> {
 
     TypeConventionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -52,6 +52,8 @@ class TypeConventionImporter extends GenericTypeImporter<RefConvention> {
         while (it.hasNext()) {
             final Row row = it.next();
             final RefConvention typeConvention = new RefConvention();
+            
+            typeConvention.setId(typeConvention.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_CONVENTION.toString())));
             typeConvention.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONVENTION.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

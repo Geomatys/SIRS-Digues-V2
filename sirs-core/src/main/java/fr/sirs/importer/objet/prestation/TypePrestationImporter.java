@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefPrestation;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypePrestationImporter extends GenericTypeImporter<RefPrestation> {
+public class TypePrestationImporter extends GenericTypeReferenceImporter<RefPrestation> {
     
     public TypePrestationImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -53,6 +53,7 @@ public class TypePrestationImporter extends GenericTypeImporter<RefPrestation> {
             final Row row = it.next();
             final RefPrestation typePrestation = new RefPrestation();
             
+            typePrestation.setId(typePrestation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_PRESTATION.toString())));
             typePrestation.setLibelle(row.getString(Columns.LIBELLE_TYPE_PRESTATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typePrestation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

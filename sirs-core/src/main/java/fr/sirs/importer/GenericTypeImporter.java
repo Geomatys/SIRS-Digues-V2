@@ -6,11 +6,10 @@ import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
- * 
- * @author Samuel Andrés (Geomatys)
- * @param <T>
+ *
+ * @author samuel
  */
-public abstract class GenericTypeImporter<T> extends GenericImporter {
+abstract class GenericTypeImporter<T> extends GenericImporter {
     
     protected Map<Integer, T> types = null;
     
@@ -18,8 +17,8 @@ public abstract class GenericTypeImporter<T> extends GenericImporter {
         super(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, T> getTypes() throws IOException, AccessDbImporterException {
+    public Map<Integer, T> getTypeReferences() throws IOException, AccessDbImporterException {
         if(types == null) compute();
         return types;
-    }
+    }    
 }

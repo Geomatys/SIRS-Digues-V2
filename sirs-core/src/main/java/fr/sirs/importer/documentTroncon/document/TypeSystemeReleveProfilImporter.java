@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeSystemeReleveProfilImporter extends GenericTypeImporter<RefSystemeReleveProfil> {
+public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporter<RefSystemeReleveProfil> {
 
     public TypeSystemeReleveProfilImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -53,8 +53,8 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeImporter<RefSyst
             final Row row = it.next();
             final RefSystemeReleveProfil typeSystemeReleve = new RefSystemeReleveProfil();
             
+            typeSystemeReleve.setId(typeSystemeReleve.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())));
             typeSystemeReleve.setLibelle(row.getString(Columns.LIBELLE_TYPE_SYSTEME_RELEVE_PROFIL.toString()));
-            
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeSystemeReleve.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }

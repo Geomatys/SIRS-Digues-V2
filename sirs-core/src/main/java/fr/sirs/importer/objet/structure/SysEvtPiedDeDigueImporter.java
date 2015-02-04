@@ -185,12 +185,12 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypes();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypes();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

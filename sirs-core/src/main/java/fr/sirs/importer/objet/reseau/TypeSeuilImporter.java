@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefSeuil;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeSeuilImporter extends GenericTypeImporter<RefSeuil> {
+class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
     
     TypeSeuilImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeSeuilImporter extends GenericTypeImporter<RefSeuil> {
             final Row row = it.next();
             final RefSeuil typeSeuil = new RefSeuil();
             
+            typeSeuil.setId(typeSeuil.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString())));
             typeSeuil.setLibelle(row.getString(Columns.LIBELLE_TYPE_SEUIL.toString()));
             typeSeuil.setAbrege(row.getString(Columns.ABREGE_TYPE_SEUIL.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

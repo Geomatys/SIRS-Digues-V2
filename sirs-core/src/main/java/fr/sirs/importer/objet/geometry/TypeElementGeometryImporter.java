@@ -8,23 +8,21 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.ProfilFrontFrancBord;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeInternalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeElementGeometryImporter extends GenericTypeImporter<Class> {
+class TypeElementGeometryImporter extends GenericTypeInternalImporter<Class> {
 
-    TypeElementGeometryImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
+    TypeElementGeometryImporter(final Database accessDatabase) {
+        super(accessDatabase, null);
     }
 
     private enum Columns {

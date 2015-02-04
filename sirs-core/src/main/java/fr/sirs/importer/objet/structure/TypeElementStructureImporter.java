@@ -16,24 +16,21 @@ import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeInternalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeElementStructureImporter extends GenericTypeImporter<Class> {
+class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
 
-    TypeElementStructureImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
+    TypeElementStructureImporter(final Database accessDatabase) {
+        super(accessDatabase, null);
     }
 
     private enum Columns {

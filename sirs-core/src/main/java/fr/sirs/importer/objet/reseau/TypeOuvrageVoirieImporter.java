@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOuvrageFranchissement;
 import fr.sirs.core.model.RefOuvrageVoirie;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOuvrageVoirieImporter extends GenericTypeImporter<RefOuvrageVoirie> {
+class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageVoirie> {
     
     TypeOuvrageVoirieImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -55,6 +55,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeImporter<RefOuvrageVoirie> {
             final Row row = it.next();
             final RefOuvrageVoirie typeOuvrage = new RefOuvrageVoirie();
             
+            typeOuvrage.setId(typeOuvrage.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())));
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_VOIRIE.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_VOIRIE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

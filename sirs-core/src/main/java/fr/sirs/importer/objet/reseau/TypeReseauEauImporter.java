@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefReseauHydroCielOuvert;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeReseauEauImporter extends GenericTypeImporter<RefReseauHydroCielOuvert> {
+class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroCielOuvert> {
     
     TypeReseauEauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -52,14 +52,15 @@ class TypeReseauEauImporter extends GenericTypeImporter<RefReseauHydroCielOuvert
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefReseauHydroCielOuvert typeOuvrage = new RefReseauHydroCielOuvert();
+            final RefReseauHydroCielOuvert typeReseau = new RefReseauHydroCielOuvert();
             
-            typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_EAU.toString()));
-            typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_EAU.toString()));
+            typeReseau.setId(typeReseau.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString())));
+            typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_EAU.toString()));
+            typeReseau.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_EAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString())), typeOuvrage);
+            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString())), typeReseau);
         }
         couchDbConnector.executeBulk(types.values());
     }

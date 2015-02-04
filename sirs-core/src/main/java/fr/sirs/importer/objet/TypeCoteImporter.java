@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
+public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
     
     TypeCoteImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -55,6 +55,7 @@ public class TypeCoteImporter extends GenericTypeImporter<RefCote> {
             final Row row = it.next();
             final RefCote typeCote = new RefCote();
             
+            typeCote.setId(typeCote.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())));
             typeCote.setLibelle(row.getString(Columns.LIBELLE_TYPE_COTE.toString()));
             typeCote.setAbrege(row.getString(Columns.ABREGE_TYPE_COTE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeFonctionMoImporter extends GenericTypeImporter<RefFoncitonMaitreOeuvre> {
+class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFoncitonMaitreOeuvre> {
 
     TypeFonctionMoImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -53,6 +53,7 @@ class TypeFonctionMoImporter extends GenericTypeImporter<RefFoncitonMaitreOeuvre
             final Row row = it.next();
             final RefFoncitonMaitreOeuvre typeFonctionMo = new RefFoncitonMaitreOeuvre();
             
+            typeFonctionMo.setId(typeFonctionMo.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString())));
             typeFonctionMo.setLibelle(row.getString(Columns.LIBELLE_FONCTION_MO.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

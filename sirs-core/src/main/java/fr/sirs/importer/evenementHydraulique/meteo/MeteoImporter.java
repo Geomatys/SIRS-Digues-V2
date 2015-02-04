@@ -60,7 +60,7 @@ public class MeteoImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         meteos = new HashMap<>();
         
-        final Map<Integer, RefOrientationVent> typesOrientationVent = typeOrientationVentImporter.getTypes();
+        final Map<Integer, RefOrientationVent> typesOrientationVent = typeOrientationVentImporter.getTypeReferences();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){

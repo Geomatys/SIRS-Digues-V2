@@ -108,9 +108,9 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         
-        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypes();
+        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypeReferences();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

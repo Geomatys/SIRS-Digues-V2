@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOrientationPhoto;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class OrientationImporter extends GenericTypeImporter<RefOrientationPhoto> {
+public class OrientationImporter extends GenericTypeReferenceImporter<RefOrientationPhoto> {
 
     public OrientationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ public class OrientationImporter extends GenericTypeImporter<RefOrientationPhoto
             final Row row = it.next();
             final RefOrientationPhoto orientation = new RefOrientationPhoto();
             
+            orientation.setId(orientation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_ORIENTATION.toString())));
             orientation.setLibelle(row.getString(Columns.LIBELLE_ORIENTATION.toString()));
             
             orientation.setAbrege(row.getString(Columns.ABREGE_TYPE_ORIENTATION.toString()));

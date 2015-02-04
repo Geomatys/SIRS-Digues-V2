@@ -99,7 +99,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
 
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefProprietaire> typesProprietaires = typeProprietaireImporter.getTypes();
+        final Map<Integer, RefProprietaire> typesProprietaires = typeProprietaireImporter.getTypeReferences();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeImporter<RefFrequenceEvenementHydraulique> {
+class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefFrequenceEvenementHydraulique> {
 
     TypeFrequenceEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeImporter<RefF
             final Row row = it.next();
             final RefFrequenceEvenementHydraulique typeFrequence = new RefFrequenceEvenementHydraulique();
             
+            typeFrequence.setId(typeFrequence.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())));
             typeFrequence.setLibelle(row.getString(Columns.LIBELLE_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString()));
             typeFrequence.setAbrege(row.getString(Columns.ABREGE_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

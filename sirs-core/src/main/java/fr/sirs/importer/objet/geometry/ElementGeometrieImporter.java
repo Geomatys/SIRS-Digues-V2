@@ -49,7 +49,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         typeElementGeometryImporter = new TypeElementGeometryImporter(
-                accessDatabase, couchDbConnector);
+                accessDatabase);
         typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
                 accessDatabase, couchDbConnector);
         largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase,
@@ -115,9 +115,9 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypes();
-        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypeReferences();
+        final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypeReferences();
 
         for (final GenericObjetImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getById();
@@ -164,7 +164,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString());
-            final Class typeStructure = this.typeElementGeometryImporter.getTypes().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
+            final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
             final Objet structure;
             
             if(typeStructure==null){

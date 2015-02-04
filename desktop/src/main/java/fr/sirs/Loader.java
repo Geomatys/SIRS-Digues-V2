@@ -83,6 +83,7 @@ public class Loader extends Application {
         splashStage.initStyle(StageStyle.TRANSPARENT);
     }
     
+    
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be
@@ -221,6 +222,12 @@ public class Loader extends Application {
                                 }
                             });
                             fadeSplash.play();
+                            
+                            try {
+                                ReferenceChecking.checkAllReferences();
+                            } catch (IOException ex) {
+                                SIRS.LOGGER.log(Level.WARNING, null, ex);
+                            }
                         }
                     }
                 }
@@ -341,4 +348,7 @@ public class Loader extends Application {
             return null;
         }
     }
+
+    
+    
 }

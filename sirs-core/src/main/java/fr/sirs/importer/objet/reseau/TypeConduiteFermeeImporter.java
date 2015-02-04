@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> {
+class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduiteFermee> {
     
     TypeConduiteFermeeImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeConduiteFermeeImporter extends GenericTypeImporter<RefConduiteFermee> 
             final Row row = it.next();
             final RefConduiteFermee typeConduite = new RefConduiteFermee();
             
+            typeConduite.setId(typeConduite.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())));
             typeConduite.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONDUITE_FERMEE.toString()));
             typeConduite.setAbrege(row.getString(Columns.ABREGE_TYPE_CONDUITE_FERMEE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

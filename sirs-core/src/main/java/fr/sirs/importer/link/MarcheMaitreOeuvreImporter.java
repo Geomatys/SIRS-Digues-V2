@@ -65,7 +65,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
         
         final Map<Integer, Marche> marches = marcheImporter.getRelated();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefFoncitonMaitreOeuvre> fonctionsMo = typeFonctionMoImporter.getTypes();
+        final Map<Integer, RefFoncitonMaitreOeuvre> fonctionsMo = typeFonctionMoImporter.getTypeReferences();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

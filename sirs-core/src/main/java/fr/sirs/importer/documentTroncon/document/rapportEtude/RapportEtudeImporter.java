@@ -61,7 +61,7 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Map<Integer, RefRapportEtude> typesRapport = typeRapportEtudeImporter.getTypes();
+        final Map<Integer, RefRapportEtude> typesRapport = typeRapportEtudeImporter.getTypeReferences();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

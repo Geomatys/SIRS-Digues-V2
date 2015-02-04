@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import fr.sirs.core.model.RefNatureBatardeaux;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeMoyenManipBatardeauxImporter extends GenericTypeImporter<RefMoyenManipBatardeaux> {
+class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefMoyenManipBatardeaux> {
     
     TypeMoyenManipBatardeauxImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -55,6 +55,7 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeImporter<RefMoyenManip
             final Row row = it.next();
             final RefMoyenManipBatardeaux moyen = new RefMoyenManipBatardeaux();
             
+            moyen.setId(moyen.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())));
             moyen.setLibelle(row.getString(Columns.LIBELLE_TYPE_MOYEN_MANIP_BATARDEAUX.toString()));
             moyen.setAbrege(row.getString(Columns.ABREGE_TYPE_MOYEN_MANIP_BATARDEAUX.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

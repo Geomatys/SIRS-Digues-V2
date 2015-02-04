@@ -75,7 +75,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypes();
+        final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeReferences();
         final Map<Integer, List<ContactConvention>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
         final Map<Integer, List<ContactConvention>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
 

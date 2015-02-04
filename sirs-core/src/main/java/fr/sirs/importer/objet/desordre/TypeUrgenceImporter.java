@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeUrgenceImporter extends GenericTypeImporter<RefUrgence> {
+class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
 
     TypeUrgenceImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeUrgenceImporter extends GenericTypeImporter<RefUrgence> {
             final Row row = it.next();
             final RefUrgence typeUrgence = new RefUrgence();
             
+            typeUrgence.setId(typeUrgence.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_URGENCE.toString())));
             typeUrgence.setLibelle(row.getString(Columns.LIBELLE_TYPE_URGENCE.toString()));
             typeUrgence.setAbrege(row.getString(Columns.ABREGE_TYPE_URGENCE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

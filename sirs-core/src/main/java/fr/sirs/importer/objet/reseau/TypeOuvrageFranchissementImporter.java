@@ -3,9 +3,8 @@ package fr.sirs.importer.objet.reseau;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.core.model.RefRevetement;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOuvrageFranchissementImporter extends GenericTypeImporter<RefOuvrageFranchissement> {
+class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<RefOuvrageFranchissement> {
     
     TypeOuvrageFranchissementImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -55,6 +54,7 @@ class TypeOuvrageFranchissementImporter extends GenericTypeImporter<RefOuvrageFr
             final Row row = it.next();
             final RefOuvrageFranchissement typeOuvrage = new RefOuvrageFranchissement();
             
+            typeOuvrage.setId(typeOuvrage.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString())));
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_FRANCHISSEMENT.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_FRANCHISSEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

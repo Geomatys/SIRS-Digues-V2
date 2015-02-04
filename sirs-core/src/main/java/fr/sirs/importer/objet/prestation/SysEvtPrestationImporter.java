@@ -162,10 +162,10 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         
-        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
+        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypeReferences();
         
         final Map<Integer, Marche> marches = marcheImporter.getRelated();
         

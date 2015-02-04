@@ -6,7 +6,7 @@ import fr.sirs.core.model.RefOuvrageFranchissement;
 import fr.sirs.core.model.RefRevetement;
 import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeVoieSurDigueImporter extends GenericTypeImporter<RefVoieDigue> {
+class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue> {
     
     TypeVoieSurDigueImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -56,6 +56,7 @@ class TypeVoieSurDigueImporter extends GenericTypeImporter<RefVoieDigue> {
             final Row row = it.next();
             final RefVoieDigue typeVoie = new RefVoieDigue();
             
+            typeVoie.setId(typeVoie.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString())));
             typeVoie.setLibelle(row.getString(Columns.LIBELLE_TYPE_VOIE_SUR_DIGUE.toString()));
             typeVoie.setAbrege(row.getString(Columns.ABREGE_TYPE_VOIE_SUR_DIGUE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

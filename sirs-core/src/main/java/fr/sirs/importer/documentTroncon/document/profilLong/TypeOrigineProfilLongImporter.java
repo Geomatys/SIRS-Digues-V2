@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOrigineProfilLongImporter extends GenericTypeImporter<RefOrigineProfilLong> {
+class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrigineProfilLong> {
 
     TypeOrigineProfilLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeOrigineProfilLongImporter extends GenericTypeImporter<RefOrigineProfil
             final Row row = it.next();
             final RefOrigineProfilLong typeOrigineProfilLong = new RefOrigineProfilLong();
             
+            typeOrigineProfilLong.setId(typeOrigineProfilLong.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())));
             typeOrigineProfilLong.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIGINE_PROFIL_EN_LONG.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

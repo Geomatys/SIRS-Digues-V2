@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEvenementHydraulique> {
+class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefEvenementHydraulique> {
 
     TypeEvenementHydrauliqueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -58,6 +58,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeImporter<RefEvenementH
             final Row row = it.next();
             final RefEvenementHydraulique typeEvenement = new RefEvenementHydraulique();
             
+            typeEvenement.setId(typeEvenement.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())));
             typeEvenement.setLibelle(row.getString(Columns.LIBELLE_TYPE_EVENEMENT_HYDRAU.toString()));
             typeEvenement.setAbrege(row.getString(Columns.ABREGE_TYPE_EVENEMENT_HYDRAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

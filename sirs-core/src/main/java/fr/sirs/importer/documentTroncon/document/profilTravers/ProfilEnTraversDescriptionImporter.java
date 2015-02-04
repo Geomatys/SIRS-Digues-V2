@@ -114,9 +114,9 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         levesByProfil = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypes();
-        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypes();
-        final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypes();
+        final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
+        final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeReferences();
+        final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeReferences();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
         final Map<Integer, List<ProfilTraversTroncon>> profilTraversTroncons = profilTraversTronconImporter.getProfilTraversTronconByLeveId();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();

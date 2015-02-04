@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefNatureBatardeaux;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeNatureBatardeauxImporter extends GenericTypeImporter<RefNatureBatardeaux> {
+class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatureBatardeaux> {
     
     TypeNatureBatardeauxImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeImporter<RefNatureBatardea
             final Row row = it.next();
             final RefNatureBatardeaux nature = new RefNatureBatardeaux();
             
+            nature.setId(nature.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString())));
             nature.setLibelle(row.getString(Columns.LIBELLE_TYPE_NATURE_BATARDEAUX.toString()));
             nature.setAbrege(row.getString(Columns.ABREGE_TYPE_NATURE_BATARDEAUX.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

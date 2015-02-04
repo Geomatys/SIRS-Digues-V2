@@ -89,9 +89,9 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         mesuresByMonteeDesEaux = new HashMap<>();
         
-        final Map<Integer, RefReferenceHauteur> typesRefHEau = typeRefHeauImporter.getTypes();
+        final Map<Integer, RefReferenceHauteur> typesRefHEau = typeRefHeauImporter.getTypeReferences();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

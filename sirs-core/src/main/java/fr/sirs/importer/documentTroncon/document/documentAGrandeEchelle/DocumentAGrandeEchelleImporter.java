@@ -97,7 +97,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Map<Integer, RefDocumentGrandeEchelle> types = typeDocumentAGrandeEchelleImporter.getTypes();
+        final Map<Integer, RefDocumentGrandeEchelle> types = typeDocumentAGrandeEchelleImporter.getTypeReferences();
         final Map<Integer, Class> typesDocument = typeDocumentImporter.getClasseDocument();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();

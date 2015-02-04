@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class EcoulementImporter extends GenericTypeImporter<RefEcoulement> {
+class EcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement> {
     
     EcoulementImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class EcoulementImporter extends GenericTypeImporter<RefEcoulement> {
             final Row row = it.next();
             final RefEcoulement typeEcoulement = new RefEcoulement();
             
+            typeEcoulement.setId(typeEcoulement.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_ECOULEMENT.toString())));
             typeEcoulement.setLibelle(row.getString(Columns.LIBELLE_ECOULEMENT.toString()));
             typeEcoulement.setAbrege(row.getString(Columns.ABREGE_ECOULEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefLargeurFrancBord;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeLargeurFrancBordImporter extends GenericTypeImporter<RefLargeurFrancBord> {
+class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLargeurFrancBord> {
     
     TypeLargeurFrancBordImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeLargeurFrancBordImporter extends GenericTypeImporter<RefLargeurFrancBo
             final Row row = it.next();
             final RefLargeurFrancBord typeLargeur = new RefLargeurFrancBord();
             
+            typeLargeur.setId(typeLargeur.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_LARGEUR_FB.toString())));
             typeLargeur.setLibelle(row.getString(Columns.LIBELLE_TYPE_LARGEUR_FB.toString()));
             typeLargeur.setAbrege(row.getString(Columns.ABREGE_TYPE_LARGEUR_FB.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

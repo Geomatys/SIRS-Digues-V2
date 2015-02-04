@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefReseauTelecomEnergie;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTelecomEnergie> {
+class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefReseauTelecomEnergie> {
     
     TypeReseauTelecommunicImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeImporter<RefReseauTeleco
             final Row row = it.next();
             final RefReseauTelecomEnergie typeReseau = new RefReseauTelecomEnergie();
             
+            typeReseau.setId(typeReseau.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())));
             typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
             typeReseau.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_COMMUNICATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

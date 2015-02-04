@@ -136,8 +136,8 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, DocumentTroncon> docTroncons = documentImporter.getDocuments();
         
-        final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypes();
-        final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypes();
+        final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
+        final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypeReferences();
         final Map<Entry<Integer, Integer>, DbImporter.TableName> types = typeDonneesSousGroupeImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();

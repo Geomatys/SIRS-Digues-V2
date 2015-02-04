@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefUtilisationConduite;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class UtilisationConduiteImporter extends GenericTypeImporter<RefUtilisationConduite> {
+class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilisationConduite> {
     
     
     UtilisationConduiteImporter(final Database accessDatabase, 
@@ -55,6 +55,7 @@ class UtilisationConduiteImporter extends GenericTypeImporter<RefUtilisationCond
             final Row row = it.next();
             final RefUtilisationConduite typeUtilisation = new RefUtilisationConduite();
             
+            typeUtilisation.setId(typeUtilisation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())));
             typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_UTILISATION_CONDUITE.toString()));
             typeUtilisation.setAbrege(row.getString(Columns.ABREGE_UTILISATION_CONDUITE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

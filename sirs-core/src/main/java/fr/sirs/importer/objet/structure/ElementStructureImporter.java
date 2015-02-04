@@ -86,7 +86,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         typeElementStructureImporter = new TypeElementStructureImporter(
-                accessDatabase, couchDbConnector);
+                accessDatabase);
         creteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
                 tronconGestionDigueImporter, systemeReperageImporter, 
                 borneDigueImporter, typeSourceImporter, typeCoteImporter, 
@@ -272,9 +272,9 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
 
         for (final GenericObjetImporter gsi : structureImporters){
             final Map<Integer, Objet> objets = gsi.getById();
@@ -321,7 +321,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString());
-            final Class typeStructure = this.typeElementStructureImporter.getTypes().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
+            final Class typeStructure = this.typeElementStructureImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
             final Objet structure;
             
             if(typeStructure==null){

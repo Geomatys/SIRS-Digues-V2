@@ -119,7 +119,7 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new ExportMenu());
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
-        uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());
+//        uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());
         final Property<MapContext> prop1 = FXUtilities.beanProperty(uiMap1.getContainer(),ContextContainer2D.CONTEXT_PROPERTY, MapContext.class);
         uiTree.mapItemProperty().bind(prop1);
         prop1.addListener(new ChangeListener<MapContext>() {

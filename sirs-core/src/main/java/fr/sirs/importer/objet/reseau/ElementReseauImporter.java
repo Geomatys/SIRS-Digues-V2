@@ -324,9 +324,9 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
 
         for (final GenericObjetImporter gsi : reseauImporters){
             final Map<Integer, Objet> objets = gsi.getById();
@@ -343,13 +343,13 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             }
         }
 
-        final Map<Integer, RefOrientationOuvrage> typesOrientationOuvrageFranchissement = typeOrientationOuvrageFranchissementImporter.getTypes();
-        final Map<Integer, RefOuvrageParticulier> typesOuvrageParticulier = typeOuvrageParticulierImporter.getTypes();
-        final Map<Integer, RefOuvrageFranchissement> typesOuvrageFranchissement = typeOuvrageFranchissementImporter.getTypes();
-        final Map<Integer, RefNatureBatardeaux> typesNatureBatardeaux = typeNatureBatardeauxImporter.getTypes();
-        final Map<Integer, RefMoyenManipBatardeaux> typesMoyenManipBatardeaux = typeMoyenManipBatardeauxImporter.getTypes();
-        final Map<Integer, RefSeuil> typesSeuil = typeSeuilImporter.getTypes();
-        final Map<Integer, RefTypeGlissiere> typesGlissiere = typeGlissiereImporter.getTypes();
+        final Map<Integer, RefOrientationOuvrage> typesOrientationOuvrageFranchissement = typeOrientationOuvrageFranchissementImporter.getTypeReferences();
+        final Map<Integer, RefOuvrageParticulier> typesOuvrageParticulier = typeOuvrageParticulierImporter.getTypeReferences();
+        final Map<Integer, RefOuvrageFranchissement> typesOuvrageFranchissement = typeOuvrageFranchissementImporter.getTypeReferences();
+        final Map<Integer, RefNatureBatardeaux> typesNatureBatardeaux = typeNatureBatardeauxImporter.getTypeReferences();
+        final Map<Integer, RefMoyenManipBatardeaux> typesMoyenManipBatardeaux = typeMoyenManipBatardeauxImporter.getTypeReferences();
+        final Map<Integer, RefSeuil> typesSeuil = typeSeuilImporter.getTypeReferences();
+        final Map<Integer, RefTypeGlissiere> typesGlissiere = typeGlissiereImporter.getTypeReferences();
         final Map<Integer, Contact> contacts = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
 
@@ -360,7 +360,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_RESEAU.toString());
             final Objet structure = structures.get(structureId);
-            final Class typeStructure = this.typeElementReseauImporter.getTypes().get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
+            final Class typeStructure = this.typeElementReseauImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
             
             if(structure instanceof StationPompage){
                 

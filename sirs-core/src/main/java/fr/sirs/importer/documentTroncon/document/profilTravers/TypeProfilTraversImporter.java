@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefTypeProfilTravers;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeProfilTraversImporter extends GenericTypeImporter<RefTypeProfilTravers> {
+class TypeProfilTraversImporter extends GenericTypeReferenceImporter<RefTypeProfilTravers> {
 
     TypeProfilTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeProfilTraversImporter extends GenericTypeImporter<RefTypeProfilTravers
             final Row row = it.next();
             final RefTypeProfilTravers typeProfilTravers = new RefTypeProfilTravers();
             
+            typeProfilTravers.setId(typeProfilTravers.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())));
             typeProfilTravers.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROFIL_EN_TRAVERS.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

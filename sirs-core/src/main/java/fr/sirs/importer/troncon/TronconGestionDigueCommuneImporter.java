@@ -119,7 +119,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         
         final Map<Integer, Commune> communes = communeImporter.getCommunes();
         

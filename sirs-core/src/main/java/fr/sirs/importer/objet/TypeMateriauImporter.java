@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeMateriauImporter extends GenericTypeImporter<RefMateriau> {
+public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateriau> {
     
     TypeMateriauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ public class TypeMateriauImporter extends GenericTypeImporter<RefMateriau> {
             final Row row = it.next();
             final RefMateriau typeMateriau = new RefMateriau();
             
+            typeMateriau.setId(typeMateriau.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString())));
             typeMateriau.setLibelle(row.getString(Columns.LIBELLE_TYPE_MATERIAU.toString()));
             typeMateriau.setAbrege(row.getString(Columns.ABREGE_TYPE_MATERIAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

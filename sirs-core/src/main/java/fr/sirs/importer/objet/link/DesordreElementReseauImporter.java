@@ -65,7 +65,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
         
         final Map<Integer, Objet> elementsReseaux = elementReseauImporter.getById();
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
-        final Map<Integer, Class> classesElementReseaux = typeElementReseauImporter.getTypes();
+        final Map<Integer, Class> classesElementReseaux = typeElementReseauImporter.getTypeReferences();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

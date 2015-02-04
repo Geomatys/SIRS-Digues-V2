@@ -81,8 +81,8 @@ implements DocumentsUpdatable {
     protected void compute() throws IOException, AccessDbImporterException {
         evenements = new HashMap<>();
         
-        final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypes();
-        final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypes();
+        final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypeReferences();
+        final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypeReferences();
         final Map<Integer, List<Meteo>> meteos = meteoImporter.getMeteoByEvenementHydrauliqueId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();

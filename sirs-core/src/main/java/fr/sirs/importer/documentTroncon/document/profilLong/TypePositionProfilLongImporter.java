@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypePositionProfilLongImporter extends GenericTypeImporter<RefPositionProfilLongSurDigue> {
+class TypePositionProfilLongImporter extends GenericTypeReferenceImporter<RefPositionProfilLongSurDigue> {
 
     TypePositionProfilLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypePositionProfilLongImporter extends GenericTypeImporter<RefPositionProf
             final Row row = it.next();
             final RefPositionProfilLongSurDigue typePositionProfilLong = new RefPositionProfilLongSurDigue();
             
+            typePositionProfilLong.setId(typePositionProfilLong.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())));
             typePositionProfilLong.setLibelle(row.getString(Columns.LIBELLE_TYPE_POSITION_PROFIL_EN_LONG.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

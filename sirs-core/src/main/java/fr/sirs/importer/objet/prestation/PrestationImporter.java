@@ -116,11 +116,11 @@ public class PrestationImporter extends GenericPrestationImporter {
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         
-        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypes();
+        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypeReferences();
         
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();

@@ -4,21 +4,20 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefRapportEtude;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeRapportEtudeImporter extends GenericTypeImporter<RefRapportEtude> {
+class TypeRapportEtudeImporter extends GenericTypeReferenceImporter<RefRapportEtude> {
 
     TypeRapportEtudeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -55,6 +54,7 @@ class TypeRapportEtudeImporter extends GenericTypeImporter<RefRapportEtude> {
             final Row row = it.next();
             final RefRapportEtude typeRapportEtude = new RefRapportEtude();
             
+            typeRapportEtude.setId(typeRapportEtude.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RAPPORT_ETUDE.toString())));
             typeRapportEtude.setLibelle(row.getString(Columns.LIBELLE_TYPE_RAPPORT_ETUDE.toString()));
             typeRapportEtude.setAbrege(row.getString(Columns.ABREGE_TYPE_RAPPORT_ETUDE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

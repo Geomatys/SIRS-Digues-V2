@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeDesordreImporter extends GenericTypeImporter<RefTypeDesordre> {
+class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre> {
 
     TypeDesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeDesordreImporter extends GenericTypeImporter<RefTypeDesordre> {
             final Row row = it.next();
             final RefTypeDesordre typeDesordre = new RefTypeDesordre();
             
+            typeDesordre.setId(typeDesordre.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_DESORDRE.toString())));
             typeDesordre.setLibelle(row.getString(Columns.LIBELLE_TYPE_DESORDRE.toString()));
             typeDesordre.setAbrege(row.getString(Columns.ABREGE_TYPE_DESORDRE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

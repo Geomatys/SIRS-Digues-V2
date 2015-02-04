@@ -172,7 +172,7 @@ implements DocumentsUpdatable {
         tronconsIds = new HashMap<>();
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
-        final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypes();
+        final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeReferences();
         final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
         final Map<Integer, List<ContactTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
         final Map<Integer, List<ContactTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();

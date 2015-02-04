@@ -18,7 +18,7 @@ import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeInternalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeElementReseauImporter extends GenericTypeImporter<Class> {
+public class TypeElementReseauImporter extends GenericTypeInternalImporter<Class> {
 
     TypeElementReseauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {

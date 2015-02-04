@@ -121,7 +121,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
         
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
         
-        final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypes();
+        final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
         
         final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
         final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();

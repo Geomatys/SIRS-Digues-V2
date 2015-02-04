@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.RefOuvrageParticulier;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.GenericTypeImporter;
+import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeOuvrageParticulierImporter extends GenericTypeImporter<RefOuvrageParticulier> {
+class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuvrageParticulier> {
     
     TypeOuvrageParticulierImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -54,6 +54,7 @@ class TypeOuvrageParticulierImporter extends GenericTypeImporter<RefOuvrageParti
             final Row row = it.next();
             final RefOuvrageParticulier typeOuvrage = new RefOuvrageParticulier();
             
+            typeOuvrage.setId(typeOuvrage.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())));
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_PARTICULIER.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_PARTICULIER.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

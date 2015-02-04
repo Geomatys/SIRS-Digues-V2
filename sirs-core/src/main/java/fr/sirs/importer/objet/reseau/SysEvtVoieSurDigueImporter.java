@@ -164,13 +164,13 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypes();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypes();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypes();
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         
-        final Map<Integer, RefVoieDigue> typesVoieDigue = typeVoieSurDigueImporter.getTypes();
-        final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypes();
-        final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypes();
+        final Map<Integer, RefVoieDigue> typesVoieDigue = typeVoieSurDigueImporter.getTypeReferences();
+        final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypeReferences();
+        final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypeReferences();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

@@ -64,7 +64,7 @@ public class DesordreObservationImporter extends GenericImporter {
         this.observations = new HashMap<>();
         this.observationsByDesordreId = new HashMap<>();
         
-        final Map<Integer, RefUrgence> typesUrgence = typeUrgenceImporter.getTypes();
+        final Map<Integer, RefUrgence> typesUrgence = typeUrgenceImporter.getTypeReferences();
         final Map<Integer, Contact> contacts = intervenantImporter.getIntervenants();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
