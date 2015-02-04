@@ -114,6 +114,9 @@ public class TronconUtils {
             if(objGeom==null){
                 //on la calcule
                 objGeom = LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), obj, bdRepo);
+                if (objGeom == null) {
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n"+obj);
+                }
                 obj.setGeometry(objGeom);
             }
             
@@ -213,7 +216,7 @@ public class TronconUtils {
                 final SystemeReperage srCp = sr2.copy();
                 srCp.setTronconId(troncon1.getDocumentId());
                 //sauvegarde du sr
-                srRepo.add(srCp);
+                srRepo.add(srCp, troncon1);
             }else{
                 //on merge les bornes
                 final List<SystemeReperageBorne> srbs1 = sibling.getSystemereperageborneId();
@@ -231,7 +234,7 @@ public class TronconUtils {
                     srbs1.add(srb2.copy());
                 }
                 //maj du sr
-                srRepo.update(sibling);
+                srRepo.update(sibling, troncon1);
             }
         }
         
@@ -411,14 +414,29 @@ public class TronconUtils {
             //calcule de la position geographique
             Point point = pos.getPositionDebut();
             if(point==null){
-                //calcule a partir des bornes
-                final Map<String,BorneDigue> cacheBorneDigue = getBorneCache();
-                final BorneDigue borne = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
-                final Point bornePoint = borne.getGeometry();
-                double dist = pos.getBorne_debut_distance();
-                if(!pos.getBorne_debut_aval()) dist *= -1;
+                if (pos.getBorneDebutId() != null) {
+                    //calcule a partir des bornes
+                    final Point bornePoint = getBorneCache().get(pos.getBorneDebutId()).getGeometry();
+                    double dist = pos.getBorne_debut_distance();
+                    if (!pos.getBorne_debut_aval()) {
+                        dist *= -1;
+                    }
+                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
 
-                point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                } else if (pos.getPositionFin()!= null) {
+                    point = pos.getPositionFin();
+                    
+                } else if (pos.getBorneFinId()!= null) {
+                    final Point bornePoint = getBorneCache().get(pos.getBorneFinId()).getGeometry();
+                    double dist = pos.getBorne_fin_distance();
+                    if (!pos.getBorne_fin_aval()) {
+                        dist *= -1;
+                    }
+                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    
+                } else {
+                    throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
+                }
             }
             
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
@@ -434,15 +452,31 @@ public class TronconUtils {
                 FactoryException, MismatchedDimensionException, TransformException{
             //calcule de la position geographique
             Point point = pos.getPositionFin();
-            if(point==null){
-                //calcule a partir des bornes
-                final Map<String,BorneDigue> cacheBorneDigue = getBorneCache();
-                final BorneDigue borne = cacheBorneDigue.get(pos.borneFinIdProperty().get());
-                final Point bornePoint = borne.getGeometry();
-                double dist = pos.getBorne_fin_distance();
-                if(!pos.getBorne_fin_aval()) dist *= -1;
+            if (point == null) {
+                
+                if (pos.getBorneFinId() != null) {
+                    //calcule a partir des bornes
+                    final Point bornePoint = getBorneCache().get(pos.getBorneFinId()).getGeometry();
+                    double dist = pos.getBorne_fin_distance();
+                    if (!pos.getBorne_fin_aval()) {
+                        dist *= -1;
+                    }
+                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
 
-                point = LinearReferencingUtilities.calculateCoordinate(linear, bornePoint, dist, 0);
+                } else if (pos.getPositionDebut() != null) {
+                    point = pos.getPositionDebut();
+                    
+                } else if (pos.getBorneDebutId() != null) {
+                    final Point bornePoint = getBorneCache().get(pos.getBorneDebutId()).getGeometry();
+                    double dist = pos.getBorne_debut_distance();
+                    if (!pos.getBorne_debut_aval()) {
+                        dist *= -1;
+                    }
+                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    
+                } else {
+                    throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
+                }
             }
             
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);

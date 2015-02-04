@@ -3,7 +3,12 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.SIRS;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.json.GeometryDeserializer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
@@ -13,6 +18,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -32,6 +38,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.internal.GeotkFX;
@@ -40,7 +47,15 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXTronconCut extends VBox{
+public class FXTronconCut extends VBox {
+        
+    public static final Color[] PALETTE = new Color[] {
+        Color.BLUE,
+        Color.CYAN,
+        Color.MAGENTA,
+        Color.RED,
+        Color.GREEN
+    };
     
     @FXML private TextField uiTronconLabel;
     @FXML private TableView<CutPoint> uiCutTable;
@@ -48,14 +63,14 @@ public class FXTronconCut extends VBox{
     @FXML private ToggleButton uiAddCut;
 
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
-    private final ObservableList<CutPoint> cutpoints = FXCollections.observableArrayList();
+    private final ObservableList<CutPoint> cutPoints = FXCollections.observableArrayList();
     private final ObservableList<Segment> segments = FXCollections.observableArrayList();
     
     public FXTronconCut() {
         SIRS.loadFXML(this);
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?"":tronconProp.get().getLibelle(),tronconProp));
         
-        uiCutTable.setItems(cutpoints);
+        uiCutTable.setItems(cutPoints);
         uiCutTable.getColumns().add(new DeleteColumn());
         uiCutTable.getColumns().add(new DistanceColumn());
         
@@ -63,10 +78,20 @@ public class FXTronconCut extends VBox{
         uiSegmentTable.getColumns().add(new ColorColumn());
         uiSegmentTable.getColumns().add(new TypeColumn());
         
+        // Recalcul des segments lors d'un changement de point de coupe
+        cutPoints.addListener(this::cutPointChanged);
+        
+        // On vide le panneau lorsqu'on change de tronçon.
+        tronconProp.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
+            cutPoints.clear();
+            // Only here because if above list was already empty, the new selected troncon will not be highlighted.
+            cutPointChanged(null);
+            uiAddCut.setSelected(false);
+        });
     }
 
     public ObservableList<CutPoint> getCutpoints() {
-        return cutpoints;
+        return cutPoints;
     }
     
     public ObservableList<Segment> getSegments() {
@@ -81,12 +106,77 @@ public class FXTronconCut extends VBox{
         return uiAddCut.isSelected();
     }
     
+    private void cutPointChanged(ListChangeListener.Change c) {
+        segments.clear();
+        
+        final TronconDigue troncon = tronconProp.get();
+        if (troncon == null) return;
+
+        final FXTronconCut.CutPoint[] tmpCutPoints = cutPoints.toArray(new FXTronconCut.CutPoint[0]);
+        final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
+
+        final List<FXTronconCut.Segment> tmpSegments = new ArrayList<>();
+
+        int colorIndex = 0;
+        double distanceDebut = 0.0;
+        double distanceFin = 0.0;
+        for (int i = 0; i < tmpCutPoints.length; i++) {
+            if (i > 0) {
+                distanceDebut = distanceFin;
+            }
+            distanceFin = tmpCutPoints[i].distance.doubleValue();
+
+            if (distanceDebut != distanceFin) {
+                final FXTronconCut.Segment segment = new FXTronconCut.Segment();
+                segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
+                segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
+                segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
+                JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+                tmpSegments.add(segment);
+            }
+        }
+        //dernier segment
+        distanceDebut = distanceFin;
+        distanceFin = Double.MAX_VALUE;
+        if (distanceDebut != distanceFin) {
+            final FXTronconCut.Segment segment = new FXTronconCut.Segment();
+            segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
+            segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
+            segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
+            JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+            tmpSegments.add(segment);
+        }
+
+        // If no cut points defined, we highlight the entire troncon as "A conserver".
+        if (tmpSegments.isEmpty()) {
+            final FXTronconCut.Segment segment = new FXTronconCut.Segment();
+            segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
+            segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
+            segment.geometryProp.set(linear);
+            JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+            tmpSegments.add(segment);
+        }
+        segments.setAll(tmpSegments);
+    }
+    
+    /*
+     * UTILITY CLASSES
+     */
+    
     public static final class CutPoint implements Comparable<CutPoint>{
         public final DoubleProperty distance = new SimpleDoubleProperty(0);
-
+        
         @Override
         public int compareTo(CutPoint o) {
             return Double.compare(distance.get(),o.distance.get());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof CutPoint) {
+                return compareTo((CutPoint)obj) == 0;
+            }
+            return false;
         }
     }
     
@@ -101,7 +191,6 @@ public class FXTronconCut extends VBox{
         SECTIONNER,
         ARCHIVER
     }
-    
     
     private class DeleteColumn extends TableColumn{
 

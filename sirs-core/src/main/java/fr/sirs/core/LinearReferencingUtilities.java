@@ -33,12 +33,21 @@ public final class LinearReferencingUtilities extends LinearReferencing{
     
     public static LineString buildGeometry(Geometry tronconGeom, Objet structure, BorneDigueRepository repo){
         
-        final LineString troncon = asLineString(tronconGeom);        
+        final LineString troncon = asLineString(tronconGeom);
+        SegmentInfo[] segments = buildSegments(troncon);
         
-        if(structure.getPositionDebut()!=null){
-            //reconstruction a partir de 2 points géographique
-            //TODO
-        }else{
+        Point positionDebut = structure.getPositionDebut();
+        Point positionFin = structure.getPositionFin();
+        if (positionDebut != null || positionFin != null) {
+            ProjectedReference refDebut = null, refFin = null;
+            if (positionDebut != null) refDebut = projectReference(segments, positionDebut);
+            if (positionFin != null) refFin = projectReference(segments, positionFin);
+            if (refDebut == null) refDebut = refFin;
+            else if (refFin == null) refFin = refDebut;
+            
+            return cut(troncon, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
+            
+        } else {
             //reconstruction a partir de bornes et de distances
             BorneDigue borneDebut = (structure.getBorneDebutId()!=null) ? repo.get(structure.getBorneDebutId()) : null;
             BorneDigue borneFin = (structure.getBorneFinId()!=null) ? repo.get(structure.getBorneFinId()) : null;
@@ -62,8 +71,8 @@ public final class LinearReferencingUtilities extends LinearReferencing{
             final Point borneFinGeom = borneFin.getGeometry();
             
             final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
-            final double borneDebutDistance = calculateRelative(troncon, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
-            final double borneFinDistance = calculateRelative(troncon, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
+            final double borneDebutDistance = calculateRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
+            final double borneFinDistance = calculateRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
             
             //conversion des distances au borne en distance par rapport au debut du troncon
             distanceDebut += borneDebutDistance;
@@ -78,16 +87,14 @@ public final class LinearReferencingUtilities extends LinearReferencing{
             
             return cut(troncon, distanceDebut, distanceFin);
         }
-        
-        return null;
     }
         
     public static LineString cut(LineString linear, double distanceDebut, double distanceFin){
         
         //on s"assure de ne pas sortir du troncon
         final double tronconLength = linear.getLength();
-        distanceDebut = XMath.clamp(distanceDebut, 0, tronconLength);
-        distanceFin = XMath.clamp(distanceFin, 0, tronconLength);
+        distanceDebut = XMath.clamp(Math.min(distanceDebut, distanceFin), 0, tronconLength);
+        distanceFin = XMath.clamp(Math.max(distanceDebut, distanceFin), 0, tronconLength);
 
         //create du tracé de la structure le long du troncon
         final PathIterator ite = new JTSLineIterator(linear, null);
