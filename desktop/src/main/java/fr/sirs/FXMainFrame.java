@@ -54,6 +54,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
     @FXML private Menu uiRefs;
+    @FXML private Menu uiRefsList;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -82,7 +83,7 @@ public class FXMainFrame extends BorderPane {
         
         // Load references
         for(final Class reference : Session.getReferences()){
-            uiRefs.getItems().add(toMenuItem(reference));
+            uiRefsList.getItems().add(toMenuItem(reference));
         }
         
         if(session.getRole()==Role.ADMIN){

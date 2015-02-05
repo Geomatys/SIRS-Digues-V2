@@ -256,8 +256,8 @@ public class PojoTable extends BorderPane {
         uiTable.setMaxWidth(Double.MAX_VALUE);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
-        if (repo!=null) {
-            setTableItems(()-> FXCollections.observableList(repo.getAll()));
+        if (this.repo!=null) {
+            setTableItems(()-> FXCollections.observableList(this.repo.getAll()));
         }
         
         final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
