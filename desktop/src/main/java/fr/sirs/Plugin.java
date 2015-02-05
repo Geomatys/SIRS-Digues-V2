@@ -112,17 +112,23 @@ public class Plugin {
                 return new ObjectMapper().readValue(pluginDescriptor.get().toFile(), PluginInfo.class);
             }
         } catch (IOException e) {
-            SirsCore.LOGGER.log(Level.WARNING, "Plugin has not any json descriptor.", e);
+            SirsCore.LOGGER.log(Level.FINE, "Plugin "+name +" has not any json descriptor.", e);
         }
 
         final PluginInfo info = new PluginInfo();
         info.setName(pluginName);
 
-        final String jarLocation = this.getClass().getProtectionDomain().getCodeSource().getLocation().toExternalForm();
-        final Matcher matcher = Pattern.compile("(\\d+)\\.(\\d+)\\.jar$").matcher(jarLocation);
-        if (matcher.find()) {
-            info.setVersionMajor(Integer.parseInt(matcher.group(1)));
-            info.setVersionMinor(Integer.parseInt(matcher.group(2)));
+        final Matcher versionMatcher;
+        final String jarVersion = this.getClass().getPackage().getImplementationVersion();
+        if (jarVersion == null || jarVersion.isEmpty()) {
+            final String jarLocation = this.getClass().getProtectionDomain().getCodeSource().getLocation().toExternalForm();
+            versionMatcher = Pattern.compile("(\\d+)\\.(\\d+)\\.jar$").matcher(jarLocation);
+        } else {
+            versionMatcher = Pattern.compile("(\\d+)\\.(\\d+)").matcher(jarVersion);
+        }
+        if (versionMatcher.find()) {
+            info.setVersionMajor(Integer.parseInt(versionMatcher.group(1)));
+            info.setVersionMinor(Integer.parseInt(versionMatcher.group(2)));
         }
         return info;
     }

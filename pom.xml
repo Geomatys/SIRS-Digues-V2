@@ -206,7 +206,21 @@
           </execution>
         </executions>
       </plugin>
-
+      
+      <!-- Force jar packager to properly set META-INF version as maven project. -->
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+              <archive>                   
+                  <manifest>
+                      <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                  </manifest>
+              </archive>
+          </configuration>
+      </plugin>
+      
     </plugins>
 
 

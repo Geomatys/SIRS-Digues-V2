@@ -133,5 +133,16 @@ public class PluginInfo {
                 && this.getVersionMinor() == other.getVersionMinor();
         
     }
+
+    @Override
+    public String toString() {
+        return "Module " + name.get() +
+                ((description.get() == null || description.get().isEmpty())?
+                "" : "\nInformations : " + description.get()) + 
+                "\nVersion : " + versionMajor.get() + "." + versionMinor.get() +
+                ((downloadURL.get() == null || downloadURL.get().isEmpty())?
+                "" : "\nTéléchargement : " + downloadURL.get());
+    }
+    
     
 }

@@ -11,8 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.imageio.spi.ServiceRegistry;
 
@@ -23,7 +25,10 @@ import javax.imageio.spi.ServiceRegistry;
  */
 public class Plugins {
     
-    private static List<Plugin> REGISTERED_PLUGINS;
+    /**
+     * List of installed plugins. To access it, use {@linkplain #getPluginMap() }.
+     */
+    private static Map<String, Plugin> REGISTERED_PLUGINS;
     private static List<Theme> THEMES;
     
     private static final Pattern JAR_PATTERN = Pattern.compile("(?i).*(\\.jar)$");
@@ -34,16 +39,25 @@ public class Plugins {
      * @return Tableau de plugin, jamais nul.
      */
     public static Plugin[] getPlugins() {
+        return getPluginMap().values().toArray(new Plugin[0]);
+    }
+    
+    public static Map<String, Plugin> getPluginMap() {
         if (REGISTERED_PLUGINS == null) {
             //creation de la liste des plugins disponibles.
             final Iterator<Plugin> ite = ServiceRegistry.lookupProviders(Plugin.class);
-            final List<Plugin> candidates = new ArrayList<>();
+            final HashMap<String, Plugin> candidates = new HashMap<>();
             while(ite.hasNext()){
-                candidates.add(ite.next());
+                Plugin next = ite.next();
+                candidates.put(next.name, next);
             }
-            REGISTERED_PLUGINS = Collections.unmodifiableList(candidates);
+            REGISTERED_PLUGINS = Collections.unmodifiableMap(candidates);
         }
-        return REGISTERED_PLUGINS.toArray(new Plugin[0]);
+        return REGISTERED_PLUGINS;
+    }
+    
+    public static Plugin getPlugin(final String pluginName) {
+        return getPluginMap().get(pluginName);
     }
     
     /**

@@ -117,4 +117,8 @@ public class SirsCore {
             throw new SirsCoreRuntimeExecption(e);
         }
     }
+    
+    public static String getVersion() {
+        return SirsCore.class.getPackage().getImplementationVersion();
+    }
 }
