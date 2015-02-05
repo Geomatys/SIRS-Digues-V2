@@ -32,6 +32,10 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import org.apache.sis.geometry.GeneralEnvelope;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.iso.Names;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -43,6 +47,9 @@ import org.geotoolkit.display2d.container.fx.FXMapContainerPane;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.DefaultName;
+import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.feature.type.GeometryDescriptor;
+import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -59,12 +66,16 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
+import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
+import org.opengis.filter.Filter;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.SingleCRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
@@ -246,27 +257,78 @@ public class FXMapPane extends BorderPane {
         if (!(container instanceof FeatureMapLayer)) return;
 
         final FeatureMapLayer fLayer = (FeatureMapLayer) container;
-        final Id filter = GO2Utilities.FILTER_FACTORY.id(
+        
+        final Id idFilter = GO2Utilities.FILTER_FACTORY.id(
                 Collections.singleton(new DefaultFeatureId(target.getId())));
-        fLayer.setSelectionFilter(filter);
+        fLayer.setSelectionFilter(idFilter);
         fLayer.setVisible(true);
         try {
-            final GenericName typeName = fLayer.getCollection().getFeatureType().getName();
-            FeatureCollection<? extends Feature> subCollection = fLayer.getCollection().subCollection(
-                    QueryBuilder.filtered(new DefaultName(typeName.scope().toString(), typeName.head().toString()), filter));
-            Envelope selectionEnvelope = subCollection.getEnvelope();
+            final FeatureType fType = fLayer.getCollection().getFeatureType();
+            final GenericName typeName = fType.getName();
+            QueryBuilder queryBuilder = new QueryBuilder(
+                    new DefaultName(typeName.scope().toString(), typeName.head().toString()));
+            queryBuilder.setFilter(idFilter);
+            GeometryDescriptor geomDescriptor = fType.getGeometryDescriptor();
+            if (geomDescriptor != null) {
+                queryBuilder.setProperties(new Name[]{geomDescriptor.getName()});
+            }
+            FeatureCollection<? extends Feature> subCollection = 
+                    fLayer.getCollection().subCollection(queryBuilder.buildQuery());
+            Envelope selectionEnvelope = pseudoBuffer(subCollection.getEnvelope());
             uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
-//            uiMap2.getCanvas().setVisibleArea(selectionEnvelope);
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Error on zoom at layer selection.", e);
         }
     }
 
+    /**
+     * Try to expand a little an envelope. Main purpose is to ensure we won't 
+     * have an envelope which is merely a point.
+     * @param input The input to expand.
+     * @return An expanded envelope. If we cannot analyze CRS or it's unit on
+     * horizontal axis, the same envelope is returned.
+     */
+    private Envelope pseudoBuffer(final Envelope input) {
+        double additionalDistance = 0.01;
+        if (input.getCoordinateReferenceSystem() != null) {
+            CoordinateReferenceSystem crs = input.getCoordinateReferenceSystem();
+            int firstAxis = CRSUtilities.firstHorizontalAxis(crs);
+            
+            if (firstAxis >=0) {
+                Unit unit = crs.getCoordinateSystem().getAxis(firstAxis).getUnit();
+                if (unit != null && SI.METRE.isCompatible(unit)) {
+                    additionalDistance = SI.METRE.getConverterTo(unit).convert(1);
+                }
+                
+                final GeneralEnvelope result = new GeneralEnvelope(input);
+                result.setRange(firstAxis, 
+                        result.getLower(firstAxis)-additionalDistance, 
+                        result.getUpper(firstAxis)+additionalDistance);
+                final int secondAxis = firstAxis +1;
+                result.setRange(secondAxis, 
+                        result.getLower(secondAxis)-additionalDistance, 
+                        result.getUpper(secondAxis)+additionalDistance);
+                return result;
+            }
+        }
+        return input;
+    }
+    
+    /** 
+     * Try to get the map layer which contains {@link Element}s of given class.
+     * @param elementClass The particular class of element we want to retrieve on map.
+     * @return The Map layer in which are contained elements of input type, or null.
+     */
     public MapLayer getMapLayerForElement(Class elementClass) {
         final LabelMapper mapper = new LabelMapper(elementClass);
         return getMapLayerForElement(mapper.mapClassName());
     }
     
+    /** 
+     * Try to get the map layer using its name.
+     * @param layerName Identifier of the map layer to retrieve
+     * @return The matching map layer, or null.
+     */
     public MapLayer getMapLayerForElement(String layerName) {
         if (context == null) return null;
         for (MapLayer layer : context.layers()) {
