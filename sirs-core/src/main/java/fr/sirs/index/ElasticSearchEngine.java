@@ -9,6 +9,7 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+import org.elasticsearch.river.RiverSettings;
 
 /**
  *
@@ -28,14 +29,15 @@ public class ElasticSearchEngine implements Closeable {
     
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) {
         
-        final ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION);
-        
-        this.node = nodeBuilder().settings(builder).local(true).node();
-        this.client = node.client();
-        
-        //link to couchdb database
+        /*
+         * Elastic search configuration. We want a local index on the input 
+         * couchDb database.
+         */
         final String config = 
         "{\n" +
+        "    \"path\" : {\n" +
+        "        \"home\" : \""+DEFAULT_CONFIGURATION.toString()+"\"\n" +
+        "    },\n" +
         "    \"type\" : \"couchdb\",\n" +
         "    \"couchdb\" : {\n" +
         "        \"host\" : \""+dbHost+"\",\n" +
@@ -50,8 +52,13 @@ public class ElasticSearchEngine implements Closeable {
         "        \"type\" : \"*\"\n" +
         "    }\n" +
         "}";
+        final ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder().loadFromSource(config);
+        
+        this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
+        this.client = node.client();
         
         // TODO : Is this sufficient to initialize river plugin ?
+//        client.index(Requests.indexRequest(dbName).type(dbName).id("_meta").source(config)).actionGet();
         client.index(Requests.indexRequest("_river").type("*").id("_meta").source(config)).actionGet();
         indexName = dbName;
     }
