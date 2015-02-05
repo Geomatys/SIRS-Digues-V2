@@ -23,8 +23,11 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
@@ -34,7 +37,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
@@ -122,6 +127,7 @@ public class FXMainFrame extends BorderPane {
         
         
         SIRS.LOGGER.log(Level.INFO, org.apache.sis.setup.About.configuration().toString());
+        SIRS.LOGGER.log(Level.INFO, "Application version : "+SIRS.getVersion());
     }
     
     public TabPane getUiTabs() {
@@ -286,6 +292,16 @@ public class FXMainFrame extends BorderPane {
             }
         };
         t.start();
+    }
+    
+    @FXML
+    public void openAppInfo() {
+        final Stage infoStage = new Stage();
+        infoStage.setTitle("À propos");
+        infoStage.initStyle(StageStyle.UTILITY);
+        infoStage.setScene(new Scene(new FXAboutPane()));
+        infoStage.setResizable(false);
+        infoStage.show();
     }
     
     private void openUsersTab(){

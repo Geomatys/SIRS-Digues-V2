@@ -23,7 +23,7 @@
                 <Menu mnemonicParsing="false" text="Aide">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Guide utilisateur" />
-                        <MenuItem mnemonicParsing="false" text="A propos" />
+                        <MenuItem mnemonicParsing="false" text="A propos" onAction="#openAppInfo" />
                     </items>
                 </Menu>
             </menus>
