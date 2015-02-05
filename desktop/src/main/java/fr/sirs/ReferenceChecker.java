@@ -64,23 +64,53 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ReferenceChecking {
+public class ReferenceChecker {
 
-    private static String MODEL_PACKAGE = "fr.sirs.core.model";
-    private static String FRANCE_DIGUES_REFERENCES_DIRECTORY = "http://france-digues.moc/references/";
+    private static final String MODEL_PACKAGE = "fr.sirs.core.model";
+    
+    private final String referencesDirectoryPath = "http://france-digues.moc/references/";
+    
+    private String referencesNotFoundLocallyMessage = null;
+    public String getReferencesNotFoundLocallyMessage(){
+        return referencesNotFoundLocallyMessage;
+    }
+    
+    private String referencesNotFoundOnServerMessage = null;
+    public String getReferencesNotFoundOnServerMessage(){
+        return referencesNotFoundOnServerMessage;
+    }
 
-    public static void checkAllReferences() throws IOException {
+    private final Map<Class, Map<Object, Object>> incoherentReferences = new HashMap<>();
+    public Map<Class, Map<Object, Object>> getIncoherentReferences(){
+        return incoherentReferences;
+    }
+    private final Map<Class, List<Object>> serverInstancesNotLocal = new HashMap<>();
+    public Map<Class, List<Object>> getServerInstancesNotLocal() {
+        return serverInstancesNotLocal;
+    }
+    
+    private final Map<Class, List<Object>> localInstancesNotOnTheServer = new HashMap<>();
+    public Map<Class, List<Object>> getLocalInstancesNotOnTheServer() {
+        return localInstancesNotOnTheServer;
+    }
+
+    public void checkAllReferences() throws IOException {
         
         /*
         Récupération des classes de référence du serveur. Inclut la
@@ -105,13 +135,22 @@ public class ReferenceChecking {
         }
         
         if(!referencesNotFound.isEmpty()){
-            final StringBuilder information = new StringBuilder("Les références suivantes sont présentes sur localement mais sont inconnues du serveur :");
+            final StringBuilder messageBuilder = new StringBuilder("Les références suivantes sont présentes sur localement mais sont inconnues du serveur :");
             for (final String referenceNotFound : referencesNotFound) {
-                information.append("\n").append(referenceNotFound);
+                messageBuilder.append("\n").append(referenceNotFound);
             }
-            information.append("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
-            new Alert(Alert.AlertType.WARNING, information.toString(), ButtonType.OK).showAndWait();
+            messageBuilder.append("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
+            referencesNotFoundOnServerMessage = messageBuilder.toString();
         }
+        
+        
+//        if(referencesNotFoundLocally!=null){
+//            new Alert(Alert.AlertType.WARNING, referencesNotFoundLocally, ButtonType.OK).showAndWait();
+//        }
+//        
+//        if(referencesNotFoundOnServer!=null){
+//            new Alert(Alert.AlertType.WARNING, referencesNotFoundOnServer, ButtonType.OK).showAndWait();
+//        }
         
         /*
         On vérifie ensuite l'identité des instances : pour chaque classe de 
@@ -129,54 +168,75 @@ public class ReferenceChecking {
         
         
     }
-
+    
+    private void registerIncoherentReferences(final Class referenceClass, final Object localReferenceInstance, final Object serverReferenceInstance){
+        
+        if(referenceClass==null || localReferenceInstance==null || serverReferenceInstance==null) return;
+        
+        if(incoherentReferences.get(referenceClass)==null) incoherentReferences.put(referenceClass, new HashMap<>());
+        
+        final Map<Object, Object> classMap = incoherentReferences.get(referenceClass);
+        
+        classMap.put(localReferenceInstance, serverReferenceInstance);
+    }
+    
     /**
      * Check one reference class
      *
      * @param referenceClass
      */
-    private static void checkReferenceClass(final Class referenceClass) {
+    private void checkReferenceClass(final Class referenceClass) {
         try {
-            final URL referenceURL = referenceURL(FRANCE_DIGUES_REFERENCES_DIRECTORY, referenceClass);
+            final URL referenceURL = referenceURL(referencesDirectoryPath, referenceClass);
             final File referenceFile = retriveFileFromURL(referenceURL);
 
-            final List<Object> localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
             final List<Object> fileReferences = readReferenceFile(referenceFile, referenceClass);
-
-            System.out.println(fileReferences);
+            final List<Object> localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
             
             /*
             On vérifie que toutes les instances locales sont présentes sur le serveur.
             Sinon, on récupère les instances locales non présentes sur le serveur.
              */
-            final List<Object> localInstancesNotOnTheServer = new ArrayList<>();
-            for (final Object serverReferenceInstance : fileReferences){
-                for (final Object localReferenceInstance : localReferences){
-                
-                }
-            }
+//            final List<Object> serverInstancesNotLocal = new ArrayList<>();
+//            final List<Object> localInstancesNotOnTheServer = new ArrayList<>();
+            final List<Object> currentServerInstances = new ArrayList(fileReferences);
+//            for (final Object serverReferenceInstance : fileReferences){
+//                for (final Object localReferenceInstance : localReferences){
+//                
+//                }
+//            }
             
             /*
             On vérifie que toutes les instances du serveur sont présentes localement.
             Sinon, on récupère les instances du serveur non présentes localement.
             */
             final Method getId = referenceClass.getMethod("getId");
-            final List<Object> serverInstancesNotLocal = new ArrayList<>();
+            
+            
+            
+            /*
+            Pour toutes les instances de références locales :
+            1) On vérifie qu'elle est bien présente sur les serveur ;
+            2) Que son état sur le serveur est identique à son état local ;
+            3) Si elle est présente sur le serveur et que son état a changé, on enregistre les deux états dans la map dédiée.
+            4) Si elle n'est pas présente sur le serveur, on l'enregistre dans la liste dédiée.
+             */
             for (final Object localReferenceInstance : localReferences){
+                boolean presentOnServer=false;
+                
                 try{
                     final Object localId = getId.invoke(localReferenceInstance);
-                    for (final Object serverReferenceInstance : fileReferences){
+                    for (final Object serverReferenceInstance : currentServerInstances){
                         try{
                             final Object serverId = getId.invoke(serverReferenceInstance);
                             if(localId instanceof String
                                     && localId.equals(serverId)){
-                                if(!localReferenceInstance.equals(serverReferenceInstance)){
-                                    System.out.println(localReferenceInstance+"\n"+serverReferenceInstance+"\n");
+                                presentOnServer=true;
+                                currentServerInstances.remove(serverReferenceInstance);
+                                if(!sameReferences(localReferenceInstance, serverReferenceInstance)){
+                                    registerIncoherentReferences(referenceClass, localReferenceInstance, serverReferenceInstance);
                                 }
-                                else{
-                                    System.out.println("Instances identiques !");
-                                    System.out.println(localReferenceInstance+"\n"+serverReferenceInstance+"\n");
-                                }
+                                break;
                             }
                         } catch (IllegalAccessException | InvocationTargetException ex) {
                             SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -185,7 +245,30 @@ public class ReferenceChecking {
                 } catch (IllegalAccessException | InvocationTargetException ex) {
                     SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                 }
+                
+                if(presentOnServer==false) {
+                    if(localInstancesNotOnTheServer.get(referenceClass)==null) {
+                        localInstancesNotOnTheServer.put(referenceClass, new ArrayList());
+                    }
+                    localInstancesNotOnTheServer.get(referenceClass).add(localReferenceInstance);
+                }
             }
+            
+            
+            /*
+            Maintenant qu'on a vérifié que toutes les références locales de la 
+            classe étaient sur le serveur (cas des instances de références qui 
+            auraient été supprimées sur le serveur), il faut vérifier s'il n'y 
+            aurait pas des instances de références qui seraient présentes sur 
+            le serveur mais pas localement (cas des instances de références qui 
+            auraient été ajoutées sur le serveur). 
+            
+            Pour cela Il faut examiner uniquement les instances de références du 
+            serveur qui n'auraient pas trouvé de référence locale 
+            correspondante (danslla liste currentServerInstances qui a été mise 
+            à jour au fur et à mesure).
+             */
+            serverInstancesNotLocal.put(referenceClass, currentServerInstances);
             
             
 
@@ -194,9 +277,32 @@ public class ReferenceChecking {
         } catch (IOException ex) {
             Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ReferenceChecking.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ReferenceChecker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SecurityException ex) {
-            Logger.getLogger(ReferenceChecking.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ReferenceChecker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    /**
+     * Compare reference instances.
+     * @param localReferenceInstance
+     * @param serverReferenceInstance
+     * @return 
+     */
+    private static boolean sameReferences(final Object localReferenceInstance, final Object serverReferenceInstance){
+         // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
+        if(localReferenceInstance.equals(serverReferenceInstance)){
+            // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
+            if(!localReferenceInstance.toString().equals(serverReferenceInstance.toString())){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+            return false;
         }
     }
     
@@ -229,7 +335,7 @@ public class ReferenceChecking {
                 break;
             }
 
-            final String[] fields = line.split("\\s*,\\s*");
+            final String[] fields = line.split(",", -1);
             if (readHeader) {
                 header = fields;
                 readHeader = false;
@@ -240,6 +346,12 @@ public class ReferenceChecking {
 
                     /*
                      Il faut :
+                    0) Comparer les classes de références du serveur et les classes de référence locales.
+                    => En cas d'incohérence, contacter FranceDigue.
+                    
+                    ------------------------------------------------------------
+                    On compare ensuite, pour une classe de référence donnée, les instances de références :
+                    
                      1) Vérifier que toutes les références du serveur (libellé et éventuellement abrégé) sont présentes dans la base locale
                      !!! Cela suppose de pouvoir parser l'ensemble des fichiers du serveur : mettre un fichier d'index ?
                      => si ce n'est pas le cas, signaler quelles sont les références du serveur non disponibles localement;
@@ -272,31 +384,34 @@ public class ReferenceChecking {
         return fileReferences;
     }
 
-//    /**
-//     * Tentative d'écriture d'une méthode utilisant la généricité et la
-//     * métaprogrammation : échec.
-//     *
-//     * @param <T>
-//     */
-//    private static class ReferenceHelper<T> {
-//
-//        public T buildReferenceInstance(final String[] header, final String[] fields, final T instance) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//
-//            for (int i = 0; i < header.length; i++) {
-//                final String fieldUpperCase = header[i].substring(0, 1).toUpperCase() + header[i].substring(1);
-//                final Class fieldType = instance.getClass().getMethod("get" + fieldUpperCase).getReturnType();
-//                final Method setter = instance.getClass().getMethod("set" + fieldUpperCase, fieldType);
-//                if (String.class == fieldType) {
-//                    setter.invoke(instance, fields[i]);
-//                } else if (LocalDateTime.class == fieldType) {
-//                    setter.invoke(instance, LocalDateTime.parse(fields[i], DateTimeFormatter.ISO_DATE));
-//                }
-//            }
-//
-//            return instance;
-//        }
-//    }
-
+    /**
+     * Builds a reference instance form :
+     * 1) the csv header containing field names;
+     * 2) the csv entry containing field values;
+     * 3) the class of the reference.
+     * 
+     * Note : this method needs the name fiels of the given referenceClass map
+     * the header column names.
+     * 
+     * This method supports the following field types :
+     * 
+     * <ol>
+     * <li>String. Note if the column name is set to "id", the method generates an id by concatenating the referenceClass simple name to ":" and to the value of the id column;</li>
+     * <li>LocalDate (see ISO_DATE format);</li>
+     * <li>LocalDateTime (see ISO_DATE_TIME format).</li>
+     * </ol>
+     * 
+     * @param header
+     * @param fields
+     * @param referenceClass
+     * @return A reference instance of referenceClass wich fields map the given csv entry.
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws NoSuchFieldException 
+     */
     private static Object buildReferenceInstance(final String[] header, final String[] fields, final Class referenceClass)
             throws NoSuchMethodException, IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
@@ -318,6 +433,19 @@ public class ReferenceChecking {
                 }
                 else{
                     setter.invoke(referenceInstance, fields[i]);
+                }
+            } else if(LocalDateTime.class.equals(type)){
+                try{
+                    setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(fields[i], DateTimeFormatter.ISO_DATE), LocalTime.MIN));
+                }
+                catch(DateTimeParseException ex){
+                    try{
+                        setter.invoke(referenceInstance, LocalDateTime.parse(fields[i], DateTimeFormatter.ISO_DATE_TIME));
+                    }
+                    catch(DateTimeParseException ex2){
+                        SIRS.LOGGER.log(Level.INFO, ex2.getMessage());
+                    }
+                    SIRS.LOGGER.log(Level.INFO, ex.getMessage());
                 }
             } else {
 
@@ -491,7 +619,7 @@ public class ReferenceChecking {
      *
      * @return
      */
-    private static List<Class> getAllServerReferences() throws IOException {
+    private List<Class> getAllServerReferences() throws IOException {
         final List<String> names = getAllServerReferenceNames();
         final List<Class> classes = new ArrayList<>();
         final List<String> classesNotFound = new ArrayList<String>();
@@ -505,12 +633,12 @@ public class ReferenceChecking {
         }
 
         if (!classesNotFound.isEmpty()) {
-            String information = "Les références suivantes sont présentes sur le serveur mais sont inconnues de l'application :";
+            final StringBuilder messageBuilder = new StringBuilder("Les références suivantes sont présentes sur le serveur mais sont inconnues de l'application :");
             for (final String classeNotFound : classesNotFound) {
-                information += ("\n" + classeNotFound);
+                messageBuilder.append("\n").append(classeNotFound);
             }
-            information += ("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
-            new Alert(Alert.AlertType.WARNING, information, ButtonType.OK).showAndWait();
+            messageBuilder.append("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
+            referencesNotFoundLocallyMessage = messageBuilder.toString();
         }
 
         return classes;
@@ -521,9 +649,9 @@ public class ReferenceChecking {
      *
      * @return
      */
-    private static List<String> getAllServerReferenceNames() throws MalformedURLException, IOException {
+    private List<String> getAllServerReferenceNames() throws MalformedURLException, IOException {
         final List<String> result;
-        final URL indexURL = new URL(FRANCE_DIGUES_REFERENCES_DIRECTORY + "index.csv");
+        final URL indexURL = new URL(referencesDirectoryPath + "index.csv");
         result = readIndexFile(retriveFileFromURL(indexURL));
         return result;
     }

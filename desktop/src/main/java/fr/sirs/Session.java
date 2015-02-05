@@ -132,6 +132,13 @@ public class Session extends SessionGen {
     
     public static String FLAG_SIRSLAYER = "SirsLayer";
     
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // GESTION DES REFERENCES
+    ////////////////////////////////////////////////////////////////////////////
+    private final ReferenceChecker referenceChecker;
+    public ReferenceChecker getReferenceChecker(){return referenceChecker;}
+    
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
@@ -258,6 +265,7 @@ public class Session extends SessionGen {
         previewLabelRepository = new PreviewLabelRepository(connector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        referenceChecker = new ReferenceChecker();
     }
 
     public CouchDbConnector getConnector() {

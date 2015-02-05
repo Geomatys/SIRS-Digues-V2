@@ -224,7 +224,8 @@ public class Loader extends Application {
                             fadeSplash.play();
                             
                             try {
-                                ReferenceChecking.checkAllReferences();
+                                session.getReferenceChecker().checkAllReferences();
+                                
                             } catch (IOException ex) {
                                 SIRS.LOGGER.log(Level.WARNING, null, ex);
                             }
@@ -249,6 +250,8 @@ public class Loader extends Application {
         stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
         stage.setMaximized(true);
         stage.show();
+        stage.setMinWidth(1045);
+        stage.setMinHeight(750);
         frame.getMapTab().show();
     }
 
@@ -347,8 +350,5 @@ public class Loader extends Application {
             }
             return null;
         }
-    }
-
-    
-    
+    }    
 }

@@ -14,12 +14,20 @@
                     <items>
                         <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="%preferences" />
                   <MenuItem fx:id="uiCompte" mnemonicParsing="false" onAction="#openCompte" text="%count" />
-                  <Menu fx:id="uiRefs" mnemonicParsing="false" text="%references" />
                   <MenuItem mnemonicParsing="false" onAction="#changeUser" text="%changeUser" />
                   <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="%changeDB" />
                         <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="%exit" />
                     </items>
                 </Menu>
+            <Menu fx:id="uiRefs" mnemonicParsing="false" text="%references">
+               <items>
+                  <Menu fx:id="uiRefsList" mnemonicParsing="false" text="Liste">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                    </items>
+                  </Menu>
+               </items>
+            </Menu>
                 <Menu mnemonicParsing="false" text="Aide">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Guide utilisateur" />
