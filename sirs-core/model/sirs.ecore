@@ -511,7 +511,6 @@
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maitre_ouvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="montant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -523,6 +522,7 @@
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOeuvre" upperBound="-1"
         eType="#//MaitreOeuvreMarche" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="maitre_ouvrage" eType="#//Organisme"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference #//SIRSDocument">
     <eAnnotations source="generation">
