@@ -32,6 +32,7 @@ import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXCanvasHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
+import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 
 /**
@@ -99,9 +100,15 @@ public class FXOpenElementEditorAction extends FXMapAction {
             return true;
         }
 
-        private class InfoMouseListener extends AbstractMouseHandler {
+        
+        private class InfoMouseListener extends FXPanMouseListen {
             
             final ContextMenu choice = new ContextMenu();
+            
+            public InfoMouseListener() {
+                super(OpenElementEditorHandler.this);
+                choice.setAutoHide(true);
+            }
 
             @Override
             public void mouseClicked(MouseEvent me) {
@@ -128,7 +135,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
 
                     @Override
                     public void endVisit() {
-                        SIRS.LOGGER.log(Level.INFO, "End of visit.");
+                        SIRS.LOGGER.log(Level.FINE, "End of visit.");
                         super.endVisit();
                         if (foundElements.size() == 1) {
                             displayElement(foundElements.iterator().next());
@@ -150,20 +157,6 @@ public class FXOpenElementEditorAction extends FXMapAction {
                 Rectangle2D.Double searchArea = new Rectangle2D.Double(
                         getMouseX(me) - POINT_RADIUS, getMouseY(me) - POINT_RADIUS, POINT_RADIUS * 2, POINT_RADIUS * 2);
                 map.getCanvas().getGraphicsIn(searchArea, visitor, VisitFilter.INTERSECTS);
-            }
-
-            @Override
-            public void mouseWheelMoved(final ScrollEvent e) {
-            SIRS.LOGGER.log(Level.FINE, "Mouse wheel detected.");
-                final double rotate = -e.getDeltaY();
-                final double startX = getMouseX(e);
-                final double startY = getMouseY(e);
-
-                if (rotate < 0) {
-                    scale(new Point2D.Double(startX, startY), 2);
-                } else if (rotate > 0) {
-                    scale(new Point2D.Double(startX, startY), 0.5);
-                }
             }
         }
     }

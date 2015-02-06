@@ -568,11 +568,15 @@ public class Session extends SessionGen {
     }
     
     public String generateElementTitle(final Element element) {
-        String title =  new SirsStringConverter().toString(element);
-        if(title==null || title.isEmpty()){
-            final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+        String title;
+        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+        if (bundle != null) {
             title = bundle.getString("class");
+        } else {
+            title = "";
         }
+        
+        title += new SirsStringConverter().toString(element);
         
         final Element parent = element.getParent();
         if (parent instanceof AvecLibelle) {

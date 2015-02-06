@@ -45,6 +45,7 @@ import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
@@ -267,31 +268,19 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         }
     }
     
-    private class MouseListen extends AbstractMouseHandler {
+    private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
         private double startX;
         private double startY;
-        private double diffX;
-        private double diffY;
-        private MouseButton mousebutton;
 
         public MouseListen() {
+            super(BorneEditHandler.this);
             popup.setAutoHide(true);
         }
         
-        private double getMouseX(MouseEvent event){
-            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
-            return event.getScreenX()- pt.getX();
-        }
-        
-        private double getMouseY(MouseEvent event){
-            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
-            return event.getScreenY() - pt.getY();
-        }
-        
         @Override
-        public void mouseClicked(final MouseEvent e) {            
+        public void mouseClicked(final MouseEvent e) {
             if(tronconLayer==null) return;
             
             startX = getMouseX(e);
@@ -350,10 +339,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         }
 
         @Override
-        public void mousePressed(final MouseEvent e) {                   
+        public void mousePressed(final MouseEvent e) {
+            super.mousePressed(e);
             startX = getMouseX(e);
             startY = getMouseY(e);
-            mousebutton = e.getButton();
             
             if(editGeometry.geometry!=null){
                 helperBorne.grabGeometryNode(startX, startY, editGeometry);
@@ -366,8 +355,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
             
             //calcul du deplacement
-            diffX = getMouseX(me)-startX;
-            diffY = getMouseY(me)-startY;
             startX = getMouseX(me);
             startY = getMouseY(me);
             
@@ -375,6 +362,8 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 //deplacement d'une borne
                 editGeometry.moveSelectedNode(helperBorne.toCoord(startX,startY));
                 updateGeometry();
+            } else {
+                super.mouseDragged(me);
             }
         }
 
@@ -393,33 +382,10 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                     //on recalcule les geometries des positionables du troncon.
                     TronconUtils.updatePositionableGeometry(troncon,session);
                 }
+            } else {
+                super.mouseReleased(me);
             }
-        }
-        
-        @Override
-        public void mouseExited(final MouseEvent e) {
-            decorationPane.setFill(false);
-            decorationPane.setCoord(-10, -10,-10, -10, true);
-        }
-
-        @Override
-        public void mouseMoved(final MouseEvent e){
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-        }
-        
-        @Override
-        public void mouseWheelMoved(final ScrollEvent e) {
-            final double rotate = -e.getDeltaY();
-
-            if(rotate<0){
-                scale(new Point2D.Double(startX, startY),zoomFactor);
-            }else if(rotate>0){
-                scale(new Point2D.Double(startX, startY),1d/zoomFactor);
-            }
-
         }
     }
         
-    
 }

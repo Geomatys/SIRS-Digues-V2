@@ -36,6 +36,7 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.referencing.CRS;
@@ -93,32 +94,15 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
         return true;
     }
             
-    private class MouseListen extends AbstractMouseHandler {
+    private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
-        private double startX;
-        private double startY;
 
         public MouseListen() {
+            super(ConvertGeomToTronconHandler.this);
             popup.setAutoHide(true);
         }
         
-        private double getMouseX(MouseEvent event){
-            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
-            return event.getScreenX()- pt.getX();
-        }
-        
-        private double getMouseY(MouseEvent event){
-            final javafx.geometry.Point2D pt = map.localToScreen(0, 0);
-            return event.getScreenY() - pt.getY();
-        }
-        
-        @Override
-        public void mouseClicked(final MouseEvent e) {   
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-        }
-
         @Override
         public void mousePressed(final MouseEvent e) {            
             final GraphicVisitor visitor = new AbstractGraphicVisitor() {
@@ -159,44 +143,8 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
                 public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
             };
             
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-            final Rectangle2D rect = new Rectangle2D.Double(startX-3, startY-3, 6, 6);
+            final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
             map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent me) {
-            //do not use getX/getY to calculate difference
-            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-            
-            //calcul du deplacement
-            startX = getMouseX(me);
-            startY = getMouseY(me);
-        }
-        
-        @Override
-        public void mouseExited(final MouseEvent e) {
-            decorationPane.setFill(false);
-            decorationPane.setCoord(-10, -10,-10, -10, true);
-        }
-
-        @Override
-        public void mouseMoved(final MouseEvent e){
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-        }
-        
-        @Override
-        public void mouseWheelMoved(final ScrollEvent e) {
-            final double rotate = -e.getDeltaY();
-
-            if(rotate<0){
-                scale(new Point2D.Double(startX, startY),zoomFactor);
-            }else if(rotate>0){
-                scale(new Point2D.Double(startX, startY),1d/zoomFactor);
-            }
-
         }
     }
         

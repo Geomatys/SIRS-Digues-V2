@@ -276,7 +276,6 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         private final ContextMenu popup = new ContextMenu();
         private double startX;
         private double startY;
-        private MouseButton mousebutton;
 
         public MouseListen() {
             super(TronconCutHandler.this);

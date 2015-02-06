@@ -46,7 +46,6 @@ import org.opengis.filter.identity.Identifier;
 public class TronconMergeHandler extends FXAbstractNavigationHandler {
     
     private final MouseListen mouseInputListener = new MouseListen();
-    private final double zoomFactor = 2;
     
     //edition variables
     private FeatureMapLayer tronconLayer = null;
@@ -157,7 +156,6 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         private final ContextMenu popup = new ContextMenu();
         private double startX;
         private double startY;
-        private MouseButton mousebutton;
 
         public MouseListen() {
             super(TronconMergeHandler.this);
