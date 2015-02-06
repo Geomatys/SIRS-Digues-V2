@@ -3,6 +3,8 @@
 package fr.sirs.theme;
 
 import fr.sirs.core.model.Crete;
+import fr.sirs.core.model.Deversoire;
+import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
@@ -36,8 +38,14 @@ public class StructuresTheme extends AbstractTronconTheme {
             (TronconDigue t, Object c) -> t.structures.remove(c));
     private static final ThemeGroup GROUP6 = new ThemeGroup("Pied de digue", "Table des pieds de digue", PiedDigue.class,         
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof PiedDigue),
-            (TronconDigue t, Object c) -> t.structures.remove(c));    
+            (TronconDigue t, Object c) -> t.structures.remove(c));
     private static final ThemeGroup GROUP7 = new ThemeGroup("Fondation", "Table des fondations", Fondation.class,        
+            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Fondation),
+            (TronconDigue t, Object c) -> t.structures.remove(c));
+    private static final ThemeGroup GROUP8 = new ThemeGroup("Epi", "Table des épis", Epi.class,        
+            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Fondation),
+            (TronconDigue t, Object c) -> t.structures.remove(c));
+    private static final ThemeGroup GROUP9 = new ThemeGroup("Déversoire", "Table des déversoires", Deversoire.class,        
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Fondation),
             (TronconDigue t, Object c) -> t.structures.remove(c));
     

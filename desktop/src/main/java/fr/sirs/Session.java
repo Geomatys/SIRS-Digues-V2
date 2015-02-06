@@ -571,7 +571,7 @@ public class Session extends SessionGen {
         String title;
         final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
         if (bundle != null) {
-            title = bundle.getString("class");
+            title = bundle.getString("class")+" : ";
         } else {
             title = "";
         }

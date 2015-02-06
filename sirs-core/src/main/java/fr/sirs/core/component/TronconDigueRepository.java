@@ -72,36 +72,36 @@ public class TronconDigueRepository extends
         super(TronconDigue.class, db);
         initStandardDesignDocument();
         viewMap.put(CRETE, this::getAllCretes);
-        viewMap.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
+        viewMap.put(DESORDRE, this::getAllDesordres);
+        viewMap.put(DEVERSOIRE, this::getAllDeversoires);
+        viewMap.put(EPI, this::getAllEpis);
+        viewMap.put(FONDATION, this::getAllFondations);
+        viewMap.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
+        viewMap.put(LAISSECRUE, this::getAllLaisseCrues);
+        viewMap.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
+        viewMap.put(LIGNEEAU, this::getAllLigneEaus);
+        viewMap.put(MONTEEEAUX, this::getAllMonteeEaux);
         viewMap.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
+        viewMap.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
+        viewMap.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
+        viewMap.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
+        viewMap.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
+        viewMap.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
+        viewMap.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
+        viewMap.put(PIEDDIGUE, this::getAllPiedDigues);
+        viewMap.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
+        viewMap.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
+        viewMap.put(PRESTATION, this::getAllPrestations);
+        viewMap.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
+        viewMap.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
+        viewMap.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
+        viewMap.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
+        viewMap.put(SOMMETRISBERME, this::getAllSommetRisbermes);
+        viewMap.put(STATIONPOMPAGE, this::getAllStationPompages);
         viewMap.put(TALUSDIGUE, this::getAllTalusDigues);
         viewMap.put(TALUSRISBERME, this::getAllTalusRisbermes);
-        viewMap.put(SOMMETRISBERME, this::getAllSommetRisbermes);
-        viewMap.put(FONDATION, this::getAllFondations);
-        viewMap.put(PIEDDIGUE, this::getAllPiedDigues);
-        viewMap.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
-        viewMap.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
         viewMap.put(VOIEACCES, this::getAllVoieAccess);
         viewMap.put(VOIEDIGUE, this::getAllVoieDigues);
-        viewMap.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
-        viewMap.put(STATIONPOMPAGE, this::getAllStationPompages);
-        viewMap.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
-        viewMap.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
-        viewMap.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
-        viewMap.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
-        viewMap.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
-        viewMap.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
-        viewMap.put(PRESTATION, this::getAllPrestations);
-        viewMap.put(DESORDRE, this::getAllDesordres);
-        viewMap.put(LAISSECRUE, this::getAllLaisseCrues);
-        viewMap.put(MONTEEEAUX, this::getAllMonteeEaux);
-        viewMap.put(LIGNEEAU, this::getAllLigneEaus);
-        viewMap.put(DEVERSOIRE, this::getAllDeversoires);
-        viewMap.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
-        viewMap.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
-        viewMap.put(EPI, this::getAllEpis);
-        viewMap.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
-        viewMap.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -375,6 +375,10 @@ public class TronconDigueRepository extends
                 db.queryForStreamingView(createQuery("streamLight")));
     }
 
+    public List<? extends Objet> getAllFromView(Class elementClass) {
+        return getAllFromView(elementClass.getSimpleName());
+    }
+    
     /**
      * Get all elements of the queried view. The view identifiers can be found as
      * public static variables of the current class. It generally is the name of 
@@ -382,7 +386,7 @@ public class TronconDigueRepository extends
      * @param view The view to query.
      * @return The result of the executed view, or null if there's no view with 
      * the given name.
-     */
+     */    
     public List<? extends Objet> getAllFromView(String view) {
         final Callable<List<? extends Objet>> callable = viewMap.get(view);
         if (callable != null) {
