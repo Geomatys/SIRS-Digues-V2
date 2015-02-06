@@ -26,8 +26,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
@@ -37,7 +35,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -127,8 +124,7 @@ public class FXMainFrame extends BorderPane {
         }
         
         
-        SIRS.LOGGER.log(Level.INFO, org.apache.sis.setup.About.configuration().toString());
-        SIRS.LOGGER.log(Level.INFO, "Application version : "+SIRS.getVersion());
+        SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
     }
     
     public TabPane getUiTabs() {
