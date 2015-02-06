@@ -37,7 +37,6 @@ import javafx.scene.control.TextField;
  */
 public class FXContactPane extends AbstractFXElementPane<Contact> {
     
-    @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
     
     @FXML private TextField uiNom;
@@ -128,9 +127,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         
         // We should not need to unbind fields, as they use weak listeners.
         if (contact == null) return;
-        
-        uiDocId.setText(contact.getDocumentId());
-        
+                
         uiNom.textProperty().bindBidirectional(contact.nomProperty());
         uiPrenom.textProperty().bindBidirectional(contact.prenomProperty());
         uiService.textProperty().bindBidirectional(contact.serviceProperty());

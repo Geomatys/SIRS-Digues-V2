@@ -23,13 +23,11 @@
                         <Label styleClass="label-header" text="Digue :" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
                         <TextField fx:id="uiName" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label styleClass="label-header" text="Nom :" GridPane.rowIndex="1" />
-                        <Label styleClass="label-header" text="Identifiant :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                         <ChoiceBox fx:id="uiDigue" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label styleClass="label-header" text="Rive :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                         <ChoiceBox fx:id="uiRive" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                         <Label styleClass="label-header" text="SR par défaut :" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                   <ChoiceBox fx:id="uiSrDefault" maxWidth="1.7976931348623157E308" minWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <Label fx:id="uiId" styleClass="label-header" GridPane.columnIndex="3" GridPane.columnSpan="2" />
                     </children>
                     <columnConstraints>
                         <ColumnConstraints fillWidth="false" hgrow="NEVER" />

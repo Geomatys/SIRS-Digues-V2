@@ -146,8 +146,6 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
-                  <Label text="Identifiant : " textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                  <Label fx:id="idOrganismeTextField" prefHeight="16.0" prefWidth="43.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
                <columnConstraints>
                   <ColumnConstraints hgrow="NEVER" />

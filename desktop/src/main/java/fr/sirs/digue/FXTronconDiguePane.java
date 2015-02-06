@@ -68,7 +68,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     
     // En-tete
     @FXML private FXEditMode uiMode;
-    @FXML private Label uiId;
     @FXML private TextField uiName;
     @FXML private ChoiceBox<Digue> uiDigue;
     @FXML private ChoiceBox<SystemeReperage> uiSrDefault;
@@ -223,7 +222,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         
         final TronconDigue troncon = elementProperty.get();
         
-        this.uiId.setText(troncon.getId());
         this.uiName.textProperty().bindBidirectional(troncon.libelleProperty());
         this.uiComment.setHtmlText(troncon.getCommentaire());
                 

@@ -44,9 +44,7 @@
                                   <Font name="System Bold" size="14.0" />
                               </font>
                           </Label>
-                          <Label text="Identifiant :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                           <Label text="Mise à jour :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                           <Label fx:id="id" prefHeight="15.0" prefWidth="395.0" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <FXDateField fx:id="date_maj" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" /> 
                       </children>
                       <columnConstraints>

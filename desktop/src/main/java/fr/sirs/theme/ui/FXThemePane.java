@@ -44,7 +44,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     @FXML protected ScrollPane uiEditDetailTronconTheme;
     @FXML private FXDateField date_maj;
-    @FXML private Label id;
     @FXML private Label uiTitleLabel;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
@@ -121,7 +120,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         
         if (object == null) {
             uiTitleLabel.setText("Aucune information à afficher");
-            id.setText("");
             date_maj.valueProperty().unbind();
             
             uiEditDetailTronconTheme.setContent(new Label("Pas d'éditeur disponible."));
@@ -129,7 +127,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
         } else {
             uiTitleLabel.setText("Information sur une instance de " + object.getClass().getSimpleName());
-            id.setText(object.getId());
             // TODO : make a "WithDateMaj" interface, or something similar.
             if (object instanceof ProfilTravers) {
                 date_maj.valueProperty().bindBidirectional(((ProfilTravers) object).dateMajProperty());

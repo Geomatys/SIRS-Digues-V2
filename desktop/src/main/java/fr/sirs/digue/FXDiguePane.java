@@ -46,7 +46,6 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     @Autowired private Session session;
 
     @FXML private TextField libelle;
-    @FXML private Label id;
     @FXML private FXDateField date_maj;
     @FXML private HTMLEditor uiComment;
     
@@ -105,9 +104,6 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         // Binding levee's name.------------------------------------------------
         this.libelle.textProperty().bindBidirectional(elementProperty.get().libelleProperty());
 //        this.libelle.editableProperty().bindBidirectional(editBind);
-        
-        // Display levee's id.--------------------------------------------------
-        this.id.setText(this.elementProperty.get().getId());
         
         // Display levee's update date.-----------------------------------------
         this.date_maj.setValue(this.elementProperty.get().getDateMaj());

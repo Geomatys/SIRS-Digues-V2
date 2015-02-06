@@ -34,7 +34,6 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  */
 public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganisme> {
     
-    @FXML private Label uiDocId;
     @FXML private FXEditMode uiMode;
     
     @FXML ComboBox<Contact> uiContactChoice;
