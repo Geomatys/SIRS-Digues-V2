@@ -11,13 +11,10 @@ import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.index.ElasticSearchEngine;
-import fr.sirs.index.SearchEngine;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -71,7 +68,6 @@ import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -252,8 +248,10 @@ public class PojoTable extends BorderPane {
         
         topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
         setTop(topPane);
-        uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         uiTable.setMaxWidth(Double.MAX_VALUE);
+        uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+        uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);        
         if (this.repo!=null) {
@@ -593,35 +591,37 @@ public class PojoTable extends BorderPane {
             });
             
             //choix de l'editeur en fonction du type de données          
-            if(ref!=null){
+            if (ref != null) {
                 //reference vers un autre objet
                 setEditable(false);
                 setCellValueFactory(new CellLinkValueFactory(desc));
                 setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());
-                
-            }else{
-                editableProperty().bind(editableProperty);
-                final Class type = desc.getReadMethod().getReturnType();  
-                
+
+            } else {
+                final Class type = desc.getReadMethod().getReturnType();
+
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-                
-                if(Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)){
+
+                boolean isEditable = true;
+                if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
-                }else if(String.class.isAssignableFrom(type)){
+                } else if (String.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
-                }else if(Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)){
+                } else if (Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
-                }else if(Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)){
+                } else if (Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
-                }else if(Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)){
+                } else if (Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
-                }else if(LocalDateTime.class.isAssignableFrom(type)){
+                } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+                } else {
+                    isEditable = false;
                 }
                 
-                
-                else if(type.isEnum()){
-                    
+                setEditable(isEditable);
+                if (isEditable) {
+                    editableProperty().bind(editableProperty);
                 }
             }
         }  

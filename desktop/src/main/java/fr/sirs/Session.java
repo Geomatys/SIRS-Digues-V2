@@ -571,12 +571,15 @@ public class Session extends SessionGen {
         String title;
         final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
         if (bundle != null) {
-            title = bundle.getString("class")+" : ";
+            title = bundle.getString("class");
         } else {
             title = "";
         }
         
-        title += new SirsStringConverter().toString(element);
+        final String libelle = new SirsStringConverter().toString(element);
+        if (libelle != null && !libelle.isEmpty()) {
+            title += " : "+libelle;
+        }
         
         final Element parent = element.getParent();
         if (parent instanceof AvecLibelle) {
@@ -585,12 +588,12 @@ public class Session extends SessionGen {
         return title;
     }
     
+    // TODO : Implement
     public Element getCompleteElement(Element e) {
         if (e.getCouchDBDocument() != null) {
             return e;
         } else {
             String documentId = e.getDocumentId();
-            
         }
         throw new IllegalArgumentException("Complete element cannot be rebuilt for : "+e);
     }

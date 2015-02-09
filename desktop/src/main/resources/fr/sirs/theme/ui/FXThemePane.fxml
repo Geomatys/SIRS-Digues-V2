@@ -37,29 +37,25 @@
                 </Button>
              </left>
               <center>
-                  <GridPane hgap="10.0" vgap="20.0" BorderPane.alignment="CENTER">
-                      <children>
-                          <Label fx:id="uiTitleLabel" minWidth="-Infinity" textFill="WHITE" GridPane.columnSpan="2">
-                              <font>
-                                  <Font name="System Bold" size="14.0" />
-                              </font>
-                          </Label>
-                          <Label text="Mise à jour :" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                  <FXDateField fx:id="date_maj" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" /> 
-                      </children>
-                      <columnConstraints>
-                          <ColumnConstraints hgrow="NEVER" />
-                          <ColumnConstraints hgrow="NEVER" />
-                      </columnConstraints>
-                      <padding>
-                          <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
-                      </padding>
-                      <rowConstraints>
-                  <RowConstraints vgrow="NEVER" />
-                          <RowConstraints vgrow="NEVER" />
-                          <RowConstraints vgrow="NEVER" />
-                      </rowConstraints>
-                  </GridPane>
+            <HBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+               <children>
+                          <Label prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" />
+                  <FXDateField fx:id="date_maj">
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                  </FXDateField>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" top="10.0" />
+               </padding>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+            </HBox>
               </center>
          <right>
             <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
