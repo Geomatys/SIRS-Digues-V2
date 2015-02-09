@@ -373,6 +373,7 @@ public class CorePlugin extends Plugin {
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
             fml.setName(layerName);
+            fml.setSelectable(true);
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             
             if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
@@ -400,6 +401,7 @@ public class CorePlugin extends Plugin {
             );
             fml.getExtraDimensions().add(datefilter);
             fml.setVisible(visible);
+            fml.setSelectable(true);
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             
             final String str = nameMap.get(name.getLocalPart());
@@ -448,6 +450,7 @@ public class CorePlugin extends Plugin {
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
                 .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
         layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        layer.setSelectable(true);
         return layer;
     }
     
