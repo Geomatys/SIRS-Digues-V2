@@ -39,6 +39,12 @@
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-csv</artifactId>
+        <version>1.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.geotoolkit</groupId>

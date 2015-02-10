@@ -7,7 +7,7 @@ import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.query.FXSearchPane;
-import fr.sirs.theme.ui.FXReferencePane;
+import fr.sirs.other.FXReferencePane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
@@ -50,8 +50,8 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
-    @FXML private Menu uiRefs;
-    @FXML private Menu uiRefsList;
+//    @FXML private Menu uiRefs;
+//    @FXML private Menu uiRefsList;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -78,11 +78,6 @@ public class FXMainFrame extends BorderPane {
             }
         }
         
-        // Load references
-        for(final Class reference : Session.getReferences()){
-            uiRefsList.getItems().add(toMenuItem(reference));
-        }
-        
         if(session.getRole()==Role.ADMIN){
             final Menu uiAdmin = new Menu(bundle.getString("administration"));
             final MenuItem uiUserAdmin = new MenuItem(bundle.getString("utilisateurs"));
@@ -102,25 +97,20 @@ public class FXMainFrame extends BorderPane {
                 }
             });
             
-            // Plus d'actualité… ?
-//            final MenuItem uiSaveContext = new MenuItem("Sauvegarder le contexte");
-//            uiSaveContext.setOnAction(new EventHandler<ActionEvent>() {
-//
-//                @Override
-//                public void handle(ActionEvent event) {
-//                    saveContext();
-//                }
-//            });
-//            final MenuItem uiLoadContext = new MenuItem("Charger le contexte");
-//            uiLoadContext.setOnAction(new EventHandler<ActionEvent>() {
-//
-//                @Override
-//                public void handle(ActionEvent event) {
-//                    loadContext();
-//                }
-//            });
-            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);//, uiSaveContext, uiLoadContext);
+            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);
             uiMenu.getMenus().add(1, uiAdmin);
+            
+            
+            final Menu uiRefs = new Menu(bundle.getString("references"));
+            final Menu uiRefsList = new Menu(bundle.getString("listeReferences"));
+            uiRefs.getItems().add(uiRefsList);
+        
+            // Load references
+            for(final Class reference : Session.getReferences()){
+                uiRefsList.getItems().add(toMenuItem(reference));
+            }
+            
+            uiAdmin.getItems().add(uiRefs);
         }
         
         

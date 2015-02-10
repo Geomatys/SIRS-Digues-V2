@@ -19,16 +19,10 @@
                         <MenuItem fx:id="uiExit" mnemonicParsing="false" onAction="#exit" text="%exit" />
                     </items>
                 </Menu>
-            <Menu fx:id="uiRefs" mnemonicParsing="false" text="%references">
-               <items>
-                  <Menu fx:id="uiRefsList" mnemonicParsing="false" text="%listeReferences" />
-                  <MenuItem mnemonicParsing="false" text="Unspecified Action" />
-               </items>
-            </Menu>
                 <Menu mnemonicParsing="false" text="Aide">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Guide utilisateur" />
-                        <MenuItem mnemonicParsing="false" text="A propos" onAction="#openAppInfo" />
+                        <MenuItem mnemonicParsing="false" onAction="#openAppInfo" text="A propos" />
                     </items>
                 </Menu>
             </menus>

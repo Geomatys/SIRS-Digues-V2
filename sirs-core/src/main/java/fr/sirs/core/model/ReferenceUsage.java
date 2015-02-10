@@ -2,23 +2,26 @@ package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PreviewLabel {
+public class ReferenceUsage {
 
-    @JsonProperty("libelle")
-    private String label;
+    @JsonProperty("property")
+    private String property;
     
     @JsonProperty("type")
     private String type;
     
     @JsonProperty("objectId")
     private String objectId;
+    
+    @JsonProperty("label")
+    private String label;
 
-    public String getLabel() {
-        return label;
+    public String getProperty() {
+        return property;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setProperty(String label) {
+        this.property = label;
     }
     
     public String getType(){
@@ -36,9 +39,13 @@ public class PreviewLabel {
     public void setObjectid(String objectId){
         this.objectId = objectId;
     }
+    
+    public String getLabel(){return label;}
+    
+    public void setLabel(final String label){this.label=label;}
 
     @Override
     public String toString() {
-        return "PreviewLabel [label=" + label + " type="+ type + " objectId="+objectId+"]";
+        return "ReferenceUsage [property=" + property + " type="+ type + " objectId="+objectId+ " label="+label+"]";
     }
 }

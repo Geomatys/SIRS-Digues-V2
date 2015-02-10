@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
@@ -243,6 +244,7 @@ public class Session extends SessionGen {
     private final CouchDbConnector connector;
     
     private final PreviewLabelRepository previewLabelRepository;
+    private final ReferenceUsageRepository referenceUsageRepository;
 
     private FXMainFrame frame = null;
     
@@ -263,9 +265,10 @@ public class Session extends SessionGen {
         this.connector = couchDbConnector;
         
         previewLabelRepository = new PreviewLabelRepository(connector);
+        referenceUsageRepository = new ReferenceUsageRepository(connector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        referenceChecker = new ReferenceChecker();
+        referenceChecker = new ReferenceChecker("http://france-digues.moc/references/");
     }
 
     public CouchDbConnector getConnector() {
@@ -275,6 +278,10 @@ public class Session extends SessionGen {
     public PreviewLabelRepository getPreviewLabelRepository() {
         return previewLabelRepository;
     }    
+    
+    public ReferenceUsageRepository getReferenceUsageRepository(){
+        return referenceUsageRepository;
+    }
     
     void setFrame(FXMainFrame frame) {
         this.frame = frame;

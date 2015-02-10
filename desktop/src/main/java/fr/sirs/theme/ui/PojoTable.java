@@ -85,7 +85,7 @@ import org.geotoolkit.internal.GeotkFX;
 public class PojoTable extends BorderPane {
     
     protected final Class pojoClass;
-    private final Repository repo;
+    protected final Repository repo;
     protected final Session session = Injector.getBean(Session.class);
     protected final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
@@ -103,8 +103,8 @@ public class PojoTable extends BorderPane {
         
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
-    private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
-    private final Button uiSearch;
+    protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
+    protected final Button uiSearch;
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
     protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE);
@@ -121,11 +121,11 @@ public class PojoTable extends BorderPane {
     protected final HBox navigationToolbar = new HBox();
     
     
-    private final ProgressIndicator searchRunning = new ProgressIndicator();
-    private ObservableList<Element> allValues;
-    private ObservableList<Element> filteredValues;
+    protected final ProgressIndicator searchRunning = new ProgressIndicator();
+    protected ObservableList<Element> allValues;
+    protected ObservableList<Element> filteredValues;
     
-    private final StringProperty currentSearch = new SimpleStringProperty("");
+    protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
     
     public PojoTable(final Class pojoClass, final String title) {

@@ -165,3 +165,19 @@
 .element-pane:disabled{
     -fx-opacity: 1.0
 }
+
+
+
+
+.deprecatedReferenceRow {
+    -fx-background-color: #FFE4C4;
+    /*-fx-background-insets: 0, 1, 2;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;*/
+}
+.deprecatedReferenceRow:selected {
+    -fx-background-color: #aF7454;
+    /*-fx-background-insets: 0, 1, 2;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;*/
+}

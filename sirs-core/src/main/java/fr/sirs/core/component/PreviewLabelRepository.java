@@ -7,8 +7,9 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
-import java.util.function.Predicate;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.ViewQuery;
+import org.ektorp.support.Views;
 
 @View(name = "all", map = "classpath:PreviewLabel-map.js")
 public class PreviewLabelRepository extends
@@ -57,5 +58,18 @@ public class PreviewLabelRepository extends
         return previews;
     }
     
-    
+//    public List<PreviewLabel> getReferenceUsages(final String referenceId){
+//        ArgumentChecks.ensureNonNull("Reference id", referenceId);
+//        final ViewQuery viewQuery = createQuery("referenceUsages").includeDocs(false).key(referenceId);
+//        final List<PreviewLabel> previewLabels = db.queryView(viewQuery, PreviewLabel.class);
+//        return previewLabels;
+//    }
+//    
+//    
+//    
+//    public List<PreviewLabel> getReferenceUsages(){
+//        final ViewQuery viewQuery = createQuery("referenceUsages").includeDocs(false);
+//        final List<PreviewLabel> previewLabels = db.queryView(viewQuery, PreviewLabel.class);
+//        return previewLabels;
+//    }
 }

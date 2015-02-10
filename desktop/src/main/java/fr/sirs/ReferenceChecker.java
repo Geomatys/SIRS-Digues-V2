@@ -1,54 +1,9 @@
 package fr.sirs;
 
+import fr.sirs.core.Repository;
 import fr.sirs.core.model.RefConduiteFermee;
-import fr.sirs.core.model.RefConvention;
-import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefDevers;
-import fr.sirs.core.model.RefDocumentGrandeEchelle;
-import fr.sirs.core.model.RefEcoulement;
-import fr.sirs.core.model.RefEvenementHydraulique;
-import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
-import fr.sirs.core.model.RefFonction;
-import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
-import fr.sirs.core.model.RefImplantation;
-import fr.sirs.core.model.RefLargeurFrancBord;
-import fr.sirs.core.model.RefMateriau;
-import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefNatureBatardeaux;
-import fr.sirs.core.model.RefOrientationOuvrage;
-import fr.sirs.core.model.RefOrientationPhoto;
-import fr.sirs.core.model.RefOrientationVent;
-import fr.sirs.core.model.RefOrigineProfilLong;
-import fr.sirs.core.model.RefOrigineProfilTravers;
-import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.RefOuvrageParticulier;
-import fr.sirs.core.model.RefOuvrageTelecomEnergie;
-import fr.sirs.core.model.RefOuvrageVoirie;
-import fr.sirs.core.model.RefPosition;
-import fr.sirs.core.model.RefPositionProfilLongSurDigue;
-import fr.sirs.core.model.RefPrestation;
-import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.core.model.RefProprietaire;
-import fr.sirs.core.model.RefRapportEtude;
-import fr.sirs.core.model.RefReferenceHauteur;
-import fr.sirs.core.model.RefReseauHydroCielOuvert;
-import fr.sirs.core.model.RefReseauTelecomEnergie;
-import fr.sirs.core.model.RefRevetement;
-import fr.sirs.core.model.RefRive;
-import fr.sirs.core.model.RefSeuil;
-import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.RefSystemeReleveProfil;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.RefTypeDocument;
-import fr.sirs.core.model.RefTypeGlissiere;
-import fr.sirs.core.model.RefTypeProfilTravers;
-import fr.sirs.core.model.RefTypeTroncon;
-import fr.sirs.core.model.RefUrgence;
-import fr.sirs.core.model.RefUsageVoie;
-import fr.sirs.core.model.RefUtilisationConduite;
-import fr.sirs.core.model.RefVoieDigue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -73,8 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 /**
  *
@@ -84,18 +41,12 @@ public class ReferenceChecker {
 
     private static final String MODEL_PACKAGE = "fr.sirs.core.model";
 
-    private final String referencesDirectoryPath = "http://france-digues.moc/references/";
-
-    private String referencesNotFoundLocallyMessage = null;
-
-    public String getReferencesNotFoundLocallyMessage() {
-        return referencesNotFoundLocallyMessage;
-    }
-
-    private String referencesNotFoundOnServerMessage = null;
-
-    public String getReferencesNotFoundOnServerMessage() {
-        return referencesNotFoundOnServerMessage;
+    private String referencesDirectoryPath;
+    
+    private ReferenceChecker(){}
+    
+    public ReferenceChecker(final String referencesDirectoryPath){
+        this.referencesDirectoryPath = referencesDirectoryPath;
     }
 
     private final Map<Class, Map<Object, Object>> incoherentReferences = new HashMap<>();
@@ -147,20 +98,11 @@ public class ReferenceChecker {
          */
         serverClassReferences = buildServerClassReferences();
 
-        if (!serverClassNameReferencesNotLocal.isEmpty()) {
-            final StringBuilder messageBuilder = new StringBuilder("Les références suivantes sont présentes sur le serveur mais sont inconnues de l'application :");
-            for (final String classeNotFound : serverClassNameReferencesNotLocal) {
-                messageBuilder.append("\n").append(classeNotFound);
-            }
-            messageBuilder.append("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
-            referencesNotFoundLocallyMessage = messageBuilder.toString();
-        }
-
         ////////////////////////////////////////////////////////////////////////
         /*
          Récupération des classes de référence de l'application. 
          */
-        localClassReferences = retrieveLocalClassReferences();
+        localClassReferences = Session.getReferences();
 
         /*
          Vérification que les classes de l'application sont toutes recensées sur
@@ -172,23 +114,7 @@ public class ReferenceChecker {
                 localClassNameReferencesNotOnServer.add(reference.getSimpleName());
             }
         }
-
-        if (!localClassNameReferencesNotOnServer.isEmpty()) {
-            final StringBuilder messageBuilder = new StringBuilder("Les références suivantes sont présentes sur localement mais sont inconnues du serveur :");
-            for (final String referenceNotFound : localClassNameReferencesNotOnServer) {
-                messageBuilder.append("\n").append(referenceNotFound);
-            }
-            messageBuilder.append("\n\nVotre application n'est peut-être pas à jour. Pour la mettre à jour, veuillez s'il vous plaît contacter l'administrateur France-Digue.");
-            referencesNotFoundOnServerMessage = messageBuilder.toString();
-        }
-
-//        if(referencesNotFoundLocally!=null){
-//            new Alert(Alert.AlertType.WARNING, referencesNotFoundLocally, ButtonType.OK).showAndWait();
-//        }
-//        
-//        if(referencesNotFoundOnServer!=null){
-//            new Alert(Alert.AlertType.WARNING, referencesNotFoundOnServer, ButtonType.OK).showAndWait();
-//        }
+        
         /*
          On vérifie ensuite l'identité des instances : pour chaque classe de 
          référence locale, pourvu qu'elle soit référencée sur le serveur,
@@ -197,9 +123,10 @@ public class ReferenceChecker {
         for (final Class reference : localClassReferences) {
             if (serverClassReferences.contains(reference)) {
                 // Provisoirement, on ne vérifie que RefNature
-                if (reference == RefNature.class) {
+                if (reference == RefNature.class || reference == RefProprietaire.class || reference == RefConduiteFermee.class) {
                     final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
                     referenceClassChecker.checkReferenceClass();
+                    referenceClassChecker.update();
                 }
             }
         }
@@ -208,6 +135,8 @@ public class ReferenceChecker {
     public final class ReferenceClassChecker {
 
         private final Class referenceClass;
+        private List<Object> fileReferences;
+        private List<Object> localReferences;
 
         private ReferenceClassChecker(final Class referenceClass) {
             this.referenceClass = referenceClass;
@@ -223,21 +152,10 @@ public class ReferenceChecker {
                 final URL referenceURL = referenceURL();
                 final File referenceFile = retriveFileFromURL(referenceURL);
 
-                final List<Object> fileReferences = readReferenceFile(referenceFile);
-                final List<Object> localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
+                fileReferences = readReferenceFile(referenceFile);
+                localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
 
-                /*
-                 On vérifie que toutes les instances locales sont présentes sur le serveur.
-                 Sinon, on récupère les instances locales non présentes sur le serveur.
-                 */
-//            final List<Object> serverInstancesNotLocal = new ArrayList<>();
-//            final List<Object> localInstancesNotOnTheServer = new ArrayList<>();
                 final List<Object> currentServerInstances = new ArrayList(fileReferences);
-//            for (final Object serverReferenceInstance : fileReferences){
-//                for (final Object localReferenceInstance : localReferences){
-//                
-//                }
-//            }
 
                 /*
                  On vérifie que toutes les instances du serveur sont présentes localement.
@@ -277,7 +195,7 @@ public class ReferenceChecker {
                         SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                     }
 
-                    if (presentOnServer == false) {
+                    if (!presentOnServer) {
                         if (localInstancesNotOnTheServer.get(referenceClass) == null) {
                             localInstancesNotOnTheServer.put(referenceClass, new ArrayList());
                         }
@@ -301,13 +219,11 @@ public class ReferenceChecker {
                 serverInstancesNotLocal.put(referenceClass, currentServerInstances);
 
             } catch (MalformedURLException ex) {
-                Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
             } catch (IOException ex) {
-                Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchMethodException ex) {
-                Logger.getLogger(ReferenceChecker.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(ReferenceChecker.class.getName()).log(Level.SEVERE, null, ex);
+                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+            } catch (NoSuchMethodException | SecurityException ex) {
+                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -322,81 +238,11 @@ public class ReferenceChecker {
         private URL referenceURL() throws MalformedURLException {
             return new URL(referencesDirectoryPath + referenceClass.getSimpleName() + ".csv");
         }
-
-        private List<Object> readReferenceFile(final File file) throws FileNotFoundException, IOException {
-
-            if (file == null) {
-                return null;
-            }
-
-            final BufferedReader bufferdReader = new BufferedReader(new FileReader(file));
-
-            boolean readHeader = true;
-            String[] header = null;
-
-            final List<Object> fileReferences = new ArrayList<>();
-
-            // Construction des instances de références présentes dans le fichier
-            while (true) {
-                final String line = bufferdReader.readLine();
-
-                if (line == null) {
-                    break;
-                }
-
-                final String[] fields = line.split(",", -1);
-                if (readHeader) {
-                    header = fields;
-                    readHeader = false;
-                } else {
-                    try {
-                        //                checkReferenceInstance(fields, header);
-                        fileReferences.add(buildReferenceInstance(header, fields));
-
-                        /*
-                         Il faut :
-                         0) Comparer les classes de références du serveur et les classes de référence locales.
-                         => En cas d'incohérence, contacter FranceDigue.
-                    
-                         ------------------------------------------------------------
-                         On compare ensuite, pour une classe de référence donnée, les instances de références :
-                    
-                         1) Vérifier que toutes les références du serveur (libellé et éventuellement abrégé) sont présentes dans la base locale
-                         !!! Cela suppose de pouvoir parser l'ensemble des fichiers du serveur : mettre un fichier d'index ?
-                         => si ce n'est pas le cas, signaler quelles sont les références du serveur non disponibles localement;
-                         ==> proposition de solution : créer les nouvelles références dans la base locale.
-                         2) Vérifier que toutes les références locales sont bien référencées sur le serveur (libellé et éventuellement abrégé)
-                         => si ce n'est pas le cas, signaler quelles sont les références locales qui n'existent pas sur le serveur;
-                         ==> proposition de solution a) : proposer de supprimer les références locales non référencées
-                         ==> proposition de solution b) : proposer de contacter france-digues.
-                         3) Question de l'identifiant : Que définir comme identifiant des références (pour le partage, il faut s'assurer de l'identifiant) : proposition : concaténation de la classe et du libellé
-                         4) Question de l'interface globale à toutes les références.
-                         5)
-                         */
-                    } catch (NoSuchMethodException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IllegalAccessException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (InstantiationException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IllegalArgumentException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (InvocationTargetException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (NoSuchFieldException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-            }
-
-            return fileReferences;
-        }
-
+        
+        
         /**
-         * Builds a reference instance form : 1) the csv header containing field
-         * names; 2) the csv entry containing field values; 3) the class of the
-         * reference.
+         * 
+         * Builds a reference instance form A CSV record.
          *
          * Note : this method needs the name fiels of the given referenceClass
          * map the header column names.
@@ -410,45 +256,44 @@ public class ReferenceChecker {
          * <li>LocalDate (see ISO_DATE format);</li>
          * <li>LocalDateTime (see ISO_DATE_TIME format).</li>
          * </ol>
-         *
-         * @param header
-         * @param fields
-         * @return A reference instance of referenceClass wich fields map the
-         * given csv entry.
+         * 
+         * @param record
+         * @return
          * @throws NoSuchMethodException
-         * @throws IllegalAccessException
          * @throws InstantiationException
+         * @throws IllegalAccessException
          * @throws IllegalArgumentException
-         * @throws InvocationTargetException
-         * @throws NoSuchFieldException
+         * @throws InvocationTargetException 
          */
-        private Object buildReferenceInstance(final String[] header, final String[] fields)
-                throws NoSuchMethodException, IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-
-            if (header == null || fields == null) {
+        private Object buildReferenceInstance2(final CSVRecord record) 
+                throws NoSuchMethodException, InstantiationException, 
+                IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+            
+            if (record == null) {
                 return null;
             }
 
             final Constructor constructor = referenceClass.getConstructor();
             final Object referenceInstance = constructor.newInstance();
-
-            for (int i = 0; i < header.length; i++) {
-
-                final Method getter = referenceClass.getMethod("get" + header[i].substring(0, 1).toUpperCase() + header[i].substring(1));
+            
+            
+            for(final String header : record.toMap().keySet()){
+                final Method getter = referenceClass.getMethod("get" + header.substring(0, 1).toUpperCase() + header.substring(1));
                 final Class type = getter.getReturnType();
-                final Method setter = referenceClass.getMethod("set" + header[i].substring(0, 1).toUpperCase() + header[i].substring(1), type);
+                final Method setter = referenceClass.getMethod("set" + header.substring(0, 1).toUpperCase() + header.substring(1), type);
+                
                 if (String.class.equals(type)) {
-                    if ("id".equals(header[i])) {
-                        setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + fields[i]);
+                    if ("id".equals(header)) {
+                        setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
                     } else {
-                        setter.invoke(referenceInstance, fields[i]);
+                        setter.invoke(referenceInstance, record.get(header));
                     }
                 } else if (LocalDateTime.class.equals(type)) {
                     try {
-                        setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(fields[i], DateTimeFormatter.ISO_DATE), LocalTime.MIN));
+                        setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE), LocalTime.MIN));
                     } catch (DateTimeParseException ex) {
                         try {
-                            setter.invoke(referenceInstance, LocalDateTime.parse(fields[i], DateTimeFormatter.ISO_DATE_TIME));
+                            setter.invoke(referenceInstance, LocalDateTime.parse(record.get(header), DateTimeFormatter.ISO_DATE_TIME));
                         } catch (DateTimeParseException ex2) {
                             SIRS.LOGGER.log(Level.INFO, ex2.getMessage());
                         }
@@ -460,6 +305,74 @@ public class ReferenceChecker {
             }
 
             return referenceInstance;
+        }
+        
+
+        private List<Object> readReferenceFile(final File file) throws FileNotFoundException, IOException {
+            
+            final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new FileReader(file));
+            final List<Object> fileRefs = new ArrayList<>();
+            
+            for (final CSVRecord record : records) {
+
+                try {
+                    fileRefs.add(buildReferenceInstance2(record));
+
+                } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | IllegalArgumentException | InvocationTargetException ex) {
+                    SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                }
+            }
+
+            return fileRefs;
+        }
+        
+        private void update(){
+            final List<Object> updated = new ArrayList<>();
+            for(final Object fileReference : fileReferences){
+                Object localInstance = null;
+                for(final Object localReference : localReferences){
+                    if(fileReference.equals(localReference)) {
+                        localInstance = localReference;
+                        break;
+                    }
+                }
+                
+                if(localInstance==null){
+                    final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                    repository.add(fileReference);
+                    updated.add(fileReference);
+                }
+                else{
+                    if(!localInstance.toString().equals(fileReference.toString())){
+                        final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                        try {
+                            final Method getRevision = referenceClass.getMethod("getRevision");
+                            final Method setRevision = referenceClass.getMethod("setRevision", String.class);
+                            final String revision = (String) getRevision.invoke(localInstance);
+                            setRevision.invoke(fileReference, revision);
+                            repository.update(fileReference);
+                            updated.add(fileReference);// On mémorise la référence mise à jour
+                        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                            SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                        }
+                    }
+                }
+            }
+            
+            // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker.
+            serverInstancesNotLocal.get(referenceClass).removeAll(updated);
+            final Map<Object, Object> incoherentInstances = incoherentReferences.get(referenceClass);
+            if(incoherentInstances!=null){
+                for(final Object updatedInstance : updated){
+                    final Set keySet = incoherentInstances.keySet();
+                    for(final Object localInstanceKey : keySet){
+                        if(incoherentInstances.get(localInstanceKey)==updatedInstance){
+                            incoherentInstances.remove(localInstanceKey);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void registerIncoherentReferences(final Object localReferenceInstance, final Object serverReferenceInstance) {
@@ -499,28 +412,7 @@ public class ReferenceChecker {
             return false;
         }
     }
-//    
-//    private static void checkReferenceInstance(final Object referenceToCheck, final List<Object> listOfReferences){
-//        
-//    }
-//    
-//    
-//    
-//    
-//
-
-//    
-//    
-//    
-//    
-//
-////    private static void checkReferenceInstance(final String[] fields, final String[] header) {
-////
-////        if (fields == null || header == null || (fields.length != header.length) || header.length == 0) {
-////            return;
-////        }
-////
-////    }
+    
     /**
      * Return the file content located at the URL.
      *
@@ -559,102 +451,6 @@ public class ReferenceChecker {
         return file;
     }
 
-////    /**
-////     * Get the class for the reference provided by the URL.
-////     *
-////     * @param referenceURL
-////     * @return
-////     */
-////    private static Class referenceClass(final URL referenceURL) {
-////        final Pattern pattern = Pattern.compile("\\/references\\/(.*)\\.csv");
-////        final Matcher matcher = pattern.matcher(referenceURL.getFile());
-////        if (matcher.matches()) {
-////            final String filePattern = matcher.group(1);
-////            switch (filePattern) {
-////                case "TYPE_NATURE":
-////                    return RefNature.class;
-////                default:
-////                    return null;
-////            }
-////        } else {
-////            return null;
-////        }
-////    }
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//    
-//
-    /**
-     * TODO Retrive all the reference classes of the local system.
-     *
-     * @return
-     */
-    private static List<Class> retrieveLocalClassReferences() {
-        final List<Class> references = new ArrayList<>();
-        references.add(RefConduiteFermee.class);
-        references.add(RefConvention.class);
-        references.add(RefCote.class);
-        references.add(RefDevers.class);
-        references.add(RefDocumentGrandeEchelle.class);
-        references.add(RefEcoulement.class);
-        references.add(RefEvenementHydraulique.class);
-        references.add(RefFoncitonMaitreOeuvre.class);
-        references.add(RefFonction.class);
-        references.add(RefFrequenceEvenementHydraulique.class);
-        references.add(RefImplantation.class);
-        references.add(RefLargeurFrancBord.class);
-        references.add(RefMateriau.class);
-        references.add(RefMoyenManipBatardeaux.class);
-        references.add(RefNatureBatardeaux.class);
-        references.add(RefNature.class);
-        references.add(RefOrientationOuvrage.class);
-        references.add(RefOrientationPhoto.class);
-        references.add(RefOrientationVent.class);
-        references.add(RefOrigineProfilLong.class);
-        references.add(RefOrigineProfilTravers.class);
-        references.add(RefOuvrageFranchissement.class);
-        references.add(RefOuvrageHydrauliqueAssocie.class);
-        references.add(RefOuvrageParticulier.class);
-        references.add(RefOuvrageTelecomEnergie.class);
-        references.add(RefOuvrageVoirie.class);
-        references.add(RefPosition.class);
-        references.add(RefPositionProfilLongSurDigue.class);
-        references.add(RefPrestation.class);
-        references.add(RefProfilFrancBord.class);
-        references.add(RefProprietaire.class);
-        references.add(RefRapportEtude.class);
-        references.add(RefReferenceHauteur.class);
-        references.add(RefReseauHydroCielOuvert.class);
-        references.add(RefReseauTelecomEnergie.class);
-        references.add(RefRevetement.class);
-        references.add(RefRive.class);
-        references.add(RefSeuil.class);
-        references.add(RefSource.class);
-        references.add(RefSystemeReleveProfil.class);
-        references.add(RefTypeDesordre.class);
-        references.add(RefTypeDocument.class);
-        references.add(RefTypeGlissiere.class);
-        references.add(RefTypeProfilTravers.class);
-        references.add(RefTypeTroncon.class);
-        references.add(RefUrgence.class);
-        references.add(RefUsageVoie.class);
-        references.add(RefUtilisationConduite.class);
-        references.add(RefVoieDigue.class);
-        return references;
-    }
-
     /**
      * Reference names located on the server references index file are supposed
      * to be the simple name of the model class related to the given reference.
@@ -664,7 +460,7 @@ public class ReferenceChecker {
     private List<Class> buildServerClassReferences() throws IOException {
         final List<String> names = retrieveServerClassNameReferences();
         final List<Class> classes = new ArrayList<>();
-        serverClassNameReferencesNotLocal = new ArrayList<String>();
+        serverClassNameReferencesNotLocal = new ArrayList<>();
         for (final String name : names) {
             final String className = MODEL_PACKAGE + "." + name;
             try {
