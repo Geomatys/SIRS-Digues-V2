@@ -150,7 +150,7 @@ public class FXSystemeReperagePane extends BorderPane {
         //colonne de la table
         final TableColumn<SystemeReperageBorne,SystemeReperageBorne> deleteCol = new DeleteColumn();
         final TableColumn<SystemeReperageBorne,SystemeReperageBorne> nameCol = new NameColumn();
-        final TableColumn<SystemeReperageBorne,Object> prCol = new PRColumn();
+        final TableColumn<SystemeReperageBorne,Number> prCol = new PRColumn();
         
         uiBorneTable.getColumns().add(deleteCol);
         uiBorneTable.getColumns().add(nameCol);
@@ -480,23 +480,23 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
     
-    public class PRColumn extends TableColumn<SystemeReperageBorne,Object>{
+    public class PRColumn extends TableColumn<SystemeReperageBorne, Number>{
 
         public PRColumn() {
             super("PR");
             setSortable(false);
             setEditable(true);
             
-            setCellValueFactory(new Callback<CellDataFeatures<SystemeReperageBorne, Object>, ObservableValue<Object>>() {
+            setCellValueFactory(new Callback<CellDataFeatures<SystemeReperageBorne, Number>, ObservableValue<Number>>() {
                 @Override
-                public ObservableValue<Object> call(CellDataFeatures<SystemeReperageBorne, Object> param) {
+                public ObservableValue<Number> call(CellDataFeatures<SystemeReperageBorne, Number> param) {
                     return (ObservableValue)param.getValue().valeurPRProperty();
                 }
             });
             
-            setCellFactory(new Callback<TableColumn<SystemeReperageBorne, Object>, TableCell<SystemeReperageBorne, Object>>() {
+            setCellFactory(new Callback<TableColumn<SystemeReperageBorne, Number>, TableCell<SystemeReperageBorne, Number>>() {
                 @Override
-                public TableCell<SystemeReperageBorne, Object> call(TableColumn<SystemeReperageBorne, Object> param) {
+                public TableCell<SystemeReperageBorne, Number> call(TableColumn<SystemeReperageBorne, Number> param) {
                     return new FXNumberCell<SystemeReperageBorne>(NumberField.NumberType.Normal);
                 }
             });

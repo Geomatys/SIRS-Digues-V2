@@ -610,7 +610,7 @@ public class PojoTable extends BorderPane {
                 } else if (Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
                 } else if (Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)) {
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell.Float(NumberField.NumberType.Normal));
                 } else if (Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
