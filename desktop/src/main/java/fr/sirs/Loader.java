@@ -1,9 +1,7 @@
 package fr.sirs;
 
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.CONSULTANT;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.USER;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +42,8 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.GUEST;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
@@ -203,8 +203,8 @@ public class Loader extends Application {
                         session.setUtilisateur(user);
                         if (session.getRole() == ADMIN
                                 || session.getRole() == USER
-                                || session.getRole() == CONSULTANT
-                                || session.getRole() == EXTERNE) {
+                                || session.getRole() == GUEST
+                                || session.getRole() == EXTERN) {
                             controller.uiLogInfo.setText("Identifiants valides.");
                             final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
                             fadeSplash.setFromValue(1.0);

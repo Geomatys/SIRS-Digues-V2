@@ -5,9 +5,9 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveProfilTravers;
@@ -54,7 +54,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         
         date_maj.setDisable(true);
         
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
         disableFieldsProperty().bind(uiMode.editionState().not());
         uiEditDetailTronconTheme.getStyleClass().add("element-pane");

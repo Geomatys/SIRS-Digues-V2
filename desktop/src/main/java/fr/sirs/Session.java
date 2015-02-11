@@ -71,6 +71,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.Role;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
@@ -147,14 +148,14 @@ public class Session extends SessionGen {
     public void setUtilisateur(final Utilisateur utilisateur){
         this.utilisateur = utilisateur;
         if(utilisateur!=null){
-            this.role.set(Role.valueOf(utilisateur.getRole()));
+            this.role.set(utilisateur.getRole2());
             needValidationProperty.set(false);
             geometryEditionProperty.set(false);
             nonGeometryEditionProperty.set(false);
-            if(role.get()==Role.ADMIN || role.get()==Role.EXTERNE){
+            if(role.get()==Role.ADMIN || role.get()==Role.EXTERN){
                 geometryEditionProperty.set(true);
                 nonGeometryEditionProperty.set(true);
-                if(role.get()==Role.EXTERNE){
+                if(role.get()==Role.EXTERN){
                     needValidationProperty.set(true);
                 }
             }
@@ -162,7 +163,7 @@ public class Session extends SessionGen {
                 geometryEditionProperty.set(false);
                 nonGeometryEditionProperty.set(true);
             }
-            else if(role.get()==Role.CONSULTANT){
+            else if(role.get()==Role.GUEST){
                 geometryEditionProperty.set(false);
                 nonGeometryEditionProperty.set(false);
             }

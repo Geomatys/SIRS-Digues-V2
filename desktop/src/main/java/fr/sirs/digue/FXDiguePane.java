@@ -4,9 +4,9 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -26,7 +26,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -58,7 +57,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         Injector.injectDependencies(this);
         
         //mode edition
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
         final BooleanProperty editBind = uiMode.editionState();
         libelle.editableProperty().bind(editBind);

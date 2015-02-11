@@ -3,9 +3,9 @@ package fr.sirs.other;
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
@@ -60,7 +60,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     public FXOrganismePane(Organisme organisme) {
         SIRS.loadFXML(this);
 
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         final BooleanBinding editProp = uiMode.editionState().not();
         for (final Node child : uiDescriptionGrid.getChildren()) {
             if (!(child instanceof Label)) {

@@ -6,10 +6,9 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.CONSULTANT;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.ContactTroncon;
@@ -34,13 +33,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -97,7 +94,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         Injector.injectDependencies(this);
         
         //mode edition
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
         final BooleanProperty editBind = uiMode.editionState();
         final BooleanBinding editSR = Bindings.and(editBind, new SimpleBooleanProperty(session.getRole()!=USER));

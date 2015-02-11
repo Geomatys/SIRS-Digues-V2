@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.core.model.Role;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;

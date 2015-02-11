@@ -3,7 +3,7 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
-import fr.sirs.Role;
+import fr.sirs.core.model.Role;
 import fr.sirs.Session;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
@@ -30,7 +30,7 @@ public class ContactsTheme extends Theme {
         final Session session = Injector.getSession();
         final boolean editable = ((session.getRole()==Role.ADMIN) 
                 || (session.getRole()==Role.USER) 
-                || (session.getRole()==Role.EXTERNE));
+                || (session.getRole()==Role.EXTERN));
         final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Liste des contacts");
         tableContact.editableProperty().set(editable);
         final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Liste des organismes");

@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;

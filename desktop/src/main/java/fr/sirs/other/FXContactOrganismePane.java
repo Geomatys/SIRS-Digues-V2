@@ -4,9 +4,9 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
@@ -54,7 +54,7 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
         orgRepository = session.getOrganismeRepository();
         contactRepository = session.getContactRepository();
         
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         final BooleanBinding editProp = uiMode.editionState().not();
         uiContactChoice.disableProperty().bind(editProp);
         uiOrganismeChoice.disableProperty().bind(editProp);

@@ -3,16 +3,15 @@ package fr.sirs.digue;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
-import static fr.sirs.Role.ADMIN;
-import static fr.sirs.Role.EXTERNE;
-import static fr.sirs.Role.USER;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.FXMapTab;
@@ -30,7 +29,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -79,7 +77,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
     public FXSystemeEndiguementPane() {
         SIRS.loadFXML(this);
         endiguementProp.addListener(this::changed);
-        uiEditMode.setAllowedRoles(ADMIN, USER, EXTERNE);
+        uiEditMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiEditMode.setSaveAction(this::save);
         
         uiMaj.disableProperty().set(true);
