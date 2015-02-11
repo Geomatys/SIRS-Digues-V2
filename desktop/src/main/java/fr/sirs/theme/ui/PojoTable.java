@@ -11,6 +11,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Role;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -74,6 +75,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -192,9 +194,10 @@ public class PojoTable extends BorderPane {
             final TableColumn col;
             // Colonne de mots de passe simplifiée : ne marche pas très bien.
             if("password".equals(desc.getDisplayName())) {
-                col = new PasswordColumn();
-            }
-            else{
+                col = new PasswordColumn(desc);
+            } else if(desc.getReadMethod().getReturnType().isEnum()){
+                col = new EnumColumn(desc);
+            } else{
                 col = new PropertyColumn(desc); 
             }
             uiTable.getColumns().add(col);
@@ -526,23 +529,25 @@ public class PojoTable extends BorderPane {
     }
     
     // Matérieau à utiliser quand le role des utilisateurs sera devenu une énumération
-//        public enum role{ADMIN, USER, CONSULTANT, EXTERNE};
-//        private class EnumColumn extends TableColumn<Element, role>{
-//            private EnumColumn(){
-//                setCellValueFactory(new PropertyValueFactory<>("role"));
-//                setCellFactory(new Callback<TableColumn<Element, role>, TableCell<Element, role>>() {
-//
-//                    @Override
-//                    public TableCell<Element, role> call(TableColumn<Element, role> param) {
-//                        return new FXEnumTableCell<Element, role>();
-//                    }
-//
-//                });
-//            }
-//        }
+        private class EnumColumn extends TableColumn<Element, Role>{
+            private EnumColumn(PropertyDescriptor desc){
+                super(labelMapper.mapPropertyName(desc.getDisplayName()));
+                
+                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
+
+                    @Override
+                    public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
+                        return new FXEnumTableCell<Element, Role>();
+                    }
+
+                });
+            }
+        }
     
         private class PasswordColumn extends TableColumn<Element, String>{
-            private PasswordColumn(){
+            private PasswordColumn(PropertyDescriptor desc){
+                super(labelMapper.mapPropertyName(desc.getDisplayName()));
                 setEditable(true);
                 setCellValueFactory(new PropertyValueFactory<>("password"));
                 setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
@@ -615,7 +620,7 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
-                } else {
+                }else {
                     isEditable = false;
                 }
                 

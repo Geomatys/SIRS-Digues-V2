@@ -148,7 +148,7 @@ public class Session extends SessionGen {
     public void setUtilisateur(final Utilisateur utilisateur){
         this.utilisateur = utilisateur;
         if(utilisateur!=null){
-            this.role.set(utilisateur.getRole2());
+            role.set(utilisateur.getRole());
             needValidationProperty.set(false);
             geometryEditionProperty.set(false);
             nonGeometryEditionProperty.set(false);
@@ -221,8 +221,8 @@ public class Session extends SessionGen {
                 s.put(split[i].trim().toLowerCase(), i);
             }
             SORTED_FIELDS.put(name.toLowerCase(), s);
-            
         }
+        
         for(Entry entry : SORTED_OVERRIDES.entrySet()){
             final String name = (String) entry.getKey();
             final String fields = (String) entry.getValue();
@@ -494,12 +494,19 @@ public class Session extends SessionGen {
         try {
             for (java.beans.PropertyDescriptor pd : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
                 final Method m = pd.getReadMethod();
+                
                 if(m==null || m.getAnnotation(Internal.class)!=null) continue;
+                
                 final Class propClass = m.getReturnType();
-                for(Class c : SUPPORTED_TYPES){
-                    if(c.isAssignableFrom(propClass)){
-                        properties.add(pd);
-                        break;
+                if(propClass.isEnum()){
+                    properties.add(pd);
+                }
+                else{
+                    for(Class c : SUPPORTED_TYPES){
+                        if(c.isAssignableFrom(propClass)){
+                            properties.add(pd);
+                            break;
+                        }
                     }
                 }
             }

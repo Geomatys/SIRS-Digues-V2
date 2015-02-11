@@ -388,7 +388,7 @@ public class FXLauncherPane extends BorderPane {
                         Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
-                    administrateur.setRole(Role.ADMIN.toString());
+                    administrateur.setRole(Role.ADMIN);
                     utilisateurRepository.add(administrateur);
                     
                     applicationContext.close();
@@ -468,7 +468,7 @@ public class FXLauncherPane extends BorderPane {
                         Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
-                    administrateur.setRole(Role.ADMIN.toString());
+                    administrateur.setRole(Role.ADMIN);
                     utilisateurRepository.add(administrateur);
                     
                     applicationContext.close();

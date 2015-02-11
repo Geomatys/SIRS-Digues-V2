@@ -13,6 +13,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import javafx.util.StringConverter;
 
 /**
  *
@@ -31,7 +32,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     @FXML PasswordField ui_password;
     @FXML PasswordField ui_passwordConfirm;
     @FXML Label ui_labelConfirm;
-    @FXML TextField ui_role;
+    @FXML ComboBox<Role> ui_role;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when
@@ -43,7 +44,6 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
             initFields();
         });
         messageDigest = MessageDigest.getInstance("MD5");
-
     }
 
     public FXUtilisateurPane(final Utilisateur utilisateur) throws NoSuchAlgorithmException {
@@ -86,9 +86,10 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
 
         // * role
-        ui_role.textProperty().bindBidirectional(element.roleProperty());
-        ui_role.disableProperty().bind(disableFieldsProperty());
-        ui_role.editableProperty().bind(administrableProperty());
+        ui_role.getItems().addAll(Role.values());
+        ui_role.valueProperty().bindBidirectional(element.roleProperty());
+        ui_role.setDisable(element.equals(Injector.getSession().getUtilisateur()));
+        ui_role.setEditable(element.equals(Injector.getSession().getUtilisateur()));
 
     }
 

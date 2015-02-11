@@ -39,7 +39,7 @@
                   <PasswordField fx:id="ui_passwordConfirm" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <!-- EString -->                 
                   <Label text="%role" GridPane.rowIndex="3" />
-                  <TextField fx:id="ui_role" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="ui_role" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
             </children>
                <padding>
