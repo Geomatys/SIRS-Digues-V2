@@ -1154,6 +1154,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="login" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="password" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="role" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="role2" eType="#//Role"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ContactConvention">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1200,7 +1201,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReferenceType" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EEnum" name="Role">
-    <eAnnotations source="generation"/>
     <eLiterals name="USER"/>
     <eLiterals name="ADMIN"/>
     <eLiterals name="GUEST"/>
