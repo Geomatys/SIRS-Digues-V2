@@ -557,7 +557,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefVoieDigue">
+  <eClassifiers xsi:type="ecore:EClass" name="RefVoieDigue" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -565,7 +565,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefUsageVoie">
+  <eClassifiers xsi:type="ecore:EClass" name="RefUsageVoie" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -573,7 +573,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefUtilisationConduite">
+  <eClassifiers xsi:type="ecore:EClass" name="RefUtilisationConduite" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
@@ -581,7 +581,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefUrgence">
+  <eClassifiers xsi:type="ecore:EClass" name="RefUrgence" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -589,29 +589,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefSystemeReleveProfil">
+  <eClassifiers xsi:type="ecore:EClass" name="RefSystemeReleveProfil" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefSeuil">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefRive">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefRevetement">
+  <eClassifiers xsi:type="ecore:EClass" name="RefSeuil" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -619,7 +604,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefReseauTelecomEnergie">
+  <eClassifiers xsi:type="ecore:EClass" name="RefRive" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefRevetement" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -627,7 +619,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefReseauHydroCielOuvert">
+  <eClassifiers xsi:type="ecore:EClass" name="RefReseauTelecomEnergie" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -635,7 +627,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefRapportEtude">
+  <eClassifiers xsi:type="ecore:EClass" name="RefReseauHydroCielOuvert" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -643,14 +635,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefProprietaire">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefProfilFrancBord">
+  <eClassifiers xsi:type="ecore:EClass" name="RefRapportEtude" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -658,21 +643,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeProfilTravers">
+  <eClassifiers xsi:type="ecore:EClass" name="RefProprietaire" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPrestation">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPosition">
+  <eClassifiers xsi:type="ecore:EClass" name="RefProfilFrancBord" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -680,7 +658,21 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageVoirie">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeProfilTravers" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefPrestation" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefPosition" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -688,7 +680,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageTelecomEnergie">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageVoirie" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -696,7 +688,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageParticulier">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageTelecomEnergie" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -704,7 +696,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageHydrauliqueAssocie">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageParticulier" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -712,7 +704,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageFranchissement">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageHydrauliqueAssocie" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -720,7 +712,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationVent">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageFranchissement" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -728,7 +720,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationOuvrage">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationVent" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -736,7 +728,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefNatureBatardeaux">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationOuvrage" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -744,7 +736,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefMateriau">
+  <eClassifiers xsi:type="ecore:EClass" name="RefNatureBatardeaux" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -752,7 +744,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefNature">
+  <eClassifiers xsi:type="ecore:EClass" name="RefMateriau" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -760,7 +752,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefMoyenManipBatardeaux">
+  <eClassifiers xsi:type="ecore:EClass" name="RefNature" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -768,7 +760,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefLargeurFrancBord">
+  <eClassifiers xsi:type="ecore:EClass" name="RefMoyenManipBatardeaux" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -776,7 +768,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeGlissiere">
+  <eClassifiers xsi:type="ecore:EClass" name="RefLargeurFrancBord" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -784,7 +776,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFrequenceEvenementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeGlissiere" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -792,7 +784,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefEvenementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFrequenceEvenementHydraulique" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -800,14 +792,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefDocumentGrandeEchelle">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordre">
+  <eClassifiers xsi:type="ecore:EClass" name="RefEvenementHydraulique" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -815,7 +800,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefCote">
+  <eClassifiers xsi:type="ecore:EClass" name="RefDocumentGrandeEchelle" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -823,14 +815,22 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefConvention">
+  <eClassifiers xsi:type="ecore:EClass" name="RefCote" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="generation">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefConvention" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefConduiteFermee">
+  <eClassifiers xsi:type="ecore:EClass" name="RefConduiteFermee" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -843,7 +843,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valeurPR" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneId" eType="#//Borne_digue"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefEcoulement">
+  <eClassifiers xsi:type="ecore:EClass" name="RefEcoulement" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -851,7 +851,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDocument" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -885,7 +885,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefSource">
+  <eClassifiers xsi:type="ecore:EClass" name="RefSource" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -893,7 +893,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefImplantation">
+  <eClassifiers xsi:type="ecore:EClass" name="RefImplantation" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -901,7 +901,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFonction">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonction" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -922,7 +922,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordre" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/articleJournal"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefReferenceHauteur">
+  <eClassifiers xsi:type="ecore:EClass" name="RefReferenceHauteur" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -930,7 +930,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFoncitonMaitreOeuvre">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionMaitreOeuvre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1008,14 +1008,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" upperBound="-1"
         eType="#//ProfilTraversTroncon" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefDevers">
+  <eClassifiers xsi:type="ecore:EClass" name="RefDevers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1072,7 +1072,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLongEvenementHydraulique"
         upperBound="-1" eType="#//ProfilLongEvenementHydraulique" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1096,7 +1096,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="Epi" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeTroncon">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeTroncon" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1111,7 +1111,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="d" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPositionProfilLongSurDigue">
+  <eClassifiers xsi:type="ecore:EClass" name="RefPositionProfilLongSurDigue" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1134,12 +1134,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MaitreOeuvreMarche">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvre" eType="#//RefFoncitonMaitreOeuvre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvre" eType="#//RefFonctionMaitreOeuvre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationPhoto">
+  <eClassifiers xsi:type="ecore:EClass" name="RefOrientationPhoto" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1197,5 +1197,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true">
     <eStructuralFeatures xsi:type="ecore:EReference" name="documenttroncon" upperBound="-1"
         eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/sirsdocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReferenceType" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="Role">
+    <eLiterals name="USER"/>
+    <eLiterals name="ADMIN"/>
+    <eLiterals name="GUEST"/>
+    <eLiterals name="EXTERN"/>
   </eClassifiers>
 </ecore:EPackage>
