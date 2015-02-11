@@ -13,13 +13,6 @@
 <?import javafx.scene.text.*?>
 
 <fx:root fx:id="uiBorderPane" prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-   <center>
-        <VBox BorderPane.alignment="CENTER">
-            <children>
-            <ScrollPane fx:id="uiEditDetailTronconTheme" />
-            </children>
-        </VBox>
-   </center>
    <top>
           <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
               <left>

@@ -42,7 +42,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
     
-    @FXML protected ScrollPane uiEditDetailTronconTheme;
     @FXML private FXDateField date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
@@ -57,7 +56,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
         disableFieldsProperty().bind(uiMode.editionState().not());
-        uiEditDetailTronconTheme.getStyleClass().add("element-pane");
         
         elementProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
             initPane();
@@ -120,7 +118,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         if (object == null) {
             date_maj.valueProperty().unbind();
             
-            uiEditDetailTronconTheme.setContent(new Label("Pas d'éditeur disponible."));
+            setCenter(new Label("Pas d'éditeur disponible."));
             specificThemePane = null;
 
         } else {
@@ -145,7 +143,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 if(specificThemePane instanceof FXUtilisateurPane){
                     ((FXUtilisateurPane) specificThemePane).setAdministrable(session.getRole()==ADMIN);
                 }
-                uiEditDetailTronconTheme.setContent((Node)specificThemePane);
+                setCenter((Node)specificThemePane);
             } catch (Exception ex) {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             }

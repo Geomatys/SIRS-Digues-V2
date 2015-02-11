@@ -162,7 +162,13 @@
     -fx-background-radius: 0 0 10 10;
 }
 
-.element-pane:disabled{
+// Set disabled texts fully opaque to ease "consultation" mode.
+.label:disabled,
+.text-input:disabled, 
+.choice-box:disabled,
+.combo-box:disabled,
+.date-cell:disabled > * /* This is set on children so border is not affected. */
+{
     -fx-opacity: 1.0
 }
 

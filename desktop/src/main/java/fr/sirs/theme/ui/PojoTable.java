@@ -435,13 +435,11 @@ public class PojoTable extends BorderPane {
                 if(str == null || str.isEmpty()){
                     filteredValues = allValues;
                 }else{
-                    final Client searchEngine = Injector.getElasticEngine().getClient();
-                    final String type = pojoClass.getSimpleName();
+//                    final String type = pojoClass.getSimpleName();
                     final Set<String> result = new HashSet<>();
                     
-                    ActionFuture<SearchResponse> search = searchEngine.search(
-                            searchEngine.prepareSearch(Injector.getElasticEngine().indexName).setTypes(type).addField("*").setQuery(QueryBuilders.queryString(str)).request());
-                    Iterator<SearchHit> iterator = search.actionGet().getHits().iterator();
+                    SearchResponse search = Injector.getElasticEngine().search(QueryBuilders.queryString(str));
+                    Iterator<SearchHit> iterator = search.getHits().iterator();
                     while (iterator.hasNext()) {
                         result.add(iterator.next().getId());
                     }

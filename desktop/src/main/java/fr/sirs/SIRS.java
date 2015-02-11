@@ -18,6 +18,7 @@ import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.other.FXContactOrganismePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.FXThemePane;
 import fr.sirs.util.property.SirsPreferences;
@@ -259,8 +260,8 @@ public final class SIRS extends SirsCore {
      * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être 
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
-    public static FXElementPane generateEditionPane(final Element pojo) {
-        final FXElementPane content;        
+    public static AbstractFXElementPane generateEditionPane(final Element pojo) {
+        final AbstractFXElementPane content;        
         if (pojo instanceof Contact) {
             content = new FXContactPane((Contact) pojo);
             

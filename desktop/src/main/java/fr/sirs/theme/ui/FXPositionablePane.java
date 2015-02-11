@@ -11,7 +11,6 @@ import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
@@ -65,7 +64,6 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -117,22 +115,8 @@ public class FXPositionablePane extends BorderPane {
     private final Map<String,BorneDigue> cacheBorneDigue = new HashMap<>();
     private final CoordinateReferenceSystem baseCrs = SirsCore.getEpsgCode();
             
-    public FXPositionablePane(){
-        try{
-            final Class cdtClass = getClass();
-            final String fxmlpath = "/fr/sirs/theme/ui/FXPositionnablePane.fxml";
-            final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
-            loader.setController(this);
-            loader.setRoot(this);
-            loader.setClassLoader(cdtClass.getClassLoader());
-            try {
-                loader.load();
-            } catch (IOException ex) {
-                throw new IllegalArgumentException(ex.getMessage(), ex);
-            }
-        }catch(Throwable ex){
-            ex.printStackTrace();
-        }
+    public FXPositionablePane() {
+        SIRS.loadFXML(this, Positionable.class);
         
         positionableProperty.addListener(new ChangeListener() {
             @Override

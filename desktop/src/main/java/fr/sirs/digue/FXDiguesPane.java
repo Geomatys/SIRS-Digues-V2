@@ -15,6 +15,8 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.theme.ui.AbstractFXElementPane;
+import fr.sirs.theme.ui.FXElementPane;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -129,23 +131,20 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
     }
     
     public final void displayTronconDigue(TronconDigue obj){
-        FXTronconDiguePane ctrl = new FXTronconDiguePane();
-        ctrl.setElement((TronconDigue) obj);
+        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
         uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
     }
     
     public final void displayDigue(Digue obj){
-        FXDiguePane digueController = new FXDiguePane();
-        digueController.setElement((Digue) obj);
-        uiRight.setCenter(digueController);
+        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
+        uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
     }
     
     public final void displaySystemeEndiguement(SystemeEndiguement obj){
-        FXSystemeEndiguementPane pane = new FXSystemeEndiguementPane();
-        pane.systemeEndiguementProp().set(obj);
-        uiRight.setCenter(pane);
+        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
+        uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
     }
 

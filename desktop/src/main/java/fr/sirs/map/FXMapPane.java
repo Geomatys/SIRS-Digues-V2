@@ -1,13 +1,16 @@
 
 package fr.sirs.map;
 
+import fr.sirs.CorePlugin;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
@@ -316,8 +319,14 @@ public class FXMapPane extends BorderPane {
      * @return The Map layer in which are contained elements of input type, or null.
      */
     public MapLayer getMapLayerForElement(Class elementClass) {
-        final LabelMapper mapper = new LabelMapper(elementClass);
-        return getMapLayerForElement(mapper.mapClassName());
+        if (TronconDigue.class.isAssignableFrom(elementClass)) {
+            return getMapLayerForElement(CorePlugin.TRONCON_LAYER_NAME);
+        } else if (BorneDigue.class.isAssignableFrom(elementClass)) {
+            return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
+        } else {
+            final LabelMapper mapper = new LabelMapper(elementClass);
+            return getMapLayerForElement(mapper.mapClassName());
+        }
     }
     
     /** 

@@ -4,18 +4,21 @@ package fr.sirs.index;
 import fr.sirs.core.SirsCore;
 import java.io.Closeable;
 import java.util.HashMap;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.node.Node;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-import org.elasticsearch.river.RiverSettings;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
+    
+    private static final String DEFAULT_TYPE_NAME = "sirs-river";
     
     // TODO : put elastic search configuration in a properties file.
     private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
@@ -25,7 +28,7 @@ public class ElasticSearchEngine implements Closeable {
     
     private final Node node;
     private final Client client;
-    public final String indexName;
+    public final String currentDbName;
     
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) {
         
@@ -48,31 +51,25 @@ public class ElasticSearchEngine implements Closeable {
         "        \"password\" : \""+password+"\"\n" +
         "    },\n" +
         "    \"index\" : {\n" +
-        "        \"index\" : \""+dbName+"\",\n" +
-        "        \"type\" : \"*\"\n" +
+        "        \"index\" : \"_river\",\n" +
+        "        \"type\" : \""+dbName+"\"\n" +
         "    }\n" +
         "}";
-        final ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder().loadFromSource(config);
         
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
         this.client = node.client();
         
-        // TODO : Is this sufficient to initialize river plugin ?
-//        client.index(Requests.indexRequest(dbName).type(dbName).id("_meta").source(config)).actionGet();
-        client.index(Requests.indexRequest("_river").type("*").id("_meta").source(config)).actionGet();
-        indexName = dbName;
+        client.index(Requests.indexRequest("_river").type(dbName).id("_meta").source(config)).actionGet();
+        currentDbName = dbName;
     }
 
-    public Client getClient() {
-        return client;
+    public SearchResponse search(final QueryBuilder query) {
+        return client.prepareSearch("_river").setTypes(currentDbName).setQuery(query)
+                .execute().actionGet();
     }
     
     @Override
     public void close(){
         node.close();
-    }
-    
-    public String getIndexName() {
-        return indexName;
     }
 }

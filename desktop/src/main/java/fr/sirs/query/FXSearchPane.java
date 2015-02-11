@@ -367,18 +367,13 @@ public class FXSearchPane extends BorderPane {
                 uiTable.getColumns().add(libelleCol);
 
 
-                final ElasticSearchEngine engine = Injector.getElasticEngine();        
-                final Client client = engine.getClient();
+                final ElasticSearchEngine engine = Injector.getElasticEngine();
                 final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
 
-                final SearchResponse response = client.prepareSearch(engine.indexName)
-                        .setQuery(qb)
-                        .setSize(10000)
-                        //.addFields("*")
-                        .execute()
-                        .actionGet();
-                final List<ElementHit> results = new ArrayList<>();
+                final SearchResponse response = engine.search(qb);
                 final SearchHits hits = response.getHits();
+                
+                final List<ElementHit> results = new ArrayList<>();
                 final Iterator<SearchHit> ite = hits.iterator();
                 while(ite.hasNext()){
                     final SearchHit hit = ite.next();
