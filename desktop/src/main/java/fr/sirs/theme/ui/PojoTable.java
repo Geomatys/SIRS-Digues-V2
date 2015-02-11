@@ -526,19 +526,27 @@ public class PojoTable extends BorderPane {
         }
     }
     
-    // Matérieau à utiliser quand le role des utilisateurs sera devenu une énumération
         private class EnumColumn extends TableColumn<Element, Role>{
             private EnumColumn(PropertyDescriptor desc){
                 super(labelMapper.mapPropertyName(desc.getDisplayName()));
-                
+                setEditable(true);
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
                 setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
 
                     @Override
                     public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
-                        return new FXEnumTableCell<Element, Role>();
+                        return new FXEnumTableCell<Element, Role>(Role.class);
                     }
 
+                });     
+                addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+
+                    @Override
+                    public void handle(CellEditEvent<Element, Object> event) {
+                        final Object rowElement = event.getRowValue();
+                        new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
+                        elementEdited(event);
+                    }
                 });
             }
         }

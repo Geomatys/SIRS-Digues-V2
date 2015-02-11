@@ -6,6 +6,7 @@ import fr.sirs.core.model.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -88,9 +89,21 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         // * role
         ui_role.getItems().addAll(Role.values());
         ui_role.valueProperty().bindBidirectional(element.roleProperty());
-        ui_role.setDisable(element.equals(Injector.getSession().getUtilisateur()));
-        ui_role.setEditable(element.equals(Injector.getSession().getUtilisateur()));
+        ui_role.disableProperty().bind(new SecurityBinding());
+//        ui_role.setEditable(element.equals(Injector.getSession().getUtilisateur()));
 
+    }
+    
+    private class SecurityBinding extends BooleanBinding{
+
+        SecurityBinding(){
+            super.bind(disableFieldsProperty(), elementProperty(), Injector.getSession().utilisateurProperty());
+        }
+        @Override
+        protected boolean computeValue() {
+            return disableFieldsProperty().get() || elementProperty().get().equals(Injector.getSession().utilisateurProperty().get());
+        }
+        
     }
 
     private String digest(final String toEncrypt) {
@@ -112,7 +125,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
             new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE).showAndWait();
             throw new Exception("L'identifiant utilisateur n'a pas été renseigné ! Modification non enregistrée.");
         }
-        else{
+        else if(ui_login.isEditable()){ // Si on est susceptible d'avoir modifié le login.
+            
             final List<Utilisateur> utilisateurs = Injector.getSession().getUtilisateurRepository().getAll();
             for(final Utilisateur utilisateur : utilisateurs){
                 if(ui_login.getText().equals(utilisateur.getLogin())){

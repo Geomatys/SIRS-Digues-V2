@@ -143,10 +143,11 @@ public class Session extends SessionGen {
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
-    private Utilisateur utilisateur = null;
-    public Utilisateur getUtilisateur() {return utilisateur;}
+    private ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
+    public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
+    public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
     public void setUtilisateur(final Utilisateur utilisateur){
-        this.utilisateur = utilisateur;
+        utilisateurProperty.set(utilisateur);
         if(utilisateur!=null){
             role.set(utilisateur.getRole());
             needValidationProperty.set(false);
