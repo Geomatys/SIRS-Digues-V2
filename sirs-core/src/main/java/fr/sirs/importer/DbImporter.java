@@ -25,7 +25,7 @@ import fr.sirs.core.component.RefCoteRepository;
 import fr.sirs.core.component.RefDocumentGrandeEchelleRepository;
 import fr.sirs.core.component.RefEcoulementRepository;
 import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
-import fr.sirs.core.component.RefFoncitonMaitreOeuvreRepository;
+import fr.sirs.core.component.RefFonctionMaitreOeuvreRepository;
 import fr.sirs.core.component.RefFonctionRepository;
 import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
 import fr.sirs.core.component.RefImplantationRepository;
@@ -176,7 +176,7 @@ public class DbImporter {
     private final MarcheRepository marcheRepository;
     private final RefOrientationVentRepository refOrientationVentRepository;
     private final RefProprietaireRepository refProprietaireRepository;
-    private final RefFoncitonMaitreOeuvreRepository refFoncitonMaitreOeuvreRepository;
+    private final RefFonctionMaitreOeuvreRepository refFonctionMaitreOeuvreRepository;
     private final CommuneRepository communeRepository;
     private final RefOrientationPhotoRepository refOrientationPhotoRepository;
     private final RefUrgenceRepository refUrgenceRepository;
@@ -683,8 +683,8 @@ public class DbImporter {
         repositories.add(refOrientationVentRepository);
         refProprietaireRepository = new RefProprietaireRepository(couchDbConnector);
         repositories.add(refProprietaireRepository);
-        refFoncitonMaitreOeuvreRepository = new RefFoncitonMaitreOeuvreRepository(couchDbConnector);
-        repositories.add(refFoncitonMaitreOeuvreRepository);
+        refFonctionMaitreOeuvreRepository = new RefFonctionMaitreOeuvreRepository(couchDbConnector);
+        repositories.add(refFonctionMaitreOeuvreRepository);
         communeRepository = new CommuneRepository(couchDbConnector);
         repositories.add(communeRepository);
         refOrientationPhotoRepository = new RefOrientationPhotoRepository(couchDbConnector);

@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.MaitreOeuvreMarche;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
+import fr.sirs.core.model.RefFonctionMaitreOeuvre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -65,7 +65,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
         
         final Map<Integer, Marche> marches = marcheImporter.getRelated();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
-        final Map<Integer, RefFoncitonMaitreOeuvre> fonctionsMo = typeFonctionMoImporter.getTypeReferences();
+        final Map<Integer, RefFonctionMaitreOeuvre> fonctionsMo = typeFonctionMoImporter.getTypeReferences();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

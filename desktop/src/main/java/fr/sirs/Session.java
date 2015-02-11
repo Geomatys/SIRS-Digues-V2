@@ -25,7 +25,7 @@ import fr.sirs.core.model.RefDevers;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.core.model.RefEvenementHydraulique;
-import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
+import fr.sirs.core.model.RefFonctionMaitreOeuvre;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.core.model.RefImplantation;
@@ -103,7 +103,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
@@ -301,7 +300,7 @@ public class Session extends SessionGen {
         REFERENCES.add(RefDocumentGrandeEchelle.class);
         REFERENCES.add(RefEcoulement.class);
         REFERENCES.add(RefEvenementHydraulique.class);
-        REFERENCES.add(RefFoncitonMaitreOeuvre.class);
+        REFERENCES.add(RefFonctionMaitreOeuvre.class);
         REFERENCES.add(RefFonction.class);
         REFERENCES.add(RefFrequenceEvenementHydraulique.class);
         REFERENCES.add(RefImplantation.class);

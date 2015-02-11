@@ -2,8 +2,6 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.core.model.RefRevetement;
 import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeReferenceImporter;

@@ -123,11 +123,11 @@ public class ReferenceChecker {
         for (final Class reference : localClassReferences) {
             if (serverClassReferences.contains(reference)) {
                 // Provisoirement, on ne vérifie que RefNature
-                if (reference == RefNature.class || reference == RefProprietaire.class || reference == RefConduiteFermee.class) {
+//                if (reference == RefNature.class || reference == RefProprietaire.class || reference == RefConduiteFermee.class) {
                     final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
                     referenceClassChecker.checkReferenceClass();
                     referenceClassChecker.update();
-                }
+//                }
             }
         }
     }
@@ -322,7 +322,6 @@ public class ReferenceChecker {
                     SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                 }
             }
-
             return fileRefs;
         }
         

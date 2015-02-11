@@ -2,7 +2,7 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefFoncitonMaitreOeuvre;
+import fr.sirs.core.model.RefFonctionMaitreOeuvre;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFoncitonMaitreOeuvre> {
+class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMaitreOeuvre> {
 
     TypeFonctionMoImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -51,7 +51,7 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFoncitonMai
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefFoncitonMaitreOeuvre typeFonctionMo = new RefFoncitonMaitreOeuvre();
+            final RefFonctionMaitreOeuvre typeFonctionMo = new RefFonctionMaitreOeuvre();
             
             typeFonctionMo.setId(typeFonctionMo.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString())));
             typeFonctionMo.setLibelle(row.getString(Columns.LIBELLE_FONCTION_MO.toString()));
