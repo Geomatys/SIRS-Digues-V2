@@ -27,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -154,13 +155,14 @@ public class FXMapPane extends BorderPane {
             }
         });
         
-        
         splitButton.setOnAction((ActionEvent event) -> {
             if(mapsplit.getItems().contains(paneMap2)){
                 mapsplit.getItems().remove(paneMap2);
+                splitButton.setTooltip(new Tooltip("Afficher la deuxième carte"));
             }else{
                 mapsplit.setDividerPositions(0.5);
                 mapsplit.getItems().add(paneMap2);
+                splitButton.setTooltip(new Tooltip("Cacher la deuxième carte"));
             }
         });
         
