@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
@@ -265,42 +266,48 @@ public class ReferenceChecker {
          * @throws IllegalArgumentException
          * @throws InvocationTargetException 
          */
-        private Object buildReferenceInstance2(final CSVRecord record) 
-                throws NoSuchMethodException, InstantiationException, 
-                IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-            
+        private Object buildReferenceInstance(final CSVRecord record) {
+
             if (record == null) {
                 return null;
             }
 
-            final Constructor constructor = referenceClass.getConstructor();
-            final Object referenceInstance = constructor.newInstance();
-            
-            
-            for(final String header : record.toMap().keySet()){
-                final Method getter = referenceClass.getMethod("get" + header.substring(0, 1).toUpperCase() + header.substring(1));
-                final Class type = getter.getReturnType();
-                final Method setter = referenceClass.getMethod("set" + header.substring(0, 1).toUpperCase() + header.substring(1), type);
-                
-                if (String.class.equals(type)) {
-                    if ("id".equals(header)) {
-                        setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
-                    } else {
-                        setter.invoke(referenceInstance, record.get(header));
-                    }
-                } else if (LocalDateTime.class.equals(type)) {
-                    try {
-                        setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE), LocalTime.MIN));
-                    } catch (DateTimeParseException ex) {
-                        try {
-                            setter.invoke(referenceInstance, LocalDateTime.parse(record.get(header), DateTimeFormatter.ISO_DATE_TIME));
-                        } catch (DateTimeParseException ex2) {
-                            SIRS.LOGGER.log(Level.INFO, ex2.getMessage());
-                        }
-                        SIRS.LOGGER.log(Level.INFO, ex.getMessage());
-                    }
-                } else {
+            Object referenceInstance = null;
 
+            try {
+                final Constructor constructor = referenceClass.getConstructor();
+                referenceInstance = constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                SIRS.LOGGER.log(Level.SEVERE, null, ex);
+            }
+
+            for (final String header : record.toMap().keySet()) {
+                try {
+                    final Method getter = referenceClass.getMethod("get" + header.substring(0, 1).toUpperCase() + header.substring(1));
+                    final Class type = getter.getReturnType();
+                    final Method setter = referenceClass.getMethod("set" + header.substring(0, 1).toUpperCase() + header.substring(1), type);
+
+                    if (String.class.equals(type)) {
+                        if ("id".equals(header)) {
+                            setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
+                        } else {
+                            setter.invoke(referenceInstance, record.get(header));
+                        }
+                    } else if (LocalDateTime.class.equals(type)) {
+                        try {
+                            setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE), LocalTime.MIN));
+                        } catch (DateTimeParseException ex) {
+                            try {
+                                setter.invoke(referenceInstance, LocalDateTime.parse(record.get(header), DateTimeFormatter.ISO_DATE_TIME));
+                            } catch (DateTimeParseException ex2) {
+                                SIRS.LOGGER.log(Level.INFO, ex2.getMessage());
+                            }
+                            SIRS.LOGGER.log(Level.INFO, ex.getMessage());
+                        }
+                    }
+
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                    SIRS.LOGGER.log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -314,13 +321,8 @@ public class ReferenceChecker {
             final List<Object> fileRefs = new ArrayList<>();
             
             for (final CSVRecord record : records) {
-
-                try {
-                    fileRefs.add(buildReferenceInstance2(record));
-
-                } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | IllegalArgumentException | InvocationTargetException ex) {
-                    SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
-                }
+                final Object referenceInstance = buildReferenceInstance(record);
+                if(referenceInstance!=null) fileRefs.add(referenceInstance);
             }
             return fileRefs;
         }

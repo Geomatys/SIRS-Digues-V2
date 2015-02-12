@@ -94,6 +94,7 @@ public class TypeDocumentImporter extends GenericImporter {
             final Row row = it.next();
             final RefTypeDocument typeDocument = new RefTypeDocument();
             
+            typeDocument.setId(typeDocument.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())));
             typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

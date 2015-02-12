@@ -18,59 +18,11 @@ import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.RefConduiteFermee;
-import fr.sirs.core.model.RefConvention;
-import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefDevers;
-import fr.sirs.core.model.RefDocumentGrandeEchelle;
-import fr.sirs.core.model.RefEcoulement;
-import fr.sirs.core.model.RefEvenementHydraulique;
-import fr.sirs.core.model.RefFonctionMaitreOeuvre;
-import fr.sirs.core.model.RefFonction;
-import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
-import fr.sirs.core.model.RefImplantation;
-import fr.sirs.core.model.RefLargeurFrancBord;
-import fr.sirs.core.model.RefMateriau;
-import fr.sirs.core.model.RefMoyenManipBatardeaux;
-import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefNatureBatardeaux;
-import fr.sirs.core.model.RefOrientationOuvrage;
-import fr.sirs.core.model.RefOrientationPhoto;
-import fr.sirs.core.model.RefOrientationVent;
-import fr.sirs.core.model.RefOrigineProfilLong;
-import fr.sirs.core.model.RefOrigineProfilTravers;
-import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.RefOuvrageParticulier;
-import fr.sirs.core.model.RefOuvrageTelecomEnergie;
-import fr.sirs.core.model.RefOuvrageVoirie;
-import fr.sirs.core.model.RefPosition;
-import fr.sirs.core.model.RefPositionProfilLongSurDigue;
-import fr.sirs.core.model.RefPrestation;
-import fr.sirs.core.model.RefProfilFrancBord;
-import fr.sirs.core.model.RefProprietaire;
-import fr.sirs.core.model.RefRapportEtude;
-import fr.sirs.core.model.RefReferenceHauteur;
-import fr.sirs.core.model.RefReseauHydroCielOuvert;
-import fr.sirs.core.model.RefReseauTelecomEnergie;
-import fr.sirs.core.model.RefRevetement;
-import fr.sirs.core.model.RefRive;
-import fr.sirs.core.model.RefSeuil;
-import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.RefSystemeReleveProfil;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.RefTypeDocument;
-import fr.sirs.core.model.RefTypeGlissiere;
-import fr.sirs.core.model.RefTypeProfilTravers;
-import fr.sirs.core.model.RefTypeTroncon;
-import fr.sirs.core.model.RefUrgence;
-import fr.sirs.core.model.RefUsageVoie;
-import fr.sirs.core.model.RefUtilisationConduite;
-import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.FXTronconThemePane;
@@ -91,7 +43,9 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
+import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -295,55 +249,15 @@ public class Session extends SessionGen {
     // REFERENCES
     private static final List<Class> REFERENCES = new ArrayList<>();
     private static void initReferences(){
-        REFERENCES.add(RefConduiteFermee.class);
-        REFERENCES.add(RefConvention.class);
-        REFERENCES.add(RefCote.class);
-        REFERENCES.add(RefDevers.class);
-        REFERENCES.add(RefDocumentGrandeEchelle.class);
-        REFERENCES.add(RefEcoulement.class);
-        REFERENCES.add(RefEvenementHydraulique.class);
-        REFERENCES.add(RefFonctionMaitreOeuvre.class);
-        REFERENCES.add(RefFonction.class);
-        REFERENCES.add(RefFrequenceEvenementHydraulique.class);
-        REFERENCES.add(RefImplantation.class);
-        REFERENCES.add(RefLargeurFrancBord.class);
-        REFERENCES.add(RefMateriau.class);
-        REFERENCES.add(RefMoyenManipBatardeaux.class);
-        REFERENCES.add(RefNatureBatardeaux.class);
-        REFERENCES.add(RefNature.class);
-        REFERENCES.add(RefOrientationOuvrage.class);
-        REFERENCES.add(RefOrientationPhoto.class);
-        REFERENCES.add(RefOrientationVent.class);
-        REFERENCES.add(RefOrigineProfilLong.class);
-        REFERENCES.add(RefOrigineProfilTravers.class);
-        REFERENCES.add(RefOuvrageFranchissement.class);
-        REFERENCES.add(RefOuvrageHydrauliqueAssocie.class);
-        REFERENCES.add(RefOuvrageParticulier.class);
-        REFERENCES.add(RefOuvrageTelecomEnergie.class);
-        REFERENCES.add(RefOuvrageVoirie.class);
-        REFERENCES.add(RefPosition.class);
-        REFERENCES.add(RefPositionProfilLongSurDigue.class);
-        REFERENCES.add(RefPrestation.class);
-        REFERENCES.add(RefProfilFrancBord.class);
-        REFERENCES.add(RefProprietaire.class);
-        REFERENCES.add(RefRapportEtude.class);
-        REFERENCES.add(RefReferenceHauteur.class);
-        REFERENCES.add(RefReseauHydroCielOuvert.class);
-        REFERENCES.add(RefReseauTelecomEnergie.class);
-        REFERENCES.add(RefRevetement.class);
-        REFERENCES.add(RefRive.class);
-        REFERENCES.add(RefSeuil.class);
-        REFERENCES.add(RefSource.class);
-        REFERENCES.add(RefSystemeReleveProfil.class);
-        REFERENCES.add(RefTypeDesordre.class);
-        REFERENCES.add(RefTypeDocument.class);
-        REFERENCES.add(RefTypeGlissiere.class);
-        REFERENCES.add(RefTypeProfilTravers.class);
-        REFERENCES.add(RefTypeTroncon.class);
-        REFERENCES.add(RefUrgence.class);
-        REFERENCES.add(RefUsageVoie.class);
-        REFERENCES.add(RefUtilisationConduite.class);
-        REFERENCES.add(RefVoieDigue.class);
+        
+        final ServiceLoader<ReferenceType> serviceLoader = ServiceLoader.load(ReferenceType.class);
+        serviceLoader.forEach(new Consumer<ReferenceType>() {
+
+            @Override
+            public void accept(ReferenceType t) {
+                REFERENCES.add(t.getClass());
+            }
+        });
     }
     
     static{
@@ -351,8 +265,6 @@ public class Session extends SessionGen {
     }
     
     public static List<Class> getReferences(){return REFERENCES;}
-    
-    public static void addReference(final Class reference){REFERENCES.add(reference);}
 
     /**
      * MapContext affiché pour toute l'application.
