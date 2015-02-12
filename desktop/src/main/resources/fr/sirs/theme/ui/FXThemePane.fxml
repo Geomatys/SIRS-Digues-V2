@@ -30,7 +30,7 @@
                 </Button>
              </left>
               <center>
-            <HBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+            <HBox fx:id="uiDateMajHBox" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
                <children>
                           <Label prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" />
                   <FXDateField fx:id="date_maj">

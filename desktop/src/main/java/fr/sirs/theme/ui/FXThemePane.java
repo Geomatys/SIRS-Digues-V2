@@ -9,11 +9,9 @@ import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveProfilTravers;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.map.FXMapTab;
 import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
@@ -26,7 +24,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -42,6 +40,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
     
+    @FXML private HBox uiDateMajHBox;
     @FXML private FXDateField date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
@@ -50,7 +49,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     public FXThemePane(final T theme) {
         SIRS.loadFXML(this);
-        
         date_maj.setDisable(true);
         
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
@@ -76,7 +74,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
             Element elementDocument = elementProperty.get().getCouchDBDocument();
             if (elementDocument == null) {
-                new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
+                new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK).show();
                 return;
             }
 
@@ -84,12 +82,19 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             if (couchDbDocument == null) {
                 couchDbDocument = elementDocument;
             } else if (!couchDbDocument.equals(elementDocument)) {
+                if (couchDbDocument instanceof AvecDateMaj) {
+                    ((AvecDateMaj)couchDbDocument).dateMajProperty().set(now);
+                }
                 repo.update(couchDbDocument);
                 couchDbDocument = elementDocument;
             }
 
+            if (couchDbDocument instanceof AvecDateMaj) {
+                ((AvecDateMaj)couchDbDocument).dateMajProperty().set(now);
+            }
             repo.update(couchDbDocument);
         } catch (Exception e) {
+            new Alert(Alert.AlertType.INFORMATION, "L'élément ne peut être sauvegardé.\nCause : ", ButtonType.OK).show();
             SIRS.LOGGER.log(Level.INFO, e.getMessage(), e);
         }
     }
@@ -113,24 +118,20 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     
     protected void initPane() {
         final Element object = elementProperty.get();
-        couchDbDocument = object.getCouchDBDocument();
-        
-        if (object == null) {
-            date_maj.valueProperty().unbind();
-            
+        if (object == null) {        
+            date_maj.valueProperty().unbind();            
             setCenter(new Label("Pas d'éditeur disponible."));
             specificThemePane = null;
 
         } else {
+            couchDbDocument = object.getCouchDBDocument();
             // TODO : make a "WithDateMaj" interface, or something similar.
-            if (object instanceof ProfilTravers) {
-                date_maj.valueProperty().bindBidirectional(((ProfilTravers) object).dateMajProperty());
-            } else if (object instanceof LeveProfilTravers) {
-                date_maj.valueProperty().bindBidirectional(((LeveProfilTravers) object).dateMajProperty());
-            } else if (object instanceof Objet) {
-                date_maj.valueProperty().bindBidirectional(((Objet) object).dateMajProperty());
+            if (object instanceof AvecDateMaj) {
+                date_maj.valueProperty().bind(((AvecDateMaj) object).dateMajProperty());
+                uiDateMajHBox.setVisible(true);
             } else {
                 date_maj.valueProperty().unbind();
+                uiDateMajHBox.setVisible(false);
             }
             
             try {
