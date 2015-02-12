@@ -32,6 +32,7 @@ public interface FXElementPane<T extends Element> {
     
     /**
      * Record unbound field changes before saving.
+     * @throws java.lang.Exception If an error happened while updating element attributes.
      */
     void preSave() throws Exception;
 }
