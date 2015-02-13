@@ -223,7 +223,7 @@ public class Session extends SessionGen {
         referenceUsageRepository = new ReferenceUsageRepository(connector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        referenceChecker = new ReferenceChecker("http://france-digues.moc/references/");
+        referenceChecker = new ReferenceChecker("http://sirs-digues.info/wp-content/tablesReferences/");
     }
 
     public CouchDbConnector getConnector() {

@@ -313,22 +313,6 @@ public class FXMainFrame extends BorderPane {
         usersTab.setContent(usersTable);
         addTab(usersTab);
     }
-    
-//    private void saveContext(){
-//        try {
-//            OwcXmlIO.write(new FileOutputStream(new File("src/main/resources/saveContext.owc")), getMapTab().getMap().getMapContext());
-//        } catch (FileNotFoundException | JAXBException | FactoryException ex) {
-//            Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
-//    
-//    private void loadContext(){
-//        try {
-//            getMapTab().getMap().setMapContext(OwcXmlIO.read(new File("src/main/resources/saveContext.owc")));
-//        } catch (JAXBException | FactoryException | DataStoreException ex) {
-//            Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
 
     private void openDocsTab(){
         final Tab docsTab = new Tab("Validation");

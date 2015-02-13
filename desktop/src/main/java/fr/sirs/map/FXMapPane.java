@@ -121,8 +121,6 @@ public class FXMapPane extends BorderPane {
         context = session.getMapContext();
         
         uiCoordBar2.setCrsButtonVisible(false);
-        uiMap1.getContainer().setContext(context);
-        uiMap2.getContainer().setContext(context);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         uiMap2.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         synchronizer.addCanvas(uiMap1.getCanvas(),true,true);
@@ -154,6 +152,7 @@ public class FXMapPane extends BorderPane {
                 uiMap2.getContainer().setContext(newValue);
             }
         });
+        uiMap1.getContainer().setContext(context);
         
         splitButton.setOnAction((ActionEvent event) -> {
             if(mapsplit.getItems().contains(paneMap2)){

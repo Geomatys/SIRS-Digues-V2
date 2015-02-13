@@ -123,12 +123,9 @@ public class ReferenceChecker {
          */
         for (final Class reference : localClassReferences) {
             if (serverClassReferences.contains(reference)) {
-                // Provisoirement, on ne vérifie que RefNature
-//                if (reference == RefNature.class || reference == RefProprietaire.class || reference == RefConduiteFermee.class) {
-                    final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
-                    referenceClassChecker.checkReferenceClass();
-                    referenceClassChecker.update();
-//                }
+                final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
+                referenceClassChecker.checkReferenceClass();
+                referenceClassChecker.update();
             }
         }
     }
@@ -329,32 +326,34 @@ public class ReferenceChecker {
         
         private void update(){
             final List<Object> updated = new ArrayList<>();
-            for(final Object fileReference : fileReferences){
-                Object localInstance = null;
-                for(final Object localReference : localReferences){
-                    if(fileReference.equals(localReference)) {
-                        localInstance = localReference;
-                        break;
+            if(fileReferences!=null){
+                for(final Object fileReference : fileReferences){
+                    Object localInstance = null;
+                    for(final Object localReference : localReferences){
+                        if(fileReference.equals(localReference)) {
+                            localInstance = localReference;
+                            break;
+                        }
                     }
-                }
-                
-                if(localInstance==null){
-                    final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
-                    repository.add(fileReference);
-                    updated.add(fileReference);
-                }
-                else{
-                    if(!localInstance.toString().equals(fileReference.toString())){
+
+                    if(localInstance==null){
                         final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
-                        try {
-                            final Method getRevision = referenceClass.getMethod("getRevision");
-                            final Method setRevision = referenceClass.getMethod("setRevision", String.class);
-                            final String revision = (String) getRevision.invoke(localInstance);
-                            setRevision.invoke(fileReference, revision);
-                            repository.update(fileReference);
-                            updated.add(fileReference);// On mémorise la référence mise à jour
-                        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                            SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                        repository.add(fileReference);
+                        updated.add(fileReference);
+                    }
+                    else{
+                        if(!localInstance.toString().equals(fileReference.toString())){
+                            final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                            try {
+                                final Method getRevision = referenceClass.getMethod("getRevision");
+                                final Method setRevision = referenceClass.getMethod("setRevision", String.class);
+                                final String revision = (String) getRevision.invoke(localInstance);
+                                setRevision.invoke(fileReference, revision);
+                                repository.update(fileReference);
+                                updated.add(fileReference);// On mémorise la référence mise à jour
+                            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                            }
                         }
                     }
                 }
