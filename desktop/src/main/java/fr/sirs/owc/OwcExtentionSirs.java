@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.spi.ServiceRegistry;
 import javax.xml.bind.JAXBElement;
 import org.apache.sis.storage.DataStoreException;
@@ -19,10 +21,13 @@ import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.Query;
+import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.data.query.Selector;
 import org.geotoolkit.data.query.Source;
 import org.geotoolkit.data.query.TextStatement;
 import org.geotoolkit.db.JDBCFeatureStore;
+import org.geotoolkit.factory.FactoryFinder;
+import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
@@ -32,7 +37,12 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.owc.gtkext.ParameterType;
 import static org.geotoolkit.owc.xml.OwcMarshallerPool.*;
+import org.geotoolkit.ogc.xml.v110.FilterType;
 import org.geotoolkit.owc.xml.v10.OfferingType;
+import org.geotoolkit.sld.xml.StyleXmlIO;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.util.FactoryException;
 
 /**
  * Extension OWC pour SIRS.
@@ -55,8 +65,14 @@ public class OwcExtentionSirs extends OwcExtension {
         }
     }
 
+    private final FilterFactory2 filterFactory;
+    
     public OwcExtentionSirs() {
         super(CODE,10);
+        
+        final Hints hints = new Hints();
+        hints.put(Hints.FILTER_FACTORY, FilterFactory2.class);
+        filterFactory = (FilterFactory2) FactoryFinder.getFilterFactory(hints);
     }
     
     @Override
@@ -77,16 +93,25 @@ public class OwcExtentionSirs extends OwcExtension {
         //rebuild parameters map
         String beanClassName = null;
         String sqlQuery = null;
-        for(Object o : fields){
-            if(o instanceof JAXBElement){
-                o = ((JAXBElement)o).getValue();
+        Filter filter = null;
+        for(Object field : fields){
+            if(field instanceof JAXBElement){
+                field = ((JAXBElement)field).getValue();
             }
-            if(o instanceof ParameterType){
-                final ParameterType param = (ParameterType) o;
+            if(field instanceof ParameterType){
+                final ParameterType param = (ParameterType) field;
                 if(KEY_BEANCLASS.equals(param.getKey())){
                     beanClassName = param.getValue();
                 }else if(KEY_SQLQUERY.equals(param.getKey())){
                     sqlQuery = param.getValue();
+                }
+            }
+            if(field instanceof FilterType){
+                try {
+                    final StyleXmlIO io = new StyleXmlIO();
+                    filter = io.getTransformer110().visitFilter((FilterType)field);
+                } catch (FactoryException ex) {
+                    Logger.getLogger(OwcExtentionSirs.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -98,7 +123,12 @@ public class OwcExtentionSirs extends OwcExtension {
             } catch (ClassNotFoundException ex) {
                 throw new DataStoreException(ex.getMessage(),ex);
             }
-            return CorePlugin.createLayer(clazz);
+            if(filter==null){
+                return CorePlugin.createLayer(clazz);
+            }
+            else{
+                return CorePlugin.createLayer(clazz, QueryBuilder.filtered( new DefaultName(clazz.getSimpleName()), filter));
+            }
         }else if(sqlQuery!=null){
             final Session session = Injector.getSession();
             try {
@@ -143,7 +173,21 @@ public class OwcExtentionSirs extends OwcExtension {
             fieldList.add(new ParameterType(KEY_BEANCLASS,String.class.getName(),beanClass.getName()));
         }
         
+        final Query query = fml.getQuery();
+        if (query!=null){
+            final Filter filter = query.getFilter();
+            if(filter!=null){
+                offering.getOperationOrContentOrStyleSet().add(toFilter(filter));
+            }
+        }
+        
         return offering;
+    }
+    
+    private static FilterType toFilter(final Filter filter){
+        final StyleXmlIO io = new StyleXmlIO();
+        final FilterType visit = io.getTransformerXMLv110().visit(filter);
+        return visit;
     }
         
     private static Name getTypeName(MapLayer layer){

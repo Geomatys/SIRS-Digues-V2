@@ -80,9 +80,11 @@ import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
+import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
+import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.filter.DefaultLiteral;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -97,6 +99,7 @@ import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
 
 import static org.geotoolkit.style.StyleConstants.*;
+import org.opengis.filter.Filter;
 
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
@@ -442,16 +445,22 @@ public class CorePlugin extends Plugin {
         themes.add(new DocumentsTheme());
         
     }
-
-    public static MapLayer createLayer(Class beanClass) throws DataStoreException {
+    
+    public static MapLayer createLayer(final Class beanClass, final Query query){
         final BeanFeatureSupplier supplier = getSupplier(beanClass);
         final BeanStore store = new BeanStore(supplier);
         
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
-                .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
+                .getFeatureCollection(query));
         layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         layer.setSelectable(true);
         return layer;
+    }
+
+    public static MapLayer createLayer(Class beanClass) throws DataStoreException {
+        final BeanFeatureSupplier supplier = getSupplier(beanClass);
+        final BeanStore store = new BeanStore(supplier);
+        return createLayer(beanClass, QueryBuilder.all(store.getNames().iterator().next()));
     }
     
     private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
