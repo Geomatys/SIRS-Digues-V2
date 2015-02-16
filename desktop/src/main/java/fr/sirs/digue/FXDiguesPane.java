@@ -119,7 +119,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
         uiAdd.getItems().add(new NewSystemeMenuItem(null));
         uiAdd.getItems().add(new NewDigueMenuItem(null));
-        uiAdd.getItems().add(new NewTronconMenuItem(null));
+//        uiAdd.getItems().add(new NewTronconMenuItem(null));
         uiAdd.setDisable(!session.nonGeometryEditionProperty().get());
         
         this.updateTree();
