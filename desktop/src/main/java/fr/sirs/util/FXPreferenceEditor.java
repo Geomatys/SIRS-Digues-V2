@@ -5,17 +5,15 @@ import fr.sirs.util.property.SirsPreferences;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -32,7 +30,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
-import javafx.scene.layout.VBox;
+import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.stage.Stage;
 import org.apache.sis.util.logging.Logging;
 
@@ -58,7 +56,7 @@ public class FXPreferenceEditor extends Stage {
         setScene(new Scene(root));        
         root.setPadding(new Insets(5));
         
-        this.setTitle("Préférences");
+        setTitle("Préférences");
         initializeCenter();
         initializeBottom();
         
@@ -81,12 +79,13 @@ public class FXPreferenceEditor extends Stage {
     private void initializeCenter() {
         
         final GridPane propertyPane = new GridPane();
-        propertyPane.getColumnConstraints().add(new ColumnConstraints(10, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, true));
-        propertyPane.getColumnConstraints().add(new ColumnConstraints(10, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, true));
-        propertyPane.getColumnConstraints().add(new ColumnConstraints(10, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
-//        final VBox propertyList = new VBox();
-//        ObservableList<Node> children = propertyList.getChildren();
-//        propertyList.setSpacing(10);
+        propertyPane.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, true));
+        propertyPane.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, true));
+        propertyPane.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+        propertyPane.setVgap(10);
+        propertyPane.setHgap(10);
+        propertyPane.setPadding(new Insets(10));
+        
         int row = 0;
         for (final SirsPreferences.PROPERTIES p : SirsPreferences.PROPERTIES.values()) {
             final Label propLibelle = new Label(p.title);
@@ -95,6 +94,8 @@ public class FXPreferenceEditor extends Stage {
             final TextInputControl propEditor;
             if (p.propertyEditor == null) {
                 propEditor = new TextField();
+                propEditor.setMinWidth(USE_COMPUTED_SIZE);
+                propEditor.setPrefWidth(USE_COMPUTED_SIZE);
                 propEditor.setPrefWidth(USE_COMPUTED_SIZE);
             } else {
                 propEditor = p.propertyEditor;
@@ -117,19 +118,24 @@ public class FXPreferenceEditor extends Stage {
             final Button resetValueBtn = new Button();
             resetValueBtn.setMaxHeight(propEditor.getHeight());
             resetValueBtn.setGraphic(new ImageView(SIRS.ICON_UNDO_BLACK));
-            resetValueBtn.setOnAction((ActionEvent e)->propEditor.textProperty().setValue(SirsPreferences.INSTANCE.getPropertySafe(p.name())));
+            resetValueBtn.setPrefSize(16, 16);
+            resetValueBtn.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent e) {
+                    if(SirsPreferences.INSTANCE.getPropertySafe(p.name())!=null){
+                        propEditor.textProperty().setValue(SirsPreferences.INSTANCE.getPropertySafe(p.name()));
+                    }else if (p.getDefaultValue()!=null){
+                        propEditor.textProperty().setValue(p.getDefaultValue());
+                    }
+                }
+            });
             propertyPane.add(resetValueBtn, 2, row);
             
             final Tooltip tip = new Tooltip(p.description);
             propLibelle.setTooltip(tip);
             propEditor.setTooltip(tip);
             
-//            final HBox hbox = new HBox(propLibelle, propEditor, resetValueBtn);
-//            hbox.setPadding(new Insets(10));
-//            hbox.setSpacing(10);
-//            HBox.setHgrow(propEditor, Priority.ALWAYS);
-//            hbox.setAlignment(Pos.CENTER_LEFT);
-//            children.add(hbox);
             row++;
         }
         root.setCenter(new ScrollPane(propertyPane));

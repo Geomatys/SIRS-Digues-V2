@@ -29,6 +29,7 @@ import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Internal;
+import fr.sirs.util.property.SirsPreferences;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -223,7 +224,14 @@ public class Session extends SessionGen {
         referenceUsageRepository = new ReferenceUsageRepository(connector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        referenceChecker = new ReferenceChecker("http://sirs-digues.info/wp-content/tablesReferences/");
+        final String referenceUrl;
+        if(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL)!=null){
+            referenceUrl = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL);
+        }
+        else {
+            referenceUrl = SirsPreferences.PROPERTIES.REFERENCE_URL.getDefaultValue();
+        }
+        referenceChecker = new ReferenceChecker(referenceUrl);
     }
 
     public CouchDbConnector getConnector() {
