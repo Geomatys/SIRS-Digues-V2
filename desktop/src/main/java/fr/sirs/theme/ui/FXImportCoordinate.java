@@ -7,7 +7,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.util.SirsListCell;
+import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Collection;
@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -81,14 +80,12 @@ public class FXImportCoordinate extends BorderPane {
         SIRS.loadFXML(this);
         this.positionable = pos;
         
+        final SirsStringConverter stringConverter = new SirsStringConverter();
         uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionablePane.CRS_WGS84));
-        uiCRS.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new SirsListCell());
-        uiCRS.setButtonCell(new SirsListCell());
+        uiCRS.setConverter(stringConverter);
         uiCRS.getSelectionModel().clearAndSelect(0);
-        uiAttX.setCellFactory((ListView<PropertyType> param) -> new SirsListCell());
-        uiAttX.setButtonCell(new SirsListCell());
-        uiAttY.setCellFactory((ListView<PropertyType> param) -> new SirsListCell());
-        uiAttY.setButtonCell(new SirsListCell());
+        uiAttX.setConverter(stringConverter);
+        uiAttY.setConverter(stringConverter);
         
         uiPaneConfig.setDisable(true);
         uiTable.setEditable(false);

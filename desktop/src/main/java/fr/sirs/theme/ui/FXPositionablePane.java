@@ -16,9 +16,8 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.SirsListCell;
+import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -40,14 +39,12 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -127,15 +124,12 @@ public class FXPositionablePane extends BorderPane {
         
         uiImport.setGraphic(new ImageView(ICON_IMPORT));
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER));
-     
-        uiSRs.setCellFactory((ListView<String> param) -> new ObjectListCell());
-        uiSRs.setButtonCell(new ObjectListCell());
-        uiCRSs.setCellFactory((ListView<CoordinateReferenceSystem> param) -> new ObjectListCell());
-        uiCRSs.setButtonCell(new ObjectListCell());
-        uiBorneStart.setCellFactory((ListView<String> param) -> new ObjectListCell());
-        uiBorneStart.setButtonCell(new ObjectListCell());
-        uiBorneEnd.setCellFactory((ListView<String> param) -> new ObjectListCell());
-        uiBorneEnd.setButtonCell(new ObjectListCell());
+        
+        final SirsStringConverter sirsStringConverter = new SirsStringConverter();     
+        uiSRs.setConverter(sirsStringConverter);
+        uiCRSs.setConverter(sirsStringConverter);
+        uiBorneStart.setConverter(sirsStringConverter);
+        uiBorneEnd.setConverter(sirsStringConverter);
         
         //liste par défaut des systemes de coordonnées
         final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();
@@ -400,7 +394,8 @@ public class FXPositionablePane extends BorderPane {
         
         final Session session = Injector.getBean(Session.class);
         final TronconDigue troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
-        final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);      
+        final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
+        
         
         for(SystemeReperage sr : srs){
             cacheSystemeReperage.put(sr.getId(), sr);
@@ -553,20 +548,4 @@ public class FXPositionablePane extends BorderPane {
         pos.setGeometry(structGeom);
         
     }
-    
-    private final class ObjectListCell extends SirsListCell{
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            if(item instanceof String){
-                if(cacheBorneDigue.containsKey(item)) item = cacheBorneDigue.get(item);
-                if(cacheSystemeReperage.containsKey(item)) item = cacheSystemeReperage.get(item);
-            }
-            super.updateItem(item, empty);
-        }
-    
-    }
-    
-    
-    
 }

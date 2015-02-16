@@ -11,15 +11,24 @@ import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import javafx.util.StringConverter;
+import org.opengis.feature.PropertyType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
- *
+ * Try to return a simple and readable name for any element given as argument.
+ * 
+ * @author Alexis Manin
  * @author Johann Sorel
  */
 public class SirsStringConverter extends StringConverter {
 
     private final WeakHashMap<String, Object> fromString = new WeakHashMap<>();
     
+    /**
+     * Find a simple name for input object.
+     * @param item The object to find a name for.
+     * @return A title for input item, or a null or empty value, if none have been found.
+     */
     @Override
     public String toString(Object item) {
         if(item instanceof SystemeReperageBorne){
@@ -42,6 +51,10 @@ public class SirsStringConverter extends StringConverter {
             text = ((Organisme)item).getNom();
         } else if (item instanceof String) {
             text = (String) item;
+        } else if (item instanceof CoordinateReferenceSystem) {
+            text = ((CoordinateReferenceSystem) item).getName().toString();
+        } else if (item instanceof PropertyType) {
+            text = ((PropertyType) item).getName().tip().toString();
         }
         
         if (text != null && !text.isEmpty()) {

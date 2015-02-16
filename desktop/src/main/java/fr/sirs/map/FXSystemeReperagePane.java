@@ -12,7 +12,6 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.SirsListCell;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.util.Comparator;
@@ -47,6 +46,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
@@ -225,7 +225,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         final ListView<BorneDigue> bornesView = new ListView<>();
         bornesView.setItems(FXCollections.observableArrayList(bornes));
-        bornesView.setCellFactory((ListView<BorneDigue> param) -> new SirsListCell());
+        bornesView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
         bornesView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         final Dialog dialog = new Dialog();
