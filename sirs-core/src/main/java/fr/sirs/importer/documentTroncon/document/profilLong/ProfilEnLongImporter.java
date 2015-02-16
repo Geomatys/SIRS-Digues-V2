@@ -152,6 +152,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             
             profil.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
+            profil.setPseudoId(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             related.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);
         }
         couchDbConnector.executeBulk(related.values());

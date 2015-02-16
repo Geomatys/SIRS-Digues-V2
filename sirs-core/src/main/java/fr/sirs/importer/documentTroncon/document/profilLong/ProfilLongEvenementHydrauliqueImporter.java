@@ -98,11 +98,16 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
                 profilLongEvenementHydraulique.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
+            // Pas d'id car table de jointure : arbitrairement, on met l'id de l'événement hydrau
+            profilLongEvenementHydraulique.setPseudoId(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
+            
             List<ProfilLongEvenementHydraulique> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }
             listByLeve.add(profilLongEvenementHydraulique);
+            
+            
             evenementHydrauByProfilLongId.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), listByLeve);
         }
     }

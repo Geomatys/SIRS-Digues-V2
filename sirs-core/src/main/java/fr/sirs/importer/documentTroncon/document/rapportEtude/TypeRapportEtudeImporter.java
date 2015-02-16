@@ -60,6 +60,7 @@ class TypeRapportEtudeImporter extends GenericTypeReferenceImporter<RefRapportEt
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeRapportEtude.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeRapportEtude.setPseudoId(row.getInt(Columns.ID_TYPE_RAPPORT_ETUDE.toString()));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RAPPORT_ETUDE.toString())), typeRapportEtude);
         }
         couchDbConnector.executeBulk(types.values());

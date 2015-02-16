@@ -60,6 +60,7 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeOrigineProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeOrigineProfilTravers.setPseudoId(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString()));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())), typeOrigineProfilTravers);
         }
         couchDbConnector.executeBulk(types.values());

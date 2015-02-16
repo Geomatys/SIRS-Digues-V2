@@ -86,6 +86,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
                 articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
+            articleJournal.setPseudoId(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
             related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
         couchDbConnector.executeBulk(related.values());

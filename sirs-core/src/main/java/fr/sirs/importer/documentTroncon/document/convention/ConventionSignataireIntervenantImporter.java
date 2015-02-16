@@ -90,6 +90,9 @@ class ConventionSignataireIntervenantImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 signataire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            // Pas d'Id unique car table de jointure. Arbitrairement, on met comme Id celui du signataire.
+            signataire.setPseudoId(row.getInt(Columns.ID_INTERV_SIGNATAIRE.toString()));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<ContactConvention> listeSignataires = signatairesByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));

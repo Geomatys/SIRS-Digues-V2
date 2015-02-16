@@ -175,6 +175,8 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
                 leve.setProfilTraversTroncon(profilTraversTroncons.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
+            leve.setPseudoId(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            
             leves.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             
             List<LeveProfilTravers> listByProfil = levesByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));

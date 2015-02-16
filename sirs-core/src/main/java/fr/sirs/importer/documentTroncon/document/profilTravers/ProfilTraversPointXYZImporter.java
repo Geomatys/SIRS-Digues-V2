@@ -83,6 +83,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             }
             
             leveePoint.setD(Double.NaN);
+            leveePoint.setPseudoId(row.getInt(Columns.ID_POINT.toString()));
             
             points.put(row.getInt(Columns.ID_POINT.toString()), leveePoint);
             

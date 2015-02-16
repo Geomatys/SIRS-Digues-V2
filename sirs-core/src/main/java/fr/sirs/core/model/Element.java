@@ -66,4 +66,13 @@ public interface Element extends Serializable {
      * otherwise.
      */
     public boolean addChild(final Element toAdd);
+    
+//    String getAuthor();
+//    void setAuthor(String author);
+//    
+//    int getPseudoId();
+//    void setPseudoId(int pseudoId);
+//    
+//    boolean getValid();
+//    void setValid(boolean valid);
 }

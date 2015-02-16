@@ -59,6 +59,7 @@ class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention>
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeConvention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeConvention.setPseudoId(row.getInt(Columns.ID_TYPE_CONVENTION.toString()));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONVENTION.toString())), typeConvention);
         }
         couchDbConnector.executeBulk(types.values());

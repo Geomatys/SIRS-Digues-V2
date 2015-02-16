@@ -58,6 +58,7 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeSystemeReleve.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeSystemeReleve.setPseudoId(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString()));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())), typeSystemeReleve);
         }
         couchDbConnector.executeBulk(types.values());
