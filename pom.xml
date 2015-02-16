@@ -167,7 +167,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.15-SNAPSHOT</version>
+          <version>0.5.16-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>

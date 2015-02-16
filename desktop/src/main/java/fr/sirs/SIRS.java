@@ -21,6 +21,7 @@ import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.FXThemePane;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
 import java.io.File;
@@ -40,12 +41,14 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 
 /**
  * Constants used for project.
@@ -293,5 +296,20 @@ public final class SIRS extends SirsCore {
             content = new FXThemePane((Element) pojo);
         }
         return content;
+    }
+    
+        /**
+     * initialize ComboBox items using input list. We also activate completion.
+     * @param comboBox The combo box to set value on.
+     * @param items The items we want into the ComboBox.
+     * @param current the element to select by default.
+     */
+    public static void initCombo(ComboBox comboBox, final ObservableList items, final Object current) {
+        comboBox.setItems(items);
+        comboBox.getSelectionModel().select(current);
+        
+        new ComboBoxCompletion(comboBox);
+        comboBox.setConverter(new SirsStringConverter());
+        comboBox.setEditable(true);
     }
 }
