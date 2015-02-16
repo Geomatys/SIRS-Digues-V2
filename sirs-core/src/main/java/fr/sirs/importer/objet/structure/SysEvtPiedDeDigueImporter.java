@@ -298,9 +298,9 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                 Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                piedDigue.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                piedDigue.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             
             

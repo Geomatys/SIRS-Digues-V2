@@ -412,9 +412,9 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
                 structure.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                structure.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                structure.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
                 structure.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());

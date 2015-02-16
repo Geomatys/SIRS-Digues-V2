@@ -182,14 +182,6 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
                 pointAcces.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                pointAcces.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 pointAcces.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
@@ -275,16 +267,13 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
             }
             
             if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                pointAcces.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+                pointAcces.setPositionBasId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+                pointAcces.setPositionHautId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
             
             if (row.getDouble(Columns.LARGEUR.toString()) != null) {
                 pointAcces.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());
             }
-            
-//            if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
-//                voie.setListeNature(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
-//            }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), pointAcces);

@@ -198,7 +198,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            desordre.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            desordre.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {

@@ -295,9 +295,9 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
                 Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                crete.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                crete.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

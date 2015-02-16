@@ -294,9 +294,9 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
                 sommetRisberme.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                sommetRisberme.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                sommetRisberme.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

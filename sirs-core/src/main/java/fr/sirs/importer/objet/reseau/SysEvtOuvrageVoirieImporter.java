@@ -259,9 +259,9 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
             
             ouvrage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 //            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                ouvrage.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                ouvrage.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             if(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())!=null){
                 ouvrage.setTypeOuvrageVoirieId(typesOuvrageVoirie.get(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())).getId());

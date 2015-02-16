@@ -302,9 +302,9 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
                 conduiteFermee.setAutorise(row.getBoolean(Columns.AUTORISE.toString()));
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                conduiteFermee.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                conduiteFermee.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             if (row.getDouble(Columns.DIAMETRE.toString()) != null) {
                 conduiteFermee.setDiametre(row.getDouble(Columns.DIAMETRE.toString()).floatValue());

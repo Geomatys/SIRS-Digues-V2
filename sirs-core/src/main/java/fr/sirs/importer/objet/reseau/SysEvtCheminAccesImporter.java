@@ -280,9 +280,9 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
                 }
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                voie.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                voie.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             if (row.getDouble(Columns.LARGEUR.toString()) != null) {
                 voie.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());

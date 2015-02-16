@@ -276,9 +276,9 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
                 }
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                reseau.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                reseau.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
             if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
                 reseau.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());

@@ -7,7 +7,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.FrontFrancBord;
-import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -21,8 +20,6 @@ import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -300,9 +297,9 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
                 talus.setPente_interieur(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
             }
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                talus.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                talus.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), talus);

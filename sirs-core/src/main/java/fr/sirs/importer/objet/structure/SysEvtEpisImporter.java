@@ -262,9 +262,9 @@ class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
             epi.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                epi.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+//                epi.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+//            }
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

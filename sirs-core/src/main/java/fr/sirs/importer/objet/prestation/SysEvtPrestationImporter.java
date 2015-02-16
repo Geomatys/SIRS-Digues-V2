@@ -178,7 +178,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         }
         
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            prestation.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            prestation.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
         
         if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
