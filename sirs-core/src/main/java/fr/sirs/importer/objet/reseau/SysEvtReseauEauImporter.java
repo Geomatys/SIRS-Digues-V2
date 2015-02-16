@@ -259,9 +259,9 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
             
             reseauEau.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                reseauEau.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                reseauEau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
             
             if(row.getInt(Columns.ID_TYPE_RESEAU_EAU.toString())!=null){
                 reseauEau.setTypeReseauHydroCielOuvertId(typesReseauHydroCielOuvert.get(row.getInt(Columns.ID_TYPE_RESEAU_EAU.toString())).getId());

@@ -252,9 +252,9 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
             
             ouverture.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                ouverture.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouverture.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
             
             if (row.getDouble(Columns.LARGEUR.toString()) != null) {
                 ouverture.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());

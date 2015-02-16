@@ -189,14 +189,6 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
                 ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                ouvrage.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
@@ -291,7 +283,6 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
             
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), ouvrage);
 
             // Set the list ByTronconId

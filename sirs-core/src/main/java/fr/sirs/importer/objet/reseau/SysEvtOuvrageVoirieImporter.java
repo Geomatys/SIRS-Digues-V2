@@ -177,14 +177,6 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
                 ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                ouvrage.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 ouvrage.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
@@ -258,10 +250,10 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
             }
             
             ouvrage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-//            
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                ouvrage.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
+            
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouvrage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
             
             if(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())!=null){
                 ouvrage.setTypeOuvrageVoirieId(typesOuvrageVoirie.get(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())).getId());

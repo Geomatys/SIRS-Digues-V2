@@ -205,14 +205,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                 piedDigue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                piedDigue.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
@@ -298,12 +290,9 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                 Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                piedDigue.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
-            
-            
-            
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                piedDigue.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);

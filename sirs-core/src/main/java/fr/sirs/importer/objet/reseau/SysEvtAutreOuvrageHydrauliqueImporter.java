@@ -263,9 +263,9 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
                 ouvrage.setTypeOuvrageHydroAssocieId(typesOuvrage.get(row.getInt(Columns.ID_TYPE_OUVR_HYDRAU_ASSOCIE.toString())).getId());
             }
             
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                ouvrage.setPosition(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                ouvrage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), ouvrage);

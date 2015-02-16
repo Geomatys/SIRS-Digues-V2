@@ -182,14 +182,6 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
                 reseau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                reseau.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 reseau.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
             }
@@ -276,9 +268,9 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
                 }
             }
             
-//            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-//                reseau.setPosition_structure(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-//            }
+            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
+                reseau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            }
             
             if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
                 reseau.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());
