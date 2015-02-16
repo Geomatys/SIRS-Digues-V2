@@ -110,6 +110,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiDateStart.disableProperty().bind(editBind.not());
         uiDateEnd.disableProperty().bind(editBind.not());
         uiComment.disableProperty().bind(editBind.not());
+        uiTypeTroncon.disableProperty().bind(editBind.not());
         
         srController.editableProperty().bind(editSR);
         uiSRAdd.disableProperty().bind(editSR.not());
@@ -327,6 +328,23 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 else if(!Objects.equals(newValue.getId(),troncon.getSystemeRepDefautId())){
                     troncon.setSystemeRepDefautId(newValue.getId());
                 }
+            }
+        });
+        
+        
+        final List<RefTypeTroncon> allTronconTypes = session.getRefTypeTronconRepository().getAll();
+        allTronconTypes.add(0, null);
+        uiTypeTroncon.setItems(FXCollections.observableArrayList(allTronconTypes));
+        uiTypeTroncon.setConverter(new StringConverter<RefTypeTroncon>() {
+
+            @Override
+            public String toString(RefTypeTroncon object) {
+                return object==null ? "-" : object.getLibelle();
+            }
+
+            @Override
+            public RefTypeTroncon fromString(String string) {
+                return null;
             }
         });
         

@@ -4,6 +4,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefProprietaire;
+import fr.sirs.core.model.RefTypeTroncon;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
