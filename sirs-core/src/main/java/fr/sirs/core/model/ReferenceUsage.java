@@ -2,6 +2,10 @@ package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * @author Samuel Andrés (Geomatys)
+ */
 public class ReferenceUsage {
 
     @JsonProperty("property")
