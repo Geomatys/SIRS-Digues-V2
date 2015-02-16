@@ -14,6 +14,7 @@ import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RefRive;
+import fr.sirs.core.model.RefTypeTroncon;
 import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -68,6 +69,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML private TextField uiName;
     @FXML private ChoiceBox<Digue> uiDigue;
     @FXML private ChoiceBox<SystemeReperage> uiSrDefault;
+    @FXML private ChoiceBox<RefTypeTroncon> uiTypeTroncon;
     @FXML private ChoiceBox<RefRive> uiRive;
     
     // Onglet "Description"
@@ -90,7 +92,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private boolean initializing = false;
     
     public FXTronconDiguePane() {
-        SIRS.loadFXML(this);
+        SIRS.loadFXML(this, TronconDigue.class);
         Injector.injectDependencies(this);
         
         //mode edition
@@ -327,6 +329,29 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 }
             }
         });
+        
+        final RefTypeTroncon typeTroncon;
+        if(troncon.getTypeTronconId()!=null){
+            typeTroncon= session.getRefTypeTronconRepository().get(troncon.getTypeTronconId());
+        }
+        else{
+            typeTroncon = null;
+        }
+        uiTypeTroncon.setValue(typeTroncon);
+        uiTypeTroncon.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<RefTypeTroncon>() {
+
+            @Override
+            public void changed(ObservableValue<? extends RefTypeTroncon> observable, RefTypeTroncon oldValue, RefTypeTroncon newValue) {
+                if(initializing) return;
+                
+                if(newValue==null) troncon.setTypeTronconId(null);
+                else if(!Objects.equals(newValue.getId(),troncon.getTypeTronconId())){
+                    troncon.setTypeTronconId(newValue.getId());
+                }
+            }
+        });
+        
+        
         
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());

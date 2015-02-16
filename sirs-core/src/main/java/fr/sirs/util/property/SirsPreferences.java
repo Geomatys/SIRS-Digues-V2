@@ -24,20 +24,26 @@ public class SirsPreferences extends Properties {
     
     public static enum PROPERTIES {
         
-        DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null);
+        DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null, null),
+        REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/", null);
+        
         public final String title;
         public final String description;
+        public final String defaultValue;
         
         /**
          * An editor to use for property setting. If null, a {@link TextField} 
          * will be used.
          */
         public final TextInputControl propertyEditor;        
-        private PROPERTIES(final String title, final String description, final TextInputControl propertyEditor) {
+        private PROPERTIES(final String title, final String description, final String defaultValue, final TextInputControl propertyEditor) {
             this.title = title;
             this.description = description;
+            this.defaultValue = defaultValue;
             this.propertyEditor = propertyEditor;
         }
+        
+        public String getDefaultValue(){return defaultValue;}
     }
 
     /**
