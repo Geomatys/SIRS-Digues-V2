@@ -309,8 +309,12 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 return null;
             }
         });
-        final SystemeReperage srDefault = session.getSystemeReperageRepository().get(troncon.getSystemeRepDefautId());
-        uiSrDefault.setValue(srDefault);
+        
+        String defaultSRID = troncon.getSystemeRepDefautId();
+        if (defaultSRID != null && !defaultSRID.isEmpty()) {
+            final SystemeReperage srDefault = session.getSystemeReperageRepository().get(defaultSRID);
+            uiSrDefault.setValue(srDefault);
+        }
         uiSrDefault.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SystemeReperage>() {
 
             @Override
@@ -323,8 +327,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 }
             }
         });
-        
-        
         
         this.uiDateStart.valueProperty().bindBidirectional(troncon.date_debutProperty());
         this.uiDateEnd.valueProperty().bindBidirectional(troncon.date_finProperty());
