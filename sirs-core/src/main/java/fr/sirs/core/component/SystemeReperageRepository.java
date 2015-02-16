@@ -95,6 +95,11 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
             }
         }
         
+        if (troncon.getSystemeRepDefautId() == null || troncon.getSystemeRepDefautId().isEmpty()) {
+            troncon.setSystemeRepDefautId(entity.getId());
+            needSave = true;
+        }
+        
         if(needSave){
             tcRepo.update(troncon);
         }
