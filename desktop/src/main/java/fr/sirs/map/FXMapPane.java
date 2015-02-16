@@ -17,6 +17,7 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -215,7 +216,6 @@ public class FXMapPane extends BorderPane {
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
         uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
         
-        
         //deplacer à la date du jour
         new Thread(){
             @Override
@@ -228,7 +228,7 @@ public class FXMapPane extends BorderPane {
                     uiMap2.getCanvas().setTemporalRange(time,time);
                     uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
                     uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
-                } catch (NoninvertibleTransformException | TransformException ex) {
+                } catch (TransformException | NoninvertibleTransformException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
                 }
             }
@@ -237,13 +237,6 @@ public class FXMapPane extends BorderPane {
 
     public MapContext getMapContext() {
         return context;
-    }
-    
-    public void setMapContext(final MapContext mapContext){
-        context = mapContext;
-        uiMap1.getContainer().setContext(context);
-        uiMap2.getContainer().setContext(context);
-        uiTree.setMapItem(mapContext);
     }
 
     public FXMap getUiMap() {
