@@ -9,6 +9,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
@@ -22,6 +23,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -59,8 +61,10 @@ import org.opengis.style.LineSymbolizer;
 import org.opengis.util.FactoryException;
 
 /**
- *
+ * Outil cartographique permettant le découpage de tronçons.
+ * 
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 public class TronconCutHandler extends FXAbstractNavigationHandler {
     
@@ -114,6 +118,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     }
                     if (i >= nbSegments) {
                         final Dialog choice = new Dialog();
+                        choice.setResizable(true);
                         choice.setContentText("Êtes-vous sûr ? Tous les morceaux du tronçon sont marqués \"à conserver\". Aucune opération ne sera effectuée.");
                         choice.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
                         final Optional result = choice.showAndWait();
@@ -121,7 +126,11 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                             dialog.show();
                         }
                     } else {
-                        processCut();
+                        TaskManager.INSTANCE.submit(new CutTask(
+                                editPane.tronconProperty().get(),
+                                editPane.getCutpoints(),
+                                editPane.getSegments()
+                        ));
                         // empty our handler, to allow new operation.
                         editPane.tronconProperty().set(null);
                     }
@@ -169,53 +178,82 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         }
     }
     
-    private void processCut() {
-        final TronconDigue troncon = editPane.tronconProperty().get();
-        if(troncon==null) return;
-        
-        final ObservableList<FXTronconCut.CutPoint> cutpoints = editPane.getCutpoints();
-        final ObservableList<FXTronconCut.Segment> segments = editPane.getSegments();
-        if(cutpoints.isEmpty()) return;
-        
-        TronconDigue aggregate = null;
-        
-        for (int i = 0, n = segments.size(); i < n; i++) {
-            final FXTronconCut.Segment segment = segments.get(i);
-            final TronconDigue cut = TronconUtils.cutTroncon(troncon, segment.geometryProp.get(),troncon.getLibelle()+"["+i+"]", session);
-            
-            final FXTronconCut.SegmentType type = segment.typeProp.get();
-            if (FXTronconCut.SegmentType.CONSERVER.equals(type)) {
-                //on aggrege le morceau
-                if (aggregate == null) {
-                    aggregate = cut;
-                } else {
-                    aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
-                    
-                    //on sauvegarde les modifications
-                    session.getTronconDigueRepository().update(aggregate);
-                    session.getTronconDigueRepository().remove(cut);
-                }                
+    /**
+     * The task which cut, recompose and update {@link TronconDigue} elements.
+     * Note : Cancel the task is not allowed, because database updates are 
+     * performed all along the process.
+     * 
+     * TODO : put all database updates at the end of the process ?
+     */
+    private static class CutTask extends Task<Boolean> {
+        private final TronconDigue toCut;
+        private final ObservableList<FXTronconCut.CutPoint> cutpoints;
+        private final ObservableList<FXTronconCut.Segment> segments;
 
-            } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
-                //on marque comme terminé le troncon et ses structures
-                cut.dateMajProperty().set(LocalDateTime.now());
-                cut.date_finProperty().set(LocalDateTime.now());
-                for (Objet obj : cut.structures) {
-                    obj.dateMajProperty().set(LocalDateTime.now());
-                    obj.date_finProperty().set(LocalDateTime.now());
-                }
-                //on le sauvegarde
-                session.getTronconDigueRepository().update(cut);
-
-            } else if (FXTronconCut.SegmentType.SECTIONNER.equals(type)) {
-                //rien a faire
-            } else {
-                throw new IllegalArgumentException("Type de coupe inconnue : " + type);
-            }
+        public CutTask(final TronconDigue toCut, 
+                final ObservableList<FXTronconCut.CutPoint> cutpoints,
+                final ObservableList<FXTronconCut.Segment> segments) {
+            this.toCut = toCut;
+            this.cutpoints = cutpoints;
+            this.segments = segments;
         }
+        
+        @Override
+        protected Boolean call() throws Exception {
+            updateTitle("Découpage de tronçon");
+
+            if (toCut == null || cutpoints.isEmpty() || segments.isEmpty()) {
+                return false;
+            }
+            
+            updateMessage("Tronçon "+toCut.getLibelle());
+            
+            final Session session = Injector.getSession();
+            TronconDigue aggregate = null;
+            for (int i = 0, n = segments.size(); i < n; i++) {
                 
-        //on supprime l'ancien troncon
-        session.getTronconDigueRepository().remove(troncon);
+                updateProgress(i, n);
+                
+                final FXTronconCut.Segment segment = segments.get(i);
+                final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), toCut.getLibelle() + "[" + i + "]", session);
+
+                final FXTronconCut.SegmentType type = segment.typeProp.get();
+                if (FXTronconCut.SegmentType.CONSERVER.equals(type)) {
+                    //on aggrege le morceau
+                    if (aggregate == null) {
+                        aggregate = cut;
+                    } else {
+                        aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
+
+                        //on sauvegarde les modifications
+                        session.getTronconDigueRepository().update(aggregate);
+                        session.getTronconDigueRepository().remove(cut);
+                    }
+
+                } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
+                    //on marque comme terminé le troncon et ses structures
+                    cut.dateMajProperty().set(LocalDateTime.now());
+                    cut.date_finProperty().set(LocalDateTime.now());
+                    for (Objet obj : cut.structures) {
+                        obj.dateMajProperty().set(LocalDateTime.now());
+                        obj.date_finProperty().set(LocalDateTime.now());
+                    }
+                    //on le sauvegarde
+                    session.getTronconDigueRepository().update(cut);
+
+                } else if (FXTronconCut.SegmentType.SECTIONNER.equals(type)) {
+                    //rien a faire
+                } else {
+                    throw new IllegalArgumentException("Type de coupe inconnue : " + type);
+                }
+            }
+
+            //on supprime l'ancien troncon
+            updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
+            session.getTronconDigueRepository().remove(toCut);
+
+            return true;
+        }
     }
         
     
