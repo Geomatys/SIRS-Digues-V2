@@ -189,15 +189,10 @@ public class FXSystemeReperagePane extends BorderPane {
         return uiBorneTable.getSelectionModel().getSelectedItems();
     }
     
-    public void save(){
-        final TronconDigue troncon = tronconProperty().get();
-        if(troncon!=null){
-            session.getTronconDigueRepository().update(troncon);
-        }
-        
+    public void save() {
         final SystemeReperage sr = systemeReperageProperty().get();
         if(sr!=null){
-            session.getSystemeReperageRepository().update(sr);
+            session.getSystemeReperageRepository().update(sr, tronconProperty().get());
         }
     }
     
@@ -334,7 +329,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage sr = session.getSystemeReperageRepository().create();
         sr.setLibelle(srName);
         sr.setTronconId(troncon.getDocumentId());
-        session.getSystemeReperageRepository().add(sr);
+        session.getSystemeReperageRepository().add(sr, troncon);
         
         //maj de la liste des SR
         updateSrList(null, null, null);
@@ -382,7 +377,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         //sauvegarde du SR
         sr.systemereperageborneId.add(srb);
-        session.getSystemeReperageRepository().update(sr);
+        session.getSystemeReperageRepository().update(sr, tronconProperty().get());
         updateBorneTable(null, null, null);
         
     }
