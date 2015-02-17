@@ -17,9 +17,7 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
-    
-    private static final String DEFAULT_TYPE_NAME = "sirs-river";
-    
+        
     // TODO : put elastic search configuration in a properties file.
     private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
     static {
