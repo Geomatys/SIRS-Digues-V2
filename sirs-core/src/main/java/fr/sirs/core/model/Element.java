@@ -2,6 +2,7 @@ package fr.sirs.core.model;
 
 import java.io.Serializable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 
 public interface Element extends Serializable {
 
@@ -92,4 +93,14 @@ public interface Element extends Serializable {
      */
     int getPseudoId();
     void setPseudoId(int pseudoId);
+    
+    /**
+     * Search in this object a contained {@link Element} with the given ID. If 
+     * we cannot find an element (which means your element is not referenced here,
+     * or just its ID is referenced) a null value is returned.
+     * @param toSearch The identifier of the element to find.
+     * @return The Element matching input ID, or null if we cannot find 
+     * any in child structures.
+     */
+    public Element getChildById(final String toSearch);
 }
