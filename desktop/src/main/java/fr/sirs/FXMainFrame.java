@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
@@ -12,6 +13,7 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
+import fr.sirs.util.ProgressMonitor;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -99,8 +103,7 @@ public class FXMainFrame extends BorderPane {
             });
             
             uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);
-            uiMenu.getMenus().add(1, uiAdmin);
-            
+            uiMenu.getMenus().add(1, uiAdmin);            
             
             final Menu uiRefs = new Menu(bundle.getString("references"));
             final Menu uiRefsList = new Menu(bundle.getString("listeReferences"));
@@ -115,7 +118,10 @@ public class FXMainFrame extends BorderPane {
         }
         
         
-        SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
+        SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());     
+
+        final ProgressMonitor pm = new ProgressMonitor(session.getTaskManager());
+        ((BorderPane) uiMenu.getParent()).setRight(pm);
     }
     
     public TabPane getUiTabs() {

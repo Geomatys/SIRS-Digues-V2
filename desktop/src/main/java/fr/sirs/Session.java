@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.component.DigueRepository;
 
 import java.util.List;
@@ -206,6 +207,17 @@ public class Session extends SessionGen {
     
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
+    
+    private final TaskManager taskManager = new TaskManager();
+
+    /**
+     * 
+     * @return the application task manager, designed to start users tasks in a 
+     * separate thread pool.
+     */
+    public TaskManager getTaskManager() {
+        return SirsCore.getTaskManager();
+    }
     
     /**
      * Clear session cache.

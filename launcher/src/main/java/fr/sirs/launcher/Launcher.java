@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.controlsfx.dialog.ExceptionDialog;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -45,7 +46,10 @@ public class Launcher extends Application {
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);
-            new Alert(Alert.AlertType.ERROR, "Une erreur inattendue est survenue.Code d'erreur : "+errorCode, ButtonType.CLOSE).show();
+            ExceptionDialog d = new ExceptionDialog(e);
+            d.setContentText("Une erreur inattendue est survenue.Code d'erreur : "+errorCode);
+            d.setResizable(true);
+            d.show();
         });
         
         ProgressIndicator progressIndicator = new ProgressIndicator();
@@ -87,4 +91,11 @@ public class Launcher extends Application {
         new Thread(epsgIniter).start();
 
     }
+
+    @Override
+    public void stop() throws Exception {
+        SirsCore.getTaskManager().close();
+    }
+    
+    
 }
