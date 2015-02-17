@@ -7,6 +7,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.IntervenantImporter;
@@ -82,34 +83,72 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_PROPRIO.toString()));
             
             if(reseau!=null && (intervenant!=null || organisme!=null)){
-                final ContactStructure contactStructure = new ContactStructure();
-            
-                if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
-                    try{
-                        contactStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()).toString(), dateTimeFormatter));
-                    } catch (DateTimeParseException e) {
-                        SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                    }
-                }
-
-                if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
-                    contactStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()).toString(), dateTimeFormatter));
-                }
-
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    contactStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
             
                 if(intervenant!=null){
+                    final ContactStructure contactStructure = readContactStructure(row);
                     contactStructure.setContactId(intervenant.getId());
                     contactStructure.setTypeContact(intervenant.getClass().getSimpleName());
+                    reseau.getContactStructure().add(contactStructure);
                 }
                 else{
-                    contactStructure.setContactId(organisme.getId());
-                    contactStructure.setTypeContact(organisme.getClass().getSimpleName());
+                    final OrganismeStructure organismeStructure = readOrganismeStructure(row);
+                    organismeStructure.setOrganismeId(organisme.getId());
+                    organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
+                    reseau.getOrganismeStructure().add(organismeStructure);
                 }
-                reseau.getContactStructure().add(contactStructure);
             }
         }
+    }
+    
+    
+    private ContactStructure readContactStructure(final Row row){
+        
+        final ContactStructure contactStructure = new ContactStructure();
+
+        if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
+            try{
+                contactStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()).toString(), dateTimeFormatter));
+            } catch (DateTimeParseException e) {
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+            }
+        }
+
+        if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
+            contactStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+            contactStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+        }
+        // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
+        contactStructure.setPseudoId(row.getInt(Columns.ID_INTERV_PROPRIO.toString()));
+
+        return contactStructure;
+    }
+    
+    
+    private OrganismeStructure readOrganismeStructure(final Row row){
+        
+        final OrganismeStructure organismeStructure = new OrganismeStructure();
+
+        if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
+            try{
+                organismeStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()).toString(), dateTimeFormatter));
+            } catch (DateTimeParseException e) {
+                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+            }
+        }
+
+        if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
+            organismeStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+            organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+        }
+        // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
+        organismeStructure.setPseudoId(row.getInt(Columns.ID_ORG_PROPRIO.toString()));
+
+        return organismeStructure;
     }
 }

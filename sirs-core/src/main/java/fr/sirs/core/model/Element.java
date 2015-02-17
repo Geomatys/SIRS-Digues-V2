@@ -67,12 +67,29 @@ public interface Element extends Serializable {
      */
     public boolean addChild(final Element toAdd);
     
+    /**
+     * Manage the author of an element. This piece of information is used for 
+     * validation of documents created by external members.
+     * 
+     * @return 
+     */
     String getAuthor();
     void setAuthor(String author);
     
-    int getPseudoId();
-    void setPseudoId(int pseudoId);
-    
+    /**
+     * Manage the validity of an element.
+     * @return 
+     */
     boolean getValid();
     void setValid(boolean valid);
+    
+    /**
+     * Manage the pseudo ID of an element. To handle with couchDB ids is not an 
+     * easy task, then elements can be given a numerical ID, without guarantee 
+     * of unicity.
+     * 
+     * @return 
+     */
+    int getPseudoId();
+    void setPseudoId(int pseudoId);
 }

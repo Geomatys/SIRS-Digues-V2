@@ -101,6 +101,8 @@ public class TypeDocumentImporter extends GenericImporter {
                 typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
+            typeDocument.setPseudoId(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
+            
 //            if (row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()) != null) {
 //                final RefDocumentGrandeEchelle typeDocumentGrandeEchelle = typeDocumentGrandeEchelleImporter.getTypeDocumentGrandeEchelle().get(row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()));
 //                if(typeDocumentGrandeEchelle!=null){

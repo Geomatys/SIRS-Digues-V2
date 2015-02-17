@@ -43,7 +43,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
     }
 
     private enum Columns {
-//        ID_PROPRIETAIRE_TRONCON_GESTION, // Pas dans le nouveau modèle
+        ID_PROPRIETAIRE_TRONCON_GESTION, // Pas dans le nouveau modèle
         ID_TRONCON_GESTION,
         ID_TYPE_PROPRIETAIRE,
         DATE_DEBUT,
@@ -122,14 +122,6 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
                 propriete.setTypeProprietaireId(typesProprietaires.get(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())).getId());
             }
 
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(listeGestions == null){
-                listeGestions = new ArrayList<>();
-            }
-            listeGestions.add(propriete);
-            proprietairesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
-
             // Set the references.
             if(row.getInt(Columns.ID_INTERVENANT.toString())!=null){
                 final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
@@ -147,6 +139,16 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
                     throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
                 }
             }
+            
+            propriete.setPseudoId(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString()));
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(listeGestions == null){
+                listeGestions = new ArrayList<>();
+            }
+            listeGestions.add(propriete);
+            proprietairesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
         }
     }
 }

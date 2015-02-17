@@ -6,6 +6,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -74,29 +75,32 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(reseau!=null && organisme!=null){
-                final ContactStructure contactStructure = new ContactStructure();
+                final OrganismeStructure organismeStructure = new OrganismeStructure();
                 
-                contactStructure.setContactId(organisme.getId());
+                organismeStructure.setOrganismeId(organisme.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
                     try{
-                        contactStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
+                        organismeStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
                     } catch (DateTimeParseException e) {
                         SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                     }
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                    contactStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    contactStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
             
-                contactStructure.setTypeContact(organisme.getClass().getSimpleName());
+                organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
                 
-                reseau.getContactStructure().add(contactStructure);
+                // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
+                organismeStructure.setPseudoId(row.getInt(Columns.ID_ORG_GESTION.toString()));
+                
+                reseau.getOrganismeStructure().add(organismeStructure);
             }
         }
     }

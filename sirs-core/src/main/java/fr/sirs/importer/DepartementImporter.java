@@ -2,7 +2,6 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.DepartementRepository;
 import fr.sirs.core.model.Departement;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -20,18 +19,10 @@ import org.ektorp.CouchDbConnector;
 public class DepartementImporter extends GenericImporter {
 
     private Map<Integer, Departement> departements = null;
-    private DepartementRepository departementRepository;
-
-    private DepartementImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
 
     DepartementImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final DepartementRepository departementRepository) {
-        this(accessDatabase, couchDbConnector);
-        this.departementRepository = departementRepository;
+            final CouchDbConnector couchDbConnector) {
+        super(accessDatabase, couchDbConnector);
     }
 
     private enum Columns {
@@ -76,6 +67,8 @@ public class DepartementImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 departement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            departement.setPseudoId(row.getInt(Columns.ID_DEPARTEMENT.toString()));
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             departements.put(row.getInt(Columns.ID_DEPARTEMENT.toString()), departement);

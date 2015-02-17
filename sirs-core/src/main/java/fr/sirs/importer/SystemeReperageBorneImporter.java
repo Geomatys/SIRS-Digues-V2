@@ -108,6 +108,9 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             final BorneDigue borne = bornes.get(row.getInt(Columns.ID_BORNE.toString()));
             systemeReperageBorne.setBorneId(borne.getId());
             
+            // Table de jointure, donc pas d'id propre : on affecte arbitrairement l'id de la borne comme pseudo id.
+            systemeReperageBorne.setPseudoId(row.getInt(Columns.ID_BORNE.toString()));
+            
             final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){
                 systemeReperage.systemereperageborneId.add(systemeReperageBorne);

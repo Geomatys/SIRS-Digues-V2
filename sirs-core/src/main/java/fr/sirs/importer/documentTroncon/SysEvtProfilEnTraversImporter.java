@@ -220,5 +220,6 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter {
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
             docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
+        docTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
     }
 }

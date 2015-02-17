@@ -59,6 +59,9 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeProprietaire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            typeProprietaire.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())));
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())), typeProprietaire);
         }
         couchDbConnector.executeBulk(types.values());

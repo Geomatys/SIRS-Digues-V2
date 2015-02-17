@@ -2,7 +2,6 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.component.CommuneRepository;
 import fr.sirs.core.model.Commune;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -70,6 +69,8 @@ class CommuneImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 commune.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            commune.setPseudoId(row.getInt(Columns.ID_COMMUNE.toString()));
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);

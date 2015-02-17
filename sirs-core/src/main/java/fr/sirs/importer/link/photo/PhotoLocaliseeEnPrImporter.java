@@ -261,6 +261,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             if (row.getDouble(Columns.DIST_BORNEREF.toString()) != null) {
                 photo.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF.toString()).floatValue());
             }
+            photo.setPseudoId(row.getInt(Columns.ID_PHOTO.toString()));
 
             final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(
                     row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 

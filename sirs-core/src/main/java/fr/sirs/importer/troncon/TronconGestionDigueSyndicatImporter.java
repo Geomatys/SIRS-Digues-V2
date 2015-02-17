@@ -33,7 +33,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
     }
 
     private enum Columns {
-//        ID_TRONCON_SYNDICAT,
+        ID_TRONCON_SYNDICAT,
         ID_TRONCON_GESTION,
         ID_SYNDICAT,
         DATE_DEBUT,
@@ -92,37 +92,39 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactTroncon perideSyndicale = new ContactTroncon();
+            final ContactTroncon periodeSyndicale = new ContactTroncon();
             
-            perideSyndicale.setTypeContact("Syndicat");
+            periodeSyndicale.setTypeContact("Syndicat");
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                perideSyndicale.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                perideSyndicale.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                perideSyndicale.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+
+            // Set the references.
+            if(row.getInt(Columns.ID_SYNDICAT.toString())!=null){
+                final Contact syndicat = syndicats.get(row.getInt(Columns.ID_SYNDICAT.toString()));
+                if (syndicat.getId() != null) {
+                    periodeSyndicale.setContactId(syndicat.getId());
+                } else {
+                    throw new AccessDbImporterException("Le contact " + syndicat + " n'a pas encore d'identifiant CouchDb !");
+                }
+            }
+            
+            periodeSyndicale.setPseudoId(row.getInt(Columns.ID_TRONCON_SYNDICAT.toString()));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<ContactTroncon> listeGestions = syndicatsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
-            listeGestions.add(perideSyndicale);
+            listeGestions.add(periodeSyndicale);
             syndicatsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
-
-            // Set the references.
-            if(row.getInt(Columns.ID_SYNDICAT.toString())!=null){
-                final Contact syndicat = syndicats.get(row.getInt(Columns.ID_SYNDICAT.toString()));
-                if (syndicat.getId() != null) {
-                    perideSyndicale.setContactId(syndicat.getId());
-                } else {
-                    throw new AccessDbImporterException("Le contact " + syndicat + " n'a pas encore d'identifiant CouchDb !");
-                }
-            }
         }
     }
 }

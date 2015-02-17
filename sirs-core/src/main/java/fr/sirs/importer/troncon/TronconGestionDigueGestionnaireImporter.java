@@ -90,14 +90,6 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
                 gestion.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(listeGestions == null){
-                listeGestions = new ArrayList<>();
-            }
-            listeGestions.add(gestion);
-            gestionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
-
             // Set the references.
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             if (organisme.getId() != null) {
@@ -105,6 +97,17 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             } else {
                 throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
             }
+            
+            // Pas d'ID propre car table de jointure : on affecte arbitrairement l'id de l'organisme.
+            gestion.setPseudoId(row.getInt(Columns.ID_ORG_GESTION.toString()));
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(listeGestions == null){
+                listeGestions = new ArrayList<>();
+            }
+            listeGestions.add(gestion);
+            gestionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
         }
     }
 }

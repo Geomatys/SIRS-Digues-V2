@@ -207,6 +207,16 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 communeTroncon.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+
+            // Set the references.
+            final Commune commune = communes.get(row.getInt(Columns.ID_COMMUNE.toString()));
+            if (commune.getId() != null) {
+                communeTroncon.setCommuneId(commune.getId());
+            } else {
+                throw new AccessDbImporterException("L'organisme " + commune + " n'a pas encore d'identifiant CouchDb !");
+            }
+            
+            communeTroncon.setPseudoId(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()));
             
             communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), communeTroncon);
 
@@ -217,14 +227,6 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             }
             listeCommunes.add(communeTroncon);
             communesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeCommunes);
-
-            // Set the references.
-            final Commune commune = communes.get(row.getInt(Columns.ID_COMMUNE.toString()));
-            if (commune.getId() != null) {
-                communeTroncon.setCommuneId(commune.getId());
-            } else {
-                throw new AccessDbImporterException("L'organisme " + commune + " n'a pas encore d'identifiant CouchDb !");
-            }
         }
     }
 }

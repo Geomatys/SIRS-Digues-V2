@@ -2,15 +2,12 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -74,25 +71,28 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(structure!=null && organisme!=null){
-                final ContactStructure contactStructure = new ContactStructure();
+                final OrganismeStructure organismeStructure = new OrganismeStructure();
                 
-                contactStructure.setContactId(organisme.getId());
+                organismeStructure.setOrganismeId(organisme.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
-                    contactStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                    contactStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    contactStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
             
-                contactStructure.setTypeContact(organisme.getClass().getSimpleName());
+                organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
                 
-                structure.getContactStructure().add(contactStructure);
+                // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
+                organismeStructure.setPseudoId(row.getInt(Columns.ID_ORG_GESTION.toString()));
+                
+                structure.getOrganismeStructure().add(organismeStructure);
             }
         }
     }

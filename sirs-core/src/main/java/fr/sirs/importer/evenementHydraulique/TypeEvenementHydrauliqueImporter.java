@@ -64,6 +64,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeEvenement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeEvenement.setPseudoId(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString()));
             
             try{
 //                final Class classe;

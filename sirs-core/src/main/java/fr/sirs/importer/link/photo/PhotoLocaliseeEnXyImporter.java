@@ -147,6 +147,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
+            photo.setPseudoId(row.getInt(Columns.ID_PHOTO.toString()));
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;

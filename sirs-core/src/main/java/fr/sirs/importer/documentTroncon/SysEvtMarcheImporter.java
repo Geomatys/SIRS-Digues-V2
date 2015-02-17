@@ -9,7 +9,6 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -222,5 +221,6 @@ class SysEvtMarcheImporter extends GenericDocumentImporter {
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
             docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
+        docTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
     }
 }

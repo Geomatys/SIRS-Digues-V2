@@ -226,5 +226,6 @@ class SysEvtJournalImporter extends GenericDocumentImporter {
                 docTroncon.setSirsdocument(articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())).getId());
             }
         }
+        docTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
     }
 }

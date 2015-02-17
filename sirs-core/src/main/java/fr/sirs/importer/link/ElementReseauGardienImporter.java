@@ -89,6 +89,9 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
             
                 contactStructure.setTypeContact(intervenant.getClass().getSimpleName());
                 
+                // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gardien.
+                contactStructure.setPseudoId(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
+                
                 reseau.getContactStructure().add(contactStructure);
             }
         }

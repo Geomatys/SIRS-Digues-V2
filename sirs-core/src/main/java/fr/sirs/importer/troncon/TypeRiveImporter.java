@@ -58,6 +58,8 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeRive.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            typeRive.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())), typeRive);
         }
         couchDbConnector.executeBulk(types.values());
