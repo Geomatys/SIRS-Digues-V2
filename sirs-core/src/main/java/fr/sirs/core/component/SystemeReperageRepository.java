@@ -52,12 +52,38 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
     }
     
     public void add(SystemeReperage entity, TronconDigue troncon) {
-        ArgumentChecks.ensureNonNull("SR to update", entity);
-        ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
+        ArgumentChecks.ensureNonNull("SR to add", entity);
+        ArgumentChecks.ensureNonNull("Troncon bound to added SR", troncon);
         super.add(entity);
         constraintBorneInTronconListBorne(entity,troncon);
     }
+
+    @Override
+    public void update(SystemeReperage entity) {
+        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+    }
+
+    @Override
+    public void remove(SystemeReperage entity) {
+        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+    }
+
+    @Override
+    public void add(SystemeReperage entity) {
+        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+    }
    
+    public void remove(SystemeReperage source, TronconDigue troncon) {
+        ArgumentChecks.ensureNonNull("SR to delete", source);
+        ArgumentChecks.ensureNonNull("Troncon bound to deleted SR", troncon);
+        if (source.getId().equals(troncon.getSystemeRepDefautId())) {
+            troncon.setSystemeRepDefautId(null);
+            new TronconDigueRepository(db).update(troncon);
+        }
+        super.remove(source);
+        
+    }
+    
     /**
      * Cette contrainte s'assure que les bornes du systeme de reperage sont
      * dans la liste des bornes du troncon.
