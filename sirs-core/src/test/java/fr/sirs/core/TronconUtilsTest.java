@@ -67,7 +67,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         sr.getSystemereperageborneId().add(srb0);
         sr.getSystemereperageborneId().add(srb1);
         sr.getSystemereperageborneId().add(srb2);
-        session.getSystemeReperageRepository().add(sr);
+        session.getSystemeReperageRepository().add(sr, troncon);
         
         //le troncon doit etre a jour avec la liste des bornes
         troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());

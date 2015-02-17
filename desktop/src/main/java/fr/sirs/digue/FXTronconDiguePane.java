@@ -173,7 +173,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         final SystemeReperage sr = new SystemeReperage();
         sr.setLibelle("Nouveau SR");
         sr.setTronconId(troncon.getId());
-        repo.add(sr);
+        repo.add(sr, troncon);
         
         //maj de la liste
         final List<SystemeReperage> srs = repo.getByTroncon(troncon);

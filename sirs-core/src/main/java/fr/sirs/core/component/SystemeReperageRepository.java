@@ -14,6 +14,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.util.List;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.support.Views;
 
@@ -42,23 +43,17 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
     public List<SystemeReperage> getByTroncon(final TronconDigue troncon) {
         return this.queryView("byTronconId", troncon.getId());
     }
-
-    @Override
-    public void update(SystemeReperage entity) {
-        update(entity,null);
-    }
     
     public void update(SystemeReperage entity, TronconDigue troncon) {
+        ArgumentChecks.ensureNonNull("SR to update", entity);
+        ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
         super.update(entity);
-        constraintBorneInTronconListBorne(entity,troncon);
-    }
-
-    @Override
-    public void add(SystemeReperage entity) {
-        add(entity,null);
+        constraintBorneInTronconListBorne(entity, troncon);
     }
     
     public void add(SystemeReperage entity, TronconDigue troncon) {
+        ArgumentChecks.ensureNonNull("SR to update", entity);
+        ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
         super.add(entity);
         constraintBorneInTronconListBorne(entity,troncon);
     }
@@ -103,7 +98,6 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
         if(needSave){
             tcRepo.update(troncon);
         }
-        
     }
     
 }

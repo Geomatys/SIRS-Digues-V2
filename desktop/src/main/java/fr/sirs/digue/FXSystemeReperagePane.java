@@ -9,6 +9,7 @@ import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
+import fr.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -85,7 +86,12 @@ public class FXSystemeReperagePane extends BorderPane {
         final Session session = Injector.getBean(Session.class);
         final SystemeReperageRepository repo = session.getSystemeReperageRepository();
         
-        repo.update(sr);
+        final String tcId = sr.getTronconId();
+        if (tcId == null || tcId.isEmpty()) {
+            throw new IllegalArgumentException("Aucun tronçon n'est associé au SR. Sauvegarde impossible.");
+        }
+        final TronconDigue troncon = session.getTronconDigueRepository().get(tcId);
+        repo.update(sr, troncon);
     }
     
     private class BorneTable extends PojoTable {

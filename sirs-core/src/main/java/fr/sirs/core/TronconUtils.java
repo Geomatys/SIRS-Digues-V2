@@ -97,7 +97,7 @@ public class TronconUtils {
                 }
             }
             if(!srCp.systemereperageborneId.isEmpty()){
-                srRepo.add(srCp);
+                srRepo.add(srCp, troncon);
                 mapSrs.put(sr.getDocumentId(), srCp);
             }
         }
