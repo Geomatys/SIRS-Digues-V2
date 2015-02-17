@@ -207,8 +207,6 @@ public class Session extends SessionGen {
     
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
-    
-    private final TaskManager taskManager = new TaskManager();
 
     /**
      * 

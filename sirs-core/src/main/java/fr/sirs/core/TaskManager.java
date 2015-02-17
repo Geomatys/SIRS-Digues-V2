@@ -23,13 +23,16 @@ import org.apache.sis.util.ArgumentChecks;
  */
 public class TaskManager implements Closeable {
     
+    public static final TaskManager INSTANCE = new TaskManager();
+    
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     
-    // TODO : Store weak references ?
     private final ObservableList<Task> submittedTasks = FXCollections.observableArrayList();
     private final ObservableList<Task> tasksInError = FXCollections.observableArrayList();
     
     // TODO : keep succeded tasks in a sort of cache 
+    
+    protected TaskManager() {}
         
     public Task submit(final Runnable newTask) {
         return submit(new MockTask(newTask));

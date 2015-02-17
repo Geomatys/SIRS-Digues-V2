@@ -54,8 +54,6 @@ public class SirsCore {
     
     private static CoordinateReferenceSystem PROJECTION;
     
-    private static final TaskManager TASK_MANAGER = new TaskManager();
-    
     /**
      * User directory root folder.
      * 
@@ -130,6 +128,6 @@ public class SirsCore {
      * separate thread pool.
      */
     public static TaskManager getTaskManager() {
-        return TASK_MANAGER;
+        return TaskManager.INSTANCE;
     }
 }
