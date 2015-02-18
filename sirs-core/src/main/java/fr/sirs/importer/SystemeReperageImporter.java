@@ -111,7 +111,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
                 systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            systemeReperage.setPseudoId(row.getInt(Columns.ID_SYSTEME_REP.toString()));
+            systemeReperage.setPseudoId(String.valueOf(row.getInt(Columns.ID_SYSTEME_REP.toString())));
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             systemesReperage.put(row.getInt(Columns.ID_SYSTEME_REP.toString()), systemeReperage);

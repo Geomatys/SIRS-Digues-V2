@@ -28,6 +28,9 @@ public class ValiditySummary {
     
     @JsonProperty("pseudoId")
     private String pseudoId;
+    
+    @JsonProperty("label")
+    private String label;
 
     public String getDocId() {
         return docId;
@@ -85,9 +88,17 @@ public class ValiditySummary {
         this.pseudoId = pseudoId;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     @Override
     public String toString() {
-        return "ValiditySummary{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", pseudoId=" + pseudoId + '}';
+        return "ValiditySummary{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", pseudoId=" + pseudoId + ", label=" + label + '}';
     }
     
 }

@@ -29,30 +29,34 @@
                    </font>
                 </Button>
              </left>
-              <center>
-            <HBox fx:id="uiDateMajHBox" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+         <right>
+            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
                <children>
-                          <Label prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" />
-                  <FXDateField fx:id="date_maj">
+                          <Label fx:id="uiDateMajLabel" prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" GridPane.rowIndex="1" />
+                  <FXDateField fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
                   </FXDateField>
+                  <Label text="Pseudo-id :" textFill="WHITE" />
+                  <TextField fx:id="uiPseudoId" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" />
                </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
                <padding>
-                  <Insets left="10.0" top="10.0" />
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
-            </HBox>
-              </center>
-         <right>
-            <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
-         </right>
+            </GridPane>
+         </center>
           </BorderPane>
    </top>
 </fx:root>

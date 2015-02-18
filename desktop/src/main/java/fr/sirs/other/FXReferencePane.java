@@ -5,20 +5,17 @@ import fr.sirs.Injector;
 import fr.sirs.ReferenceChecker;
 import fr.sirs.Session;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,11 +33,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.elasticsearch.action.ActionFuture;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
@@ -61,7 +53,7 @@ public class FXReferencePane extends BorderPane {
     private final Session session = Injector.getSession();
     protected final ReferenceChecker referenceChecker;
         
-    public FXReferencePane(final Class type) {
+    public FXReferencePane(final Class<ReferenceType> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName());
         referenceChecker = session.getReferenceChecker();
         references = new ReferencePojoTable(type, bundle.getString("class"));
@@ -163,7 +155,7 @@ public class FXReferencePane extends BorderPane {
         }
         
         
-        public class StateButtonTableCell extends ButtonTableCell<Element, Object>{
+        private class StateButtonTableCell extends ButtonTableCell<Element, Object>{
 
             private final Node defaultGraphic;
 
@@ -175,7 +167,7 @@ public class FXReferencePane extends BorderPane {
                         if (localInstancesNotOnTheServer != null
                                 && localInstancesNotOnTheServer.contains(t)) {
                             final Tab tab = new FXFreeTab("Analyse de la base");
-                            tab.setContent(new FXReferenceAnalysePane(t));
+                            tab.setContent(new FXReferenceAnalysePane((ReferenceType)t));
                             Injector.getSession().getFrame().addTab(tab);
                         }
                         else{
@@ -221,7 +213,7 @@ public class FXReferencePane extends BorderPane {
         
         
     
-    public class StateColumn extends TableColumn<Element,Object>{
+    private class StateColumn extends TableColumn<Element,Object>{
 
         public StateColumn() {
             super("État");     

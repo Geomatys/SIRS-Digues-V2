@@ -91,7 +91,7 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
             }
             
             // Pas d'Id unique car table de jointure. Arbitrairement, on met comme Id celui du signataire.
-            signataire.setPseudoId(row.getInt(Columns.ID_ORG_SIGNATAIRE.toString()));
+            signataire.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORG_SIGNATAIRE.toString())));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<ContactConvention> listeSignataires = signatairesByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));

@@ -1,6 +1,5 @@
 package fr.sirs;
 
-import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
@@ -8,6 +7,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.other.FXPseudoIdAnalysePane;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.other.FXReferencePane;
 import fr.sirs.theme.ui.PojoTable;
@@ -22,12 +22,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -85,6 +84,8 @@ public class FXMainFrame extends BorderPane {
         
         if(session.getRole()==Role.ADMIN){
             final Menu uiAdmin = new Menu(bundle.getString("administration"));
+            uiMenu.getMenus().add(1, uiAdmin);  
+            
             final MenuItem uiUserAdmin = new MenuItem(bundle.getString("utilisateurs"));
             uiUserAdmin.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -93,6 +94,7 @@ public class FXMainFrame extends BorderPane {
                     openUsersTab();
                 }
             });
+            
             final MenuItem uiDocsAdmin = new MenuItem(bundle.getString("validation"));
             uiDocsAdmin.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -101,20 +103,24 @@ public class FXMainFrame extends BorderPane {
                     openDocsTab();
                 }
             });
-            
-            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin);
-            uiMenu.getMenus().add(1, uiAdmin);            
-            
+             
             final Menu uiRefs = new Menu(bundle.getString("references"));
             final Menu uiRefsList = new Menu(bundle.getString("listeReferences"));
             uiRefs.getItems().add(uiRefsList);
         
             // Load references
             for(final Class reference : Session.getReferences()){
-                uiRefsList.getItems().add(toMenuItem(reference));
+                uiRefsList.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
             }
             
-            uiAdmin.getItems().add(uiRefs);
+            final Menu uiPseudoId = new Menu(bundle.getString("pseudoIds"));
+            for(final Class elementClass : Session.getElements()){
+                if(!Session.getReferences().contains(elementClass)){
+                    uiPseudoId.getItems().add(toMenuItem(elementClass, SummaryTab.MODEL));
+                }
+            }
+            
+            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin, uiRefs, uiPseudoId);
         }
         
         
@@ -149,19 +155,36 @@ public class FXMainFrame extends BorderPane {
         uiTabs.getSelectionModel().select(tab);
     }
     
-    private MenuItem toMenuItem(final Class reference){
-        final ResourceBundle bundle = ResourceBundle.getBundle(reference.getName());
+    private enum SummaryTab{REFERENCE, MODEL};
+    private MenuItem toMenuItem(final Class clazz, final SummaryTab typeOfSummary){
+        final ResourceBundle bundle = ResourceBundle.getBundle(clazz.getName());
         final MenuItem item = new MenuItem(bundle.getString("class"));
-        item.setOnAction(new EventHandler<ActionEvent>() {
+        final EventHandler handler;
+        
+        if(typeOfSummary==SummaryTab.REFERENCE){
+            handler = new EventHandler<ActionEvent>() {
 
-            @Override
-            public void handle(ActionEvent event) {
-                final FXReferencePane referencesPane = new FXReferencePane(reference);
-                final Tab tab = new FXFreeTab(bundle.getString("class"));
-                tab.setContent(referencesPane);
-                addTab(tab);
-            }
-        });
+                @Override
+                public void handle(ActionEvent event) {
+                    final Tab tab = new FXFreeTab(bundle.getString("class"));
+                    tab.setContent(new FXReferencePane(clazz));
+                    addTab(tab);
+                }
+            };
+        }
+        else{
+            handler = new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    final Tab tab = new FXFreeTab(bundle.getString("class"));
+                    tab.setContent(new FXPseudoIdAnalysePane(clazz));
+                    addTab(tab);
+                }
+            };
+        }
+        
+        item.setOnAction(handler);
         return item;
     }
     

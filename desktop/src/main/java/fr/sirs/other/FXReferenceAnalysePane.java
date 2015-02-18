@@ -6,6 +6,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.ReferenceUsage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,10 +35,8 @@ public class FXReferenceAnalysePane extends BorderPane {
     private TableView<ReferenceUsage> usages;
     private final Session session = Injector.getSession();
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    private final Object reference;
         
-    public FXReferenceAnalysePane(final Object reference) {
-        this.reference = reference;
+    public FXReferenceAnalysePane(final ReferenceType reference) {
         final ResourceBundle bundle = ResourceBundle.getBundle(ReferenceUsage.class.getName());
         
         try {

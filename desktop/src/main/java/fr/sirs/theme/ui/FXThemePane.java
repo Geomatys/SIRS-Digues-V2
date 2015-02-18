@@ -24,7 +24,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.TextField;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
@@ -40,7 +40,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
     
-    @FXML private HBox uiDateMajHBox;
+    @FXML private Label uiDateMajLabel;
+    @FXML private TextField uiPseudoId;
     @FXML private FXDateField date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
@@ -128,11 +129,16 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             // TODO : make a "WithDateMaj" interface, or something similar.
             if (object instanceof AvecDateMaj) {
                 date_maj.valueProperty().bind(((AvecDateMaj) object).dateMajProperty());
-                uiDateMajHBox.setVisible(true);
+                date_maj.setVisible(true);
+                uiDateMajLabel.setVisible(true);
             } else {
                 date_maj.valueProperty().unbind();
-                uiDateMajHBox.setVisible(false);
+                date_maj.setVisible(false);
+                uiDateMajLabel.setVisible(false);
             }
+            
+            uiPseudoId.textProperty().bindBidirectional(object.pseudoIdProperty());
+            uiPseudoId.disableProperty().bind(disableFieldsProperty());
             
             try {
                 // Choose the pane adapted to the specific structure.

@@ -1,8 +1,9 @@
 package fr.sirs.core.model;
 
 import java.io.Serializable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
+import javafx.beans.property.StringProperty;
 
 public interface Element extends Serializable {
 
@@ -75,6 +76,7 @@ public interface Element extends Serializable {
      * @return 
      */
     String getAuthor();
+    StringProperty authorProperty();
     void setAuthor(String author);
     
     /**
@@ -82,6 +84,7 @@ public interface Element extends Serializable {
      * @return 
      */
     boolean getValid();
+    BooleanProperty validProperty();
     void setValid(boolean valid);
     
     /**
@@ -92,6 +95,7 @@ public interface Element extends Serializable {
      * @return 
      */
     String getPseudoId();
+    StringProperty pseudoIdProperty();
     void setPseudoId(String pseudoId);
     
     /**

@@ -17,6 +17,7 @@ import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeEndiguement;
@@ -51,6 +52,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -204,6 +206,7 @@ public class Session extends SessionGen {
     
     private final PreviewLabelRepository previewLabelRepository;
     private final ReferenceUsageRepository referenceUsageRepository;
+    private final ValiditySummaryRepository validitySummaryRepository;
 
     private FXMainFrame frame = null;
     
@@ -234,6 +237,7 @@ public class Session extends SessionGen {
         
         previewLabelRepository = new PreviewLabelRepository(connector);
         referenceUsageRepository = new ReferenceUsageRepository(connector);
+        validitySummaryRepository = new ValiditySummaryRepository(couchDbConnector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         final String referenceUrl;
@@ -258,6 +262,10 @@ public class Session extends SessionGen {
         return referenceUsageRepository;
     }
     
+    public ValiditySummaryRepository getValiditySummaryRepository(){
+        return validitySummaryRepository;
+    }
+    
     void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }
@@ -268,6 +276,7 @@ public class Session extends SessionGen {
         
     // REFERENCES
     private static final List<Class> REFERENCES = new ArrayList<>();
+    private static final List<Class> ELEMENTS = new ArrayList<>();
     private static void initReferences(){
         
         final ServiceLoader<ReferenceType> serviceLoader = ServiceLoader.load(ReferenceType.class);
@@ -279,12 +288,25 @@ public class Session extends SessionGen {
             }
         });
     }
+    private static void initElements(){
+        
+        final ServiceLoader<Element> serviceLoader = ServiceLoader.load(Element.class);
+        serviceLoader.forEach(new Consumer<Element>() {
+
+            @Override
+            public void accept(Element t) {
+                ELEMENTS.add(t.getClass());
+            }
+        });
+    }
     
     static{
         initReferences();
+        initElements();
     }
     
     public static List<Class> getReferences(){return REFERENCES;}
+    public static List<Class> getElements(){return ELEMENTS;}
 
     /**
      * MapContext affiché pour toute l'application.
@@ -500,6 +522,13 @@ public class Session extends SessionGen {
                     }
 
                     tab.setContent(content);
+                    element.pseudoIdProperty().addListener(new ChangeListener<String>() {
+
+                        @Override
+                        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                            tab.setTextAbrege(generateElementTitle(element));
+                        }
+                    });
                     tab.setTextAbrege(generateElementTitle(element));
                     tab.setOnSelectionChanged((Event event) -> {
                         if (tab.isSelected()) {
