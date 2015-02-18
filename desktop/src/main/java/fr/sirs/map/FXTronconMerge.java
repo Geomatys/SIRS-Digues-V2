@@ -4,11 +4,16 @@ package fr.sirs.map;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.Objet;
+import java.time.LocalDateTime;
+import java.util.Iterator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -26,6 +31,7 @@ public class FXTronconMerge extends VBox{
     @FXML private TableView uiTable;
 
     private final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
+    private final MergeTask task = new MergeTask();
     
     public FXTronconMerge() {
         SIRS.loadFXML(this);
@@ -38,42 +44,79 @@ public class FXTronconMerge extends VBox{
         uiTable.getColumns().add(new FXMoveUpTableColumn());
         uiTable.getColumns().add(new FXMoveDownTableColumn());
         uiTable.getColumns().add(col);
-        uiTable.getColumns().add(new FXDeleteTableColumn(false));
-        
+        uiTable.getColumns().add(new FXDeleteTableColumn(false));        
     }
 
     public ObservableList<TronconDigue> getTroncons() {
         return troncons;
     }
  
-    public void processMerge(){
-        if(troncons.size()<=1) return;
-        
-        final Session session = Injector.getSession();
-
-        final TronconDigue merge = troncons.get(0).copy();
-        final TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
-        tronconRepo.add(merge);
-        try {
-            final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
-            for (int i = 1, n = troncons.size(); i < n; i++) {
-                TronconUtils.mergeTroncon(merge, troncons.get(i), session);
-                sb.append(" + ").append(troncons.get(i).getLibelle());
-            }
-            merge.setLibelle(sb.toString());
-            tronconRepo.update(merge);
-        } catch (Exception e) {
-            /* An exception has been thrown. We remove the resulting troncon from
-             * database, as it is not complete.
-             */
-            try {
-                tronconRepo.remove(merge);
-            } catch (Exception suppressed) {
-                e.addSuppressed(suppressed);
-            }
-            throw e;
+    public void processMerge() {
+        if (!task.isDone() || !task.isRunning()) {
+            TaskManager.INSTANCE.submit(task);
         }
-        
     }
     
+    /**
+     * A task whose job is to perform fusion of {@link TronconDigue} selected via merge tool.
+     */
+    private class MergeTask extends Task<Boolean> {
+
+        @Override
+        protected Boolean call() throws Exception {
+            if (troncons.size() <= 1) {
+                return false;
+            }
+            
+            updateTitle("Fusion de tronçons");
+            updateProgress(0, troncons.size());
+            
+            final Session session = Injector.getSession();
+
+            final TronconDigue merge = troncons.get(0).copy();
+            final TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
+            tronconRepo.add(merge);
+            try {
+                final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
+                for (int i = 1, n = troncons.size(); i < n; i++) {
+                    if (Thread.currentThread().isInterrupted()) throw new InterruptedException("La fusion de tronçon a été interrompue.");
+                    
+                    final TronconDigue current = troncons.get(i);
+                    updateProgress(i, troncons.size());
+                    updateMessage("Ajout du tronçon "+current.getLibelle());
+                    
+                    TronconUtils.mergeTroncon(merge, current, session);
+                    sb.append(" + ").append(current.getLibelle());
+                }
+                merge.setLibelle(sb.toString());
+                tronconRepo.update(merge);
+            } catch (Exception e) {
+                /* An exception has been thrown. We remove the resulting troncon from
+                 * database, as it is not complete.
+                 */
+                try {
+                    tronconRepo.remove(merge);
+                } catch (Exception suppressed) {
+                    e.addSuppressed(suppressed);
+                }
+                throw e;
+            }
+            
+            // Merge succeeded, we must now archive old ones.
+            Iterator<TronconDigue> it = troncons.iterator();
+            while (it.hasNext()) {
+                final TronconDigue current = it.next();
+                LocalDateTime now = LocalDateTime.now();
+                current.dateMajProperty().set(now);
+                current.date_finProperty().set(now);
+                for (Objet obj : current.structures) {
+                    obj.dateMajProperty().set(now);
+                    obj.date_finProperty().set(now);
+                }
+                session.getTronconDigueRepository().update(current);
+                it.remove();
+            }
+            return true;
+        }
+    }
 }

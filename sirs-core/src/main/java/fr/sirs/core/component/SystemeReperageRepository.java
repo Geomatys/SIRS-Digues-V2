@@ -48,14 +48,18 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
         ArgumentChecks.ensureNonNull("SR to update", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
         super.update(entity);
-        constraintBorneInTronconListBorne(entity, troncon);
+        constraintBorneInTronconListBorne(entity, troncon, false);
     }
     
     public void add(SystemeReperage entity, TronconDigue troncon) {
+        add(entity, troncon, false);
+    }
+    
+    public void add(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         ArgumentChecks.ensureNonNull("SR to add", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to added SR", troncon);
         super.add(entity);
-        constraintBorneInTronconListBorne(entity,troncon);
+        constraintBorneInTronconListBorne(entity,troncon, forceDefaultSR);
     }
 
     @Override
@@ -90,7 +94,7 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
      * 
      * @param entity 
      */
-    private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon){
+    private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         final String tcId = entity.getTronconId();
         if(tcId==null) return;
         if(entity.getSystemereperageborneId().isEmpty()) return;
@@ -116,7 +120,7 @@ public class SystemeReperageRepository extends CouchDbRepositorySupport<SystemeR
             }
         }
         
-        if (troncon.getSystemeRepDefautId() == null || troncon.getSystemeRepDefautId().isEmpty()) {
+        if (troncon.getSystemeRepDefautId() == null || troncon.getSystemeRepDefautId().isEmpty() || forceDefaultSR) {
             troncon.setSystemeRepDefautId(entity.getId());
             needSave = true;
         }

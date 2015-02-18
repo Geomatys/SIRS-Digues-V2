@@ -189,12 +189,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 ButtonType.NO, ButtonType.YES).showAndWait().get();
         if(ButtonType.YES != res) return;
         
+        final TronconDigue troncon = elementProperty.get();
+        
         //suppression du SR
         final SystemeReperageRepository repo = session.getSystemeReperageRepository();
-        repo.remove(sr);
+        repo.remove(sr, troncon);
         
         //maj de la liste
-        final TronconDigue troncon = elementProperty.get();
         final List<SystemeReperage> srs = repo.getByTroncon(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }

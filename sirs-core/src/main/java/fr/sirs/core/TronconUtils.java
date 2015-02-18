@@ -58,7 +58,8 @@ public class TronconUtils {
         final TronconDigue tronconCp = troncon.copy();
         tronconCp.setGeometry(segment);
         tronconCp.setLibelle(newName);
-        
+        // On enlève toute réference vers un SR appartenant au tronçon copié
+        tronconCp.setSystemeRepDefautId(null);
         
         final LinearReferencingUtilities.SegmentInfo[] parts = LinearReferencingUtilities.buildSegments((LineString) tronconCp.geometryProperty().get());
         
@@ -97,8 +98,10 @@ public class TronconUtils {
                 }
             }
             if(!srCp.systemereperageborneId.isEmpty()){
-                srRepo.add(srCp, troncon);
-                mapSrs.put(sr.getDocumentId(), srCp);
+                // Si le SR d'origine était celui par défaut dans le tronçon 
+                // original, le SR copié sera celui par défaut dans le tronçon copié.
+                srRepo.add(srCp, tronconCp, sr.getId().equals(troncon.getSystemeRepDefautId()));
+                mapSrs.put(sr.getId(), srCp);
             }
         }
         
@@ -131,7 +134,7 @@ public class TronconUtils {
                 if(mapSrs.containsKey(objCp.getSystemeRepId())){
                     //le systeme de reperage existe toujours, on recalcule les positions relatives
                     final SystemeReperage sr = mapSrs.get(objCp.getSystemeRepId());
-                    objCp.setSystemeRepId(sr.getDocumentId());
+                    objCp.setSystemeRepId(sr.getId());
                     
                     //on sort les positions geographique
                     final PosInfo infoOrig = new PosInfo(obj,troncon,session);                    
@@ -183,40 +186,50 @@ public class TronconUtils {
     }
     
     /**
-     * On merge les propriétés du troncon2 (incluant les structures) dans le troncon1.
+     * On ajoute / copie les propriétés du second tronçon (incluant les structures) dans le premier.
      * 
-     * @param troncon1 a merger
-     * @param troncon2 a merger
-     * @return troncon1
+     * TODO : check SR par défaut dans le troncon final.
+     * 
+     * @param mergeResult Le tronçon qui va servir de base à la fusion, qui va 
+     * être mis à jour.
+     * @param mergeParam Le tronçon dont on va prendre les propriétés pour les copier dans le second.
+     * @param session La session applicative permettant de mettre à jour les SRs.
+     * @return le premier tronçon (mergeResult).
      */
-    public static TronconDigue mergeTroncon(TronconDigue troncon1, TronconDigue troncon2, SessionGen session){
+    public static TronconDigue mergeTroncon(TronconDigue mergeResult, TronconDigue mergeParam, SessionGen session) {
         
         final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
         
-        //on merge les bornes
+        //on ajoute les bornes. Pas de copie / modification ici, car les bornes 
+        // indépendantes des tronçons.
         final Set<String> borneIds = new HashSet<>();
-        borneIds.addAll(troncon1.getBorneIds());
-        borneIds.addAll(troncon2.getBorneIds());
-        troncon1.setBorneIds(new ArrayList<>(borneIds));
+        borneIds.addAll(mergeResult.getBorneIds());
+        borneIds.addAll(mergeParam.getBorneIds());
+        mergeResult.setBorneIds(new ArrayList<>(borneIds));
                 
-        //on merge les SR 
-        for(SystemeReperage sr2 : srRepo.getByTroncon(troncon2)){
+        /* On fusionne les SR. On cherche les systèmes portant le même nom dans 
+         * les deux tronçons originaux, puis en fait un seul comportant les bornes
+         * des deux. Pour le reste, on fait une simple copie des SR.
+         */
+        final HashMap<String, String> modifiedSRs = new HashMap<>(); 
+        for(SystemeReperage sr2 : srRepo.getByTroncon(mergeParam)){
             
             //on cherche le SR du meme nom
             SystemeReperage sibling = null;
-            for(SystemeReperage sr1 : srRepo.getByTroncon(troncon1)){
+            for(SystemeReperage sr1 : srRepo.getByTroncon(mergeResult)){
                 if(sr1.getLibelle().equals(sr2.getLibelle())){
                     sibling = sr1;
                     break;
                 }
             }
-            
+                 
             if(sibling==null){
                 //on copy le SR
                 final SystemeReperage srCp = sr2.copy();
-                srCp.setTronconId(troncon1.getDocumentId());
+                srCp.setTronconId(mergeResult.getDocumentId());
                 //sauvegarde du sr
-                srRepo.add(srCp, troncon1);
+                srRepo.add(srCp, mergeResult);
+                modifiedSRs.put(sr2.getId(), srCp.getId());
             }else{
                 //on merge les bornes
                 final List<SystemeReperageBorne> srbs1 = sibling.getSystemereperageborneId();
@@ -228,22 +241,29 @@ public class TronconUtils {
                         if(srb1.getBorneId().equals(srb2.getBorneId())){
                             continue loop;
                         }
-                    }
-                          
+                    }                          
                     //cette borne n'existe pas dans l'autre SR, on la copie
                     srbs1.add(srb2.copy());
                 }
                 //maj du sr
-                srRepo.update(sibling, troncon1);
+                srRepo.update(sibling, mergeResult);
+                modifiedSRs.put(sr2.getId(), sibling.getId());
             }
         }
         
-        //on ajoute les structures
-        troncon1.structures.addAll(troncon2.structures);
+        // On ajoute les structures du tronçon paramètre. On les copie pour changer le SR associé.
+        for (final Objet objet : mergeParam.structures) {
+            Objet copy = objet.copy();
+            final String srId = modifiedSRs.get(copy.getSystemeRepId());
+            if (srId != null) {
+                copy.setSystemeRepId(srId);
+            }
+            mergeResult.structures.add(copy);
+        }
         
         //on combine les geometries
-        final LineString line1 = (LineString) troncon1.getGeometry();
-        final LineString line2 = (LineString) troncon2.getGeometry();
+        final Geometry line1 = mergeResult.getGeometry();
+        final Geometry line2 = mergeParam.getGeometry();
         
         final List<Coordinate> coords = new  ArrayList<>();
         coords.addAll(Arrays.asList(line1.getCoordinates()));
@@ -252,9 +272,9 @@ public class TronconUtils {
         final LineString serie = GF.createLineString(coords.toArray(new Coordinate[0]));
         serie.setSRID(line1.getSRID());
         serie.setUserData(line1.getUserData());
-        troncon1.setGeometry(serie);        
+        mergeResult.setGeometry(serie);        
         
-        return troncon1;
+        return mergeResult;
     }
     
     /**

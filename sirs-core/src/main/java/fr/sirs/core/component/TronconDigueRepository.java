@@ -412,7 +412,7 @@ public class TronconDigueRepository extends
         final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
         final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
         for(SystemeReperage sr : srs){
-            srrepo.remove(sr);
+            srrepo.remove(sr, entity);
         }
         //on supprime toutes les bornes du troncon
         final BorneDigueRepository bdrepo = new BorneDigueRepository(db);

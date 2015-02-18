@@ -14,8 +14,12 @@ import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
@@ -23,7 +27,9 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
@@ -51,7 +57,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
     private FeatureMapLayer tronconLayer = null;
     private EditionHelper helper;
     
-    private final Dialog dialog = new Dialog();
+    private Stage dialog;
     private final FXTronconMerge editPane;
     private final Session session;
     
@@ -60,33 +66,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         session = Injector.getSession();
         editPane = new FXTronconMerge();
         
-        final DialogPane subpane = new DialogPane();
-        subpane.setContent(editPane);
-        subpane.getButtonTypes().addAll(ButtonType.CANCEL,ButtonType.FINISH);
-        dialog.setTitle("Fusionner des tronçons");
-        dialog.setResizable(true);
-        dialog.initModality(Modality.NONE);
-        dialog.initOwner(map.getScene().getWindow());
-        dialog.setDialogPane(subpane);
-        dialog.setWidth(500);
-        dialog.setHeight(700);
-        
-        dialog.resultProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if(newValue == ButtonType.FINISH){
-                    editPane.processMerge();
-                }
-                dialog.hide();
-                if(tronconLayer!=null){
-                    tronconLayer.setSelectionFilter(null);
-                }
-                map.setHandler(new FXPanHandler(map, false));
-            }
-        });
-
-        editPane.getTroncons().addListener(this::tronconChanged);
-        
+        editPane.getTroncons().addListener(this::tronconChanged);        
     }
 
     private void tronconChanged(ListChangeListener.Change c){
@@ -129,8 +109,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         helper = new EditionHelper(map, tronconLayer);
         helper.setMousePointerSize(6);
         
-        dialog.show();
-        
+        installDialog();
     }
 
     /**
@@ -144,18 +123,66 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+            
+            uninstallDialog();
             return true;
         }
         
-        dialog.hide();
         return false;
+    }
+    
+    private void installDialog() {
+        dialog = new Stage();
+        
+        final Button finishBtn = new Button("Terminer");
+        final Button cancelBtn = new Button("Annuler");
+        cancelBtn.setCancelButton(true);
+        
+        final ButtonBar babar = new ButtonBar();
+        babar.getButtons().addAll(cancelBtn, finishBtn);
+        
+        final BorderPane dialogContent = new BorderPane();
+        dialogContent.setCenter(editPane);
+        dialogContent.setBottom(babar);
+        
+        dialog.setTitle("Fusion de tronçons");
+        dialog.setResizable(true);
+        dialog.initModality(Modality.NONE);
+        dialog.initOwner(map.getScene().getWindow());
+        dialog.setScene(new Scene(dialogContent));
+        
+        finishBtn.setOnAction((ActionEvent e)-> {
+
+            editPane.processMerge();
+
+            dialog.hide();
+            if (tronconLayer != null) {
+                tronconLayer.setSelectionFilter(null);
+            }
+            map.setHandler(new FXPanHandler(map, false));
+        });
+        
+        cancelBtn.setOnAction((ActionEvent e)-> {
+            dialog.hide();
+            if (tronconLayer != null) {
+                tronconLayer.setSelectionFilter(null);
+            }
+            map.setHandler(new FXPanHandler(map, false));
+        });
+        
+        dialog.show();
+    }
+    
+    private void uninstallDialog() {
+        if (dialog != null) {
+            dialog.close();
+            dialog = null;
+        }
     }
         
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
-        private double startX;
-        private double startY;
 
         public MouseListen() {
             super(TronconMergeHandler.this);
@@ -166,8 +193,6 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         public void mouseClicked(final MouseEvent e) {            
             if(tronconLayer==null) return;
             
-            startX = getMouseX(e);
-            startY = getMouseY(e);
             mousebutton = e.getButton();
                 
             if(mousebutton == MouseButton.PRIMARY){

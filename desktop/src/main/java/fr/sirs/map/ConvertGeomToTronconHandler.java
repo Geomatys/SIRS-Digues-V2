@@ -110,10 +110,13 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
                 @Override
                 public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                     final Feature f = feature.getCandidate();
-                    final Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
-                    LineString line = LinearReferencingUtilities.asLineString(geom);
+                    Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
                     
-                    if(line !=null){
+                    if (geom != null) {
+                        geom = LinearReferencingUtilities.asLineString(geom);
+                    }
+                    
+                    if(geom !=null) {
                         final Map.Entry<String, Digue> entry = showTronconDialog();
                         final Session session = Injector.getBean(Session.class);
                         final TronconDigue troncon = new TronconDigue();
@@ -122,11 +125,11 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
 
                         try{
                             //convertion from data crs to base crs
-                            line = (LineString) JTS.transform(line, CRS.findMathTransform(
+                            geom = JTS.transform(geom, CRS.findMathTransform(
                                     f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(), 
                                     SirsCore.getEpsgCode(), true));
                             JTS.setCRS(geom, SirsCore.getEpsgCode());
-                            troncon.setGeometry(line);
+                            troncon.setGeometry(geom);
 
                             //save troncon
                             session.getTronconDigueRepository().add(troncon);
