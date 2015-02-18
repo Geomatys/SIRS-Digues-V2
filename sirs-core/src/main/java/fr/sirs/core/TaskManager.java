@@ -26,8 +26,8 @@ public class TaskManager implements Closeable {
     
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     
-    private final ObservableList<Task> submittedTasks = FXCollections.observableArrayList();
-    private final ObservableList<Task> tasksInError = FXCollections.observableArrayList();
+    private final ObservableList<Task> submittedTasks = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+    private final ObservableList<Task> tasksInError = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     
     // TODO : keep succeded tasks in a sort of cache 
     
@@ -57,19 +57,14 @@ public class TaskManager implements Closeable {
              */
             newTask.stateProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
                 if (Worker.State.FAILED.equals(newValue)) {
-                    synchronized (tasksInError) {
-                        tasksInError.add(newTask);
-                    }
+                    tasksInError.add(newTask);
                 }
                 if (newTask.isDone()) {
-                    synchronized (submittedTasks) {
-                        submittedTasks.remove(newTask);
-                    }
+                    submittedTasks.remove(newTask);
                 }
             });
-            synchronized (submittedTasks) {
-                submittedTasks.add(newTask);
-            }
+            submittedTasks.add(newTask);
+            
             threadPool.submit(newTask);
         }
         return newTask;

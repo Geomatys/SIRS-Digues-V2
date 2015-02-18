@@ -37,7 +37,7 @@ import org.geotoolkit.font.IconBuilder;
  */
 public class ProgressMonitor extends HBox {
 
-    public static final Image ICON_CANCEL = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BAN, 13, Color.BLACK), null);
+    public static final Image ICON_CANCEL = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BAN, 16, Color.BLACK), null);
     public static final Image ICON_ERROR = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, new Color(200, 0, 0)), null);
     public static final Image ICON_RUNNING_TASKS = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ELLIPSIS_V, 16, new Color(0, 200, 220)), null);
 
@@ -56,7 +56,6 @@ public class ProgressMonitor extends HBox {
         prefWidthProperty().set(USE_COMPUTED_SIZE);
 
         taskRegistry = registry;
-
         
         // Hide list of tasks if there's no information on tasks.
         runningTasks.visibleProperty().bind(new SimpleListProperty(runningTasks.getItems()).emptyProperty().not());
@@ -73,6 +72,8 @@ public class ProgressMonitor extends HBox {
         
         runningTasks.setBorder(Border.EMPTY);
         tasksInError.setBorder(Border.EMPTY);
+        
+        initTasks();
         
         getChildren().addAll(lastTask, runningTasks, tasksInError);
     }
@@ -157,7 +158,11 @@ public class ProgressMonitor extends HBox {
                 item.setHideOnClick(false);
                 runningTasks.getItems().add(item);
             }
-            lastTask.setTask(tmpSubmittedTasks.get(nbSubmitted - 1));
+            if (nbSubmitted > 0) {
+                lastTask.setTask(tmpSubmittedTasks.get(nbSubmitted - 1));
+            } else {
+                lastTask.setTask(null);
+            }
         }
 
         synchronized (tmpTasksInError) {
@@ -187,12 +192,12 @@ public class ProgressMonitor extends HBox {
         public TaskProgress(final Task t) {
             setSpacing(5);
             setAlignment(Pos.CENTER);
+            cancelButton.prefHeightProperty().bind(progress.prefHeightProperty());
+            cancelButton.prefWidthProperty().bind(progress.prefHeightProperty());
             
             getChildren().addAll(title, progress, cancelButton);
 
-            if (t != null) {
-                setTask(t);
-            }
+            setTask(t);
         }
 
         public Task getTask() {
