@@ -234,6 +234,6 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
             docTroncon.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
         }
 
-        docTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
+        docTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
     }
 }

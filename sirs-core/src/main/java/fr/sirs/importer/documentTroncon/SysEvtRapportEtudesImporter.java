@@ -223,6 +223,6 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
                 docTroncon.setSirsdocument(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
             }
         }
-        docTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
+        docTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
     }
 }

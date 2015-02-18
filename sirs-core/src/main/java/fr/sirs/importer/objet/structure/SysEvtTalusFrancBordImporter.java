@@ -307,7 +307,7 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
             talus.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
-        talus.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        talus.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
 
         return talus;
     }

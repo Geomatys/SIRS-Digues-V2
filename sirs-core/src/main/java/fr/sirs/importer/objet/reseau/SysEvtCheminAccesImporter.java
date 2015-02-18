@@ -298,7 +298,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
             voie.setListeNature(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
-        voie.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+        voie.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
 
         return voie;
     }

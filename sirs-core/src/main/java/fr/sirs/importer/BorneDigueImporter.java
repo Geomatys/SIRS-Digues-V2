@@ -131,7 +131,7 @@ public class BorneDigueImporter extends GenericImporter {
                 Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            borne.setPseudoId(row.getInt(Columns.ID_BORNE.toString()));
+            borne.setPseudoId(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(Columns.ID_BORNE.toString()), borne);

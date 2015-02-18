@@ -117,7 +117,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             
             if(contacts!=null) convention.setContacts(contacts);
 
-            convention.setPseudoId(row.getInt(Columns.ID_CONVENTION.toString()));
+            convention.setPseudoId(String.valueOf(row.getInt(Columns.ID_CONVENTION.toString())));
             related.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
         }
         couchDbConnector.executeBulk(related.values());

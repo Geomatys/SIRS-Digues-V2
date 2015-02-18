@@ -140,7 +140,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
                 }
             }
             
-            propriete.setPseudoId(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString()));
+            propriete.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString())));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<ContactTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

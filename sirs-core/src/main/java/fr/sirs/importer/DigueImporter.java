@@ -70,7 +70,7 @@ public class DigueImporter extends GenericImporter {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 digue.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            digue.setPseudoId(row.getInt(Columns.ID_DIGUE.toString()));
+            digue.setPseudoId(String.valueOf(row.getInt(Columns.ID_DIGUE.toString())));
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             digues.put(row.getInt(Columns.ID_DIGUE.toString()), digue);

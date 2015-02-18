@@ -283,7 +283,7 @@ implements DocumentsUpdatable {
                 tronconDigue.setDigueId(d.getId());
             }
             
-            tronconDigue.setPseudoId(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            tronconDigue.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
 
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));

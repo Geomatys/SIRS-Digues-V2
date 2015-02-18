@@ -302,7 +302,7 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
             fondation.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        fondation.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        fondation.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
 
         return fondation;
     }

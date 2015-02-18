@@ -322,7 +322,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
             talusRisberme.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
-        talusRisberme.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        talusRisberme.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         return talusRisberme;
     }
 

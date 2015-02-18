@@ -100,7 +100,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             }
             
             // Table de jointure : on prend l'id de l'événement hydraulique comme pseudo id en l'absence d'identifiant véritable
-            profilTraversEvenementHydraulique.setPseudoId(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
+            profilTraversEvenementHydraulique.setPseudoId(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             
             List<ProfilTraversEvenementHydraulique> listByLeve = evenementHydrauByLeveId.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {

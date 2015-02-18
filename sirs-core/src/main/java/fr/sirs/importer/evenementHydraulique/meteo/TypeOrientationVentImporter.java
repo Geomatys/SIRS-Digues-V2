@@ -60,7 +60,7 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeOrientation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeOrientation.setPseudoId(row.getInt(Columns.ID_TYPE_ORIENTATION_VENT.toString()));
+            typeOrientation.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_ORIENTATION_VENT.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_VENT.toString())), typeOrientation);
         }
         couchDbConnector.executeBulk(types.values());

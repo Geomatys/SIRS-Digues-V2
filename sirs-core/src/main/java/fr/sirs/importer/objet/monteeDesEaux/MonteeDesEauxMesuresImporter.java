@@ -129,7 +129,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             mesure.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
             // En l'absence d'identifiant propre, on met celui de la montée des eaux comme pseudo id.
-            mesure.setPseudoId(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()));
+            mesure.setPseudoId(String.valueOf(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
 
             // Set the list ByLigneEauId
             List<MesureMonteeEaux> listByEltReseauId = mesuresByMonteeDesEaux.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()));

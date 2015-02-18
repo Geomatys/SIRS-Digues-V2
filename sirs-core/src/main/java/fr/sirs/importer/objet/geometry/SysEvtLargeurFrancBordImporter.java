@@ -215,7 +215,7 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
             largeur.setTypeLargeurFrancBord(typesLargeur.get(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())).getId());
         }
 
-        largeur.setPseudoId(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
+        largeur.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
 
         return largeur;
     }

@@ -60,7 +60,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
                 typeProprietaire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            typeProprietaire.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())));
+            typeProprietaire.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString()))));
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())), typeProprietaire);
         }

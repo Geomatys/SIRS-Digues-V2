@@ -310,7 +310,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
             piedDigue.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        piedDigue.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        piedDigue.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
 
         return piedDigue;
     }

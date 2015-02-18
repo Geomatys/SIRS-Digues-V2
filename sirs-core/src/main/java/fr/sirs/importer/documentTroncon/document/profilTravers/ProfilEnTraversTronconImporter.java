@@ -112,7 +112,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             }
             
             // Table de jointure : en l'absence d'ID, on choisit arbitrairement ID_DOC comme pseudo ID
-            profilTraversTroncon.setPseudoId(row.getInt(Columns.ID_DOC.toString()));
+            profilTraversTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
             
             List<ProfilTraversTroncon> listByLeve = profilTraversTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {

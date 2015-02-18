@@ -68,7 +68,7 @@ public class DepartementImporter extends GenericImporter {
                 departement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            departement.setPseudoId(row.getInt(Columns.ID_DEPARTEMENT.toString()));
+            departement.setPseudoId(String.valueOf(row.getInt(Columns.ID_DEPARTEMENT.toString())));
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             departements.put(row.getInt(Columns.ID_DEPARTEMENT.toString()), departement);

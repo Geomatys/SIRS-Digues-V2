@@ -290,7 +290,7 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
             pointAcces.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());
         }
 
-        pointAcces.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+        pointAcces.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
 
         return pointAcces;
     }

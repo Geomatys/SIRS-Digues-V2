@@ -210,7 +210,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
             monteeEaux.setMesureId(mesures.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
         }
 
-        monteeEaux.setPseudoId(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()));
+        monteeEaux.setPseudoId(String.valueOf(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
 
         return monteeEaux;
     }

@@ -249,7 +249,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
         }
         
-        desordre.setPseudoId(row.getInt(Columns.ID_DESORDRE.toString()));
+        desordre.setPseudoId(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));
 
         return desordre;
     }

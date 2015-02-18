@@ -92,7 +92,7 @@ public class MeteoImporter extends GenericImporter {
             }
             
             // La météo n'ayant pas d'ID, on affecte l'ID de l'événement hydraulique comme pseudo id.
-            meteo.setPseudoId(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
+            meteo.setPseudoId(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             
             // Set the list ByTronconId
             List<Meteo> listByTronconId = meteos.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));

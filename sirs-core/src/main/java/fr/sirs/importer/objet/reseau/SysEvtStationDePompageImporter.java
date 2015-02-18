@@ -275,7 +275,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
                 }
             }
             
-            stationPompage.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            stationPompage.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
             
             return stationPompage;
     }

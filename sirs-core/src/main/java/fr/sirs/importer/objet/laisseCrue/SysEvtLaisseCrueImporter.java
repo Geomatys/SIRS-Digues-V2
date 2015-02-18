@@ -250,7 +250,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
 
         laisseCrue.setPosition_laisse(cleanNullString(row.getString(Columns.POSITION.toString())));
         
-        laisseCrue.setPseudoId(row.getInt(Columns.ID_LAISSE_CRUE.toString()));
+        laisseCrue.setPseudoId(String.valueOf(row.getInt(Columns.ID_LAISSE_CRUE.toString())));
         return laisseCrue;
     }
 }

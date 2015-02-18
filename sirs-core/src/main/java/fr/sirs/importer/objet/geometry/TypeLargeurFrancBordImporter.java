@@ -60,8 +60,8 @@ class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLarge
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeLargeur.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeLargeur.setPseudoId(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString()));
-            types.put(row.getInt(String.valueOf(Columns.ID_TYPE_LARGEUR_FB.toString())), typeLargeur);
+            typeLargeur.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())));
+            types.put(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString()), typeLargeur);
         }
         couchDbConnector.executeBulk(types.values());
     }

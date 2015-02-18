@@ -274,7 +274,7 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
             ouvrage.setTypeOuvrageVoirieId(typesOuvrageVoirie.get(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())).getId());
         }
 
-        ouvrage.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+        ouvrage.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
 
         return ouvrage;
     }

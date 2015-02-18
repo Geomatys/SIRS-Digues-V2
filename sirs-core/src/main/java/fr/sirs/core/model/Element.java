@@ -86,13 +86,13 @@ public interface Element extends Serializable {
     
     /**
      * Manage the pseudo ID of an element. To handle with couchDB ids is not an 
-     * easy task, then elements can be given a numerical ID, without guarantee 
+     * easy task, then elements can be given an ID, without guarantee 
      * of unicity.
      * 
      * @return 
      */
-    int getPseudoId();
-    void setPseudoId(int pseudoId);
+    String getPseudoId();
+    void setPseudoId(String pseudoId);
     
     /**
      * Search in this object a contained {@link Element} with the given ID. If 

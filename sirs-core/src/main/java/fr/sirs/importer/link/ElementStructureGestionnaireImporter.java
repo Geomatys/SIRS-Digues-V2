@@ -90,7 +90,7 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
                 organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
-                organismeStructure.setPseudoId(row.getInt(Columns.ID_ORG_GESTION.toString()));
+                organismeStructure.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
                 
                 structure.getOrganismeStructure().add(organismeStructure);
             }

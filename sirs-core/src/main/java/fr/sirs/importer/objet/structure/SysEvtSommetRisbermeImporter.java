@@ -302,7 +302,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
             if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
                 sommetRisberme.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
-            sommetRisberme.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+            sommetRisberme.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
             return sommetRisberme;
     }
 
