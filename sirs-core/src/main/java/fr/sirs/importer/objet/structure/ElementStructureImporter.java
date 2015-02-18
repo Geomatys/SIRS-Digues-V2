@@ -5,19 +5,22 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.Crete;
+import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
+import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -57,21 +60,20 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
     private final TypeElementStructureImporter typeElementStructureImporter;
     
     private final List<GenericObjetImporter> structureImporters = new ArrayList<>();
-    private final SysEvtCreteImporter creteImporter;
-    private final SysEvtPiedDeDigueImporter piedDigueImporter;
-    private final SysEvtTalusDigueImporter talusDigueImporter;
-    private final SysEvtSommetRisbermeImporter sommetRisbermeImporter;
-    private final SysEvtTalusRisbermeImporter talusRisbermeImporter;
-    private final SysEvtFondationImporter fondationImporter;
-    private final SysEvtEpisImporter epiImporter;
-    private final SysEvtOuvrageRevancheImporter ouvrageRevancheImporter;
-    private final SysEvtTalusFrancBordImporter talusFrancBordImporter;
+    private final SysEvtCreteImporter sysEvtCreteImporter;
+    private final SysEvtPiedDeDigueImporter sysEvtPiedDeDigueImporter;
+    private final SysEvtTalusDigueImporter sysEvtTalusDigueImporter;
+    private final SysEvtSommetRisbermeImporter sysEvtSommetRisbermeImporter;
+    private final SysEvtTalusRisbermeImporter sysEvtTalusRisbermeImporter;
+    private final SysEvtFondationImporter sysEvtFondationImporter;
+    private final SysEvtEpisImporter sysEvtEpiImporter;
+    private final SysEvtOuvrageRevancheImporter sysEvtOuvrageRevancheImporter;
+    private final SysEvtTalusFrancBordImporter sysEvtTalusFrancBordImporter;
     private final SysEvtPiedFrontFrancBordImporter sysEvtPiedFrontFrancBordImporter;
     
 
     public ElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
@@ -80,74 +82,74 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
         typeElementStructureImporter = new TypeElementStructureImporter(
                 accessDatabase);
-        creteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter, systemeReperageImporter, 
+        sysEvtCreteImporter = new SysEvtCreteImporter(accessDatabase, couchDbConnector, 
+                systemeReperageImporter, 
                 borneDigueImporter, typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(creteImporter);
-        piedDigueImporter = new SysEvtPiedDeDigueImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtCreteImporter);
+        sysEvtPiedDeDigueImporter = new SysEvtPiedDeDigueImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(piedDigueImporter);
-        talusDigueImporter = new SysEvtTalusDigueImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtPiedDeDigueImporter);
+        sysEvtTalusDigueImporter = new SysEvtTalusDigueImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(talusDigueImporter);
-        sommetRisbermeImporter = new SysEvtSommetRisbermeImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtTalusDigueImporter);
+        sysEvtSommetRisbermeImporter = new SysEvtSommetRisbermeImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(sommetRisbermeImporter);
-        talusRisbermeImporter = new SysEvtTalusRisbermeImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtSommetRisbermeImporter);
+        sysEvtTalusRisbermeImporter = new SysEvtTalusRisbermeImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(talusRisbermeImporter);
-        fondationImporter = new  SysEvtFondationImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtTalusRisbermeImporter);
+        sysEvtFondationImporter = new  SysEvtFondationImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(fondationImporter);
-        epiImporter = new SysEvtEpisImporter(accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter, systemeReperageImporter, 
+        structureImporters.add(sysEvtFondationImporter);
+        sysEvtEpiImporter = new SysEvtEpisImporter(accessDatabase, couchDbConnector, 
+                systemeReperageImporter, 
                 borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter);
-        structureImporters.add(epiImporter);
-        ouvrageRevancheImporter = new SysEvtOuvrageRevancheImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtEpiImporter);
+        sysEvtOuvrageRevancheImporter = new SysEvtOuvrageRevancheImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter);
-        structureImporters.add(ouvrageRevancheImporter);
-        talusFrancBordImporter = new SysEvtTalusFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        structureImporters.add(sysEvtOuvrageRevancheImporter);
+        sysEvtTalusFrancBordImporter = new SysEvtTalusFrancBordImporter(
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter, 
                 typeFonctionImporter);
-        structureImporters.add(talusFrancBordImporter);
+        structureImporters.add(sysEvtTalusFrancBordImporter);
         sysEvtPiedFrontFrancBordImporter = new SysEvtPiedFrontFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 typeSourceImporter, typeCoteImporter, typePositionImporter, 
                 typeMateriauImporter, typeNatureImporter);
@@ -291,26 +293,26 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         }
         
 //        // Importation détaillée de toutes les structures au sens strict.
-        final Map<Integer, Crete> cretes = creteImporter.getById();
+        final Map<Integer, Crete> cretes = sysEvtCreteImporter.getById();
 //        if(cretes!=null) for(final Integer key : cretes.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(cretes.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, cretes.get(key));
 //        }
 //
-        final Map<Integer, PiedDigue> piedsDigue = piedDigueImporter.getById();
+        final Map<Integer, PiedDigue> piedsDigue = sysEvtPiedDeDigueImporter.getById();
 //        if(piedsDigue!=null) for(final Integer key : piedsDigue.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(piedsDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, piedsDigue.get(key));
 //        }
 //
-        final Map<Integer, TalusDigue> talusDigue = talusDigueImporter.getById();
+        final Map<Integer, TalusDigue> talusDigue = sysEvtTalusDigueImporter.getById();
 //        if(talusDigue!=null) for(final Integer key : talusDigue.keySet()){
 //            if(structures.get(key)!=null) throw new AccessDbImporterException(talusDigue.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
 //            else structures.put(key, talusDigue.get(key));
 //        }
         
-        final Map<Integer, SommetRisberme> sommetsRisbermes = sommetRisbermeImporter.getById();
-        final Map<Integer, TalusRisberme> talusRisbermes = talusRisbermeImporter.getById();
+        final Map<Integer, SommetRisberme> sommetsRisbermes = sysEvtSommetRisbermeImporter.getById();
+        final Map<Integer, TalusRisberme> talusRisbermes = sysEvtTalusRisbermeImporter.getById();
         
         //======================================================================
 
@@ -491,46 +493,37 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
             }
 
         }
+    }
+    
+    
 
+    @Override
+    public Objet importRow(Row row) throws IOException, AccessDbImporterException {
         
-        
-        
-//        final Map<Integer, List<Crete>> cretesByTroncon = creteImporter.getStructuresByTronconId();
-//        if(cretesByTroncon!=null){
-//            cretesByTroncon.keySet().stream().map((key) -> {
-//                if (structuresByTronconId.get(key) == null) {
-//                    structuresByTronconId.put(key, new ArrayList<>());
-//                }   return key;
-//            }).forEach((key) -> {
-//                if(cretesByTroncon.get(key)!=null)
-//                    structuresByTronconId.get(key).addAll(cretesByTroncon.get(key));
-//            });
-//        }
-//
-//        final Map<Integer, List<PiedDigue>> piedsDigueByTroncon = piedDigueImporter.getStructuresByTronconId();
-//        if(piedsDigueByTroncon!=null){
-//        piedsDigue.keySet().stream().map((key) -> {
-//            if (structuresByTronconId.get(key) == null) {
-//                structuresByTronconId.put(key, new ArrayList<>());
-//            }
-//            return key;
-//        }).forEach((key) -> {
-//            if(piedsDigueByTroncon.get(key)!=null)
-//                structuresByTronconId.get(key).addAll(piedsDigueByTroncon.get(key));
-//        });
-//        }
-//
-//        final Map<Integer, List<TalusDigue>> talusDigueByTroncon = talusDigueImporter.getStructuresByTronconId();
-//        if(talusDigueByTroncon!=null){
-//        talusDigue.keySet().stream().map((key) -> {
-//            if (structuresByTronconId.get(key) == null) {
-//                structuresByTronconId.put(key, new ArrayList<>());
-//            }
-//            return key;
-//        }).forEach((key) -> {
-//            if(talusDigueByTroncon.get(key)!=null)
-//                structuresByTronconId.get(key).addAll(talusDigueByTroncon.get(key));
-//        });
-//        }
+        final Class typeStructure = this.typeElementStructureImporter.getTypeReferences().get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        if(typeStructure==Crete.class){
+            return sysEvtCreteImporter.importRow(row);
+        } else if(typeStructure==Epi.class){
+            return sysEvtEpiImporter.importRow(row);
+        } else if(typeStructure==Fondation.class){
+            return sysEvtFondationImporter.importRow(row);
+        } else if(typeStructure==OuvrageRevanche.class){
+            return sysEvtOuvrageRevancheImporter.importRow(row);
+        } else if(typeStructure==PiedDigue.class){
+            return sysEvtPiedDeDigueImporter.importRow(row);
+        } else if(typeStructure==PiedFrontFrancBord.class){
+            return sysEvtPiedFrontFrancBordImporter.importRow(row);
+        } else if(typeStructure==SommetRisberme.class){
+            return sysEvtSommetRisbermeImporter.importRow(row);
+        } else if(typeStructure==TalusDigue.class){
+            return sysEvtTalusDigueImporter.importRow(row);
+        } else if(typeStructure==FrontFrancBord.class){
+            return sysEvtTalusFrancBordImporter.importRow(row);
+        } else if(typeStructure==TalusRisberme.class){
+            return sysEvtTalusRisbermeImporter.importRow(row);
+        } else {
+            SirsCore.LOGGER.log(Level.SEVERE, "Type incohérent.");
+            return null;
+        }
     }
 }

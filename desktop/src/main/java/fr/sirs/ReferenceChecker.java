@@ -1,10 +1,6 @@
 package fr.sirs;
 
 import fr.sirs.core.Repository;
-import fr.sirs.core.model.RefConduiteFermee;
-import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefProprietaire;
-import fr.sirs.core.model.RefTypeTroncon;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
@@ -298,9 +293,9 @@ public class ReferenceChecker {
                             try {
                                 setter.invoke(referenceInstance, LocalDateTime.parse(record.get(header), DateTimeFormatter.ISO_DATE_TIME));
                             } catch (DateTimeParseException ex2) {
-                                SIRS.LOGGER.log(Level.INFO, ex2.getMessage());
+                                SIRS.LOGGER.log(Level.FINE, ex2.getMessage());
                             }
-                            SIRS.LOGGER.log(Level.INFO, ex.getMessage());
+                            SIRS.LOGGER.log(Level.FINE, ex.getMessage());
                         }
                     }
 

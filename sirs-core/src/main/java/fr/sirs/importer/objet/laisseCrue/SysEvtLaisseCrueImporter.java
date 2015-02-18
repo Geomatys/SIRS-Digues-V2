@@ -48,14 +48,13 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
 
     SysEvtLaisseCrueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 intervenantImporter, evenementHydrauliqueImporter, 
                 typeSourceImporter, typeRefHeauImporter);
@@ -120,114 +119,11 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        
-        final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
-        
-        final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
-        
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final LaisseCrue laisseCrue = new LaisseCrue();
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                laisseCrue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                laisseCrue.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE.toString()) != null) {
-                laisseCrue.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                laisseCrue.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                laisseCrue.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        laisseCrue.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        laisseCrue.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                laisseCrue.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-            
-             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
-                if(b!=null) laisseCrue.setBorneDebutId(b.getId());
-            }
-             
-            laisseCrue.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                laisseCrue.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) laisseCrue.setBorneFinId(b.getId());
-            }
-            
-            laisseCrue.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                laisseCrue.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            
-            laisseCrue.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
-            
-            if(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())!=null){
-                laisseCrue.setReferenceHauteurId(referenceHauteur.get(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.HAUTEUR_EAU.toString()) != null) {
-                laisseCrue.setHauteur(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
-            }
-            
-            if(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())!=null){
-                laisseCrue.setObservateurId(intervenants.get(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())).getId());
-            }
-            
-            laisseCrue.setPosition_laisse(cleanNullString(row.getString(Columns.POSITION.toString())));
+            final LaisseCrue laisseCrue = importRow(row);
             
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
@@ -241,5 +137,120 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
             listByTronconId.add(laisseCrue);
             structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
         }
+    }
+
+    @Override
+    public LaisseCrue importRow(Row row) throws IOException, AccessDbImporterException {
+        
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+        
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        
+        final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
+        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
+        
+        final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
+        
+        final LaisseCrue laisseCrue = new LaisseCrue();
+            
+            if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            laisseCrue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()) != null) {
+            laisseCrue.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE.toString()) != null) {
+            laisseCrue.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            laisseCrue.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            laisseCrue.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    laisseCrue.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    laisseCrue.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtLaisseCrueImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            laisseCrue.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
+            if (b != null) {
+                laisseCrue.setBorneDebutId(b.getId());
+            }
+        }
+
+        laisseCrue.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            laisseCrue.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
+            if (b != null) {
+                laisseCrue.setBorneFinId(b.getId());
+            }
+        }
+
+        laisseCrue.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            laisseCrue.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+
+        laisseCrue.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
+
+        if (row.getInt(Columns.ID_TYPE_REF_HEAU.toString()) != null) {
+            laisseCrue.setReferenceHauteurId(referenceHauteur.get(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.HAUTEUR_EAU.toString()) != null) {
+            laisseCrue.setHauteur(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
+        }
+
+        if (row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString()) != null) {
+            laisseCrue.setObservateurId(intervenants.get(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())).getId());
+        }
+
+        laisseCrue.setPosition_laisse(cleanNullString(row.getString(Columns.POSITION.toString())));
+        
+        laisseCrue.setPseudoId(row.getInt(Columns.ID_LAISSE_CRUE.toString()));
+        return laisseCrue;
     }
 }

@@ -61,6 +61,7 @@ class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilis
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeUtilisation.setPseudoId(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());

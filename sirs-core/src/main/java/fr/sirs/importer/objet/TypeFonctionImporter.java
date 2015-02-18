@@ -58,6 +58,7 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeFonction.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeFonction.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString())), typeFonction);
         }
         couchDbConnector.executeBulk(types.values());

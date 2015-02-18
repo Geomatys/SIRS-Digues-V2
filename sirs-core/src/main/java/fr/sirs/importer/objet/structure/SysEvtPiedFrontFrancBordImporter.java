@@ -11,14 +11,12 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
@@ -49,49 +47,49 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
 
     SysEvtPiedFrontFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter, 
+            final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
-            final TypeCoteImporter typeCoteImporter, 
+            final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector,
                 systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeSourceImporter, typeCoteImporter,
+                typePositionImporter, typeMateriauImporter, typeNatureImporter,
                 null);
     }
-    
+
     private enum Columns {
+
         ID_ELEMENT_STRUCTURE,
-//        id_nom_element,
-//        ID_SOUS_GROUPE_DONNEES,
-//        LIBELLE_TYPE_ELEMENT_STRUCTURE,
-//        DECALAGE_DEFAUT,
-//        DECALAGE,
-//        LIBELLE_SOURCE,
-//        LIBELLE_TYPE_COTE,
-//        LIBELLE_SYSTEME_REP,
-//        NOM_BORNE_DEBUT,
-//        NOM_BORNE_FIN,
-//        LIBELLE_TYPE_MATERIAU,
-//        LIBELLE_TYPE_NATURE,
-//        LIBELLE_TYPE_FONCTION,
-//        LIBELLE_TYPE_NATURE_HAUT,
-//        LIBELLE_TYPE_MATERIAU_HAUT,
-//        LIBELLE_TYPE_NATURE_BAS,
-//        LIBELLE_TYPE_MATERIAU_BAS,
-//        LIBELLE_TYPE_OUVRAGE_PARTICULIER,
-//        LIBELLE_TYPE_POSITION,
-//        RAISON_SOCIALE_ORG_PROPRIO,
-//        RAISON_SOCIALE_ORG_GESTION,
-//        INTERV_PROPRIO,
-//        INTERV_GARDIEN,
-//        LIBELLE_TYPE_COMPOSITION,
-//        LIBELLE_TYPE_VEGETATION,
-//        ID_TYPE_ELEMENT_STRUCTURE,
+        //        id_nom_element,
+        //        ID_SOUS_GROUPE_DONNEES,
+        //        LIBELLE_TYPE_ELEMENT_STRUCTURE,
+        //        DECALAGE_DEFAUT,
+        //        DECALAGE,
+        //        LIBELLE_SOURCE,
+        //        LIBELLE_TYPE_COTE,
+        //        LIBELLE_SYSTEME_REP,
+        //        NOM_BORNE_DEBUT,
+        //        NOM_BORNE_FIN,
+        //        LIBELLE_TYPE_MATERIAU,
+        //        LIBELLE_TYPE_NATURE,
+        //        LIBELLE_TYPE_FONCTION,
+        //        LIBELLE_TYPE_NATURE_HAUT,
+        //        LIBELLE_TYPE_MATERIAU_HAUT,
+        //        LIBELLE_TYPE_NATURE_BAS,
+        //        LIBELLE_TYPE_MATERIAU_BAS,
+        //        LIBELLE_TYPE_OUVRAGE_PARTICULIER,
+        //        LIBELLE_TYPE_POSITION,
+        //        RAISON_SOCIALE_ORG_PROPRIO,
+        //        RAISON_SOCIALE_ORG_GESTION,
+        //        INTERV_PROPRIO,
+        //        INTERV_GARDIEN,
+        //        LIBELLE_TYPE_COMPOSITION,
+        //        LIBELLE_TYPE_VEGETATION,
+        //        ID_TYPE_ELEMENT_STRUCTURE,
         ID_TYPE_COTE,
         ID_SOURCE,
         ID_TRONCON_GESTION,
@@ -111,20 +109,20 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_COUCHE,
+        //        N_COUCHE,
         ID_TYPE_MATERIAU,
         ID_TYPE_NATURE,
-//        ID_TYPE_FONCTION,
-//        EPAISSEUR,
-//        TALUS_INTERCEPTE_CRETE,
-//        ID_TYPE_NATURE_HAUT,
-//        ID_TYPE_MATERIAU_HAUT,
-//        ID_TYPE_MATERIAU_BAS,
-//        ID_TYPE_NATURE_BAS,
-//        LONG_RAMP_HAUT,
-//        LONG_RAMP_BAS,
-//        PENTE_INTERIEURE,
-//        ID_TYPE_OUVRAGE_PARTICULIER,
+        //        ID_TYPE_FONCTION,
+        //        EPAISSEUR,
+        //        TALUS_INTERCEPTE_CRETE,
+        //        ID_TYPE_NATURE_HAUT,
+        //        ID_TYPE_MATERIAU_HAUT,
+        //        ID_TYPE_MATERIAU_BAS,
+        //        ID_TYPE_NATURE_BAS,
+        //        LONG_RAMP_HAUT,
+        //        LONG_RAMP_BAS,
+        //        PENTE_INTERIEURE,
+        //        ID_TYPE_OUVRAGE_PARTICULIER,
         ID_TYPE_POSITION,
 //        ID_ORG_PROPRIO,
 //        ID_ORG_GESTION,
@@ -165,115 +163,11 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
 
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
-        
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
-        
+
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final PiedFrontFrancBord pied = new PiedFrontFrancBord();
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                pied.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                pied.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                pied.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                pied.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                pied.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                pied.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        pied.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        pied.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                pied.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                pied.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-            }
-            
-            pied.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                pied.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    pied.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-                }
-            }
-            
-            pied.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                pied.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            
-            pied.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if(row.getInt(Columns.ID_TYPE_MATERIAU.toString())!=null){
-                pied.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
-                pied.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                pied.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+            final PiedFrontFrancBord pied = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), pied);
@@ -286,6 +180,118 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
             }
             listByTronconId.add(pied);
         }
+    }
+
+    @Override
+    public PiedFrontFrancBord importRow(Row row) throws IOException, AccessDbImporterException {
+
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
+
+        final PiedFrontFrancBord pied = new PiedFrontFrancBord();
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            pied.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            pied.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            pied.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            pied.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            pied.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            pied.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    pied.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    pied.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtPiedFrontFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            pied.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            pied.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+        }
+
+        pied.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            pied.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            if (bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()) != null) {
+                pied.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            }
+        }
+
+        pied.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            pied.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+
+        pied.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+
+        if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
+            pied.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
+            pied.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
+            pied.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+
+        pied.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+        return pied;
     }
 
     @Override

@@ -4,20 +4,12 @@ import fr.sirs.core.SirsCore;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.RefCote;
-import fr.sirs.core.model.RefPosition;
-import fr.sirs.core.model.RefPrestation;
 import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
@@ -42,20 +34,19 @@ public class PrestationImporter extends GenericPrestationImporter {
 
     public PrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final MarcheImporter marcheImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, marcheImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
                 couchDbConnector);
         this.sysEvtPrestationImporter = new SysEvtPrestationImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, marcheImporter,
                 typePositionImporter, typeCoteImporter, typePrestationImporter);
     }
@@ -112,81 +103,60 @@ public class PrestationImporter extends GenericPrestationImporter {
         this.structures = sysEvtPrestationImporter.getById();
         this.structuresByTronconId = sysEvtPrestationImporter.getByTronconId();
         
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        
-        final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypeReferences();
         
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Prestation prestation;
-            final boolean nouvellePrestation;
+            final Prestation objet;
+            final boolean nouvelObjet;
+            
             if(structures.get(row.getInt(Columns.ID_PRESTATION.toString()))!=null){
-                prestation = structures.get(row.getInt(Columns.ID_PRESTATION.toString()));
-                nouvellePrestation=false;
+                objet = structures.get(row.getInt(Columns.ID_PRESTATION.toString()));
+                nouvelObjet=false;
             }
             else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvelle prestation !!");
-                prestation = importRow(row);
-                nouvellePrestation=true;
+                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
+                objet = importRow(row);
+                nouvelObjet=true;
+            }
+            
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
             
-            {
-                final String l = cleanNullString(row.getString(Columns.LIBELLE_PRESTATION.toString()));
-                if (l!=null){
-                    if(nouvellePrestation){
-                        prestation.setLibelle(l);
-                    } 
-                    else if(!l.equals(prestation.getLibelle())){
-                        throw new AccessDbImporterException("Inconsistent data.");
-                    }
-                }
-            }
             
             {
                 final boolean realisation = row.getBoolean(Columns.REALISATION_INTERNE.toString());
-                    if(nouvellePrestation){
-                        prestation.setRealisation_interne(realisation);
+                    if(nouvelObjet){
+                        objet.setRealisation_interne(realisation);
                     }
             }
             
             if (row.getDouble(Columns.COUT_AU_METRE.toString()) != null) {
-                prestation.setCout_metre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
+                objet.setCout_metre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.COUT_GLOBAL.toString()) != null) {
-                prestation.setCout_global(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
+                objet.setCout_global(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
             }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
                 final RefSource typeSource = typesSource.get(row.getInt(Columns.ID_SOURCE.toString()));
                 if(typeSource!=null){
-                    if(prestation.getSourceId()==null){
-                        prestation.setSourceId(typeSource.getId());
-                    }
-                    else if(!prestation.getSourceId().equals(typeSource.getId())){
-                        throw new AccessDbImporterException("Inconsistent data.");
+                    if(objet.getSourceId()==null){
+                        objet.setSourceId(typeSource.getId());
                     }
                 }
             }
             
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                prestation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
+            if (nouvelObjet) {
             
-            
-            if (nouvellePrestation) {
-                
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_PRESTATION.toString()), prestation);
+                structures.put(row.getInt(Columns.ID_PRESTATION.toString()), objet);
 
                 // Set the list ByTronconId
                 List<Prestation> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
@@ -194,7 +164,7 @@ public class PrestationImporter extends GenericPrestationImporter {
                     listByTronconId = new ArrayList<>();
                     structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
-                listByTronconId.add(prestation);
+                listByTronconId.add(objet);
             }
         }
     }

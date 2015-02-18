@@ -7,7 +7,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.geometry.ElementGeometrieImporter;
@@ -67,7 +66,6 @@ public class ObjetManager {
     
     public ObjetManager(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
@@ -92,44 +90,44 @@ public class ObjetManager {
                 couchDbConnector);
         
         structureImporter = new ElementStructureImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter,
                 sourceInfoImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         importers.add(structureImporter);
         desordreImporter = new DesordreImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, intervenantImporter, sourceInfoImporter, 
                 typePositionImporter, typeCoteImporter);
         importers.add(desordreImporter);
         geometryImporter = new ElementGeometrieImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, sourceInfoImporter);
         importers.add(geometryImporter);
         reseauImporter = new ElementReseauImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter,
                 sourceInfoImporter, typeCoteImporter, typePositionImporter, 
                 typeNatureImporter);
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, marcheImporter, 
                 sourceInfoImporter, typeCoteImporter, typePositionImporter);
         importers.add(prestationImporter);
         laisseCrueImporter = new LaisseCrueImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 intervenantImporter, evenementHydrauliqueImporter, 
                 sourceInfoImporter, typeRefHeauImporter);
         importers.add(laisseCrueImporter);
         ligneEauImporter = new LigneEauImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, evenementHydrauliqueImporter, 
                 typeRefHeauImporter);
         importers.add(ligneEauImporter);
         monteeDesEauxImporter = new MonteeDesEauxImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
+                couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, evenementHydrauliqueImporter, 
                 intervenantImporter, typeRefHeauImporter, sourceInfoImporter);
         importers.add(monteeDesEauxImporter);

@@ -81,6 +81,9 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
                 mesure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
 
+            // Pas d'ID : on met arbitrairement celui de la ligne d'eau comme pseudo id.
+            mesure.setPseudoId(row.getInt(Columns.ID_LIGNE_EAU.toString()));
+
             // Set the list ByLigneEauId
             List<MesureLigneEau> listByEltReseauId = mesuresByLigneEau.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
             if (listByEltReseauId == null) {

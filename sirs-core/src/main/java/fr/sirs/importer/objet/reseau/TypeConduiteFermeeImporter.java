@@ -60,6 +60,8 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeConduite.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            
+            typeConduite.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())), typeConduite);
         }
         couchDbConnector.executeBulk(types.values());

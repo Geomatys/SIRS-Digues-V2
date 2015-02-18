@@ -39,37 +39,37 @@ import org.opengis.util.FactoryException;
  * @author Samuel Andrés (Geomatys)
  */
 class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFrancBord> {
-    
+
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
 
     SysEvtLargeurFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter, 
+            final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         this.typeLargeurFrancBordImporter = typeLargeurFrancBordImporter;
     }
-    
+
     private enum Columns {
+
         ID_ELEMENT_GEOMETRIE,
-//        id_nom_element, // Redondant avec ID_ELEMENT_GEOMETRIE
-//        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_ELEMENT_GEOMETRIE, // Redondant avec l'importaton des types de géométries
-//        DECALAGE_DEFAUT, // Affichage
-//        DECALAGE, // Affichage
-//        LIBELLE_SOURCE, // Redondant avec l'importation des sources
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des systèmes de repérage
-//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
-//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        LIBELLE_TYPE_LARGEUR_FB, // Redondant avec l'importation des types de largeur de FB
-//        LIBELLE_TYPE_PROFIL_FB, // Redondant avec l'importation des types de profil de front de FB
-//        LIBELLE_TYPE_DIST_DIGUE_BERGE, // Redondant avec l'importation des distances digue/berge
+        //        id_nom_element, // Redondant avec ID_ELEMENT_GEOMETRIE
+        //        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
+        //        LIBELLE_TYPE_ELEMENT_GEOMETRIE, // Redondant avec l'importaton des types de géométries
+        //        DECALAGE_DEFAUT, // Affichage
+        //        DECALAGE, // Affichage
+        //        LIBELLE_SOURCE, // Redondant avec l'importation des sources
+        //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des systèmes de repérage
+        //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
+        //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
+        //        LIBELLE_TYPE_LARGEUR_FB, // Redondant avec l'importation des types de largeur de FB
+        //        LIBELLE_TYPE_PROFIL_FB, // Redondant avec l'importation des types de profil de front de FB
+        //        LIBELLE_TYPE_DIST_DIGUE_BERGE, // Redondant avec l'importation des distances digue/berge
         ID_TRONCON_GESTION,
-//        ID_TYPE_ELEMENT_GEOMETRIE,
+        //        ID_TYPE_ELEMENT_GEOMETRIE,
         ID_SOURCE,
         DATE_DEBUT_VAL,
         DATE_FIN_VAL,
@@ -103,108 +103,12 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
 
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
-        
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        
-        final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypeReferences();
-        
+
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final LargeurFrancBord largeur = new LargeurFrancBord();
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                largeur.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                largeur.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                largeur.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                largeur.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                largeur.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                largeur.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+            final LargeurFrancBord largeur = importRow(row);
 
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        largeur.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        largeur.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                largeur.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                largeur.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-            }
-            
-            largeur.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                largeur.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                largeur.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-            }
-            
-            largeur.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                largeur.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            
-            largeur.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())!=null){
-                largeur.setTypeLargeurFrancBord(typesLargeur.get(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())).getId());
-            }
-            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
             structures.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), largeur);
@@ -217,6 +121,103 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
             }
             listByTronconId.add(largeur);
         }
+    }
+
+    @Override
+    public LargeurFrancBord importRow(Row row) throws IOException, AccessDbImporterException {
+
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+
+        final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypeReferences();
+
+        final LargeurFrancBord largeur = new LargeurFrancBord();
+
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            largeur.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            largeur.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            largeur.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            largeur.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            largeur.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    largeur.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    largeur.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtLargeurFrancBordImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            largeur.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            largeur.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+        }
+
+        largeur.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            largeur.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            largeur.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+        }
+
+        largeur.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            largeur.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+
+        largeur.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+
+        if (row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString()) != null) {
+            largeur.setTypeLargeurFrancBord(typesLargeur.get(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())).getId());
+        }
+
+        largeur.setPseudoId(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
+
+        return largeur;
     }
 
     @Override

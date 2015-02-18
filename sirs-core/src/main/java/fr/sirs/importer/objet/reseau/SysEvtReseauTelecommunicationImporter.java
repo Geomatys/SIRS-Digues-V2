@@ -10,7 +10,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefImplantation;
 import fr.sirs.core.model.RefPosition;
@@ -18,7 +17,6 @@ import fr.sirs.core.model.RefReseauTelecomEnergie;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
@@ -45,55 +43,55 @@ import org.opengis.util.FactoryException;
  * @author Samuel Andrés (Geomatys)
  */
 class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<ReseauTelecomEnergie> {
-    
+
     private final ImplantationImporter typeImplantationImporter;
     private final TypeReseauTelecommunicImporter typeReseauTelecomImporter;
 
     SysEvtReseauTelecommunicationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter, 
+            final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
             final ImplantationImporter typeImplantationImporter,
             final TypeReseauTelecommunicImporter typeReseauTelecomImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector,
                 systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, 
+                typeSourceImporter, typeCoteImporter,
                 typePositionImporter, null);
         this.typeImplantationImporter = typeImplantationImporter;
         this.typeReseauTelecomImporter = typeReseauTelecomImporter;
     }
-    
+
     private enum Columns {
+
         ID_ELEMENT_RESEAU,
-//        id_nom_element,
-//        ID_SOUS_GROUPE_DONNEES,
-//        LIBELLE_TYPE_ELEMENT_RESEAU,
-//        DECALAGE_DEFAUT,
-//        DECALAGE,
-//        LIBELLE_SOURCE,
-//        LIBELLE_TYPE_COTE,
-//        LIBELLE_SYSTEME_REP,
-//        NOM_BORNE_DEBUT,
-//        NOM_BORNE_FIN,
-//        LIBELLE_ECOULEMENT,
-//        LIBELLE_IMPLANTATION,
-//        LIBELLE_UTILISATION_CONDUITE,
-//        LIBELLE_TYPE_CONDUITE_FERMEE,
-//        LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE,
-//        LIBELLE_TYPE_RESEAU_COMMUNICATION,
-//        LIBELLE_TYPE_VOIE_SUR_DIGUE,
-//        NOM_OUVRAGE_VOIRIE,
-//        LIBELLE_TYPE_POSITION,
-//        LIBELLE_TYPE_OUVRAGE_VOIRIE,
-//        LIBELLE_TYPE_RESEAU_EAU,
-//        LIBELLE_TYPE_REVETEMENT,
-//        LIBELLE_TYPE_USAGE_VOIE,
+        //        id_nom_element,
+        //        ID_SOUS_GROUPE_DONNEES,
+        //        LIBELLE_TYPE_ELEMENT_RESEAU,
+        //        DECALAGE_DEFAUT,
+        //        DECALAGE,
+        //        LIBELLE_SOURCE,
+        //        LIBELLE_TYPE_COTE,
+        //        LIBELLE_SYSTEME_REP,
+        //        NOM_BORNE_DEBUT,
+        //        NOM_BORNE_FIN,
+        //        LIBELLE_ECOULEMENT,
+        //        LIBELLE_IMPLANTATION,
+        //        LIBELLE_UTILISATION_CONDUITE,
+        //        LIBELLE_TYPE_CONDUITE_FERMEE,
+        //        LIBELLE_TYPE_OUVR_HYDRAU_ASSOCIE,
+        //        LIBELLE_TYPE_RESEAU_COMMUNICATION,
+        //        LIBELLE_TYPE_VOIE_SUR_DIGUE,
+        //        NOM_OUVRAGE_VOIRIE,
+        //        LIBELLE_TYPE_POSITION,
+        //        LIBELLE_TYPE_OUVRAGE_VOIRIE,
+        //        LIBELLE_TYPE_RESEAU_EAU,
+        //        LIBELLE_TYPE_REVETEMENT,
+        //        LIBELLE_TYPE_USAGE_VOIE,
         NOM,
-//        ID_TYPE_ELEMENT_RESEAU,
+        //        ID_TYPE_ELEMENT_RESEAU,
         ID_TYPE_COTE,
         ID_SOURCE,
         ID_TRONCON_GESTION,
@@ -113,22 +111,22 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_SECTEUR,
-//        ID_ECOULEMENT,
+        //        N_SECTEUR,
+        //        ID_ECOULEMENT,
         ID_IMPLANTATION,
-//        ID_UTILISATION_CONDUITE,
-//        ID_TYPE_CONDUITE_FERMEE,
-//        AUTORISE,
-//        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
+        //        ID_UTILISATION_CONDUITE,
+        //        ID_TYPE_CONDUITE_FERMEE,
+        //        AUTORISE,
+        //        ID_TYPE_OUVR_HYDRAU_ASSOCIE,
         ID_TYPE_RESEAU_COMMUNICATION,
-//        ID_OUVRAGE_COMM_NRJ,
-//        ID_TYPE_VOIE_SUR_DIGUE,
-//        ID_OUVRAGE_VOIRIE,
-//        ID_TYPE_REVETEMENT,
-//        ID_TYPE_USAGE_VOIE,
+        //        ID_OUVRAGE_COMM_NRJ,
+        //        ID_TYPE_VOIE_SUR_DIGUE,
+        //        ID_OUVRAGE_VOIRIE,
+        //        ID_TYPE_REVETEMENT,
+        //        ID_TYPE_USAGE_VOIE,
         ID_TYPE_POSITION,
-//        LARGEUR,
-//        ID_TYPE_OUVRAGE_VOIRIE,
+        //        LARGEUR,
+        //        ID_TYPE_OUVRAGE_VOIRIE,
         HAUTEUR,
 //        DIAMETRE,
 //        ID_TYPE_RESEAU_EAU,
@@ -155,127 +153,12 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
 
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
-        
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        
-        final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypeReferences();
-        final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypeReferences();
-        
+
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauTelecomEnergie reseau = new ReseauTelecomEnergie();
-            
-            reseau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                reseau.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                reseau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                reseau.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                reseau.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                reseau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                reseau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+            final ReseauTelecomEnergie reseau = importRow(row);
 
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        reseau.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        reseau.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                reseau.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                reseau.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-            }
-            
-            reseau.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                reseau.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue())!=null){
-                    reseau.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-                }
-            }
-            
-            reseau.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                reseau.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            
-            reseau.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if(row.getInt(Columns.ID_IMPLANTATION.toString())!=null){
-                if(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString()))!=null){
-                    reseau.setImplantaitonId(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())).getId());
-                }
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())!=null){
-                if(typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString()))!=null){
-                    reseau.setTypeReseauTelecomEnergieId(typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())).getId());
-                }
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                reseau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
-                reseau.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());
-            }
-            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), reseau);
 
@@ -287,6 +170,130 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
             }
             listByTronconId.add(reseau);
         }
+    }
+
+    @Override
+    public ReseauTelecomEnergie importRow(Row row) throws IOException, AccessDbImporterException {
+
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+
+        final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypeReferences();
+        final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypeReferences();
+
+        final ReseauTelecomEnergie reseau = new ReseauTelecomEnergie();
+
+        reseau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            reseau.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            reseau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            reseau.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            reseau.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            reseau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            reseau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    reseau.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    reseau.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            reseau.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            reseau.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+        }
+
+        reseau.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            reseau.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            if (bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()) != null) {
+                reseau.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            }
+        }
+
+        reseau.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            reseau.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+
+        reseau.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+
+        if (row.getInt(Columns.ID_IMPLANTATION.toString()) != null) {
+            if (implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())) != null) {
+                reseau.setImplantaitonId(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())).getId());
+            }
+        }
+
+        if (row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString()) != null) {
+            if (typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())) != null) {
+                reseau.setTypeReseauTelecomEnergieId(typesReseau.get(row.getInt(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())).getId());
+            }
+        }
+
+        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
+            reseau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
+            reseau.setHauteur(row.getDouble(Columns.HAUTEUR.toString()).floatValue());
+        }
+
+        reseau.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+
+        return reseau;
     }
 
     @Override

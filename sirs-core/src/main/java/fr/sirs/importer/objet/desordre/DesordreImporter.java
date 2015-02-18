@@ -33,15 +33,14 @@ public class DesordreImporter extends GenericDesordreImporter {
     private final DesordreObservationImporter desordreObservationImporter;
 
     public DesordreImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final CouchDbConnector couchDbConnector,  
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
@@ -49,7 +48,7 @@ public class DesordreImporter extends GenericDesordreImporter {
         this.desordreObservationImporter = new DesordreObservationImporter(
                 accessDatabase, couchDbConnector, intervenantImporter);
         this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, 
                 desordreObservationImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeDesordreImporter);
@@ -57,31 +56,31 @@ public class DesordreImporter extends GenericDesordreImporter {
 
     private enum Columns {
         ID_DESORDRE,
-        ID_TYPE_DESORDRE,
-        ID_TYPE_COTE,
-        ID_SOURCE,
+//        ID_TYPE_DESORDRE,
+//        ID_TYPE_COTE,
+//        ID_SOURCE,
         ID_TRONCON_GESTION,
-        DATE_DEBUT_VAL,
-        DATE_FIN_VAL,
-        PR_DEBUT_CALCULE,
-        PR_FIN_CALCULE,
-        X_DEBUT,
-        Y_DEBUT,
-        X_FIN,
-        Y_FIN,
-        ID_SYSTEME_REP,
-        ID_BORNEREF_DEBUT,
-        AMONT_AVAL_DEBUT,
-        DIST_BORNEREF_DEBUT,
-        ID_BORNEREF_FIN,
-        AMONT_AVAL_FIN,
-        DIST_BORNEREF_FIN,
+//        DATE_DEBUT_VAL,
+//        DATE_FIN_VAL,
+//        PR_DEBUT_CALCULE,
+//        PR_FIN_CALCULE,
+//        X_DEBUT,
+//        Y_DEBUT,
+//        X_FIN,
+//        Y_FIN,
+//        ID_SYSTEME_REP,
+//        ID_BORNEREF_DEBUT,
+//        AMONT_AVAL_DEBUT,
+//        DIST_BORNEREF_DEBUT,
+//        ID_BORNEREF_FIN,
+//        AMONT_AVAL_FIN,
+//        DIST_BORNEREF_FIN,
 //        COMMENTAIRE, // Apparemment bsolète voir le champ DESCRIPTION_DESORDRE
-        LIEU_DIT_DESORDRE,
-        ID_TYPE_POSITION,
+//        LIEU_DIT_DESORDRE,
+//        ID_TYPE_POSITION,
 //        ID_PRESTATION, // La colonne est vide dans la base de l'Isère. Il s'agit visiblement d'une colonne obsolète remplacée par la table d'association DESORDRE_PRESTATION
 //        ID_CRUE, // La colonne est vide dans la base de l'Isère. Il s'agit visiblement d'une colonne obsolète remplacée par la table d'association DESORDRE_EVENEMENT_HYDRAULIQUE
-        DESCRIPTION_DESORDRE,
+//        DESCRIPTION_DESORDRE,
 //        DISPARU,
 //        DEJA_OBSERVE,
         DATE_DERNIERE_MAJ
@@ -95,32 +94,35 @@ public class DesordreImporter extends GenericDesordreImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
+        // Remplissage initial des structures par les importateurs subordonnés.
         structures = sysEvtDesordreImporter.getById();
         structuresByTronconId = sysEvtDesordreImporter.getByTronconId();
         
+        // Parcours de la table pour compléter l'importation.
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Desordre desordre;
-            final boolean nouveauDesordre;
+            final Desordre objet;
+            final boolean nouvelObjet;
+            
             if(structures.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
-                desordre = structures.get(row.getInt(Columns.ID_DESORDRE.toString()));
-                nouveauDesordre=false;
+                objet = structures.get(row.getInt(Columns.ID_DESORDRE.toString()));
+                nouvelObjet=false;
             }
             else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouveau désordre !!");
-                desordre = importRow(row);
-                nouveauDesordre=true;
+                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
+                objet = importRow(row);
+                nouvelObjet=true;
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                desordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            if (nouveauDesordre) {
+            if (nouvelObjet) {
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
+                structures.put(row.getInt(Columns.ID_DESORDRE.toString()), objet);
 
                 // Set the list ByTronconId
                 List<Desordre> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
@@ -128,7 +130,7 @@ public class DesordreImporter extends GenericDesordreImporter {
                     listByTronconId = new ArrayList<>();
                     structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
-                listByTronconId.add(desordre);
+                listByTronconId.add(objet);
             }
         }
     }

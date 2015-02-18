@@ -60,6 +60,7 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeImplantation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeImplantation.setPseudoId(row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString())), typeImplantation);
         }
         couchDbConnector.executeBulk(types.values());

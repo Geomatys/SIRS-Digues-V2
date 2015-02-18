@@ -60,6 +60,7 @@ class TypeOrientationOuvrageFranchissementImporter extends GenericTypeReferenceI
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeUtilisation.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());

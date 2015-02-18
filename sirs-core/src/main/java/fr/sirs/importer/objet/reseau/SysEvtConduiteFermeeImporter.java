@@ -11,7 +11,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.core.model.RefImplantation;
@@ -20,7 +19,6 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefUtilisationConduite;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
@@ -55,7 +53,6 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
 
     SysEvtConduiteFermeeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
@@ -65,7 +62,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
             final ImplantationImporter typeImplantationImporter,
             final TypeConduiteFermeeImporter typeConduiteFermeeImporter,
             final UtilisationConduiteImporter typeUtilisationConduiteImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
@@ -164,9 +161,29 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final ReseauHydrauliqueFerme conduiteFermee = importRow(row);
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), conduiteFermee);
+
+            // Set the list ByTronconId
+            List<ReseauHydrauliqueFerme> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(conduiteFermee);
+        }
+    }
+
+    @Override
+    public ReseauHydrauliqueFerme importRow(Row row) throws IOException, AccessDbImporterException {
+        
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
@@ -177,10 +194,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         final Map<Integer, RefConduiteFermee> typesConduites = typeConduiteFermeeImporter.getTypeReferences();
         final Map<Integer, RefUtilisationConduite> typesUtilisationConduites = typeUtilisationConduiteImporter.getTypeReferences();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final ReseauHydrauliqueFerme conduiteFermee = new ReseauHydrauliqueFerme();
+        final ReseauHydrauliqueFerme conduiteFermee = new ReseauHydrauliqueFerme();
             
             conduiteFermee.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
@@ -191,14 +205,6 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
                 conduiteFermee.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                conduiteFermee.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
             
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
                 conduiteFermee.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
@@ -310,17 +316,9 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
                 conduiteFermee.setDiametre(row.getDouble(Columns.DIAMETRE.toString()).floatValue());
             }
             
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), conduiteFermee);
-
-            // Set the list ByTronconId
-            List<ReseauHydrauliqueFerme> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(conduiteFermee);
-        }
+            conduiteFermee.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            
+            return conduiteFermee;
     }
 
     @Override

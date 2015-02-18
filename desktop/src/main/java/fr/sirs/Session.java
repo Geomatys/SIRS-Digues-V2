@@ -49,6 +49,8 @@ import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -512,14 +514,30 @@ public class Session extends SessionGen {
         }
     }
     
-    public String generateElementTitle(final Element element) {
-        String title;
-        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
-        if (bundle != null) {
-            title = bundle.getString("class");
-        } else {
-            title = "";
+    public String generateClassAccronym(final Class clazz){
+        final String simpleName = clazz.getSimpleName();
+        final Pattern pattern = Pattern.compile("(\\p{Upper})");
+        final Matcher matcher = pattern.matcher(simpleName);
+        System.out.println("search pattern for : "+ simpleName);
+        String result=null;
+        if(matcher.matches()){
+            System.out.println("group count : " +matcher.groupCount());
+            result=matcher.group();
         }
+        return result;
+    }
+    
+    public String generateElementTitle(final Element element) {
+        String title = "["+element.getPseudoId()+"] ";
+
+//        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+//        if (bundle != null) {
+//            title += bundle.getString("class");
+//        } else {
+//            title += "";
+//        }
+        final String accronym = generateClassAccronym(element.getClass());
+        title += (accronym==null) ? "" : accronym;
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {

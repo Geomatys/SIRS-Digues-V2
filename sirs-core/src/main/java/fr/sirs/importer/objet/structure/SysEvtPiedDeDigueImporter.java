@@ -9,7 +9,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.RefCote;
@@ -19,7 +18,6 @@ import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -49,21 +47,20 @@ import org.opengis.util.FactoryException;
  */
 class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
 
-    SysEvtPiedDeDigueImporter(final Database accessDatabase, 
+    SysEvtPiedDeDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
-            final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter,
+            final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
-            final TypeMateriauImporter typeMateriauImporter, 
+            final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector,
                 systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, 
-                typePositionImporter, typeMateriauImporter, typeNatureImporter, 
+                typeSourceImporter, typeCoteImporter,
+                typePositionImporter, typeMateriauImporter, typeNatureImporter,
                 typeFonctionImporter);
     }
 
@@ -84,44 +81,44 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         //        LIBELLE_TYPE_NATURE, // Redondant avec l'importation des natures
         //        LIBELLE_TYPE_FONCTION, // Redondant avec l'importation des fonctions
         //        ID_TYPE_ELEMENT_STRUCTURE, //Dans le TypeElementStructureImporter
-                ID_TYPE_COTE,
-                ID_SOURCE,
+        ID_TYPE_COTE,
+        ID_SOURCE,
         ID_TRONCON_GESTION,
-                DATE_DEBUT_VAL,
+        DATE_DEBUT_VAL,
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
-                ID_SYSTEME_REP,
-                ID_BORNEREF_DEBUT,
-                AMONT_AVAL_DEBUT,
+        ID_SYSTEME_REP,
+        ID_BORNEREF_DEBUT,
+        AMONT_AVAL_DEBUT,
         DIST_BORNEREF_DEBUT,
-                ID_BORNEREF_FIN,
-                AMONT_AVAL_FIN,
+        ID_BORNEREF_FIN,
+        AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
+        //        N_COUCHE, // À ignorer (probablement une valeur par défaut parasite)
         ID_TYPE_MATERIAU,
         ID_TYPE_NATURE,
         ID_TYPE_FONCTION,
-//        ID_AUTO
+        //        ID_AUTO
 
         // Empty fields
-//     LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
-//     LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
-//     LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
-//     LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
-//     LIBELLE_TYPE_OUVRAGE_PARTICULIER,
-//     LIBELLE_TYPE_POSITION, // Dans le TypePositionImporter
-//     RAISON_SOCIALE_ORG_PROPRIO,
-//     RAISON_SOCIALE_ORG_GESTION,
-//     INTERV_PROPRIO,
-//     INTERV_GARDIEN,
-//     LIBELLE_TYPE_COMPOSITION,
-//     LIBELLE_TYPE_VEGETATION,
-             DATE_FIN_VAL,
-             X_DEBUT,
-             Y_DEBUT,
-             X_FIN,
-             Y_FIN,
+        //     LIBELLE_TYPE_NATURE_HAUT, // Redondant avec l'importation des natures
+        //     LIBELLE_TYPE_MATERIAU_HAUT, // Redondant avec l'importation des matériaux
+        //     LIBELLE_TYPE_NATURE_BAS, // Redondant avec l'importation des natures
+        //     LIBELLE_TYPE_MATERIAU_BAS, // Redondant avec l'importation des matériaux
+        //     LIBELLE_TYPE_OUVRAGE_PARTICULIER,
+        //     LIBELLE_TYPE_POSITION, // Dans le TypePositionImporter
+        //     RAISON_SOCIALE_ORG_PROPRIO,
+        //     RAISON_SOCIALE_ORG_GESTION,
+        //     INTERV_PROPRIO,
+        //     INTERV_GARDIEN,
+        //     LIBELLE_TYPE_COMPOSITION,
+        //     LIBELLE_TYPE_VEGETATION,
+        DATE_FIN_VAL,
+        X_DEBUT,
+        Y_DEBUT,
+        X_FIN,
+        Y_FIN,
         //     EPAISSEUR, // N'existe pas dans le modèle des pieds de digue
         //     TALUS_INTERCEPTE_CRETE,
         //     ID_TYPE_NATURE_HAUT,// Pas dans le nouveau modèle
@@ -132,7 +129,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         //     LONG_RAMP_BAS,
         //     PENTE_INTERIEURE,
         //     ID_TYPE_OUVRAGE_PARTICULIER,
-             ID_TYPE_POSITION,
+        ID_TYPE_POSITION,
         //     ID_ORG_PROPRIO,
         //     ID_ORG_GESTION,
         //     ID_INTERV_PROPRIO,
@@ -180,119 +177,11 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
 
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
-        
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
-        
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
-        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final PiedDigue piedDigue = new PiedDigue();
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                piedDigue.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                piedDigue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                piedDigue.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                piedDigue.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            if(row.getInt(Columns.ID_SYSTEME_REP.toString())!=null){
-                piedDigue.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                piedDigue.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-            }
-            
-            piedDigue.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString())); 
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                piedDigue.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
-                if (b!=null) piedDigue.setBorneFinId(b.getId());
-            }
-            
-            piedDigue.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-            
-            if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                piedDigue.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
-            }
-            
-            piedDigue.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-            
-            if(row.getInt(Columns.ID_TYPE_MATERIAU.toString())!=null){
-                piedDigue.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_NATURE.toString())!=null){
-                piedDigue.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_FONCTION.toString())!=null){
-                piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
-            }
-
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        piedDigue.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        piedDigue.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
-                piedDigue.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-            }
+            final PiedDigue piedDigue = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), piedDigue);
@@ -305,5 +194,124 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
             }
             listByTronconId.add(piedDigue);
         }
+    }
+
+    @Override
+    public PiedDigue importRow(Row row) throws IOException, AccessDbImporterException {
+
+        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
+        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
+
+        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
+        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
+        final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
+
+        final PiedDigue piedDigue = new PiedDigue();
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            piedDigue.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+            piedDigue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            piedDigue.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
+            piedDigue.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+        }
+
+        if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
+            piedDigue.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
+            piedDigue.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+        }
+
+        piedDigue.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
+            piedDigue.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+        }
+
+        if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
+            BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue());
+            if (b != null) {
+                piedDigue.setBorneFinId(b.getId());
+            }
+        }
+
+        piedDigue.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
+        if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
+            piedDigue.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+        }
+
+        piedDigue.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+
+        if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
+            piedDigue.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
+            piedDigue.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
+            piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+        }
+
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        final MathTransform lambertToRGF;
+        try {
+            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+            try {
+
+                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
+                    piedDigue.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_DEBUT.toString()),
+                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+
+                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
+                    piedDigue.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                            row.getDouble(Columns.X_FIN.toString()),
+                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
+                }
+            } catch (MismatchedDimensionException | TransformException ex) {
+                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FactoryException ex) {
+            Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
+            piedDigue.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+
+        piedDigue.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+
+        return piedDigue;
     }
 }

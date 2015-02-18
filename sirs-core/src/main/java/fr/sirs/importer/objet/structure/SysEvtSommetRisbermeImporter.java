@@ -10,7 +10,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
@@ -19,7 +18,6 @@ import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -51,7 +49,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
 
     SysEvtSommetRisbermeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
@@ -60,7 +57,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
             final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeMateriauImporter, typeNatureImporter, 
@@ -170,9 +167,30 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
+        
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final SommetRisberme sommetRisberme = importRow(row);
+                    
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), sommetRisberme);
+
+            // Set the list ByTronconId
+            List<SommetRisberme> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(sommetRisberme);
+        }
+    }
+
+    @Override
+    public SommetRisberme importRow(Row row) throws IOException, AccessDbImporterException {
+        
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
@@ -181,9 +199,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
             final SommetRisberme sommetRisberme = new SommetRisberme();
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
@@ -287,18 +302,8 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
             if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
                 sommetRisberme.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
             }
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), sommetRisberme);
-
-            // Set the list ByTronconId
-            List<SommetRisberme> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(sommetRisberme);
-        }
+            sommetRisberme.setPseudoId(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+            return sommetRisberme;
     }
 
     @Override

@@ -60,6 +60,7 @@ class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement>
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeRevetement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeRevetement.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_REVETEMENT.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_REVETEMENT.toString())), typeRevetement);
         }
         couchDbConnector.executeBulk(types.values());

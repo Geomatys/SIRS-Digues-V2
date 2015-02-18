@@ -1,11 +1,9 @@
 package fr.sirs.importer.objet.reseau;
 
-import fr.sirs.core.SirsCore;
-import java.util.logging.Level;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -20,7 +18,6 @@ import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import fr.sirs.core.model.RefNatureBatardeaux;
 import fr.sirs.core.model.RefOrientationOuvrage;
@@ -28,13 +25,11 @@ import fr.sirs.core.model.RefOuvrageFranchissement;
 import fr.sirs.core.model.RefOuvrageParticulier;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSeuil;
-import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeGlissiere;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.IntervenantImporter;
@@ -45,11 +40,13 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -68,15 +65,15 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     private final ImplantationImporter typeImplantationImporter;
     private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
     private final UtilisationConduiteImporter typeUtilisationConduiteImporter;
-    private final SysEvtConduiteFermeeImporter conduiteFermeeImporter;
+    private final SysEvtConduiteFermeeImporter sysEvtConduiteFermeeImporter;
     private final ElementReseauPompeImporter pompeImporter;
-    private final SysEvtStationDePompageImporter stationPompageImporter;
+    private final SysEvtStationDePompageImporter sysEvtStationDePompageImporter;
     private final TypeReseauTelecommunicImporter typeReseauTelecomImporter;
-    private final SysEvtReseauTelecommunicationImporter resTelecomImporter;
+    private final SysEvtReseauTelecommunicationImporter sysEvtReseauTelecommunicationImporter;
     private final TypeOuvrageTelecomNrjImporter typeOuvrageTelecomImporter;
-    private final SysEvtOuvrageTelecommunicationImporter ouvTelecomImporter;
+    private final SysEvtOuvrageTelecommunicationImporter sysEvtOuvrageTelecommunicationImporter;
     private final TypeOuvrageHydrauAssocieImporter typeOuvrageAssocieImporter;
-    private final SysEvtAutreOuvrageHydrauliqueImporter autreOuvrageHydrauliqueImporter;
+    private final SysEvtAutreOuvrageHydrauliqueImporter sysEvtAutreOuvrageHydrauliqueImporter;
     private final TypeUsageVoieImporter typeUsageVoieImporter;
     private final SysEvtCheminAccesImporter sysEvtCheminAccesImporter;
     private final TypeOrientationOuvrageFranchissementImporter typeOrientationOuvrageFranchissementImporter;
@@ -99,7 +96,6 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
 
     public ElementReseauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
@@ -108,7 +104,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             final TypeCoteImporter typeCoteImporter, 
             final TypePositionImporter typePositionImporter,
             final TypeNatureImporter typeNatureImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, typeNatureImporter);
@@ -125,46 +121,46 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 accessDatabase, couchDbConnector);
         typeUtilisationConduiteImporter = new UtilisationConduiteImporter(
                 accessDatabase, couchDbConnector);
-        conduiteFermeeImporter = new SysEvtConduiteFermeeImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        sysEvtConduiteFermeeImporter = new SysEvtConduiteFermeeImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeEcoulementImporter, 
                 typeImplantationImporter, typeConduiteFermeeImporter, 
                 typeUtilisationConduiteImporter);
-        reseauImporters.add(conduiteFermeeImporter);
+        reseauImporters.add(sysEvtConduiteFermeeImporter);
         pompeImporter = new ElementReseauPompeImporter(accessDatabase, couchDbConnector);
-        stationPompageImporter = new SysEvtStationDePompageImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        sysEvtStationDePompageImporter = new SysEvtStationDePompageImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, pompeImporter);
-        reseauImporters.add(stationPompageImporter);
+        reseauImporters.add(sysEvtStationDePompageImporter);
         typeReseauTelecomImporter = new TypeReseauTelecommunicImporter(
                 accessDatabase, couchDbConnector);
-        resTelecomImporter = new SysEvtReseauTelecommunicationImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        sysEvtReseauTelecommunicationImporter = new SysEvtReseauTelecommunicationImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeImplantationImporter, 
                 typeReseauTelecomImporter);
-        reseauImporters.add(resTelecomImporter);
+        reseauImporters.add(sysEvtReseauTelecommunicationImporter);
         typeOuvrageTelecomImporter = new TypeOuvrageTelecomNrjImporter(
                 accessDatabase, couchDbConnector);
-        ouvTelecomImporter = new SysEvtOuvrageTelecommunicationImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+        sysEvtOuvrageTelecommunicationImporter = new SysEvtOuvrageTelecommunicationImporter(accessDatabase, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeOuvrageTelecomImporter);
-        reseauImporters.add(ouvTelecomImporter);
+        reseauImporters.add(sysEvtOuvrageTelecommunicationImporter);
         typeOuvrageAssocieImporter = new TypeOuvrageHydrauAssocieImporter(
                 accessDatabase, couchDbConnector);
-        autreOuvrageHydrauliqueImporter = new SysEvtAutreOuvrageHydrauliqueImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        sysEvtAutreOuvrageHydrauliqueImporter = new SysEvtAutreOuvrageHydrauliqueImporter(
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, 
                 typeOuvrageAssocieImporter);
-        reseauImporters.add(autreOuvrageHydrauliqueImporter);
+        reseauImporters.add(sysEvtAutreOuvrageHydrauliqueImporter);
         typeUsageVoieImporter = new TypeUsageVoieImporter(accessDatabase, 
                 couchDbConnector);
         sysEvtCheminAccesImporter = new SysEvtCheminAccesImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeNatureImporter, 
                 typeUsageVoieImporter);
@@ -176,7 +172,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         typeOuvrageFranchissementImporter = new TypeOuvrageFranchissementImporter(
                 accessDatabase, couchDbConnector);
         sysEvtPointAccesImporter = new SysEvtPointAccesImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeUsageVoieImporter, 
                 typeRevetementImporter);
@@ -184,7 +180,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         typeVoieSurDigueImporter = new TypeVoieSurDigueImporter(accessDatabase, 
                 couchDbConnector);
         sysEvtVoieSurDigueImporter = new SysEvtVoieSurDigueImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeUsageVoieImporter, 
                 typeRevetementImporter, typeVoieSurDigueImporter);
@@ -192,21 +188,21 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         typeOuvrageVoirieImporter = new TypeOuvrageVoirieImporter(
                 accessDatabase, couchDbConnector);
         sysEvtOuvrageVoirieImporter = new SysEvtOuvrageVoirieImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
                 typeCoteImporter, typePositionImporter, typeOuvrageVoirieImporter);
         reseauImporters.add(sysEvtOuvrageVoirieImporter);
         typeReseauEauImporter = new TypeReseauEauImporter(accessDatabase, 
                 couchDbConnector);
         sysEvtReseauEauImporter = new SysEvtReseauEauImporter(accessDatabase, 
-                couchDbConnector, tronconGestionDigueImporter, 
+                couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter, typeReseauEauImporter);
         reseauImporters.add(sysEvtReseauEauImporter);
         typeOuvrageParticulierImporter = new TypeOuvrageParticulierImporter(
                 accessDatabase, couchDbConnector);
         sysEvtOuvrageParticulierImporter = new SysEvtOuvrageParticulierImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter);
         reseauImporters.add(sysEvtOuvrageParticulierImporter);
@@ -219,7 +215,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         typeGlissiereImporter = new TypeGlissiereImporter(accessDatabase, 
                 couchDbConnector);
         sysEvtOuvertureBatardableImporter = new SysEvtOuvertureBatardableImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter);
         reseauImporters.add(sysEvtOuvertureBatardableImporter);
@@ -234,7 +230,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         ID_TYPE_ELEMENT_RESEAU,
 //        ID_TYPE_COTE,
 //        ID_SOURCE,
-//        ID_TRONCON_GESTION,
+        ID_TRONCON_GESTION,
 //        DATE_DEBUT_VAL,
 //        DATE_FIN_VAL,
 //        PR_DEBUT_CALCULE,
@@ -286,7 +282,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
 //        ID_TYPE_OUVRAGE_TELECOM_NRJ,
         ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT,
         ID_TYPE_OUVRAGE_FRANCHISSEMENT,
-//        DATE_DERNIERE_MAJ,
+        DATE_DERNIERE_MAJ,
         Z_SEUIL,
         ID_TYPE_SEUIL,
         ID_TYPE_GLISSIERE,
@@ -320,26 +316,37 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     
     @Override
     protected void compute() throws IOException, AccessDbImporterException {    
-        structures = new HashMap<>();
-        
-        final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
 
+        structures = new HashMap<>();
+        structuresByTronconId = new HashMap<>();
+
+        // Remplissage initial des structures par les importateurs subordonnés.
         for (final GenericObjetImporter gsi : reseauImporters){
             final Map<Integer, Objet> objets = gsi.getById();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
-                        SirsCore.LOGGER.log(Level.FINE, gsi.getClass().toGenericString());
                         throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
                     }
                     else {
                         structures.put(key, objets.get(key));
                     }
                 }
+            }
+            
+            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
+
+            if (objetsByTronconId != null) {
+                objetsByTronconId.keySet().stream().map((key) -> {
+                    if (structuresByTronconId.get(key) == null) {
+                        structuresByTronconId.put(key, new ArrayList<>());
+                    }
+                    return key;
+                }).forEach((key) -> {
+                    if (objetsByTronconId.get(key) != null) {
+                        structuresByTronconId.get(key).addAll(objetsByTronconId.get(key));
+                    }
+                });
             }
         }
 
@@ -352,6 +359,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         final Map<Integer, RefTypeGlissiere> typesGlissiere = typeGlissiereImporter.getTypeReferences();
         final Map<Integer, Contact> contacts = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         // Vérification de la cohérence des structures au sens strict.
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
@@ -359,58 +367,23 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_RESEAU.toString());
-            final Objet structure = structures.get(structureId);
-            final Class typeStructure = this.typeElementReseauImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
+            final Objet objet;
+            final boolean nouvelObjet;
             
-            if(structure instanceof StationPompage){
-                
-                if (typeStructure!=StationPompage.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
+            if(structures.get(structureId)!=null){
+                objet = structures.get(structureId);
+                nouvelObjet=false;
             }
-            else if(structure instanceof ReseauHydrauliqueFerme) {
-                
-                if (typeStructure!=ReseauHydrauliqueFerme.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
+            else{
+                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
+                objet = importRow(row);
+                nouvelObjet=true;
             }
-            else if(structure instanceof OuvrageHydrauliqueAssocie) {
+            
+            
+            if(objet instanceof OuvrageFranchissement){
                 
-                if (typeStructure!=OuvrageHydrauliqueAssocie.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if(structure instanceof ReseauTelecomEnergie){
-                
-                if (typeStructure!=ReseauTelecomEnergie.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if(structure instanceof OuvrageTelecomEnergie){
-                
-                if (typeStructure!=OuvrageTelecomEnergie.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if(structure instanceof VoieAcces){
-                
-                if (typeStructure!=VoieAcces.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if(structure instanceof OuvrageFranchissement){
-                
-                if (typeStructure!=OuvrageFranchissement.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-                final OuvrageFranchissement pointAcces = (OuvrageFranchissement) structure;
+                final OuvrageFranchissement pointAcces = (OuvrageFranchissement) objet;
             
                 if(row.getInt(Columns.ID_TYPE_POSITION.toString())!=null){
                     pointAcces.setPositionBasId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
@@ -428,45 +401,17 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                     pointAcces.setTypeOuvrageFranchissementId(typesOuvrageFranchissement.get(row.getInt(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString())).getId());
                 }
             }
-            else if (structure instanceof VoieDigue){
+            else if (objet instanceof OuvrageParticulier){
                 
-                if (typeStructure!=VoieDigue.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-            }
-            else if(structure instanceof OuvrageVoirie){
-                
-                if (typeStructure!=OuvrageVoirie.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if(structure instanceof ReseauHydroCielOuvert){
-                
-                if (typeStructure!=ReseauHydroCielOuvert.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-            }
-            else if (structure instanceof OuvrageParticulier){
-                
-                if (typeStructure!=OuvrageParticulier.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-                final OuvrageParticulier ouvrage = (OuvrageParticulier) structure;
+                final OuvrageParticulier ouvrage = (OuvrageParticulier) objet;
             
                 if(row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())!=null){
                     ouvrage.setTypeOuvrageParticulierId(typesOuvrageParticulier.get(row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())).getId());
                 }
             }
-            else if (structure instanceof OuvertureBatardable){
+            else if (objet instanceof OuvertureBatardable){
                 
-                if (typeStructure!=OuvertureBatardable.class) {
-                    throw new AccessDbImporterException("Bad type : "+typeStructure+" ("+row.getInt(Columns.ID_ELEMENT_RESEAU.toString())+")");
-                }
-                
-                final OuvertureBatardable ouverture = (OuvertureBatardable) structure;
+                final OuvertureBatardable ouverture = (OuvertureBatardable) objet;
 
                 if (row.getDouble(Columns.Z_SEUIL.toString()) != null) {
                     ouverture.setZ_du_seuil(row.getDouble(Columns.Z_SEUIL.toString()).floatValue());
@@ -506,132 +451,63 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 
                 if(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())!=null){
                     ouverture.setIntervenantManupulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
-                }
-                
+                }       
             }
             
             
             
+            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+            }
             
+            if (nouvelObjet) {
             
-            
-            
-            
-            
-            
-            if (false && structure != null) {
-//                structure.setSystemeRepId(systemesReperage.get(row.getInt(ElementGeometryColumns.ID_SYSTEME_REP.toString())).getId());
-//                
-//                structure.setBorne_debut_aval(row.getBoolean(ElementGeometryColumns.AMONT_AVAL_DEBUT.toString())); 
-//                structure.setBorne_fin_aval(row.getBoolean(ElementGeometryColumns.AMONT_AVAL_FIN.toString()));
-//                structure.setCommentaire(row.getString(ElementGeometryColumns.COMMENTAIRE.toString()));
-//                
-//                if (row.getDouble(ElementGeometryColumns.PR_DEBUT_CALCULE.toString()) != null) {
-//                    structure.setPR_debut(row.getDouble(ElementGeometryColumns.PR_DEBUT_CALCULE.toString()).floatValue());
-//                }
-//                if (row.getDouble(ElementGeometryColumns.ID_BORNEREF_DEBUT.toString()) != null) {
-//                    structure.setBorneDebutId(bornes.get((int) row.getDouble(ElementGeometryColumns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
-//                }
-//                if (row.getDouble(ElementGeometryColumns.DIST_BORNEREF_DEBUT.toString()) != null) {
-//                    structure.setBorne_debut_distance(row.getDouble(ElementGeometryColumns.DIST_BORNEREF_DEBUT.toString()).floatValue());
-//                }
-//                if (row.getDouble(ElementGeometryColumns.ID_BORNEREF_FIN.toString()) != null) {
-//                    structure.setBorneFinId(bornes.get((int) row.getDouble(ElementGeometryColumns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
-//                }
-//                if (row.getDouble(ElementGeometryColumns.DIST_BORNEREF_FIN.toString()) != null) {
-//                    structure.setBorne_fin_distance(row.getDouble(ElementGeometryColumns.DIST_BORNEREF_FIN.toString()).floatValue());
-//                }
-//                if (row.getDouble(ElementGeometryColumns.PR_FIN_CALCULE.toString()) != null) {
-//                    structure.setPR_fin(row.getDouble(ElementGeometryColumns.PR_FIN_CALCULE.toString()).floatValue());
-//                }
-                
-//                   if (row.getDouble(ElementStructureColumns.EPAISSEUR.toString()) != null) {
-//                structure.setEpaisseur(row.getDouble(ElementStructureColumns.EPAISSEUR.toString()).floatValue());
-//            }
-//                   
-//            structure.setNum_couche(row.getInt(ElementStructureColumns.N_COUCHE.toString()));
-                
-                
-//                if (row.getDate(ElementGeometryColumns.DATE_DEBUT_VAL.toString()) != null) {
-//                structure.setDate_debut(LocalDateTime.parse(row.getDate(ElementGeometryColumns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
-//            }
-//            if (row.getDate(ElementGeometryColumns.DATE_FIN_VAL.toString()) != null) {
-//                structure.setDate_fin(LocalDateTime.parse(row.getDate(ElementGeometryColumns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
-//            }
-//                
-//                if(row.getInt(ElementGeometryColumns.ID_SOURCE.toString())!=null){
-//                structure.setSourceId(typesSource.get(row.getInt(ElementGeometryColumns.ID_SOURCE.toString())).getId());
-//            }
-//            
-//            if(row.getInt(ElementGeometryColumns.ID_TYPE_POSITION.toString())!=null){
-//                structure.setPosition_structure(typesPosition.get(row.getInt(ElementGeometryColumns.ID_TYPE_POSITION.toString())).getId());
-//            }
-//            
-//            if(row.getInt(ElementGeometryColumns.ID_TYPE_COTE.toString())!=null){
-//                structure.setCoteId(typesCote.get(row.getInt(ElementGeometryColumns.ID_TYPE_COTE.toString())).getId());
-//            }
-//            
-//            GeometryFactory geometryFactory = new GeometryFactory();
-//            final MathTransform lambertToRGF;
-//            try {
-//                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-//
-//                try {
-//
-//                    if (row.getDouble(ElementGeometryColumns.X_DEBUT.toString()) != null && row.getDouble(ElementGeometryColumns.Y_DEBUT.toString()) != null) {
-//                        structure.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                                row.getDouble(ElementGeometryColumns.X_DEBUT.toString()),
-//                                row.getDouble(ElementGeometryColumns.Y_DEBUT.toString()))), lambertToRGF));
-//                    }
-//                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//
-//                try {
-//
-//                    if (row.getDouble(ElementGeometryColumns.X_FIN.toString()) != null && row.getDouble(ElementGeometryColumns.Y_FIN.toString()) != null) {
-//                        structure.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                                row.getDouble(ElementGeometryColumns.X_FIN.toString()),
-//                                row.getDouble(ElementGeometryColumns.Y_FIN.toString()))), lambertToRGF));
-//                    }
-//                } catch (MismatchedDimensionException | TransformException ex) {
-//                    Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            } catch (FactoryException ex) {
-//                Logger.getLogger(ReseauImporter.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//                
-//                
-                
-                
-                
-                
+                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+                structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), objet);
+
+                // Set the list ByTronconId
+                List<Objet> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                if (listByTronconId == null) {
+                    listByTronconId = new ArrayList<>();
+                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                }
+                listByTronconId.add(objet);
             }
         }
-        
-        
+    }
+    
+    
 
-
-        //======================================================================
-
-        // Génération de la liste des structures par identifiant de tronçon.
-        structuresByTronconId = new HashMap<>();
-        for (final GenericObjetImporter gsi : reseauImporters) {
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
-
-            if (objetsByTronconId != null) {
-                objetsByTronconId.keySet().stream().map((key) -> {
-                    if (structuresByTronconId.get(key) == null) {
-                        structuresByTronconId.put(key, new ArrayList<>());
-                    }
-                    return key;
-                }).forEach((key) -> {
-                    if (objetsByTronconId.get(key) != null) {
-                        structuresByTronconId.get(key).addAll(objetsByTronconId.get(key));
-                    }
-                });
-            }
-
+    @Override
+    public Objet importRow(Row row) throws IOException, AccessDbImporterException {
+        final Class typeStructure = typeElementReseauImporter.getTypeReferences().get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+        if(typeStructure==OuvrageHydrauliqueAssocie.class){
+            return sysEvtAutreOuvrageHydrauliqueImporter.importRow(row);
+        } else if(typeStructure==VoieAcces.class){
+            return sysEvtCheminAccesImporter.importRow(row);
+        } else if(typeStructure==ReseauHydrauliqueFerme.class){
+            return sysEvtConduiteFermeeImporter.importRow(row);
+        } else if(typeStructure==OuvertureBatardable.class){
+            return sysEvtOuvertureBatardableImporter.importRow(row);
+        } else if(typeStructure==OuvrageParticulier.class){
+            return sysEvtOuvrageParticulierImporter.importRow(row);
+        } else if(typeStructure==OuvrageTelecomEnergie.class){
+            return sysEvtOuvrageTelecommunicationImporter.importRow(row);
+        } else if(typeStructure==OuvrageVoirie.class){
+            return sysEvtOuvrageVoirieImporter.importRow(row);
+        } else if(typeStructure==OuvrageFranchissement.class){
+            return sysEvtPointAccesImporter.importRow(row);
+        } else if(typeStructure==ReseauHydroCielOuvert.class){
+            return sysEvtReseauEauImporter.importRow(row);
+        } else if(typeStructure==ReseauTelecomEnergie.class){
+            return sysEvtReseauTelecommunicationImporter.importRow(row);
+        } else if(typeStructure==StationPompage.class){
+            return sysEvtStationDePompageImporter.importRow(row);
+        } else if(typeStructure==VoieDigue.class){
+            return sysEvtVoieSurDigueImporter.importRow(row);
+        } else{
+            SirsCore.LOGGER.log(Level.SEVERE, "Type incohérent.");
+            return null;
         }
     }
 }

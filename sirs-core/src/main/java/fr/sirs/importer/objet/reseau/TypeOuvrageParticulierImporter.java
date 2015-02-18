@@ -60,6 +60,7 @@ class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuv
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeOuvrage.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())), typeOuvrage);
         }
         couchDbConnector.executeBulk(types.values());

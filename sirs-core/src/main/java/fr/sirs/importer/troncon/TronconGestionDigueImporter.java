@@ -105,7 +105,7 @@ implements DocumentsUpdatable {
         syndicatImporter = new SyndicatImporter(accessDatabase, couchDbConnector);
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
         this.documentImporter = documentImporter;
-        objetManager = new ObjetManager(accessDatabase, couchDbConnector, this, 
+        objetManager = new ObjetManager(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, organismeImporter, 
                 intervenantImporter, documentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter);
         this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(

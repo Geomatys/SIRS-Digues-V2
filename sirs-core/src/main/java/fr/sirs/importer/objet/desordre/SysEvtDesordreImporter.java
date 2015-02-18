@@ -49,7 +49,6 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
 
     SysEvtDesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final DesordreObservationImporter desordreObservationImporter,
@@ -57,7 +56,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeDesordreImporter typeDesordreImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = typeDesordreImporter;
@@ -249,6 +248,8 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         if (observations.get(row.getInt(Columns.ID_DESORDRE.toString())) != null) {
             desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
         }
+        
+        desordre.setPseudoId(row.getInt(Columns.ID_DESORDRE.toString()));
 
         return desordre;
     }

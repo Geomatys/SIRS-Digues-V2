@@ -37,6 +37,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
@@ -734,4 +735,17 @@ public class FXLauncherPane extends BorderPane {
         }
         updateLocalDbList();
     }
+    
+//    public static void main(String[] args) {
+//        final String simpleName = "Crete";
+//        final Pattern pattern = Pattern.compile("(\\p{Upper})");
+//        final Matcher matcher = pattern.matcher(simpleName);
+//        System.out.println("search pattern for : "+ simpleName);
+//        String result=null;
+//        if(matcher.matches()){
+//            System.out.println("group count : " +matcher.groupCount());
+//            result=matcher.group();
+//        }
+//        System.out.println(result);
+//    }
 }

@@ -1,7 +1,6 @@
 package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -23,7 +22,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     protected Map<Integer, T> structures = null;
     protected Map<Integer, List<T>> structuresByTronconId = null;
     
-    protected TronconGestionDigueImporter tronconGestionDigueImporter;
+//    protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     
@@ -40,8 +39,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     }
     
     public GenericObjetImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
+            final CouchDbConnector couchDbConnector, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
@@ -51,7 +49,6 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         this(accessDatabase, couchDbConnector);
-        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
         this.sourceInfoImporter = typeSourceImporter;

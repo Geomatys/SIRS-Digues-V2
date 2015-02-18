@@ -60,6 +60,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeReseau.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
         }
         couchDbConnector.executeBulk(types.values());

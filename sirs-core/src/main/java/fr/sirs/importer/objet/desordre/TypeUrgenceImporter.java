@@ -60,6 +60,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeUrgence.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeUrgence.setPseudoId(row.getInt(Columns.ID_TYPE_URGENCE.toString()));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_URGENCE.toString())), typeUrgence);
         }
         couchDbConnector.executeBulk(types.values());

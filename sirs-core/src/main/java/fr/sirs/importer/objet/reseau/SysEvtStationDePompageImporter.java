@@ -11,13 +11,11 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
@@ -49,14 +47,13 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
 
     SysEvtStationDePompageImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
             final ElementReseauPompeImporter pompeImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, 
                 typePositionImporter, null);
@@ -152,9 +149,29 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final StationPompage stationPompage = importRow(row);
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), stationPompage);
+
+            // Set the list ByTronconId
+            List<StationPompage> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(stationPompage);
+        }
+    }
+
+    @Override
+    public StationPompage importRow(Row row) throws IOException, AccessDbImporterException {
+        
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
@@ -162,10 +179,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         
         final Map<Integer, List<Pompe>> pompes = pompeImporter.getPompeByElementReseau();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final StationPompage stationPompage = new StationPompage();
+        final StationPompage stationPompage = new StationPompage();
             
             stationPompage.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
             
@@ -261,17 +275,9 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
                 }
             }
             
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), stationPompage);
-
-            // Set the list ByTronconId
-            List<StationPompage> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(stationPompage);
-        }
+            stationPompage.setPseudoId(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            
+            return stationPompage;
     }
 
     @Override

@@ -17,7 +17,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
@@ -51,14 +50,13 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
 
     SysEvtPrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final MarcheImporter marcheImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePrestationImporter typePrestationImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,  marcheImporter, 
                 null, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = typePrestationImporter;
@@ -157,8 +155,6 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
     @Override
     public Prestation importRow(Row row) throws IOException, AccessDbImporterException {
         
-        final Prestation prestation = new Prestation();
-        
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
@@ -168,6 +164,8 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypeReferences();
         
         final Map<Integer, Marche> marches = marcheImporter.getRelated();
+        
+        final Prestation prestation = new Prestation();
         
         if (row.getInt(Columns.ID_TYPE_PRESTATION.toString()) != null) {
             prestation.setTypePrestationId(typesPrestation.get(row.getInt(Columns.ID_TYPE_PRESTATION.toString())).getId());
@@ -264,6 +262,8 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         prestation.setLibelle(cleanNullString(row.getString(Columns.LIBELLE_PRESTATION.toString())));
         
         prestation.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PRESTATION.toString())));
+        
+        prestation.setPseudoId(row.getInt(Columns.ID_PRESTATION.toString()));
         
         return prestation;
     }

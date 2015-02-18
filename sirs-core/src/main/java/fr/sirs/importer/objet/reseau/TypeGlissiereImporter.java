@@ -60,6 +60,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeGlissiere.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            typeGlissiere.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString())), typeGlissiere);
         }
         couchDbConnector.executeBulk(types.values());

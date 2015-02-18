@@ -60,6 +60,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 nature.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
+            nature.setPseudoId(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString())));
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString())), nature);
         }
         couchDbConnector.executeBulk(types.values());

@@ -11,13 +11,11 @@ import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MesureLigneEau;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import java.io.IOException;
@@ -48,14 +46,13 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
     
     SysEvtLigneEauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter,
             final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter,
                 evenementHydrauliqueImporter, typeRefHeauImporter);
         this.ligneEauMesuresPrzImporter = ligneEauMesuresPrzImporter;
@@ -115,8 +112,28 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         this.structures = new HashMap<>();
         this.structuresByTronconId = new HashMap<>();
         
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
+            final Row row = it.next();
+            final LigneEau ligneEau = importRow(row);
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            structures.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), ligneEau);
+
+            // Set the list ByTronconId
+            List<LigneEau> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+            }
+            listByTronconId.add(ligneEau);
+            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+        }
+    }
+
+    @Override
+    public LigneEau importRow(Row row) throws IOException, AccessDbImporterException {
+        
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
-        final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
         final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
@@ -126,18 +143,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
         final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final LigneEau ligneEau = new LigneEau();
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                ligneEau.setTroncon(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
+        final LigneEau ligneEau = new LigneEau();
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 ligneEau.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
@@ -225,16 +231,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
                 ligneEau.getMesureId().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             }
             
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), ligneEau);
-
-            // Set the list ByTronconId
-            List<LigneEau> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-            }
-            listByTronconId.add(ligneEau);
-            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
+            ligneEau.setPseudoId(row.getInt(Columns.ID_LIGNE_EAU.toString()));
+            return ligneEau;
     }
 }
