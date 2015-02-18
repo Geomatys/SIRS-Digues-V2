@@ -735,17 +735,4 @@ public class FXLauncherPane extends BorderPane {
         }
         updateLocalDbList();
     }
-    
-//    public static void main(String[] args) {
-//        final String simpleName = "Crete";
-//        final Pattern pattern = Pattern.compile("(\\p{Upper})");
-//        final Matcher matcher = pattern.matcher(simpleName);
-//        System.out.println("search pattern for : "+ simpleName);
-//        String result=null;
-//        if(matcher.matches()){
-//            System.out.println("group count : " +matcher.groupCount());
-//            result=matcher.group();
-//        }
-//        System.out.println(result);
-//    }
 }

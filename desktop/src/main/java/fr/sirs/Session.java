@@ -514,30 +514,16 @@ public class Session extends SessionGen {
         }
     }
     
-    public String generateClassAccronym(final Class clazz){
-        final String simpleName = clazz.getSimpleName();
-        final Pattern pattern = Pattern.compile("(\\p{Upper})");
-        final Matcher matcher = pattern.matcher(simpleName);
-        System.out.println("search pattern for : "+ simpleName);
-        String result=null;
-        if(matcher.matches()){
-            System.out.println("group count : " +matcher.groupCount());
-            result=matcher.group();
-        }
-        return result;
-    }
-    
     public String generateElementTitle(final Element element) {
-        String title = "["+element.getPseudoId()+"] ";
+        String title="";
 
-//        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
-//        if (bundle != null) {
-//            title += bundle.getString("class");
-//        } else {
-//            title += "";
-//        }
-        final String accronym = generateClassAccronym(element.getClass());
-        title += (accronym==null) ? "" : accronym;
+        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
+        if (bundle != null) {
+            title += bundle.getString("classAbrege");
+        } else {
+            title += "";
+        }
+        title+=element.getPseudoId();
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {
