@@ -39,6 +39,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
@@ -167,71 +168,75 @@ public class Loader extends Application {
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                final Session session = Injector.getBean(Session.class);
-                final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
+                controller.uiConnexion.setDisable(true);
+                try {
+                    final Session session = Injector.getBean(Session.class);
+                    final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
 
-                controller.uiLogInfo.setText("Recherche…");
-                final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
-                
-                if(candidateUsers.isEmpty()){
-                    controller.uiLogInfo.setText("Identifiants erronés.");
-                    controller.uiLogin.setText("");
-                    controller.uiPassword.setText("");
-                }else{
-                
-                    Utilisateur user = null;
-                    MessageDigest messageDigest = null;
-                    String encryptedPassword = null;
-                    try {
-                        messageDigest = MessageDigest.getInstance("MD5");
-                        encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    controller.uiLogInfo.setText("Recherche…");
+                    final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
 
-                    for (final Utilisateur candidate : candidateUsers) {
-                        if (candidate.getPassword().equals(encryptedPassword)) {
-                            user = candidate;
-                            break;
-                        }
-                    }
-
-                    if (user == null) {
+                    if (candidateUsers.isEmpty()) {
                         controller.uiLogInfo.setText("Identifiants erronés.");
                         controller.uiPassword.setText("");
                     } else {
-                        session.setUtilisateur(user);
-                        if (session.getRole() == ADMIN
-                                || session.getRole() == USER
-                                || session.getRole() == GUEST
-                                || session.getRole() == EXTERN) {
-                            controller.uiLogInfo.setText("Identifiants valides.");
-                            final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                            fadeSplash.setFromValue(1.0);
-                            fadeSplash.setToValue(0.0);
-                            fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                                @Override
-                                public void handle(ActionEvent actionEvent) {
-                                    splashStage.hide();
-                                    root.setOpacity(1.0);
-                                    try {
-                                        showMainStage();
-                                    } catch (IOException ex) {
-                                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+
+                        Utilisateur user = null;
+                        MessageDigest messageDigest = null;
+                        String encryptedPassword = null;
+                        try {
+                            messageDigest = MessageDigest.getInstance("MD5");
+                            encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
+                        } catch (NoSuchAlgorithmException ex) {
+                            Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        for (final Utilisateur candidate : candidateUsers) {
+                            if (candidate.getPassword().equals(encryptedPassword)) {
+                                user = candidate;
+                                break;
+                            }
+                        }
+
+                        if (user == null) {
+                            controller.uiLogInfo.setText("Identifiants erronés.");
+                            controller.uiPassword.setText("");
+                        } else {
+                            session.setUtilisateur(user);
+                            if (session.getRole() == ADMIN
+                                    || session.getRole() == USER
+                                    || session.getRole() == GUEST
+                                    || session.getRole() == EXTERN) {
+                                controller.uiLogInfo.setText("Identifiants valides.");
+                                final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                                fadeSplash.setFromValue(1.0);
+                                fadeSplash.setToValue(0.0);
+                                fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent actionEvent) {
+                                        splashStage.hide();
+                                        root.setOpacity(1.0);
+                                        try {
+                                            showMainStage();
+                                        } catch (IOException ex) {
+                                            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                                        }
                                     }
+                                });
+                                fadeSplash.play();
+
+                                try {
+                                    final ReferenceChecker referenceChecker = session.getReferenceChecker();
+                                    referenceChecker.checkAllReferences();
+
+                                } catch (IOException ex) {
+                                    SIRS.LOGGER.log(Level.WARNING, null, ex);
                                 }
-                            });
-                            fadeSplash.play();
-                            
-                            try {
-                                final ReferenceChecker referenceChecker = session.getReferenceChecker();
-                                referenceChecker.checkAllReferences();
-                                
-                            } catch (IOException ex) {
-                                SIRS.LOGGER.log(Level.WARNING, null, ex);
                             }
                         }
                     }
+                } finally {
+                    controller.uiConnexion.setDisable(false);
                 }
             }
         });
@@ -241,18 +246,22 @@ public class Loader extends Application {
     /**
      * Display the main frame.
      */
-    private static void showMainStage() throws IOException {
-        final FXMainFrame frame = new FXMainFrame();
-        final Session session = Injector.getBean(Session.class);
-        session.setFrame(frame);
-        final Stage stage = new Stage();
-        stage.setTitle("SIRS-Digues V2");
-        stage.setScene(new Scene(frame));
-        stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
-        stage.setMaximized(true);
-        stage.show();
-        stage.setMinWidth(1045);
-        stage.setMinHeight(750);
+    private static synchronized void showMainStage() throws IOException {
+        FXMainFrame frame = Injector.getSession().getFrame();
+        if (frame == null) {            
+            frame = new FXMainFrame();
+            final Session session = Injector.getBean(Session.class);
+            session.setFrame(frame);
+            final Stage stage = new Stage();
+            stage.setTitle("SIRS-Digues V2");
+            stage.setScene(new Scene(frame));
+            stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
+            stage.setMaximized(true);
+            stage.show();
+            stage.setMinWidth(1045);
+            stage.setMinHeight(750);
+        }
+        
         frame.getMapTab().show();
     }
 
@@ -326,17 +335,12 @@ public class Loader extends Application {
                     plugin.load();
                 }
 
+                // COUCHDB TO SQL //////////////////////////////////////////////
                 updateMessage("Export vers la base RDBMS");
-                new Thread(()->{
-                    try {
+                TaskManager.INSTANCE.submit("Export vers la base RDBMS", ()->{
                         H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
-                    } catch (IOException ex) {
-                        SIRS.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-                    }
-                }
-                ).start();
-                Thread.sleep(5000);
-                
+                        return true;
+                });                
 
                 updateProgress(inc++, total);
 

@@ -2,6 +2,7 @@
 package fr.sirs.index;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
 import java.io.Closeable;
 import java.util.HashMap;
 import org.elasticsearch.action.search.SearchResponse;
@@ -55,10 +56,11 @@ public class ElasticSearchEngine implements Closeable {
         "}";
         
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
-        this.client = node.client();
-        
-        client.index(Requests.indexRequest("_river").type(dbName).id("_meta").source(config)).actionGet();
+        this.client = node.client();        
         currentDbName = dbName;
+        
+        TaskManager.INSTANCE.submit("Mise à jour des index", () -> client.index(
+                Requests.indexRequest("_river").type(dbName).id("_meta").source(config)).actionGet());
     }
 
     public SearchResponse search(final QueryBuilder query) {
