@@ -225,13 +225,19 @@ public class Loader extends Application {
                                 });
                                 fadeSplash.play();
 
-                                try {
-                                    final ReferenceChecker referenceChecker = session.getReferenceChecker();
-                                    referenceChecker.checkAllReferences();
+                                session.getTaskManager().submit(new Runnable() {
 
-                                } catch (IOException ex) {
-                                    SIRS.LOGGER.log(Level.WARNING, null, ex);
-                                }
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            final ReferenceChecker referenceChecker = session.getReferenceChecker();
+                                            referenceChecker.checkAllReferences();
+                                        } catch (IOException ex) {
+                                           SIRS.LOGGER.log(Level.WARNING, null, ex);
+                                        }
+                                    }
+                                });
+                                    
                             }
                         }
                     }
