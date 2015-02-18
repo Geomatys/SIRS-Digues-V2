@@ -10,6 +10,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.other.FXPseudoIdAnalysePane;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.other.FXReferencePane;
+import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
@@ -26,7 +27,6 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -345,6 +345,7 @@ public class FXMainFrame extends BorderPane {
 
     private void openDocsTab(){
         final Tab docsTab = new Tab("Validation");
+        docsTab.setContent(new FXValidationPane());
 //        final PojoTable docsTable = new PojoTable(session.getPreviewLabelRepository(), "Table des documents");
         addTab(docsTab);
     }

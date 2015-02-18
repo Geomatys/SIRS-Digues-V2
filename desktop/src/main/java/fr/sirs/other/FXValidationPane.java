@@ -33,23 +33,25 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXPseudoIdAnalysePane extends BorderPane {
+public class FXValidationPane extends BorderPane {
 
-    private TableView<ValiditySummary> pseudoIds;
+    private TableView<ValiditySummary> usages;
     private final Session session = Injector.getSession();
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
 
-    public FXPseudoIdAnalysePane(final Class type) {
+    public FXValidationPane() {
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
-        final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
-        final List<ValiditySummary> validitySummaries = valididySummaryRepository.getPseudoIdsForClass(type);
+        final ValiditySummaryRepository referenceUsageRepository = session.getValiditySummaryRepository();
+        final List<ValiditySummary> referenceUsages = referenceUsageRepository.getValidation();
 
-        if (validitySummaries != null && !validitySummaries.isEmpty()) {
-            pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
-            pseudoIds.setEditable(false);
+        final List<ValiditySummary> all = referenceUsageRepository.getPseudoIds();
 
-            pseudoIds.getColumns().add(new StateColumn());
+        if (referenceUsages != null && !referenceUsages.isEmpty()) {
+            usages = new TableView<>(FXCollections.observableArrayList(referenceUsages));
+            usages.setEditable(false);
+
+            usages.getColumns().add(new StateColumn());
 
             final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
             propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
@@ -59,7 +61,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
                     return new SimpleObjectProperty<>(param.getValue().getPseudoId());
                 }
             });
-            pseudoIds.getColumns().add(propertyColumn);
+            usages.getColumns().add(propertyColumn);
 
             final TableColumn<ValiditySummary, String> objectIdColumn = new TableColumn<>(bundle.getString("elementId"));
             objectIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
@@ -69,7 +71,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
                     return new SimpleObjectProperty(param.getValue().getElementId());
                 }
             });
-            pseudoIds.getColumns().add(objectIdColumn);
+            usages.getColumns().add(objectIdColumn);
 //                
             final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
             labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
@@ -79,16 +81,16 @@ public class FXPseudoIdAnalysePane extends BorderPane {
                     return new SimpleObjectProperty(param.getValue().getLabel());
                 }
             });
-            pseudoIds.getColumns().add(labelColumn);
-            setCenter(pseudoIds);
+            usages.getColumns().add(labelColumn);
+            setCenter(usages);
 
-            final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
-            final Label uiTitle = new Label("Occurrences des pseudo-identifiants pour les entités " + topBundle.getString("class"));
-            uiTitle.getStyleClass().add("pojotable-header");
-            uiTitle.setAlignment(Pos.CENTER);
-            uiTitle.setPadding(new Insets(5));
-            uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
-            setTop(uiTitle);
+//            final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
+//            final Label uiTitle = new Label("Occurrences des pseudo-identifiants pour les entités " + topBundle.getString("class"));
+//            uiTitle.getStyleClass().add("pojotable-header");
+//            uiTitle.setAlignment(Pos.CENTER);
+//            uiTitle.setPadding(new Insets(5));
+//            uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
+//            setTop(uiTitle);
 
         }
     }
