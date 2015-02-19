@@ -117,7 +117,6 @@ public class FXSystemeReperagePane extends BorderPane {
             }
         });
         
-        
         uiPickTroncon.setOnAction(this::startPickTroncon);
         uiAddBorne.setOnAction(this::startAddBorne);
         uiCreateBorne.setOnAction(this::startCreateBorne);

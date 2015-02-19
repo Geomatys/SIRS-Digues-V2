@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
@@ -262,6 +263,7 @@ public class FXMainFrame extends BorderPane {
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
         session.clearCache();
+        session.getTaskManager().reset();
         if(SIRS.getLauncher()!=null){
             session.getApplicationContext().close();
             SIRS.getLauncher().show();
@@ -275,6 +277,7 @@ public class FXMainFrame extends BorderPane {
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
         session.clearCache();
+        session.getTaskManager().reset();
         SIRS.LOADER.showSplashStage();
     }
     

@@ -84,7 +84,6 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
-import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.filter.DefaultLiteral;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -99,7 +98,6 @@ import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
 
 import static org.geotoolkit.style.StyleConstants.*;
-import org.opengis.filter.Filter;
 
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;

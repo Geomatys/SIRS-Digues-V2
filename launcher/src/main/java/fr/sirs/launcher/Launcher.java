@@ -1,6 +1,7 @@
 
 package fr.sirs.launcher;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.logging.Level;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Pos;
@@ -21,7 +23,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.controlsfx.dialog.ExceptionDialog;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -44,10 +45,11 @@ public class Launcher extends Application {
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);
-            ExceptionDialog d = new ExceptionDialog(e);
-            d.setContentText("Une erreur inattendue est survenue.Code d'erreur : "+errorCode);
-            d.setResizable(true);
-            d.show();
+            final Runnable exceptionDialog = () -> {
+                SIRS.newExceptionDialog("Une erreur inattendue est survenue.Code d'erreur : "+errorCode, e).show();
+            };
+            if (Platform.isFxApplicationThread()) exceptionDialog.run();
+            else Platform.runLater(exceptionDialog);
         });
         
         ProgressIndicator progressIndicator = new ProgressIndicator();

@@ -36,14 +36,12 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
@@ -157,12 +155,11 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 // Warn user that something has gone wrong.
                 final Dialog d;
                 if (submitted.getException() != null) {
-                    d = new ExceptionDialog(submitted.getException());
+                    d = SIRS.newExceptionDialog(null, submitted.getException());
                 } else {
                     d = new Alert(Alert.AlertType.ERROR, "Cause : erreur inconnue.", ButtonType.OK);
                 }
                 d.setHeaderText("Le découpage de " + troncon.getLibelle() + " n'a pas pu être mené à son terme.");
-                d.setResizable(true);
                 d.show();
             });
 

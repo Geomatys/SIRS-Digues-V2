@@ -300,7 +300,7 @@ public class ReferenceChecker {
                     }
 
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-                    SIRS.LOGGER.log(Level.SEVERE, null, ex);
+                    SIRS.LOGGER.log(Level.FINE, null, ex);
                 }
             }
 

@@ -84,7 +84,7 @@
                     <right>
                         <ToolBar BorderPane.alignment="CENTER">
                             <items>
-                                <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#print" styleClass="buttonbar-button" text="Impressions">
+                                <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#print" styleClass="buttonbar-button" text="Impression">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                             <image>

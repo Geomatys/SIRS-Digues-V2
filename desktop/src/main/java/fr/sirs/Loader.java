@@ -218,8 +218,12 @@ public class Loader extends Application {
                                         root.setOpacity(1.0);
                                         try {
                                             showMainStage();
-                                        } catch (IOException ex) {
-                                            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                                        } catch (Throwable ex) {
+                                            try {
+                                                SIRS.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex).showAndWait();
+                                            } finally {
+                                                System.exit(1);
+                                            }
                                         }
                                     }
                                 });
@@ -254,7 +258,7 @@ public class Loader extends Application {
      */
     private static synchronized void showMainStage() throws IOException {
         FXMainFrame frame = Injector.getSession().getFrame();
-        if (frame == null) {            
+        if (frame == null) {
             frame = new FXMainFrame();
             final Session session = Injector.getBean(Session.class);
             session.setFrame(frame);
@@ -264,8 +268,8 @@ public class Loader extends Application {
             stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
             stage.setMaximized(true);
             stage.show();
-            stage.setMinWidth(1045);
-            stage.setMinHeight(750);
+            stage.setMinWidth(800);
+            stage.setMinHeight(600);
         }
         
         frame.getMapTab().show();
@@ -345,6 +349,7 @@ public class Loader extends Application {
                 updateMessage("Export vers la base RDBMS");
                 TaskManager.INSTANCE.submit("Export vers la base RDBMS", ()->{
                         H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
+                        SIRS.LOGGER.info("RDBMS EXPORT FINISHED");
                         return true;
                 });                
 
