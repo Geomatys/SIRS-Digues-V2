@@ -19,7 +19,6 @@ import fr.sirs.other.FXContactOrganismePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.FXThemePane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -46,6 +45,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
+import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
@@ -312,5 +312,17 @@ public final class SIRS extends SirsCore {
         new ComboBoxCompletion(comboBox);
         comboBox.setConverter(new SirsStringConverter());
         comboBox.setEditable(true);
+    }
+    
+    public static ExceptionDialog newExceptionDialog(final String headerText, final Throwable t) {
+        ArgumentChecks.ensureNonNull("Exception to display", t);
+        ExceptionDialog d = new ExceptionDialog(t);
+        d.setResizable(true);
+        if (headerText != null) {
+            d.setHeaderText(headerText);
+        }
+        d.setWidth(400);
+        d.setHeight(500);
+        return d;
     }
 }

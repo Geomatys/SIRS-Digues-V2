@@ -3,6 +3,7 @@ package fr.sirs.core;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -22,9 +23,12 @@ import org.apache.sis.util.ArgumentChecks;
  */
 public class TaskManager implements Closeable {
     
+    private static final TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
+    private static final int TIMEOUT = 10;
+    
     public static final TaskManager INSTANCE = new TaskManager();
     
-    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private ExecutorService threadPool = Executors.newCachedThreadPool();
     
     private final ObservableList<Task> submittedTasks = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     private final ObservableList<Task> tasksInError = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -80,21 +84,47 @@ public class TaskManager implements Closeable {
 
     @Override
     public void close() throws IOException {
+        closeTask();
+    }
+
+    public void reset() {
+        Task closeTask = closeTask();
+        try {
+            closeTask.get();
+            threadPool = Executors.newCachedThreadPool();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            SirsCore.LOGGER.log(Level.FINE, "Interuption requested !");
+        } catch (ExecutionException ex) {
+            SirsCore.LOGGER.log(Level.SEVERE, "A thread executor cannot be closed. It's likely to create memory leaks !", ex);
+        }
+        threadPool = Executors.newCachedThreadPool();
+    }
+
+    private Task closeTask() {
         final Task shutdownTask = new MockTask("Shutdown remaining tasks.", () -> {
-                try {
-                    threadPool.awaitTermination(10, TimeUnit.SECONDS);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    SirsCore.LOGGER.log(Level.WARNING, "Application thread pool interrupted !", ex);
-                } finally {
-                    threadPool.shutdownNow();
-                }
+            try {
+                threadPool.awaitTermination(TIMEOUT, TIMEOUT_UNIT);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                SirsCore.LOGGER.log(Level.WARNING, "Application thread pool interrupted !", ex);
+            } finally {
+                submittedTasks.removeAll(threadPool.shutdownNow());
+            }
         });
         submittedTasks.add(shutdownTask);
         new Thread(shutdownTask).start();
+        return shutdownTask;
     }
     
-    private class MockTask<V> extends Task<V> {
+    /**
+     * A wrapper allowing to execute a runnable or a callable using {@link Task} API.
+     * 
+     * @param <V> Return type to set on the task. It should be the same of embedded
+     * callable. If a runnable is embedded, task result will always be null, whatever
+     * type you choose.
+     */
+    public static class MockTask<V> extends Task<V> {
 
         private final Object runnableOrCallable;
         
@@ -105,7 +135,6 @@ public class TaskManager implements Closeable {
         public MockTask(final Runnable toRun) {
             this(null, toRun);
         }        
-        
         
         public MockTask(final String title, final Callable<V> toCall) {
             ArgumentChecks.ensureNonNull("Callable to execute", toCall);

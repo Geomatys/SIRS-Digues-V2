@@ -3,10 +3,16 @@ package fr.sirs.util;
 import fr.sirs.SIRS;
 import fr.sirs.core.TaskManager;
 import java.awt.Color;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -27,12 +33,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
 import org.apache.sis.util.ArgumentChecks;
-import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
 /**
- *
+ * A JavaFX component which display progress and encountered errors for all tasks 
+ * submitted on a specific task manager.
+ * 
+ * The last submitted task is displayed in an Hbox. To see other running tasks
+ * and tasks in error, there's two {@link MenuButton}. Each display custom menu
+ * items containing information about a task.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class ProgressMonitor extends HBox {
@@ -56,118 +67,126 @@ public class ProgressMonitor extends HBox {
         prefWidthProperty().set(USE_COMPUTED_SIZE);
 
         taskRegistry = registry;
+
+        runningTasks.setTooltip(new Tooltip("Tâches en cours"));
+        tasksInError.setTooltip(new Tooltip("Tâches échouées"));
         
-        // Hide list of tasks if there's no information on tasks.
-        runningTasks.visibleProperty().bind(new SimpleListProperty(runningTasks.getItems()).emptyProperty().not());
-        tasksInError.visibleProperty().bind(new SimpleListProperty(tasksInError.getItems()).emptyProperty().not());
+        SimpleListProperty runningTasksProp = new SimpleListProperty(taskRegistry.getSubmittedTasks());
+        SimpleListProperty failedTasksProp = new SimpleListProperty(taskRegistry.getTasksInError());
+
+        // Hide list of tasks if there's no information available.
+        runningTasks.visibleProperty().bind(runningTasksProp.emptyProperty().not());
+        tasksInError.visibleProperty().bind(failedTasksProp.emptyProperty().not());
+        
+        // Display number of tasks on menu button.
+        runningTasks.textProperty().bind(runningTasksProp.sizeProperty().asString());
+        tasksInError.textProperty().bind(failedTasksProp.sizeProperty().asString());
+
+        // Set default visible task the last one submitted.
+        lastTask.taskProperty().bind(
+                runningTasksProp.valueAt(runningTasksProp.sizeProperty().subtract(1)));
 
         // Do not reserve size for hidden components.
         runningTasks.managedProperty().bind(runningTasks.visibleProperty());
         tasksInError.managedProperty().bind(tasksInError.visibleProperty());
         lastTask.managedProperty().bind(lastTask.visibleProperty());
-        
+
         runningTasks.setMinWidth(0);
         runningTasks.setAlignment(Pos.CENTER);
         tasksInError.setAlignment(Pos.CENTER);
-        
+
         runningTasks.setBorder(Border.EMPTY);
         tasksInError.setBorder(Border.EMPTY);
         
         initTasks();
-        
+
         getChildren().addAll(lastTask, runningTasks, tasksInError);
     }
 
     /**
-     * Fill panel with currently submitted tasks. Add listeners on {@link TaskManager}
-     * to be aware of new events.
+     * Fill panel with currently submitted tasks. Add listeners on
+     * {@link TaskManager} to be aware of new events.
      */
     private void initTasks() {
         // Listen on current running tasks
         final ObservableList<Task> tmpSubmittedTasks = taskRegistry.getSubmittedTasks();
         tmpSubmittedTasks.addListener((ListChangeListener.Change<? extends Task> c) -> {
-            synchronized (tmpSubmittedTasks) {
-                final int tmpSize = tmpSubmittedTasks.size();
-                final String runTooltip = "" + tmpSize + " tâche" + ((tmpSize > 1) ? "s" : "") + " en cours";
-                runningTasks.setTooltip(new Tooltip(runTooltip));
-                boolean updateLastTask = false;
-                while (c.next()) {
-                    List<? extends Task> addedSubList = c.getAddedSubList();
-                    if (addedSubList != null && !addedSubList.isEmpty()) {
-                        updateLastTask = true;
-                        SIRS.LOGGER.info("new tasks detected !");
-                        for (Task task : addedSubList) {
-                            final CustomMenuItem item = new CustomMenuItem(new TaskProgress(task));
-                            item.setHideOnClick(false);
-                            runningTasks.getItems().add(item);
-                        }
-                    }
 
-                    // remove Ended tasks
-                    List<? extends Task> removeSubList = c.getRemoved();
-                    if (removeSubList != null && !removeSubList.isEmpty()) {
-                        runningTasks.getItems().removeIf(new GetItemsForTask(removeSubList));
-                        if (removeSubList.contains(lastTask.getTask())) {
-                            updateLastTask = true;
-                        }
-                    }
-                }
+            final HashSet<Task> toAdd = new HashSet<>();
+            final HashSet<Task> toRemove = new HashSet<>();
+            storeChanges(c, toAdd, toRemove);
 
-                // if task order changed, we update the one on display.
-                if (updateLastTask) {
-                    if (tmpSubmittedTasks.size() > 0) {
-                        final Task newTask = tmpSubmittedTasks.get(tmpSubmittedTasks.size() - 1);
-                        lastTask.setTask(newTask);
-                        runningTasks.getItems().removeIf(new GetItemsForTask(Collections.singletonList(newTask)));
-                    } else {
-                        lastTask.setTask(null);
-                    }
+            Platform.runLater(() -> {
+                for (Task task : toAdd) {
+                    final CustomMenuItem item = new CustomMenuItem(new TaskProgress(task));
+                    item.setHideOnClick(false);
+                    runningTasks.getItems().add(item);
                 }
-            }
+                // remove Ended tasks
+                runningTasks.getItems().removeIf(new GetItemsForTask(toRemove));
+            });
         });
+        final ObservableList<Task> tmpTasksInError = taskRegistry.getTasksInError();
 
         // Check failed tasks.
-        final ObservableList<Task> tmpTasksInError = taskRegistry.getTasksInError();
         tmpTasksInError.addListener((ListChangeListener.Change<? extends Task> c) -> {
-            synchronized (tmpTasksInError) {
-                final int tmpSize = tmpTasksInError.size();
-                final String errorTooltip = "" + tmpSize + " tâche" + ((tmpSize > 1) ? "s ont échouées" : " a échouée");
-                tasksInError.setTooltip(new Tooltip(errorTooltip));
-                while (c.next()) {
-                    List<? extends Task> addedSubList = c.getAddedSubList();
-                    if (addedSubList != null && !addedSubList.isEmpty()) {
-                        for (Task task : addedSubList) {
-                            tasksInError.getItems().add(new ErrorMenuItem(task));
-                        }
-                    }
+            final HashSet<Task> toAdd = new HashSet<>();
+            final HashSet<Task> toRemove = new HashSet<>();
+            storeChanges(c, toAdd, toRemove);
 
-                    // remove Ended tasks
-                    List<? extends Task> removeSubList = c.getRemoved();
-                    if (removeSubList != null && !removeSubList.isEmpty()) {
-                        tasksInError.getItems().removeIf(new GetItemsForTask(removeSubList));
-                    }
+            Platform.runLater(() -> {
+                for (Task task : toAdd) {
+                    tasksInError.getItems().addAll(new ErrorMenuItem(task));
                 }
-            }
+                // remove Ended tasks
+                tasksInError.getItems().removeIf(new GetItemsForTask(toRemove));
+            });
         });
-        
-        synchronized (tmpSubmittedTasks) {
+
+        final Runnable initPanel = () -> {
             final int nbSubmitted = tmpSubmittedTasks.size();
             // do not add last task to our menu, it will be used on main display.
-            for (int i = 0; i < nbSubmitted - 1; i++) {
+            for (int i = 0; i < nbSubmitted; i++) {
                 final CustomMenuItem item = new CustomMenuItem(new TaskProgress(tmpSubmittedTasks.get(i)));
                 item.setHideOnClick(false);
                 runningTasks.getItems().add(item);
             }
-            if (nbSubmitted > 0) {
-                lastTask.setTask(tmpSubmittedTasks.get(nbSubmitted - 1));
-            } else {
-                lastTask.setTask(null);
-            }
-        }
 
-        synchronized (tmpTasksInError) {
             for (Task t : tmpTasksInError) {
                 tasksInError.getItems().add(new ErrorMenuItem(t));
+            }
+        };
+
+        if (Platform.isFxApplicationThread()) {
+            initPanel.run();
+        } else {
+            Platform.runLater(initPanel);
+        }
+    }
+
+    /**
+     * Store all objects depicted by a {@link ListChangeListener} into given 
+     * collections.
+     * 
+     * @param c The {@link ListChangeListener.Change} containing list content delta.
+     * @param added The collection to store new added objects into.
+     * @param removed Add removed objects in it.
+     */
+    private static void storeChanges(final ListChangeListener.Change c, final Collection added, final Collection removed) {
+        while (c.next()) {
+            final List<? extends Task> addedSubList = c.getAddedSubList();
+            final List<? extends Task> removeSubList = c.getRemoved();
+
+            if (addedSubList != null && !addedSubList.isEmpty()) {
+                added.addAll(addedSubList);
+            }
+
+            Iterator<? extends Task> it = removeSubList.iterator();
+            while (it.hasNext()) {
+                final Task current = it.next();
+                if (!added.remove(current)) {
+                    removed.add(current);
+                }
             }
         }
     }
@@ -183,7 +202,7 @@ public class ProgressMonitor extends HBox {
         private final ProgressBar progress = new ProgressBar();
         private final Button cancelButton = new Button("", new ImageView(ICON_CANCEL));
 
-        private Task currentTask;
+        private final ObjectProperty<Task> taskProperty = new SimpleObjectProperty<>();
 
         public TaskProgress() {
             this(null);
@@ -194,51 +213,63 @@ public class ProgressMonitor extends HBox {
             setAlignment(Pos.CENTER);
             cancelButton.prefHeightProperty().bind(progress.prefHeightProperty());
             cancelButton.prefWidthProperty().bind(progress.prefHeightProperty());
-            
+            cancelButton.maxHeightProperty().bind(progress.prefHeightProperty());
+            cancelButton.maxWidthProperty().bind(progress.prefHeightProperty());
+
             getChildren().addAll(title, progress, cancelButton);
 
-            setTask(t);
+            taskProperty.addListener((ObservableValue<? extends Task> observable, Task oldValue, Task newValue) -> {
+                taskUpdated();
+            });
+            
+            taskProperty.set(t);
+        }
+
+        public ObjectProperty<Task> taskProperty() {
+            return taskProperty;
         }
 
         public Task getTask() {
-            return currentTask;
+            return taskProperty.get();
         }
 
-        public synchronized void setTask(Task t) {
+        public synchronized void taskUpdated() {
             title.textProperty().unbind();
             progress.progressProperty().unbind();
             description.textProperty().unbind();
 
             cancelButton.setOnAction(null);
 
-            currentTask = t;
-
-            if (currentTask != null) {
-                title.textProperty().bind(currentTask.titleProperty());
-                description.textProperty().bind(currentTask.messageProperty());
-                progress.progressProperty().bind(currentTask.workDoneProperty());
-                cancelButton.setOnAction((ActionEvent e) -> currentTask.cancel());
+            final Task t =taskProperty.get();
+            if (t != null) {
+                title.textProperty().bind(t.titleProperty());
+                description.textProperty().bind(t.messageProperty());
+                progress.progressProperty().bind(t.workDoneProperty());
+                cancelButton.setOnAction((ActionEvent e) -> t.cancel());
                 setVisible(true);
             } else {
                 setVisible(false);
             }
         }
     }
-    
+
+    /**
+     * A simple menu items for failed tasks. Display an exception Dialog when clicked.
+     */
     private static class ErrorMenuItem extends MenuItem {
-         
+
         final Task failedTask;
-        
+
         public ErrorMenuItem(final Task failedTask) {
             ArgumentChecks.ensureNonNull("task in error", failedTask);
             this.failedTask = failedTask;
             textProperty().bind(this.failedTask.titleProperty());
-            Dialog d = new ExceptionDialog(failedTask.getException());
+            Dialog d = SIRS.newExceptionDialog(failedTask.getMessage(), failedTask.getException());
             d.setResizable(true);
-            
-            setOnAction((ActionEvent ae)->d.show());
+
+            setOnAction((ActionEvent ae) -> d.show());
         }
-        
+
         public Task getTask() {
             return failedTask;
         }
@@ -250,9 +281,9 @@ public class ProgressMonitor extends HBox {
      */
     private static class GetItemsForTask implements Predicate<MenuItem> {
 
-        private final List<? extends Task> tasks;
+        private final Collection<? extends Task> tasks;
 
-        public GetItemsForTask(final List<? extends Task> taskFilter) {
+        public GetItemsForTask(final Collection<? extends Task> taskFilter) {
             ArgumentChecks.ensureNonNull("Input filter tasks", taskFilter);
             tasks = taskFilter;
         }
@@ -265,7 +296,7 @@ public class ProgressMonitor extends HBox {
                         && tasks.contains(((TaskProgress) content).getTask()));
             } else if (item instanceof ErrorMenuItem) {
                 return tasks.contains(((ErrorMenuItem) item).getTask());
-            } 
+            }
             return false;
         }
     }
