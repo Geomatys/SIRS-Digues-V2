@@ -2,9 +2,9 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.Injector;
+import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
 
 
 /**
@@ -20,9 +20,7 @@ public class EvenementsHydrauliquesTheme extends Theme {
 
     @Override
     public Parent createPane() {
-        final BorderPane pane = new BorderPane();
-        pane.setCenter(new Label("TODO"));
-        return pane;
+        return new PojoTable(Injector.getSession().getEvenementHydrauliqueRepository(), null);
     }
     
 }

@@ -5,7 +5,6 @@ package fr.sirs.theme;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.Repository;
-import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;

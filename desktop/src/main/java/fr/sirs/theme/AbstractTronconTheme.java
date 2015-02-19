@@ -59,7 +59,7 @@ public class AbstractTronconTheme extends Theme {
         
     }
     
-    private final ThemeGroup[] groups;
+    private ThemeGroup[] groups;
     
     public AbstractTronconTheme(String name, ThemeGroup ... groups) {
         super(name,Type.STANDARD);
@@ -71,7 +71,10 @@ public class AbstractTronconTheme extends Theme {
                 getSubThemes().add(subtheme);
             }
         }
-        
+    }
+    
+    protected void setGroups(final ThemeGroup[] groups) {
+        this.groups = groups;
     }
     
     @Override
