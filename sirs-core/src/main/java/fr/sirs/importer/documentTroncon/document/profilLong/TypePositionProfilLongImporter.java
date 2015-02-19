@@ -61,6 +61,7 @@ class TypePositionProfilLongImporter extends GenericTypeReferenceImporter<RefPos
                 typePositionProfilLong.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typePositionProfilLong.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())));
+            typePositionProfilLong.setValid(true);
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())), typePositionProfilLong);
         }
         couchDbConnector.executeBulk(types.values());

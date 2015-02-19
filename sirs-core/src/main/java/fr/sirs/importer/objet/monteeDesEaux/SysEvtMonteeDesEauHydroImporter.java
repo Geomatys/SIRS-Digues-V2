@@ -211,7 +211,8 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
         }
 
         monteeEaux.setPseudoId(String.valueOf(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
-
+        monteeEaux.setValid(true);
+        
         return monteeEaux;
     }
 }

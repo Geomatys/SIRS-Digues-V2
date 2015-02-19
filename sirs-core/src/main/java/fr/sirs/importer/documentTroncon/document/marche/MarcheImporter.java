@@ -100,6 +100,8 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         
         marche.setPseudoId(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));
         
+        marche.setValid(true);
+        
         return marche;
     }
 }

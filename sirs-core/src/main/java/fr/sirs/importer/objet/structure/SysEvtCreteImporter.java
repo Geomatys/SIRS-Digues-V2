@@ -305,7 +305,8 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
         }
 
         crete.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
-
+        crete.setValid(true);
+        
         return crete;
     }
 

@@ -62,6 +62,8 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
             }
             
             typeConduite.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString()))));
+            typeConduite.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())), typeConduite);
         }
         couchDbConnector.executeBulk(types.values());

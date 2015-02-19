@@ -6,7 +6,6 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.objet.*;
 import java.io.IOException;
 import org.ektorp.CouchDbConnector;

@@ -62,6 +62,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
                 typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeOuvrage.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString()))));
+            typeOuvrage.setValid(true);
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())), typeOuvrage);
         }
         couchDbConnector.executeBulk(types.values());

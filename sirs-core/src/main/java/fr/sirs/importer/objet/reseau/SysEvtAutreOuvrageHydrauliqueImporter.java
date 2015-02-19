@@ -275,7 +275,8 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
         }
 
         ouvrage.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-
+        ouvrage.setValid(true);
+        
         return ouvrage;
     }
 

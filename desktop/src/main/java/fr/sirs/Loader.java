@@ -225,7 +225,7 @@ public class Loader extends Application {
                                 });
                                 fadeSplash.play();
 
-                                session.getTaskManager().submit(new Runnable() {
+                                session.getTaskManager().submit("Vérification des références", new Runnable() {
 
                                     @Override
                                     public void run() {

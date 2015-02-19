@@ -292,7 +292,8 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         }
 
         reseau.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-
+        reseau.setValid(true);
+        
         return reseau;
     }
 

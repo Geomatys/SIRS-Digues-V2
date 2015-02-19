@@ -272,7 +272,8 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         }
 
         ouverture.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-
+        ouverture.setValid(true);
+        
         return ouverture;
     }
 

@@ -82,8 +82,7 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
                 }
             }
             else if(reseau==null){
-                
-            SirsCore.LOGGER.log(Level.FINE, reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+                SirsCore.LOGGER.log(Level.FINE, reseau+" => "+row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             }
         }
     }

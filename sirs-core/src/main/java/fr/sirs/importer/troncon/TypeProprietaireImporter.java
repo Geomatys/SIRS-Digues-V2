@@ -61,6 +61,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
             }
             
             typeProprietaire.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString()))));
+            typeProprietaire.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())), typeProprietaire);
         }

@@ -69,31 +69,31 @@ class ProfilLongPointXYZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LeveePoints leveePoint = new LeveePoints();
+            final LeveePoints levePoint = new LeveePoints();
             
             if (row.getDouble(Columns.X.toString()) != null) {
-                leveePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
+                levePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
             }
             
             if (row.getDouble(Columns.Y.toString()) != null) {
-                leveePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
+                levePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
             }
             
             if (row.getDouble(Columns.Z.toString()) != null) {
-                leveePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
+                levePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
             }
             
-            leveePoint.setD(Double.NaN);
-            leveePoint.setPseudoId(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            
-            points.put(row.getInt(Columns.ID_POINT.toString()), leveePoint);
+            levePoint.setD(Double.NaN);
+            levePoint.setPseudoId(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
+            levePoint.setValid(true);
+            points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
             List<LeveePoints> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();
                 pointsByProfil.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), listByProfil);
             }
-            listByProfil.add(leveePoint);
+            listByProfil.add(levePoint);
         }
     }
 }

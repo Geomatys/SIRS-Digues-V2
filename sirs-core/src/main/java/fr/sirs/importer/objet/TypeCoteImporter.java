@@ -62,6 +62,8 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
                 typeCote.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeCote.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString()))));
+            typeCote.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())), typeCote);
         }
         couchDbConnector.executeBulk(types.values());

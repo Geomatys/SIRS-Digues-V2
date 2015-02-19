@@ -61,6 +61,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
                 typeMateriau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeMateriau.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString()))));
+            typeMateriau.setValid(true);
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString())), typeMateriau);
         }
         couchDbConnector.executeBulk(types.values());

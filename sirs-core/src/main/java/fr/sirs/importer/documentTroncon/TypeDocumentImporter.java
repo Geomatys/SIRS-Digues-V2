@@ -102,6 +102,7 @@ public class TypeDocumentImporter extends GenericImporter {
             }
             
             typeDocument.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())));
+            typeDocument.setValid(true);
             
 //            if (row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()) != null) {
 //                final RefDocumentGrandeEchelle typeDocumentGrandeEchelle = typeDocumentGrandeEchelleImporter.getTypeDocumentGrandeEchelle().get(row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()));

@@ -148,6 +148,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
                 }
             }
             photo.setPseudoId(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
+            photo.setValid(true);
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;

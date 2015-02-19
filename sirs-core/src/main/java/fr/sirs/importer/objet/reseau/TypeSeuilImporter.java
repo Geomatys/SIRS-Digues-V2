@@ -61,6 +61,8 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
                 typeSeuil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeSeuil.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString()))));
+            typeSeuil.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString())), typeSeuil);
         }
         couchDbConnector.executeBulk(types.values());

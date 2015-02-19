@@ -61,6 +61,7 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMai
             }
             
             typeFonctionMo.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString()))));
+            typeFonctionMo.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString())), typeFonctionMo);
         }

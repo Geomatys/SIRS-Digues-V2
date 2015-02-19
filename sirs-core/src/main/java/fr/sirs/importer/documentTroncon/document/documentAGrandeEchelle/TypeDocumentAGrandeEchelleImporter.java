@@ -62,6 +62,8 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
             }
             
             typeDocument.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())));
+            typeDocument.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
             
         }

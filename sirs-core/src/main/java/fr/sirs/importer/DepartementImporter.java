@@ -69,6 +69,7 @@ public class DepartementImporter extends GenericImporter {
             }
             
             departement.setPseudoId(String.valueOf(row.getInt(Columns.ID_DEPARTEMENT.toString())));
+            departement.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             departements.put(row.getInt(Columns.ID_DEPARTEMENT.toString()), departement);

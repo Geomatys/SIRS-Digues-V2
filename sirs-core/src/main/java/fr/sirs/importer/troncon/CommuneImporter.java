@@ -71,6 +71,7 @@ class CommuneImporter extends GenericImporter {
             }
             
             commune.setPseudoId(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
+            commune.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);

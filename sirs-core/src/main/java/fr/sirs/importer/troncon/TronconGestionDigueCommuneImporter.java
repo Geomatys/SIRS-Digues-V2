@@ -217,6 +217,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             }
             
             communeTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_COMMUNE.toString())));
+            communeTroncon.setValid(true);
             
             communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), communeTroncon);
 

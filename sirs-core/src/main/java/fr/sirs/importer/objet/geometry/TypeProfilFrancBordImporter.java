@@ -61,6 +61,8 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
                 typeProfil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeProfil.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())));
+            typeProfil.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROFIL_FB.toString())), typeProfil);
         }
         couchDbConnector.executeBulk(types.values());

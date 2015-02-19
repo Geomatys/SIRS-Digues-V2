@@ -224,5 +224,6 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter {
             }
         }
         docTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+        docTroncon.setValid(true);
     }
 }

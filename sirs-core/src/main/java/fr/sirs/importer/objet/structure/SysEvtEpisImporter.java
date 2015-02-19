@@ -273,7 +273,8 @@ class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
         }
 
         epi.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
-
+        epi.setValid(true);
+        
         return epi;
     }
 

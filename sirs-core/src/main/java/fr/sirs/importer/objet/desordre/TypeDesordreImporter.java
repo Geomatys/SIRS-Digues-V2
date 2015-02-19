@@ -62,6 +62,8 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
             }
         
             typeDesordre.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_DESORDRE.toString())));
+            typeDesordre.setValid(true);
+            
             types.put(row.getInt(Columns.ID_TYPE_DESORDRE.toString()), typeDesordre);
         }
         couchDbConnector.executeBulk(types.values());

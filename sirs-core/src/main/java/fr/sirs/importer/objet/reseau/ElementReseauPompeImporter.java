@@ -108,6 +108,7 @@ class ElementReseauPompeImporter extends GenericImporter {
             }
             
             pompe.setPseudoId(String.valueOf(row.getInt(Columns.ID_POMPE.toString())));
+            pompe.setValid(true);
             
             pompes.put(row.getInt(Columns.ID_POMPE.toString()), pompe);
 

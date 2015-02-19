@@ -62,6 +62,8 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
                 moyen.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             moyen.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString()))));
+            moyen.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())), moyen);
         }
         couchDbConnector.executeBulk(types.values());

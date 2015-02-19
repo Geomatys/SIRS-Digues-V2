@@ -61,6 +61,8 @@ class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
                 typeUtilisation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeUtilisation.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_USAGE_VOIE.toString()))));
+            typeUtilisation.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_USAGE_VOIE.toString())), typeUtilisation);
         }
         couchDbConnector.executeBulk(types.values());

@@ -11,7 +11,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;

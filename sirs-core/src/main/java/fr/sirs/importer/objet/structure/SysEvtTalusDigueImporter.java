@@ -325,6 +325,8 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
             talus.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
         talus.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        talus.setValid(true);
+        
         return talus;
     }
 

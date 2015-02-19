@@ -108,6 +108,7 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
                             classe = FrontFrancBord.class;
                         }
                         else {
+                            System.out.println(row.getString(Columns.NOM_TABLE_EVT.toString()));
                             classe = null;
                         }
                 }

@@ -59,6 +59,8 @@ public class TypePrestationImporter extends GenericTypeReferenceImporter<RefPres
                 typePrestation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typePrestation.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_PRESTATION.toString())));
+            typePrestation.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PRESTATION.toString())), typePrestation);
         }
         couchDbConnector.executeBulk(types.values());

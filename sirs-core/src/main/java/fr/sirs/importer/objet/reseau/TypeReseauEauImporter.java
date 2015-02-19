@@ -61,6 +61,7 @@ class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroC
                 typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeReseau.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString()))));
+            typeReseau.setValid(true);
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString())), typeReseau);
         }
         couchDbConnector.executeBulk(types.values());

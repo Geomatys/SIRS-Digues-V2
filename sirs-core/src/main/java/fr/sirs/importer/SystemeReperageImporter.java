@@ -112,6 +112,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
             }
             
             systemeReperage.setPseudoId(String.valueOf(row.getInt(Columns.ID_SYSTEME_REP.toString())));
+            systemeReperage.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             systemesReperage.put(row.getInt(Columns.ID_SYSTEME_REP.toString()), systemeReperage);

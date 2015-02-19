@@ -176,6 +176,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             
             leve.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            leve.setValid(true);
             
             leves.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             

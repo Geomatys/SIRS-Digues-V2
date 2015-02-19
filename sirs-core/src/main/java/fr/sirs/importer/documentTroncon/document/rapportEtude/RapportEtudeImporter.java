@@ -88,6 +88,8 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
                 rapport.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             rapport.setPseudoId(String.valueOf(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())));
+            rapport.setValid(true);
+            
             related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }
         couchDbConnector.executeBulk(related.values());

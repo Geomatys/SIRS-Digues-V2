@@ -132,7 +132,8 @@ public class BorneDigueImporter extends GenericImporter {
             }
             
             borne.setPseudoId(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
-
+            borne.setValid(true);
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(Columns.ID_BORNE.toString()), borne);
 

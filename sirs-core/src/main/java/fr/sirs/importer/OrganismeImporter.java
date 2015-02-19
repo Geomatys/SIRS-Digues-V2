@@ -118,7 +118,8 @@ public class OrganismeImporter extends GenericImporter {
             }
             
             organisme.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
-
+            organisme.setValid(true);
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             organismes.put(row.getInt(Columns.ID_ORGANISME.toString()), organisme);
         }

@@ -10,12 +10,10 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -215,7 +213,8 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
         }
         
         profil.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
-
+        profil.setValid(true);
+        
         return profil;
     }
 

@@ -87,6 +87,8 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             }
             
             articleJournal.setPseudoId(String.valueOf(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())));
+            articleJournal.setValid(true);
+            
             related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
         couchDbConnector.executeBulk(related.values());

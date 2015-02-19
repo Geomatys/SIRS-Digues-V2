@@ -61,6 +61,8 @@ public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> 
                 typeSource.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             typeSource.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_SOURCE.toString()))));
+            typeSource.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_SOURCE.toString())), typeSource);
         }
         couchDbConnector.executeBulk(types.values());

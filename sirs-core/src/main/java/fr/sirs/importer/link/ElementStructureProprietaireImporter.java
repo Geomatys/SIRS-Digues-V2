@@ -114,7 +114,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         contactStructure.setPseudoId(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
-
+        contactStructure.setValid(true);
         return contactStructure;
     }
     
@@ -136,7 +136,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         organismeStructure.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));
-
+        organismeStructure.setValid(true);
         return organismeStructure;
     }
 }

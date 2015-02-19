@@ -264,6 +264,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         prestation.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PRESTATION.toString())));
         
         prestation.setPseudoId(String.valueOf(row.getInt(Columns.ID_PRESTATION.toString())));
+        prestation.setValid(true);
         
         return prestation;
     }

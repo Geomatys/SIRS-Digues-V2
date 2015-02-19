@@ -13,14 +13,12 @@ import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import java.io.IOException;
@@ -251,6 +249,8 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         laisseCrue.setPosition_laisse(cleanNullString(row.getString(Columns.POSITION.toString())));
         
         laisseCrue.setPseudoId(String.valueOf(row.getInt(Columns.ID_LAISSE_CRUE.toString())));
+        laisseCrue.setValid(true);
+        
         return laisseCrue;
     }
 }

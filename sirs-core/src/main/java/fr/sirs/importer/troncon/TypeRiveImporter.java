@@ -60,6 +60,8 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
             }
             
             typeRive.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString()))));
+            typeRive.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())), typeRive);
         }
         couchDbConnector.executeBulk(types.values());

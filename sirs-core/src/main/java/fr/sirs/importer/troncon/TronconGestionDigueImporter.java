@@ -284,14 +284,14 @@ implements DocumentsUpdatable {
             }
             
             tronconDigue.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
-
+            tronconDigue.setValid(true);
+            
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
         
         for(final TronconDigue tronconDigue : tronconsDigue.values()){
             List<Objet> structures = tronconDigue.getStructures();
-            
             structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
 
             //Update the repository

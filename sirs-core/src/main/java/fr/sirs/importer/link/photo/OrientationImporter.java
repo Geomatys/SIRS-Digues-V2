@@ -63,6 +63,8 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
                 orientation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             orientation.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORIENTATION.toString())));
+            orientation.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_ORIENTATION.toString())), orientation);
         }
         couchDbConnector.executeBulk(types.values());
