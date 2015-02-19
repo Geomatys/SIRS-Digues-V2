@@ -16,10 +16,7 @@ import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -53,6 +50,47 @@ public class FXValidationPane extends BorderPane {
 
             usages.getColumns().add(new StateColumn());
 
+            final TableColumn<ValiditySummary, String> docIdColumn = new TableColumn<>(bundle.getString("docId"));
+            docIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleObjectProperty<>(param.getValue().getDocId());
+                }
+            });
+            usages.getColumns().add(docIdColumn);
+
+            final TableColumn<ValiditySummary, String> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
+            docClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleObjectProperty<>(getBundleForClass(param.getValue().getDocClass()).getString("class"));
+                }
+            });
+            usages.getColumns().add(docClassColumn);
+
+            final TableColumn<ValiditySummary, String> elementIdColumn = new TableColumn<>(bundle.getString("elementId"));
+            elementIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleObjectProperty<>(param.getValue().getElementId());
+                }
+            });
+            usages.getColumns().add(elementIdColumn);
+
+            final TableColumn<ValiditySummary, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
+            elementClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    final ResourceBundle rb = getBundleForClass(param.getValue().getElementClass());
+                    return new SimpleObjectProperty<>((rb==null) ? null : rb.getString("class"));
+                }
+            });
+            usages.getColumns().add(elementClassColumn);
+
             final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
             propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
@@ -62,16 +100,6 @@ public class FXValidationPane extends BorderPane {
                 }
             });
             usages.getColumns().add(propertyColumn);
-
-            final TableColumn<ValiditySummary, String> objectIdColumn = new TableColumn<>(bundle.getString("elementId"));
-            objectIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                    return new SimpleObjectProperty(param.getValue().getElementId());
-                }
-            });
-            usages.getColumns().add(objectIdColumn);
 //                
             final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
             labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
@@ -82,6 +110,26 @@ public class FXValidationPane extends BorderPane {
                 }
             });
             usages.getColumns().add(labelColumn);
+
+            final TableColumn<ValiditySummary, String> authorColumn = new TableColumn<>(bundle.getString("author"));
+            authorColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleObjectProperty(param.getValue().getAuthor());
+                }
+            });
+            usages.getColumns().add(authorColumn);
+
+            final TableColumn<ValiditySummary, String> validColumn = new TableColumn<>(bundle.getString("valid"));
+            validColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleObjectProperty(param.getValue().getValid());
+                }
+            });
+            usages.getColumns().add(validColumn);
             setCenter(usages);
 
 //            final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
@@ -93,6 +141,12 @@ public class FXValidationPane extends BorderPane {
 //            setTop(uiTitle);
 
         }
+    }
+    
+    private ResourceBundle getBundleForClass(final String type){
+        if(type==null) return null;
+        if(bundles.get(type)==null) bundles.put(type, ResourceBundle.getBundle(type));
+        return bundles.get(type);
     }
 
     public class StateButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {

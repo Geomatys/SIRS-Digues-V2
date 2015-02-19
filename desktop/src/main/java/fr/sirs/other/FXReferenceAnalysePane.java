@@ -108,5 +108,4 @@ public class FXReferenceAnalysePane extends BorderPane {
     }
     
     
-    
 }
