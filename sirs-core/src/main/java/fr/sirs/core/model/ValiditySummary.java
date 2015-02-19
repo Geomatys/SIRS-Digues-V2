@@ -24,7 +24,7 @@ public class ValiditySummary {
     private String author;
     
     @JsonProperty("valid")
-    private String valid;
+    private boolean valid;
     
     @JsonProperty("pseudoId")
     private String pseudoId;
@@ -72,11 +72,11 @@ public class ValiditySummary {
         this.author = author;
     }
 
-    public String getValid() {
+    public boolean getValid() {
         return valid;
     }
 
-    public void setValid(String valid) {
+    public void setValid(boolean valid) {
         this.valid = valid;
     }
 

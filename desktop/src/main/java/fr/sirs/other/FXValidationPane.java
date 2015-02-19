@@ -7,7 +7,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
-import static fr.sirs.other.FXReferencePane.ICON_CHECK_CIRCLE;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +16,22 @@ import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -31,6 +40,9 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXValidationPane extends BorderPane {
+
+    public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode("#aa0000")), null);
+    public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode("#00aa00")), null);
 
     private TableView<ValiditySummary> usages;
     private final Session session = Injector.getSession();
@@ -86,7 +98,7 @@ public class FXValidationPane extends BorderPane {
                 @Override
                 public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
                     final ResourceBundle rb = getBundleForClass(param.getValue().getElementClass());
-                    return new SimpleObjectProperty<>((rb==null) ? null : rb.getString("class"));
+                    return new SimpleObjectProperty<>((rb == null) ? null : rb.getString("class"));
                 }
             });
             usages.getColumns().add(elementClassColumn);
@@ -121,15 +133,9 @@ public class FXValidationPane extends BorderPane {
             });
             usages.getColumns().add(authorColumn);
 
-            final TableColumn<ValiditySummary, String> validColumn = new TableColumn<>(bundle.getString("valid"));
-            validColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                    return new SimpleObjectProperty(param.getValue().getValid());
-                }
-            });
+            final TableColumn<ValiditySummary, Object> validColumn = new ValidColumn();
             usages.getColumns().add(validColumn);
+
             setCenter(usages);
 
 //            final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
@@ -139,19 +145,20 @@ public class FXValidationPane extends BorderPane {
 //            uiTitle.setPadding(new Insets(5));
 //            uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
 //            setTop(uiTitle);
-
         }
     }
-    
-    private ResourceBundle getBundleForClass(final String type){
-        if(type==null) return null;
-        if(bundles.get(type)==null) bundles.put(type, ResourceBundle.getBundle(type));
+
+    private ResourceBundle getBundleForClass(final String type) {
+        if (type == null) {
+            return null;
+        }
+        if (bundles.get(type) == null) {
+            bundles.put(type, ResourceBundle.getBundle(type));
+        }
         return bundles.get(type);
     }
 
     public class StateButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {
-
-        private final Node defaultGraphic;
 
         public StateButtonTableCell(Node graphic) {
             super(false, graphic, (Object t) -> true, new Function<Object, Object>() {
@@ -175,7 +182,6 @@ public class FXValidationPane extends BorderPane {
                     return t;
                 }
             });
-            defaultGraphic = graphic;
         }
 
         @Override
@@ -219,4 +225,92 @@ public class FXValidationPane extends BorderPane {
         }
     }
 
+    private class ValidButtonTableCell extends TableCell<ValiditySummary, Object> {
+
+        private final Node defaultGraphic;
+        protected final Button button = new Button();
+
+        public ValidButtonTableCell(Node graphic) {
+            super();
+            defaultGraphic = graphic;
+            button.setGraphic(defaultGraphic);
+            setGraphic(button);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER);
+            button.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    Object t = getItem();
+                    if (t != null && t instanceof ValiditySummary) {
+                        final Session session = Injector.getSession();
+                        final Repository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
+                        final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
+
+                        // Si l'elementid est null, c'est que l'élément est le document lui-même
+                        if (((ValiditySummary) t).getElementId() == null) {
+                            docu.setValid(!docu.getValid());
+                        } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
+                        else {
+                            final Element elt = docu.getChildById(((ValiditySummary) t).getElementId());
+                            elt.setValid(!elt.getValid());
+                        }
+                        repo.update(docu);
+                        ((ValiditySummary) t).setValid(!((ValiditySummary) t).getValid());
+                        updateButton(((ValiditySummary) t).getValid());
+                    }
+                }
+            });
+        }
+
+        protected void updateButton(final boolean valid) {
+            if (!valid) {
+                button.setGraphic(new ImageView(ICON_EXCLAMATION_CIRCLE));
+                button.setText("Invalide");
+            } else {
+                button.setGraphic(defaultGraphic);
+                button.setText("Valide");
+            }
+        }
+
+        @Override
+        protected void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item != null) {
+                updateButton(((ValiditySummary) item).getValid());
+            }
+        }
+    }
+
+    private class ValidColumn extends TableColumn<ValiditySummary, Object> {
+
+        public ValidColumn() {
+            super("État");
+            setEditable(false);
+            setSortable(false);
+            setResizable(true);
+            setPrefWidth(70);
+//            setPrefWidth(24);
+//            setMinWidth(24);
+//            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_MOVEUP));
+
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
+                @Override
+                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
+            });
+
+            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
+
+                @Override
+                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
+
+                    return new ValidButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
+                }
+            });
+        }
+    }
 }
