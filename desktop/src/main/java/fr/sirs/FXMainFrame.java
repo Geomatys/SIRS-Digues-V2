@@ -71,6 +71,9 @@ public class FXMainFrame extends BorderPane {
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
         
+        final ProgressMonitor pm = new ProgressMonitor(TaskManager.INSTANCE);
+        ((BorderPane) uiMenu.getParent()).setRight(pm);
+        
         // Load themes
         final Theme[] themes = Plugins.getThemes();
         for(final Theme theme : themes){
@@ -123,11 +126,7 @@ public class FXMainFrame extends BorderPane {
             uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin, uiRefs, uiPseudoId);
         }
         
-        
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());     
-
-        final ProgressMonitor pm = new ProgressMonitor(session.getTaskManager());
-        ((BorderPane) uiMenu.getParent()).setRight(pm);
     }
     
     public TabPane getUiTabs() {

@@ -84,15 +84,6 @@
                     <right>
                         <ToolBar BorderPane.alignment="CENTER">
                             <items>
-                                <Button contentDisplay="TOP" mnemonicParsing="false" styleClass="buttonbar-button" text="Outils">
-                                    <graphic>
-                                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                            <image>
-                                                <Image url="@images/menu-outils.png" />
-                                            </image>
-                                        </ImageView>
-                                    </graphic>
-                                </Button>
                                 <Button fx:id="uiPrintButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#print" styleClass="buttonbar-button" text="Impressions">
                                     <graphic>
                                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">

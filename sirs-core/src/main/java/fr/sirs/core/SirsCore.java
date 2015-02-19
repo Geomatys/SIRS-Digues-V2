@@ -6,15 +6,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 
 import javax.sql.DataSource;
+import org.apache.sis.geometry.GeneralEnvelope;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.factory.Hints;
+import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
+import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 
@@ -129,5 +134,38 @@ public class SirsCore {
      */
     public static TaskManager getTaskManager() {
         return TaskManager.INSTANCE;
+    }
+    
+        /**
+     * Try to expand a little an envelope. Main purpose is to ensure we won't 
+     * have an envelope which is merely a point.
+     * @param input The input to expand.
+     * @return An expanded envelope. If we cannot analyze CRS or it's unit on
+     * horizontal axis, the same envelope is returned.
+     */
+    public static Envelope pseudoBuffer(final Envelope input) {
+        double additionalDistance = 0.01;
+        if (input.getCoordinateReferenceSystem() != null) {
+            CoordinateReferenceSystem crs = input.getCoordinateReferenceSystem();
+            int firstAxis = CRSUtilities.firstHorizontalAxis(crs);
+            
+            if (firstAxis >=0) {
+                Unit unit = crs.getCoordinateSystem().getAxis(firstAxis).getUnit();
+                if (unit != null && SI.METRE.isCompatible(unit)) {
+                    additionalDistance = SI.METRE.getConverterTo(unit).convert(1);
+                }
+                
+                final GeneralEnvelope result = new GeneralEnvelope(input);
+                result.setRange(firstAxis, 
+                        result.getLower(firstAxis)-additionalDistance, 
+                        result.getUpper(firstAxis)+additionalDistance);
+                final int secondAxis = firstAxis +1;
+                result.setRange(secondAxis, 
+                        result.getLower(secondAxis)-additionalDistance, 
+                        result.getUpper(secondAxis)+additionalDistance);
+                return result;
+            }
+        }
+        return input;
     }
 }

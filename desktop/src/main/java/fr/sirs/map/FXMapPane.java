@@ -3,24 +3,23 @@ package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
-import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
 import java.awt.RenderingHints;
-import java.awt.geom.NoninvertibleTransformException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
@@ -37,9 +36,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-import org.apache.sis.geometry.GeneralEnvelope;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Hints;
@@ -69,15 +66,12 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
-import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
 /**
@@ -114,12 +108,8 @@ public class FXMapPane extends BorderPane {
     private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
     private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
     private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
-
-    private Session session;
     
     public FXMapPane() {
-        session = Injector.getSession();
-        context = session.getMapContext();
         
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
@@ -153,7 +143,6 @@ public class FXMapPane extends BorderPane {
                 uiMap2.getContainer().setContext(newValue);
             }
         });
-        uiMap1.getContainer().setContext(context);
         
         splitButton.setOnAction((ActionEvent event) -> {
             if(mapsplit.getItems().contains(paneMap2)){
@@ -165,7 +154,6 @@ public class FXMapPane extends BorderPane {
                 splitButton.setTooltip(new Tooltip("Cacher la deuxième carte"));
             }
         });
-        
         
         final GridPane topgrid = new GridPane();
         uiCtxBar.setMaxHeight(Double.MAX_VALUE);
@@ -216,27 +204,29 @@ public class FXMapPane extends BorderPane {
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
         uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
         
-        //deplacer à la date du jour
-        new Thread(){
-            @Override
-            public void run() {
-                final Date time = new Date();
-                try {
+        //Affiche le contexte carto et le déplace à la date du jour
+        TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
+            
+            context = Injector.getSession().getMapContext();
+            
+            // Affect context and bounds in a JavaFX thread, because it will affect UI (Note : it should not, and may be fixed in a future version).
+            final Task t = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    uiMap1.getContainer().setContext(context);
+                    final Date time = new Date();
                     uiMap1.getCanvas().setObjectiveCRS(SirsCore.getEpsgCode());
-                    uiMap1.getCanvas().setVisibleArea(session.getMapContext().getAreaOfInterest());
-                    uiMap1.getCanvas().setTemporalRange(time,time);
-                    uiMap2.getCanvas().setTemporalRange(time,time);
-                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
-                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS*8);
-                } catch (TransformException | NoninvertibleTransformException ex) {
-                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                    uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
+                    uiMap1.getCanvas().setTemporalRange(time, time);
+                    uiMap2.getCanvas().setTemporalRange(time, time);
+                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    return null;
                 }
-            }
-        }.start();
-    }
-
-    public MapContext getMapContext() {
-        return context;
+            };
+            Platform.runLater(t);
+            return null;
+        });
     }
 
     public FXMap getUiMap() {
@@ -245,66 +235,7 @@ public class FXMapPane extends BorderPane {
 
     public void focusOnElement(Element target) {
         if (context == null) return;
-        
-        final MapLayer container = getMapLayerForElement(target.getClass());
-        if (!(container instanceof FeatureMapLayer)) return;
-
-        final FeatureMapLayer fLayer = (FeatureMapLayer) container;
-        
-        final Id idFilter = GO2Utilities.FILTER_FACTORY.id(
-                Collections.singleton(new DefaultFeatureId(target.getId())));
-        fLayer.setSelectionFilter(idFilter);
-        fLayer.setVisible(true);
-        try {
-            final FeatureType fType = fLayer.getCollection().getFeatureType();
-            final GenericName typeName = fType.getName();
-            QueryBuilder queryBuilder = new QueryBuilder(
-                    new DefaultName(typeName.scope().toString(), typeName.head().toString()));
-            queryBuilder.setFilter(idFilter);
-            GeometryDescriptor geomDescriptor = fType.getGeometryDescriptor();
-            if (geomDescriptor != null) {
-                queryBuilder.setProperties(new Name[]{geomDescriptor.getName()});
-            }
-            FeatureCollection<? extends Feature> subCollection = 
-                    fLayer.getCollection().subCollection(queryBuilder.buildQuery());
-            Envelope selectionEnvelope = pseudoBuffer(subCollection.getEnvelope());
-            uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
-        } catch (Exception e) {
-            SIRS.LOGGER.log(Level.WARNING, "Error on zoom at layer selection.", e);
-        }
-    }
-
-    /**
-     * Try to expand a little an envelope. Main purpose is to ensure we won't 
-     * have an envelope which is merely a point.
-     * @param input The input to expand.
-     * @return An expanded envelope. If we cannot analyze CRS or it's unit on
-     * horizontal axis, the same envelope is returned.
-     */
-    private Envelope pseudoBuffer(final Envelope input) {
-        double additionalDistance = 0.01;
-        if (input.getCoordinateReferenceSystem() != null) {
-            CoordinateReferenceSystem crs = input.getCoordinateReferenceSystem();
-            int firstAxis = CRSUtilities.firstHorizontalAxis(crs);
-            
-            if (firstAxis >=0) {
-                Unit unit = crs.getCoordinateSystem().getAxis(firstAxis).getUnit();
-                if (unit != null && SI.METRE.isCompatible(unit)) {
-                    additionalDistance = SI.METRE.getConverterTo(unit).convert(1);
-                }
-                
-                final GeneralEnvelope result = new GeneralEnvelope(input);
-                result.setRange(firstAxis, 
-                        result.getLower(firstAxis)-additionalDistance, 
-                        result.getUpper(firstAxis)+additionalDistance);
-                final int secondAxis = firstAxis +1;
-                result.setRange(secondAxis, 
-                        result.getLower(secondAxis)-additionalDistance, 
-                        result.getUpper(secondAxis)+additionalDistance);
-                return result;
-            }
-        }
-        return input;
+        TaskManager.INSTANCE.submit(new FocusOnMap(target));
     }
     
     /** 
@@ -336,6 +267,76 @@ public class FXMapPane extends BorderPane {
             }
         }
         return null;
+    }
+    
+    /**
+     * A task which select and zoom on given element on the map.
+     * Task returns false if the element cannot be focused on.
+     */
+    private class FocusOnMap extends Task<Boolean> {
+        
+        final Element toFocusOn;
+
+        public FocusOnMap(final Element toFocusOn) {
+            ArgumentChecks.ensureNonNull("Element to focus on", toFocusOn);
+            this.toFocusOn = toFocusOn;
+            
+            updateTitle("Recherche un élément sur la carte");
+        }
+        
+        @Override
+        protected Boolean call() throws Exception {
+            final int maxProgress = 3;
+            int currentProgress = 0;
+            
+            updateProgress(currentProgress++, maxProgress);
+            updateMessage("Recherche de la couche correspondante");
+            
+            final MapLayer container = getMapLayerForElement(toFocusOn.getClass());
+            if (!(container instanceof FeatureMapLayer)) {
+                return false;
+            }
+
+            final FeatureMapLayer fLayer = (FeatureMapLayer) container;
+
+            updateProgress(currentProgress++, maxProgress);
+            updateMessage("Filtrage sur l'élément");
+            
+            final Id idFilter = GO2Utilities.FILTER_FACTORY.id(
+                    Collections.singleton(new DefaultFeatureId(toFocusOn.getId())));
+            fLayer.setSelectionFilter(idFilter);
+            fLayer.setVisible(true);
+            
+            updateProgress(currentProgress++, maxProgress);
+            updateMessage("Calcul de la zone à afficher");
+            
+            final FeatureType fType = fLayer.getCollection().getFeatureType();
+            final GenericName typeName = fType.getName();
+            QueryBuilder queryBuilder = new QueryBuilder(
+                    new DefaultName(typeName.scope().toString(), typeName.head().toString()));
+            queryBuilder.setFilter(idFilter);
+            GeometryDescriptor geomDescriptor = fType.getGeometryDescriptor();
+            if (geomDescriptor != null) {
+                queryBuilder.setProperties(new Name[]{geomDescriptor.getName()});
+            } else {
+                return false; // no zoom possible
+            }
+            FeatureCollection<? extends Feature> subCollection
+                    = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
+            
+            Envelope selectionEnvelope = subCollection.getEnvelope();
+            if (selectionEnvelope == null) {
+                return false;
+            }
+            selectionEnvelope = SIRS.pseudoBuffer(selectionEnvelope);
+            
+            updateProgress(currentProgress++, maxProgress);
+            updateMessage("Mise à jour de l'affichage");
+            
+            uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+
+            return true;
+        }
     }
             
 }

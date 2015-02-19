@@ -4,8 +4,8 @@ package fr.sirs.query;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.h2.H2Helper;
-import fr.sirs.core.model.Digue;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsTableCell;
@@ -18,14 +18,16 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -55,7 +57,6 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -150,20 +151,20 @@ public class FXSearchPane extends BorderPane {
         
         uiTogglePlainText.setSelected(true);
 
-        try {
-            //h2 connection
+        //h2 connection
+        Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
             h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
             
             final Set<Name> names = h2Store.getNames();
             final ObservableList observableNames = FXCollections.observableArrayList();
             for(Name n : names) observableNames.add(n.getLocalPart());
             Collections.sort(observableNames);
-            uiDBTable.setItems(observableNames);
             
-        } catch (Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
+            SIRS.LOGGER.info("RDBMS CONNEXION FINISHED");
+            return observableNames;
+        });
         
+        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiDBTable.setItems(h2Names.getValue())));
         
         uiDBTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -173,7 +174,7 @@ public class FXSearchPane extends BorderPane {
                         FeatureType type = h2Store.getFeatureType(newValue);
                         uiFilterEditor.setType(type);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        throw new RuntimeException(ex);
                     }
                 }
             }
@@ -269,15 +270,14 @@ public class FXSearchPane extends BorderPane {
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Dossier d'export");
         final File file = chooser.showDialog(null);
-        
-        if(file!=null){
-            try{
-                final Connection cnx = h2Store.getDataSource().getConnection();
-                H2Helper.dumbSchema(cnx, file.toPath());
-                cnx.close();
-            }catch(Exception ex){
-                ex.printStackTrace();
-            }
+
+        if (file != null) {
+            TaskManager.INSTANCE.submit("Export vers un fichier SQL", () -> {
+                try (Connection cnx = h2Store.getDataSource().getConnection()) {
+                    H2Helper.dumbSchema(cnx, file.toPath());
+                }
+                return null;
+            });
         }
     }
     
@@ -404,12 +404,14 @@ public class FXSearchPane extends BorderPane {
 
     private void searchSQL(String query){
         final FeatureMapLayer layer = searchSQLLayer(query);
-        if(layer==null) return;
-        
-        final FXFeatureTable table = new FXFeatureTable("fr.sirs.core.model.");
-        table.setLoadAll(true);
-        table.init(layer);
-        setCenter(table);
+        if (layer == null || layer.getCollection().isEmpty()) {
+            setCenter(new Label("Pas de résultat pour votre recherche."));
+        } else {
+            final FXFeatureTable table = new FXFeatureTable("fr.sirs.core.model.");
+            table.setLoadAll(true);
+            table.init(layer);
+            setCenter(table);
+        }
     }
     
     private FeatureMapLayer searchSQLLayer(String query){
