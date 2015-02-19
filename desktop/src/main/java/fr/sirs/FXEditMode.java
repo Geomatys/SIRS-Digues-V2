@@ -1,19 +1,28 @@
 
 package fr.sirs;
 
+import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
+import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Role;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -21,9 +30,14 @@ import javafx.scene.layout.VBox;
  */
 public class FXEditMode extends VBox {
     
+    @FXML private ImageView uiImageValid;
+    @FXML private Label uiLabelValid;
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
     @FXML private ToggleButton uiConsult;
+    
+    private final StringProperty authorIDProperty;
+    private final BooleanProperty validProperty;
 
     private Runnable saveAction;
     
@@ -52,14 +66,56 @@ public class FXEditMode extends VBox {
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(newValue==null) group.selectToggle(uiConsult);
         });
+        
+        authorIDProperty = new SimpleStringProperty();
+        validProperty = new SimpleBooleanProperty();
+        validProperty.addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                resetValidUIs(newValue);
+            }
+        });
     }
+    
+    public void resetValidUIs(final boolean valid){
+        if(valid){
+            uiImageValid.setImage(ICON_CHECK_CIRCLE);
+            uiLabelValid.setText("Valide");
+            uiLabelValid.setTextFill(Color.WHITE);
+        }
+        else {
+            uiImageValid.setImage(ICON_EXCLAMATION_CIRCLE);
+            uiLabelValid.setText("Invalide");
+            uiLabelValid.setTextFill(Color.RED);
+        }
+    }
+    
+    public StringProperty authorIDProperty(){return authorIDProperty;}
+    public BooleanProperty validProperty(){return validProperty;}
      
     public void setAllowedRoles(Role... allowed){
         final Session session = Injector.getBean(Session.class);
         boolean editionGranted = false;
         for(final Role role : allowed){
+            // Si le role du visiteur fait partie des roles autorisés à éditer
             if(session.getRole()==role) {
-                editionGranted=true;
+                
+                // Dans le cas des externes, il y a une vérificatin supplémentaire à effectuer
+                if(session.getRole()==Role.EXTERN){
+                    // Si l'utilisateur est bien l'auteur et que le document n'est pas validé
+                    if(session.getUtilisateur().getId().equals(authorIDProperty().get()) 
+                            && !validProperty().get()){
+                        editionGranted=true;
+                    }
+                    else{
+                        editionGranted=false;
+                    }
+                }
+                // Dans les autres cas, on accorde l'édition.
+                else{
+                    editionGranted=true;
+                }
             }
         }
         uiEdit.setDisable(!editionGranted);

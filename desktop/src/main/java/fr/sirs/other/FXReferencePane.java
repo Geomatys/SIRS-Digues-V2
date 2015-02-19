@@ -3,12 +3,13 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.ReferenceChecker;
+import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
+import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.Session;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -29,12 +29,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.geotoolkit.font.FontAwesomeIcons;
-import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -43,11 +40,6 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXReferencePane extends BorderPane {
-    
-//    public static final Image ICON_EXCLAMATION_TRIANGLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.yellow),null);
-    public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode("#aa0000")),null);
-//    public static final Image ICON_DOWNLOAD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
-    public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode("#00aa00")),null);
     
     private final ReferencePojoTable references;
     private final Session session = Injector.getSession();

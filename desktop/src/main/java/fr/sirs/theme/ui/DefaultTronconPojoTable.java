@@ -5,6 +5,7 @@ import fr.sirs.Session;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import java.lang.reflect.Constructor;
@@ -93,6 +94,8 @@ public class DefaultTronconPojoTable extends PojoTable {
             pojo = (Objet) pojoConstructor.newInstance();
             trc.getStructures().add(pojo);
             pojo.setParent(trc);
+            pojo.setAuthor(session.getUtilisateur().getId());
+            pojo.setValid(!(session.getRole().equals(Role.EXTERN)));
             session.getTronconDigueRepository().update(trc);
         } catch (Exception ex) {
             Logging.getLogger(DefaultTronconPojoTable.class).log(Level.WARNING, null, ex);

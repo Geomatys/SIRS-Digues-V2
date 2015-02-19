@@ -2,12 +2,12 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import fr.sirs.Session;
 import fr.sirs.core.Repository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,6 @@ import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -24,12 +23,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.geotoolkit.font.FontAwesomeIcons;
-import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -39,7 +35,6 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class FXPseudoIdAnalysePane extends BorderPane {
     
-    public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode("#00aa00")),null);
     
     private TableView<ValiditySummary> pseudoIds;
     private final Session session = Injector.getSession();

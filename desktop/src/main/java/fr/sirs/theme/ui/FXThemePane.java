@@ -93,6 +93,11 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             if (couchDbDocument instanceof AvecDateMaj) {
                 ((AvecDateMaj)couchDbDocument).dateMajProperty().set(now);
             }
+
+            if (elementProperty.get() instanceof AvecDateMaj) {
+                ((AvecDateMaj)elementProperty.get()).dateMajProperty().set(now);
+            }
+            
             repo.update(couchDbDocument);
         } catch (Exception e) {
             new Alert(Alert.AlertType.INFORMATION, "L'élément ne peut être sauvegardé.\nCause : ", ButtonType.OK).show();
@@ -126,7 +131,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
         } else {
             couchDbDocument = object.getCouchDBDocument();
-            // TODO : make a "WithDateMaj" interface, or something similar.
+            
             if (object instanceof AvecDateMaj) {
                 date_maj.valueProperty().bind(((AvecDateMaj) object).dateMajProperty());
                 date_maj.setVisible(true);
@@ -155,6 +160,9 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             }
         }
+        
+        uiMode.validProperty().bind(elementProperty.get().validProperty());
+        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
         
         uiShowOnMapButton.setVisible(object instanceof Positionable);
     }

@@ -487,10 +487,20 @@ public class PojoTable extends BorderPane {
         Object result = null;
         if (repo != null) {
             result = repo.create();
+            if(result instanceof Element) {
+                ((Element)result).setAuthor(session.getUtilisateur().getId());
+                ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
+            }
             repo.add(result);
-        } else if (pojoClass != null) {
+        } 
+        
+        else if (pojoClass != null) {
             try {
                 result = pojoClass.newInstance();
+                if(result instanceof Element) {
+                    ((Element)result).setAuthor(session.getUtilisateur().getId());
+                    ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
+                }
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
