@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -44,7 +43,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.logging.Logging;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -76,8 +74,6 @@ public final class SIRS extends SirsCore {
 //    public static final Image ICON_DOWNLOAD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode("#00aa00")),null);
     
-    
-    public static final Logger LOGGER = Logging.getLogger(SIRS.class);
     public static final String CSS_PATH = "/fr/sirs/theme.css";
 
     private static Stage LAUNCHER;
@@ -270,7 +266,7 @@ public final class SIRS extends SirsCore {
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
     public static AbstractFXElementPane generateEditionPane(final Element pojo) {
-        final AbstractFXElementPane content;        
+        final AbstractFXElementPane content;
         if (pojo instanceof Contact) {
             content = new FXContactPane((Contact) pojo);
             

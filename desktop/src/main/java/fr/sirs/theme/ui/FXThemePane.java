@@ -100,7 +100,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             
             repo.update(couchDbDocument);
         } catch (Exception e) {
-            new Alert(Alert.AlertType.INFORMATION, "L'élément ne peut être sauvegardé.\nCause : ", ButtonType.OK).show();
+            SIRS.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.INFO, e.getMessage(), e);
         }
     }

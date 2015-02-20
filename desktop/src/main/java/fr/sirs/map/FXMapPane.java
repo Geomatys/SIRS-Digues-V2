@@ -13,8 +13,11 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.awt.geom.NoninvertibleTransformException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -72,6 +75,7 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
 /**
@@ -324,16 +328,22 @@ public class FXMapPane extends BorderPane {
             FeatureCollection<? extends Feature> subCollection
                     = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
             
-            Envelope selectionEnvelope = subCollection.getEnvelope();
-            if (selectionEnvelope == null) {
+            Envelope tmpEnvelope = subCollection.getEnvelope();
+            if (tmpEnvelope == null) {
                 return false;
             }
-            selectionEnvelope = SIRS.pseudoBuffer(selectionEnvelope);
+            final Envelope selectionEnvelope = SIRS.pseudoBuffer(tmpEnvelope);
             
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Mise à jour de l'affichage");
             
-            uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+            final TaskManager.MockTask displayUpdate = new TaskManager.MockTask(() -> {
+                    uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+                    return null;
+            });
+            
+            Platform.runLater(displayUpdate);
+            displayUpdate.get();
 
             return true;
         }

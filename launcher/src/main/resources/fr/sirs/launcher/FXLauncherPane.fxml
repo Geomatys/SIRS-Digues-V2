@@ -61,7 +61,7 @@
                      <children>
                         <Label text="Adresse" GridPane.columnSpan="2" />
                         <TextField fx:id="uiDistantUrl" promptText="http://user:password@server.com/database" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="uiDistantSync" mnemonicParsing="false" selected="true" text="Synchronizer localement" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="uiDistantSync" mnemonicParsing="false" selected="true" text="Synchroniser localement" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                         <Button mnemonicParsing="false" onAction="#connectDistant" text="Créer" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
                         <Label text="Nom de la base locale" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                         <TextField fx:id="uiDistantName" GridPane.columnSpan="2" GridPane.rowIndex="5" />
