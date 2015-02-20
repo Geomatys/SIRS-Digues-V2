@@ -8,24 +8,30 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -38,13 +44,15 @@ public class FXPseudoIdAnalysePane extends BorderPane {
     
     private TableView<ValiditySummary> pseudoIds;
     private final Session session = Injector.getSession();
+        final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
+        final List<ValiditySummary> validitySummaries;
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
+    private enum ValiditySummaryChoice{DOUBLON, ALL};
 
     public FXPseudoIdAnalysePane(final Class type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
-        final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
-        final List<ValiditySummary> validitySummaries = valididySummaryRepository.getPseudoIdsForClass(type);
+        validitySummaries = valididySummaryRepository.getPseudoIdsForClass(type);
 
         if (validitySummaries != null && !validitySummaries.isEmpty()) {
             pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
@@ -84,14 +92,90 @@ public class FXPseudoIdAnalysePane extends BorderPane {
             setCenter(pseudoIds);
 
             final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
-            final Label uiTitle = new Label("Occurrences des pseudo-identifiants pour les entités " + topBundle.getString("class"));
+            final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString("class"));
             uiTitle.getStyleClass().add("pojotable-header");
             uiTitle.setAlignment(Pos.CENTER);
             uiTitle.setPadding(new Insets(5));
             uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
-            setTop(uiTitle);
+            
+            
+            
+            
+            final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
+        choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
 
+            @Override
+            public String toString(ValiditySummaryChoice object) {
+                final String result;
+                switch(object){
+                    case DOUBLON: result = "Doublons"; break;
+                    case ALL:
+                    default: result="Tous";
+                }
+                return result;
+            }
+
+            @Override
+            public ValiditySummaryChoice fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        choiceBox.setValue(ValiditySummaryChoice.ALL);
+        choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ValiditySummaryChoice>() {
+
+            @Override
+            public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
+                final List<ValiditySummary> referenceUsages;
+                switch(choiceBox.getSelectionModel().getSelectedItem()){
+                    case DOUBLON: 
+                        referenceUsages = doublons();
+                        break;
+                    case ALL:
+                    default: referenceUsages= validitySummaries;
+                }
+                pseudoIds.setItems(FXCollections.observableArrayList(referenceUsages));
+            }
+        });
+        
+        final HBox hBox = new HBox(choiceBox);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setPadding(new Insets(20));
+        hBox.setSpacing(100);
+
+        final VBox vBox = new VBox(uiTitle, hBox);
+            
+            setTop(vBox);
+            
         }
+    }
+    
+    private List<ValiditySummary> doublons() {
+
+        final List<String> doubleids = new ArrayList<>();
+
+        // Détection des identifiants doublons
+        final List<String> ids = new ArrayList<>();
+        for (final ValiditySummary validitySummary : validitySummaries) {
+
+            if (validitySummary.getPseudoId() != null) {
+                if (!ids.contains(validitySummary.getPseudoId())) {
+                    ids.add(validitySummary.getPseudoId());
+                } else if (!doubleids.contains(validitySummary.getPseudoId())) {
+                    doubleids.add(validitySummary.getPseudoId());
+                }
+            }
+            ids.add(validitySummary.getPseudoId());
+        }
+
+        // Maintenant on sait quels sont les id doublons
+        final List<ValiditySummary> referenceUsages = new ArrayList<>();
+
+        for (final ValiditySummary validitySummary : validitySummaries) {
+            if (validitySummary.getPseudoId() != null && doubleids.contains(validitySummary.getPseudoId())) {
+                referenceUsages.add(validitySummary);
+            }
+        }
+        return referenceUsages;
     }
 
     public class StateButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {

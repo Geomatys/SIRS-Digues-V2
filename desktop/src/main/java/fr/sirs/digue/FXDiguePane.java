@@ -149,6 +149,10 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         @Override
         protected void deletePojos(Element ... pojos) {
             for(Element pojo : pojos){
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+                // la suppression.
+                if(!authoriseElementDeletion(pojo)) continue;
                 session.delete(((TronconDigue) pojo));
             }
             updateTable();

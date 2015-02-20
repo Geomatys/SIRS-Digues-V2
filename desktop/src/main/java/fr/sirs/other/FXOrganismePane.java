@@ -151,7 +151,14 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         
         @Override
         protected void deletePojos(Element... pojos) {
-            ((ObservableList)elementProperty.get().contactOrganisme).removeAll(pojos);
+            for(final Element pojo : pojos){
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+                // la suppression.
+                if(!authoriseElementDeletion(pojo)) continue;
+                ((ObservableList)elementProperty.get().contactOrganisme).remove(pojo);
+            }
+//            ((ObservableList)elementProperty.get().contactOrganisme).removeAll(pojos);
         }
 
         @Override

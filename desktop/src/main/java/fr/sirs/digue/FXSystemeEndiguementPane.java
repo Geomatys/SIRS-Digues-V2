@@ -198,6 +198,10 @@ public class FXSystemeEndiguementPane extends BorderPane {
             final SystemeEndiguement sd = endiguementProp.get();
             
             for(Element element : pojos){
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+                // la suppression.
+                if(!authoriseElementDeletion(element)) continue;
                 final Digue d = (Digue)element;
                 sd.getDigue().remove(d.getDocumentId());
             }

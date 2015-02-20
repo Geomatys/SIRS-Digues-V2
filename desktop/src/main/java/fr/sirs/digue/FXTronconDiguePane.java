@@ -399,6 +399,10 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         protected void deletePojos(Element... pojos) {
             final TronconDigue troncon = elementProperty.get();
             for(Element ele : pojos){
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+                // la suppression.
+                if(!authoriseElementDeletion(ele)) continue;
                 troncon.contacts.remove(ele);
             }
         }

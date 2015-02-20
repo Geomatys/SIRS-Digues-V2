@@ -189,7 +189,14 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         
         @Override
         protected void deletePojos(Element... pojos) {
-            orgsOfContact.removeAll(pojos);
+            for(final Element pojo : pojos){
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+                // la suppression.
+                if(!authoriseElementDeletion(pojo)) continue;
+                orgsOfContact.remove(pojo);
+            }
+//            orgsOfContact.removeAll(pojos);
         }
 
         @Override

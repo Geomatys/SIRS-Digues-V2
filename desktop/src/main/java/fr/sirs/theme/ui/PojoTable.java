@@ -12,6 +12,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Role;
+import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -20,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -69,9 +72,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
-import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
@@ -85,6 +86,13 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Johann Sorel (Geomatys)
  */
 public class PojoTable extends BorderPane {
+    
+    private static final List<String> UNDISPLAYABLE_COLUMNS = new ArrayList<>();
+    static{
+        UNDISPLAYABLE_COLUMNS.add("author");
+        UNDISPLAYABLE_COLUMNS.add("valid");
+        UNDISPLAYABLE_COLUMNS.add("pseudoId");
+    }
     
     protected final Class pojoClass;
     protected final Repository repo;
@@ -152,7 +160,7 @@ public class PojoTable extends BorderPane {
         if (repo == null) {
             Repository tmpRepo;
             try {
-                tmpRepo = Injector.getSession().getRepositoryForClass(pojoClass);
+                tmpRepo = session.getRepositoryForClass(pojoClass);
             } catch (IllegalArgumentException e) {
                 SIRS.LOGGER.log(Level.FINE, e.getMessage());
                 tmpRepo = null;
@@ -167,7 +175,7 @@ public class PojoTable extends BorderPane {
         searchRunning.setStyle("-fx-progress-color: white;");
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTable.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-            Injector.getSession().prepareToPrint(newValue);
+            session.prepareToPrint(newValue);
         });
                 
         // Colonnes de suppression et d'ouverture d'éditeur.
@@ -190,17 +198,20 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
-        for(final PropertyDescriptor desc : properties) {
-            final TableColumn col;
-            // Colonne de mots de passe simplifiée : ne marche pas très bien.
-            if("password".equals(desc.getDisplayName())) {
-                col = new PasswordColumn(desc);
-            } else if(desc.getReadMethod().getReturnType().isEnum()){
-                col = new EnumColumn(desc);
-            } else{
-                col = new PropertyColumn(desc); 
+        for (final PropertyDescriptor desc : properties) {
+            if (!UNDISPLAYABLE_COLUMNS.contains(desc.getName())) {
+                final TableColumn col;
+                // Colonne de mots de passe simplifiée : ne marche pas très bien.
+                if ("password".equals(desc.getDisplayName())) {
+                    col = new PasswordColumn(desc);
+                } else if (desc.getReadMethod().getReturnType().isEnum()) {
+                    col = new EnumColumn(desc);
+                } else {
+
+                    col = new PropertyColumn(desc);
+                }
+                uiTable.getColumns().add(col);
             }
-            uiTable.getColumns().add(col);
         }
         
         uiTable.editableProperty().bind(editableProperty);
@@ -223,6 +234,19 @@ public class PojoTable extends BorderPane {
         searchEditionToolbar.getStyleClass().add("buttonbar");
         searchEditionToolbar.getChildren().add(uiSearch);
             
+        BooleanBinding addOrDeleteBinding = new BooleanBinding() {
+
+            {
+                bind(editableProperty);
+            }
+            @Override
+            protected boolean computeValue() {
+                final boolean result;
+                result = editableProperty.not().get();
+                return result;
+            }
+        };
+                
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
             final Object p = createPojo();
@@ -230,7 +254,7 @@ public class PojoTable extends BorderPane {
                 editPojo(p);
             }
         });
-        uiAdd.disableProperty().bind(editableProperty.not());
+        uiAdd.disableProperty().bind(addOrDeleteBinding);
 
         uiDelete.getStyleClass().add("btn-without-style");
         uiDelete.setOnAction((ActionEvent event) -> {
@@ -245,7 +269,7 @@ public class PojoTable extends BorderPane {
                 new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
             }
         });
-        uiDelete.disableProperty().bind(editableProperty.not());
+        uiDelete.disableProperty().bind(addOrDeleteBinding);
 
         searchEditionToolbar.getChildren().addAll(uiAdd, uiDelete);
         
@@ -459,11 +483,25 @@ public class PojoTable extends BorderPane {
             }
         }.start();
     }
-        
+       
+    protected boolean authoriseElementDeletion(final Element pojo) {
+        if (session.getRole() == EXTERN) {
+            if (!session.getUtilisateur().getId().equals(pojo.getAuthor())
+                    || pojo.getValid()) {
+                new Alert(Alert.AlertType.INFORMATION, "En tant qu'utilisateur externe, vous ne pouvez supprimer que des éléments invalidés dont vous êtes l'auteur.", ButtonType.OK).showAndWait();
+                return false;
+            }
+        }
+        return true;
+    }
     
     protected void deletePojos(Element... pojos) {
         ObservableList<Element> items = uiTable.getItems();
         for (Element pojo : pojos) {
+            // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+            // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+            // la suppression.
+            if(!authoriseElementDeletion(pojo)) continue;
             if (repo != null) {
                 repo.remove(pojo);
             }

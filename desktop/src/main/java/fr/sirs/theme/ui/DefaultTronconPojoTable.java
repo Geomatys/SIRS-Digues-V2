@@ -68,6 +68,11 @@ public class DefaultTronconPojoTable extends PojoTable {
     @Override
     protected void deletePojos(Element ... pojos) {
         for(Element pojo : pojos){
+            // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+            // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+            // la suppression.
+            if(!authoriseElementDeletion(pojo)) continue;
+                
             final TronconDigue trc = troncon.get();
             if(trc==null) return;
             group.getDeletor().delete(trc, pojo);
