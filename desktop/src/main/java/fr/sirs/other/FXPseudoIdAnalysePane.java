@@ -40,77 +40,79 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXPseudoIdAnalysePane extends BorderPane {
-    
-    
+
     private TableView<ValiditySummary> pseudoIds;
     private final Session session = Injector.getSession();
-        final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
-        final List<ValiditySummary> validitySummaries;
+    final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
+    final List<ValiditySummary> validitySummaries;
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    private enum ValiditySummaryChoice{DOUBLON, ALL};
+
+    private enum ValiditySummaryChoice {
+
+        DOUBLON, ALL
+    };
 
     public FXPseudoIdAnalysePane(final Class type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
         validitySummaries = valididySummaryRepository.getPseudoIdsForClass(type);
 
-        if (validitySummaries != null && !validitySummaries.isEmpty()) {
-            pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
-            pseudoIds.setEditable(false);
+        pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
+        pseudoIds.setEditable(false);
 
-            pseudoIds.getColumns().add(new StateColumn());
+        pseudoIds.getColumns().add(new StateColumn());
 
-            final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-            propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
+        propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                    return new SimpleObjectProperty<>(param.getValue().getPseudoId());
-                }
-            });
-            pseudoIds.getColumns().add(propertyColumn);
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                return new SimpleObjectProperty<>(param.getValue().getPseudoId());
+            }
+        });
+        pseudoIds.getColumns().add(propertyColumn);
 
-            final TableColumn<ValiditySummary, String> objectIdColumn = new TableColumn<>(bundle.getString("elementId"));
-            objectIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<ValiditySummary, String> objectIdColumn = new TableColumn<>(bundle.getString("elementId"));
+        objectIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                    return new SimpleObjectProperty(param.getValue().getElementId());
-                }
-            });
-            pseudoIds.getColumns().add(objectIdColumn);
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                return new SimpleObjectProperty(param.getValue().getElementId());
+            }
+        });
+        pseudoIds.getColumns().add(objectIdColumn);
 //                
-            final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
-            labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
+        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                    return new SimpleObjectProperty(param.getValue().getLabel());
-                }
-            });
-            pseudoIds.getColumns().add(labelColumn);
-            setCenter(pseudoIds);
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                return new SimpleObjectProperty(param.getValue().getLabel());
+            }
+        });
+        pseudoIds.getColumns().add(labelColumn);
+        setCenter(pseudoIds);
 
-            final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
-            final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString("class"));
-            uiTitle.getStyleClass().add("pojotable-header");
-            uiTitle.setAlignment(Pos.CENTER);
-            uiTitle.setPadding(new Insets(5));
-            uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
-            
-            
-            
-            
-            final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
+        final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
+        final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString("class"));
+        uiTitle.getStyleClass().add("pojotable-header");
+        uiTitle.setAlignment(Pos.CENTER);
+        uiTitle.setPadding(new Insets(5));
+        uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
+
+        final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
         choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
 
             @Override
             public String toString(ValiditySummaryChoice object) {
                 final String result;
-                switch(object){
-                    case DOUBLON: result = "Doublons"; break;
+                switch (object) {
+                    case DOUBLON:
+                        result = "Doublons";
+                        break;
                     case ALL:
-                    default: result="Tous";
+                    default:
+                        result = "Tous";
                 }
                 return result;
             }
@@ -126,29 +128,29 @@ public class FXPseudoIdAnalysePane extends BorderPane {
             @Override
             public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
                 final List<ValiditySummary> referenceUsages;
-                switch(choiceBox.getSelectionModel().getSelectedItem()){
-                    case DOUBLON: 
+                switch (choiceBox.getSelectionModel().getSelectedItem()) {
+                    case DOUBLON:
                         referenceUsages = doublons();
                         break;
                     case ALL:
-                    default: referenceUsages= validitySummaries;
+                    default:
+                        referenceUsages = validitySummaries;
                 }
                 pseudoIds.setItems(FXCollections.observableArrayList(referenceUsages));
             }
         });
-        
+
         final HBox hBox = new HBox(choiceBox);
         hBox.setAlignment(Pos.CENTER);
         hBox.setPadding(new Insets(20));
         hBox.setSpacing(100);
 
         final VBox vBox = new VBox(uiTitle, hBox);
-            
-            setTop(vBox);
-            
-        }
+
+        setTop(vBox);
+
     }
-    
+
     private List<ValiditySummary> doublons() {
 
         final List<String> doubleids = new ArrayList<>();

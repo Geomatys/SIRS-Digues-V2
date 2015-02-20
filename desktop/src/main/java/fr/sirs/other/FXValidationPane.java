@@ -105,7 +105,6 @@ public class FXValidationPane extends BorderPane {
                 }
             }
         });
-        docClassColumn.setSortable(false);
         usages.getColumns().add(docClassColumn);
 
         final TableColumn<ValiditySummary, ValiditySummary> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
@@ -148,7 +147,6 @@ public class FXValidationPane extends BorderPane {
                 }
             }
         });
-        elementClassColumn.setSortable(false);
         usages.getColumns().add(elementClassColumn);
 
         final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
@@ -231,10 +229,6 @@ public class FXValidationPane extends BorderPane {
 
         setTop(hBox);
         
-
-    }
-
-    private void setTable(final List<ValiditySummary> referenceUsages) {
 
     }
 
