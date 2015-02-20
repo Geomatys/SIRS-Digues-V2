@@ -75,7 +75,7 @@ public class ProgressMonitor extends HBox {
         SimpleListProperty failedTasksProp = new SimpleListProperty(taskRegistry.getTasksInError());
 
         // Hide list of tasks if there's no information available.
-        runningTasks.visibleProperty().bind(runningTasksProp.emptyProperty().not());
+        runningTasks.visibleProperty().bind(runningTasksProp.sizeProperty().greaterThan(1));
         tasksInError.visibleProperty().bind(failedTasksProp.emptyProperty().not());
         
         // Display number of tasks on menu button.
@@ -83,8 +83,7 @@ public class ProgressMonitor extends HBox {
         tasksInError.textProperty().bind(failedTasksProp.sizeProperty().asString());
 
         // Set default visible task the last one submitted.
-        lastTask.taskProperty().bind(
-                runningTasksProp.valueAt(runningTasksProp.sizeProperty().subtract(1)));
+        lastTask.taskProperty().bind(runningTasksProp.valueAt(runningTasksProp.sizeProperty().subtract(1)));
 
         // Do not reserve size for hidden components.
         runningTasks.managedProperty().bind(runningTasks.visibleProperty());

@@ -63,7 +63,9 @@ public class TaskManager implements Closeable {
                 if (Worker.State.FAILED.equals(newValue)) {
                     tasksInError.add(newTask);
                 }
-                if (newTask.isDone()) {
+                if (Worker.State.FAILED.equals(newValue) ||
+                        Worker.State.SUCCEEDED.equals(newValue) || 
+                        Worker.State.CANCELLED.equals(newValue)) {
                     submittedTasks.remove(newTask);
                 }
             });
