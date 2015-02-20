@@ -59,6 +59,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -173,6 +174,14 @@ public class PojoTable extends BorderPane {
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
+        
+        uiTable.setRowFactory(new Callback<TableView<Element>, TableRow<Element>>() {
+
+            @Override
+            public TableRow<Element> call(TableView<Element> param) {
+                return new ReferenceTableRow();
+            }
+        });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTable.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
             session.prepareToPrint(newValue);
@@ -786,5 +795,20 @@ public class PojoTable extends BorderPane {
             }));
         }  
     }
+    
+    public class ReferenceTableRow extends TableRow<Element>{
+
+            @Override
+            protected void updateItem(Element item, boolean empty) {
+                super.updateItem(item, empty);
+                
+                if(item!=null && !item.getValid()){
+                        getStyleClass().add("invalidRow");
+                    }
+                    else{
+                        getStyleClass().removeAll("invalidRow");
+                    }
+            }
+        }
     
 }

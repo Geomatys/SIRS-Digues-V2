@@ -119,7 +119,7 @@ public class FXReferencePane extends BorderPane {
         }
 
 
-        public class ReferenceTableRow extends TableRow<Element>{
+        private class ReferenceTableRow extends TableRow<Element>{
 
             @Override
             protected void updateItem(Element item, boolean empty) {

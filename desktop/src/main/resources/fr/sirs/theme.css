@@ -187,3 +187,10 @@
     -fx-background: -fx-accent;
     -fx-text-fill: -fx-selection-bar-text;*/
 }
+
+.invalidRow {
+    -fx-background-color: #FFE4C4;
+}
+.invalidRow:selected {
+    -fx-background-color: #aF7454;
+}
