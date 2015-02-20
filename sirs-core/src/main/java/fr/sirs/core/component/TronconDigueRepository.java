@@ -50,11 +50,38 @@ import fr.sirs.core.model.VoieDigue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
+import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.collection.Cache;
 import org.ektorp.DocumentNotFoundException;
 
 /**
- *
+ * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
+ * 
+ * Note : Le cache qui permet de garder un instance unique en mémoire pour un 
+ * tronçon donné est extrêmement important pour les opérations de sauvegarde. 
+ * 
+ * Ex : On a un tronçon A, qui contient un crête tata et un talus de digue toto.
+ * 
+ * On ouvre l'éditeur de toto. Le tronçon A est donc chargé en mémoire. 
+ * Dans le même temps on ouvre le panneau d'édition pour tata. On doit donc aussi 
+ * charger le tronçon A en mémoire.
+ * 
+ * Maintenant, que se passe -'il sans cache ? On a deux copies du tronçon A en  
+ * mémoire pour une même révision (disons 0).
+ * 
+ * Si on sauvegarde toto, tronçon A passe en révision 1 dans la bdd, mais pour 
+ * UNE SEULE des 2 copies en mémoire. En conséquence de quoi, lorsqu'on veut 
+ * sauvegarder tata, on a un problème : on demande à la base de faire une mise à
+ * jour de la révision 1 en utilisant un objet de la révision 0.
+ * 
+ * Résultat : ERREUR ! 
+ * 
+ * Avec le cache, les deux éditeurs pointent sur la même copie en mémoire. Lorsqu'un
+ * éditeur met à jour le tronçon, la révision de la copie est indentée, le deuxième
+ * éditeur a donc un tronçon avec un numéro de révision correct.
+ * 
  * @author Samuel Andrés (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 @Views({
         @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
@@ -65,6 +92,12 @@ public class TronconDigueRepository extends
         CouchDbRepositorySupport<TronconDigue> implements
         Repository<TronconDigue> {
 
+    /**
+     * We will cache troncons read from database to allow an user to edit two elements
+     * contained in the same tronçon separately and save them independently at any time.
+     */
+    private final Cache<String, TronconDigue> cache = new Cache(100, 0, false);
+    
     private final HashMap<String, Callable<List<? extends Objet>>> viewMap = new HashMap();
     
     @Autowired
@@ -105,11 +138,54 @@ public class TronconDigueRepository extends
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
-        return this.queryView("byDigueId", digue.getId());
+        List<TronconDigue> queryView = this.queryView("byDigueId", digue.getId());
+        final ArrayList<TronconDigue> result = new ArrayList<>(queryView.size());
+        for (TronconDigue tr : queryView) {
+            try {
+                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
+            } catch (Exception ex) {
+                // Should never happen ...
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public TronconDigue get(String id) {
+        try {
+            return cache.getOrCreate(id, () -> {return super.get(id);});
+        } catch (Exception ex) {
+            // Once again, should never happen...
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public List<TronconDigue> getAll() {
+        List<TronconDigue> all = super.getAll();
+        final ArrayList<TronconDigue> result = new ArrayList<>(all.size());
+        for (TronconDigue tr : all) {
+            try {
+                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
+            } catch (Exception ex) {
+                // Should never happen ...
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void add(TronconDigue entity) {
+        super.add(entity);
+        cache.put(entity.getId(), entity);
     }
 
     @Override
     public void remove(TronconDigue entity) {
+        ArgumentChecks.ensureNonNull("Tronçon à supprimer", entity);
+        cache.remove(entity.getId());
         constraintDeleteBorneAndSR(entity);
         super.remove(entity);
     }
@@ -126,9 +202,17 @@ public class TronconDigueRepository extends
 
     public List<TronconDigue> getAllLight() {
         final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class,db.queryForStreamingView(createQuery("streamLight")));
-        final List<TronconDigue> lst = new ArrayList<>();
-        while(ite.hasNext()) lst.add(ite.next());
-        return lst;
+        final List<TronconDigue> result = new ArrayList<>();
+        while(ite.hasNext()) {
+            TronconDigue tr = ite.next();
+            try {
+                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
+            } catch (Exception ex) {
+                // Should never happen ...
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
     }
     
     public static final String CRETE = "Crete";
