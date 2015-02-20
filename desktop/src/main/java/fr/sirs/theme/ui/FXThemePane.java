@@ -52,7 +52,6 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
         
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
         disableFieldsProperty().bind(uiMode.editionState().not());
         
@@ -60,6 +59,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             initPane();
         });
         setElement((T) theme);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
     }
     
     public void setShowOnMapButton(final boolean isShown){
@@ -160,7 +160,8 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             }
         }
-        
+        uiMode.validProperty().unbind();
+        uiMode.authorIDProperty().unbind();
         uiMode.validProperty().bind(elementProperty.get().validProperty());
         uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
         
@@ -169,7 +170,13 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
     @Override
     final public void setElement(T element) {
+        
         elementProperty.set(element);    
+        
+        uiMode.validProperty().unbind();
+        uiMode.authorIDProperty().unbind();
+        uiMode.validProperty().bind(elementProperty.get().validProperty());
+        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
         Injector.getSession().prepareToPrint(element);
     }
 

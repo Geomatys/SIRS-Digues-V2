@@ -549,7 +549,7 @@ public class Session extends SessionGen {
         } else {
             title += "";
         }
-        title+=element.getPseudoId();
+        title+=(element.getPseudoId()==null) ? "" : element.getPseudoId();
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {

@@ -5,13 +5,18 @@ import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Role;
 import java.io.IOException;
+import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,12 +35,17 @@ import javafx.scene.paint.Color;
  */
 public class FXEditMode extends VBox {
     
+    private static final String VALID_TEXT = "Validé";
+    private static final String INVALID_TEXT = "Invalidé";
+    
+    
     @FXML private ImageView uiImageValid;
     @FXML private Label uiLabelValid;
     @FXML private ToggleButton uiEdit;
     @FXML private Button uiSave;
     @FXML private ToggleButton uiConsult;
     
+    private final Session session = Injector.getBean(Session.class);
     private final StringProperty authorIDProperty;
     private final BooleanProperty validProperty;
 
@@ -76,49 +86,57 @@ public class FXEditMode extends VBox {
                 resetValidUIs(newValue);
             }
         });
+        validProperty.set(true);
     }
     
     public void resetValidUIs(final boolean valid){
         if(valid){
             uiImageValid.setImage(ICON_CHECK_CIRCLE);
-            uiLabelValid.setText("Valide");
+            uiLabelValid.setText(VALID_TEXT);
             uiLabelValid.setTextFill(Color.WHITE);
         }
         else {
             uiImageValid.setImage(ICON_EXCLAMATION_CIRCLE);
-            uiLabelValid.setText("Invalide");
-            uiLabelValid.setTextFill(Color.RED);
+            uiLabelValid.setText(INVALID_TEXT);
+            uiLabelValid.setTextFill(Color.valueOf("#aa0000"));
         }
     }
     
     public StringProperty authorIDProperty(){return authorIDProperty;}
     public BooleanProperty validProperty(){return validProperty;}
-     
-    public void setAllowedRoles(Role... allowed){
-        final Session session = Injector.getBean(Session.class);
-        boolean editionGranted = false;
-        for(final Role role : allowed){
-            // Si le role du visiteur fait partie des roles autorisés à éditer
-            if(session.getRole()==role) {
-                
-                // Dans le cas des externes, il y a une vérificatin supplémentaire à effectuer
-                if(session.getRole()==Role.EXTERN){
-                    // Si l'utilisateur est bien l'auteur et que le document n'est pas validé
-                    if(session.getUtilisateur().getId().equals(authorIDProperty().get()) 
-                            && !validProperty().get()){
-                        editionGranted=true;
-                    }
-                    else{
-                        editionGranted=false;
-                    }
-                }
-                // Dans les autres cas, on accorde l'édition.
-                else{
-                    editionGranted=true;
-                }
+    
+    public void setAllowedRoles(final Role... allowed) {
+        uiEdit.disableProperty().bind(new BooleanBinding() {
+
+            {
+                bind(validProperty, authorIDProperty, session.utilisateurProperty());
             }
-        }
-        uiEdit.setDisable(!editionGranted);
+
+            @Override
+            protected boolean computeValue() {
+                boolean editionGranted = false;
+                for (final Role role : allowed) {
+                    // Si le role du visiteur fait partie des roles autorisés à éditer
+                    if (session.getRole() == role) {
+
+                        // Dans le cas des externes, il y a une vérificatin supplémentaire à effectuer
+                        if (session.getRole() == Role.EXTERN) {
+                            // Si l'utilisateur est bien l'auteur et que le document n'est pas validé
+                            if (session.getUtilisateur().getId().equals(authorIDProperty().get())
+                                    && !validProperty().get()) {
+                                editionGranted = true;
+                            } else {
+                                editionGranted = false;
+                            }
+                        } // Dans les autres cas, on accorde l'édition.
+                        else {
+                            editionGranted = true;
+                        }
+                    }
+                }
+                return editionGranted;
+            }
+        }.not());
     }
 
     public void setSaveAction(Runnable saveAction) {

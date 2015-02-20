@@ -1,8 +1,6 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Role;
@@ -74,7 +72,6 @@ public class DefaultTronconPojoTable extends PojoTable {
             if(trc==null) return;
             group.getDeletor().delete(trc, pojo);
             //sauvegarde des modifications du troncon
-            final Session session = Injector.getBean(Session.class);
             session.getTronconDigueRepository().update(trc);
         }
     }
