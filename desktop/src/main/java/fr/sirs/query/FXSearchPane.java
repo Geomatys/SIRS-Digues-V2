@@ -12,6 +12,8 @@ import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,9 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -45,13 +49,17 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -398,8 +406,24 @@ public class FXSearchPane extends BorderPane {
             }
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            
+            Label errorLabel = new Label("Une erreur est survenue. Assurez-vous que la syntaxe de votre requête est correcte.");            
+            errorLabel.setBackground(Background.EMPTY);
+                      
+            final StringWriter errorStack = new StringWriter();            
+            ex.printStackTrace(new PrintWriter(errorStack));
+            final TextArea stackArea = new TextArea(errorStack.toString());            
+            final TitledPane errorPane = new TitledPane("Trace de l'erreur :", stackArea);
+            errorPane.setBackground(Background.EMPTY);
+            errorPane.setBorder(Border.EMPTY);
+            
+            final Accordion accordion = new Accordion();  
+            accordion.getPanes().add(errorPane);
+            VBox vBox = new VBox(errorLabel, accordion);
+            vBox.setSpacing(10);
+            vBox.setPadding(new Insets(10));
+            setCenter(vBox);
         }
-        
     }
 
     private void searchSQL(String query){
