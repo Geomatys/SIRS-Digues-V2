@@ -59,6 +59,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         //mode edition
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
+        uiMode.validProperty().bind(elementProperty.get().validProperty());
         final BooleanProperty editBind = uiMode.editionState();
         libelle.editableProperty().bind(editBind);
         uiComment.disableProperty().bind(editBind.not());

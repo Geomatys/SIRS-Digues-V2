@@ -55,8 +55,6 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
-//    @FXML private Menu uiRefs;
-//    @FXML private Menu uiRefsList;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -109,12 +107,10 @@ public class FXMainFrame extends BorderPane {
             });
              
             final Menu uiRefs = new Menu(bundle.getString("references"));
-            final Menu uiRefsList = new Menu(bundle.getString("listeReferences"));
-            uiRefs.getItems().add(uiRefsList);
         
             // Load references
             for(final Class reference : Session.getReferences()){
-                uiRefsList.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
+                uiRefs.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
             }
             
             final Menu uiPseudoId = new Menu(bundle.getString("pseudoIds"));

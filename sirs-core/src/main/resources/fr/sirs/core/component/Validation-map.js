@@ -1,17 +1,15 @@
 function(doc) {
 
-    //var SEARCH_ID='RefProprietaire:2';
-
     // On parcours l'ensemble des clefs
     var objectKeys = Object.keys(doc);
     for (key in objectKeys) {
 
-        // Si le champ est une chaine de caractère, on regarde si sa valeur correspond à l'ID recherché
-        if (objectKeys[key] === "pseudoId") {
+        // Si le NOM du champ est valid, le document est bien un élément validable et on l'analyse en conséquence.
+        if (objectKeys[key] === "valid") {
             searchDocumentID(doc);
         }
 
-        // Si c'est un objet, il faut procéder récursivement
+        // Si la VALEUR du champ est un objet, il faut procéder récursivement en séparant les cas du tableau et de l'objet.
         else if (Array.isArray(doc[objectKeys[key]])) {
             parseTab(doc, doc[objectKeys[key]]);
         }
@@ -23,19 +21,17 @@ function(doc) {
     /**
      * Si le contenu de field correspond à l'ID recherché, pour un document.
      */
-    function searchDocumentID(object) {
-        //if(object[field] === SEARCH_ID)
+    function searchDocumentID(docu) {
         var label;
-        if(object.nom) label = object.nom;
-        else if(object.libelle) label = object.libelle;
-        emit(object.valid, {docId: object._id, docClass: object['@class'], elementId: null, elementClass: null, author: object.author, valid: object.valid, pseudoId: object.pseudoId, label: label});
+        if(docu.nom) label = docu.nom;
+        else if(docu.libelle) label = docu.libelle;
+        emit(docu.valid, {docId: docu._id, docClass: docu['@class'], elementId: null, elementClass: null, author: docu.author, valid: docu.valid, pseudoId: docu.pseudoId, label: label});
     }
 
     /**
      * Si le contenu de field correspond à l'ID recherché, pour un élément non document.
      */
     function searchElementID(docu, object) {
-        //if(object[field] === SEARCH_ID)
         var label;
         if(object.nom) label = object.nom;
         else if(object.libelle) label = object.libelle;
@@ -46,6 +42,7 @@ function(doc) {
      * Analyse un tableau, avec l'ID de son élément le plus proche.
      */
     function parseTab(docu, tab) {
+        // Pour chacun des éléments, on regarde s'il s'agit d'un tableau ou d'un objet.
         for (var i = 0; i < tab.length; i++) {
             if (Array.isArray(tab[i])) {
                 parseTab(docu, tab[i]);
@@ -61,22 +58,23 @@ function(doc) {
      */
     function parseObject(docu, object) {
 
+        // On récupère les noms des champs.
         var objectKeys = Object.keys(object);
 
         for (key1 in objectKeys) {
 
-            // Si le champ est une chaine de caractère, on regarde si sa valeur correspond à l'ID recherché
-            if (objectKeys[key1] === "pseudoId") {
+            // Si le NOM du champ est valid, l'objet est validable et on l'explore en conséquence.
+            if (objectKeys[key1] === "valid") {
                 searchElementID(docu, object);
             }
 
-            // Si c'est un objet, il faut procéder récursivement
+            // Si la VALEUR du champ est un objet, il faut procéder récursivement
             if (typeof object[objectKeys[key1]] === "object") {
                 if (Array.isArray(object[objectKeys[key1]])) {
                     
-                    var label;
-                    if(object.nom) label = object.nom;
-                    else if(object.libelle) label = object.libelle;
+//                    var label;
+//                    if(object.nom) label = object.nom;
+//                    else if(object.libelle) label = object.libelle;
                     parseTab(docu, object[objectKeys[key1]]);
                 }
                 else {

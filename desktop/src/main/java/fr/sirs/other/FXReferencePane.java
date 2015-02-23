@@ -156,15 +156,15 @@ public class FXReferencePane extends BorderPane {
                     @Override
                     public Object apply(Object t) {
 
-                        if (localInstancesNotOnTheServer != null
-                                && localInstancesNotOnTheServer.contains(t)) {
+//                        if (localInstancesNotOnTheServer != null
+//                                && localInstancesNotOnTheServer.contains(t)) {
                             final Tab tab = new FXFreeTab("Analyse de la base");
                             tab.setContent(new FXReferenceAnalysePane((ReferenceType)t));
                             Injector.getSession().getFrame().addTab(tab);
-                        }
-                        else{
-                            new Alert(Alert.AlertType.INFORMATION, "Cette référence est à jour.", ButtonType.OK).showAndWait();
-                        }
+//                        }
+//                        else{
+//                            new Alert(Alert.AlertType.INFORMATION, "Cette référence est à jour.", ButtonType.OK).showAndWait();
+//                        }
                         return t;
                     }
                 });

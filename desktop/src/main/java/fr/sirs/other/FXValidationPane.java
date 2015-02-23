@@ -15,7 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -73,76 +76,90 @@ public class FXValidationPane extends BorderPane {
         
         
 
-        final TableColumn<ValiditySummary, ValiditySummary> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
-        docClassColumn.setCellValueFactory(DEFAULT_CELL_VALUE_FACTORY);
-        docClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, ValiditySummary>, TableCell<ValiditySummary, ValiditySummary>>() {
+        final TableColumn<ValiditySummary, Map.Entry<String, String>> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
+        docClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>>, ObservableValue<Map.Entry<String, String>>>() {
+
+                @Override
+                public ObservableValue<Map.Entry<String, String>> call(TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>> param) {
+                    return new SimpleObjectProperty<>(new HashMap.SimpleImmutableEntry<String, String>(param.getValue().getDocId(), param.getValue().getDocClass()));
+                }
+            });
+        docClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, Map.Entry<String, String>>, TableCell<ValiditySummary, Map.Entry<String, String>>>() {
 
             @Override
-            public TableCell<ValiditySummary, ValiditySummary> call(TableColumn<ValiditySummary, ValiditySummary> param) {
-                return new TableCell<ValiditySummary, ValiditySummary>() {
+            public TableCell<ValiditySummary, Map.Entry<String, String>> call(TableColumn<ValiditySummary, Map.Entry<String, String>> param) {
+                return new TableCell<ValiditySummary, Map.Entry<String, String>>() {
                     @Override
-                    protected void updateItem(ValiditySummary item, boolean empty) {
+                    protected void updateItem(Map.Entry<String, String> item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (item != null) {
-                            setText(getBundleForClass(item.getDocClass()).getString("class"));
-                            setTooltip(new Tooltip(item.getDocId()));
+                        if(empty || item==null){
+                            setText(null);
+                            setGraphic(null);
+                        }
+                        else{
+                            setText(getBundleForClass(item.getValue()).getString("class"));
+                            setTooltip(new Tooltip(item.getKey()));
                         }
                     }
                 };
             }
         });
-        docClassColumn.setComparator(new Comparator<ValiditySummary>() {
+        docClassColumn.setComparator(new Comparator<Map.Entry<String, String>>() {
 
             @Override
-            public int compare(ValiditySummary o1, ValiditySummary o2) {
+            public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
                 if(o1==null && o2==null) return 0;
                 if(o1==null && o2!=null) return -1;
                 if(o1!=null && o2==null) return 1;
                 else{
-                    final ResourceBundle rb1 = getBundleForClass(o1.getDocClass());
-                    final ResourceBundle rb2 = getBundleForClass(o2.getDocClass());
+                    final ResourceBundle rb1 = getBundleForClass(o1.getValue());
+                    final ResourceBundle rb2 = getBundleForClass(o2.getValue());
                     return rb1.getString("class").compareTo(rb2.getString("class"));
                 }
             }
         });
         usages.getColumns().add(docClassColumn);
+        
+        final TableColumn<ValiditySummary, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
+        elementClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
-        final TableColumn<ValiditySummary, ValiditySummary> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
-        elementClassColumn.setCellValueFactory(DEFAULT_CELL_VALUE_FACTORY);
-        elementClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, ValiditySummary>, TableCell<ValiditySummary, ValiditySummary>>() {
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                    return new SimpleStringProperty(param.getValue().getElementClass());
+                }
+            });
+        elementClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, String>, TableCell<ValiditySummary, String>>() {
 
             @Override
-            public TableCell<ValiditySummary, ValiditySummary> call(TableColumn<ValiditySummary, ValiditySummary> param) {
-                return new TableCell<ValiditySummary, ValiditySummary>() {
+            public TableCell<ValiditySummary, String> call(TableColumn<ValiditySummary, String> param) {
+                return new TableCell<ValiditySummary, String>() {
                     @Override
-                    protected void updateItem(ValiditySummary item, boolean empty) {
+                    protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (item != null) {
-                            if(item.getElementClass()!=null){
-                                final ResourceBundle rb = getBundleForClass(item.getElementClass());
-                                setText((rb == null) ? null : rb.getString("class"));
-                                if(item.getElementId()!=null){
-                                    setTooltip(new Tooltip(item.getElementId()));       
-                                }
-                            }
+                        if(empty || item==null){
+                            setText(null);
+                            setGraphic(null);
+                        }
+                        else{
+                            final ResourceBundle rb = getBundleForClass(item);
+                            setText((rb == null) ? null : rb.getString("class"));
                         }
                     }
                 };
             }
         });
-        elementClassColumn.setComparator(new Comparator<ValiditySummary>() {
+        elementClassColumn.setComparator(new Comparator<String>() {
 
             @Override
-            public int compare(ValiditySummary o1, ValiditySummary o2) {
-                if(o1==null && o2==null) return 0;
-                else if(o1==null && o2!=null) return -1;
-                else if(o1!=null && o2==null) return 1;
-                else if(o1.getElementClass()==null && o2.getElementClass()==null) return 0;
-                else if(o1.getElementClass()==null && o2.getElementClass()!=null) return -1;
-                else if(o1.getElementClass()!=null && o2.getElementClass()==null) return 1;
+            public int compare(String o1, String o2) {
+                final String elementClass1 = o1;
+                final String elementClass2 = o2;
+                if(elementClass1==null && elementClass2==null) return 0;
+                else if(elementClass1==null && elementClass2!=null) return -1;
+                else if(elementClass1!=null && elementClass2==null) return 1;
                 else{
-                    final ResourceBundle rb1 = getBundleForClass(o1.getElementClass());
-                    final ResourceBundle rb2 = getBundleForClass(o2.getElementClass());
+                    final ResourceBundle rb1 = getBundleForClass(elementClass1);
+                    final ResourceBundle rb2 = getBundleForClass(elementClass2);
                     return rb1.getString("class").compareTo(rb2.getString("class"));
                 }
             }
@@ -271,8 +288,12 @@ public class FXValidationPane extends BorderPane {
         @Override
         protected void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
-
-            if (item != null) {
+            if(empty || item==null){
+                setText(null);
+                setGraphic(null);
+            }
+            else{
+                setGraphic(button);
                 button.setGraphic(new ImageView(SIRS.ICON_EYE));
             }
         }
@@ -311,13 +332,10 @@ public class FXValidationPane extends BorderPane {
 
     private class ValidButtonTableCell extends TableCell<ValiditySummary, Object> {
 
-        private final Node defaultGraphic;
         protected final Button button = new Button();
 
-        public ValidButtonTableCell(Node graphic) {
+        public ValidButtonTableCell() {
             super();
-            defaultGraphic = graphic;
-            button.setGraphic(defaultGraphic);
             setGraphic(button);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setAlignment(Pos.CENTER);
@@ -352,7 +370,7 @@ public class FXValidationPane extends BorderPane {
                 button.setGraphic(new ImageView(ICON_EXCLAMATION_CIRCLE));
                 button.setText("Invalidé");
             } else {
-                button.setGraphic(defaultGraphic);
+                button.setGraphic(new ImageView(ICON_CHECK_CIRCLE));
                 button.setText("Validé");
             }
         }
@@ -361,7 +379,12 @@ public class FXValidationPane extends BorderPane {
         protected void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
 
-            if (item != null) {
+            if(empty || item==null){
+                setText(null);
+                setGraphic(null);
+            }
+            else{
+                setGraphic(button);
                 updateButton(((ValiditySummary) item).getValid());
             }
         }
@@ -392,9 +415,14 @@ public class FXValidationPane extends BorderPane {
                 @Override
                 public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
 
-                    return new ValidButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
+                    return new ValidButtonTableCell();
                 }
             });
         }
+    }
+    
+    public static void main(String[] args) {
+        BooleanProperty jojo = new SimpleBooleanProperty();
+        System.out.println(jojo.get());
     }
 }

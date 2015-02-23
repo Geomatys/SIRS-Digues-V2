@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.ReferenceType;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -259,17 +260,18 @@ public class ReferenceChecker {
          * @throws IllegalArgumentException
          * @throws InvocationTargetException 
          */
-        private Object buildReferenceInstance(final CSVRecord record) {
+        private ReferenceType buildReferenceInstance(final CSVRecord record) {
 
             if (record == null) {
                 return null;
             }
 
-            Object referenceInstance = null;
+            ReferenceType referenceInstance = null;
 
             try {
-                final Constructor constructor = referenceClass.getConstructor();
+                final Constructor<ReferenceType> constructor = referenceClass.getConstructor();
                 referenceInstance = constructor.newInstance();
+                referenceInstance.setValid(true);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
                 SIRS.LOGGER.log(Level.SEVERE, null, ex);
             }
@@ -283,6 +285,7 @@ public class ReferenceChecker {
                     if (String.class.equals(type)) {
                         if ("id".equals(header)) {
                             setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
+                            referenceClass.getMethod("setPseudoId", String.class).invoke(referenceInstance, record.get(header));
                         } else {
                             setter.invoke(referenceInstance, record.get(header));
                         }

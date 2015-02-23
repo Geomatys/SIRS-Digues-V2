@@ -6,14 +6,17 @@ function(doc) {
     var objectKeys = Object.keys(doc);
     for (key in objectKeys) {
 
-        // Si le champ est une chaine de caractère, on regarde si sa valeur correspond à l'ID recherché
+        // Si la VALEUR du champ est une chaine de caractère, l'emet pour analyse.
         if (typeof doc[objectKeys[key]] === "string") {
             searchDocumentID(doc, objectKeys[key]);
         }
 
-        // Si c'est un objet, il faut procéder récursivement
+        // Si la VALEUR du champ est un objet, il faut procéder récursivement en séparant les cas du tableau et de l'objet.
         else if (Array.isArray(doc[objectKeys[key]])) {
-            parseTab(doc[objectKeys[key]], doc._id);
+            var label;
+            if(doc.nom) label = doc.nom;
+            else if(doc.libelle) label = doc.libelle;
+            parseTab(doc[objectKeys[key]], doc._id, label, doc['@class']);
         }
         else if (typeof doc[objectKeys[key]] === "object") {
             parseObject(doc[objectKeys[key]]);
@@ -21,7 +24,7 @@ function(doc) {
     }
 
     /**
-     * Si le contenu de field correspond à l'ID recherché, pour un document.
+     * Émission d'un champ chaine de caractère.
      */
     function searchDocumentID(object, field) {
         //if(object[field] === SEARCH_ID)
@@ -51,13 +54,17 @@ function(doc) {
      * Analyse un tableau, avec l'ID de son élément le plus proche.
      */
     function parseTab(tab, docId, label, docType) {
+        // On parcours les cellules
         for (var i = 0; i < tab.length; i++) {
+            // Si la cellule contient une chaîne de caractères
             if (typeof tab[i] === "string") {
                 searchTabCellID(docId, docType, label, tab[i]);
             }
+            // Si la cellule contient un tableau, on l'explore.
             else if (Array.isArray(tab[i])) {
                 parseTab(tab[i], docId, label, docType);
             }
+            // si la cellule contient un objet, on le parse.
             else if (typeof tab[i] === "object") {
 
                 parseObject(tab[i]);
@@ -74,12 +81,12 @@ function(doc) {
 
         for (key1 in objectKeys) {
 
-            // Si le champ est une chaine de caractère, on regarde si sa valeur correspond à l'ID recherché
+            // Si la VALEUR du champ est une chaine de caractère.
             if (typeof object[objectKeys[key1]] === "string") {
                 searchElementID(object, objectKeys[key1]);
             }
 
-            // Si c'est un objet, il faut procéder récursivement
+            // Si la valeur du champ est un objet, il faut procéder récursivement
             if (typeof object[objectKeys[key1]] === "object") {
                 if (Array.isArray(object[objectKeys[key1]])) {
                     
@@ -89,7 +96,7 @@ function(doc) {
                     parseTab(object[objectKeys[key1]], object.id, label, object['@class']);
                 }
                 else {
-                    parseObject(objectKeys[key1]);
+                    parseObject(object[objectKeys[key1]]);
                 }
             }
         }
