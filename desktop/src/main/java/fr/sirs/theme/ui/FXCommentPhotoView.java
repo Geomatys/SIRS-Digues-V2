@@ -107,7 +107,7 @@ public class FXCommentPhotoView extends SplitPane {
             /* TODO : It appears that image relative path is stored in 
              * libelle property. It's a bit strange, it should be watched.
              */
-            final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getLibelle());
+            final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
             // TODO : How to manage image loading error ? No exception is thrown here...
             uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
             uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
