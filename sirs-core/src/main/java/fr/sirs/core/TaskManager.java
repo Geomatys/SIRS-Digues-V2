@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,16 +60,7 @@ public class TaskManager implements Closeable {
             /* Automatically move the task from submitted to "In error" when its state change.
              * Or just dereference it if succeeded.
              */
-            newTask.stateProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
-                if (Worker.State.FAILED.equals(newValue)) {
-                    tasksInError.add(newTask);
-                }
-                if (Worker.State.FAILED.equals(newValue) ||
-                        Worker.State.SUCCEEDED.equals(newValue) || 
-                        Worker.State.CANCELLED.equals(newValue)) {
-                    submittedTasks.remove(newTask);
-                }
-            });
+            new TaskStateListener(newTask);
             submittedTasks.add(newTask);
             
             threadPool.submit(newTask);
@@ -115,8 +107,38 @@ public class TaskManager implements Closeable {
             }
         });
         submittedTasks.add(shutdownTask);
+        new TaskStateListener(shutdownTask);
         new Thread(shutdownTask).start();
         return shutdownTask;
+    }
+    
+    /**
+     * Watch a task state, and move it in the right list at change. We remove it
+     * from submitted tasks when it's done, and add it to tasks in error if it
+     * failed.
+     */
+    private class TaskStateListener implements ChangeListener {
+
+        private final Task toWatch;
+        
+        public TaskStateListener(final Task t) {
+            ArgumentChecks.ensureNonNull("Task to watch", t);
+            toWatch = t;
+            t.stateProperty().addListener(this);
+        }
+        
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            if (Worker.State.FAILED.equals(newValue)) {
+                tasksInError.add(toWatch);
+            }
+            if (Worker.State.FAILED.equals(newValue)
+                    || Worker.State.SUCCEEDED.equals(newValue)
+                    || Worker.State.CANCELLED.equals(newValue)) {
+                submittedTasks.remove(toWatch);
+            }
+        }
+        
     }
     
     /**

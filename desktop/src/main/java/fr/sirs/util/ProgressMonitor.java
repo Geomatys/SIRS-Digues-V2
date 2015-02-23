@@ -218,7 +218,11 @@ public class ProgressMonitor extends HBox {
             getChildren().addAll(title, progress, cancelButton);
 
             taskProperty.addListener((ObservableValue<? extends Task> observable, Task oldValue, Task newValue) -> {
-                taskUpdated();
+                if (Platform.isFxApplicationThread()) {
+                    taskUpdated();
+                } else {
+                    Platform.runLater(()->taskUpdated());
+                }
             });
             
             taskProperty.set(t);
