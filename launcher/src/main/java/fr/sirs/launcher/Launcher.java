@@ -41,7 +41,7 @@ public class Launcher extends Application {
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
         // the initialization phase of your application
         SLF4JBridgeHandler.install();
-        
+        // TODO : deactivate to avoid being bothered for minor UI errors.
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);

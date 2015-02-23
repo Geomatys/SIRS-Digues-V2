@@ -139,6 +139,8 @@ public class PojoTable extends BorderPane {
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
     
+    protected final SimpleObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
+    
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
     }
@@ -385,6 +387,37 @@ public class PojoTable extends BorderPane {
         topPane.setLeft(navigationToolbar);
     }
     
+    /**
+     * Définit l'élément en paramètre comme parent de tout élément créé via cette table.
+     * 
+     * Note : Ineffectif dans le cas où les éléments de la PojoTable sont créés 
+     * et listés directement depuis un repository couchDB, ou que l'élément créé  
+     * est déjà un CouchDB document. 
+     * @param parentElement L'élément qui doit devenir le parent de tout objet créé via 
+     * la PojoTable.
+     */
+    public void setParentElement(final Element parentElement) {
+        this.parentElementProperty.set(parentElement);
+    }
+    
+    /**
+     * 
+     * @return L'élément à affecter en tant que parent de tout élément créé via 
+     * cette table. Peut-être nul.
+     */
+    public Element getParentElement() {
+        return this.parentElementProperty.get();
+    }
+        
+    /**
+     * 
+     * @return La propriété contenant l'élément à affecter en tant que parent de
+     *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
+     */
+    public SimpleObjectProperty<Element> parentElementProperty() {
+        return this.parentElementProperty;
+    }
+    
     protected ObservableList<Element> getAllValues(){return allValues;}
 
     public BooleanProperty editableProperty(){
@@ -544,10 +577,6 @@ public class PojoTable extends BorderPane {
         else if (pojoClass != null) {
             try {
                 result = pojoClass.newInstance();
-                if(result instanceof Element) {
-                    ((Element)result).setAuthor(session.getUtilisateur().getId());
-                    ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
-                }
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -556,6 +585,13 @@ public class PojoTable extends BorderPane {
         }
         
         if (result instanceof Element) {
+            final Element newlyCreated = (Element)result;
+            newlyCreated.setAuthor(session.getUtilisateur().getId());
+            newlyCreated.setValid(!(session.getRole()==Role.EXTERN));
+            if (parentElementProperty.get() != null) {
+                // this should do nothing for new 
+                newlyCreated.setParent(parentElementProperty.get());
+            }
             uiTable.getItems().add((Element)result);
         } else {
             new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();

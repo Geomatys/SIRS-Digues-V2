@@ -8,6 +8,8 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import javafx.util.StringConverter;
@@ -49,6 +51,10 @@ public class SirsStringConverter extends StringConverter {
             text = c.getNom() + " " + c.getPrenom();
         } else if (item instanceof Organisme) {
             text = ((Organisme)item).getNom();
+        } else if (item instanceof Element) {
+            LabelMapper labelMapper = new LabelMapper(item.getClass());
+            // TODO : make a commodity method in label mapper ?
+            text = labelMapper.mapPropertyName("classAbrege") + ((Element)item).getPseudoId();
         } else if (item instanceof String) {
             text = (String) item;
         } else if (item instanceof CoordinateReferenceSystem) {

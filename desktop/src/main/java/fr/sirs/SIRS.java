@@ -141,6 +141,7 @@ public final class SIRS extends SirsCore {
      * si les chemins sont incorrects syntaxiquement.
      */
     public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
+        ArgumentChecks.ensureNonEmpty("Document relative path", relativeReference);
         String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
         final Path docRoot;
         try {
@@ -153,7 +154,7 @@ public final class SIRS extends SirsCore {
 
         /* HACK : change all separators, because when we use 2 different system 
          * separator in the same time, it produces invalid paths. We also check
-         * if path starts with file separato, because unix consider it as system
+         * if path starts with file separator, because unix consider it as system
          * root, and will not resolve image path as relative if we keep it.
          */
         return docRoot.resolve(relativeReference.replaceFirst("^(/+|\\\\+)", "").replaceAll("/+|\\\\+", File.separator));
@@ -307,12 +308,13 @@ public final class SIRS extends SirsCore {
      * @param current the element to select by default.
      */
     public static void initCombo(ComboBox comboBox, final ObservableList items, final Object current) {
+        comboBox.setConverter(new SirsStringConverter());
+        comboBox.setEditable(true);
+        
         comboBox.setItems(items);
         comboBox.getSelectionModel().select(current);
         
         new ComboBoxCompletion(comboBox);
-        comboBox.setConverter(new SirsStringConverter());
-        comboBox.setEditable(true);
     }
     
     public static ExceptionDialog newExceptionDialog(final String headerText, final Throwable t) {
