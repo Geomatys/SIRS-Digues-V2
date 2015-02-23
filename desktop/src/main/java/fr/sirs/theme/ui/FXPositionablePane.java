@@ -10,6 +10,8 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TaskManager;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
@@ -25,7 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -89,9 +94,9 @@ public class FXPositionablePane extends BorderPane {
     
     //Mode borne
     @FXML private GridPane uiBornePane;
-    @FXML private ComboBox<String> uiSRs;
-    @FXML private ComboBox<String> uiBorneStart;
-    @FXML private ComboBox<String> uiBorneEnd;
+    @FXML private ComboBox<SystemeReperage> uiSRs;
+    @FXML private ComboBox<BorneDigue> uiBorneStart;
+    @FXML private ComboBox<BorneDigue> uiBorneEnd;
     @FXML private CheckBox uiAvalSart;
     @FXML private CheckBox uiAvalEnd;
     @FXML private FXNumberSpinner uiDistanceStart;
@@ -167,19 +172,11 @@ public class FXPositionablePane extends BorderPane {
         uiLongitudeEnd.disableProperty().bind(binding);
         uiLatitudeEnd.disableProperty().bind(binding);
         
-        uiCRSs.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<CoordinateReferenceSystem>() {
-
-            @Override
-            public void changed(ObservableValue<? extends CoordinateReferenceSystem> observable, CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) {
-                updateGeoCoord();
-            }
+        uiCRSs.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends CoordinateReferenceSystem> observable, CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) -> {
+            updateGeoCoord();
         });
-        uiSRs.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                updateBorneList();
-            }
+        uiSRs.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) -> {
+            updateBorneList();
         });
         
     }
@@ -342,42 +339,66 @@ public class FXPositionablePane extends BorderPane {
     }
 
     private void updateGeoCoord() {
-        if(initializing) return;
+        if (initializing) return;
+        
         final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
-        
-        Point ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-            fxNumberValue(uiLongitudeStart),
-            fxNumberValue(uiLatitudeStart)
-        ));
-        Point ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-            fxNumberValue(uiLongitudeEnd),
-            fxNumberValue(uiLatitudeEnd)
-        ));
-        
-        if(crs==CRS_WGS84){
-            //conversion vers WGS84
-            try {
-                final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
-                ptStart = (Point) JTS.transform(ptStart, trs);
-                ptEnd = (Point) JTS.transform(ptEnd, trs);
-            } catch (FactoryException | TransformException ex) {
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            }
-        }else if(crs==baseCrs){
-            //conversion vers base
-            try {
-                final MathTransform trs = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
-                ptStart = (Point) JTS.transform(ptStart, trs);
-                ptEnd = (Point) JTS.transform(ptEnd, trs);
-            } catch (FactoryException | TransformException ex) {
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            }
+
+        final Point ptStart, ptEnd;
+        // On a un point de début valide
+        if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
+            ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                    fxNumberValue(uiLongitudeStart),
+                    fxNumberValue(uiLatitudeStart)
+            ));
+        } else {
+            ptStart = null;
         }
+
+        // On a un point de fin valide
+        if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
+            ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                    fxNumberValue(uiLongitudeEnd),
+                    fxNumberValue(uiLatitudeEnd)
+            ));
+        } else {
+            ptEnd = null;
+        }
+
+        final Callable pointConverter = () -> {
+            final MathTransform conversion;
+            if (crs == CRS_WGS84) {
+                //conversion vers WGS84
+                conversion = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
+            } else if (crs == baseCrs) {
+                //conversion vers base
+                conversion = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
+            } else {
+                throw new IllegalStateException("Pas de CRS valide.");
+            }
+
+            if (ptStart != null) {
+                final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
+                Platform.runLater(() -> {
+                    uiLongitudeStart.valueProperty().set(tmpStart.getX());
+                    uiLatitudeStart.valueProperty().set(tmpStart.getY());
+                });
+            }
+            if (ptEnd != null) {
+                final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
+                Platform.runLater(() -> {
+                    uiLongitudeEnd.valueProperty().set(tmpEnd.getX());
+                    uiLatitudeEnd.valueProperty().set(tmpEnd.getY());
+                });
+            }
+            return null;
+        };
         
-        uiLongitudeStart.valueProperty().set(ptStart.getX());
-        uiLatitudeStart.valueProperty().set(ptStart.getY());
-        uiLongitudeEnd.valueProperty().set(ptEnd.getX());
-        uiLatitudeEnd.valueProperty().set(ptEnd.getY());
+        try {
+            TaskManager.INSTANCE.submit("Conversion de points géographiques", pointConverter).get();
+        } catch (Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, "La conversion des positions a échouée.", ex);
+            SIRS.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+        }
         
     }
     
@@ -396,36 +417,39 @@ public class FXPositionablePane extends BorderPane {
         final TronconDigue troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
         final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
         
-        
         for(SystemeReperage sr : srs){
             cacheSystemeReperage.put(sr.getId(), sr);
         }
         
+        uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
+        uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
     }
     
-    private void updateBorneList(){
+    private void updateBorneList() {
         final Positionable pos = (Positionable) positionableProperty.get();
-        if(pos==null) return;
-        
+        if (pos == null) return;
+
         cacheBorneDigue.clear();
-        final List<String> bornes = new ArrayList<>();
-        if(pos.getSystemeRepId()!=null && !pos.getSystemeRepId().isEmpty()){
-            final Session session = Injector.getBean(Session.class);
-            final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
-            if(sr!=null){
-                for(SystemeReperageBorne srb : sr.systemereperageborneId){
-                    final String bid = srb.getBorneId();
-                    final BorneDigue bd = session.getBorneDigueRepository().get(bid);
-                    if(bd!=null){
-                        cacheBorneDigue.put(bid, bd);
-                        bornes.add(bid);
-                    }
+        final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
+        final SystemeReperage sr = uiSRs.getSelectionModel().getSelectedItem();
+        if (sr != null) {
+            BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
+            for (SystemeReperageBorne srb : sr.systemereperageborneId) {
+                final String bid = srb.getBorneId();
+                final BorneDigue bd = borneRepo.get(bid);
+                if (bd != null) {
+                    cacheBorneDigue.put(bid, bd);
+                    bornes.add(bd);
                 }
             }
         }
-        
-        uiBorneStart.setItems(FXCollections.observableList(bornes));
-        uiBorneEnd.setItems(FXCollections.observableList(bornes));
+
+        uiBorneStart.setItems(bornes);
+        uiBorneEnd.setItems(bornes);
+        if (sr != null && sr.getId().equals(pos.getSystemeRepId())) {
+            uiBorneStart.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneDebutId()));
+            uiBorneEnd.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneFinId()));
+        }
     }
     
     private void updateField(){
@@ -441,16 +465,12 @@ public class FXPositionablePane extends BorderPane {
             public void run() {
                 //creation de la liste des systemes de reperage
                 updateSRList();
-                uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.keySet()));
                 updateBorneList();
                 
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
                         //Bindings
-                        uiSRs.valueProperty().bindBidirectional(pos.systemeRepIdProperty());
-                        uiBorneStart.valueProperty().bindBidirectional(pos.borneDebutIdProperty());
-                        uiBorneEnd.valueProperty().bindBidirectional(pos.borneFinIdProperty());
                         uiAvalSart.selectedProperty().bindBidirectional(pos.borne_debut_avalProperty());
                         uiAvalEnd.selectedProperty().bindBidirectional(pos.borne_fin_avalProperty());
                         uiDistanceStart.valueProperty().bindBidirectional(pos.borne_debut_distanceProperty());
@@ -499,46 +519,64 @@ public class FXPositionablePane extends BorderPane {
         
     public void preSave() {
         final Positionable pos = (Positionable) positionableProperty.get();
-        if(pos==null) return;
-        
-        if(uiTypeCoord.isSelected()){
-            //sauvegarde de la position geographique
-            Point ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                fxNumberValue(uiLongitudeStart),
-                fxNumberValue(uiLatitudeStart)
-            ));
-            Point ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                fxNumberValue(uiLongitudeEnd),
-                fxNumberValue(uiLatitudeEnd)
-            ));
-            
-            if(uiCRSs.getSelectionModel().getSelectedItem() == CRS_WGS84){
-                //conversion vers base crs
-                try {
-                    final MathTransform trs = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
-                    ptStart = (Point) JTS.transform(ptStart, trs);
-                    ptEnd = (Point) JTS.transform(ptEnd, trs);
-                } catch (FactoryException | TransformException ex) {
-                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        if (pos == null) {
+            return;
+        }
+
+        // Si un CRS est défini, on essaye de sauvegarder les positions géographiques.
+        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+        if (selectedCRS != null) {
+
+            Point ptStart, ptEnd;
+            // On a un point de début valide : on l'enregistre.
+            if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
+                ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                        fxNumberValue(uiLongitudeStart),
+                        fxNumberValue(uiLatitudeStart)
+                ));
+            } else {
+                ptStart = null;
+            }
+
+            // On a un point de fin valide : on l'enregistre.
+            if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
+                ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                        fxNumberValue(uiLongitudeEnd),
+                        fxNumberValue(uiLatitudeEnd)
+                ));
+            } else {
+                ptEnd = null;
+            }
+
+            if (ptStart != null || ptEnd != null) {
+                if (!CRS.equalsApproximatively(selectedCRS, baseCrs)) {
+                    try {
+                        final MathTransform trs = CRS.findMathTransform(selectedCRS, baseCrs, true);
+                        if (ptStart != null) {
+                            ptStart = (Point) JTS.transform(ptStart, trs);
+                        }
+                        if (ptEnd != null) {
+                            ptEnd = (Point) JTS.transform(ptEnd, trs);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
+                //on sauvegarde la position geo
+                pos.setPositionDebut(ptStart);
+                pos.setPositionFin(ptEnd);
             }
             
-            //on sauvegarde la position geo
-            pos.setPositionDebut(ptStart);
-            pos.setPositionFin(ptEnd);
-            //on efface la position par rapport aux bornes
-            //les propriétés sont bindées            
-            pos.borne_debut_avalProperty().set(false);
-            pos.borne_fin_avalProperty().set(false);
-            pos.borneDebutIdProperty().set(null);
-            pos.borneFinIdProperty().set(null);
-            pos.borne_debut_distanceProperty().set(0);
-            pos.borne_fin_distanceProperty().set(0);
-        }else{
             //sauvegarde de la position par borne
-            //les propriétés sont bindées            
-            pos.setPositionDebut(null);
-            pos.setPositionFin(null);
+            final SystemeReperage selectedSR = uiSRs.getSelectionModel().selectedItemProperty().get();
+            final BorneDigue borneStart = uiBorneStart.getSelectionModel().selectedItemProperty().get();
+            final BorneDigue borneEnd = uiBorneEnd.getSelectionModel().selectedItemProperty().get();
+            
+            pos.setSystemeRepId((selectedSR != null)? selectedSR.getId() : null);
+            
+            pos.setBorneDebutId((borneStart != null)? borneStart.getId() : null);
+            pos.setBorneFinId((borneEnd != null)? borneEnd.getId() : null);
         }
         
         //maj de la geometrie du positionable
