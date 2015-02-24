@@ -1,6 +1,7 @@
 package fr.sirs.map;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -34,9 +35,10 @@ public class FXTronconEditBar extends ToolBar {
         butEditSr.getStyleClass().add(CENTER);
         final ToggleButton butEditConvert = new ConvertGeomToTronconAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditConvert.getStyleClass().add(CENTER);
+        final Button importBornes = new FXImportBornesAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
         final ToggleButton butInfo = new FXOpenElementEditorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butInfo.getStyleClass().add(RIGHT);
-        final HBox hboxAction = new HBox(butEditTroncon, butCut, butMerge, butEditSr, butEditConvert, butInfo);
+        final HBox hboxAction = new HBox(butEditTroncon, butCut, butMerge, butEditSr, butEditConvert, importBornes, butInfo);
 
         getItems().add(hboxAction);
 
