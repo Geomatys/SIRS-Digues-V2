@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import fr.sirs.core.model.Positionable;
 
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -31,7 +32,7 @@ import org.geotoolkit.referencing.LinearReferencing;
  */
 public final class LinearReferencingUtilities extends LinearReferencing{
     
-    public static LineString buildGeometry(Geometry tronconGeom, Objet structure, BorneDigueRepository repo){
+    public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, BorneDigueRepository repo){
         
         final LineString troncon = asLineString(tronconGeom);
         SegmentInfo[] segments = buildSegments(troncon);

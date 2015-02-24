@@ -596,9 +596,19 @@ public class FXPositionablePane extends BorderPane {
         }
         
         //maj de la geometrie du positionable
-        final TronconDigue troncon = (TronconDigue) pos.getParent();
-        final LineString structGeom = LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), 
-                (Objet)pos, Injector.getSession().getBorneDigueRepository());
+        final TronconDigue troncon;
+        
+        if (pos.getParent() != null) {
+            Element tmp = pos.getParent();
+            while (tmp != null && !(tmp instanceof TronconDigue)) {
+                tmp = tmp.getParent();
+            }
+            troncon = (TronconDigue) tmp;
+        } else {
+            troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
+        }
+        final LineString structGeom = LinearReferencingUtilities.buildGeometry(
+                troncon.getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
         pos.setGeometry(structGeom);
         
     }
