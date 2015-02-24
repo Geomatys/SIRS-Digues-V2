@@ -41,15 +41,15 @@ public class Launcher extends Application {
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
         // the initialization phase of your application
         SLF4JBridgeHandler.install();
-        // TODO : deactivate to avoid being bothered for minor UI errors.
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);
-            final Runnable exceptionDialog = () -> {
-                SIRS.newExceptionDialog("Une erreur inattendue est survenue.Code d'erreur : "+errorCode, e).show();
-            };
-            if (Platform.isFxApplicationThread()) exceptionDialog.run();
-            else Platform.runLater(exceptionDialog);
+        // deactivates to avoid being bothered for minor UI errors.
+//            final Runnable exceptionDialog = () -> {
+//                SIRS.newExceptionDialog("Une erreur inattendue est survenue.Code d'erreur : "+errorCode, e).show();
+//            };
+//            if (Platform.isFxApplicationThread()) exceptionDialog.run();
+//            else Platform.runLater(exceptionDialog);
         });
         
         ProgressIndicator progressIndicator = new ProgressIndicator();
