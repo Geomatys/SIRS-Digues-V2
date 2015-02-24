@@ -96,13 +96,15 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         orgsOfContact.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
-                    // We check only removed elements, because new ones do not 
+                // We check only removed elements, because new ones do not 
                 // have an attached organism.
-                final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
-                while (it.hasNext()) {
-                    final ContactOrganisme co = it.next();
-                    if (co.getParent() != null) {
-                        modifiedOrgs.add((Organisme) co.getParent());
+                while (c.next()) {
+                    final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
+                    while (it.hasNext()) {
+                        final ContactOrganisme co = it.next();
+                        if (co.getParent() != null) {
+                            modifiedOrgs.add((Organisme) co.getParent());
+                        }
                     }
                 }
             }

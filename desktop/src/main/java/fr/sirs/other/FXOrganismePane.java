@@ -74,6 +74,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         }
         
         coTable = new ContactOrganismeTable();
+        coTable.editableProperty().bind(uiMode.editionState());
         uiContactOrganismesTab.setContent(coTable);
         setElement(organisme);
     }
