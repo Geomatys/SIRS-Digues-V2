@@ -181,7 +181,7 @@ public class PojoTable extends BorderPane {
 
             @Override
             public TableRow<Element> call(TableView<Element> param) {
-                return new ReferenceTableRow();
+                return new ValidatedTableRow();
             }
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -832,7 +832,7 @@ public class PojoTable extends BorderPane {
         }  
     }
     
-    public class ReferenceTableRow extends TableRow<Element>{
+    public class ValidatedTableRow extends TableRow<Element>{
 
             @Override
             protected void updateItem(Element item, boolean empty) {

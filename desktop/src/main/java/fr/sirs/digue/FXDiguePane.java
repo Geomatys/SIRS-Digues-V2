@@ -15,7 +15,6 @@ import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Level;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -88,10 +87,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     private void reloadTroncons(){
         
         final List<TronconDigue> items = session.getTronconDigueByDigue(elementProperty.get());
-        this.troncons = FXCollections.observableArrayList();
-        items.stream().forEach((item) -> {
-            this.troncons.add(item);
-        });
+        this.troncons = FXCollections.observableArrayList(items);
     }
 
     /**

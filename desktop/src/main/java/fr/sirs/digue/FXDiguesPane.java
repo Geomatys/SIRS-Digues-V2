@@ -16,7 +16,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.SearchEngine;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXElementPane;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -414,10 +413,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
     
     private class CustomizedTreeCell extends TreeCell {
 
-        private final ContextMenu addTronconMenu;
+        private final ContextMenu addMenu;
 
         public CustomizedTreeCell() {
-            addTronconMenu = new ContextMenu();
+            addMenu = new ContextMenu();
         }
 
         @Override
@@ -431,17 +430,17 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
 
             if (obj instanceof SystemeEndiguement) {
                 this.setText(((SystemeEndiguement) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                addTronconMenu.getItems().clear();
+                addMenu.getItems().clear();
                 if(session.nonGeometryEditionProperty().get()){
-                    addTronconMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
-                    setContextMenu(addTronconMenu);
+                    addMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
+                    setContextMenu(addMenu);
                 }
             } else if (obj instanceof Digue) {
                 this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                addTronconMenu.getItems().clear();
+                addMenu.getItems().clear();
                 if(session.nonGeometryEditionProperty().get()){
-                    addTronconMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
-                    setContextMenu(addTronconMenu);
+                    addMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
+                    setContextMenu(addMenu);
                 }
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
