@@ -46,15 +46,15 @@ public class TaskManager implements Closeable {
         return submit(new MockTask(title, newTask));
     }
     
-    public Task submit(final Callable newTask) {
+    public <T> Task<T> submit(final Callable<T> newTask) {
         return submit(new MockTask(newTask));
     }
     
-    public Task submit(final String title, final Callable newTask) {
-        return submit(new MockTask(title, newTask));
+    public <T> Task<T> submit(final String title, final Callable<T> newTask) {
+        return submit(new MockTask<T>(title, newTask));
     }
     
-    public Task submit(final Task newTask) {
+    public <T> Task<T> submit(final Task<T> newTask) {
         ArgumentChecks.ensureNonNull("input task", newTask);
         if (!newTask.isDone()) {
             /* Automatically move the task from submitted to "In error" when its state change.
