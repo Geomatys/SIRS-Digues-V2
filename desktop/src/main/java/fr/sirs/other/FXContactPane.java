@@ -109,6 +109,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }
             }
         });
+        
+        initFields();
     }
     
     private void save(){
@@ -118,9 +120,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         modifiedOrgs.stream().forEach((org) -> orgRepository.update(org));
         modifiedOrgs.clear();
     }
-
-    @Override
-    public void preSave() {        
+    
+    private void initFields(){
         final Contact contact = elementProperty.get();
         
         orgsOfContact.clear();
@@ -148,6 +149,37 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }));
             }
         }
+    }
+
+    @Override
+    public void preSave() {        
+//        final Contact contact = elementProperty.get();
+//        
+//        orgsOfContact.clear();
+//        modifiedOrgs.clear();
+//        
+//        // We should not need to unbind fields, as they use weak listeners.
+//        if (contact == null) return;
+//                
+//        uiNom.textProperty().bindBidirectional(contact.nomProperty());
+//        uiPrenom.textProperty().bindBidirectional(contact.prenomProperty());
+//        uiService.textProperty().bindBidirectional(contact.serviceProperty());
+//        uiFonction.textProperty().bindBidirectional(contact.fonctionProperty());
+//        uiTelephone.textProperty().bindBidirectional(contact.telephoneProperty());
+//        uiFax.textProperty().bindBidirectional(contact.faxProperty());
+//        uiEmail.textProperty().bindBidirectional(contact.emailProperty());
+//        uiAdresse.textProperty().bindBidirectional(contact.adresseProperty());
+//        uiCodePostale.textProperty().bindBidirectional(contact.code_postalProperty());
+//        uiCommune.textProperty().bindBidirectional(contact.paysProperty());
+//               
+//        // Retrieve all organisms current contact is / was part of.
+//        if (contact.getId() != null) {
+//            for (final Organisme org : orgRepository.getAll()) {
+//                orgsOfContact.addAll(org.contactOrganisme.filtered((ContactOrganisme co) -> {
+//                    return contact.getId().equals(co.getContactId());
+//                }));
+//            }
+//        }
     }
  
     /**

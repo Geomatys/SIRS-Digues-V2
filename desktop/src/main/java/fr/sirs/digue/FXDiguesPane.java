@@ -392,6 +392,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
                     se.getDigue().add(digue.getDocumentId());
+                    digue.setSystemeEndiguement(se.getId());
                     FXDiguesPane.this.session.getSystemeEndiguementRepository().update(se);
                 }
                 
