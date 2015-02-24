@@ -52,22 +52,23 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
 
     private final TronconPojoTable table = new TronconPojoTable();
 
-    public FXDiguePane() {
+    public FXDiguePane(final Digue digue) {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         
         //mode edition
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.setSaveAction(this::save);
-        uiMode.validProperty().bind(elementProperty.get().validProperty());
-        final BooleanProperty editBind = uiMode.editionState();
-        libelle.editableProperty().bind(editBind);
-        uiComment.disableProperty().bind(editBind.not());
-        table.editableProperty().bind(editBind);
+        disableFieldsProperty().bind(uiMode.editionState().not());
+        
+        libelle.disableProperty().bind(disableFieldsProperty());
+        uiComment.disableProperty().bind(disableFieldsProperty());
+        table.editableProperty().bind(disableFieldsProperty().not());
         
         elementProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
         });
+        setElement(digue);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
     }
     
     public ObjectProperty<Digue> tronconProperty(){
@@ -112,6 +113,11 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
 
         // Binding levee's comment.---------------------------------------------
         this.uiComment.setHtmlText(elementProperty.get().getCommentaire());
+        
+        uiMode.validProperty().unbind();
+        uiMode.authorIDProperty().unbind();
+        uiMode.validProperty().bind(elementProperty.get().validProperty());
+        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
         
         table.updateTable();
     }

@@ -291,8 +291,7 @@ public final class SIRS extends SirsCore {
             content = ctrl;
             
         } else if (pojo instanceof Digue) {
-            final FXDiguePane ctrl = new FXDiguePane();
-            ctrl.setElement((Digue) pojo);
+            final FXDiguePane ctrl = new FXDiguePane((Digue) pojo);
             content = ctrl;
             
         } else {
