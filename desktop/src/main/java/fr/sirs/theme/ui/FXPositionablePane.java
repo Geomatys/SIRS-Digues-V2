@@ -13,6 +13,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
@@ -413,16 +414,23 @@ public class FXPositionablePane extends BorderPane {
         final Positionable pos = (Positionable) positionableProperty.get();
         if(pos==null) return;
         
-        final Session session = Injector.getBean(Session.class);
-        final TronconDigue troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
-        final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
-        
-        for(SystemeReperage sr : srs){
-            cacheSystemeReperage.put(sr.getId(), sr);
+        final TronconDigue troncon;
+        if (pos.getParent() instanceof TronconDigue) {
+            troncon = (TronconDigue) pos.getParent();
+        } else {
+            troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
         }
         
-        uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
-        uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
+        if (troncon != null) {
+            final List<SystemeReperage> srs = Injector.getSession().getSystemeReperageRepository().getByTroncon(troncon);
+
+            for (SystemeReperage sr : srs) {
+                cacheSystemeReperage.put(sr.getId(), sr);
+            }
+
+            uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
+            uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
+        }
     }
     
     private void updateBorneList() {
@@ -475,6 +483,14 @@ public class FXPositionablePane extends BorderPane {
                         uiAvalEnd.selectedProperty().bindBidirectional(pos.borne_fin_avalProperty());
                         uiDistanceStart.valueProperty().bindBidirectional(pos.borne_debut_distanceProperty());
                         uiDistanceEnd.valueProperty().bindBidirectional(pos.borne_fin_distanceProperty());
+                        
+                        // Mise à jour automatique de la liste des SRs si le parent
+                        // du positionable change.
+                        if (pos.parentProperty() != null) {
+                            pos.parentProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
+                                updateSRList();
+                            });
+                        }
 
                         //on ecoute les changements de geometrie pour mettre a jour les champs
                         final ChangeListener cl = new ChangeListener() {
