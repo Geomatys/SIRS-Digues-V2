@@ -306,8 +306,11 @@ public class Loader extends Application {
                 updateMessage("Chargement de Geotoolkit...");
                 // work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-                // Geotoolkit startup
-                Setup.initialize(null);
+                // Geotoolkit startup. We specify that we don't want to use Java preferences,
+                // because it does not work on most systems anyway.
+                final Properties noJavaPrefs = new Properties();
+                noJavaPrefs.put("platform", "server");
+                Setup.initialize(noJavaPrefs);
 
                 // DATABASE ////////////////////////////////////////////////////
                 updateProgress(inc++, total);

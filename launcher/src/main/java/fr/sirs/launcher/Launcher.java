@@ -37,24 +37,25 @@ public class Launcher extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
-        
+
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
         // the initialization phase of your application
         SLF4JBridgeHandler.install();
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             final String errorCode = UUID.randomUUID().toString();
             SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);
-        // deactivates to avoid being bothered for minor UI errors.
+            // deactivates to avoid being bothered for minor UI errors.
 //            final Runnable exceptionDialog = () -> {
 //                SIRS.newExceptionDialog("Une erreur inattendue est survenue.Code d'erreur : "+errorCode, e).show();
 //            };
 //            if (Platform.isFxApplicationThread()) exceptionDialog.run();
 //            else Platform.runLater(exceptionDialog);
         });
-        
+
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setBackground(Background.EMPTY);
-        final VBox vbox = new VBox(progressIndicator, new Label("Initialisation de la base EPSG"));
+        Label splashLabel = new Label("Initialisation de la base EPSG");
+        final VBox vbox = new VBox(progressIndicator, splashLabel);
         vbox.setSpacing(10);
         vbox.setAlignment(Pos.CENTER);
         StackPane stackPane = new StackPane(vbox);
@@ -66,13 +67,14 @@ public class Launcher extends Application {
         splashStage.setTitle("SIRS");
         splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
-        
-        primaryStage.setScene(new Scene(new FXLauncherPane()));
+
         primaryStage.setTitle("SIRS");
-        primaryStage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
-        
+        primaryStage.setOnCloseRequest((WindowEvent event) -> {
+            System.exit(0);
+        });
+
         splashStage.show();
-        
+
         /*
          * Initialize / create EPSG db. A loader is displayed while the task is 
          * running, preventing application launch.
@@ -85,8 +87,19 @@ public class Launcher extends Application {
             }
         };
         epsgIniter.setOnSucceeded((WorkerStateEvent event) -> {
-                    splashStage.close();
-                    primaryStage.show();
+            splashLabel.setText("Lancement de l'application");
+            primaryStage.setScene(new Scene(new FXLauncherPane()));
+            splashStage.close();
+            primaryStage.show();
+        });
+
+        epsgIniter.setOnFailed((WorkerStateEvent event) -> {
+            SIRS.newExceptionDialog("Impossible de se connecter à la base EPSG.", event.getSource().getException()).showAndWait();
+            System.exit(1);
+        });
+
+        epsgIniter.setOnCancelled((WorkerStateEvent event) -> {
+            System.exit(0);
         });
         new Thread(epsgIniter).start();
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.logging.Logger;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
@@ -16,6 +17,7 @@ import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.internal.sql.DefaultDataSource;
+import org.geotoolkit.lang.Setup;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
@@ -105,12 +107,16 @@ public class SirsCore {
         
         final DataSource ds = new DefaultDataSource(url);
         Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
+        
         final EpsgInstaller installer = new EpsgInstaller();
         installer.setDatabase(url);
         if (!installer.exists()) {
             installer.call();
         }
 
+        // work in lazy mode, do your best for lenient datum shift
+        Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
+        
         // force loading epsg
         CRS.decode("EPSG:3395");
     }
