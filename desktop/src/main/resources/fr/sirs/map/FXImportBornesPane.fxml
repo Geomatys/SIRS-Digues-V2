@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxWidth="600.0" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxWidth="700.0" minHeight="-Infinity" minWidth="-Infinity" prefWidth="450.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <VBox spacing="10.0" BorderPane.alignment="CENTER">
          <children>

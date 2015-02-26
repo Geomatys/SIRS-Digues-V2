@@ -262,7 +262,7 @@ public class FXImportBornesPane extends BorderPane {
 
     @FXML
     void cancelImport(ActionEvent event) {
-
+        this.getScene().getWindow().hide();
     }
 
     @FXML
