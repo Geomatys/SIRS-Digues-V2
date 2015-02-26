@@ -9,6 +9,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
+import fr.sirs.core.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Role;
@@ -42,6 +43,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -85,6 +88,8 @@ import org.geotoolkit.internal.GeotkFX;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  */
 public class PojoTable extends BorderPane {
     
@@ -139,7 +144,11 @@ public class PojoTable extends BorderPane {
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
     
+    /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
     protected final SimpleObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
+    
+    /** Task object designed for asynchronous update of the elements contained in the table. */
+    private Task tableUpdater;
     
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
@@ -291,8 +300,9 @@ public class PojoTable extends BorderPane {
         uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
         uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
         uiTable.setPlaceholder(new Label(""));
-        uiTable.setTableMenuButtonVisible(true);        
-        if (this.repo!=null) {
+        uiTable.setTableMenuButtonVisible(true);
+        // Load all elements only if the user gave us the repository.
+        if (repo != null) {
             setTableItems(()-> FXCollections.observableList(this.repo.getAll()));
         }
         
@@ -490,40 +500,57 @@ public class PojoTable extends BorderPane {
         return uiTable;
     }
     
-    public void setTableItems(Supplier<ObservableList<Element>> producer){
-        uiSearch.setGraphic(searchRunning);
+    public void setTableItems(Supplier<ObservableList<Element>> producer) {        
+        if (tableUpdater != null && !tableUpdater.isDone()) {
+            tableUpdater.cancel();
+        }
         
-        new Thread(){
-            @Override
-            public void run() {
-                allValues = producer.get();
-                final String str = currentSearch.get();
-                if(str == null || str.isEmpty()){
-                    filteredValues = allValues;
-                }else{
-//                    final String type = pojoClass.getSimpleName();
-                    final Set<String> result = new HashSet<>();
-                    
-                    SearchResponse search = Injector.getElasticEngine().search(QueryBuilders.queryString(str));
-                    Iterator<SearchHit> iterator = search.getHits().iterator();
-                    while (iterator.hasNext()) {
-                        result.add(iterator.next().getId());
-                    }
+        tableUpdater = new TaskManager.MockTask("Recherche...", () -> {
 
-                    filteredValues = allValues.filtered((Element t) -> {
-                        return result.contains(t.getDocumentId());
-                    });
+            allValues = producer.get();
+
+            final Thread currentThread = Thread.currentThread();
+            if (currentThread.isInterrupted()) {
+                return;
+            }
+            final String str = currentSearch.get();
+            if (str == null || str.isEmpty() || allValues == null || allValues.isEmpty()) {
+                filteredValues = allValues;
+            } else {
+                final Set<String> result = new HashSet<>();
+                SearchResponse search = Injector.getElasticEngine().search(QueryBuilders.queryString(str));
+                Iterator<SearchHit> iterator = search.getHits().iterator();
+                while (iterator.hasNext() && !currentThread.isInterrupted()) {
+                    result.add(iterator.next().getId());
                 }
 
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        uiTable.setItems(filteredValues);
-                        uiSearch.setGraphic(searchNone);
-                    }
+                if (currentThread.isInterrupted()) {
+                    return;
+                }
+                filteredValues = allValues.filtered((Element t) -> {
+                    return result.contains(t.getDocumentId());
                 });
             }
-        }.start();
+        });
+        
+        tableUpdater.stateProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if (Worker.State.SUCCEEDED.equals(newValue)) {
+                    Platform.runLater(() -> {
+                        uiTable.setItems(filteredValues);
+                        uiSearch.setGraphic(searchNone);
+                    });
+                } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
+                    Platform.runLater(() -> {
+                        uiSearch.setGraphic(searchNone);
+                    });
+                } else if (Worker.State.RUNNING.equals(newValue)) {
+                    Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
+                }
+            }
+        });
+        tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
     }
        
     protected boolean authoriseElementDeletion(final Element pojo) {
@@ -546,6 +573,9 @@ public class PojoTable extends BorderPane {
             if(!authoriseElementDeletion(pojo)) continue;
             if (repo != null) {
                 repo.remove(pojo);
+            }
+            if (parentElementProperty.get() != null) {
+                parentElementProperty.get().removeChild(pojo);
             }
             items.remove(pojo);
         }
@@ -584,6 +614,7 @@ public class PojoTable extends BorderPane {
             }
         }
         
+        // TODO : check and set date début
         if (result instanceof Element) {
             final Element newlyCreated = (Element)result;
             newlyCreated.setAuthor(session.getUtilisateur().getId());
