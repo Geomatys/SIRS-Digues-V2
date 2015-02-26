@@ -55,7 +55,7 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
     private void initFields(){
         if (elementProperty.get() != null) {
             uiLibelle.textProperty().bindBidirectional(elementProperty.get().libelleProperty());
-            leves.setAll(elementProperty.get().getLeveeIds());
+            leves.setAll(elementProperty.get().getLeves());
         } else {
             uiLibelle.textProperty().unbind();
             uiLibelle.textProperty().set("");
@@ -90,7 +90,7 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
         @Override
         protected Object createPojo() {
             final LeveProfilTravers leve = new LeveProfilTravers();
-            elementProperty.get().getLeveeIds().add(leve);
+            elementProperty.get().getLeves().add(leve);
             return leve;
         }
     }

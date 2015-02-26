@@ -67,8 +67,7 @@ public class DesordreJournalImporter extends GenericEntityLinker {
             final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
             
             if(desordre!=null && article!=null){
-                desordre.getArticleJournal().add(article.getId());
-                article.getDesordre().add(desordre.getId());
+                desordre.getArticleId().add(article.getId());
             }
         }
     }

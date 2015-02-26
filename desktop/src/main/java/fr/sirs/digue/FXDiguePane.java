@@ -127,7 +127,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     
         public TronconPojoTable() {
             super(TronconDigue.class, "Liste des tronçons");
-
+    
             final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
                 updateTable();
             };
@@ -204,7 +204,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             field.setOnAction((ActionEvent event) -> {
                 if (secondAction) {
                     commitEdit(field.getValue());
-                } 
+}
                 secondAction = !secondAction;
             });
         }

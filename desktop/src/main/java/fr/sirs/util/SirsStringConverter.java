@@ -54,7 +54,7 @@ public class SirsStringConverter extends StringConverter {
         } else if (item instanceof Element) {
             LabelMapper labelMapper = new LabelMapper(item.getClass());
             // TODO : make a commodity method in label mapper ?
-            text = labelMapper.mapPropertyName("classAbrege") + ((Element)item).getPseudoId();
+            text = labelMapper.mapPropertyName("classAbrege") + ((((Element)item).getPseudoId()==null) ? "" : ((Element)item).getPseudoId());
         } else if (item instanceof String) {
             text = (String) item;
         } else if (item instanceof CoordinateReferenceSystem) {

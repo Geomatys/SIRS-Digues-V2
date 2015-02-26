@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.VoieDigue;
@@ -58,7 +59,7 @@ DATE_DERNIERE_MAJ
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = reseauImpoter.getById();
+        final Map<Integer, ObjetReseau> reseaux = reseauImpoter.getById();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

@@ -186,7 +186,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         } else if(typeStructure==ProfilFrontFrancBord.class){
             return profilFrontFrancBordImporter.importRow(row);
         } else{
-            SirsCore.LOGGER.log(Level.SEVERE, "Type incohérent.");
+            SirsCore.LOGGER.log(Level.SEVERE, typeStructure+" : Type de géométrie incohérent.");
             return null;
         }
     }

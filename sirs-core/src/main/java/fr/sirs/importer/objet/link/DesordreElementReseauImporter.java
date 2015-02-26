@@ -9,6 +9,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
@@ -63,7 +64,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> elementsReseaux = elementReseauImporter.getById();
+        final Map<Integer, ObjetReseau> elementsReseaux = elementReseauImporter.getById();
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
         final Map<Integer, Class> classesElementReseaux = typeElementReseauImporter.getTypeReferences();
         

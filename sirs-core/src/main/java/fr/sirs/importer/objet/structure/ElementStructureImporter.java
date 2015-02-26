@@ -364,7 +364,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         } else if(typeStructure==TalusRisberme.class){
             return sysEvtTalusRisbermeImporter.importRow(row);
         } else {
-            SirsCore.LOGGER.log(Level.SEVERE, "Type incohérent.");
+            SirsCore.LOGGER.log(Level.SEVERE, typeStructure + " : Type de structure incohérent.");
             return null;
         }
     }

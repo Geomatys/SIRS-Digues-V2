@@ -546,10 +546,7 @@ public class Session extends SessionGen {
         final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
         if (bundle != null) {
             title += bundle.getString("classAbrege");
-        } else {
-            title += "";
-        }
-        title+=(element.getPseudoId()==null) ? "" : element.getPseudoId();
+        } 
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {

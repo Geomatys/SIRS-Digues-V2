@@ -6,10 +6,9 @@ import java.util.logging.Level;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -60,7 +59,7 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = reseauImpoter.getById();
+        final Map<Integer, ObjetReseau> reseaux = reseauImpoter.getById();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

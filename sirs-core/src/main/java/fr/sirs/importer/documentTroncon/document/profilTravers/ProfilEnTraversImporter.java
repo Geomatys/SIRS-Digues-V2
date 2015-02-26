@@ -76,8 +76,8 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
             profil.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())));
             profil.setValid(true);
             
-            final List<LeveProfilTravers> leve = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
-            if(leve!=null) profil.setLeveeIds(leve);
+            final List<LeveProfilTravers> leves = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+            if(leves!=null) profil.setLeves(leves);
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }

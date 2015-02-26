@@ -10,6 +10,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
@@ -52,7 +53,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementReseauImporter extends GenericReseauImporter<Objet> {
+public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
     
     private final TypeElementReseauImporter typeElementReseauImporter;
     
@@ -321,7 +322,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
 
         // Remplissage initial des structures par les importateurs subordonnés.
         for (final GenericObjetImporter gsi : reseauImporters){
-            final Map<Integer, Objet> objets = gsi.getById();
+            final Map<Integer, ObjetReseau> objets = gsi.getById();
             if(objets!=null){
                 for (final Integer key : objets.keySet()){
                     if(structures.get(key)!=null){
@@ -333,7 +334,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 }
             }
             
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
+            final Map<Integer, List<ObjetReseau>> objetsByTronconId = gsi.getByTronconId();
 
             if (objetsByTronconId != null) {
                 objetsByTronconId.keySet().stream().map((key) -> {
@@ -366,7 +367,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
             final Row row = it.next();
 
             final int structureId = row.getInt(Columns.ID_ELEMENT_RESEAU.toString());
-            final Objet objet;
+            final ObjetReseau objet;
             final boolean nouvelObjet;
             
             if(structures.get(structureId)!=null){
@@ -465,7 +466,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
                 structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Objet> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<ObjetReseau> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
                     structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -478,7 +479,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
     
 
     @Override
-    public Objet importRow(Row row) throws IOException, AccessDbImporterException {
+    public ObjetReseau importRow(Row row) throws IOException, AccessDbImporterException {
         final Class typeStructure = typeElementReseauImporter.getTypeReferences().get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
         if(typeStructure==OuvrageHydrauliqueAssocie.class){
             return sysEvtAutreOuvrageHydrauliqueImporter.importRow(row);
@@ -505,7 +506,7 @@ public class ElementReseauImporter extends GenericReseauImporter<Objet> {
         } else if(typeStructure==VoieDigue.class){
             return sysEvtVoieSurDigueImporter.importRow(row);
         } else{
-            SirsCore.LOGGER.log(Level.SEVERE, "Type incohérent.");
+            SirsCore.LOGGER.log(Level.SEVERE, typeStructure+" : Type de réseau incohérent.");
             return null;
         }
     }

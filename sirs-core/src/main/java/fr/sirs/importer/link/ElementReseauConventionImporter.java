@@ -3,7 +3,7 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -55,14 +55,14 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = elementReseauImporter.getById();
+        final Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
         final Map<Integer, Convention> conventions = conventionImporter.getRelated();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final ObjetReseau reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Convention convention = conventions.get(row.getInt(Columns.ID_CONVENTION.toString()));
             
             if(reseau!=null && convention!=null){

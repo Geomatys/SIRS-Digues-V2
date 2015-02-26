@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -15,7 +15,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-abstract class GenericReseauImporter<T extends Objet> extends GenericObjetImporter<T> {
+abstract class GenericReseauImporter<T extends ObjetReseau> extends GenericObjetImporter<T> {
 
     public GenericReseauImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 

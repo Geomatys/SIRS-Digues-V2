@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.IntervenantImporter;
@@ -60,7 +61,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = elementReseauImporter.getById();
+        final Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();

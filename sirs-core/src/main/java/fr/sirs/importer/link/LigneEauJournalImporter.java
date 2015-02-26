@@ -67,7 +67,7 @@ public class LigneEauJournalImporter extends GenericEntityLinker {
             final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
             
             if(ligneEau!=null && article!=null){
-                ligneEau.getArticleJournal().add(article.getId());
+                ligneEau.getArticleId().add(article.getId());
             }
         }
     }

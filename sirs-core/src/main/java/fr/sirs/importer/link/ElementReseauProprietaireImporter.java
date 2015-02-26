@@ -6,6 +6,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
@@ -70,7 +71,7 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> reseaux = elementReseauImporter.getById();
+        final Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
