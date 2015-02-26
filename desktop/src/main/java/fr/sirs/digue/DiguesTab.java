@@ -2,6 +2,7 @@
 package fr.sirs.digue;
 
 import fr.sirs.map.FXMapTab;
+import fr.sirs.util.FXFreeTab;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
@@ -9,7 +10,7 @@ import javafx.scene.control.TabPane;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class DiguesTab extends Tab {
+public class DiguesTab extends FXFreeTab {
     
     private final TabPane tabs;
     private final FXDiguesPane ctrl;

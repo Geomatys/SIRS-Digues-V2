@@ -38,9 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXDiguePane extends AbstractFXElementPane<Digue> {
-    
-    private ObservableList<TronconDigue> troncons;
-    
+       
     @Autowired private Session session;
 
     @FXML private TextField libelle;
@@ -52,26 +50,25 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     private final TronconPojoTable table = new TronconPojoTable();
 
     public FXDiguePane(final Digue digue) {
-        SIRS.loadFXML(this);
+        SIRS.loadFXML(this, Digue.class);
         Injector.injectDependencies(this);
         
         //mode edition
         uiMode.setSaveAction(this::save);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         disableFieldsProperty().bind(uiMode.editionState().not());
         
         libelle.disableProperty().bind(disableFieldsProperty());
         uiComment.disableProperty().bind(disableFieldsProperty());
         table.editableProperty().bind(disableFieldsProperty().not());
         
+        table.parentElementProperty().bind(elementProperty);
         elementProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
             initFields();
         });
         setElement(digue);
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
-    }
-    
-    public ObjectProperty<Digue> tronconProperty(){
-        return elementProperty;
+        
+        setCenter(table);
     }
     
     public Digue getDigue(){
@@ -81,106 +78,61 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     private void save(){
         elementProperty.get().setCommentaire(uiComment.getHtmlText());
         session.update(this.elementProperty.get());
-        session.update(this.troncons);
-    }
-    
-    private void reloadTroncons(){
-        
-        final List<TronconDigue> items = session.getTronconDigueByDigue(elementProperty.get());
-        this.troncons = FXCollections.observableArrayList(items);
     }
 
     /**
      * 
      */
     public void initFields() {
-        
-        this.setCenter(table);
-//        final BooleanProperty editBind = uiMode.editionState();
-        
-        // Binding levee's name.------------------------------------------------
-        this.libelle.textProperty().bindBidirectional(elementProperty.get().libelleProperty());
-//        this.libelle.editableProperty().bindBidirectional(editBind);
-        
-        // Display levee's update date.-----------------------------------------
-        this.date_maj.setValue(this.elementProperty.get().getDateMaj());
-        this.date_maj.setDisable(true);
-        this.date_maj.valueProperty().bindBidirectional(this.elementProperty.get().dateMajProperty());
-
-        // Binding levee's comment.---------------------------------------------
-        this.uiComment.setHtmlText(elementProperty.get().getCommentaire());
-        
         uiMode.validProperty().unbind();
         uiMode.authorIDProperty().unbind();
-        uiMode.validProperty().bind(elementProperty.get().validProperty());
-        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
+        this.uiComment.setHtmlText(null);
+        table.setTableItems(()->null);
         
-        table.updateTable();
+        Digue digue = elementProperty.get();
+        if (digue != null) {
+            // Binding digue name.------------------------------------------------
+            this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
+//        this.libelle.editableProperty().bindBidirectional(editBind);
+
+            // Display levee's update date.-----------------------------------------
+            this.date_maj.valueProperty().bindBidirectional(digue.dateMajProperty());
+            this.date_maj.setDisable(true);
+
+            // Binding levee's comment.---------------------------------------------
+            this.uiComment.setHtmlText(digue.getCommentaire());
+            digue.commentaireProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                this.uiComment.setHtmlText(digue.getCommentaire());
+            });
+
+            uiMode.validProperty().bind(digue.validProperty());
+            uiMode.authorIDProperty().bind(digue.authorProperty());
+            
+            table.setTableItems(()->FXCollections.observableArrayList(
+                    session.getTronconDigueByDigue(elementProperty.get())));
+        }
     }
 
     @Override
     public void preSave() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (elementProperty.get() != null) {
+            elementProperty.get().setDateMaj(LocalDateTime.now());
+        }
     }
     
     private class TronconPojoTable extends PojoTable {
     
         public TronconPojoTable() {
-            super(TronconDigue.class, "Liste des tronçons");
-    
-            final ChangeListener listener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
-                updateTable();
-            };
-
-            elementProperty.addListener(listener);
-        }
-
-        private void updateTable() {
-            reloadTroncons();
-            if (troncons == null) {
-                setTableItems(FXCollections::emptyObservableList);
-            } else {
-                //JavaFX bug : sortable is not possible on filtered list
-                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
-                // https://javafx-jira.kenai.com/browse/RT-32091
-                final SortedList sortedList = new SortedList(troncons);
-                setTableItems(()->sortedList);
-                sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
-            }
-        }
-    
-        @Override
-        protected void deletePojos(Element ... pojos) {
-            for(Element pojo : pojos){
-                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
-                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
-                // la suppression.
-                if(!authoriseElementDeletion(pojo)) continue;
-                session.delete(((TronconDigue) pojo));
-            }
-            updateTable();
-        }
-
-        @Override
-        protected void editPojo(Object pojo) {
-            session.getFrame().getDiguesTab().getDiguesController().displayTronconDigue((TronconDigue) pojo);
-            session.prepareToPrint(pojo);
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            session.update((TronconDigue) event.getRowValue());
+            super(TronconDigue.class, "Tronçons de la digue");
         }
 
         @Override
         protected Object createPojo() {
-            TronconDigue troncon = new TronconDigue();
-            troncon.setDigueId(elementProperty.get().getId());
-            session.add(troncon);
-            SIRS.LOGGER.log(Level.FINE, "Id du nouveau tronçon : "+troncon.getId());
-            troncons.add(troncon);
-            updateTable();
-            return troncon;
+            Object createdPojo = super.createPojo();
+            if (createdPojo instanceof TronconDigue && elementProperty.get() != null) {
+                ((TronconDigue)createdPojo).setDigueId(elementProperty.get().getId());
+            }
+            return createdPojo;
         }
     }
     

@@ -55,7 +55,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private Tab uiContactOrganismesTab;
     
-    private final ContactOrganismeTable coTable;
+    private final PojoTable coTable;
 
     public FXOrganismePane(Organisme organisme) {
         SIRS.loadFXML(this);
@@ -73,7 +73,8 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             }
         }
         
-        coTable = new ContactOrganismeTable();
+        coTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
+        coTable.parentElementProperty().bind(elementProperty);
         coTable.editableProperty().bind(uiMode.editionState());
         uiContactOrganismesTab.setContent(coTable);
         setElement(organisme);
@@ -126,51 +127,6 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
 
     @Override
     public void preSave() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    /**
-     * Table listant les rattachement de l'organisme courant aux contacts connus.
-     * Aucune opération de suavegarde n'est effectuée ici, elles seront appliquées
-     * lors de la sauvegarde globale du panneau.
-     */
-    private final class ContactOrganismeTable extends PojoTable {
-
-        public ContactOrganismeTable() {
-            super(ContactOrganisme.class, "Liste des organismes");
-            editableProperty().bind(uiFicheMode.selectedProperty());
-        }
-
-        @Override
-        protected void editPojo(Object pojo) {
-            if (!(pojo instanceof ContactOrganisme)) {
-                return;
-            }
-            final ContactOrganisme co = (ContactOrganisme) pojo;
-            final Tab tab = new FXFreeTab("Rattachement");
-            tab.setContent(new FXContactOrganismePane(co));
-            session.getFrame().addTab(tab);
-        }
-        
-        @Override
-        protected void deletePojos(Element... pojos) {
-            for(final Element pojo : pojos){
-                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
-                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
-                // la suppression.
-                if(!authoriseElementDeletion(pojo)) continue;
-                ((ObservableList)elementProperty.get().contactOrganisme).remove(pojo);
-            }
-//            ((ObservableList)elementProperty.get().contactOrganisme).removeAll(pojos);
-        }
-
-        @Override
-        protected Object createPojo() {
-            final ContactOrganisme co = new ContactOrganisme();
-            co.setParent(elementProperty.get());
-            co.setDateDebutIntervenant(LocalDateTime.now());
-            
-            return co;
-        }
+        // nothing to do, all is done by JavaFX bindings.
     }
 }

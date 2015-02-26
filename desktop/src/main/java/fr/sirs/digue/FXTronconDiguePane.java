@@ -221,6 +221,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private void initFields(){
         initializing = true;
         
+        // TODO : if new tronçon is null, we should just clean nodes.
         final TronconDigue troncon = elementProperty.get();
         
         this.uiName.textProperty().bindBidirectional(troncon.libelleProperty());
@@ -378,7 +379,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         
         //liste des systemes de reperage
         uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByTroncon(troncon)));
-        
+        uiContactTable.setParentElement(troncon);
         uiContactTable.setTableItems(() -> (ObservableList)troncon.contacts);
         
         initializing = false;
@@ -386,7 +387,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     @Override
     public void preSave() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Nothing to do ?
     }
     
     private final class ContactTable extends PojoTable{
@@ -396,28 +397,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         }
 
         @Override
-        protected void deletePojos(Element... pojos) {
-            final TronconDigue troncon = elementProperty.get();
-            for(Element ele : pojos){
-                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
-                // l'élément et que celui-ci soit invalide, sinon, on court-circuite
-                // la suppression.
-                if(!authoriseElementDeletion(ele)) continue;
-                troncon.contacts.remove(ele);
-            }
-        }
-
-        @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
             //on ne sauvegarde pas, le formulaire conteneur s'en charge
-        }
-
-        @Override
-        protected Object createPojo() {
-            final ContactTroncon contact = new ContactTroncon();
-            final TronconDigue troncon = elementProperty.get();
-            troncon.contacts.add(contact);
-            return contact;
         }
     }
 }

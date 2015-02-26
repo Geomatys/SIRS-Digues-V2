@@ -26,6 +26,7 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
+import fr.sirs.digue.DiguesTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
@@ -508,35 +509,41 @@ public class Session extends SessionGen {
     }
     
     public FXFreeTab getOrCreateElementTab(final Element element) {
-        try {
-            return openEditors.getOrCreate(element, new Callable<FXFreeTab>() {
-                @Override
-                public FXFreeTab call() throws Exception {
-                    final FXFreeTab tab = new FXFreeTab();
-                    Node content = (Node) SIRS.generateEditionPane(element);
-                    if (content == null) {
-                        content = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+        if (element instanceof TronconDigue) {
+            DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
+            diguesTab.getDiguesController().displayTronconDigue((TronconDigue) element);
+            return diguesTab;
+        } else {
+            try {
+                return openEditors.getOrCreate(element, new Callable<FXFreeTab>() {
+                    @Override
+                    public FXFreeTab call() throws Exception {
+                        final FXFreeTab tab = new FXFreeTab();
+                        Node content = (Node) SIRS.generateEditionPane(element);
+                        if (content == null) {
+                            content = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+                        }
+
+                        tab.setContent(content);
+                        element.pseudoIdProperty().addListener(new ChangeListener<String>() {
+
+                            @Override
+                            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                                tab.setTextAbrege(generateElementTitle(element));
+                            }
+                        });
+                        tab.setTextAbrege(generateElementTitle(element));
+                        tab.setOnSelectionChanged((Event event) -> {
+                            if (tab.isSelected()) {
+                                prepareToPrint(element);
+                            }
+                        });
+                        return tab;
                     }
-
-                    tab.setContent(content);
-                    element.pseudoIdProperty().addListener(new ChangeListener<String>() {
-
-                        @Override
-                        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                            tab.setTextAbrege(generateElementTitle(element));
-                        }
-                    });
-                    tab.setTextAbrege(generateElementTitle(element));
-                    tab.setOnSelectionChanged((Event event) -> {
-                        if (tab.isSelected()) {
-                            prepareToPrint(element);
-                        }
-                    });
-                    return tab;
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
