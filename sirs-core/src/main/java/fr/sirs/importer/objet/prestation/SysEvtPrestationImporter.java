@@ -172,7 +172,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         }
         
         if (row.getInt(Columns.ID_MARCHE.toString()) != null) {
-            prestation.setMarche(marches.get(row.getInt(Columns.ID_MARCHE.toString())).getId());
+            prestation.setMarcheId(marches.get(row.getInt(Columns.ID_MARCHE.toString())).getId());
         }
         
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {

@@ -45,41 +45,41 @@ public class PrestationImporter extends GenericPrestationImporter {
                 typeSourceImporter, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
                 couchDbConnector);
-        this.sysEvtPrestationImporter = new SysEvtPrestationImporter(accessDatabase, 
-                couchDbConnector, 
-                systemeReperageImporter, borneDigueImporter, marcheImporter,
-                typePositionImporter, typeCoteImporter, typePrestationImporter);
+        this.sysEvtPrestationImporter = new SysEvtPrestationImporter(
+                accessDatabase, couchDbConnector, systemeReperageImporter, 
+                borneDigueImporter, marcheImporter, typePositionImporter, 
+                typeCoteImporter, typePrestationImporter);
     }
 
     private enum Columns {
         ID_PRESTATION,
         ID_TRONCON_GESTION,
-        LIBELLE_PRESTATION,
-//        ID_MARCHE,
+//        LIBELLE_PRESTATION,
+////        ID_MARCHE,
         REALISATION_INTERNE,
-        ID_TYPE_PRESTATION,
+//        ID_TYPE_PRESTATION,
         COUT_AU_METRE,//
         COUT_GLOBAL,//
-        ID_TYPE_COTE,
-        ID_TYPE_POSITION,
-//        ID_INTERV_REALISATEUR, // Ne sert à rien : voir la table PRESTATION_INTERVENANT
-        DESCRIPTION_PRESTATION,
-        DATE_DEBUT_VAL,
-        DATE_FIN_VAL,
+//        ID_TYPE_COTE,
+//        ID_TYPE_POSITION,
+////        ID_INTERV_REALISATEUR, // Ne sert à rien : voir la table PRESTATION_INTERVENANT
+//        DESCRIPTION_PRESTATION,
+//        DATE_DEBUT_VAL,
+//        DATE_FIN_VAL,
         ID_SOURCE,//
-        PR_DEBUT_CALCULE,
-        PR_FIN_CALCULE,
-        X_DEBUT,
-        Y_DEBUT,
-        X_FIN,
-        Y_FIN,
-        ID_BORNEREF_DEBUT,
-        ID_BORNEREF_FIN,
-        ID_SYSTEME_REP,
-        DIST_BORNEREF_DEBUT,
-        DIST_BORNEREF_FIN,
-        AMONT_AVAL_DEBUT,
-        AMONT_AVAL_FIN,
+//        PR_DEBUT_CALCULE,
+//        PR_FIN_CALCULE,
+//        X_DEBUT,
+//        Y_DEBUT,
+//        X_FIN,
+//        Y_FIN,
+//        ID_BORNEREF_DEBUT,
+//        ID_BORNEREF_FIN,
+//        ID_SYSTEME_REP,
+//        DIST_BORNEREF_DEBUT,
+//        DIST_BORNEREF_FIN,
+//        AMONT_AVAL_DEBUT,
+//        AMONT_AVAL_FIN,
         DATE_DERNIERE_MAJ
     };
 

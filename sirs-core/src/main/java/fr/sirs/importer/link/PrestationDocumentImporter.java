@@ -2,6 +2,7 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RapportEtude;
@@ -70,7 +71,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, DocumentTroncon> documents = documentImporter.getDocuments();
         final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
-//        final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
+        final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -81,12 +82,11 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             
             if(prestation!=null && document!=null){
                 if(document.getSirsdocument()!=null){
-                    /*if(documentsGrandeEchelle.get(document.getSirsdocument())!=null){
+                    if(documentsGrandeEchelle.get(document.getSirsdocument())!=null){
                         final DocumentGrandeEchelle documentGrandeEchelle = documentsGrandeEchelle.get(document.getSirsdocument());
-                        documentGrandeEchelle.getPrestation().add(prestation.getId());
-                        prestation.getDocumentGrandeEchelle().add(documentGrandeEchelle.getId());
+                        prestation.getDocumentGrandeEchelleIds().add(documentGrandeEchelle.getId());
                     } 
-                    else*/ if (rapportsEtude.get(document.getSirsdocument())!=null){
+                    else if (rapportsEtude.get(document.getSirsdocument())!=null){
                         final RapportEtude rapport = rapportsEtude.get(document.getSirsdocument());
                         rapport.getPrestation().add(prestation.getId());
                         prestation.getRapportEtude().add(rapport.getId());
@@ -105,12 +105,12 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         return rapports;
     }
     
-//    private Map<String, DocumentGrandeEchelle> documentGrandeEchelleByCouchDbId() 
-//            throws IOException, AccessDbImporterException{
-//        final Map<String, DocumentGrandeEchelle> documents = new HashMap<>();
-//        for(final DocumentGrandeEchelle document : documentAGrandeEchelleImporter.getRelated().values()){
-//            documents.put(document.getId(), document);
-//        }
-//        return documents;
-//    }
+    private Map<String, DocumentGrandeEchelle> documentGrandeEchelleByCouchDbId() 
+            throws IOException, AccessDbImporterException{
+        final Map<String, DocumentGrandeEchelle> documents = new HashMap<>();
+        for(final DocumentGrandeEchelle document : documentAGrandeEchelleImporter.getRelated().values()){
+            documents.put(document.getId(), document);
+        }
+        return documents;
+    }
 }

@@ -71,8 +71,7 @@ public class ObjetManager {
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final MarcheImporter marcheImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter
-            ){
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         
         sourceInfoImporter = new SourceInfoImporter(accessDatabase, 
                 couchDbConnector);
@@ -90,14 +89,13 @@ public class ObjetManager {
                 couchDbConnector);
         
         structureImporter = new ElementStructureImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, 
-                borneDigueImporter,
+                couchDbConnector, systemeReperageImporter, borneDigueImporter,
                 sourceInfoImporter, typePositionImporter, typeCoteImporter, 
                 typeMateriauImporter, typeNatureImporter, typeFonctionImporter);
         importers.add(structureImporter);
         desordreImporter = new DesordreImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, 
-                borneDigueImporter, intervenantImporter, sourceInfoImporter, 
+                couchDbConnector, systemeReperageImporter, borneDigueImporter, 
+                intervenantImporter, sourceInfoImporter, 
                 typePositionImporter, typeCoteImporter);
         importers.add(desordreImporter);
         geometryImporter = new ElementGeometrieImporter(accessDatabase, 
@@ -105,15 +103,14 @@ public class ObjetManager {
                 borneDigueImporter, sourceInfoImporter);
         importers.add(geometryImporter);
         reseauImporter = new ElementReseauImporter(accessDatabase, 
-                couchDbConnector, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter,
-                sourceInfoImporter, typeCoteImporter, typePositionImporter, 
-                typeNatureImporter);
+                couchDbConnector, systemeReperageImporter, borneDigueImporter, 
+                organismeImporter, intervenantImporter, sourceInfoImporter, 
+                typeCoteImporter, typePositionImporter, typeNatureImporter);
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 
-                couchDbConnector, 
-                systemeReperageImporter, borneDigueImporter, marcheImporter, 
-                sourceInfoImporter, typeCoteImporter, typePositionImporter);
+                couchDbConnector, systemeReperageImporter, borneDigueImporter, 
+                marcheImporter, sourceInfoImporter, typeCoteImporter, 
+                typePositionImporter);
         importers.add(prestationImporter);
         laisseCrueImporter = new LaisseCrueImporter(accessDatabase, 
                 couchDbConnector, 
