@@ -407,11 +407,11 @@
         eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/prestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="intervenant" upperBound="-1"
         eType="#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="marche" eType="#//Marche"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtude" upperBound="-1"
         eType="#//RapportEtude" eOpposite="#//RapportEtude/prestation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documentGrandeEchelle"
-        upperBound="-1" eType="#//DocumentGrandeEchelle" eOpposite="#//DocumentGrandeEchelle/prestation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="marcheId" eType="#//Marche"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentGrandeEchelleIds"
+        upperBound="-1" eType="#//DocumentGrandeEchelle"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieu_dit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -599,8 +599,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
-        eType="#//Prestation" eOpposite="#//Prestation/documentGrandeEchelle"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Visite" eSuperTypes="#//Positionable">
     <eAnnotations source="generation">
