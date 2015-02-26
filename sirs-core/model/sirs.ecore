@@ -100,8 +100,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentId" eType="#//RefTypeDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDocument"
-        eOpposite="#//SIRSDocument/documenttroncon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photographe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -196,7 +195,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouverture_batardable" upperBound="-1"
         eType="#//Ouverture_batardable" eOpposite="#//Ouverture_batardable/ouvrage_revanche"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Ouverture_batardable" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="Ouverture_batardable" eSuperTypes="#//ObjetReseau">
     <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantManupulateurId"
         eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismesManipulateursId"
@@ -1449,15 +1448,16 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierCoupeImage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documenttroncon" upperBound="-1"
-        eType="#//DocumentTroncon" eOpposite="#//DocumentTroncon/sirsdocument"/>
-  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="ReferenceType" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EEnum" name="Role">
     <eLiterals name="USER"/>
     <eLiterals name="ADMIN"/>
     <eLiterals name="GUEST"/>
     <eLiterals name="EXTERN"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetReseau" abstract="true" eSuperTypes="#//Objet">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="futursConventionIds" upperBound="-1"
+        eType="#//Convention"/>
   </eClassifiers>
 </ecore:EPackage>
