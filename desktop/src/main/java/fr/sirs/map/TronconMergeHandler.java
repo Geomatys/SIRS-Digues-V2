@@ -94,15 +94,11 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
-                try {
-                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
-                } catch (URISyntaxException ex) {
-                    SIRS.LOGGER.log(Level.FINE, ex.getMessage(), ex);
-                }
                 layer.setSelectable(true);
+            } else {
+                layer.setSelectable(false);
             }
         }
         

@@ -443,6 +443,10 @@ public class PojoTable extends BorderPane {
         return openEditorOnNewProperty;
     }
     
+    /**
+     * Called when user click on the search icon. Prepare the popup with the textfield
+     * to type research into. 
+     */
     protected void search(){
         if(uiSearch.getGraphic()!= searchNone){
             //une recherche est deja en cours
@@ -452,7 +456,7 @@ public class PojoTable extends BorderPane {
         final Popup popup = new Popup();
         final TextField textField = new TextField(currentSearch.get());
         popup.getContent().add(textField);
-        
+        popup.setAutoHide(true);
         textField.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -492,10 +496,18 @@ public class PojoTable extends BorderPane {
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
     
+    /**
+     * @return {@link TableView} used for element display.
+     */
     public TableView getUiTable() {
         return uiTable;
     }
     
+    /**
+     * Start an asynchronous task which will update table content with the elements
+     * provided by input supplier.
+     * @param producer Data provider.
+     */
     public void setTableItems(Supplier<ObservableList<Element>> producer) {        
         if (tableUpdater != null && !tableUpdater.isDone()) {
             tableUpdater.cancel();
@@ -548,7 +560,13 @@ public class PojoTable extends BorderPane {
         });
         tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
     }
-       
+    
+    /**
+     * Check if the input element can be deleted by current user. If not, an 
+     * alert is displyed on screen.
+     * @param pojo The element we want to delete.
+     * @return True if we can delete the element in parameter, false otherwise.
+     */
     protected boolean authoriseElementDeletion(final Element pojo) {
         if (session.getRole() == EXTERN) {
             if (!session.getUtilisateur().getId().equals(pojo.getAuthor())
@@ -560,6 +578,14 @@ public class PojoTable extends BorderPane {
         return true;
     }
     
+    /**
+     * Delete the elements given in parameter. They are suppressed from the table
+     * list, and if a {@link Repository} exists for the current table, elements 
+     * are also suppressed from database. If a parent element has been set using
+     * {@linkplain #setParentElement(fr.sirs.core.model.Element) } method, we will 
+     * try to remove them from the parent as well.
+     * @param pojos The {@link Element}s to delete.
+     */
     protected void deletePojos(Element... pojos) {
         ObservableList<Element> items = uiTable.getItems();
         for (Element pojo : pojos) {
@@ -577,10 +603,19 @@ public class PojoTable extends BorderPane {
         }
     }
     
+    /**
+     * Try to find and display a form to edit input object.
+     * @param pojo The object we want to edit.
+     */
     protected void editPojo(Object pojo){
         editElement(pojo);
     }
     
+    /**
+     * A method called when an element displayed in the table has been modified 
+     * in the table.
+     * @param event The table event refering to the edition action.
+     */
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
         if(repo!=null){
             final Element obj = event.getRowValue();
@@ -589,6 +624,13 @@ public class PojoTable extends BorderPane {
         }
     }
     
+    /**
+     * Create a new element and add it to table items. If the table {@link Repository}
+     * is not null, we also add the element to the database. We also set its parent
+     * if it's not a contained element and the table {@linkplain #parentElementProperty}
+     * is set.
+     * @return The newly created object. 
+     */
     protected Object createPojo() {
         Object result = null;
         if (repo != null) {
