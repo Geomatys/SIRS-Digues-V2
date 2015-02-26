@@ -49,18 +49,23 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
     @Override
     protected void updateItem(Object item, boolean empty) {
         super.updateItem(item, empty);
-        setText(null);
-        setGraphic(null);
-        if(empty)return;
-        
-        if (item != null) {
+        if(empty ||item == null){
+            setText(null);
+            setGraphic(null);
+        }
+        else {
             setGraphic(new ImageView(ICON_LINK));
             if(item instanceof SystemeReperageBorne){
                 final SystemeReperageBorne srb = (SystemeReperageBorne) item;
                 final Session session = Injector.getBean(Session.class);
                 item = session.getBorneDigueRepository().get(srb.getBorneId());
-            }            
-            
+            } else{
+                // On essaye de récupérer le préview label : si le résultat n'est pas nul, c'est que l'item est bien un id
+                final String res = Injector.getSession().getPreviewLabelRepository().getPreview((String) item);
+                if(res!=null) item = res;
+                
+                // Si le résultat n'était pas null, alors c'est que l'item n'était certainement pas un id, mais déjà un libellé issu de preview label.
+            }
             setText(new SirsStringConverter().toString(item));
         }
     }

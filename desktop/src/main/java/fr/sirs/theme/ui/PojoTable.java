@@ -19,6 +19,7 @@ import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -93,11 +94,11 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class PojoTable extends BorderPane {
     
-    private static final List<String> UNDISPLAYABLE_COLUMNS = new ArrayList<>();
+    private static final List<String> SPECIAL_DISPLAY_COLUMNS = new ArrayList<>();
     static{
-        UNDISPLAYABLE_COLUMNS.add("author");
-        UNDISPLAYABLE_COLUMNS.add("valid");
-        UNDISPLAYABLE_COLUMNS.add("pseudoId");
+        SPECIAL_DISPLAY_COLUMNS.add("author");
+        SPECIAL_DISPLAY_COLUMNS.add("valid");
+        SPECIAL_DISPLAY_COLUMNS.add("pseudoId");
     }
     
     protected final Class pojoClass;
@@ -218,8 +219,16 @@ public class PojoTable extends BorderPane {
         
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
+        
+        //On commence par la colonne des pseudoId
+        for(final PropertyDescriptor desc : properties){
+            if(desc.getName().equals("pseudoId")){
+                uiTable.getColumns().add(new PropertyColumn(desc));
+            }
+        }
+        
         for (final PropertyDescriptor desc : properties) {
-            if (!UNDISPLAYABLE_COLUMNS.contains(desc.getName())) {
+            if (!SPECIAL_DISPLAY_COLUMNS.contains(desc.getName())) {
                 final TableColumn col;
                 // Colonne de mots de passe simplifiée : ne marche pas très bien.
                 if ("password".equals(desc.getDisplayName())) {
@@ -253,19 +262,6 @@ public class PojoTable extends BorderPane {
         
         searchEditionToolbar.getStyleClass().add("buttonbar");
         searchEditionToolbar.getChildren().add(uiSearch);
-            
-        BooleanBinding addOrDeleteBinding = new BooleanBinding() {
-
-            {
-                bind(editableProperty);
-            }
-            @Override
-            protected boolean computeValue() {
-                final boolean result;
-                result = editableProperty.not().get();
-                return result;
-            }
-        };
                 
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
@@ -274,7 +270,7 @@ public class PojoTable extends BorderPane {
                 editPojo(p);
             }
         });
-        uiAdd.disableProperty().bind(addOrDeleteBinding);
+        uiAdd.disableProperty().bind(editableProperty.not());
 
         uiDelete.getStyleClass().add("btn-without-style");
         uiDelete.setOnAction((ActionEvent event) -> {
@@ -289,7 +285,7 @@ public class PojoTable extends BorderPane {
                 new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
             }
         });
-        uiDelete.disableProperty().bind(addOrDeleteBinding);
+        uiDelete.disableProperty().bind(editableProperty.not());
 
         searchEditionToolbar.getChildren().addAll(uiAdd, uiDelete);
         
@@ -772,6 +768,16 @@ public class PojoTable extends BorderPane {
         
         @Override
         public ObservableValue<Object> call(CellDataFeatures<Element, Object> param) {
+            
+            // On essaye de renvoyer l'ID observable de manière à mettre à jour la cellule lors du changement d'ID.
+            try {
+                final Method propertyAccessor = param.getValue().getClass().getMethod(desc.getName()+"Property");
+                return (ObservableValue) propertyAccessor.invoke(param.getValue());
+            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            // Sinon, on fait comme avant, on ne renvoie pas un ID, mais un preview label ( :
             Object obj = null;
             try {
                 obj = desc.getReadMethod().invoke(param.getValue());

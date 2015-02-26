@@ -57,10 +57,10 @@ import org.ektorp.DocumentNotFoundException;
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
  * 
- * Note : Le cache qui permet de garder un instance unique en mémoire pour un 
+ * Note : Le cache qui permet de garder une instance unique en mémoire pour un 
  * tronçon donné est extrêmement important pour les opérations de sauvegarde. 
  * 
- * Ex : On a un tronçon A, qui contient un crête tata et un talus de digue toto.
+ * Ex : On a un tronçon A, qui contient une crête tata et un talus de digue toto.
  * 
  * On ouvre l'éditeur de toto. Le tronçon A est donc chargé en mémoire. 
  * Dans le même temps on ouvre le panneau d'édition pour tata. On doit donc aussi 
