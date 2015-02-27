@@ -35,6 +35,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -73,6 +74,7 @@ public class FXSystemeReperagePane extends BorderPane {
     @FXML private TextField uiTronconLabel;
     @FXML private ToggleButton uiPickTroncon;
     @FXML private ChoiceBox<SystemeReperage> uiSrComboBox;
+    @FXML private CheckBox uiDefaultSRCheckBox;
     @FXML private Button uiAddSr;
     @FXML private FXTableView<SystemeReperageBorne> uiBorneTable;
     @FXML private Button uiAddBorne;
@@ -98,7 +100,11 @@ public class FXSystemeReperagePane extends BorderPane {
         uiSrComboBox.disableProperty().bind(srEditBinding);
         uiSrComboBox.setConverter(new SirsStringConverter());
         uiSrComboBox.valueProperty().addListener(this::updateBorneTable);
+        uiSrComboBox.valueProperty().addListener(this::updateDefaultSRCheckBox);
         uiAddSr.disableProperty().bind(srEditBinding);
+        
+        // When user choose a new default sr
+        uiDefaultSRCheckBox.selectedProperty().addListener(this::updateTonconDefaultSR);
         
         //on active la table et bouton de creation si un sr est sélectionné
         final BooleanBinding borneEditBinding = uiSrComboBox.valueProperty().isNull();
@@ -398,6 +404,31 @@ public class FXSystemeReperagePane extends BorderPane {
             mode.set(Mode.NONE);
             final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
+            
+            final String defaultSRID = troncon.getSystemeRepDefautId();
+            if (defaultSRID != null) {
+                for (final SystemeReperage sr : srs) {
+                    if (defaultSRID.equals(sr.getId())) {
+                        uiSrComboBox.getSelectionModel().select(sr);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    private void updateDefaultSRCheckBox(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+        if (newValue != null && tronconProp.get() != null &&
+                newValue.getId().equals(tronconProp.get().getSystemeRepDefautId())) {
+            uiDefaultSRCheckBox.setSelected(true);
+        } else {
+            uiDefaultSRCheckBox.setSelected(false);
+        }
+    }
+    
+    private void updateTonconDefaultSR(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+        if (Boolean.TRUE.equals(newValue) && tronconProp.get() != null) {
+            tronconProp.get().setSystemeRepDefautId(uiSrComboBox.getSelectionModel().getSelectedItem().getId());
         }
     }
     

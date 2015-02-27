@@ -26,7 +26,9 @@ import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
@@ -37,6 +39,8 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
@@ -85,7 +89,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     private EditionHelper helperBorne;
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     
-    private final Dialog dialog = new Dialog();
+    private final Stage dialog = new Stage();
     private final FXSystemeReperagePane editPane;
         
     
@@ -95,9 +99,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         
         editPane = new FXSystemeReperagePane(map);
         
-        final DialogPane subpane = new DialogPane();
-        subpane.setContent(editPane);
-        subpane.getButtonTypes().add(ButtonType.FINISH);
         dialog.setResizable(true);
         dialog.setOnCloseRequest(new EventHandler() {
             @Override
@@ -107,7 +108,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         });
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
-        dialog.setDialogPane(subpane);
+        dialog.setScene(new Scene(editPane));
         
         //on ecoute la selection du troncon et des bornes pour les mettre en surbrillant
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
@@ -158,15 +159,14 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         });
         
         //fin de l'edition
-        dialog.resultProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
+        dialog.setOnHiding((WindowEvent event) -> {
             TronconDigue troncon = editPane.tronconProperty().get();
-            if(troncon!=null){
+            if (troncon != null) {
                 //on recupere la derniere version, la maj des sr entraine la maj des troncons
                 troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
                 //on recalcule les geometries des positionables du troncon.
-                TronconUtils.updatePositionableGeometry(troncon,session);
+                TronconUtils.updatePositionableGeometry(troncon, session);
             }
-            dialog.close();
             editPane.reset();
         });
         
@@ -180,9 +180,6 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 }
             }
         });
-        
-        dialog.setWidth(500);
-        dialog.setHeight(700);
     }
 
     /**
