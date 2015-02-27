@@ -129,19 +129,38 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         
     }
     
-    public final void displayTronconDigue(TronconDigue obj){
-        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
-        uiRight.setCenter(ctrl);
-        this.session.prepareToPrint(obj);
+    /**
+     * Affiche un éditeur pour le tronçon en entrée.
+     * @param obj Le tronçon à éditer.
+     * @deprecated Utiliser {@link #displayElement(fr.sirs.core.model.Element) }.
+     */
+    public final void displayTronconDigue(TronconDigue obj) {
+        displayElement(obj);
+    }
+
+    /**
+     * Affiche un éditeur pour la digue en entrée.
+     * @param obj La digue à éditer.
+     * @deprecated Utiliser {@link #displayElement(fr.sirs.core.model.Element) }.
+     */
+    public final void displayDigue(Digue obj) {
+        displayElement(obj);
+    }
+
+    /**
+     * Affiche un éditeur pour le système d'endiguement en entrée.
+     * @param obj Le système d'endiguement à éditer.
+     * @deprecated Utiliser {@link #displayElement(fr.sirs.core.model.Element) }.
+     */
+    public final void displaySystemeEndiguement(SystemeEndiguement obj) {
+        displayElement(obj);
     }
     
-    public final void displayDigue(Digue obj){
-        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
-        uiRight.setCenter(ctrl);
-        this.session.prepareToPrint(obj);
-    }
-    
-    public final void displaySystemeEndiguement(SystemeEndiguement obj){
+    /**
+     * Affiche un éditeur pour l'élément en entrée.
+     * @param obj L'élément à éditer.
+     */
+    public void displayElement(final Element obj) {
         AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
         uiRight.setCenter(ctrl);
         this.session.prepareToPrint(obj);
@@ -199,7 +218,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
     
     @FXML
     private void openSearchPopup(ActionEvent event) {
-        if(uiSearch.getGraphic()!= searchNone){
+        if (uiSearch.getGraphic() != searchNone) {
             //une recherche est deja en cours
             return;
         }

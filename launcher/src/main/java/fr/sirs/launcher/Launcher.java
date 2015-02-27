@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Pos;
