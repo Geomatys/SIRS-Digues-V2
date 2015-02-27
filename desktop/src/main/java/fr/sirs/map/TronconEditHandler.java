@@ -373,7 +373,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     //action : sauvegarder edition
                     if (troncon.get() != null) {
 
-                        //action : supprission d'un noeud
+                        //action : suppression d'un noeud
                         helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);                    
                         if(editGeometry.selectedNode[0]>=0){
                             final MenuItem item = new MenuItem("Supprimer noeud");
@@ -384,25 +384,46 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             popup.getItems().add(item);
                         }
                     
-                        final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
-                        saveItem.setOnAction((ActionEvent event) -> {
-                            troncon.get().setGeometry(editGeometry.geometry);
-                            session.getTronconDigueRepository().update(troncon.get());
+                        // Si le tronçon est vide, on peut inverser son tracé
+                        if (troncon.get().getGeometry() != null && troncon.get().getStructures().isEmpty()) {
+                            final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
+                            invert.setOnAction((ActionEvent ae) -> {
+                                editGeometry.geometry = editGeometry.geometry.reverse();
+                                // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
+                                troncon.get().setGeometry(editGeometry.geometry);
+                                session.getTronconDigueRepository().update(troncon.get());
+                                TronconUtils.updateSRElementaire(troncon.get(), session);
+                                
+                                updateGeometry();
+                            });
+                            popup.getItems().add(invert);
+                        }
+                        
+                        popup.getItems().add(new SeparatorMenuItem());                        
+                        
+                        // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
+                        // diffère de celle de l'éditeur.
+                        if (editGeometry.geometry != null && editGeometry.geometry.equals(troncon.get().getGeometry())) {
+                            final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
+                            saveItem.setOnAction((ActionEvent event) -> {
+                                troncon.get().setGeometry(editGeometry.geometry);
+                                session.getTronconDigueRepository().update(troncon.get());
 
-                            TronconUtils.updateSRElementaire(troncon.get(), session);
-                            //on recalcule les geometries des positionables du troncon.
-                            TronconUtils.updatePositionableGeometry(troncon.get(), session);
+                                TronconUtils.updateSRElementaire(troncon.get(), session);
+                                //on recalcule les geometries des positionables du troncon.
+                                TronconUtils.updatePositionableGeometry(troncon.get(), session);
 
-                            troncon.set(null);
-                        });
-                        popup.getItems().add(saveItem);
+                                troncon.set(null);
+                            });
+                            popup.getItems().add(saveItem);
 
-                        //action : annuler edition
-                        final MenuItem cancelItem = new MenuItem("Annuler les modifications");
-                        cancelItem.setOnAction((ActionEvent event) -> {
-                            troncon.set(null);
-                        });
-                        popup.getItems().add(cancelItem);
+                            //action : annuler edition
+                            final MenuItem cancelItem = new MenuItem("Annuler les modifications");
+                            cancelItem.setOnAction((ActionEvent event) -> {
+                                troncon.set(null);
+                            });
+                            popup.getItems().add(cancelItem);
+                        }
 
                         //action : suppression du troncon
                         popup.getItems().add(new SeparatorMenuItem());
@@ -412,14 +433,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             troncon.set(null);
                         });
                         popup.getItems().add(deleteItem);
-
-                        // If selected troncon is empty, we can invert its geometry.
-                        if (troncon.get().getGeometry() != null && troncon.get().getStructures().isEmpty()) {
-                            final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
-                            invert.setOnAction((ActionEvent ae) -> {
-                                editGeometry.geometry = editGeometry.geometry.reverse();
-                            });
-                        }
                     }
 
                     popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
