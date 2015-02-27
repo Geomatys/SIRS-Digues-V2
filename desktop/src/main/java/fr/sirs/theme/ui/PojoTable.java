@@ -10,10 +10,14 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
 import fr.sirs.core.TaskManager;
+import fr.sirs.core.model.Convention;
+import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
+import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -27,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,8 +39,8 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -48,13 +53,16 @@ import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -72,10 +80,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import jidefx.scene.control.field.NumberField;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -117,6 +128,8 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
     // Ouvrir l'editeur sur creation d'un nouvel objet
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
+    // Créer un nouvel objet à l'ajout
+    protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
         
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
@@ -265,9 +278,18 @@ public class PojoTable extends BorderPane {
                 
         uiAdd.getStyleClass().add("btn-without-style");
         uiAdd.setOnAction((ActionEvent event) -> {
-            final Object p = createPojo();
-            if (p != null && openEditorOnNewProperty.get()) {
-                editPojo(p);
+            final Object p;
+            if(createNewProperty.get()){
+                p = createPojo();
+            
+                if (p != null && openEditorOnNewProperty.get()) {
+                    editPojo(p);
+                }
+            }
+            else{
+                final ChoiceStage stage = new ChoiceStage();
+                stage.showAndWait();
+                p=stage.getRetrievedElement().get();
             }
         });
         uiAdd.disableProperty().bind(editableProperty.not());
@@ -279,7 +301,12 @@ public class PojoTable extends BorderPane {
                 final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
                         ButtonType.NO, ButtonType.YES).showAndWait().get();
                 if (ButtonType.YES == res) {
-                    deletePojos(elements);
+                    if(createNewProperty.get()){
+                        deletePojos(elements);
+                    } 
+                    else{
+                        removeExistingPojos(elements);
+                    }
                 }
             } else {
                 new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
@@ -438,9 +465,11 @@ public class PojoTable extends BorderPane {
     public BooleanProperty searchableProperty(){
         return searchableProperty;
     }
-
     public BooleanProperty openEditorOnNewProperty() {
         return openEditorOnNewProperty;
+    }
+    public BooleanProperty createNewProperty() {
+        return createNewProperty;
     }
     
     /**
@@ -621,6 +650,32 @@ public class PojoTable extends BorderPane {
             final Element obj = event.getRowValue();
             if(obj == null) return;
             repo.update(obj);
+        }
+    }
+    
+    protected Object addExistingPojo(final ValiditySummary summary) {
+        Object result = null;
+        if (repo != null) {
+            result = repo.get(summary.getDocId());
+        } 
+        if (result!=null) {
+            uiTable.getItems().add((Element)result);
+        } else {
+            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
+        }
+        return result;
+    }
+    
+    
+    
+    protected void removeExistingPojos(Element... pojos) {
+        ObservableList<Element> items = uiTable.getItems();
+        for (Element pojo : pojos) {
+            // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+            // l'élément et que celui-ci soit invalide, sinon, on court-circuite
+            // la suppression.
+            if(!authoriseElementDeletion(pojo)) continue;
+            items.remove(pojo);
         }
     }
     
@@ -873,7 +928,12 @@ public class PojoTable extends BorderPane {
                                     final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
                                             ButtonType.NO, ButtonType.YES).showAndWait().get();
                                     if (ButtonType.YES == res) {
-                                        deletePojos(t);
+                                        if(createNewProperty.get()){
+                                            deletePojos(t);
+                                        } 
+                                        else{
+                                            removeExistingPojos(t);
+                                        }
                                     }
                                     return null;
                                 }
@@ -913,17 +973,74 @@ public class PojoTable extends BorderPane {
     
     public class ValidatedTableRow extends TableRow<Element>{
 
-            @Override
-            protected void updateItem(Element item, boolean empty) {
-                super.updateItem(item, empty);
-                
-                if(item!=null && !item.getValid()){
-                        getStyleClass().add("invalidRow");
-                    }
-                    else{
-                        getStyleClass().removeAll("invalidRow");
-                    }
-            }
+        @Override
+        protected void updateItem(Element item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if(item!=null && !item.getValid()){
+                    getStyleClass().add("invalidRow");
+                }
+                else{
+                    getStyleClass().removeAll("invalidRow");
+                }
         }
+    }
+    
+    private class ChoiceStage extends Stage{
+        
+        private ObjectProperty retrievedElement = new SimpleObjectProperty();
+        
+        private ChoiceStage(){
+            super();
+            setTitle("Choix de l'élément");
+            
+            final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName());
+            final String prefix = bundle.getString("classAbrege")+" : ";
+            final ComboBox<ValiditySummary> comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)));
+            comboBox.setConverter(new StringConverter<ValiditySummary>() {
+
+                @Override
+                public String toString(ValiditySummary object) {
+                    return prefix+object.getPseudoId();
+                }
+
+                @Override
+                public ValiditySummary fromString(String string) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+            
+            final Button cancel = new Button("Annuler");
+            cancel.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    retrievedElement.set(null);
+                    hide();
+                }
+            });
+            final Button add = new Button("Ajouter");
+            add.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    retrievedElement.set(addExistingPojo(comboBox.valueProperty().get()));
+                    hide();
+                }
+            });
+            final HBox hBox = new HBox(cancel, add);
+            hBox.setAlignment(Pos.CENTER);
+            hBox.setPadding(new Insets(20));
+            
+            final VBox vBox = new VBox(comboBox, hBox);
+            vBox.setAlignment(Pos.CENTER);
+            vBox.setPadding(new Insets(20));
+            setScene(new Scene(vBox));
+        }
+        
+        private ObjectProperty getRetrievedElement(){
+            return retrievedElement;
+        }
+    }
     
 }

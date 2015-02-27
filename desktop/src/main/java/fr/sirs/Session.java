@@ -555,6 +555,8 @@ public class Session extends SessionGen {
             title += bundle.getString("classAbrege");
         } 
         
+        title += (element.getPseudoId()==null) ? "" : "-"+element.getPseudoId();
+        
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {
             title += " : "+libelle;

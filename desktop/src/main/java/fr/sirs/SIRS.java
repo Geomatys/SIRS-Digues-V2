@@ -44,6 +44,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
+import org.ektorp.ViewQuery;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
@@ -171,13 +172,10 @@ public final class SIRS extends SirsCore {
      * @return Une liste d'éléments. Peut être vide, mais jamais nulle.
      */
     public static ObservableList<Element> toElementList(final List sourceList, final Repository repo) {
-        if (sourceList == null || sourceList.isEmpty()) {
-            if (sourceList instanceof ObservableList) {
-                return (ObservableList) sourceList;
-            } else {
-                return FXCollections.observableArrayList();
-            }
-        } else if (sourceList.get(0) instanceof Element) {
+        if (sourceList == null) {
+            return FXCollections.observableArrayList();
+            
+        } else if (!sourceList.isEmpty() && sourceList.get(0) instanceof Element) {
             if (sourceList instanceof ModifiableObservableListBase) {
                 return (ObservableList) sourceList;
             } else {
@@ -186,11 +184,17 @@ public final class SIRS extends SirsCore {
         } else if (repo == null) {
             return FXCollections.observableArrayList();
         } else {
-            ObservableList resultList = FXCollections.observableArrayList();
-            final Iterator<String> it = sourceList.iterator();
-            while (it.hasNext()) {
-                resultList.add(repo.get(it.next()));
-            }
+            ViewQuery q = new ViewQuery()
+                      .allDocs()
+                      .includeDocs(true)
+                      .keys(sourceList);
+            List r = Injector.getSession().getConnector().queryView(q, repo.getModelClass());
+            
+            ObservableList resultList = FXCollections.observableArrayList(r);
+//            final Iterator<String> it = sourceList.iterator();
+//            while (it.hasNext()) {
+//                resultList.add(repo.get(it.next()));
+//            }
             return resultList;
         }
     }
