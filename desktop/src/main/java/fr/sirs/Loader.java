@@ -50,8 +50,10 @@ import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import org.controlsfx.dialog.ExceptionDialog;
 
 /**
  *
@@ -220,8 +222,13 @@ public class Loader extends Application {
                                             showMainStage();
                                         } catch (Throwable ex) {
                                             try {
-                                                SIRS.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex).showAndWait();
-                                            } finally {
+                                                SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
+                                                ExceptionDialog exDialog = SIRS.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
+                                                exDialog.setOnHidden((DialogEvent de)-> System.exit(1));
+                                                exDialog.show();
+                                                
+                                            } catch (Throwable e) {
+                                                SIRS.LOGGER.log(Level.WARNING, "Cannot show error dialofg to user", e);
                                                 System.exit(1);
                                             }
                                         }

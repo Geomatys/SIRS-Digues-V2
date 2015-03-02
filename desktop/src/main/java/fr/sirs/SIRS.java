@@ -29,10 +29,10 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -201,7 +201,7 @@ public final class SIRS extends SirsCore {
     
     /**
      * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
-     * le {@link HashSet} d'entrée. La recherche s'effectue uniquement sur le 
+     * le {@link Set} d'entrée. La recherche s'effectue uniquement sur le 
      * tronçon donné en paramètre.
      * 
      * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
@@ -210,7 +210,7 @@ public final class SIRS extends SirsCore {
      * @param sourceTroncon Le tronçon où chercher les objets.
      * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
      */
-    public static ObservableList<Objet> getStructures(final HashSet<String> objetIds, final Element sourceTroncon) {
+    public static ObservableList<Objet> getStructures(final Set<String> objetIds, final Element sourceTroncon) {
         ObservableList<Objet> result = FXCollections.observableArrayList();
         if (objetIds == null || objetIds.isEmpty()) {
             return result;
@@ -232,7 +232,7 @@ public final class SIRS extends SirsCore {
         
     /**
      * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
-     * le {@link HashSet} d'entrée. La recherche s'effectue sur tous les tronçons
+     * le {@link Set} d'entrée. La recherche s'effectue sur tous les tronçons
      * de la base de donnée chargée. Pour éviter un surcoût mémoire et processeur
      * trop important, la recherche se limite aux objets du type passé en paramètre.
      * 
@@ -242,7 +242,7 @@ public final class SIRS extends SirsCore {
      * @param objetClass L'implémentation d'Objet sur laquelle se concentrer.
      * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
      */
-    public static ObservableList<Objet> getStructures(final HashSet<String> objetIds, final Class objetClass) {
+    public static ObservableList<Objet> getStructures(final Set<String> objetIds, final Class objetClass) {
         ObservableList<Objet> result = FXCollections.observableArrayList();
         if (objetClass == null || !Objet.class.isAssignableFrom(objetClass)
                 || objetIds == null || objetIds.isEmpty()) {
