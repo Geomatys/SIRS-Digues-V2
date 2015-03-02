@@ -1,9 +1,26 @@
-target/
 data/
 *~
-*.log
 //eclipse
-.project
-.classpath
-.settings/
 sirs-core/src/main/resources/fr/sirs/core/model/Utilisateur.properties
+
+*.log
+.classpath
+.project
+.settings/
+
+.DS_Store
+.hg
+.hgtags
+.hgignore
+
+# Maven files
+target/
+dependency-reduced-pom.xml
+
+# Netbeans files
+nbactions.xml
+nbproject/
+
+# IntelliJ files
+.idea/
+*.iml
