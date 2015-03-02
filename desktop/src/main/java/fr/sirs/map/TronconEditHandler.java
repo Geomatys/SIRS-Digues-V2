@@ -183,7 +183,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                 try {
                     tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
                 } catch (URISyntaxException ex) {
-                    Logger.getLogger(TronconEditHandler.class.getName()).log(Level.WARNING, null, ex);
+                    SIRS.LOGGER.log(Level.WARNING, null, ex);
                 }
             }
             return true;
