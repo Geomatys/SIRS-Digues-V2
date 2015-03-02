@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
 import java.io.IOException;
+import org.junit.Ignore;
 
 //@Ignore
 public class DatabaseRegistryTestCase extends CouchDBTestCase {
@@ -67,7 +68,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
         DatabaseRegistry.startReplication(connector, dst, false);
     }
 
-    @Test
+    @Ignore
     public void replicateWihoutRemote() throws MalformedURLException {
         DatabaseRegistry.startReplication(connector, false);
     }

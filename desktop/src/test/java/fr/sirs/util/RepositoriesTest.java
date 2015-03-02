@@ -40,7 +40,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class RepositoriesTest {
 
     @Autowired
-    @Qualifier("sirsChouchDB")
     private CouchDbConnector connector;
 
     public void test() {
@@ -165,6 +164,7 @@ public class RepositoriesTest {
     }
     
     @Test
+    @Ignore
     public void testBase(){
         this.removeDigues();
         this.removeTronconsDigue();
@@ -176,8 +176,8 @@ public class RepositoriesTest {
     /**
      * Test of getAll method, of class DigueRepository.
      */
-    @Ignore
     @Test
+    @Ignore
     public void testGetAll() {
         System.out.println("getAll");
         final DigueRepository digueRepository = new DigueRepository(connector);

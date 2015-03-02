@@ -38,7 +38,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class PrinterUtilitiesTest {
 
     @Autowired
-    @Qualifier("sirsChouchDB")
+    @Qualifier("sirsCouchDB")
     private CouchDbConnector connector;
     
     public PrinterUtilitiesTest() {
@@ -64,8 +64,8 @@ public class PrinterUtilitiesTest {
      * Test of generateJasperReportsTemplate method, of class PrinterUtilities.
      * @throws java.lang.Exception
      */
-    @Ignore
     @Test
+    @Ignore
     public void testGenerateJasperReportsTemplate() throws Exception {
         System.out.println("generateJasperReportsTemplate");
         
@@ -87,6 +87,7 @@ public class PrinterUtilitiesTest {
      * @throws java.lang.Exception
      */
     @Test
+    @Ignore
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
         final DigueRepository digueRepository = new DigueRepository(connector);
@@ -99,6 +100,7 @@ public class PrinterUtilitiesTest {
      * @throws java.lang.Exception
      */
     @Test
+    @Ignore
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
         final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
@@ -110,7 +112,8 @@ public class PrinterUtilitiesTest {
      * Test of print method for BorneDigue, of class PrinterUtilities.
      * @throws java.lang.Exception
      */
-    @Test
+    @Test 
+    @Ignore
     public void testPrintBorneDigue() throws Exception {
         System.out.println("Test print BorneDigue.");
         final BorneDigue borneDigue = new BorneDigue();
