@@ -12,7 +12,7 @@
   <groupId>fr.sirs</groupId>
   <artifactId>sirs</artifactId>
   <packaging>pom</packaging>
-  <version>1.x-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
   <name>SIRS</name>
 
   <organization>
@@ -168,6 +168,20 @@
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
           <version>0.5.23-SNAPSHOT</version>
+        </plugin>
+        <plugin>
+            <groupId>external.atlassian.jgitflow</groupId>
+            <artifactId>jgitflow-maven-plugin</artifactId>
+            <version>1.0-m4.3</version>
+            <configuration>
+                <flowInitContext>
+                    <masterBranchName>master</masterBranchName>
+                    <developBranchName>develop</developBranchName>
+                    <featureBranchPrefix>feature-</featureBranchPrefix>
+                    <releaseBranchPrefix>release-</releaseBranchPrefix>
+                    <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
+                </flowInitContext>
+            </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
