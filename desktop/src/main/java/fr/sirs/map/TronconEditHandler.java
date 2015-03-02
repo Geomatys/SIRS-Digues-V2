@@ -94,7 +94,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
             return new Group(h,v);
         }
     };
-    private final double zoomFactor = 2;
     
     //edition variables
     private FeatureMapLayer tronconLayer;
@@ -351,13 +350,13 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                 if (mousebutton == MouseButton.PRIMARY && e.getClickCount() >= 2) {
                     //ajout d'un noeud                    
                     final Geometry result;
-                    if(editGeometry.geometry instanceof LineString){
-                        result = helper.insertNode((LineString)editGeometry.geometry, startX, startY);
-                    }else if(editGeometry.geometry instanceof Polygon){
-                        result = helper.insertNode((Polygon)editGeometry.geometry, startX, startY);
-                    }else if(editGeometry.geometry instanceof GeometryCollection){
-                        result = helper.insertNode((GeometryCollection)editGeometry.geometry, startX, startY);
-                    }else{
+                    if (editGeometry.geometry instanceof LineString) {
+                        result = helper.insertNode((LineString) editGeometry.geometry, startX, startY);
+                    } else if (editGeometry.geometry instanceof Polygon) {
+                        result = helper.insertNode((Polygon) editGeometry.geometry, startX, startY);
+                    } else if (editGeometry.geometry instanceof GeometryCollection) {
+                        result = helper.insertNode((GeometryCollection) editGeometry.geometry, startX, startY);
+                    } else {
                         result = editGeometry.geometry;
                     }
                     editGeometry.geometry = result;
@@ -371,39 +370,37 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     popup.getItems().clear();
 
                     //action : sauvegarder edition
-                    if (troncon.get() != null) {
-
-                        //action : suppression d'un noeud
-                        helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);                    
-                        if(editGeometry.selectedNode[0]>=0){
-                            final MenuItem item = new MenuItem("Supprimer noeud");
-                            item.setOnAction((ActionEvent event) -> {
-                                editGeometry.deleteSelectedNode(); 
-                                updateGeometry();
-                            });
-                            popup.getItems().add(item);
-                        }
+                    //action : suppression d'un noeud
+                    helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+                    if (editGeometry.selectedNode[0] >= 0) {
+                        final MenuItem item = new MenuItem("Supprimer noeud");
+                        item.setOnAction((ActionEvent event) -> {
+                            editGeometry.deleteSelectedNode();
+                            updateGeometry();
+                        });
+                        popup.getItems().add(item);
+                    }
                     
+                    if (editGeometry.geometry != null) {
                         // Si le tronçon est vide, on peut inverser son tracé
-                        if (troncon.get().getGeometry() != null && troncon.get().getStructures().isEmpty()) {
+                        if (troncon.get().getStructures().isEmpty()) {
+                            if (!popup.getItems().isEmpty()) {
+                                popup.getItems().add(new SeparatorMenuItem());
+                            }
                             final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
                             invert.setOnAction((ActionEvent ae) -> {
-                                editGeometry.geometry = editGeometry.geometry.reverse();
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
-                                troncon.get().setGeometry(editGeometry.geometry);
+                                troncon.get().setGeometry(editGeometry.geometry.reverse());
                                 session.getTronconDigueRepository().update(troncon.get());
                                 TronconUtils.updateSRElementaire(troncon.get(), session);
-                                
-                                updateGeometry();
+                                troncon.set(null);
                             });
                             popup.getItems().add(invert);
                         }
-                        
-                        popup.getItems().add(new SeparatorMenuItem());                        
-                        
-                        // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
+
+                    // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
                         // diffère de celle de l'éditeur.
-                        if (editGeometry.geometry != null && editGeometry.geometry.equals(troncon.get().getGeometry())) {
+                        if (!editGeometry.geometry.equals(troncon.get().getGeometry())) {
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
                                 troncon.get().setGeometry(editGeometry.geometry);
@@ -417,28 +414,33 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                             });
                             popup.getItems().add(saveItem);
 
-                            //action : annuler edition
-                            final MenuItem cancelItem = new MenuItem("Annuler les modifications");
-                            cancelItem.setOnAction((ActionEvent event) -> {
-                                troncon.set(null);
-                            });
-                            popup.getItems().add(cancelItem);
                         }
 
-                        //action : suppression du troncon
-                        popup.getItems().add(new SeparatorMenuItem());
-                        final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
-                        deleteItem.setOnAction((ActionEvent event) -> {
-                            session.getTronconDigueRepository().remove(troncon.get());
+                        //action : annuler edition
+                        final String cancelTitle = (!editGeometry.geometry.equals(troncon.get().getGeometry()))?
+                                "Annuler les modifications" : "Désélectionner le tronçon";
+                                
+                        final MenuItem cancelItem = new MenuItem(cancelTitle);
+                        cancelItem.setOnAction((ActionEvent event) -> {
                             troncon.set(null);
                         });
-                        popup.getItems().add(deleteItem);
+                        popup.getItems().add(cancelItem);
                     }
+
+                    //action : suppression du troncon
+                    if (!popup.getItems().isEmpty()) {
+                        popup.getItems().add(new SeparatorMenuItem());
+                    }
+                    final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
+                    deleteItem.setOnAction((ActionEvent event) -> {
+                        session.getTronconDigueRepository().remove(troncon.get());
+                        troncon.set(null);
+                    });
+                    popup.getItems().add(deleteItem);
 
                     popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
                 }
             }
-            
         }
 
         @Override
