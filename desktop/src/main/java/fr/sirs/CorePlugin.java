@@ -522,7 +522,7 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
         if(graduation){
-            final GraduationSymbolizer grad = new GraduationSymbolizer();
+            final GraduationSymbolizer bigGrad = new GraduationSymbolizer();
             //tous les 100metres
             final GraduationSymbolizer.Graduation g1 = new GraduationSymbolizer.Graduation();
             g1.setUnit(new DefaultLiteral("m"));
@@ -530,17 +530,21 @@ public class CorePlugin extends Plugin {
             g1.setStroke(SF.stroke(Color.RED, 3));
             g1.setFont(SF.font(12));
             g1.setSize(FF.literal(12));
-            grad.getGraduations().add(g1);
+            bigGrad.getGraduations().add(g1);
             //tous les 10metres
+            final GraduationSymbolizer littleGrad = new GraduationSymbolizer();
             final GraduationSymbolizer.Graduation g2 = new GraduationSymbolizer.Graduation();
             g2.setUnit(new DefaultLiteral("m"));
             g2.setStep(FF.literal(10));
             g2.setStroke(SF.stroke(Color.BLACK, 1));
             g2.setFont(SF.font(10));
             g2.setSize(FF.literal(4));
-            grad.getGraduations().add(g2);
+            littleGrad.getGraduations().add(g2);
+            
+            final MutableRule ruleClose = SF.rule(littleGrad);
+            ruleClose.setMaxScaleDenominator(3000);
         
-            return SF.style(line1,direction,grad);
+            return SF.style(line1, direction, bigGrad, littleGrad);
         }else{
             return SF.style(line1,direction);
         }
