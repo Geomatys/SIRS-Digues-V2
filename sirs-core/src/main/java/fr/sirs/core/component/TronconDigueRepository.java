@@ -150,6 +150,10 @@ public class TronconDigueRepository extends
         }
         return result;
     }
+    
+    public void clearCache(){
+        cache.clear();
+    }
 
     @Override
     public TronconDigue get(String id) {

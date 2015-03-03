@@ -187,6 +187,7 @@ public class FXMainFrame extends BorderPane {
     @FXML 
     private void clearCache(){
         session.clearCache();
+        session.getTronconDigueRepository().clearCache();
     }
     
     @FXML 
