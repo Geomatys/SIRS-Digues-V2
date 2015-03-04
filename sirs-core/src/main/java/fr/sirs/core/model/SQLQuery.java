@@ -1,6 +1,7 @@
 
-package fr.sirs.query;
+package fr.sirs.core.model;
 
+import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -40,5 +41,36 @@ public class SQLQuery {
     public String getValueString(){
         return sql.get()+SEPARATOR+desc.get();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + Objects.hashCode(this.name);
+        hash = 71 * hash + Objects.hashCode(this.desc);
+        hash = 71 * hash + Objects.hashCode(this.sql);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SQLQuery other = (SQLQuery) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.desc, other.desc)) {
+            return false;
+        }
+        if (!Objects.equals(this.sql, other.sql)) {
+            return false;
+        }
+        return true;
+    }
+    
     
 }

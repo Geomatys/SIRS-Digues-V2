@@ -1,6 +1,8 @@
 
 package fr.sirs.query;
 
+import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -98,8 +100,7 @@ public class FXSearchPane extends BorderPane {
     public static final Image ICON_EXPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UPLOAD,22,Color.WHITE),null);
     public static final Image ICON_MODEL   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SHARE_ALT_SQUARE,22,Color.WHITE),null);
     public static final Image ICON_CARTO   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS,22,Color.WHITE),null);
-    
-    @FXML private BorderPane uiTopPane;
+
     @FXML private Button uiSave;
     @FXML private Button uiOpen;
     @FXML private Button uiExport;
@@ -111,18 +112,17 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiPlainTextPane;
     @FXML private TextField uiElasticKeywords;
     
-    //recherche simple
-    @FXML private ToggleButton uiToggleSimple;
-    @FXML private GridPane uiSimplePane;
-    @FXML private ChoiceBox<String> uiDBTable;
-    @FXML private BorderPane uiFilterPane;
-    @FXML private TextArea uiSimpleSQL;
-    private FXSQLFilterEditor uiFilterEditor;
-    
     //recherche SQL
     @FXML private ToggleButton uiToggleSQL;
     @FXML private GridPane uiSQLPane;
-    @FXML private TextArea uiAdvSQL;
+    @FXML private GridPane uiSQLModelOptions;
+    @FXML private GridPane uiSQLQueryOptions;
+    @FXML private GridPane uiAdminOptions;
+    @FXML private ChoiceBox<String> uiDBTable;
+    @FXML private BorderPane uiFilterPane;
+    @FXML private TextArea uiSQLText;
+    private FXSQLFilterEditor uiFilterEditor;
+    
     
     private final Session session;
 
@@ -133,29 +133,14 @@ public class FXSearchPane extends BorderPane {
         session = Injector.getSession();
                
         uiFilterEditor = new FXSQLFilterEditor();
-        uiFilterPane.setCenter(uiFilterEditor);
+        uiFilterEditor.filterProperty.addListener(this::setSQLText);
         
-        uiTopPane.setCenter(null);
+        uiFilterPane.setCenter(uiFilterEditor);
         
         //affichage des panneaux coord/borne
         final ToggleGroup group = new ToggleGroup();
         uiTogglePlainText.setToggleGroup(group);
-        uiToggleSimple.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
-        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null){
-                group.selectToggle(uiTogglePlainText);
-            }
-            if(newValue==uiTogglePlainText){
-                uiTopPane.setCenter(uiPlainTextPane);
-            }else if(newValue==uiToggleSimple){
-                uiTopPane.setCenter(uiSimplePane);
-            }else if(newValue==uiToggleSQL){
-                uiTopPane.setCenter(uiSQLPane);
-            }else{
-                uiTopPane.setCenter(null);
-            }
-        });
         
         uiTogglePlainText.setSelected(true);
 
@@ -193,11 +178,24 @@ public class FXSearchPane extends BorderPane {
         uiExport.setGraphic(new ImageView(ICON_EXPORT));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
-        uiViewModel.visibleProperty().bind(uiToggleSimple.selectedProperty().or(uiToggleSQL.selectedProperty()));
-        uiCarto.visibleProperty().bind(uiToggleSimple.selectedProperty().or(uiToggleSQL.selectedProperty()));
-        uiSave.visibleProperty().bind(uiToggleSQL.selectedProperty());
-        uiOpen.visibleProperty().bind(uiToggleSQL.selectedProperty());
-        uiExport.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiPlainTextPane.visibleProperty().bind(uiTogglePlainText.selectedProperty());
+        uiPlainTextPane.managedProperty().bind(uiPlainTextPane.visibleProperty());
+        
+        uiSQLPane.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLPane.managedProperty().bind(uiSQLPane.visibleProperty());
+        
+        uiSQLModelOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLModelOptions.managedProperty().bind(uiSQLModelOptions.visibleProperty());
+        
+        uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
+        
+        uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiAdminOptions.managedProperty().bind(uiAdminOptions.visibleProperty());
+        
+        // TODO : change binding to make it visible if selected result is positionable or has geometry ?
+        uiCarto.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiCarto.managedProperty().bind(uiCarto.visibleProperty());
     }
 
     @FXML
@@ -223,7 +221,7 @@ public class FXSearchPane extends BorderPane {
         final DialogPane pane = new DialogPane();
         pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);        
         final SQLQuery query = new SQLQuery();
-        query.sql.set(uiAdvSQL.getText());
+        query.sql.set(uiSQLText.getText());
         pane.setContent(new FXQueryPane(query));
         
         dialog.setDialogPane(pane);
@@ -263,7 +261,7 @@ public class FXSearchPane extends BorderPane {
                 if(res.isPresent() && ButtonType.OK.equals(res.get())){
                     final SQLQuery selected = table.getSelection();
                     if(selected!=null){
-                        uiAdvSQL.setText(selected.sql.get());
+                        uiSQLText.setText(selected.sql.get());
                     }
                 }
             }
@@ -315,24 +313,33 @@ public class FXSearchPane extends BorderPane {
         session.getFrame().getMapTab().show();
     }
     
-    private String getCurrentSQLQuery() throws DataStoreException{
-        if(uiToggleSimple.isSelected()){
-            final String tableName = uiDBTable.getValue();
-            if(tableName==null) return null;
-            final Filter filter = uiFilterEditor.toFilter();
-
-            final FeatureType ft = h2Store.getFeatureType(tableName);
-            final FilterToSQL filterToSQL = new SirsFilterToSQL(ft);
-            final StringBuilder sb = new StringBuilder();
-            filter.accept(filterToSQL, sb);
-            final String condition = sb.toString();
-
-            return "SELECT * FROM \""+tableName+"\" WHERE "+condition;
-
-        }else if(uiToggleSQL.isSelected()){
-            return uiAdvSQL.getText().trim();
+    private void setSQLText(final ObservableValue observable, Object oldValue, Object newValue) {
+        try {
+            uiSQLText.setText(buildSQLQueryFromFilter());
+        } catch (DataStoreException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de construire une requête SQL depuis le panneau de filtres.", ex);
+            SIRS.newExceptionDialog("Impossible de construire une requête SQL depuis le panneau de filtres.", ex).show();
         }
-        return null;
+    }
+    
+    private String buildSQLQueryFromFilter() throws DataStoreException {
+        final String tableName = uiDBTable.getValue();
+        if (tableName == null) {
+            return null;
+        }
+        final Filter filter = uiFilterEditor.toFilter();
+
+        final FeatureType ft = h2Store.getFeatureType(tableName);
+        final FilterToSQL filterToSQL = new SirsFilterToSQL(ft);
+        final StringBuilder sb = new StringBuilder();
+        filter.accept(filterToSQL, sb);
+        final String condition = sb.toString();
+
+        return "SELECT * FROM \"" + tableName + "\" WHERE " + condition;
+    }
+    
+    private String getCurrentSQLQuery() throws DataStoreException {
+        return uiSQLText.getText().trim();
     }
     
     @FXML
@@ -395,18 +402,15 @@ public class FXSearchPane extends BorderPane {
                 scroll.setFitToWidth(true);
                 setCenter(scroll);
                 
-            }else if(uiToggleSimple.isSelected()){
-                final String query = getCurrentSQLQuery();
-                uiSimpleSQL.setText(query);
-                searchSQL(query);
-                
-            }else if(uiToggleSQL.isSelected()){
+            } else if(uiToggleSQL.isSelected()) {
                 final String query = getCurrentSQLQuery();
                 searchSQL(query);
             }
-        }catch(Exception ex){
+        } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             
+            // Si une erreur s'est produite pendant la requête, on propose un panneau
+            // dépliable pour informer l'utilisateur.
             Label errorLabel = new Label("Une erreur est survenue. Assurez-vous que la syntaxe de votre requête est correcte.");            
             errorLabel.setBackground(Background.EMPTY);
                       

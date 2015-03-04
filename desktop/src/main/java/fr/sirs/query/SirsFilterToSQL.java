@@ -511,12 +511,11 @@ public class SirsFilterToSQL implements FilterToSQL {
                     unwrapPath(dt, new DefaultPropertyName(path.substring(index+1)), pattern, subsb);
                     
                     sb.append(" \"").append(fieldName).append("\"");
-                    sb.append(" IN (SELECT ").append(relation.getForeignColumn());
+                    sb.append(" IN (SELECT \"").append(relation.getForeignColumn()).append('\"');
                     sb.append(" FROM \"").append(relation.getForeignTable());
                     sb.append("\" WHERE ").append(subsb.toString());
                     sb.append(" ) ");
                 }
-                
             }
             
         }else{

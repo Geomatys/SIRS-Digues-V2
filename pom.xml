@@ -27,7 +27,7 @@
     <slf4j.version>1.7.7</slf4j.version>
     <geoapi.version>3.1-SNAPSHOT</geoapi.version>
     <sis.version>0.5-jdk7-SNAPSHOT</sis.version>
-    <geotoolkit.version>4.x-SNAPSHOT</geotoolkit.version>
+    <geotoolkit.version>4.0-SNAPSHOT</geotoolkit.version>
     <jai.version>1.1.4</jai.version>
     <jai-io.version>1.1.1</jai-io.version>
     <project.encoding>UTF-8</project.encoding>

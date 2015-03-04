@@ -18,9 +18,9 @@
     <RowConstraints vgrow="NEVER" />
   </rowConstraints>
    <children>
-      <Label text="Libéllé :" />
-      <Label text="Déscription :" GridPane.rowIndex="2" GridPane.valignment="TOP" />
-      <Label text="SQL :" GridPane.rowIndex="4" GridPane.valignment="TOP" />
+      <Label text="Libellé :" />
+      <Label text="Description :" GridPane.rowIndex="2" GridPane.valignment="TOP" />
+      <Label text="Requête SQL :" GridPane.rowIndex="4" GridPane.valignment="TOP" />
       <TextField fx:id="uiLibelle" GridPane.rowIndex="1" />
       <TextArea fx:id="uiDesc" prefHeight="70.0" GridPane.rowIndex="3" />
       <TextArea fx:id="uiSql" prefHeight="70.0" GridPane.rowIndex="5" />

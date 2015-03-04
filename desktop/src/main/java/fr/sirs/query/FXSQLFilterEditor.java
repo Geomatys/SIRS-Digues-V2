@@ -5,6 +5,8 @@ import static fr.sirs.SIRS.CSS_PATH;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -86,12 +88,14 @@ public class FXSQLFilterEditor extends GridPane {
     private final TextField uiPropertyName = new TextField();
     private final TextField uiPropertyValue = new TextField();
     private final GridPane uiPropertyPane = new GridPane();
-    private ObservableList<String> choices = FXCollections.observableArrayList();
+    private final ObservableList<String> choices = FXCollections.observableArrayList();
     
     private ComplexType type;
     
     private FXSQLFilterEditor uiSub1 = null;
     private FXSQLFilterEditor uiSub2 = null;
+    
+    public final SimpleObjectProperty<Filter> filterProperty = new SimpleObjectProperty<>();
     
     public FXSQLFilterEditor() {
         this(Type.NONE);
@@ -153,39 +157,43 @@ public class FXSQLFilterEditor extends GridPane {
             }
         };
         
+        uiConditionBox.getSelectionModel().selectedItemProperty().addListener(this::setFilterProperty);
+        uiPropertyName.textProperty().addListener(this::setFilterProperty);
+        uiPropertyValue.textProperty().addListener(this::setFilterProperty);
     }
 
     public ObservableList<String> getChoices() {
-        if(type!=null){
-            final String text = uiPropertyName.getText();
+        final String text = uiPropertyName.getText();
+        if (type != null && text != null && !text.isEmpty()) {
             final String[] parts = text.split("/");
-            
+
             final ObservableList<String> candidates = FXCollections.observableArrayList();
-            
             final StringBuilder sb = new StringBuilder();
-            
+
             ComplexType ct = type;
-            for(int i=0;i<parts.length;i++){
+            for (int i = 0; i < parts.length; i++) {
                 PropertyDescriptor desc = ct.getDescriptor(parts[i]);
-                if(desc==null) break;
+                if (desc == null) {
+                    break;
+                }
                 final PropertyType propType = desc.getType();
-                if(propType instanceof AssociationType){
+                if (propType instanceof AssociationType) {
                     ct = (ComplexType) ((AssociationType) propType).getRelatedType();
                     sb.append(parts[i]).append('/');
                 }
             }
-            
-            if(ct!=null){
+
+            if (ct != null) {
                 candidates.addAll(listProps(sb.toString(), ct));
             }
             return candidates;
         }
-        
+
         return choices;
     }
-
+    
     public void setChoices(ObservableList<String> choices) {
-        this.choices = choices;
+        this.choices.setAll(choices);
         uiTypeBox.getSelectionModel().select(Type.NONE);
     }
 
@@ -195,6 +203,8 @@ public class FXSQLFilterEditor extends GridPane {
 
     public void setType(ComplexType type) {
         this.type = type;
+        uiTypeBox.getSelectionModel().select(Type.NONE);
+        choices.setAll(listProps("", type));
     }
     
     private static List<String> listProps(String base, ComplexType ct){
@@ -226,6 +236,8 @@ public class FXSQLFilterEditor extends GridPane {
             add(uiSub1,2,0,1,2);  
             add(uiSub2,2,2,1,2);
             
+            uiSub1.filterProperty.addListener(this::setFilterProperty);
+            uiSub2.filterProperty.addListener(this::setFilterProperty);
             
             final ImageView ivhaut = new ImageView(DIV_HAUT);
             final ScrollPane scrollhaut = new ScrollPane(ivhaut);
@@ -251,8 +263,11 @@ public class FXSQLFilterEditor extends GridPane {
         }
     }
     
-    public Filter toFilter(){
-        
+    private void setFilterProperty(ObservableValue observable, Object oldValue, Object newValue) {
+        filterProperty.set(toFilter());
+    }
+    
+    public Filter toFilter(){    
         final Type t = uiTypeBox.getValue();
         if(Type.PROPERTY.equals(t)){
             final PropertyName propName = FF.property(uiPropertyName.getText());

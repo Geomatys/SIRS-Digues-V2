@@ -1,6 +1,8 @@
 
 package fr.sirs.query;
 
+import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.SQLQueries;
 import fr.sirs.SIRS;
 import java.io.IOException;
 import java.util.HashMap;
