@@ -33,6 +33,9 @@ releaseMajor=
 # RELEASE VERSION : COMPLETE STRING COMPOSED OF MAJOR AND MINOR variables. 
 releaseVersion=
 
+# The name of the file in which we put tag name (so an automatic script can checkout tag by doing cat lastTag.tmp|git checkout)
+lastTagFile="lastTag.tmp"
+
 # TODO : add a case to change SNAPSHOT version after release.
 oldSnaphot=
 newSnapshot=
@@ -105,6 +108,7 @@ function createTag {
 
 	echo "Create tag named $releaseVersion"
 	git tag $releaseVersion $tmpReleaseBranch
+	echo "$releaseVersion" > "$lastTagFile"
 
 	echo "Remove temporary Release branch"
 	git checkout $originalBranch
