@@ -204,19 +204,20 @@ public class TronconDigueRepository extends
         return new TronconDigue();
     }
 
+    /**
+     * Return a light version of the tronçon, without sub-structures.
+     * 
+     * Note : As the objects returned here are incomplete, they're not cached.
+     * 
+     * @return 
+     */
     public List<TronconDigue> getAllLight() {
-        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class,db.queryForStreamingView(createQuery("streamLight")));
-        final List<TronconDigue> result = new ArrayList<>();
-        while(ite.hasNext()) {
-            TronconDigue tr = ite.next();
-            try {
-                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
-            } catch (Exception ex) {
-                // Should never happen ...
-                throw new RuntimeException(ex);
-            }
+        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery("streamLight")));
+        final List<TronconDigue> lst = new ArrayList<>();
+        while (ite.hasNext()) {
+            lst.add(ite.next());
         }
-        return result;
+        return lst;
     }
     
     public static final String CRETE = "Crete";
