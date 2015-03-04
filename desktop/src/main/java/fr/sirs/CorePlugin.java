@@ -544,7 +544,20 @@ public class CorePlugin extends Plugin {
             final MutableRule ruleClose = SF.rule(littleGrad);
             ruleClose.setMaxScaleDenominator(3000);
         
-            return SF.style(line1, direction, bigGrad, littleGrad);
+            final MutableRule ruleDistant = SF.rule(bigGrad);
+            ruleDistant.setMinScaleDenominator(3000);
+            
+            MutableRule others = SF.rule(line1, direction);
+            
+            MutableFeatureTypeStyle ftStyle = SF.featureTypeStyle();
+            ftStyle.rules().add(ruleClose);
+            ftStyle.rules().add(ruleDistant);
+            ftStyle.rules().add(others);            
+            
+            MutableStyle style = SF.style();
+            style.featureTypeStyles().add(ftStyle);
+            
+            return style;
         }else{
             return SF.style(line1,direction);
         }
