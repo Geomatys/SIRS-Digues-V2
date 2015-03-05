@@ -24,7 +24,7 @@
       </VBox>
    </left>
    <center>
-      <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" spacing="30.0" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="uiToDatabaseBtn" mnemonicParsing="false" onAction="#localToDatabase" text="&gt;&gt;" />
             <Button fx:id="uiToLocalBtn" mnemonicParsing="false" onAction="#databaseToLocal" text="&lt;&lt;" />
@@ -50,15 +50,4 @@
          </children>
       </VBox>
    </right>
-   <bottom>
-      <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="5.0" BorderPane.alignment="CENTER">
-         <children>
-            <Button cancelButton="true" mnemonicParsing="false" text="Annuler" />
-            <Button mnemonicParsing="false" onAction="#saveQueries" text="Sauvegarder" />
-         </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </HBox>
-   </bottom>
 </fx:root>
