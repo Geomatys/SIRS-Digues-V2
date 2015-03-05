@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
+import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
@@ -91,7 +92,6 @@ public class Session extends SessionGen {
     
     public static String FLAG_SIRSLAYER = "SirsLayer";
     
-    
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES REFERENCES
     ////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ public class Session extends SessionGen {
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
-    private ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
     public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
     public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
     public void setUtilisateur(final Utilisateur utilisateur){
@@ -202,9 +202,13 @@ public class Session extends SessionGen {
 
     private final CouchDbConnector connector;
     
+    ////////////////////////////////////////////////////////////////////////////
+    // NON-GENERATED REPOSITORIES
+    ////////////////////////////////////////////////////////////////////////////
     private final PreviewLabelRepository previewLabelRepository;
     private final ReferenceUsageRepository referenceUsageRepository;
     private final ValiditySummaryRepository validitySummaryRepository;
+    private final SQLQueryRepository sqlQueryRepository;
 
     private FXMainFrame frame = null;
     
@@ -235,7 +239,8 @@ public class Session extends SessionGen {
         
         previewLabelRepository = new PreviewLabelRepository(connector);
         referenceUsageRepository = new ReferenceUsageRepository(connector);
-        validitySummaryRepository = new ValiditySummaryRepository(couchDbConnector);
+        validitySummaryRepository = new ValiditySummaryRepository(connector);
+        sqlQueryRepository = new SQLQueryRepository(connector);
         
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         final String referenceUrl;
@@ -262,6 +267,10 @@ public class Session extends SessionGen {
     
     public ValiditySummaryRepository getValiditySummaryRepository(){
         return validitySummaryRepository;
+    }
+
+    public SQLQueryRepository getSqlQueryRepository() {
+        return sqlQueryRepository;
     }
     
     void setFrame(FXMainFrame frame) {

@@ -21,7 +21,7 @@ public class FXQueryPane extends GridPane {
     public FXQueryPane(SQLQuery query) {
         SIRS.loadFXML(this);
         uiLibelle.textProperty().bindBidirectional(query.name);
-        uiDesc.textProperty().bindBidirectional(query.desc);
+        uiDesc.textProperty().bindBidirectional(query.description);
         uiSql.textProperty().bindBidirectional(query.sql);
     }
     

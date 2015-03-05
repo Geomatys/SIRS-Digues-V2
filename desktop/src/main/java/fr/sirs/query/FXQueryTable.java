@@ -1,30 +1,32 @@
 
 package fr.sirs.query;
 
+import fr.sirs.Injector;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.SIRS;
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
@@ -32,22 +34,24 @@ import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
- *
+ * A panel which lists queries stored locally or imported from a file. It allows
+ * for deletion and selection of multiple queries.
+ * 
+ * @author Alexis Manin
  * @author Johann Sorel
  */
 public class FXQueryTable extends BorderPane{
 
-    private final TableView<SQLQuery> table = new FXTableView<>();
-    private final ScrollPane scroll = new ScrollPane(table);
+    public final TableView<SQLQuery> table = new FXTableView<>();
+    /** A button to import queries from a chosen properties file. */
+    private final Button uiImportQueries = new Button("Import");
     
     public FXQueryTable(List<SQLQuery> queries) {
-        scroll.setFitToHeight(true);
-        scroll.setFitToWidth(true);
-        table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefSize(200, 400);
         FXUtilities.hideTableHeader(table);
-        setLeft(scroll);
+        setLeft(table);
         
         table.setItems(FXCollections.observableList(queries));
         
@@ -75,18 +79,47 @@ public class FXQueryTable extends BorderPane{
             }
         });
         
+        uiImportQueries.setTooltip(new Tooltip("Importer des requêtes SQL depuis un fichier."));
+        uiImportQueries.setOnAction(this::importRequests);
+        setBottom(uiImportQueries);
+    }
+    
+    private void importRequests(ActionEvent e) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Fichier à charger");
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Fichier de propriétés Java", ".properties"));
+        File outputFile = chooser.showOpenDialog(null);
+        if (outputFile != null) {
+            try {
+                table.getItems().addAll(SQLQueries.openQueryFile(outputFile.toPath()));
+            } catch (IOException ex) {
+                SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
+                SIRS.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
+            }
+        }
     }
     
     public void save(){
         try {
-            SQLQueries.saveQueries(table.getItems());
+            SQLQueries.saveQueriesLocally(getLocalQueries());
         } catch (IOException ex) {
+            // TODO : is logging sufficient ?
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
     }
 
     final SQLQuery getSelection() {
         return table.getSelectionModel().getSelectedItem();
+    }
+
+    /**
+     * Get all queries of the current table which are not contained into CouchDB
+     * database (system local and imported from a file).
+     * 
+     * @return A list of queries. Never null, but can be empty.
+     */
+    private List<SQLQuery> getLocalQueries() {
+        return table.getItems().filtered((SQLQuery current)-> current.getId() == null);
     }
     
     public class DeleteColumn extends TableColumn{
@@ -125,6 +158,4 @@ public class FXQueryTable extends BorderPane{
             });
         }  
     }
-    
-    
 }

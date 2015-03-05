@@ -59,6 +59,8 @@ public class SirsCore {
     
     public static final Path ELASTIC_SEARCH_PATH = CONFIGURATION_PATH.resolve("elasticSearch");
     
+    public static final Path LOCAL_QUERIES_PATH = CONFIGURATION_PATH.resolve("queries.properties");
+    
     private static CoordinateReferenceSystem PROJECTION;
     
     /**

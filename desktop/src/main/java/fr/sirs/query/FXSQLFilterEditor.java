@@ -22,6 +22,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javafx.util.StringConverter;
 import static org.geotoolkit.db.JDBCFeatureStore.JDBC_PROPERTY_RELATION;
 import org.geotoolkit.db.reverse.RelationMetaModel;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -48,12 +49,11 @@ public class FXSQLFilterEditor extends GridPane {
     
     public static enum Type{
         NONE("-"),
-        PROPERTY("PROP"),
+        PROPERTY("filtre sur colonne"),
         AND("ET"),
         OR("OU");
 
         private final String text;
-
         private Type(String text) {
             this.text = text;
         }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <left>
+      <VBox>
+         <children>
+            <ListView fx:id="uiLocalList" BorderPane.alignment="CENTER" />
+            <HBox maxWidth="1.7976931348623157E308" spacing="5.0">
+               <children>
+                  <Button fx:id="uiDeleteLocalBtn" mnemonicParsing="false" text="Supprimer" />
+                  <Button fx:id="uiLocalEditBtn" mnemonicParsing="false" onAction="#editSelection" text="Editer" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="uiToDatabaseBtn" mnemonicParsing="false" onAction="#localToDatabase" text="&gt;&gt;" />
+            <Button fx:id="uiToLocalBtn" mnemonicParsing="false" onAction="#databaseToLocal" text="&lt;&lt;" />
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+   </center>
+   <right>
+      <VBox>
+         <children>
+            <ListView fx:id="uiDBList" BorderPane.alignment="CENTER" />
+            <HBox maxWidth="1.7976931348623157E308" spacing="5.0">
+               <children>
+                  <Button fx:id="uiDeleteDBBtn" mnemonicParsing="false" text="Supprimer" />
+                  <Button mnemonicParsing="false" text="Editer" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </right>
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="5.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button cancelButton="true" mnemonicParsing="false" text="Annuler" />
+            <Button mnemonicParsing="false" onAction="#saveQueries" text="Sauvegarder" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</fx:root>

@@ -8,6 +8,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.TaskManager;
 import fr.sirs.core.h2.H2Helper;
+import fr.sirs.core.model.Role;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsTableCell;
@@ -24,7 +25,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -46,6 +50,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -55,6 +60,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -63,6 +69,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.sis.storage.DataStoreException;
@@ -103,7 +110,8 @@ public class FXSearchPane extends BorderPane {
 
     @FXML private Button uiSave;
     @FXML private Button uiOpen;
-    @FXML private Button uiExport;
+    @FXML private Button uiQueryManagement;
+    @FXML private Button uiExportModel;
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
     
@@ -175,9 +183,10 @@ public class FXSearchPane extends BorderPane {
         
         uiSave.setGraphic(new ImageView(ICON_SAVE));
         uiOpen.setGraphic(new ImageView(ICON_OPEN));
-        uiExport.setGraphic(new ImageView(ICON_EXPORT));
+        uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
+        // VISIBILITY RULES
         uiPlainTextPane.visibleProperty().bind(uiTogglePlainText.selectedProperty());
         uiPlainTextPane.managedProperty().bind(uiPlainTextPane.visibleProperty());
         
@@ -190,12 +199,22 @@ public class FXSearchPane extends BorderPane {
         uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
         
-        uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        final SimpleBooleanProperty isAdmin = new ReadOnlyBooleanWrapper(Role.ADMIN.equals(Injector.getSession().getRole()));
+        uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(isAdmin));
         uiAdminOptions.managedProperty().bind(uiAdminOptions.visibleProperty());
         
         // TODO : change binding to make it visible if selected result is positionable or has geometry ?
         uiCarto.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiCarto.managedProperty().bind(uiCarto.visibleProperty());
+        
+        // TOOLTIPS
+        uiExportModel.setTooltip(new Tooltip("Voir la structure de la base SQL."));
+        uiExportModel.setTooltip(new Tooltip("Exporter l'intégralité de la base SQL."));
+        uiOpen.setTooltip(new Tooltip("Choisir une requête SQL parmi celles stockées dans le système."));
+        uiSave.setTooltip(new Tooltip("Enregistrer la requête actuelle dans le système local."));
+        uiSave.setTooltip(new Tooltip("Ajouter / supprimer des requêtes en base de données."));
+        
+        uiCarto.setTooltip(new Tooltip("Afficher le résultat de la requête sur la carte."));
     }
 
     @FXML
@@ -216,7 +235,7 @@ public class FXSearchPane extends BorderPane {
     }
         
     @FXML
-    private void saveSQL(ActionEvent event){
+    private void saveSQLQuery(ActionEvent event){
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
         pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);        
@@ -227,12 +246,12 @@ public class FXSearchPane extends BorderPane {
         dialog.setDialogPane(pane);
         dialog.setTitle("Information sur la requête");
         dialog.getDialogPane().setHeader(null);
-        final Optional<String> name = dialog.showAndWait();
-        if(name.isPresent()){
+        final Optional name = dialog.showAndWait();
+        if (name.isPresent() && ButtonType.OK.equals(name.get())) {
             try{
-                final List<SQLQuery> queries = SQLQueries.getQueries();
+                final List<SQLQuery> queries = SQLQueries.getLocalQueries();
                 queries.add(query);
-                SQLQueries.saveQueries(queries);
+                SQLQueries.saveQueriesLocally(queries);
             }catch(IOException ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
@@ -240,38 +259,91 @@ public class FXSearchPane extends BorderPane {
     }
     
     @FXML
-    private void openSQL(ActionEvent event){
-        try{
-            final List<SQLQuery> queries = SQLQueries.getQueries();
-            if(queries.isEmpty()){
-                new Alert(Alert.AlertType.INFORMATION,"Aucune requête disponible.",ButtonType.OK).showAndWait();
-            }else{
-                final Dialog dia = new Dialog();
-                final FXQueryTable table = new FXQueryTable(queries);
-                final DialogPane pane = new DialogPane();
-                pane.setPrefSize(700, 400);
-                pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);
-                pane.setContent(table);
-                dia.setDialogPane(pane);
-                dia.setTitle("Liste des requêtes");
-                
-                final Optional res = dia.showAndWait();
+    private void openSQLQuery(ActionEvent event){
+        final List<SQLQuery> queries;
+        try {
+            queries = SQLQueries.getLocalQueries();
+        } catch (IOException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
+            return;
+        }
+
+        if (queries.isEmpty()) {
+            new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK).showAndWait();
+        } else {
+            final Dialog dia = new Dialog();
+            final FXQueryTable table = new FXQueryTable(queries);
+            final DialogPane pane = new DialogPane();
+            pane.setPrefSize(700, 400);
+            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            pane.setContent(table);
+            dia.setDialogPane(pane);
+            dia.setTitle("Liste des requêtes");
+
+            final Optional res = dia.showAndWait();
+            if (res.isPresent() && ButtonType.OK.equals(res.get())) {
                 //sauvegarde s'il y a eu des changements
                 table.save();
-                if(res.isPresent() && ButtonType.OK.equals(res.get())){
-                    final SQLQuery selected = table.getSelection();
-                    if(selected!=null){
-                        uiSQLText.setText(selected.sql.get());
-                    }
+                final SQLQuery selected = table.getSelection();
+                if (selected != null) {
+                    uiSQLText.setText(selected.sql.get());
                 }
             }
-        }catch(IOException ex){
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
     }
             
     @FXML
-    private void exportSQL(ActionEvent event) {
+    private void exportSQLQueries(ActionEvent event) {
+        // Load available queries
+        final List<SQLQuery> queries;
+        try {
+            queries = SQLQueries.getLocalQueries();
+        } catch (IOException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
+            return;
+        }
+        if (queries.isEmpty()) {
+            new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK).showAndWait();
+        } else {
+            final Dialog dia = new Dialog();
+            final FXQueryTable table = new FXQueryTable(queries);
+            table.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            final DialogPane pane = new DialogPane();
+            pane.setPrefSize(700, 400);
+            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            pane.setContent(table);
+            dia.setDialogPane(pane);
+            dia.setTitle("Liste des requêtes");
+
+            final Optional res = dia.showAndWait();
+            if (res.isPresent() && ButtonType.OK.equals(res.get())) {
+                // Save system local if some queries has been deleted.
+                table.save();
+                final List<SQLQuery> selected = table.table.getSelectionModel().getSelectedItems();
+                if (selected == null || selected.isEmpty()) {
+                    new Alert(Alert.AlertType.INFORMATION, "Aucune requête sélectionnée pour l'export.", ButtonType.OK).show();
+                } else {
+                    FileChooser chooser = new FileChooser();
+                    chooser.setTitle("Fichier d'export");
+                    chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Fichier de propriétés Java", ".properties"));
+                    File outputFile = chooser.showSaveDialog(null);
+                    if (outputFile != null) {
+                        try {
+                            SQLQueries.saveQueriesInFile(selected, outputFile.toPath());
+                        } catch (IOException ex) {
+                            SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
+                            SIRS.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @FXML
+    private void exportModel(ActionEvent event) {
         
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Dossier d'export");
