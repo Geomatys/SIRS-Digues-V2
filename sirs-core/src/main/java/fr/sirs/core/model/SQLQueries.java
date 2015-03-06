@@ -112,7 +112,12 @@ public class SQLQueries {
         @Override
         protected void updateItem(SQLQuery item, boolean empty) {
             super.updateItem(item, empty);
-            this.textProperty().bind(item.name);
+            if (!empty && item != null) {
+                this.textProperty().bind(item.name);
+            } else {
+                this.textProperty().unbind();
+                this.setText(null);
+            }
         }
     }
 }

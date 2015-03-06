@@ -129,6 +129,7 @@ public class FXSearchPane extends BorderPane {
     @FXML private ChoiceBox<String> uiDBTable;
     @FXML private BorderPane uiFilterPane;
     @FXML private TextArea uiSQLText;
+    @FXML private Button uiExportQueries;
     private FXSQLFilterEditor uiFilterEditor;
     
     
@@ -184,6 +185,7 @@ public class FXSearchPane extends BorderPane {
         uiSave.setGraphic(new ImageView(ICON_SAVE));
         uiOpen.setGraphic(new ImageView(ICON_OPEN));
         uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
+        uiExportQueries.setGraphic(new ImageView(ICON_EXPORT));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
         // VISIBILITY RULES
@@ -215,6 +217,9 @@ public class FXSearchPane extends BorderPane {
         uiSave.setTooltip(new Tooltip("Ajouter / supprimer des requêtes en base de données."));
         
         uiCarto.setTooltip(new Tooltip("Afficher le résultat de la requête sur la carte."));
+        
+        // Action on admin button
+        uiQueryManagement.setOnAction((ActionEvent e)-> FXAdminQueryPane.showAndWait());
     }
 
     @FXML

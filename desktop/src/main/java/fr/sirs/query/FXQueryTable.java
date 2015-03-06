@@ -16,6 +16,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -82,6 +83,8 @@ public class FXQueryTable extends BorderPane{
         uiImportQueries.setTooltip(new Tooltip("Importer des requêtes SQL depuis un fichier."));
         uiImportQueries.setOnAction(this::importRequests);
         setBottom(uiImportQueries);
+        
+        setPadding(new Insets(5));
     }
     
     private void importRequests(ActionEvent e) {

@@ -12,12 +12,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Level;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -25,9 +28,10 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -62,13 +66,22 @@ public class FXAdminQueryPane extends BorderPane {
 
     @FXML
     private Button uiDeleteLocalBtn;
-
+    
     @FXML
-    private Button uiLocalEditBtn;
+    private BorderPane uiBottomPane;
+    
+    private FXQueryPane queryEditor;
     
     // Notification lists. Contains element to add or remove at save.
-    private HashSet<SQLQuery> toAddInDB = new HashSet<>();
-    private HashMap<String, SQLQuery> toRemoveFromDB = new HashMap<>();
+    private final HashSet<SQLQuery> toAddInDB = new HashSet<>();
+    private final HashMap<String, SQLQuery> toRemoveFromDB = new HashMap<>();
+    private final HashSet<SQLQuery> toUpdate = new HashSet<>();
+    
+    /** 
+     * A copy of the last edited query. So we will submit edited query for update 
+     * only if its not equal to its copy.
+     */
+    private SQLQuery initialState;
     
     public FXAdminQueryPane() throws IOException {
         super();
@@ -86,6 +99,8 @@ public class FXAdminQueryPane extends BorderPane {
         uiDeleteDBBtn.setTooltip(new Tooltip("Supprimer la sélection de la base de données."));
         uiDeleteLocalBtn.setTooltip(new Tooltip("Supprimer la sélection du système local."));
         
+        uiLocalList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        uiDBList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiLocalList.setCellFactory(new SQLQueries.QueryListCellFactory());
         uiDBList.setCellFactory(new SQLQueries.QueryListCellFactory());
         
@@ -117,8 +132,48 @@ public class FXAdminQueryPane extends BorderPane {
                 }
             }
         });
+        
+        // delete button actions
+        uiDeleteLocalBtn.setOnAction((ActionEvent e)-> deleteSelection(uiLocalList));
+        uiDeleteDBBtn.setOnAction((ActionEvent e)-> deleteSelection(uiDBList));
+        
+        queryEditor = new FXQueryPane();
+        
+        // As focused item is not cleared when a list lose focus, we're forced to make update ourself on click.
+//        uiLocalList.getFocusModel().focusedItemProperty().addListener(this::updateEditor);
+//        uiDBList.getFocusModel().focusedItemProperty().addListener(this::updateEditor);
+        uiLocalList.setOnMouseClicked((MouseEvent e)-> updateEditor(null, null, uiLocalList.getFocusModel().getFocusedItem()));
+        uiDBList.setOnMouseClicked((MouseEvent e)-> updateEditor(null, null, uiDBList.getFocusModel().getFocusedItem()));
+        
+        uiBottomPane.setCenter(queryEditor);        
     }
 
+    /**
+     * Update query editor content. This method has been designed to serve as 
+     * changeListener on focused item of {@link #uiDBList} and {@link #uiLocalList}.
+     * @param observable The ListView on which the focus has been requested.
+     * @param oldValue The previously focused element.
+     * @param newValue The current focused element.
+     */
+    private void updateEditor(ObservableValue<? extends SQLQuery> observable, SQLQuery oldValue, SQLQuery newValue) {
+        if (newValue != null) {
+            /* First, we check if last edited query has been modified. Check is needed
+             * only for queries already inserted in database, because all local queries
+             * will be updated at save, and queries moved to db will be added anyway.
+             * Also, if the query is already triggered for deletion, there's no need 
+             * for update.
+             */
+            final SQLQuery previouslyEdited = queryEditor.getSQLQuery();
+            if (previouslyEdited != null && previouslyEdited.getId() != null) {
+                if (!previouslyEdited.equals(initialState) && !toRemoveFromDB.containsKey(previouslyEdited.getId())) {
+                    toUpdate.add(previouslyEdited);
+                }
+            }
+            initialState = newValue.copy();
+            queryEditor.setSQLQuery(newValue);
+        }
+    }
+    
     /**
      * Save queries (re)moved using the panel. It means insertions / deletion in
      * couchDB and local system properties.
@@ -141,10 +196,16 @@ public class FXAdminQueryPane extends BorderPane {
                     queryRepo.add(addIt.next());
                     addIt.remove();
                 }
-
+                
+                Iterator<SQLQuery> updateIt = toUpdate.iterator();
+                while (updateIt.hasNext()) {
+                    queryRepo.update(updateIt.next());
+                    updateIt.remove();
+                }
+                
                 Iterator<SQLQuery> removeIt = toRemoveFromDB.values().iterator();
                 while (removeIt.hasNext()) {
-                    queryRepo.add(removeIt.next());
+                    queryRepo.remove(removeIt.next());
                     removeIt.remove();
                 }
                 return null;
@@ -165,24 +226,32 @@ public class FXAdminQueryPane extends BorderPane {
         transferFromListToList(uiDBList, uiLocalList);
     }
     
-    /**
-     * Move (not copy) selected items of one list to another.
-     * @param source The list to get and cut selection from.
-     * @param destination The destination to put selection into.
-     */
-    private void transferFromListToList(final ListView source, ListView destination) {
-        // Get list selection and remove it
+    boolean deleteSelection(final ListView source) {
         ObservableList<SQLQuery> selectedItems = source.getSelectionModel().getSelectedItems();
-        source.getItems().removeAll(selectedItems);
-        // add it in destination 
-        destination.getItems().addAll(selectedItems);
+        return source.getItems().removeAll(selectedItems);
     }
     
     /**
-     * Show a dialog for query transfer. Return only if user has saved or cancelled changes.
+     * Move (not copy) selected items of one list to another.
+     * 
+     * @param source The list to get and cut selection from.
+     * @param destination The destination to put selection into.
+     */
+    private void transferFromListToList(final ListView source, final ListView destination) {
+        // Get list selection
+        ObservableList<SQLQuery> selectedItems = source.getSelectionModel().getSelectedItems();
+        // add it in destination 
+        destination.getItems().addAll(selectedItems);
+        // remove from source list
+        source.getItems().removeAll(selectedItems);
+    }
+    
+    /**
+     * Show a dialog for query transfer. Return only if user has saved or canceled changes.
      */
     public static void showAndWait() {
         final Stage dialog = new Stage();
+        dialog.setTitle("Administration des requêtes");
         dialog.setResizable(true);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(Injector.getSession().getFrame().getScene().getWindow());
@@ -208,6 +277,7 @@ public class FXAdminQueryPane extends BorderPane {
 
         final BorderPane dialogPane = new BorderPane(adminPanel);
         final ButtonBar hBox = new ButtonBar();
+        hBox.setPadding(new Insets(5));
         hBox.getButtons().addAll(cancelBtn, saveBtn);
         dialogPane.setBottom(hBox);
 

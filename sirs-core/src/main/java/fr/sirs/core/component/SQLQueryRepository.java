@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Views({
-        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc._id, doc._id)}}"),
+        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc._id, doc._id)}}"),
         @View(name = "byName", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc.name, doc._id)}}") })
 public class SQLQueryRepository  extends CouchDbRepositorySupport<SQLQuery> implements Repository<SQLQuery>{
 

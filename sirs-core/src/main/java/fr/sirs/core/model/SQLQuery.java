@@ -79,10 +79,15 @@ public class SQLQuery {
         this.sql.set(sql);
     }
     
+    @JsonIgnore
     public String getValueString(){
         return sql.get()+SEPARATOR+description.get();
     }
 
+    public SQLQuery copy() {
+        return new SQLQuery(this.name.get(), this.description.get(), this.sql.get());
+    }
+    
     @Override
     public int hashCode() {
         int hash = 3;
