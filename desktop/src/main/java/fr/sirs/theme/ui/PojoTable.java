@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,6 +131,12 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
     // Créer un nouvel objet à l'ajout
     protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
+    /* Rechercher les objets dans un tronçon donné (sert uniquement si on ne 
+    crée pas les objets à l'ajout, mais si on cherche des objets préexisants.
+    Cette propriété sert alors à limiter la recherche à un tronçon donné (de 
+    manière à ne relier entre eux que des "objets" du même tronçon.*/
+    protected final StringProperty tronconSourceProperty = new SimpleStringProperty(null);
+    
         
     // Icônes de la barre d'action
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
@@ -470,6 +477,9 @@ public class PojoTable extends BorderPane {
     }
     public BooleanProperty createNewProperty() {
         return createNewProperty;
+    }
+    public StringProperty tronconSourceProperty() {
+        return tronconSourceProperty;
     }
     
     /**
@@ -1003,12 +1013,25 @@ public class PojoTable extends BorderPane {
             
             final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName());
             final String prefix = bundle.getString("classAbrege")+" : ";
-            final ComboBox<ValiditySummary> comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)));
+            final ComboBox<ValiditySummary> comboBox;
+            if(tronconSourceProperty.get()==null){
+                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)));
+            }
+            else{
+                
+                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)).filtered(new Predicate<ValiditySummary>() {
+
+                    @Override
+                    public boolean test(ValiditySummary t) {
+                        return tronconSourceProperty.get().equals(t.getDocId());
+                    }
+                }));
+            }
             comboBox.setConverter(new StringConverter<ValiditySummary>() {
 
                 @Override
                 public String toString(ValiditySummary object) {
-                    return prefix+object.getPseudoId();
+                    return prefix+object.getPseudoId() + ((object.getLabel()==null) ? "" : " - "+object.getLabel());
                 }
 
                 @Override
