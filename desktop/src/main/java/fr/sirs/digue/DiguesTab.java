@@ -18,7 +18,7 @@ public class DiguesTab extends FXFreeTab {
     public DiguesTab(TabPane tabs) {
         this.tabs = tabs;
         this.ctrl = new FXDiguesPane();
-        setText("Digues");
+        setText("Ouvrages");
         setContent(ctrl);
     }    
     

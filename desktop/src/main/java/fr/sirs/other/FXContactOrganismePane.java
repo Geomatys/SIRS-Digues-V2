@@ -25,7 +25,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextField;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -34,6 +36,8 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganisme> {
     
     @FXML private FXEditMode uiMode;
+    @FXML private TextField uiPseudoId;
+    @FXML private FXDateField date_maj;
     
     @FXML ComboBox<Contact> uiContactChoice;
     @FXML ComboBox<Organisme> uiOrganismeChoice;
@@ -48,17 +52,18 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
     
     public FXContactOrganismePane(ContactOrganisme co) {
         SIRS.loadFXML(this);
+        date_maj.setDisable(true);
         
         final Session session = Injector.getSession();
         orgRepository = session.getOrganismeRepository();
         contactRepository = session.getContactRepository();
         
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
-        final BooleanBinding editProp = uiMode.editionState().not();
-        uiContactChoice.disableProperty().bind(editProp);
-        uiOrganismeChoice.disableProperty().bind(editProp);
-        uiDebutDatePicker.disableProperty().bind(editProp);
-        uiFinDatePicker.disableProperty().bind(editProp);
+        disableFieldsProperty().bind(uiMode.editionState().not());
+        uiContactChoice.disableProperty().bind(disableFieldsProperty());
+        uiOrganismeChoice.disableProperty().bind(disableFieldsProperty());
+        uiDebutDatePicker.disableProperty().bind(disableFieldsProperty());
+        uiFinDatePicker.disableProperty().bind(disableFieldsProperty());
         
         initContacts(uiContactChoice);
         initOrganismes(uiOrganismeChoice);
@@ -74,6 +79,10 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
         final ContactOrganisme contactOrganisme = elementProperty.get();
         
         if (contactOrganisme == null) return;
+        
+        date_maj.valueProperty().bind(contactOrganisme.dateMajProperty());
+        uiPseudoId.textProperty().bindBidirectional(contactOrganisme.pseudoIdProperty());
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         originalOrg = (Organisme) contactOrganisme.getParent();
         

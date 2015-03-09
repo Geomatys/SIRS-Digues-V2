@@ -29,6 +29,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -37,6 +38,8 @@ import javafx.scene.control.TextField;
 public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     @FXML private FXEditMode uiMode;
+    @FXML private TextField uiPseudoId;
+    @FXML private FXDateField date_maj;
     
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;
@@ -69,27 +72,28 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
      */
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
+        date_maj.setDisable(true);
         
         this.contactRepository = session.getContactRepository();
         this.orgRepository = session.getOrganismeRepository();
         
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
-        final BooleanProperty editProp = uiMode.editionState();
-        uiNom.editableProperty().bind(editProp);
-        uiPrenom.editableProperty().bind(editProp);
-        uiService.editableProperty().bind(editProp);
-        uiFonction.editableProperty().bind(editProp);
-        uiTelephone.editableProperty().bind(editProp);
-        uiFax.editableProperty().bind(editProp);
-        uiEmail.editableProperty().bind(editProp);
-        uiAdresse.editableProperty().bind(editProp);
-        uiCodePostale.editableProperty().bind(editProp);
-        uiCommune.editableProperty().bind(editProp);
+        disableFieldsProperty().bind(uiMode.editionState().not());
+        uiNom.disableProperty().bind(disableFieldsProperty());
+        uiPrenom.disableProperty().bind(disableFieldsProperty());
+        uiService.disableProperty().bind(disableFieldsProperty());
+        uiFonction.disableProperty().bind(disableFieldsProperty());
+        uiTelephone.disableProperty().bind(disableFieldsProperty());
+        uiFax.disableProperty().bind(disableFieldsProperty());
+        uiEmail.disableProperty().bind(disableFieldsProperty());
+        uiAdresse.disableProperty().bind(disableFieldsProperty());
+        uiCodePostale.disableProperty().bind(disableFieldsProperty());
+        uiCommune.disableProperty().bind(disableFieldsProperty());
         
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
         // /!\ If you remove "and" condition, you must add null check in below ContactOrganismeTable.
-        organismeTable.editableProperty().bind(editProp.and(elementProperty.isNotNull()));
+        organismeTable.editableProperty().bind(disableFieldsProperty().not().and(elementProperty.isNotNull()));
         
         uiMode.setSaveAction(this::save);
         setElement(contact);
@@ -126,6 +130,10 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     private void initFields(){
         final Contact contact = elementProperty.get();
+        
+        date_maj.valueProperty().bind(contact.dateMajProperty());
+        uiPseudoId.textProperty().bindBidirectional(contact.pseudoIdProperty());
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         orgsOfContact.clear();
         modifiedOrgs.clear();

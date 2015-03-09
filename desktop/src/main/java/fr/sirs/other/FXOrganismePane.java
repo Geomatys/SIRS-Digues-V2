@@ -3,6 +3,7 @@ package fr.sirs.other;
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.model.AvecDateMaj;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
@@ -23,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -31,13 +33,12 @@ import javafx.scene.layout.GridPane;
  */
 public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
-    @FXML
-    private FXEditMode uiMode;
+    @FXML private FXEditMode uiMode;
+    @FXML private TextField uiPseudoId;
+    @FXML private FXDateField date_maj;
 
-    @FXML
-    private GridPane uiDescriptionGrid;
-    @FXML
-    private GridPane uiAdresseGrid;
+    @FXML private GridPane uiDescriptionGrid;
+    @FXML private GridPane uiAdresseGrid;
     
     @FXML private TextField uiRaisonSocialeTextField;
     @FXML private TextField uiStatutJuridiqueTextField;
@@ -56,17 +57,18 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
 
     public FXOrganismePane(Organisme organisme) {
         SIRS.loadFXML(this);
+        date_maj.setDisable(true);
 
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
-        final BooleanBinding editProp = uiMode.editionState().not();
+        disableFieldsProperty().bind(uiMode.editionState().not());
         for (final Node child : uiDescriptionGrid.getChildren()) {
             if (!(child instanceof Label)) {
-                child.disableProperty().bind(editProp);
+                child.disableProperty().bind(disableFieldsProperty());
             }
         }
         for (final Node child : uiAdresseGrid.getChildren()) {
             if (!(child instanceof Label)) {
-                child.disableProperty().bind(editProp);
+                child.disableProperty().bind(disableFieldsProperty());
             }
         }
         
@@ -88,6 +90,10 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             organisme = elementProperty.get();
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().update(organisme);});
         }
+        
+        date_maj.valueProperty().bind(organisme.dateMajProperty());
+        uiPseudoId.textProperty().bindBidirectional(organisme.pseudoIdProperty());
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statut_juridiqueProperty());
