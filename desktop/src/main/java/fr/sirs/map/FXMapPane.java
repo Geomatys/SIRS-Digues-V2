@@ -58,6 +58,7 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
+import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
@@ -132,6 +133,7 @@ public class FXMapPane extends BorderPane {
         uiTree.getTreetable().setShowRoot(false);
         uiTree.getMenuItems().add(new OpacityItem());
         uiTree.getMenuItems().add(new SeparatorMenuItem());
+        uiTree.getMenuItems().add(new EmptySelectionItem());
         uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
