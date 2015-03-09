@@ -4,13 +4,11 @@ import java.util.List;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.StreamingViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
-import fr.sirs.core.Repository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
@@ -51,7 +49,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.collection.Cache;
 import org.ektorp.DocumentNotFoundException;
 
 /**
@@ -88,15 +85,7 @@ import org.ektorp.DocumentNotFoundException;
         @View(name = "stream", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
         @View(name = "streamLight", map = "classpath:TronconDigueLight-map.js"),
         @View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
-public class TronconDigueRepository extends
-        CouchDbRepositorySupport<TronconDigue> implements
-        Repository<TronconDigue> {
-
-    /**
-     * We will cache troncons read from database to allow an user to edit two elements
-     * contained in the same tronçon separately and save them independently at any time.
-     */
-    private final Cache<String, TronconDigue> cache = new Cache(100, 0, false);
+public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
     
     private final HashMap<String, Callable<List<? extends Objet>>> viewMap = new HashMap();
     
@@ -150,46 +139,10 @@ public class TronconDigueRepository extends
         }
         return result;
     }
-    
-    public void clearCache(){
-        cache.clear();
-    }
-
-    @Override
-    public TronconDigue get(String id) {
-        try {
-            return cache.getOrCreate(id, () -> {return super.get(id);});
-        } catch (Exception ex) {
-            // Once again, should never happen...
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public List<TronconDigue> getAll() {
-        List<TronconDigue> all = super.getAll();
-        final ArrayList<TronconDigue> result = new ArrayList<>(all.size());
-        for (TronconDigue tr : all) {
-            try {
-                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
-            } catch (Exception ex) {
-                // Should never happen ...
-                throw new RuntimeException(ex);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void add(TronconDigue entity) {
-        super.add(entity);
-        cache.put(entity.getId(), entity);
-    }
 
     @Override
     public void remove(TronconDigue entity) {
         ArgumentChecks.ensureNonNull("Tronçon à supprimer", entity);
-        cache.remove(entity.getId());
         constraintDeleteBorneAndSR(entity);
         super.remove(entity);
     }

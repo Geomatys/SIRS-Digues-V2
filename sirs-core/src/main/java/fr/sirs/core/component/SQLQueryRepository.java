@@ -1,10 +1,8 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.Repository;
 import fr.sirs.core.model.SQLQuery;
 import java.util.List;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Views({
         @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc._id, doc._id)}}"),
         @View(name = "byName", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc.name, doc._id)}}") })
-public class SQLQueryRepository  extends CouchDbRepositorySupport<SQLQuery> implements Repository<SQLQuery>{
+public class SQLQueryRepository  extends AbstractSIRSRepository<SQLQuery>{
 
     @Autowired
     public SQLQueryRepository (CouchDbConnector db) {
@@ -30,6 +28,7 @@ public class SQLQueryRepository  extends CouchDbRepositorySupport<SQLQuery> impl
        initStandardDesignDocument();
    }
     
+    @Override
     public Class<SQLQuery> getModelClass() {
         return SQLQuery.class;
     }

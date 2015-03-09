@@ -5,7 +5,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 
-public interface Element extends Serializable {
+public interface Element extends Identifiable, Serializable {
 
     /**
      * @return the parent {@link Element} of the current object, or itself if 
@@ -20,8 +20,6 @@ public interface Element extends Serializable {
      * @return The CouchDb identifier of the element backed by {@linkplain #getCouchDBDocument() }.
      */
     String getDocumentId();
-
-    String getId();
     
     /**
      * @return the parent {@link Element} of the current element, or null if no parent is set.

@@ -2,9 +2,7 @@
 package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import fr.sirs.util.property.Internal;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +21,7 @@ import org.ektorp.util.Assert;
  * @author Alexis Manin
  * @author Johann Sorel
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
-@SuppressWarnings("serial")
-public class SQLQuery {
+public class SQLQuery implements Identifiable {
     
     private static final char SEPARATOR = '§';
     
@@ -115,17 +110,16 @@ public class SQLQuery {
         return Objects.equals(this.sql.get(), other.sql.get());
     }
     
-    //
-    // COUCH-DB RELATIVE PROPERTIES
+    // COUCHDB DOCUMENT COMMON INFORMATION
     // BEGIN-DUP This code is duplicated from org.ektorp.support.CouchDbDocument
     //
     public static final String ATTACHMENTS_NAME = "_attachments";
 
-    private String id;
-    private String revision;
-    private Map<String, Attachment> attachments;
-    private List<String> conflicts;
-    private Revisions revisions;
+    protected String id;
+    protected String revision;
+    protected Map<String, Attachment> attachments;
+    protected List<String> conflicts;
+    protected Revisions revisions;
 
     @Internal
     @JsonProperty("_id")
@@ -206,6 +200,7 @@ public class SQLQuery {
     public List<String> getConflicts() {
         return conflicts;
     }
+    
     /**
      *
      * @return true if this document has a conflict. Note: Will only give a correct value if this document has been loaded through the CouchDbConnector.getWithConflicts method.
@@ -228,5 +223,5 @@ public class SQLQuery {
             attachments = new HashMap<String, Attachment>();
         }
         attachments.put(a.getId(), a);
-    } 
+    }
 }

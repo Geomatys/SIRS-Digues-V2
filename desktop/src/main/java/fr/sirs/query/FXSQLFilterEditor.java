@@ -49,7 +49,7 @@ public class FXSQLFilterEditor extends GridPane {
     
     public static enum Type{
         NONE("-"),
-        PROPERTY("filtre sur colonne"),
+        PROPERTY("Filtre sur colonne"),
         AND("ET"),
         OR("OU");
 
