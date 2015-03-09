@@ -88,7 +88,8 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
         }
     }
        
-    private void save() {        
+    private void save() { 
+        preSave();
         if (originalOrg != null) {
             orgRepository.update(originalOrg);
         }
@@ -123,15 +124,19 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
         final ContactOrganisme contactOrganisme = elementProperty().get();
         if (contactOrganisme == null) return;
         if (uiOrganismeChoice.getValue() == null) {
-            new Alert(Alert.AlertType.ERROR, "Le champs Organisme ne doit pas être vide !", ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Le champ organisme ne doit pas être vide !", ButtonType.OK).showAndWait();
             return;
         } 
         if (uiContactChoice.getValue() == null) {
-            new Alert(Alert.AlertType.ERROR, "Le champs Contact ne doit pas être vide !", ButtonType.OK).showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Le champ contact ne doit pas être vide !", ButtonType.OK).showAndWait();
             return;
         }
         
-        contactOrganisme.setParent(uiOrganismeChoice.getValue());
+        if(!uiOrganismeChoice.getValue().getContactOrganisme().contains(contactOrganisme)){
+            if(originalOrg!=null) originalOrg.getContactOrganisme().remove(contactOrganisme);
+            uiOrganismeChoice.getValue().getContactOrganisme().add(contactOrganisme);
+            contactOrganisme.setParent(uiOrganismeChoice.getValue());
+        }
         contactOrganisme.setContactId(uiContactChoice.getValue().getId());
         
         if (uiFinDatePicker.getValue() != null) {
@@ -142,5 +147,6 @@ public class FXContactOrganismePane extends AbstractFXElementPane<ContactOrganis
             contactOrganisme.setDateFinIntervenant(LocalDateTime.of(
                     uiFinDatePicker.getValue(), LocalTime.MIN));
         }
+        contactOrganisme.setDateMaj(LocalDateTime.now());
     }
 }

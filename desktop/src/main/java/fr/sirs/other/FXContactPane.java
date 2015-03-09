@@ -14,9 +14,9 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.Role;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.FXFreeTab;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,9 +57,11 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     private final ContactRepository contactRepository;
     private final OrganismeRepository orgRepository;
     
-    final ObservableList orgsOfContact = FXCollections.observableArrayList();
+    final ObservableList<Element> orgsOfContact = FXCollections.observableArrayList();
     
     final HashSet<Organisme> modifiedOrgs = new HashSet<>();
+        
+    final Session session = Injector.getSession();
     
     /**
      *
@@ -68,7 +70,6 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
         
-        final Session session = Injector.getSession();
         this.contactRepository = session.getContactRepository();
         this.orgRepository = session.getOrganismeRepository();
         
@@ -117,7 +118,9 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         if (elementProperty.get() != null) {
             contactRepository.update(elementProperty.get());
         }
-        modifiedOrgs.stream().forEach((org) -> orgRepository.update(org));
+        for(final Element org : orgsOfContact){
+            orgRepository.update((Organisme) org.getParent());
+        }
         modifiedOrgs.clear();
     }
     
@@ -207,6 +210,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         @Override
         protected Object createPojo() {
             final ContactOrganisme co = new ContactOrganisme();
+            co.setValid(session.getRole()!=Role.EXTERN);
+            co.setAuthor(session.getUtilisateur().getId());
             co.setContactId(elementProperty.get().getId());
             co.setDateDebutIntervenant(LocalDateTime.now());
             orgsOfContact.add(co);

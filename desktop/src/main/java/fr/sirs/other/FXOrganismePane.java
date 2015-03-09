@@ -7,12 +7,9 @@ import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.FXFreeTab;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -55,7 +52,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private Tab uiContactOrganismesTab;
     
-    private final PojoTable coTable;
+    private final PojoTable contactOrganismeTable;
 
     public FXOrganismePane(Organisme organisme) {
         SIRS.loadFXML(this);
@@ -73,10 +70,10 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             }
         }
         
-        coTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
-        coTable.parentElementProperty().bind(elementProperty);
-        coTable.editableProperty().bind(uiMode.editionState());
-        uiContactOrganismesTab.setContent(coTable);
+        contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
+        contactOrganismeTable.parentElementProperty().bind(elementProperty);
+        contactOrganismeTable.editableProperty().bind(uiMode.editionState());
+        uiContactOrganismesTab.setContent(contactOrganismeTable);
         setElement(organisme);
         
         initPane();
@@ -122,7 +119,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             }
         });
         
-        coTable.setTableItems(()-> (ObservableList) organisme.contactOrganisme);
+        contactOrganismeTable.setTableItems(()-> (ObservableList) organisme.contactOrganisme);
     }
 
     @Override
