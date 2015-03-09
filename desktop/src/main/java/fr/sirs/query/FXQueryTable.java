@@ -1,13 +1,11 @@
 
 package fr.sirs.query;
 
-import fr.sirs.Injector;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.SIRS;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Level;
