@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
@@ -35,7 +38,7 @@ import org.apache.commons.csv.CSVRecord;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ReferenceChecker {
+public class ReferenceChecker extends Task<Void> {
 
     private static final String MODEL_PACKAGE = "fr.sirs.core.model";
 
@@ -45,6 +48,13 @@ public class ReferenceChecker {
     
     public ReferenceChecker(final String referencesDirectoryPath){
         this.referencesDirectoryPath = referencesDirectoryPath;
+        messageProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                updateTitle(getMessage());
+            }
+        });
     }
 
     private final Map<Class, Map<Object, Object>> incoherentReferences = new HashMap<>();
@@ -88,7 +98,8 @@ public class ReferenceChecker {
         return localClassNameReferencesNotOnServer;
     }
 
-    public void checkAllReferences() throws IOException {
+    private void checkAllReferences() throws IOException {
+        updateMessage("Vérification des références.");
 
         /*
          Récupération des classes de référence du serveur. Inclut la
@@ -101,16 +112,22 @@ public class ReferenceChecker {
          Récupération des classes de référence de l'application. 
          */
         localClassReferences = Session.getReferences();
+        final int progressSize = localClassReferences.size()*2;
+        int progress = 0;
+        updateProgress(0, progressSize);
 
         /*
          Vérification que les classes de l'application sont toutes recensées sur
          le serveur.
          */
         localClassNameReferencesNotOnServer = new ArrayList<>();
+        updateMessage("Vérification de la présence des classes de références locales sur le serveur.");
         for (final Class reference : localClassReferences) {
+            updateMessage("Vérification de la présence sur le serveur de la classe de référence "+reference.getName());
             if (!serverClassReferences.contains(reference)) {
                 localClassNameReferencesNotOnServer.add(reference.getSimpleName());
             }
+            updateProgress(progress++, progressSize);
         }
         
         /*
@@ -118,13 +135,22 @@ public class ReferenceChecker {
          référence locale, pourvu qu'elle soit référencée sur le serveur,
          on va vérifier que les instances sont "identiques" (identité à définir).
          */
+        updateMessage("Vérification des instances de références.");
         for (final Class reference : localClassReferences) {
+            updateMessage("Vérification des instances de la classe de référence "+reference.getName());
             if (serverClassReferences.contains(reference)) {
                 final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
                 referenceClassChecker.checkReferenceClass();
                 referenceClassChecker.update();
             }
+            updateProgress(progress++, progressSize);
         }
+    }
+
+    @Override
+    protected Void call() throws Exception {
+        checkAllReferences();
+        return null;
     }
 
     public final class ReferenceClassChecker {

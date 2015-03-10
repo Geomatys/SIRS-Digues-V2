@@ -17,7 +17,7 @@ import javafx.scene.layout.VBox;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
+public class FXProfilTraversPaneOld extends AbstractFXElementPane<ProfilTravers> {
         
     private final BooleanProperty disableFields = new SimpleBooleanProperty();
     
@@ -27,11 +27,11 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
     @FXML private TextField uiLibelle;
     @FXML private VBox uiVbox;
     
-    private FXProfilTraversPane(){
+    private FXProfilTraversPaneOld(){
         this(null);
     }
     
-    public FXProfilTraversPane(final ProfilTravers profilTravers){
+    public FXProfilTraversPaneOld(final ProfilTravers profilTravers){
         SIRS.loadFXML(this, ProfilTravers.class);
         uiVbox.getChildren().add(levesTable);
         levesTable.editableProperty().bind(disableProperty().not().and(elementProperty.isNotNull()));

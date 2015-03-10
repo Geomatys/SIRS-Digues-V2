@@ -154,7 +154,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             
             if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())!=null){
-                leve.setTypeOrigineProfil(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
+                leve.setOriginesProfil(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())).getId());
             }
             
             leve.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));

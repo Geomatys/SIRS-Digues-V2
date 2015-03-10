@@ -236,18 +236,7 @@ public class Loader extends Application {
                                 });
                                 fadeSplash.play();
 
-                                session.getTaskManager().submit("Vérification des références", new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            final ReferenceChecker referenceChecker = session.getReferenceChecker();
-                                            referenceChecker.checkAllReferences();
-                                        } catch (IOException ex) {
-                                           SIRS.LOGGER.log(Level.WARNING, null, ex);
-                                        }
-                                    }
-                                });
+                                session.getTaskManager().submit(session.getReferenceChecker());
                                     
                             }
                         }
