@@ -114,6 +114,13 @@
       <artifactId>geotk-render2d</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-widgets-javafx</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
+    
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>

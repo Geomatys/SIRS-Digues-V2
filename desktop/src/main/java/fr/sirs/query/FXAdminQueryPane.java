@@ -2,7 +2,7 @@ package fr.sirs.query;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.SQLQueries;

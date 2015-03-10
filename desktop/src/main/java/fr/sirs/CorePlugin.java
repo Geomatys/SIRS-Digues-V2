@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import org.geotoolkit.data.bean.BeanStore;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.core.component.DocumentListener;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.DocumentsTheme;
@@ -61,6 +63,7 @@ import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +82,7 @@ import org.apache.sis.util.ArraysExt;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -348,14 +352,40 @@ public class CorePlugin extends Plugin {
         return items;
     }
 
-    private static class StructBeanSupplier extends BeanFeatureSupplier{
+    /**
+     * A data supplier for {@link BeanStore}. It listens on application {@link DocumentChangeEmiter} to be notified when data is updated.
+     * 
+     * TODO : Optimization : the change emitter fire too many events, which will cause CPU overload at update.
+     */
+    private static class StructBeanSupplier extends BeanFeatureSupplier implements DocumentListener {
 
         public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
             super(clazz, "id", "geometry", 
                 (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
                 null, SirsCore.getEpsgCode(), callable::get);
+            Injector.getDocumentChangeEmiter().addListener(this);
         }
-        
+
+        @Override
+        public void documentCreated(Element changed) {
+            if (changed != null && getBeanClass().isAssignableFrom(changed.getClass())) {
+                fireFeaturesAdded(FF.id(Collections.singleton((FF.featureId(changed.getId())))));
+            }
+        }
+
+        @Override
+        public void documentChanged(Element changed) {
+            if (changed != null && getBeanClass().isAssignableFrom(changed.getClass())) {
+                fireFeaturesUpdated(FF.id(Collections.singleton((FF.featureId(changed.getId())))));
+            }
+        }
+
+        @Override
+        public void documentDeleted(Element deleteObject) {
+            if (deleteObject != null && getBeanClass().isAssignableFrom(deleteObject.getClass())) {
+                fireFeaturesDeleted(FF.id(Collections.singleton((FF.featureId(deleteObject.getId())))));
+            }
+        }        
     }
     
     private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{

@@ -10,7 +10,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;

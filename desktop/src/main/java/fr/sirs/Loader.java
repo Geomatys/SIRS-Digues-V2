@@ -39,7 +39,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;

@@ -9,7 +9,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;

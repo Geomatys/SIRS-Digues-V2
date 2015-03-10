@@ -1,6 +1,6 @@
 package fr.sirs;
 
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
@@ -15,7 +15,7 @@ import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
-import fr.sirs.util.ProgressMonitor;
+import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;

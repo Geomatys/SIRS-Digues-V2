@@ -4,7 +4,7 @@ package fr.sirs.map;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.TronconDigueRepository;

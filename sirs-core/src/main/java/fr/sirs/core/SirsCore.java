@@ -1,5 +1,6 @@
 package fr.sirs.core;
 
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

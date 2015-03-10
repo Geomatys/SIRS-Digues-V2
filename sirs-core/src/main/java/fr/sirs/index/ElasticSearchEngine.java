@@ -2,7 +2,7 @@
 package fr.sirs.index;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.Closeable;
 import java.util.HashMap;
 import org.elasticsearch.action.search.SearchResponse;

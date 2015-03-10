@@ -1,7 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.DigueRepository;
 
 import java.util.List;
