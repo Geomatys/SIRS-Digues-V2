@@ -39,6 +39,8 @@ public class DocumentsTheme extends Theme {
         tabRapport.setContent(new PojoTable(session.getRapportEtudeRepository(), "Rapports d'étude"));
         final Tab tabDocGrandeEchelle = new Tab("Documents à grande échelle");
         tabDocGrandeEchelle.setContent(new PojoTable(session.getDocumentGrandeEchelleRepository(), "Documents à grande échelle"));
+        final Tab tabDocProfilLong = new Tab("Profils en long");
+        tabDocProfilLong.setContent(new PojoTable(session.getProfilLongRepository(), "Profils en long"));
         
 //        tabPane.getTabs().add(tabPhoto);
         tabPane.getTabs().add(tabConvention);
@@ -46,6 +48,7 @@ public class DocumentsTheme extends Theme {
         tabPane.getTabs().add(tabMarche);
         tabPane.getTabs().add(tabRapport);
         tabPane.getTabs().add(tabDocGrandeEchelle);
+        tabPane.getTabs().add(tabDocProfilLong);
         
         uiCenter.setCenter(tabPane);
         return tabPane;

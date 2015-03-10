@@ -1,8 +1,14 @@
 function(doc) {
-    if(doc.libelle) {
-        emit(doc._id, {libelle: doc.libelle, type: doc['@class'], objectId: doc._id})
-    } 
-    else if (doc.nom) {
-        emit(doc._id, {libelle: doc.nom, type: doc['@class'], objectId: doc._id})
+    if(doc['@class']){
+        var label
+        if(doc.libelle) label=doc.libelle
+        else if (doc.nom) label=doc.nom
+        else label=""
+
+        var pseudoId
+        if(doc.pseudoId) pseudoId=doc.pseudoId
+        else pseudoId=""
+
+        emit(doc._id, {libelle: label, type: doc['@class'], objectId: doc._id, pseudoId: pseudoId})
     }
 }

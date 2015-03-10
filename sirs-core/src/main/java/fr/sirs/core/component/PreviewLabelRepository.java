@@ -7,9 +7,11 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
+import java.util.ArrayList;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.ViewQuery;
-import org.ektorp.support.Views;
 
 @View(name = "all", map = "classpath:PreviewLabel-map.js")
 public class PreviewLabelRepository extends
@@ -55,6 +57,29 @@ public class PreviewLabelRepository extends
         ArgumentChecks.ensureNonNull("Element type", type);
         final List<PreviewLabel> previews = db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
         previews.removeIf((PreviewLabel t) -> !type.equals(t.getType()));
+        return previews;
+    }
+
+    public List<PreviewLabel> getPreviewLabelsFromInterface(Class type) {
+        ArgumentChecks.ensureNonNull("Element type", type);
+        return getPreviewLabelsFromInterface(type.getCanonicalName());
+    }
+
+    public List<PreviewLabel> getPreviewLabelsFromInterface(final String type) {
+        ArgumentChecks.ensureNonNull("Element type", type);
+        final List<PreviewLabel> previews = db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
+        previews.removeIf(new Predicate<PreviewLabel>() {
+
+            @Override
+            public boolean test(PreviewLabel t) {
+                try {
+                    return !Class.forName(type).isAssignableFrom(Class.forName(t.getType()));
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(PreviewLabelRepository.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return false;
+            }
+        });
         return previews;
     }
     

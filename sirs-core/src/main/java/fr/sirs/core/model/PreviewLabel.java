@@ -12,6 +12,9 @@ public class PreviewLabel {
     
     @JsonProperty("objectId")
     private String objectId;
+    
+    @JsonProperty("pseudoId")
+    private String pseudoId;
 
     public String getLabel() {
         return label;
@@ -35,6 +38,14 @@ public class PreviewLabel {
     
     public void setObjectid(String objectId){
         this.objectId = objectId;
+    }
+
+    public String getPseudoId() {
+        return pseudoId;
+    }
+
+    public void setPseudoId(String pseudoId) {
+        this.pseudoId = pseudoId;
     }
 
     @Override
