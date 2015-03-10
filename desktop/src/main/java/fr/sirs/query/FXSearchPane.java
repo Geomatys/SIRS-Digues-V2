@@ -6,7 +6,7 @@ import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.TaskManager;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Role;
 import fr.sirs.index.ElasticSearchEngine;
@@ -225,7 +225,7 @@ public class FXSearchPane extends BorderPane {
     @FXML
     private void viewDBModel(ActionEvent event) {
         
-        final Image image = new Image("/fr/sirs/diagram.png");
+        final Image image = new Image("/fr/sirs/diagram.jpg");
         final ImageView view = new ImageView(image);
         
         final Stage stage = new Stage();
