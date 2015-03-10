@@ -57,6 +57,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.map.BorneDigueCache;
+import fr.sirs.theme.DocumentTronconTheme;
 
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
@@ -466,6 +467,7 @@ public class CorePlugin extends Plugin {
         themes.add(new DesordreTheme());
         themes.add(new PrestationsTheme());
         themes.add(new MesureEvenementsTheme());
+        themes.add(new DocumentTronconTheme());
         themes.add(new EmpriseCommunaleTheme());
         themes.add(new ProfilsEnTraversTheme());
         themes.add(new ContactsTheme());

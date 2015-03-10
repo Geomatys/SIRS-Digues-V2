@@ -25,7 +25,7 @@ public class DocumentsTheme extends Theme {
     public Parent createPane() {
         final BorderPane uiCenter = new BorderPane();
         final TabPane tabPane = new TabPane();
-        
+    
         final Session session = Injector.getSession();
 //        final Tab tabPhoto = new Tab("Photo");
 //        tabPhoto.setContent(tablePhotos);
@@ -49,6 +49,6 @@ public class DocumentsTheme extends Theme {
         
         uiCenter.setCenter(tabPane);
         return tabPane;
-    }
+}
     
 }

@@ -1,5 +1,3 @@
-
-
 package fr.sirs.theme;
 
 import fr.sirs.core.model.Prestation;

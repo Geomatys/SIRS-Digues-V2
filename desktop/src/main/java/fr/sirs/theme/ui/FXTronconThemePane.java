@@ -5,6 +5,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
@@ -13,11 +14,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -39,7 +38,7 @@ public class FXTronconThemePane extends BorderPane {
         SIRS.loadFXML(this);
         
         if(groups.length==1){
-            final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[0]);
+            final TronconThemePojoTable table = getPojoTable(groups[0]);
             table.editableProperty.bind(session.nonGeometryEditionProperty());
             table.tronconPropoerty().bindBidirectional(currentTronconProperty);
             uiCenter.setCenter(table);
@@ -47,7 +46,7 @@ public class FXTronconThemePane extends BorderPane {
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
             for(int i=0; i<groups.length; i++){
-                final DefaultTronconPojoTable table = new DefaultTronconPojoTable(groups[i]);
+                final TronconThemePojoTable table = getPojoTable(groups[i]);
                 table.tronconPropoerty().bindBidirectional(currentTronconProperty);
                 final Tab tab = new Tab(groups[i].getName());
                 tab.setContent(table);
@@ -94,4 +93,9 @@ public class FXTronconThemePane extends BorderPane {
     }
     
     public ObjectProperty<TronconDigue> currentTronconProperty(){return currentTronconProperty;}
+    
+    private TronconThemePojoTable getPojoTable(final AbstractTronconTheme.ThemeGroup group){
+        if(group.getDataClass()==DocumentTroncon.class) return new TronconThemeDocumentTronconPojoTable(group);
+        else return new TronconThemeObjetPojoTable(group);
+    }
 }

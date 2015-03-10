@@ -1,5 +1,3 @@
-
-
 package fr.sirs.theme;
 
 
