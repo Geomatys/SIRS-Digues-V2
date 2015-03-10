@@ -96,7 +96,6 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         organismeTable.editableProperty().bind(disableFieldsProperty().not().and(elementProperty.isNotNull()));
         
         uiMode.setSaveAction(this::save);
-        setElement(contact);
         
         orgsOfContact.addListener(new ListChangeListener() {
             @Override
@@ -115,7 +114,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             }
         });
         
-        initFields();
+        elementProperty.addListener(this::initFields);
+        setElement(contact);
     }
     
     private void save(){
@@ -128,8 +128,19 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         modifiedOrgs.clear();
     }
     
-    private void initFields(){
-        final Contact contact = elementProperty.get();
+    private void initFields(ObservableValue<? extends Contact> observable, Contact oldValue, Contact newValue) {
+        if (oldValue != null) {
+            uiNom.textProperty().unbindBidirectional(oldValue.nomProperty());
+            uiPrenom.textProperty().unbindBidirectional(oldValue.prenomProperty());
+            uiService.textProperty().unbindBidirectional(oldValue.serviceProperty());
+            uiFonction.textProperty().unbindBidirectional(oldValue.fonctionProperty());
+            uiTelephone.textProperty().unbindBidirectional(oldValue.telephoneProperty());
+            uiFax.textProperty().unbindBidirectional(oldValue.faxProperty());
+            uiEmail.textProperty().unbindBidirectional(oldValue.emailProperty());
+            uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
+            uiCodePostale.textProperty().unbindBidirectional(oldValue.code_postalProperty());
+            uiCommune.textProperty().unbindBidirectional(oldValue.paysProperty());
+        }
         
         date_maj.valueProperty().bind(contact.dateMajProperty());
         uiPseudoId.textProperty().bindBidirectional(contact.pseudoIdProperty());
@@ -138,25 +149,24 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         orgsOfContact.clear();
         modifiedOrgs.clear();
         
-        // We should not need to unbind fields, as they use weak listeners.
-        if (contact == null) return;
+        if (newValue == null) return;
                 
-        uiNom.textProperty().bindBidirectional(contact.nomProperty());
-        uiPrenom.textProperty().bindBidirectional(contact.prenomProperty());
-        uiService.textProperty().bindBidirectional(contact.serviceProperty());
-        uiFonction.textProperty().bindBidirectional(contact.fonctionProperty());
-        uiTelephone.textProperty().bindBidirectional(contact.telephoneProperty());
-        uiFax.textProperty().bindBidirectional(contact.faxProperty());
-        uiEmail.textProperty().bindBidirectional(contact.emailProperty());
-        uiAdresse.textProperty().bindBidirectional(contact.adresseProperty());
-        uiCodePostale.textProperty().bindBidirectional(contact.code_postalProperty());
-        uiCommune.textProperty().bindBidirectional(contact.paysProperty());
+        uiNom.textProperty().bindBidirectional(newValue.nomProperty());
+        uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
+        uiService.textProperty().bindBidirectional(newValue.serviceProperty());
+        uiFonction.textProperty().bindBidirectional(newValue.fonctionProperty());
+        uiTelephone.textProperty().bindBidirectional(newValue.telephoneProperty());
+        uiFax.textProperty().bindBidirectional(newValue.faxProperty());
+        uiEmail.textProperty().bindBidirectional(newValue.emailProperty());
+        uiAdresse.textProperty().bindBidirectional(newValue.adresseProperty());
+        uiCodePostale.textProperty().bindBidirectional(newValue.code_postalProperty());
+        uiCommune.textProperty().bindBidirectional(newValue.paysProperty());
                
-        // Retrieve all organisms current contact is / was part of.
-        if (contact.getId() != null) {
+        // Retrieve all organisms current newValue is / was part of.
+        if (newValue.getId() != null) {
             for (final Organisme org : orgRepository.getAll()) {
                 orgsOfContact.addAll(org.contactOrganisme.filtered((ContactOrganisme co) -> {
-                    return contact.getId().equals(co.getContactId());
+                    return newValue.getId().equals(co.getContactId());
                 }));
             }
         }

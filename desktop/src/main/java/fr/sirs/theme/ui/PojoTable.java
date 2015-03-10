@@ -151,7 +151,6 @@ public class PojoTable extends BorderPane {
     
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
-    private int currentFiche = 0;
     private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
     private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
@@ -345,7 +344,9 @@ public class PojoTable extends BorderPane {
         sPane.setDividerPositions(0.9);
         setCenter(sPane);
         
-        // NAVIGABILITE FICHE PAR FICHE
+        //
+        // NAVIGATION FICHE PAR FICHE
+        //
         navigationToolbar.getStyleClass().add("buttonbarleft");
         
         uiCurrent.setFont(Font.font(20));
@@ -353,41 +354,17 @@ public class PojoTable extends BorderPane {
         uiCurrent.setAlignment(Pos.CENTER);
         uiCurrent.setTextFill(Color.WHITE);
         uiCurrent.setOnAction(this::goTo);
-
+        
         uiPrevious.getStyleClass().add("btn-without-style"); 
         uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
-        uiPrevious.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                final ObservableList<Element> items = uiTable.getItems();
-                if(!items.isEmpty()){
-                    if(currentFiche>0)
-                        currentFiche--;
-                    else
-                        currentFiche=items.size()-1;
-                    elementPane.setElement(items.get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+items.size());
-                }
-            }
-        });
+        uiPrevious.setOnAction((ActionEvent event) -> {
+            uiTable.getSelectionModel().selectPrevious();
+        });        
 
         uiNext.getStyleClass().add("btn-without-style"); 
         uiNext.setTooltip(new Tooltip("Fiche suivante."));
-        uiNext.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                final ObservableList<Element> items = uiTable.getItems();
-                if(!items.isEmpty()){
-                    if(currentFiche<items.size()-1)
-                        currentFiche++;
-                    else
-                        currentFiche=0;
-                    elementPane.setElement(items.get(currentFiche));
-                    uiCurrent.setText((currentFiche+1)+" / "+items.size());
-                }
-            }
+        uiNext.setOnAction((ActionEvent event) -> {
+            uiTable.getSelectionModel().selectNext();
         });
         navigationToolbar.getChildren().addAll(uiPrevious, uiCurrent, uiNext);
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
@@ -395,28 +372,45 @@ public class PojoTable extends BorderPane {
         uiFicheMode.setGraphic(playIcon);
         uiFicheMode.getStyleClass().add("btn-without-style"); 
         uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+        
+        // Update counter when we change selected element.
+        final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            uiCurrent.setText(newValue.toString()+1 + " / " + uiTable.getItems().size());
+        };
         uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if(!newValue){
+                if (newValue) {
+                    // If there's no selection, initialize on first element.
+                    if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
+                        uiTable.getSelectionModel().select(0);
+                    }
+                    
+                    // Prepare editor and bind its content to selection model. 
+                    if (elementPane == null) {
+                        elementPane = SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem());
+                    }
+                    elementPane.elementProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
+                    
+                    // Prepare display
+                    uiFicheMode.setGraphic(stopIcon);
+                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
+                    
+                    uiCurrent.setText("" + uiTable.getSelectionModel().getSelectedIndex()+1 + " / " + uiTable.getItems().size());
+                    uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
+                    setCenter((Node) elementPane);
+                    
+                } else {
+                    // Deconnect editor.
+                    if (elementPane != null) {
+                        elementPane.elementProperty().unbind();
+                    }
+                    
+                    // Update display
+                    uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
                     setCenter(uiTable);
                     uiFicheMode.setGraphic(playIcon);
                     uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
-                }else{
-                    final ObservableList<Element> items = uiTable.getItems();
-                    if(!items.isEmpty()){
-                        currentFiche=0;
-                        elementPane = SIRS.generateEditionPane(items.get(currentFiche));
-                        elementPane.elementProperty().addListener((ObservableValue observable1, Object oldValue1, Object newValue1) -> {
-                            Injector.getSession().prepareToPrint(newValue1);
-                        });
-                        setCenter((Node) elementPane);
-                        uiCurrent.setText((currentFiche+1)+" / "+items.size());
-                    }else{
-                        uiCurrent.setText(0+" / "+0);
-                    }
-                    uiFicheMode.setGraphic(stopIcon);
-                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
                 }
             }
         });
@@ -511,25 +505,20 @@ public class PojoTable extends BorderPane {
     
     protected void goTo(ActionEvent event){
         final Popup popup = new Popup();
-        final TextField textField = new TextField();
-        popup.getContent().add(textField);
+        NumberField indexEditor = new NumberField(NumberField.NumberType.Integer);
+        
+        popup.getContent().add(indexEditor);
+        popup.setAutoHide(false);
 
-        textField.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                int oldCurrentFiche = currentFiche;
-                try {
-                    currentFiche = Integer.valueOf(textField.getText()).intValue() - 1;
-                } finally {
-                    if (currentFiche < 0 || currentFiche > uiTable.getItems().size() - 1) {
-                        currentFiche = oldCurrentFiche;
-                    }
-
-                    elementPane.setElement(uiTable.getItems().get(currentFiche));
-                    uiCurrent.setText((currentFiche + 1) + " / " + uiTable.getItems().size());
+        indexEditor.setOnAction((ActionEvent event1) -> {
+            final Number indexToSelect = indexEditor.valueProperty().get();
+            if (indexToSelect != null) {
+                final int index = indexToSelect.intValue();
+                if (index >= 0 && index < uiTable.getItems().size()) {
+                    uiTable.getSelectionModel().select(index);
                 }
-                popup.hide();
             }
+            popup.hide();
         });
         final Point2D sc = uiCurrent.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());

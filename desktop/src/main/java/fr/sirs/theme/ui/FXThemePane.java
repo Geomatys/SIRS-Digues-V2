@@ -53,13 +53,14 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         date_maj.setDisable(true);
         
         uiMode.setSaveAction(this::save);
+        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         disableFieldsProperty().bind(uiMode.editionState().not());
         
-        elementProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-            initPane();
-        });
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
+        
+        elementProperty.addListener(this::initPane);
+        
         setElement((T) theme);
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
     }
     
     public void setShowOnMapButton(final boolean isShown){
@@ -101,7 +102,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             repo.update(couchDbDocument);
         } catch (Exception e) {
             SIRS.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
-            SIRS.LOGGER.log(Level.INFO, e.getMessage(), e);
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
     
@@ -122,62 +123,68 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         }
     }
     
-    protected void initPane() {
-        final Element object = elementProperty.get();
-        if (object == null) {        
-            date_maj.valueProperty().unbind();            
+    protected void initPane(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
+        // unbind all mono-directional
+        date_maj.valueProperty().unbind();
+        uiMode.validProperty().unbind();
+        uiMode.authorIDProperty().unbind();
+        
+        if (oldValue != null) {
+            //unbind all bidirectionnal
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
+        }
+        
+        if (newValue == null) {    
             setCenter(new Label("Pas d'éditeur disponible."));
             specificThemePane = null;
-
         } else {
-            couchDbDocument = object.getCouchDBDocument();
+            // Keep parent reference, so we can now if it has been switched at save.
+            couchDbDocument = newValue.getCouchDBDocument();
             
-            if (object instanceof AvecDateMaj) {
-                date_maj.valueProperty().bind(((AvecDateMaj) object).dateMajProperty());
+            // maj
+            if (newValue instanceof AvecDateMaj) {
+                date_maj.valueProperty().bind(((AvecDateMaj) newValue).dateMajProperty());
                 date_maj.setVisible(true);
                 uiDateMajLabel.setVisible(true);
             } else {
-                date_maj.valueProperty().unbind();
                 date_maj.setVisible(false);
                 uiDateMajLabel.setVisible(false);
             }
             
-            uiPseudoId.textProperty().bindBidirectional(object.pseudoIdProperty());
-            uiPseudoId.disableProperty().bind(disableFieldsProperty());
+            //validation
+            uiMode.validProperty().bind(newValue.validProperty());
+            uiMode.authorIDProperty().bind(newValue.authorProperty());
+            Injector.getSession().prepareToPrint(newValue);
             
-            try {
-                // Choose the pane adapted to the specific structure.
-                final String className = "fr.sirs.theme.ui.FX" + object.getClass().getSimpleName() + "Pane";
-                final Class controllerClass = Class.forName(className);
-                final Constructor cstr = controllerClass.getConstructor(object.getClass());
-                specificThemePane = (FXElementPane) cstr.newInstance(object);
-                specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
-                if(specificThemePane instanceof FXUtilisateurPane){
-                    ((FXUtilisateurPane) specificThemePane).setAdministrable(session.getRole()==ADMIN);
+            uiPseudoId.textProperty().bindBidirectional(newValue.pseudoIdProperty());
+            
+            // If we previously edited same type of element, we recycle edition panel.
+            if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {
+                specificThemePane.setElement(newValue);
+            } else {
+                try {
+                    // Choose the pane adapted to the specific structure.
+                    final String className = "fr.sirs.theme.ui.FX" + newValue.getClass().getSimpleName() + "Pane";
+                    final Class controllerClass = Class.forName(className);
+                    final Constructor cstr = controllerClass.getConstructor(newValue.getClass());
+                    specificThemePane = (FXElementPane) cstr.newInstance(newValue);
+                    specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
+                    if (specificThemePane instanceof FXUtilisateurPane) {
+                        ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
+                    }
+                    setCenter((Node) specificThemePane);
+                } catch (Exception ex) {
+                    throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
                 }
-                setCenter((Node)specificThemePane);
-            } catch (Exception ex) {
-                throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
             }
         }
-        uiMode.validProperty().unbind();
-        uiMode.authorIDProperty().unbind();
-        uiMode.validProperty().bind(elementProperty.get().validProperty());
-        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
         
-        uiShowOnMapButton.setVisible(object instanceof Positionable);
+        uiShowOnMapButton.setVisible(newValue instanceof Positionable);
     }
 
     @Override
     final public void setElement(T element) {
-        
-        elementProperty.set(element);    
-        
-        uiMode.validProperty().unbind();
-        uiMode.authorIDProperty().unbind();
-        uiMode.validProperty().bind(elementProperty.get().validProperty());
-        uiMode.authorIDProperty().bind(elementProperty.get().authorProperty());
-        Injector.getSession().prepareToPrint(element);
+        elementProperty.set(element);
     }
 
     @Override

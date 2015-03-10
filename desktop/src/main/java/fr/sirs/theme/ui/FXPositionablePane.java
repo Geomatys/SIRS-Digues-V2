@@ -121,12 +121,7 @@ public class FXPositionablePane extends BorderPane {
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
         
-        positionableProperty.addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                updateField();
-            }
-        });
+        positionableProperty.addListener(this::updateField);
         
         uiImport.setGraphic(new ImageView(ICON_IMPORT));
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER));
@@ -460,9 +455,15 @@ public class FXPositionablePane extends BorderPane {
         }
     }
     
-    private void updateField(){
-        final Positionable pos = (Positionable) positionableProperty.get();
-        if(pos==null) return;
+    private void updateField(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
+        if (oldValue != null) {
+            uiAvalSart.selectedProperty().unbindBidirectional(oldValue.borne_debut_avalProperty());
+            uiAvalEnd.selectedProperty().unbindBidirectional(oldValue.borne_fin_avalProperty());
+            uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
+            uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
+        }
+        
+        if(newValue==null) return;
         
         initializing = true;
         uiLoading.setVisible(true);
@@ -479,15 +480,15 @@ public class FXPositionablePane extends BorderPane {
                     @Override
                     public void run() {
                         //Bindings
-                        uiAvalSart.selectedProperty().bindBidirectional(pos.borne_debut_avalProperty());
-                        uiAvalEnd.selectedProperty().bindBidirectional(pos.borne_fin_avalProperty());
-                        uiDistanceStart.valueProperty().bindBidirectional(pos.borne_debut_distanceProperty());
-                        uiDistanceEnd.valueProperty().bindBidirectional(pos.borne_fin_distanceProperty());
+                        uiAvalSart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
+                        uiAvalEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
+                        uiDistanceStart.valueProperty().bindBidirectional(newValue.borne_debut_distanceProperty());
+                        uiDistanceEnd.valueProperty().bindBidirectional(newValue.borne_fin_distanceProperty());
                         
                         // Mise à jour automatique de la liste des SRs si le parent
                         // du positionable change.
-                        if (pos.parentProperty() != null) {
-                            pos.parentProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
+                        if (newValue.parentProperty() != null) {
+                            newValue.parentProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
                                 updateSRList();
                             });
                         }
@@ -495,11 +496,11 @@ public class FXPositionablePane extends BorderPane {
                         //on ecoute les changements de geometrie pour mettre a jour les champs
                         final ChangeListener cl = new ChangeListener() {
                             @Override
-                            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                            public void changed(ObservableValue observable, Object oldPosition, Object newPosition) {
                                 //selectionner RGF93 par defaut
                                 uiCRSs.getSelectionModel().clearAndSelect(1);
-                                final Point startPos = pos.getPositionDebut();
-                                final Point endPos = pos.getPositionFin();
+                                final Point startPos = newValue.getPositionDebut();
+                                final Point endPos = newValue.getPositionFin();
                                 if(startPos != null){
                                     uiLongitudeStart.valueProperty().set(startPos.getX());
                                     uiLatitudeStart.valueProperty().set(startPos.getY());
@@ -510,13 +511,13 @@ public class FXPositionablePane extends BorderPane {
                                 }
                             }
                         };                        
-                        pos.positionDebutProperty().addListener(cl);
-                        pos.positionFinProperty().addListener(cl);
+                        newValue.positionDebutProperty().addListener(cl);
+                        newValue.positionFinProperty().addListener(cl);
                         cl.changed(null, null, null);
                         
                         //on active le panneau qui a le positionnement
-                        final Point startPos = pos.getPositionDebut();
-                        final Point endPos = pos.getPositionFin();
+                        final Point startPos = newValue.getPositionDebut();
+                        final Point endPos = newValue.getPositionFin();
                         if(startPos!=null || endPos!=null){
                             uiTypeCoord.setSelected(true);
                         }else{
@@ -528,7 +529,6 @@ public class FXPositionablePane extends BorderPane {
                         initializing = false;
                     }
                 });
-                
             }
         }.start();
     }

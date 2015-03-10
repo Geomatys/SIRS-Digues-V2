@@ -53,8 +53,7 @@ public class ElasticSearchEngine implements Closeable {
         "        \"index\" : \"_river\",\n" +
         "        \"type\" : \""+dbName+"\"\n" +
         "    }\n" +
-        "}";
-        
+        "}";        
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
         this.client = node.client();        
         currentDbName = dbName;
@@ -63,6 +62,11 @@ public class ElasticSearchEngine implements Closeable {
                 Requests.indexRequest("_river").type(dbName).id("_meta").source(config)).actionGet());
     }
 
+    /**
+     * Perform a search on the current database index, using given query.
+     * @param query The query to execute.
+     * @return ElasticSearch response, never null.
+     */
     public SearchResponse search(final QueryBuilder query) {
         return client.prepareSearch("_river").setTypes(currentDbName).setQuery(query)
                 .execute().actionGet();

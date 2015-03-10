@@ -62,61 +62,62 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         uiComment.disableProperty().bind(disableFieldsProperty());
         table.editableProperty().bind(disableFieldsProperty().not());
         
+        this.date_maj.setDisable(true);
+        
         table.parentElementProperty().bind(elementProperty);
-        elementProperty.addListener((ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) -> {
-            initFields();
-        });
+        elementProperty.addListener(this::initFields);
         setElement(digue);
         
         setCenter(table);
     }
     
-    public Digue getDigue(){
+    public Digue getDigue() {
         return elementProperty.get();
     }
     
-    private void save(){
-        elementProperty.get().setCommentaire(uiComment.getHtmlText());
+    private void save() {
+        preSave();
         session.update(this.elementProperty.get());
     }
 
     /**
      * 
      */
-    public void initFields() {
+    public void initFields(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
         uiMode.validProperty().unbind();
         uiMode.authorIDProperty().unbind();
         this.uiComment.setHtmlText(null);
         table.setTableItems(()->null);
         
-        Digue digue = elementProperty.get();
-        if (digue != null) {
-            // Binding digue name.------------------------------------------------
-            this.libelle.textProperty().bindBidirectional(digue.libelleProperty());
-//        this.libelle.editableProperty().bindBidirectional(editBind);
+        if (oldValue != null) {
+            this.libelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            this.date_maj.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
+        }
+        
+        if (newValue != null) {
+            // Binding digue name.----------------------------------------------
+            this.libelle.textProperty().bindBidirectional(newValue.libelleProperty());
 
-            // Display levee's update date.-----------------------------------------
-            this.date_maj.valueProperty().bindBidirectional(digue.dateMajProperty());
-            this.date_maj.setDisable(true);
+            // Display levee's update date.-------------------------------------
+            this.date_maj.valueProperty().bindBidirectional(newValue.dateMajProperty());
 
-            // Binding levee's comment.---------------------------------------------
-            this.uiComment.setHtmlText(digue.getCommentaire());
-            digue.commentaireProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                this.uiComment.setHtmlText(digue.getCommentaire());
-            });
+            // Initialize comment editor.---------------------------------------
+            this.uiComment.setHtmlText(newValue.getCommentaire());
 
-            uiMode.validProperty().bind(digue.validProperty());
-            uiMode.authorIDProperty().bind(digue.authorProperty());
+            uiMode.validProperty().bind(newValue.validProperty());
+            uiMode.authorIDProperty().bind(newValue.authorProperty());
             
             table.setTableItems(()->FXCollections.observableArrayList(
-                    session.getTronconDigueByDigue(elementProperty.get())));
+                    session.getTronconDigueByDigue(newValue)));
         }
     }
 
     @Override
     public void preSave() {
-        if (elementProperty.get() != null) {
-            elementProperty.get().setDateMaj(LocalDateTime.now());
+        final Digue digue = elementProperty.get();
+        if (digue != null) {
+            digue.setDateMaj(LocalDateTime.now());
+            digue.commentaireProperty().set(uiComment.getHtmlText());
         }
     }
     

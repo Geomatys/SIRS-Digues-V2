@@ -40,11 +40,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
      * element edited change.
      */
     private FXUtilisateurPane() throws NoSuchAlgorithmException {
-        SIRS.loadFXML(this, Utilisateur.class);
-        elementProperty().addListener((ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) -> {
-            initFields();
-        });
-        messageDigest = MessageDigest.getInstance("MD5");
+        this(null, false);
     }
 
     public FXUtilisateurPane(final Utilisateur utilisateur) throws NoSuchAlgorithmException {
@@ -52,7 +48,20 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     }
 
     public FXUtilisateurPane(final Utilisateur utilisateur, final boolean administrable) throws NoSuchAlgorithmException {
-        this();
+        
+        SIRS.loadFXML(this, Utilisateur.class);
+        
+        ui_role.disableProperty().bind(new SecurityBinding());
+        ui_login.disableProperty().bind(disableFieldsProperty());
+        ui_login.editableProperty().bind(administrableProperty());
+        ui_password.disableProperty().bind(disableFieldsProperty());
+        ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
+        
+        ui_role.getItems().addAll(Role.values());
+        
+        elementProperty().addListener(this::initFields);
+        messageDigest = MessageDigest.getInstance("MD5");
+        
         this.elementProperty().set(utilisateur);
         this.administrableProperty().set(administrable);
     }
@@ -66,30 +75,26 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     /**
      * Initialize fields at element setting.
      */
-    private void initFields() {
-
-        final Utilisateur element = (Utilisateur) elementProperty().get();
-
+    private void initFields(ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) {
+        if (oldValue != null) {
+            ui_login.textProperty().unbindBidirectional(oldValue.loginProperty());
+            ui_role.valueProperty().unbindBidirectional(oldValue.roleProperty());
+        }
+        
+        // * password
+        ui_password.setText("");
+        ui_passwordConfirm.setText("");
+        
+        if (newValue == null) return;
         /*
          * Bind control properties to Element ones.
          */
         // Propriétés de Utilisateur
         // * login
-        ui_login.textProperty().bindBidirectional(element.loginProperty());
-        ui_login.disableProperty().bind(disableFieldsProperty());
-        ui_login.editableProperty().bind(administrableProperty());
-
-        // * password
-        ui_password.setText("");
-        ui_passwordConfirm.setText("");
-
-        ui_password.disableProperty().bind(disableFieldsProperty());
-        ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
+        ui_login.textProperty().bindBidirectional(newValue.loginProperty());
 
         // * role
-        ui_role.getItems().addAll(Role.values());
-        ui_role.valueProperty().bindBidirectional(element.roleProperty());
-        ui_role.disableProperty().bind(new SecurityBinding());
+        ui_role.valueProperty().bindBidirectional(newValue.roleProperty());
 //        ui_role.setEditable(element.equals(Injector.getSession().getUtilisateur()));
 
     }

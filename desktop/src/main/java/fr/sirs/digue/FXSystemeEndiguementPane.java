@@ -118,7 +118,14 @@ public class FXSystemeEndiguementPane extends BorderPane {
     
     private void changed(ObservableValue<? extends SystemeEndiguement> observable, SystemeEndiguement oldValue, SystemeEndiguement newValue) {
         uiLibelle.textProperty().unbind();
-        if(newValue!=null){
+        if (oldValue != null) {
+            uiLibelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            uiMaj.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
+            uiClassement.textProperty().unbindBidirectional(oldValue.classementProperty());
+            uiProtection.valueProperty().unbindBidirectional(oldValue.niveauProtectionProperty());
+            uiPopulation.valueProperty().unbindBidirectional(oldValue.populationProtegeeProperty());
+        }
+        if (newValue != null) {
             uiLibelle.textProperty().bindBidirectional(newValue.libelleProperty());
             uiMaj.valueProperty().bindBidirectional(newValue.dateMajProperty());
             uiClassement.textProperty().bindBidirectional(newValue.classementProperty());

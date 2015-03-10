@@ -37,19 +37,18 @@ public class FXProfilTraversPane extends AbstractFXElementPane<ProfilTravers> {
         levesTable.editableProperty().bind(disableProperty().not().and(elementProperty.isNotNull()));
         
         levesTable.parentElementProperty().bind(elementProperty);
-        elementProperty.addListener((ObservableValue<? extends ProfilTravers> observable, ProfilTravers oldValue, ProfilTravers newValue) -> {
-            initFields();
-        });
+        elementProperty.addListener(this::initFields);
         setElement(profilTravers);
     }       
             
-    private void initFields(){
-        final ProfilTravers profil = elementProperty.get();
-        if (profil != null) {
-            uiLibelle.textProperty().bindBidirectional(profil.libelleProperty());
-            levesTable.setTableItems(()-> (ObservableList) profil.getLeves());
+    private void initFields(ObservableValue<? extends ProfilTravers> observable, ProfilTravers oldValue, ProfilTravers newValue) {
+        if (oldValue != null) {
+            uiLibelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+        }
+        if (newValue != null) {
+            uiLibelle.textProperty().bindBidirectional(newValue.libelleProperty());
+            levesTable.setTableItems(()-> (ObservableList) newValue.getLeves());
         } else {
-            uiLibelle.textProperty().unbind();
             uiLibelle.textProperty().set("");
             levesTable.setTableItems(()-> null);
         }

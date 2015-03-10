@@ -72,22 +72,32 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             }
         }
         
-        contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
-        contactOrganismeTable.parentElementProperty().bind(elementProperty);
-        contactOrganismeTable.editableProperty().bind(uiMode.editionState());
-        uiContactOrganismesTab.setContent(contactOrganismeTable);
-        setElement(organisme);
+        coTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
+        coTable.parentElementProperty().bind(elementProperty);
+        coTable.editableProperty().bind(uiMode.editionState());
+        uiContactOrganismesTab.setContent(coTable);
         
-        initPane();
+        elementProperty.addListener(this::initPane);
+        setElement(organisme);
     }
     
-    private void initPane() {
+    private void initPane(ObservableValue<? extends Organisme> observable, Organisme oldValue, Organisme newValue) {
+        if (oldValue != null) {
+            uiRaisonSocialeTextField.textProperty().unbindBidirectional(oldValue.nomProperty());
+            uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statut_juridiqueProperty());
+            uiTelTextField.textProperty().unbindBidirectional(oldValue.telephoneProperty());
+            uiEmailTextField.textProperty().unbindBidirectional(oldValue.emailProperty());
+            uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
+            uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.code_postalProperty());
+            uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
+        }
+        
         final Organisme organisme;
-        if (elementProperty.get() == null) {
+        if (newValue == null) {
             organisme = Injector.getSession().getOrganismeRepository().create();
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().add(organisme);});
         } else {
-            organisme = elementProperty.get();
+            organisme = newValue;
             uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().update(organisme);});
         }
         
@@ -106,22 +116,22 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         if (organisme.getDate_debut() != null) {
             uiDebutDatePicker.valueProperty().set(organisme.getDate_debut().toLocalDate());
         }
-        uiDebutDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) -> {
-            if (newValue == null) {
+        uiDebutDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observableDate, LocalDate oldDate, LocalDate newDate) -> {
+            if (newDate == null) {
                 organisme.date_debutProperty().set(null);
             } else {
-                organisme.date_debutProperty().set(LocalDateTime.of(newValue, LocalTime.MIN));
+                organisme.date_debutProperty().set(LocalDateTime.of(newDate, LocalTime.MIN));
             }
         });
         
         if (organisme.getDate_fin() != null) {
             uiFinDatePicker.valueProperty().set(organisme.getDate_fin().toLocalDate());
         }
-        uiFinDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) -> {
-            if (newValue == null) {
+        uiFinDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observableDate, LocalDate oldDate, LocalDate newDate) -> {
+            if (newDate == null) {
                 organisme.date_finProperty().set(null);
             } else {
-                organisme.date_finProperty().set(LocalDateTime.of(newValue, LocalTime.MIN));
+                organisme.date_finProperty().set(LocalDateTime.of(newDate, LocalTime.MIN));
             }
         });
         

@@ -42,14 +42,7 @@ public class FXSystemeReperagePane extends BorderPane {
                 
         setCenter(borneTable);
         
-        srProperty.addListener((ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) -> {
-            if(oldValue!=null){
-                uiNom.textProperty().unbindBidirectional(oldValue.libelleProperty());
-                uiDate.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
-                borneTable.getUiTable().setItems(FXCollections.emptyObservableList());
-            }
-            updateFields();
-        });
+        srProperty.addListener(this::updateFields);
         
         this.visibleProperty().bind(srProperty.isNotNull());
         
@@ -67,15 +60,19 @@ public class FXSystemeReperagePane extends BorderPane {
         return srProperty;
     }
     
-    private void updateFields(){
-        final SystemeReperage sr = srProperty.get();
-        if(sr==null) return;
+    private void updateFields(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+        if (oldValue != null) {
+            uiNom.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            uiDate.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
+            borneTable.getUiTable().setItems(FXCollections.emptyObservableList());
+        }
         
-        uiNom.textProperty().bindBidirectional(sr.libelleProperty());
-        uiDate.valueProperty().bindBidirectional(sr.dateMajProperty());
-        uiComment.setHtmlText(sr.getCommentaire());
+        if(newValue==null) return;        
+        uiNom.textProperty().bindBidirectional(newValue.libelleProperty());
+        uiDate.valueProperty().bindBidirectional(newValue.dateMajProperty());
+        uiComment.setHtmlText(newValue.getCommentaire());
                 
-        borneTable.getUiTable().setItems(sr.systemereperageborneId);
+        borneTable.getUiTable().setItems(newValue.systemereperageborneId);
     }
     
     public void save(){
