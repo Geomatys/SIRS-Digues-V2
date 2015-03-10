@@ -72,16 +72,19 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             }
         }
         
-        coTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
-        coTable.parentElementProperty().bind(elementProperty);
-        coTable.editableProperty().bind(uiMode.editionState());
-        uiContactOrganismesTab.setContent(coTable);
+        contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
+        contactOrganismeTable.parentElementProperty().bind(elementProperty);
+        contactOrganismeTable.editableProperty().bind(uiMode.editionState());
+        uiContactOrganismesTab.setContent(contactOrganismeTable);
+        
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         elementProperty.addListener(this::initPane);
         setElement(organisme);
     }
     
     private void initPane(ObservableValue<? extends Organisme> observable, Organisme oldValue, Organisme newValue) {
+        date_maj.valueProperty().unbind();
         if (oldValue != null) {
             uiRaisonSocialeTextField.textProperty().unbindBidirectional(oldValue.nomProperty());
             uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statut_juridiqueProperty());
@@ -90,6 +93,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.code_postalProperty());
             uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
         }
         
         final Organisme organisme;
@@ -103,7 +107,6 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         
         date_maj.valueProperty().bind(organisme.dateMajProperty());
         uiPseudoId.textProperty().bindBidirectional(organisme.pseudoIdProperty());
-        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statut_juridiqueProperty());

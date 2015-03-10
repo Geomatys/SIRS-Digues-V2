@@ -20,7 +20,6 @@ import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -89,6 +88,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiAdresse.disableProperty().bind(disableFieldsProperty());
         uiCodePostale.disableProperty().bind(disableFieldsProperty());
         uiCommune.disableProperty().bind(disableFieldsProperty());
+        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
@@ -129,6 +129,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     }
     
     private void initFields(ObservableValue<? extends Contact> observable, Contact oldValue, Contact newValue) {
+        date_maj.valueProperty().unbind();
+        
         if (oldValue != null) {
             uiNom.textProperty().unbindBidirectional(oldValue.nomProperty());
             uiPrenom.textProperty().unbindBidirectional(oldValue.prenomProperty());
@@ -140,17 +142,17 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostale.textProperty().unbindBidirectional(oldValue.code_postalProperty());
             uiCommune.textProperty().unbindBidirectional(oldValue.paysProperty());
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
         }
         
-        date_maj.valueProperty().bind(contact.dateMajProperty());
-        uiPseudoId.textProperty().bindBidirectional(contact.pseudoIdProperty());
-        uiPseudoId.disableProperty().bind(disableFieldsProperty());
+        if (newValue == null) return;
+        
+        date_maj.valueProperty().bind(newValue.dateMajProperty());
         
         orgsOfContact.clear();
         modifiedOrgs.clear();
-        
-        if (newValue == null) return;
                 
+        uiPseudoId.textProperty().bindBidirectional(newValue.pseudoIdProperty());
         uiNom.textProperty().bindBidirectional(newValue.nomProperty());
         uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
         uiService.textProperty().bindBidirectional(newValue.serviceProperty());

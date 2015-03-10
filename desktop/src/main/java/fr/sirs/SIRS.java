@@ -15,7 +15,6 @@ import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
-import fr.sirs.other.FXContactOrganismePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
@@ -277,9 +276,6 @@ public final class SIRS extends SirsCore {
             
         } else if (pojo instanceof Organisme) {
             content = new FXOrganismePane((Organisme) pojo);
-            
-        } else if (pojo instanceof ContactOrganisme) {
-            content = new FXContactOrganismePane((ContactOrganisme) pojo);
             
         } else if (pojo instanceof ProfilTravers) {
             content = new FXThemePane((ProfilTravers) pojo);
