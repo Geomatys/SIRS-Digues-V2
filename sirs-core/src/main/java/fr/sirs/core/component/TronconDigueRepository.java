@@ -14,6 +14,7 @@ import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoire;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -396,6 +397,14 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public List<PiedFrontFrancBord> getAllPiedFrontFrancBords() {
         return db.queryView(createQuery(PIEDFRONTFRANCBORD),
                 PiedFrontFrancBord.class);
+    }
+
+    public static final String DOCUMENTTRONCON = "DocumentTroncon";
+
+    @View(name = DOCUMENTTRONCON, map = "classpath:DocumentTroncon-map.js")
+    public List<DocumentTroncon> getAllDocumentTroncons() {
+        return db.queryView(createQuery(DOCUMENTTRONCON),
+                DocumentTroncon.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {

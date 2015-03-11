@@ -28,6 +28,7 @@ import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoire;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -83,7 +84,6 @@ import org.apache.sis.util.ArraysExt;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
-import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -161,7 +161,7 @@ public class CorePlugin extends Plugin {
         
     };
     
-    private static final HashMap<Class,BeanFeatureSupplier> SUPPLIERS = new HashMap<Class, BeanFeatureSupplier>();
+    private static final HashMap<Class, BeanFeatureSupplier> SUPPLIERS = new HashMap<Class, BeanFeatureSupplier>();
     
     public CorePlugin() {
         name = NAME;
@@ -218,6 +218,9 @@ public class CorePlugin extends Plugin {
             SUPPLIERS.put(LaisseCrue.class, new StructBeanSupplier(LaisseCrue.class, () -> repository.getAllFromView(LaisseCrue.class)));
             SUPPLIERS.put(MonteeEaux.class, new StructBeanSupplier(MonteeEaux.class, () -> repository.getAllFromView(MonteeEaux.class)));
             SUPPLIERS.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> repository.getAllFromView(LigneEau.class)));
+            
+            // Documents positionnés
+            SUPPLIERS.put(DocumentTroncon.class, new StructBeanSupplier(DocumentTroncon.class, () -> repository.getAllDocumentTroncons()));
 
             // Emprises communales
             SUPPLIERS.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
@@ -342,6 +345,15 @@ public class CorePlugin extends Plugin {
             mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createStructureSelectionStyle(),false) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(mesuresLayer);
+                        
+            // Positionnement des documents
+            final BeanStore documentsStore = new BeanStore(
+                    getSupplier(DocumentTroncon.class));
+            final MapItem documentsLayer = MapBuilder.createItem();
+            documentsLayer.setName("Documents");
+            documentsLayer.items().addAll( buildLayers(documentsStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            items.add(documentsLayer);
             
             // Emprises communales
             //final BeanStore communesStore = new BeanStore(getSupplier(CommuneTroncon.class));               

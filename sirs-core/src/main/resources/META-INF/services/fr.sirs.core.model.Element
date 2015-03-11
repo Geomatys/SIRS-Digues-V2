@@ -51,7 +51,6 @@ fr.sirs.core.model.ProfilLongEvenementHydraulique
 fr.sirs.core.model.ProfilLong
 fr.sirs.core.model.ProfilTraversEvenementHydraulique
 fr.sirs.core.model.ProfilTravers
-fr.sirs.core.model.ProfilTraversTroncon
 fr.sirs.core.model.RapportEtude
 fr.sirs.core.model.RefConduiteFermee
 fr.sirs.core.model.RefConvention
