@@ -9,13 +9,11 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.ValiditySummary;
@@ -32,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -106,7 +105,6 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Samuel Andrés (Geomatys)
  */
 public class PojoTable extends BorderPane {
-    
     private static final List<String> SPECIAL_DISPLAY_COLUMNS = new ArrayList<>();
     static{
         SPECIAL_DISPLAY_COLUMNS.add("author");
@@ -305,15 +303,10 @@ public class PojoTable extends BorderPane {
         uiDelete.setOnAction((ActionEvent event) -> {
             final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
             if (elements.length > 0) {
-                final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                        ButtonType.NO, ButtonType.YES).showAndWait().get();
-                if (ButtonType.YES == res) {
-                    if(createNewProperty.get()){
+                final Optional<ButtonType> res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                        ButtonType.NO, ButtonType.YES).showAndWait();
+                if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                         deletePojos(elements);
-                    } 
-                    else{
-                        removeExistingPojos(elements);
-                    }
                 }
             } else {
                 new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
@@ -622,7 +615,7 @@ public class PojoTable extends BorderPane {
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
             // la suppression.
             if(!authoriseElementDeletion(pojo)) continue;
-            if (repo != null) {
+            if (repo != null && createNewProperty.get()) {
                 repo.remove(pojo);
             }
             if (parentElementProperty.get() != null) {
@@ -671,19 +664,6 @@ public class PojoTable extends BorderPane {
             new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
         }
         return result;
-    }
-    
-    
-    
-    protected void removeExistingPojos(Element... pojos) {
-        ObservableList<Element> items = uiTable.getItems();
-        for (Element pojo : pojos) {
-            // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
-            // l'élément et que celui-ci soit invalide, sinon, on court-circuite
-            // la suppression.
-            if(!authoriseElementDeletion(pojo)) continue;
-            items.remove(pojo);
-        }
     }
     
     /**
@@ -829,14 +809,24 @@ public class PojoTable extends BorderPane {
             if (ref != null) {
                 //reference vers un autre objet
                 setEditable(false);
-                setCellValueFactory(new CellLinkValueFactory(desc));
-                setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());
+                setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());            
+                try {
+                    final Method propertyAccessor = pojoClass.getMethod(desc.getName()+"Property");
+                    setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
+                        try {
+                            return (ObservableValue) propertyAccessor.invoke(param.getValue());
+                        } catch (Exception ex) {
+                            SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                            return null;
+                        }
+                    });
+                } catch (Exception ex) {
+                    setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                } 
 
             } else {
-                final Class type = desc.getReadMethod().getReturnType();
-
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-
+                final Class type = desc.getReadMethod().getReturnType();
                 boolean isEditable = true;
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
@@ -861,48 +851,14 @@ public class PojoTable extends BorderPane {
             }
         }  
     }
-    
-    public class CellLinkValueFactory implements Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>{
 
-        private final PropertyDescriptor desc;
-
-        public CellLinkValueFactory(PropertyDescriptor desc) {
-            this.desc = desc;
-        }
-        
-        @Override
-        public ObservableValue<Object> call(CellDataFeatures<Element, Object> param) {
-            
-            // On essaye de renvoyer l'ID observable de manière à mettre à jour la cellule lors du changement d'ID.
-            try {
-                final Method propertyAccessor = param.getValue().getClass().getMethod(desc.getName()+"Property");
-                return (ObservableValue) propertyAccessor.invoke(param.getValue());
-            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            // Sinon, on fait comme avant, on ne renvoie pas un ID, mais un preview label ( :
-            Object obj = null;
-            try {
-                obj = desc.getReadMethod().invoke(param.getValue());
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            }
-            
-            final SimpleObjectProperty res = new SimpleObjectProperty();
-            
-            if(obj instanceof String && !((String)obj).isEmpty()){
-                final String id = (String)obj;
-                res.set(session.getPreviewLabelRepository().getPreview(id));
-            }
-            
-            return res;
-        }
-        
-    }
-    
+    /**
+     * A column allowing to delete the {@link Element} of a row. Two modes possible :
+     * - Concrete deletion, which remove the element from database
+     * - unlink mode, which dereference element from current list and parent element.
+     */
     public class DeleteColumn extends TableColumn<Element,Element>{
-
+        
         public DeleteColumn() {
             super("Suppression");            
             setSortable(false);
@@ -912,40 +868,23 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
             
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
-                @Override
-                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-            setCellFactory(new Callback<TableColumn<Element, Element>, TableCell<Element, Element>>() {
-
-                @Override
-                public TableCell<Element, Element> call(TableColumn<Element, Element> param) {
-                    return new ButtonTableCell<>(
-                            false, new ImageView(GeotkFX.ICON_DELETE), new Function<Element, Boolean>() {
-
-                        public Boolean apply(Element t) {
-                            return true;
-                        }
-                    }, new Function<Element, Element>() {
-                                @Override
-                                public Element apply(Element t) {
-                                    
-                                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                                    if (ButtonType.YES == res) {
-                                        if(createNewProperty.get()){
-                                            deletePojos(t);
-                                        } 
-                                        else{
-                                            removeExistingPojos(t);
-                                        }
-                                    }
-                                    return null;
-                                }
-                            });
-                }
+            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
+            setCellFactory((TableColumn<Element, Element> param) -> {
+                final boolean realDelete = createNewProperty.get();
+                return new ButtonTableCell<>(
+                        false, realDelete? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK), (Element t) -> true, (Element t) -> {
+                            final Alert confirm;
+                            if (realDelete) {
+                                confirm = new Alert(Alert.AlertType.WARNING, "Vous allez supprimer DEFINITIVEMENT l'entrée de la base de données. Êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
+                            } else {
+                                confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer le lien ?", ButtonType.NO, ButtonType.YES);
+                            }
+                            final Optional<ButtonType> res = confirm.showAndWait();
+                            if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                                deletePojos(t);
+                            }
+                            return null;
+                        });
             });
         }  
     }
@@ -961,12 +900,7 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(SIRS.ICON_EDIT));
             
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Object, Object>, ObservableValue<Object>>() {
-                @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<Object, Object> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
+            setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> new SimpleObjectProperty<>(param.getValue()));
             setCellFactory((TableColumn<Object,Object> param) -> new ButtonTableCell(
                     false,new ImageView(SIRS.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
                 @Override

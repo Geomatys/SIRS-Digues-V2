@@ -440,7 +440,7 @@ public class FXPositionablePane extends BorderPane {
         if (pos == null) return;
 
         cacheBorneDigue.clear();
-        final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
+        final ArrayList<BorneDigue> bornes = new ArrayList<>();
         final SystemeReperage sr = uiSRs.getSelectionModel().getSelectedItem();
         if (sr != null) {
             BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
@@ -455,8 +455,9 @@ public class FXPositionablePane extends BorderPane {
         }
 
         Runnable borneComboUpdate = () -> {
-            uiBorneStart.setItems(bornes);
-            uiBorneEnd.setItems(bornes);
+            ObservableList<BorneDigue> observableBornes = FXCollections.observableList(bornes);
+            uiBorneStart.setItems(observableBornes);
+            uiBorneEnd.setItems(observableBornes);
             if (sr != null && sr.getId().equals(pos.getSystemeRepId())) {
                 uiBorneStart.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneDebutId()));
                 uiBorneEnd.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneFinId()));
