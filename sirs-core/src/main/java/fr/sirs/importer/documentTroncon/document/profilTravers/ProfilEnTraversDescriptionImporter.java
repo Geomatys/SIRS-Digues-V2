@@ -6,7 +6,6 @@ import fr.sirs.core.model.LeveePoints;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
-import fr.sirs.core.model.ProfilTraversTroncon;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
@@ -15,7 +14,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.documentTroncon.document.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -34,6 +32,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
 
     private Map<Integer, LeveProfilTravers> leves = null;
     private Map<Integer, List<LeveProfilTravers>> levesByProfil = null;
+    private Map<Integer, List<Integer>> levesIdsByProfil = null;
     
     private TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private TypeProfilTraversImporter typeProfilTraversImporter;
@@ -41,7 +40,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
     private OrganismeImporter organismeImporter;
     private ProfilTraversEvenementHydrauliqueImporter profilTraversEvenementHydrauliqueImporter;
     private ProfilTraversPointXYZImporter profilTraversPointXYZImporter;
-    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
     
     private ProfilEnTraversDescriptionImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -52,28 +50,30 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             final CouchDbConnector couchDbConnector,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter,
             final OrganismeImporter organismeImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final DocumentImporter documentImporter) {
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         this(accessDatabase, couchDbConnector);
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.organismeImporter = organismeImporter;
         this.profilTraversEvenementHydrauliqueImporter = new ProfilTraversEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
-        this.profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
-                accessDatabase, couchDbConnector, documentImporter);
         typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, couchDbConnector);
         typeOrigineProfilTraversImporter = new TypeOrigineProfilTraversImporter(accessDatabase, couchDbConnector);
         profilTraversPointXYZImporter = new ProfilTraversPointXYZImporter(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, LeveProfilTravers> getLeveeProfilTravers() throws IOException, AccessDbImporterException{
+    public Map<Integer, LeveProfilTravers> getLeveProfilTravers() throws IOException, AccessDbImporterException{
         if(leves==null) compute();
         return leves;
     }
     
-    public Map<Integer, List<LeveProfilTravers>> getLeveeProfilTraversByProfilId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<LeveProfilTravers>> getLeveProfilTraversByProfilId() throws IOException, AccessDbImporterException{
         if(levesByProfil==null) compute();
         return levesByProfil;
+    }
+    
+    public Map<Integer, List<Integer>> getLeveProfilTraversIdsByProfilId() throws IOException, AccessDbImporterException{
+        if(levesIdsByProfil==null) compute();
+        return levesIdsByProfil;
     }
     
     private enum Columns {
@@ -112,13 +112,13 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         leves = new HashMap<>();
         levesByProfil = new HashMap<>();
+        levesIdsByProfil = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
         final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeReferences();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
-        final Map<Integer, List<ProfilTraversTroncon>> profilTraversTroncons = profilTraversTronconImporter.getProfilTraversTronconByLeveId();
         final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
@@ -171,10 +171,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
                 leve.setProfilTraversEvenementHydraulique(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
-            if(profilTraversTroncons.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
-                leve.setProfilTraversTroncon(profilTraversTroncons.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
-            }
-            
             leve.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             leve.setValid(true);
             
@@ -186,6 +182,13 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
                 levesByProfil.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), listByProfil);
             }
             listByProfil.add(leve);
+            
+            List<Integer> listIdsByProfil = levesIdsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+            if (listIdsByProfil == null) {
+                listIdsByProfil = new ArrayList<>();
+                levesIdsByProfil.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), listIdsByProfil);
+            }
+            listIdsByProfil.add(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
         }
     }
 }

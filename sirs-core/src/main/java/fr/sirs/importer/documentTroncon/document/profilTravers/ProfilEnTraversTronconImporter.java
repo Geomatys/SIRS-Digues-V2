@@ -3,7 +3,6 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DocumentTroncon;
-import fr.sirs.core.model.ProfilTraversTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -23,8 +22,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class ProfilEnTraversTronconImporter extends GenericImporter {
 
-    private Map<Integer, List<ProfilTraversTroncon>> profilTraversTronconsByLeve = null;
-    private Map<Integer, int[]> documentTronconsByLeve = null;
+    private Map<Integer, DocumentTroncon[]> documentTronconsByLeve = null;
     private DocumentImporter documentImporter;
     
     private ProfilEnTraversTronconImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
@@ -38,12 +36,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
         this.documentImporter = documentImporter;
     }
     
-    public Map<Integer, List<ProfilTraversTroncon>> getProfilTraversTronconByLeveId() throws IOException, AccessDbImporterException{
-        if(profilTraversTronconsByLeve==null) compute();
-        return profilTraversTronconsByLeve;
-    }
-    
-    public Map<Integer, int[]> getDocumentTronconsByLeveId() throws IOException, AccessDbImporterException{
+    public Map<Integer, DocumentTroncon[]> getDocumentTronconsByLeveId() throws IOException, AccessDbImporterException{
         if(documentTronconsByLeve==null) compute();
         return documentTronconsByLeve;
     }
@@ -51,13 +44,13 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
     private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_DOC,
-        COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE,
-        COTE_RIVIERE_Z_NGF_SOMMET_RISBERME,
-        CRETE_Z_NGF,
-        COTE_TERRE_Z_NGF_SOMMET_RISBERME,
-        COTE_TERRE_Z_NGF_PIED_DE_DIGUE,
-        DATE_DERNIERE_MAJ,
-        CRETE_LARGEUR
+//        COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE,
+//        COTE_RIVIERE_Z_NGF_SOMMET_RISBERME,
+//        CRETE_Z_NGF,
+//        COTE_TERRE_Z_NGF_SOMMET_RISBERME,
+//        COTE_TERRE_Z_NGF_PIED_DE_DIGUE,
+//        DATE_DERNIERE_MAJ,
+//        CRETE_LARGEUR
     }
     
     @Override
@@ -76,7 +69,6 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        profilTraversTronconsByLeve = new HashMap<>();
         documentTronconsByLeve = new HashMap<>();
         
         final Map<Integer, DocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
@@ -84,60 +76,14 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ProfilTraversTroncon profilTraversTroncon = new ProfilTraversTroncon();
-            
-            if(documents.get(row.getInt(Columns.ID_DOC.toString()))!=null){
-                profilTraversTroncon.setDocumentProfilTraversId(documents.get(row.getInt(Columns.ID_DOC.toString())).getId());
-            }
-            
-            if(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
-                profilTraversTroncon.setCoteRivierePiedDigue(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
-            }
-            
-            if(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString())!=null){
-                profilTraversTroncon.setCoteRiviereSommetRisberme(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
-            }
-            
-            if(row.getDouble(Columns.CRETE_Z_NGF.toString())!=null){
-                profilTraversTroncon.setCoteCrete(row.getDouble(Columns.CRETE_Z_NGF.toString()).floatValue());
-            }
-            
-            if(row.getDouble(Columns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString())!=null){
-                profilTraversTroncon.setCoteTerreSommetRisberme(row.getDouble(Columns.COTE_TERRE_Z_NGF_SOMMET_RISBERME.toString()).floatValue());
-            }
-            
-            if(row.getDouble(Columns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString())!=null){
-                profilTraversTroncon.setCoteTterrePiedDigue(row.getDouble(Columns.COTE_TERRE_Z_NGF_PIED_DE_DIGUE.toString()).floatValue());
-            }
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilTraversTroncon.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-            }
-            
-            if(row.getDouble(Columns.CRETE_LARGEUR.toString())!=null){
-                profilTraversTroncon.setCreteLargeur(row.getDouble(Columns.CRETE_LARGEUR.toString()).floatValue());
-            }
-            
-            // Table de jointure : en l'absence d'ID, on choisit arbitrairement ID_DOC comme pseudo ID
-            profilTraversTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-            profilTraversTroncon.setValid(true);
-            
-            List<ProfilTraversTroncon> listByLeve = profilTraversTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
-            if (listByLeve == null) {
-                listByLeve = new ArrayList<>();
-            }
-            listByLeve.add(profilTraversTroncon);
-            profilTraversTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
-            
-            
-            int[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            DocumentTroncon[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if(docTroncons==null){
-                docTroncons = new int[2];
-                docTroncons[0]=row.getInt(Columns.ID_DOC.toString());
+                docTroncons = new DocumentTroncon[2];
+                docTroncons[0]=documents.get(row.getInt(Columns.ID_DOC.toString()));//row.getInt(Columns.ID_DOC.toString());
                 documentTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), docTroncons);
             }
             else{
-                docTroncons[1]=row.getInt(Columns.ID_DOC.toString());
+                docTroncons[1]=documents.get(row.getInt(Columns.ID_DOC.toString()));//row.getInt(Columns.ID_DOC.toString());
             }
         }
     }

@@ -67,9 +67,10 @@ public class DocumentManager {
                 new ProfilEnTraversDescriptionImporter(
                 accessDatabase, couchDbConnector, 
                 typeSystemeReleveProfilImporter, organismeImporter, 
-                evenementHydrauliqueImporter, documentImporter);
+                evenementHydrauliqueImporter);
         profilEnTraversImporter = new ProfilEnTraversImporter(accessDatabase, 
-                couchDbConnector, profilTraversDescriptionImporter);
+                couchDbConnector, profilTraversDescriptionImporter, 
+                documentImporter);
         documentRelatedImporters.add(profilEnTraversImporter);
         
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
