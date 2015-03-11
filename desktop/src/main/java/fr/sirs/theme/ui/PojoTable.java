@@ -375,7 +375,7 @@ public class PojoTable extends BorderPane {
         
         // Update counter when we change selected element.
         final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            uiCurrent.setText(newValue.toString()+1 + " / " + uiTable.getItems().size());
+            uiCurrent.setText(""+(newValue.intValue()+1) + " / " + uiTable.getItems().size());
         };
         uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -396,7 +396,7 @@ public class PojoTable extends BorderPane {
                     uiFicheMode.setGraphic(stopIcon);
                     uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
                     
-                    uiCurrent.setText("" + uiTable.getSelectionModel().getSelectedIndex()+1 + " / " + uiTable.getItems().size());
+                    uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
                     uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
                     setCenter((Node) elementPane);
                     
