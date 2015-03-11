@@ -97,7 +97,7 @@ public class FXLeveProfilTraversPaneOld extends AbstractFXElementPane<LeveProfil
         final ObservableList<PreviewLabel> allOrigines = FXCollections.observableList(session.getPreviewLabelRepository().getPreviewLabels(RefOrigineProfilTravers.class));
         PreviewLabel origine = null;
         for(final PreviewLabel ropt : allOrigines){
-            if(ropt.getObjectId().equals(leveProfilTravers.getOrigineProfil())){
+            if(ropt.getObjectId().equals(leveProfilTravers.getOriginesProfil())){
                 origine = ropt;
                 break;
             }
@@ -127,7 +127,7 @@ public class FXLeveProfilTraversPaneOld extends AbstractFXElementPane<LeveProfil
                             );
                     final ButtonType res = alert.showAndWait().get();
                     if(res==ButtonType.OK){
-                        leveProfilTravers.setOrigineProfil(newValue.getObjectId());
+                        leveProfilTravers.setOriginesProfil(newValue.getObjectId());
                         preSave();
                     }
                 }

@@ -59,7 +59,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         this.organismeImporter = organismeImporter;
         this.profilTraversEvenementHydrauliqueImporter = new ProfilTraversEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
-        this.profilTraversTronconImporter = profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
+        this.profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
                 accessDatabase, couchDbConnector, documentImporter);
         typeProfilTraversImporter = new TypeProfilTraversImporter(accessDatabase, couchDbConnector);
         typeOrigineProfilTraversImporter = new TypeOrigineProfilTraversImporter(accessDatabase, couchDbConnector);

@@ -227,7 +227,7 @@ public class PojoTable extends BorderPane {
          */
         editableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             deleteColumn.setVisible(newValue);
-            editCol.setVisible(newValue && detaillableProperty.get());
+            //editCol.setVisible(newValue && detaillableProperty.get());
         });
         detaillableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             editCol.setVisible(newValue && detaillableProperty.get());
@@ -958,7 +958,7 @@ public class PojoTable extends BorderPane {
             setPrefWidth(24);
             setMinWidth(24);
             setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_EDIT));
+            setGraphic(new ImageView(SIRS.ICON_EDIT));
             
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Object, Object>, ObservableValue<Object>>() {
                 @Override
@@ -967,7 +967,7 @@ public class PojoTable extends BorderPane {
                 }
             });
             setCellFactory((TableColumn<Object,Object> param) -> new ButtonTableCell(
-                    false,new ImageView(GeotkFX.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
+                    false,new ImageView(SIRS.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
                 @Override
                 public Object apply(Object t) {
                     editFct.accept(t);
@@ -977,7 +977,7 @@ public class PojoTable extends BorderPane {
         }  
     }
     
-    public class ValidatedTableRow extends TableRow<Element>{
+    protected class ValidatedTableRow extends TableRow<Element>{
 
         @Override
         protected void updateItem(Element item, boolean empty) {
