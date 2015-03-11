@@ -423,8 +423,15 @@ public class FXPositionablePane extends BorderPane {
                 cacheSystemeReperage.put(sr.getId(), sr);
             }
 
-            uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
-            uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
+            Runnable srComboUpdate = () -> {
+                uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
+                uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
+            };
+            if (Platform.isFxApplicationThread()) {
+                srComboUpdate.run();
+            } else {
+                Platform.runLater(srComboUpdate);
+            }
         }
     }
     
@@ -447,11 +454,18 @@ public class FXPositionablePane extends BorderPane {
             }
         }
 
-        uiBorneStart.setItems(bornes);
-        uiBorneEnd.setItems(bornes);
-        if (sr != null && sr.getId().equals(pos.getSystemeRepId())) {
-            uiBorneStart.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneDebutId()));
-            uiBorneEnd.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneFinId()));
+        Runnable borneComboUpdate = () -> {
+            uiBorneStart.setItems(bornes);
+            uiBorneEnd.setItems(bornes);
+            if (sr != null && sr.getId().equals(pos.getSystemeRepId())) {
+                uiBorneStart.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneDebutId()));
+                uiBorneEnd.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneFinId()));
+            }
+        };
+        if (Platform.isFxApplicationThread()) {
+            borneComboUpdate.run();
+        } else {
+            Platform.runLater(borneComboUpdate);
         }
     }
     
