@@ -1197,8 +1197,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="origineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeOrigineProfil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveId" eType="#//ProfilTraversTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveePoints" upperBound="-1"
