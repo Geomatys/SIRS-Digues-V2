@@ -1200,13 +1200,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="leveId" eType="#//ProfilTraversTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveePoints" upperBound="-1"
         eType="#//LeveePoints" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversEvenementHydraulique"
         upperBound="-1" eType="#//ProfilTraversEvenementHydraulique" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversTroncon" upperBound="-1"
-        eType="#//ProfilTraversTroncon" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1225,26 +1222,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilTraversTroncon">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteRivierePiedDigue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteRiviereSommetRisberme"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteTerreSommetRisberme"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteTterrePiedDigue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="creteLargeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documentProfilTraversId"
-        eType="#//DocumentTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
