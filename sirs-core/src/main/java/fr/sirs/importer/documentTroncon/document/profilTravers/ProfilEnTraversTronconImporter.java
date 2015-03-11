@@ -24,6 +24,7 @@ import org.ektorp.CouchDbConnector;
 public class ProfilEnTraversTronconImporter extends GenericImporter {
 
     private Map<Integer, List<ProfilTraversTroncon>> profilTraversTronconsByLeve = null;
+    private Map<Integer, int[]> documentTronconsByLeve = null;
     private DocumentImporter documentImporter;
     
     private ProfilEnTraversTronconImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
@@ -40,6 +41,11 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
     public Map<Integer, List<ProfilTraversTroncon>> getProfilTraversTronconByLeveId() throws IOException, AccessDbImporterException{
         if(profilTraversTronconsByLeve==null) compute();
         return profilTraversTronconsByLeve;
+    }
+    
+    public Map<Integer, int[]> getDocumentTronconsByLeveId() throws IOException, AccessDbImporterException{
+        if(documentTronconsByLeve==null) compute();
+        return documentTronconsByLeve;
     }
     
     private enum Columns {
@@ -71,6 +77,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         profilTraversTronconsByLeve = new HashMap<>();
+        documentTronconsByLeve = new HashMap<>();
         
         final Map<Integer, DocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
         
@@ -121,6 +128,17 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             }
             listByLeve.add(profilTraversTroncon);
             profilTraversTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
+            
+            
+            int[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            if(docTroncons==null){
+                docTroncons = new int[2];
+                docTroncons[0]=row.getInt(Columns.ID_DOC.toString());
+                documentTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), docTroncons);
+            }
+            else{
+                docTroncons[1]=row.getInt(Columns.ID_DOC.toString());
+            }
         }
     }
 }
