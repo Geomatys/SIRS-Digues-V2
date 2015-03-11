@@ -7,6 +7,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.CommuneRepository;
@@ -102,6 +103,7 @@ import org.ektorp.BulkDeleteDocument;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.lang.Setup;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.support.CouchDbRepositorySupport;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -181,7 +183,7 @@ public class DbImporter {
     private final RefOrientationPhotoRepository refOrientationPhotoRepository;
     private final RefUrgenceRepository refUrgenceRepository;
     private final RefDocumentGrandeEchelleRepository refDocumentGrandeEchelleRepository;
-    private final List<Repository> repositories = new ArrayList<>();
+    private final List<CouchDbRepositorySupport> repositories = new ArrayList<>();
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -842,7 +844,7 @@ public class DbImporter {
         return this.accessCartoDatabase;
     }
     
-    public void cleanRepo(final Repository repository) {
+    public void cleanRepo(final CouchDbRepositorySupport repository) {
         final List<Object> objects = new ArrayList<>();
         repository.getAll().stream().forEach((refRive) -> {
             objects.add(BulkDeleteDocument.of(refRive));
@@ -851,7 +853,7 @@ public class DbImporter {
     }
     
     public void cleanDb(){
-        for(final Repository repo : repositories){
+        for(final CouchDbRepositorySupport repo : repositories){
             cleanRepo(repo);
         }
     }

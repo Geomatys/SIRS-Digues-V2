@@ -1,6 +1,6 @@
 package fr.sirs;
 
-import fr.sirs.core.Repository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ReferenceType;
 import java.io.BufferedReader;
 import java.io.File;
@@ -362,13 +362,13 @@ public class ReferenceChecker extends Task<Void> {
                     }
 
                     if(localInstance==null){
-                        final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                        final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
                         repository.add(fileReference);
                         updated.add(fileReference);
                     }
                     else{
                         if(!localInstance.toString().equals(fileReference.toString())){
-                            final Repository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                            final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
                             try {
                                 final Method getRevision = referenceClass.getMethod("getRevision");
                                 final Method setRevision = referenceClass.getMethod("setRevision", String.class);

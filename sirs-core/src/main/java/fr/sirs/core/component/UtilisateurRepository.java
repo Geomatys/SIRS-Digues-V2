@@ -1,9 +1,6 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.Repository;
-
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,7 +14,7 @@ import org.ektorp.support.Views;
 @Views({
         @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc._id, doc._id)}}"),
         @View(name = "byLogin", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc.login, doc._id)}}") })
-public class UtilisateurRepository extends CouchDbRepositorySupport<Utilisateur> implements Repository<Utilisateur>{
+public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
 
     @Autowired
     public UtilisateurRepository ( CouchDbConnector db) {

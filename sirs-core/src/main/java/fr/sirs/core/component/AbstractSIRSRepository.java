@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
+import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;
 
@@ -38,6 +39,7 @@ import org.ektorp.support.CouchDbRepositorySupport;
  * correct.
  *
  * @author Alexis Manin (Geomatys)
+ * @param <T> The type of object managed by the current repository implementation.
  */
 public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> implements Repository<T> {
 
@@ -61,19 +63,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     @Override
     public List<T> getAll() {
-        List<T> all = super.getAll();
-        final ArrayList<T> result = new ArrayList<>(all.size());
-        for (T tr : all) {
-            try {
-                result.add(cache.getOrCreate(tr.getId(), () -> {
-                    return tr;
-                }));
-            } catch (Exception ex) {
-                // Should never happen ...
-                throw new RuntimeException(ex);
-            }
-        }
-        return result;
+        return cacheList(super.getAll());
     }
 
     @Override
@@ -92,5 +82,49 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     
     public void clearCache() {
         cache.clear();
+    }
+
+    @Override
+    protected List<T> queryView(String viewName) {
+        return cacheList(super.queryView(viewName));
+    }
+
+    @Override
+    protected List<T> queryView(String viewName, ComplexKey key) {
+        return cacheList(super.queryView(viewName, key));
+    }
+
+    @Override
+    protected List<T> queryView(String viewName, int key) {
+        return cacheList(super.queryView(viewName, key));
+    }
+
+    @Override
+    protected List<T> queryView(String viewName, String key) {
+        return cacheList(super.queryView(viewName, key));
+    }
+    
+    /**
+     * Put all input element in cache, or replace by a previously cached element
+     * if an input element Id can be found in the cache. Cannot be null.
+     * @param source The list of element to put in cache or replace by previously cached value.
+     * @return A list of cached elements. Never null, but can be empty. Should be of the 
+     * same size as input list.
+     * 
+     * @throws NullPointerException if input list is null.
+     */
+    protected List<T> cacheList(List<T> source) {
+        final ArrayList<T> result = new ArrayList<>(source.size());
+        for (T element : source) {
+            try {
+                result.add(cache.getOrCreate(element.getId(), () -> {
+                    return element;
+                }));
+            } catch (Exception ex) {
+                // Should never happen ...
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;        
     }
 }

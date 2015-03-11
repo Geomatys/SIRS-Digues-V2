@@ -9,6 +9,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.Repository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Crete;
@@ -114,7 +115,7 @@ public class PojoTable extends BorderPane {
     }
     
     protected final Class pojoClass;
-    protected final Repository repo;
+    protected final AbstractSIRSRepository repo;
     protected final Session session = Injector.getBean(Session.class);
     protected final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
@@ -174,11 +175,11 @@ public class PojoTable extends BorderPane {
         this(pojoClass, title, null);
     }
     
-    public PojoTable(final Repository repo, final String title) {
+    public PojoTable(final AbstractSIRSRepository repo, final String title) {
         this(repo.getModelClass(), title, repo);
     }
     
-    private PojoTable(final Class pojoClass, final String title, final Repository repo) {
+    private PojoTable(final Class pojoClass, final String title, final AbstractSIRSRepository repo) {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
@@ -190,7 +191,7 @@ public class PojoTable extends BorderPane {
         getStylesheets().add(SIRS.CSS_PATH);
         this.labelMapper = new LabelMapper(this.pojoClass);
         if (repo == null) {
-            Repository tmpRepo;
+            AbstractSIRSRepository tmpRepo;
             try {
                 tmpRepo = session.getRepositoryForClass(pojoClass);
             } catch (IllegalArgumentException e) {

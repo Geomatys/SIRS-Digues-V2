@@ -5,7 +5,7 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.Session;
-import fr.sirs.core.Repository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
@@ -268,7 +268,7 @@ public class FXValidationPane extends BorderPane {
 
                     if (t != null && t instanceof ValiditySummary) {
                         final Session session = Injector.getSession();
-                        final Repository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
+                        final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
                         final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
 
                         // Si l'elementid est null, c'est que l'élément est le document lui-même
@@ -346,7 +346,7 @@ public class FXValidationPane extends BorderPane {
                     Object t = getItem();
                     if (t != null && t instanceof ValiditySummary) {
                         final Session session = Injector.getSession();
-                        final Repository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
+                        final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
                         final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
 
                         // Si l'elementid est null, c'est que l'élément est le document lui-même

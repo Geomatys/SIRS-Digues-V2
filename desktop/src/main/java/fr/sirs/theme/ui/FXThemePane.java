@@ -9,6 +9,7 @@ import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.Repository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
@@ -80,7 +81,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
                 return;
             }
 
-            final Repository repo = session.getRepositoryForClass(elementDocument.getClass());
+            final AbstractSIRSRepository repo = session.getRepositoryForClass(elementDocument.getClass());
             if (couchDbDocument == null) {
                 couchDbDocument = elementDocument;
             } else if (!couchDbDocument.equals(elementDocument)) {

@@ -2,7 +2,7 @@ package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PreviewLabel {
+public class PreviewLabel implements Identifiable {
 
     @JsonProperty("libelle")
     private String label;
@@ -24,6 +24,10 @@ public class PreviewLabel {
         this.label = label;
     }
     
+    /**
+     * Return canonical class name of the mirrored element.
+     * @return 
+     */
     public String getType(){
         return type;
     }
@@ -32,11 +36,15 @@ public class PreviewLabel {
         this.type=type;
     }
     
+    /**
+     * Return the Id of the object mirrored by the current preview.
+     * @return The couchDB identifier of the target element of this preview.
+     */
     public String getObjectId(){
         return objectId;
     }
     
-    public void setObjectid(String objectId){
+    public void setObjectId(String objectId) {
         this.objectId = objectId;
     }
 
@@ -51,5 +59,14 @@ public class PreviewLabel {
     @Override
     public String toString() {
         return "PreviewLabel [label=" + label + " type="+ type + " objectId="+objectId+"]";
+    }
+
+    /**
+     * Same as {@link #getObjectId() }
+     * @return 
+     */
+    @Override
+    public String getId() {
+        return objectId;
     }
 }

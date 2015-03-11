@@ -127,17 +127,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
-        List<TronconDigue> queryView = this.queryView("byDigueId", digue.getId());
-        final ArrayList<TronconDigue> result = new ArrayList<>(queryView.size());
-        for (TronconDigue tr : queryView) {
-            try {
-                result.add(cache.getOrCreate(tr.getId(), () -> {return tr;}));
-            } catch (Exception ex) {
-                // Should never happen ...
-                throw new RuntimeException(ex);
-            }
-        }
-        return result;
+        ArgumentChecks.ensureNonNull("Digue parent", digue);
+        return this.queryView("byDigueId", digue.getId());
     }
 
     @Override
