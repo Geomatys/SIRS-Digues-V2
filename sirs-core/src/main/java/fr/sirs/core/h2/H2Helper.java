@@ -105,34 +105,34 @@ public class H2Helper {
         return file;
     }
     
-    private static void init(Connection conn, CouchDbConnector db, int srid)
-            throws SQLException {
+    private static void init(Connection conn, CouchDbConnector db, int srid) throws SQLException {
         SQLHelper.createTables(conn, srid);
-
+        
         List<String> allDocIds = db.getAllDocIds();
-
         DocHelper docHelper = new DocHelper(db);
-
-        for (String id : allDocIds) {
-            if (id.startsWith("$"))
-                continue;
-            if (id.startsWith("_"))
-                continue;
-            try {
-                conn.setAutoCommit(false);
+        final Thread currentThread = Thread.currentThread();
+        try {
+            conn.setAutoCommit(false);
+            for (String id : allDocIds) {
+                if (currentThread.isInterrupted()) return;
+                if (id.startsWith("$")) {
+                    continue;
+                }
+                if (id.startsWith("_")) {
+                    continue;
+                }
                 docHelper.getElement(id).map(
                         e -> SQLHelper.updateElement(conn, e));
-                
+
                 conn.commit();
-            } catch (Exception e) {
-                LOGGER.error("DocId: " + id, e);
-                
             }
 
+            SQLHelper.addForeignKeys(conn);
+        } catch (Exception e) {
+            conn.rollback();
+            conn.close();
+            throw e;
         }
-        
-        SQLHelper.addForeignKeys(conn);
-        
     }
     
     public static void dumbSchema(Connection connection, Path file) throws SQLException {
