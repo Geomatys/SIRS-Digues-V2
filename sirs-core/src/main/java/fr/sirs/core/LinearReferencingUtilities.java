@@ -32,6 +32,16 @@ import org.geotoolkit.referencing.LinearReferencing;
  */
 public final class LinearReferencingUtilities extends LinearReferencing{
     
+    /**
+     * Create a JTS geometry for the input {@link Positionable}. Generated geometry
+     * is a line string along an input geometry, whose beginning and end are defined
+     * by geographic begin and end position in the {@link Positionable}. If no 
+     * valid point can be found, we will use its start and end {@link BorneDigue}.
+     * @param tronconGeom The source geometry to follow when creating the new one.
+     * @param structure The object to generate a geometry for.
+     * @param repo The {@link BorneDigueRepository} to use to retrieve input {@link Positionable} bornes.
+     * @return A line string for the given structure. Never null.
+     */
     public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, BorneDigueRepository repo){
         
         final LineString troncon = asLineString(tronconGeom);

@@ -12,9 +12,9 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -28,11 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -73,8 +71,11 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 /**
- *
+ * Form editor allowing to update linear and geographic/projected position of a
+ * {@link Positionable} element.
+ * 
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 public class FXPositionablePane extends BorderPane {
     
@@ -91,9 +92,8 @@ public class FXPositionablePane extends BorderPane {
     @FXML private ToggleButton uiTypeBorne;
     @FXML private ToggleButton uiTypeCoord;
     @FXML private ProgressIndicator uiLoading;
-    @FXML private BorderPane uiPane;
     
-    //Mode borne
+    // Borne mode
     @FXML private GridPane uiBornePane;
     @FXML private ComboBox<SystemeReperage> uiSRs;
     @FXML private ComboBox<BorneDigue> uiBorneStart;
@@ -101,8 +101,9 @@ public class FXPositionablePane extends BorderPane {
     @FXML private CheckBox uiAvalSart;
     @FXML private CheckBox uiAvalEnd;
     @FXML private FXNumberSpinner uiDistanceStart;
-    @FXML private FXNumberSpinner uiDistanceEnd;    
-    //Mode coordonées
+    @FXML private FXNumberSpinner uiDistanceEnd;
+    
+    // Coordinate mode
     @FXML private GridPane uiCoordPane;
     @FXML private ComboBox<CoordinateReferenceSystem> uiCRSs;
     @FXML private FXNumberSpinner uiLongitudeStart;
@@ -110,19 +111,21 @@ public class FXPositionablePane extends BorderPane {
     @FXML private FXNumberSpinner uiLatitudeStart;
     @FXML private FXNumberSpinner uiLatitudeEnd;
     
+    /** A flag to notify when a component update is running, used to lock graphic components */
+    private final SimpleBooleanProperty computingRunning = new SimpleBooleanProperty(false);
     
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
-    private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
-    private boolean initializing = false;
-    private final Map<String,SystemeReperage> cacheSystemeReperage = new HashMap<>();
-    private final Map<String,BorneDigue> cacheBorneDigue = new HashMap<>();
+    private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
     private final CoordinateReferenceSystem baseCrs = SirsCore.getEpsgCode();
+    
+    /**
+     * Reference to TronconDigue parent of the current positionable
+     */
+    private TronconDigue currentTroncon;
             
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
-        
-        positionableProperty.addListener(this::updateField);
-        
+                
         uiImport.setGraphic(new ImageView(ICON_IMPORT));
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER));
         
@@ -139,7 +142,6 @@ public class FXPositionablePane extends BorderPane {
         uiCRSs.setItems(crss);
         uiCRSs.getSelectionModel().clearAndSelect(1);
         
-        
         //affichage des panneaux coord/borne
         final ToggleGroup group = new ToggleGroup();
         uiTypeBorne.setToggleGroup(group);
@@ -148,11 +150,11 @@ public class FXPositionablePane extends BorderPane {
             if(newValue==null) group.selectToggle(uiTypeCoord);
         });
         
-        uiCoordPane.visibleProperty().bind(uiTypeCoord.selectedProperty());
-        uiBornePane.visibleProperty().bind(uiTypeBorne.selectedProperty());
-        
-        //binding de l'etat editable
-        final BooleanProperty binding = disableFieldsProperty;
+        /*
+         * COMPONENT ACTIVATION BINDINGS
+         */        
+        // Editability over view mode (consultation or edition).
+        final BooleanBinding binding = disableFieldsProperty.or(disabledProperty());
         uiImport.visibleProperty().bind(disableFieldsProperty.not().and(uiTypeCoord.selectedProperty()));
         
         uiSRs.disableProperty().bind(binding);
@@ -168,24 +170,31 @@ public class FXPositionablePane extends BorderPane {
         uiLongitudeEnd.disableProperty().bind(binding);
         uiLatitudeEnd.disableProperty().bind(binding);
         
-        uiCRSs.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends CoordinateReferenceSystem> observable, CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) -> {
-            updateGeoCoord();
-        });
-        uiSRs.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) -> {
-            updateBorneList();
-        });
+        // Bind progress display and field disabling to computing state. It allows to "lock" the component when updating its content.        
+        uiLoading.visibleProperty().bind(computingRunning);
+        disableProperty().bind(computingRunning);
         
+        // Position mode : linear or geographic
+        uiCoordPane.visibleProperty().bind(uiTypeCoord.selectedProperty());
+        uiBornePane.visibleProperty().bind(uiTypeBorne.selectedProperty());
+        
+        /*
+         * DATA LISTENERS
+         */        
+        uiCRSs.getSelectionModel().selectedItemProperty().addListener(this::updateGeoCoord);        
+        uiSRs.getSelectionModel().selectedItemProperty().addListener(this::updateBorneList);
+        positionableProperty.addListener(this::updateField);
     }
-    
-    public ObjectProperty<Positionable> positionableProperty(){
+
+    public ObjectProperty<Positionable> positionableProperty() {
         return positionableProperty;
     }
-    
-    public Positionable getPositionable(){
+
+    public Positionable getPositionable() {
         return positionableProperty.get();
     }
-    
-    public void setPositionable(Positionable positionable){
+
+    public void setPositionable(Positionable positionable) {
         positionableProperty.set(positionable);
     }
     
@@ -207,72 +216,63 @@ public class FXPositionablePane extends BorderPane {
         dialog.show();
     }
 
+    /**
+     * TODO : check null pointer and computing
+     * @param event 
+     */
     @FXML
     void viewAllSR(ActionEvent event) {
-        final Positionable pos = (Positionable) positionableProperty.get();
-        if(pos==null) return;
+        if(positionableProperty.get()==null) return;
         
         final Session session = Injector.getBean(Session.class);
-        final TronconDigue troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
-        final Geometry linear = troncon.getGeometry();
-        
-        //calcule de la position geographique
-        Point startPoint = pos.getPositionDebut();
-        Point endPoint = pos.getPositionFin();
-        if(startPoint==null){
-            //calcule a partir des bornes
-            
-            final BorneDigue borneStart = cacheBorneDigue.get(pos.borneDebutIdProperty().get());
-            final Point borneStartPoint = borneStart.getGeometry();
-            double distStart = pos.getBorne_debut_distance();
-            if(pos.getBorne_debut_aval()) distStart *= -1;
-            
-            final BorneDigue borneEnd = cacheBorneDigue.get(pos.borneFinIdProperty().get());
-            final Point borneEndPoint = borneEnd.getGeometry();            
-            double distEnd = pos.getBorne_fin_distance();
-            if(pos.getBorne_fin_aval()) distEnd *= -1;
-            
-            startPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneStartPoint, distStart, 0);
-            endPoint = LinearReferencingUtilities.calculateCoordinate(linear, borneEndPoint, distEnd, 0);
-            
-        }
-        
+        final Geometry linear = currentTroncon.getGeometry();
         
         final StringBuilder page = new StringBuilder();
         page.append("<html><body>");
-        
-        
-        //DataBase coord
-        page.append("<h2>Projection de la base ("+baseCrs.getName()+")</h2>");
-        page.append("<b>Début</b><br/>");
-        page.append("X : ").append(startPoint.getX()).append("<br/>");
-        page.append("Y : ").append(startPoint.getY()).append("<br/>");
-        page.append("<b>Fin</b><br/>");
-        page.append("X : ").append(endPoint.getX()).append("<br/>");
-        page.append("Y : ").append(endPoint.getY()).append("<br/>");
-        page.append("<br/>");
-        
-        //WGS84 coord
-        try {
-            final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
-            Point ptStart = (Point) JTS.transform(startPoint, trs);
-            Point ptEnd = (Point) JTS.transform(endPoint, trs);
             
-            page.append("<h2>Coordonnées géographique (WGS-84, EPSG:4326)</h2>");
+        //calcul de la position geographique
+        Point startPoint = getOrCreateStartPoint();
+        Point endPoint = getOrCreateEndPoint();
+        if (startPoint != null || endPoint != null) {
+
+            if (startPoint == null) {
+                startPoint = endPoint;
+            }
+            if (endPoint == null) {
+                endPoint = startPoint;
+            }
+
+            //DataBase coord
+            page.append("<h2>Projection de la base (").append(baseCrs.getName()).append(")</h2>");
             page.append("<b>Début</b><br/>");
-            page.append("Longitude : ").append(ptStart.getX()).append("<br/>");
-            page.append("Latitude&nbsp : ").append(ptStart.getY()).append("<br/>");
+            page.append("X : ").append(startPoint.getX()).append("<br/>");
+            page.append("Y : ").append(startPoint.getY()).append("<br/>");
             page.append("<b>Fin</b><br/>");
-            page.append("Longitude : ").append(ptEnd.getX()).append("<br/>");
-            page.append("Latitude&nbsp : ").append(ptEnd.getY()).append("<br/>");
+            page.append("X : ").append(endPoint.getX()).append("<br/>");
+            page.append("Y : ").append(endPoint.getY()).append("<br/>");
             page.append("<br/>");
-        } catch (FactoryException | TransformException ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+
+            //WGS84 coord
+            try {
+                final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
+                Point ptStart = (Point) JTS.transform(startPoint, trs);
+                Point ptEnd = (Point) JTS.transform(endPoint, trs);
+
+                page.append("<h2>Coordonnées géographique (WGS-84, EPSG:4326)</h2>");
+                page.append("<b>Début</b><br/>");
+                page.append("Longitude : ").append(ptStart.getX()).append("<br/>");
+                page.append("Latitude&nbsp : ").append(ptStart.getY()).append("<br/>");
+                page.append("<b>Fin</b><br/>");
+                page.append("Longitude : ").append(ptEnd.getX()).append("<br/>");
+                page.append("Latitude&nbsp : ").append(ptEnd.getY()).append("<br/>");
+                page.append("<br/>");
+            } catch (FactoryException | TransformException ex) {
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
         }
         
-        
         //pour chaque systeme de reperage
-        for(SystemeReperage sr : cacheSystemeReperage.values()){
+        for(SystemeReperage sr : uiSRs.getItems()) {
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
             for(SystemeReperageBorne srb : sr.systemereperageborneId){
@@ -302,12 +302,11 @@ public class FXPositionablePane extends BorderPane {
                 endAval = true;
             }
             
-            
             page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
             page.append("<b>Début </b>");
             page.append(startBorne.getLibelle()).append(' ');
             page.append(DISTANCE_FORMAT.format(distanceStartBorne)).append("m ");
-            page.append(startAval ? "en amont":"en aval");
+            page.append(startAval ? "en aval":"en amont");
             page.append("<br/>");
             page.append("<b>Fin&nbsp&nbsp </b>");
             page.append(endBorne.getLibelle()).append(' ');
@@ -315,7 +314,6 @@ public class FXPositionablePane extends BorderPane {
             page.append(endAval ? "en amont":"en aval");
             page.append("<br/><br/>");
         }
-        
         
         page.append("</html></body>");
         
@@ -331,17 +329,171 @@ public class FXPositionablePane extends BorderPane {
         dialog.setTitle("Position");
         dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
         dialog.showAndWait();
-        
     }
 
-    private void updateGeoCoord() {
-        if (initializing) return;
-        
-        final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
+    /**
+     * Compute current positionable start point using linear referencing information
+     * defined in the form. Returned point is expressed with Database CRS.
+     * 
+     * @return The point computed from starting borne. If we cannot, we return {@link Positionable#getPositionDebut() }
+     */
+    private Point computeGeoStartFromBornes() {
+        final Number distanceStart = uiDistanceStart.valueProperty().get();
+        if (distanceStart != null && uiBorneStart.getValue() != null && currentTroncon != null) {
+            //calcul à partir des bornes
+            final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
+            double distStart = distanceStart.doubleValue();
+            if (uiAvalSart.isSelected()) {
+                distStart *= -1;
+            }
 
+            return LinearReferencingUtilities.calculateCoordinate(currentTroncon.getGeometry(), borneStartPoint, distStart, 0);
+        } else {
+            return positionableProperty.get().getPositionDebut();
+        }
+    }
+    
+    /**
+     * Compute current positionable end point using linear referencing information
+     * defined in the form. Returned point is expressed with Database CRS.
+     * 
+     * @return The point computed from ending borne. If we cannot, we return {@link Positionable#getPositionFin() }
+     */
+    private Point computeGeoEndFromBornes() {
+        final Number distanceEnd = uiDistanceEnd.valueProperty().get();
+        if (distanceEnd != null && uiBorneEnd.getValue() != null && currentTroncon != null) {
+            //calcul à partir des bornes
+            final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
+            double distEnd = distanceEnd.doubleValue();
+            if (uiAvalEnd.isSelected()) {
+                distEnd *= -1;
+            }
+
+            return LinearReferencingUtilities.calculateCoordinate(currentTroncon.getGeometry(), borneEndPoint, distEnd, 0);
+        } else {
+            return positionableProperty.get().getPositionFin();
+        }
+    }
+        
+    private Point getOrCreateStartPoint() {
+        Point ptStart = null;
+        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
+        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+        if (selectedCRS != null) {
+            // On a un point de début valide : on le prends.
+            if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
+                ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                        fxNumberValue(uiLongitudeStart),
+                        fxNumberValue(uiLatitudeStart)
+                ));
+            }
+
+            if (ptStart != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
+                try {
+                    ptStart = (Point) JTS.transform(ptStart,
+                            CRS.findMathTransform(selectedCRS, baseCrs, true));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        
+        if (ptStart == null) {
+            ptStart = computeGeoStartFromBornes();
+        }
+        
+        return ptStart;
+    }
+    
+    private Point getOrCreateEndPoint() {
+        Point ptEnd = null;
+        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
+        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+        if (selectedCRS != null) {
+            // On a un point de fin valide : on le prends.
+            if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
+                ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+                        fxNumberValue(uiLongitudeEnd),
+                        fxNumberValue(uiLatitudeEnd)
+                ));
+            }
+
+            if (ptEnd != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
+                try {
+                    ptEnd = (Point) JTS.transform(ptEnd,
+                            CRS.findMathTransform(selectedCRS, baseCrs, true));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        if (ptEnd == null) {
+            ptEnd = computeGeoEndFromBornes();
+        }
+
+        return ptEnd;
+    }
+    
+    /**
+     * Return the {@link TronconDigue} object associated to the current positionable.
+     * 
+     * There's a high probability that our Positionable is contained in its 
+     * refering, so we start by that. If we cannot find it this way, we'll try
+     * to get it through specified SR. If it fails again, we'll have to accept
+     * our defeat and return a null value.
+     * 
+     * @return The linear object on which the current object is placed, or null 
+     * if we cannot find it.
+     */
+    private TronconDigue getTroncon() {
+        Positionable pos = positionableProperty.get();
+        if (pos == null) return null;
+        TronconDigue troncon = null;
+        if (pos.getParent() != null) {
+            Element tmp = pos.getParent();
+            while (tmp != null && !(tmp instanceof TronconDigue)) {
+                tmp = tmp.getParent();
+            }
+            troncon = (TronconDigue) tmp;
+        }
+        // Maybe we have an incomplete version of the document, so we try by querying repository.
+        if (troncon == null) {
+            try {
+                troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
+            } catch (Exception e) {
+                troncon = null;
+            }
+        }
+        // Last chance, we must try to get it from SR
+        if (troncon == null && pos.getSystemeRepId() != null) {
+            SystemeReperage sr = Injector.getSession().getSystemeReperageRepository().get(pos.getSystemeRepId());
+            if (sr.getTronconId() != null) {
+                troncon = Injector.getSession().getTronconDigueRepository().get(sr.getTronconId());
+            }
+        }
+            
+        return troncon;
+    }
+    
+    /**
+     * Update geographic/projected coordinate fields when current CRS change. 
+     * Note : listener method, should always be launched from FX-thread.
+     * 
+     * @param observable
+     * @param oldValue Previous value into {@link #uiCRSs}
+     * @param newValue Current value into {@link #uiCRSs}
+     */
+    private void updateGeoCoord(ObservableValue<? extends CoordinateReferenceSystem> observable, CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) {        
+        // There's no available null value in CRS combobox, so old value will be
+        // null only at first allocation, no transform needed in this case.
+        if (oldValue == null || newValue == null) {
+            return;
+        }
+        
         final Point ptStart, ptEnd;
         // On a un point de début valide
-        if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
+        if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart.valueProperty().get() != null) {
             ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
                     fxNumberValue(uiLongitudeStart),
                     fxNumberValue(uiLatitudeStart)
@@ -351,7 +503,7 @@ public class FXPositionablePane extends BorderPane {
         }
 
         // On a un point de fin valide
-        if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
+        if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd.valueProperty().get() != null) {
             ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
                     fxNumberValue(uiLongitudeEnd),
                     fxNumberValue(uiLatitudeEnd)
@@ -360,42 +512,40 @@ public class FXPositionablePane extends BorderPane {
             ptEnd = null;
         }
 
-        final Callable pointConverter = () -> {
-            final MathTransform conversion;
-            if (crs == CRS_WGS84) {
-                //conversion vers WGS84
-                conversion = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
-            } else if (crs == baseCrs) {
-                //conversion vers base
-                conversion = CRS.findMathTransform(CRS_WGS84, baseCrs, true);
-            } else {
-                throw new IllegalStateException("Pas de CRS valide.");
-            }
+        // If we've got at least one valid point, we transform it. Otherwise, just return.
+        if (ptStart != null || ptEnd != null) {
+            final Runnable pointConverter = () -> {
+                try {
+                    final MathTransform conversion = CRS.findMathTransform(oldValue, newValue, true);
 
-            if (ptStart != null) {
-                final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
-                Platform.runLater(() -> {
-                    uiLongitudeStart.valueProperty().set(tmpStart.getX());
-                    uiLatitudeStart.valueProperty().set(tmpStart.getY());
-                });
-            }
-            if (ptEnd != null) {
-                final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
-                Platform.runLater(() -> {
-                    uiLongitudeEnd.valueProperty().set(tmpEnd.getX());
-                    uiLatitudeEnd.valueProperty().set(tmpEnd.getY());
-                });
-            }
-            return null;
-        };
-        
-        try {
-            TaskManager.INSTANCE.submit("Conversion de points géographiques", pointConverter).get();
-        } catch (Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, "La conversion des positions a échouée.", ex);
-            SIRS.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+                    if (ptStart != null) {
+                        final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
+                        Platform.runLater(() -> {
+                            uiLongitudeStart.valueProperty().set(tmpStart.getX());
+                            uiLatitudeStart.valueProperty().set(tmpStart.getY());
+                        });
+                    }
+                    if (ptEnd != null) {
+                        final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
+                        Platform.runLater(() -> {
+                            uiLongitudeEnd.valueProperty().set(tmpEnd.getX());
+                            uiLatitudeEnd.valueProperty().set(tmpEnd.getY());
+                        });
+                    }
+                } catch (Exception ex) {
+                    // TODO : do we really need to log here ?
+                    SIRS.LOGGER.log(Level.WARNING, "La conversion des positions a échouée.", ex);
+                    SIRS.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+                    throw new RuntimeException("La conversion des positions a échouée.", ex);
+                } finally {
+                    Platform.runLater(() -> computingRunning.set(false));
+                }
+            };
+
+            computingRunning.set(true);
+            TaskManager.INSTANCE.submit("Conversion de points géographiques", pointConverter);
         }
-        
+               
     }
     
     private double fxNumberValue(FXNumberSpinner spinner){
@@ -403,73 +553,102 @@ public class FXPositionablePane extends BorderPane {
         return spinner.valueProperty().get().doubleValue();
     }
     
-    private void updateSRList(){
-        cacheSystemeReperage.clear();
-        
+    /**
+     * Set list of available {@link SystemeReperage} in {@link #uiSRs}.
+     */
+    private void updateSRList() {        
         final Positionable pos = (Positionable) positionableProperty.get();
         if(pos==null) return;
         
-        final TronconDigue troncon;
-        if (pos.getParent() instanceof TronconDigue) {
-            troncon = (TronconDigue) pos.getParent();
-        } else {
-            troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
-        }
+        currentTroncon = getTroncon();
         
-        if (troncon != null) {
-            final List<SystemeReperage> srs = Injector.getSession().getSystemeReperageRepository().getByTroncon(troncon);
-
-            for (SystemeReperage sr : srs) {
-                cacheSystemeReperage.put(sr.getId(), sr);
-            }
-
-            Runnable srComboUpdate = () -> {
-                uiSRs.setItems(FXCollections.observableArrayList(cacheSystemeReperage.values()));
-                uiSRs.getSelectionModel().select(cacheSystemeReperage.get(pos.getSystemeRepId()));
-            };
-            if (Platform.isFxApplicationThread()) {
-                srComboUpdate.run();
-            } else {
-                Platform.runLater(srComboUpdate);
-            }
-        }
-    }
-    
-    private void updateBorneList() {
-        final Positionable pos = (Positionable) positionableProperty.get();
-        if (pos == null) return;
-
-        cacheBorneDigue.clear();
-        final ArrayList<BorneDigue> bornes = new ArrayList<>();
-        final SystemeReperage sr = uiSRs.getSelectionModel().getSelectedItem();
-        if (sr != null) {
-            BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
-            for (SystemeReperageBorne srb : sr.systemereperageborneId) {
-                final String bid = srb.getBorneId();
-                final BorneDigue bd = borneRepo.get(bid);
-                if (bd != null) {
-                    cacheBorneDigue.put(bid, bd);
-                    bornes.add(bd);
+        if (currentTroncon != null) {
+            Platform.runLater(()->computingRunning.set(true));
+            TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
+                try {
+                    final SystemeReperageRepository srRepo = Injector.getSession().getSystemeReperageRepository();
+                    final List<SystemeReperage> srs = srRepo.getByTroncon(currentTroncon);
+                    final SystemeReperage defaultSR;
+                    if (pos.getSystemeRepId() != null) {
+                        defaultSR = srRepo.get(pos.getSystemeRepId());
+                    } else if (currentTroncon.getSystemeRepDefautId() != null) {
+                        defaultSR = srRepo.get(currentTroncon.getSystemeRepDefautId());
+                    } else {
+                        defaultSR = null;
+                    }
+                    Platform.runLater(() -> {
+                        uiSRs.setItems(FXCollections.observableList(srs));
+                        uiSRs.getSelectionModel().select(defaultSR);
+                    });
+                } finally {
+                    Platform.runLater(() -> computingRunning.set(false));
                 }
-            }
-        }
-
-        Runnable borneComboUpdate = () -> {
-            ObservableList<BorneDigue> observableBornes = FXCollections.observableList(bornes);
-            uiBorneStart.setItems(observableBornes);
-            uiBorneEnd.setItems(observableBornes);
-            if (sr != null && sr.getId().equals(pos.getSystemeRepId())) {
-                uiBorneStart.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneDebutId()));
-                uiBorneEnd.getSelectionModel().select(cacheBorneDigue.get(pos.getBorneFinId()));
-            }
-        };
-        if (Platform.isFxApplicationThread()) {
-            borneComboUpdate.run();
-        } else {
-            Platform.runLater(borneComboUpdate);
+            });
         }
     }
     
+    /**
+     * Update list of available bornes when selected SR changes. If no SR is selected, empty lists are set.
+     * 
+     * Note : Should ALWAYS be launched from FX-thread.
+     * 
+     * @param observable
+     * @param oldValue Previously selected SR.
+     * @param newValue Newly selected SR.
+     */
+    private void updateBorneList(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+        final Positionable pos = (Positionable) positionableProperty.get();
+        if (pos == null) {
+            return;
+        }
+
+        if (newValue == null) {
+            ObservableList<BorneDigue> emptyBornes = FXCollections.emptyObservableList();
+            uiBorneStart.setItems(emptyBornes);
+            uiBorneEnd.setItems(emptyBornes);
+        } else {
+            computingRunning.set(true);
+            TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
+                try {
+                    BorneDigue defaultStart = null, defaultEnd = null;
+                    final ArrayList<BorneDigue> bornes = new ArrayList<>();
+                    BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
+                    for (SystemeReperageBorne srb : newValue.systemereperageborneId) {
+                        final String bid = srb.getBorneId();
+                        final BorneDigue bd = borneRepo.get(bid);
+                        if (bd != null) {
+                            bornes.add(bd);
+                            if (bd.getId().equals(pos.getBorneDebutId())) {
+                                defaultStart = bd;
+                            }
+                            if (bd.getId().equals(pos.getBorneFinId())) {
+                                defaultEnd = bd;
+                            }
+                        }
+                    }
+
+                    final BorneDigue startCopy = defaultStart;
+                    final BorneDigue endopy = defaultEnd;
+                    Platform.runLater(() -> {
+                        ObservableList<BorneDigue> observableBornes = FXCollections.observableList(bornes);
+                        uiBorneStart.setItems(observableBornes);
+                        uiBorneEnd.setItems(observableBornes);
+                        uiBorneStart.getSelectionModel().select(startCopy);
+                        uiBorneEnd.getSelectionModel().select(endopy);
+                    });
+                } finally {
+                    Platform.runLater(() -> computingRunning.set(false));
+                }
+            });
+        }
+    }
+    
+    /**
+     * Update component fields when the target {@link Positionable} is set/replaced.
+     * @param observable
+     * @param oldValue Previous positionable focused by the component.
+     * @param newValue Current focused positionable.
+     */
     private void updateField(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
         if (oldValue != null) {
             uiAvalSart.selectedProperty().unbindBidirectional(oldValue.borne_debut_avalProperty());
@@ -480,16 +659,11 @@ public class FXPositionablePane extends BorderPane {
         
         if(newValue==null) return;
         
-        initializing = true;
-        uiLoading.setVisible(true);
-        uiPane.setDisable(true);
-        
-        new Thread(){
-            @Override
-            public void run() {
+        computingRunning.set(true);        
+        final Runnable updater = () -> {
+            try {
                 //creation de la liste des systemes de reperage
                 updateSRList();
-                updateBorneList();
                 
                 Platform.runLater(new Runnable() {
                     @Override
@@ -533,98 +707,44 @@ public class FXPositionablePane extends BorderPane {
                         //on active le panneau qui a le positionnement
                         final Point startPos = newValue.getPositionDebut();
                         final Point endPos = newValue.getPositionFin();
-                        if(startPos!=null || endPos!=null){
+                        if (startPos != null || endPos != null) {
                             uiTypeCoord.setSelected(true);
-                        }else{
+                        } else {
                             uiTypeBorne.setSelected(true);
                         }
-
-                        uiPane.setDisable(false);
-                        uiLoading.setVisible(false);
-                        initializing = false;
                     }
                 });
+            } finally {
+                computingRunning.set(false);  
             }
-        }.start();
-    }
+        };
         
+        TaskManager.INSTANCE.submit("Mise à jour d'une position", updater);
+    }
+    
     public void preSave() {
         final Positionable pos = (Positionable) positionableProperty.get();
         if (pos == null) {
             return;
         }
+        
+        //on sauvegarde la position geo
+        pos.setPositionDebut(getOrCreateStartPoint());
+        pos.setPositionFin(getOrCreateEndPoint());
+        
+        //sauvegarde de la position par borne
+        final SystemeReperage selectedSR = uiSRs.getSelectionModel().selectedItemProperty().get();
+        final BorneDigue borneStart = uiBorneStart.getSelectionModel().selectedItemProperty().get();
+        final BorneDigue borneEnd = uiBorneEnd.getSelectionModel().selectedItemProperty().get();
 
-        // Si un CRS est défini, on essaye de sauvegarder les positions géographiques.
-        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
-        if (selectedCRS != null) {
+        pos.setSystemeRepId((selectedSR != null) ? selectedSR.getId() : null);
 
-            Point ptStart, ptEnd;
-            // On a un point de début valide : on l'enregistre.
-            if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
-                ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                        fxNumberValue(uiLongitudeStart),
-                        fxNumberValue(uiLatitudeStart)
-                ));
-            } else {
-                ptStart = null;
-            }
-
-            // On a un point de fin valide : on l'enregistre.
-            if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
-                ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                        fxNumberValue(uiLongitudeEnd),
-                        fxNumberValue(uiLatitudeEnd)
-                ));
-            } else {
-                ptEnd = null;
-            }
-
-            if (ptStart != null || ptEnd != null) {
-                if (!CRS.equalsApproximatively(selectedCRS, baseCrs)) {
-                    try {
-                        final MathTransform trs = CRS.findMathTransform(selectedCRS, baseCrs, true);
-                        if (ptStart != null) {
-                            ptStart = (Point) JTS.transform(ptStart, trs);
-                        }
-                        if (ptEnd != null) {
-                            ptEnd = (Point) JTS.transform(ptEnd, trs);
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                //on sauvegarde la position geo
-                pos.setPositionDebut(ptStart);
-                pos.setPositionFin(ptEnd);
-            }
-            
-            //sauvegarde de la position par borne
-            final SystemeReperage selectedSR = uiSRs.getSelectionModel().selectedItemProperty().get();
-            final BorneDigue borneStart = uiBorneStart.getSelectionModel().selectedItemProperty().get();
-            final BorneDigue borneEnd = uiBorneEnd.getSelectionModel().selectedItemProperty().get();
-            
-            pos.setSystemeRepId((selectedSR != null)? selectedSR.getId() : null);
-            
-            pos.setBorneDebutId((borneStart != null)? borneStart.getId() : null);
-            pos.setBorneFinId((borneEnd != null)? borneEnd.getId() : null);
-        }
+        pos.setBorneDebutId((borneStart != null) ? borneStart.getId() : null);
+        pos.setBorneFinId((borneEnd != null) ? borneEnd.getId() : null);
         
         //maj de la geometrie du positionable
-        final TronconDigue troncon;
-        
-        if (pos.getParent() != null) {
-            Element tmp = pos.getParent();
-            while (tmp != null && !(tmp instanceof TronconDigue)) {
-                tmp = tmp.getParent();
-            }
-            troncon = (TronconDigue) tmp;
-        } else {
-            troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
-        }
         final LineString structGeom = LinearReferencingUtilities.buildGeometry(
-                troncon.getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
-        pos.setGeometry(structGeom);
-        
+                currentTroncon.getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
+        pos.setGeometry(structGeom);        
     }
 }

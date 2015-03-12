@@ -15,7 +15,7 @@
    <center>
       <StackPane BorderPane.alignment="CENTER">
          <children>
-            <BorderPane fx:id="uiPane">
+            <BorderPane>
                <top>
                   <GridPane styleClass="pos-top" BorderPane.alignment="CENTER">
                     <columnConstraints>
