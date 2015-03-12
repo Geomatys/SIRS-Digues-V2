@@ -3,15 +3,12 @@ package fr.sirs.core;
 
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Objet;
 import fr.sirs.util.json.GeometryDeserializer;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.core.model.Positionable;
 
 import java.awt.geom.PathIterator;
@@ -67,41 +64,45 @@ public final class LinearReferencingUtilities extends LinearReferencing{
                 return null;
             }
             
-            //il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel
-            if(borneDebut==null) borneDebut = borneFin;
-            if(borneFin==null) borneFin = borneDebut;
-            
             double distanceDebut = structure.getBorne_debut_distance();
             double distanceFin = structure.getBorne_fin_distance();
             //on considére que les troncons sont numérisé dans le sens amont vers aval.
             if(!structure.getBorne_debut_aval()) distanceDebut *= -1.0;
             if(!structure.getBorne_fin_aval()) distanceFin *= -1.0;
             
-            //calculate de la distance des bornes
-            final Point borneDebutGeom = borneDebut.getGeometry();
-            final Point borneFinGeom = borneFin.getGeometry();
-            
+            //calculate de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
             final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
-            final double borneDebutDistance = calculateRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
-            final double borneFinDistance = calculateRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
-            
-            //conversion des distances au borne en distance par rapport au debut du troncon
-            distanceDebut += borneDebutDistance;
-            distanceFin += borneFinDistance;
-            
-            //on s'assure de l'ordre croissant des positions
-            if(distanceDebut>distanceFin){
-                double temp = distanceDebut;
-                distanceDebut = distanceFin;
-                distanceFin = temp;
+            if (borneDebut != null) {
+                final Point borneDebutGeom = borneDebut.getGeometry();
+                final double borneDebutDistance = calculateRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
+                //conversion des distances au borne en distance par rapport au debut du troncon
+                distanceDebut += borneDebutDistance;
             }
             
-            return cut(troncon, distanceDebut, distanceFin);
+            if (borneFin != null) {
+                final Point borneFinGeom = borneFin.getGeometry();
+                final double borneFinDistance = calculateRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
+                distanceFin += borneFinDistance;
+            }
+            
+            if (borneDebut == null) {
+                distanceDebut = distanceFin;
+            } else if (borneFin == null) {
+                distanceFin = distanceDebut;
+            }
+                        
+            return cut(troncon, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
         }
     }
-        
-    public static LineString cut(LineString linear, double distanceDebut, double distanceFin){
-        
+    /**
+     * Create a line string which begins on input line, from a certain distance after its beginning
+     * to another further away.
+     * @param linear The input {@link LineString} we want to extract a piece from.
+     * @param distanceDebut Distance from the start of input line for the beginning of the new geometry.
+     * @param distanceFin Distance from the start of input line for the end of the new geometry.
+     * @return A line string, never null.
+     */
+    public static LineString cut(LineString linear, double distanceDebut, double distanceFin) {        
         //on s"assure de ne pas sortir du troncon
         final double tronconLength = linear.getLength();
         distanceDebut = XMath.clamp(Math.min(distanceDebut, distanceFin), 0, tronconLength);

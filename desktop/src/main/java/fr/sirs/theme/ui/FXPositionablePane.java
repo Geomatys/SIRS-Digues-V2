@@ -122,7 +122,7 @@ public class FXPositionablePane extends BorderPane {
      * Reference to TronconDigue parent of the current positionable
      */
     private TronconDigue currentTroncon;
-            
+
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
                 

@@ -268,12 +268,13 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
+            queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
             return;
         }
-
+        
         if (queries.isEmpty()) {
             new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK).showAndWait();
         } else {
@@ -304,6 +305,7 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
+            queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
