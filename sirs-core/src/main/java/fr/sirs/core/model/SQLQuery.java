@@ -2,7 +2,9 @@
 package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import fr.sirs.util.property.Internal;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,9 @@ import org.ektorp.util.Assert;
  * @author Alexis Manin
  * @author Johann Sorel
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@SuppressWarnings("serial")
 public class SQLQuery implements Identifiable {
     
     private static final char SEPARATOR = '§';
