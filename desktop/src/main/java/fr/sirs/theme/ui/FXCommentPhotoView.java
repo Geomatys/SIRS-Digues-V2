@@ -52,20 +52,18 @@ public class FXCommentPhotoView extends SplitPane {
         uiPhotoScroll.setUnitIncrement(1.0);
         uiPhotoScroll.setMin(0);
         
-        valueProperty.addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-            setElement(newValue);
-        });
+        valueProperty.addListener(this::elementSet);
         
         uiPhotoScroll.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             updatePhoto();
         });
     }
     
-    public void setElement(final Element input) {
-        if (!(input instanceof Objet)) {
+    private void elementSet(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
+        if (!(newValue instanceof Objet)) {
             return;
         }
-        final Objet obj = (Objet) input;
+        final Objet obj = (Objet) newValue;
         uiCommentArea.getEngine().loadContent(obj.getCommentaire());
         if (obj.photo != null && obj.photo.size() > 1 ) {
             uiPhotoScroll.setVisible(true);

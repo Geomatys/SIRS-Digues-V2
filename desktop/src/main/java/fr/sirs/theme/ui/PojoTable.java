@@ -331,7 +331,7 @@ public class PojoTable extends BorderPane {
         
         final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-        
+                
         final SplitPane sPane = new SplitPane();
         sPane.setOrientation(Orientation.VERTICAL);
         sPane.getItems().addAll(uiTable, commentPhotoView);
