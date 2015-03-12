@@ -347,8 +347,7 @@ public class CorePlugin extends Plugin {
             items.add(mesuresLayer);
                         
             // Positionnement des documents
-            final BeanStore documentsStore = new BeanStore(
-                    getSupplier(DocumentTroncon.class));
+            final BeanStore documentsStore = new BeanStore(getSupplier(DocumentTroncon.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
             documentsLayer.items().addAll( buildLayers(documentsStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -409,12 +408,14 @@ public class CorePlugin extends Plugin {
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
-            final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
-                    CommonCRS.Temporal.JAVA.crs(), 
-                    GO2Utilities.FILTER_FACTORY.property("date_debut"), 
-                    GO2Utilities.FILTER_FACTORY.property("date_fin")
-            );
-            fml.getExtraDimensions().add(datefilter);
+            if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
+                final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                        CommonCRS.Temporal.JAVA.crs(), 
+                        GO2Utilities.FILTER_FACTORY.property("date_debut"), 
+                        GO2Utilities.FILTER_FACTORY.property("date_fin")
+                );
+                fml.getExtraDimensions().add(datefilter);
+            }
             fml.setVisible(visible);
             fml.setName(layerName);
             fml.setSelectable(true);
@@ -438,12 +439,14 @@ public class CorePlugin extends Plugin {
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
-            final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
-                    CommonCRS.Temporal.JAVA.crs(), 
-                    GO2Utilities.FILTER_FACTORY.property("date_debut"), 
-                    GO2Utilities.FILTER_FACTORY.property("date_fin")
-            );
-            fml.getExtraDimensions().add(datefilter);
+            if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
+                final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                        CommonCRS.Temporal.JAVA.crs(), 
+                        GO2Utilities.FILTER_FACTORY.property("date_debut"), 
+                        GO2Utilities.FILTER_FACTORY.property("date_fin")
+                );
+                fml.getExtraDimensions().add(datefilter);
+            }
             fml.setVisible(visible);
             fml.setSelectable(true);
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);

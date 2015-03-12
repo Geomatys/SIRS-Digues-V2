@@ -18,6 +18,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -308,6 +309,22 @@ implements DocumentsUpdatable {
                 try{
                     final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                     str.setGeometry(structGeom);
+                    for(final Photo photo : str.getPhoto()){
+                        try{
+                            final LineString photoGeom = LinearReferencingUtilities.buildGeometry(structGeom, photo, borneDigueRepository);
+                            photo.setGeometry(photoGeom);
+                        }catch(IllegalArgumentException e){
+                            SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+                        }
+                    }
+                }catch(IllegalArgumentException e){
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+                }
+            }
+            for(final DocumentTroncon doc : troncon.getDocumentTroncon()){
+                try{
+                    final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
+                    doc.setGeometry(docGeom);
                 }catch(IllegalArgumentException e){
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }

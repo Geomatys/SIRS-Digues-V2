@@ -12,12 +12,12 @@ import fr.sirs.core.model.TronconDigue;
  */
 public class DocumentTronconTheme extends AbstractTronconTheme {
 
-    private static final ThemeGroup GROUP1 = new ThemeGroup("Document-tronçons", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP1 = new ThemeGroup("Documents", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon,
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     
     public DocumentTronconTheme() {
-        super("Document-tronçons", GROUP1);
+        super("Documents", GROUP1);
     }
     
 }

@@ -48,13 +48,7 @@ public class ReferenceChecker extends Task<Void> {
     
     public ReferenceChecker(final String referencesDirectoryPath){
         this.referencesDirectoryPath = referencesDirectoryPath;
-        messageProperty().addListener(new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                updateTitle(getMessage());
-            }
-        });
+        updateTitle("Vérification des références");
     }
 
     private final Map<Class, Map<Object, Object>> incoherentReferences = new HashMap<>();
