@@ -60,7 +60,7 @@ public class DocHelper {
         try {
             return Optional.of((Element) objectMapper.reader(clazz).readValue(
                     str));
-        } catch (IOException e) {
+        } catch (Exception e) {
             return Optional.empty();
         }
 
