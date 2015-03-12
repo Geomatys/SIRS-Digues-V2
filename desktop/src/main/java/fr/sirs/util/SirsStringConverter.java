@@ -14,7 +14,6 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.StringConverter;
 import org.opengis.feature.PropertyType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -28,7 +27,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public class SirsStringConverter extends StringConverter {
 
     private final WeakHashMap<String, Object> fromString = new WeakHashMap<>();
-    private final WeakHashMap<String, LabelMapper> labelMappers = new WeakHashMap<>();
+    private static final WeakHashMap<String, LabelMapper> LABEL_MAPPERS = new WeakHashMap<>();
     
     /**
      * Find a simple name for input object.
@@ -44,25 +43,22 @@ public class SirsStringConverter extends StringConverter {
         }
 
         String text = "";
-        if (item instanceof AvecLibelle) {
-            text = ((AvecLibelle)item).getLibelle();
-        } else if (item instanceof ElementHit) {
-            text = ((ElementHit) item).getLibelle();
-        } else if (item instanceof PreviewLabel) {
-            final PreviewLabel label = (PreviewLabel) item;
-            final LabelMapper labelMapper = getLabelMapperForClass(label.getType());
-            text = (labelMapper==null) ? "" : (labelMapper.mapPropertyName("classAbrege") + " - ");            
-            text += (label.getPseudoId()==null) ? "" : (label.getPseudoId() + " : ");
-            text += (label.getLabel()==null) ? "" : label.getLabel();
-        } else if (item instanceof Contact) {
+        if (item instanceof Contact) {
             final Contact c = (Contact) item;
             text = c.getNom() + " " + c.getPrenom();
         } else if (item instanceof Organisme) {
             text = ((Organisme)item).getNom();
         } else if (item instanceof Element) {
-            final LabelMapper labelMapper = getLabelMapperForClass(item.getClass());
-            // TODO : make a commodity method in label mapper ?
-            text = labelMapper.mapPropertyName("classAbrege") + ((((Element)item).getPseudoId()==null) ? "" : ((Element)item).getPseudoId());
+            text = getDesignation((Element)item);
+        } else if (item instanceof ElementHit) {
+            text = ((ElementHit) item).getLibelle();
+        } else if (item instanceof PreviewLabel) {
+            final PreviewLabel label = (PreviewLabel) item;
+            text = getDesignation(label);
+            if (label.getLabel() != null) {
+                if (!text.isEmpty())  text += " : ";
+                text += label.getLabel();
+            }
         } else if (item instanceof String) {
             text = (String) item;
         } else if (item instanceof CoordinateReferenceSystem) {
@@ -71,12 +67,37 @@ public class SirsStringConverter extends StringConverter {
             text = ((PropertyType) item).getName().tip().toString();
         }
         
+        // Whatever object we've got, if we can append a libelle, we do.
+        if (item instanceof AvecLibelle) {
+            final AvecLibelle libelle = (AvecLibelle) item;
+            if (!text.isEmpty() && !libelle.getLibelle().isEmpty()) {
+                text += " : ";
+            }
+            if (!libelle.getLibelle().isEmpty()) {
+                text += libelle.getLibelle();
+            }
+        }
+            
         if (text != null && !text.isEmpty()) {
             fromString.put(text, item);
         }
         return text;
     }
 
+    public static String getDesignation(final PreviewLabel source) {
+        final LabelMapper labelMapper = getLabelMapperForClass(source.getType());
+        // If Designation is not null, we display it.
+        return (labelMapper == null || source.getPseudoId() == null) ? ""
+                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getPseudoId());
+    }
+    
+    public static String getDesignation(final Element source) {
+        final LabelMapper labelMapper = getLabelMapperForClass(source.getClass());
+        // If Designation is not null, we display it.
+        return (labelMapper == null || source.getPseudoId() == null) ? ""
+                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getPseudoId());
+    }
+    
     @Override
     public Object fromString(String string) {
         return fromString.get(string);
@@ -87,10 +108,10 @@ public class SirsStringConverter extends StringConverter {
      * @param clazz
      * @return the label mapper for the given class.
      */
-    private LabelMapper getLabelMapperForClass(final Class clazz){
-        if(labelMappers.get(clazz.getName())==null)
-            labelMappers.put(clazz.getName(), new LabelMapper(clazz));
-        return labelMappers.get(clazz.getName());
+    private static LabelMapper getLabelMapperForClass(final Class clazz){
+        if(LABEL_MAPPERS.get(clazz.getName())==null)
+            LABEL_MAPPERS.put(clazz.getName(), new LabelMapper(clazz));
+        return LABEL_MAPPERS.get(clazz.getName());
     }
     
     /**
@@ -99,7 +120,7 @@ public class SirsStringConverter extends StringConverter {
      * @return the labelMapper for the given class name, or null if there is no
      * class for the given name.
      */
-    private LabelMapper getLabelMapperForClass(final String className){
+    private static LabelMapper getLabelMapperForClass(final String className){
         try {
             return getLabelMapperForClass(Class.forName(className));
         } catch (ClassNotFoundException ex) {
