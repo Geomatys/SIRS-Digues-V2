@@ -70,7 +70,8 @@
     -fx-focus-color: transparent;
     -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
     -fx-background-radius: 10 0 0 10;
-    -fx-border: 0px solid; 
+    -fx-border-width: 0px;
+    -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 10 0 0 10;
     -fx-text-fill: rgb(34,93,135);
@@ -85,7 +86,8 @@
     -fx-focus-color: transparent;
     -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
     -fx-background-radius: 0 0 0 0;
-    -fx-border: 0px solid; 
+    -fx-border-width: 0px;
+    -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 0 0 0;
     -fx-text-fill: rgb(34,93,135);
@@ -100,7 +102,8 @@
     -fx-focus-color: transparent;
     -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
     -fx-background-radius: 0 10 10 0;
-    -fx-border: 0px solid; 
+    -fx-border-width: 0px;
+    -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 10 10 0;
     -fx-text-fill: rgb(34,93,135);
