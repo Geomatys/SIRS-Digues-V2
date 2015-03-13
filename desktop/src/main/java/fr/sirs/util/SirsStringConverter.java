@@ -70,10 +70,13 @@ public class SirsStringConverter extends StringConverter {
         // Whatever object we've got, if we can append a libelle, we do.
         if (item instanceof AvecLibelle) {
             final AvecLibelle libelle = (AvecLibelle) item;
-            if (!text.isEmpty() && !libelle.getLibelle().isEmpty()) {
+            if (!text.isEmpty() 
+                    && libelle.getLibelle()!=null 
+                    && !libelle.getLibelle().isEmpty()) {
                 text += " : ";
             }
-            if (!libelle.getLibelle().isEmpty()) {
+            if (libelle.getLibelle()!=null 
+                    && !libelle.getLibelle().isEmpty()) {
                 text += libelle.getLibelle();
             }
         }
