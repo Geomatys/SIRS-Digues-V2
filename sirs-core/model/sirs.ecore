@@ -21,11 +21,11 @@
         eType="#//CommuneTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeRiveId" eType="#//RefRive"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
-        eType="#//Borne_digue"/>
+        eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
         eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//Systeme_reperage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//SystemeReperage"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="documentTroncon" upperBound="-1"
         eType="#//DocumentTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -71,22 +71,22 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="PR_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="positionFin" eType="ecore:EDataType jts.ecore#//Point"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepId" eType="#//Systeme_reperage"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="borneDebutId" eType="#//Borne_digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="borneFinId" eType="#//Borne_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepId" eType="#//SystemeReperage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="borneDebutId" eType="#//BorneDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="borneFinId" eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Systeme_reperage">
+  <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
     <eAnnotations source="generation">
       <details key="document" value=""/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemereperageborneId"
-        upperBound="-1" eType="#//SystemeReperageBorne" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageBorne" upperBound="-1"
+        eType="#//SystemeReperageBorne" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -159,7 +159,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Borne_digue">
+  <eClassifiers xsi:type="ecore:EClass" name="BorneDigue">
     <eAnnotations source="generation">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
@@ -999,7 +999,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperageBorne">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valeurPR" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="borneId" eType="#//Borne_digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="borneId" eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -1200,8 +1200,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="leveePoints" upperBound="-1"
-        eType="#//LeveePoints" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeve" upperBound="-1"
+        eType="#//PointLeve" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilTraversEvenementHydraulique"
         upperBound="-1" eType="#//ProfilTraversEvenementHydraulique" containment="true"/>
   </eClassifiers>
@@ -1255,7 +1255,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="leveePoints" upperBound="-1"
-        eType="#//LeveePoints" containment="true"/>
+        eType="#//PointLeve" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionProfilLongSurDigueId"
         eType="#//RefPositionProfilLongSurDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilLongEvenementHydraulique"
@@ -1302,7 +1302,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LeveePoints">
+  <eClassifiers xsi:type="ecore:EClass" name="PointLeve">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="z" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
