@@ -56,6 +56,7 @@ import org.opengis.util.FactoryException;
 import org.w3._2005.atom.ContentType;
 import org.w3._2005.atom.EntryType;
 import org.w3._2005.atom.TextType;
+import org.w3c.dom.Element;
 
 /**
  * Extension OWC pour SIRS.
@@ -119,15 +120,15 @@ public class OwcExtentionSirs extends OwcExtension {
             if(field instanceof JAXBElement){
                 field = ((JAXBElement)field).getValue();
             }
-            if(field instanceof ContentType){
-                final ContentType content = (ContentType) field;
-                if(content.getOtherAttributes().get(ATT_KEY_EXTRA_DIMENSIONS)!=null){
-                    if(content.getOtherAttributes().get(ATT_KEY_LOWER_EXTRA_DIMENSION)!=null
-                        && content.getOtherAttributes().get(ATT_KEY_UPPER_EXTRA_DIMENSION)!=null){
+            if(field instanceof Element){
+                final Element content = (Element) field;
+                if(content.getAttribute(ATT_KEY_EXTRA_DIMENSIONS)!=null){
+                    if(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)!=null
+                        && content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION)!=null){
                         datefilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(), 
-                        GO2Utilities.FILTER_FACTORY.property(content.getOtherAttributes().get(ATT_KEY_LOWER_EXTRA_DIMENSION)), 
-                        GO2Utilities.FILTER_FACTORY.property(content.getOtherAttributes().get(ATT_KEY_UPPER_EXTRA_DIMENSION)));
+                        GO2Utilities.FILTER_FACTORY.property(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)), 
+                        GO2Utilities.FILTER_FACTORY.property(content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION)));
                     }
                 }
             }
