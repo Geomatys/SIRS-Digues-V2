@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.LeveePoints;
+import fr.sirs.core.model.PointLeve;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilLongEvenementHydraulique;
@@ -96,7 +96,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeReferences();
-        final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<PointLeve>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
         final Map<Integer, List<ProfilLongEvenementHydraulique>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();

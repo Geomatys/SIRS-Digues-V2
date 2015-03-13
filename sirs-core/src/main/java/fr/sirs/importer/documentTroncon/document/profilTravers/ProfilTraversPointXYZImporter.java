@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.LeveePoints;
+import fr.sirs.core.model.PointLeve;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -20,19 +20,19 @@ import org.ektorp.CouchDbConnector;
  */
 class ProfilTraversPointXYZImporter extends GenericImporter {
 
-    private Map<Integer, LeveePoints> points = null;
-    private Map<Integer, List<LeveePoints>> pointsByLeve = null;
+    private Map<Integer, PointLeve> points = null;
+    private Map<Integer, List<PointLeve>> pointsByLeve = null;
     
     ProfilTraversPointXYZImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, LeveePoints> getLeveePoints() throws IOException, AccessDbImporterException{
+    public Map<Integer, PointLeve> getLeveePoints() throws IOException, AccessDbImporterException{
         if(points==null) compute();
         return points;
     }
     
-    public Map<Integer, List<LeveePoints>> getLeveePointByLeveId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<PointLeve>> getLeveePointByLeveId() throws IOException, AccessDbImporterException{
         if(pointsByLeve==null) compute();
         return pointsByLeve;
     }
@@ -68,7 +68,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LeveePoints levePoint = new LeveePoints();
+            final PointLeve levePoint = new PointLeve();
             
             if (row.getDouble(Columns.X.toString()) != null) {
                 levePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
@@ -88,7 +88,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
-            List<LeveePoints> listByLeve = pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            List<PointLeve> listByLeve = pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
                 pointsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);

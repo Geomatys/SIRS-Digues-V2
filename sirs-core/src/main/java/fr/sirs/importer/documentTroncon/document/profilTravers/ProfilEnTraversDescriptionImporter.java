@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.LeveePoints;
+import fr.sirs.core.model.PointLeve;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
@@ -119,7 +119,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeReferences();
         final Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
-        final Map<Integer, List<LeveePoints>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
+        final Map<Integer, List<PointLeve>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByLeveId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -164,7 +164,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             
             if(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){
-                leve.setLeveePoints(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+                leve.setPointsLeve(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
             }
             
             if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){

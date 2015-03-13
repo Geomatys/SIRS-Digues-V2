@@ -85,19 +85,19 @@ public class TronconUtils {
         final Map<String,SystemeReperage> mapSrs = new HashMap<>();
         for(SystemeReperage sr : srRepo.getByTroncon(troncon)){
             final SystemeReperage srCp = sr.copy();
-            srCp.systemereperageborneId.clear();
+            srCp.systemeReperageBorne.clear();
             srCp.setTronconId(tronconCp.getDocumentId());
-            final List<SystemeReperageBorne> lst = sr.getSystemereperageborneId();
+            final List<SystemeReperageBorne> lst = sr.getSystemeReperageBorne();
             for(int i=lst.size()-1;i>=0;i--){
                 final SystemeReperageBorne srb = lst.get(i);
                 final BorneDigue borne = newBornes.get(srb.getBorneId());
                 if(newBornes.containsKey(srb.getBorneId())){
                     final SystemeReperageBorne cp = srb.copy();
                     cp.setBorneId(borne.getDocumentId());
-                    srCp.systemereperageborneId.add(cp);
+                    srCp.systemeReperageBorne.add(cp);
                 }
             }
-            if(!srCp.systemereperageborneId.isEmpty()){
+            if(!srCp.systemeReperageBorne.isEmpty()){
                 // Si le SR d'origine était celui par défaut dans le tronçon 
                 // original, le SR copié sera celui par défaut dans le tronçon copié.
                 srRepo.add(srCp, tronconCp, sr.getId().equals(troncon.getSystemeRepDefautId()));
@@ -232,8 +232,8 @@ public class TronconUtils {
                 modifiedSRs.put(sr2.getId(), srCp.getId());
             }else{
                 //on merge les bornes
-                final List<SystemeReperageBorne> srbs1 = sibling.getSystemereperageborneId();
-                final List<SystemeReperageBorne> srbs2 = sr2.getSystemereperageborneId();
+                final List<SystemeReperageBorne> srbs1 = sibling.getSystemeReperageBorne();
+                final List<SystemeReperageBorne> srbs2 = sr2.getSystemeReperageBorne();
                     
                 loop:
                 for(SystemeReperageBorne srb2 : srbs2){
@@ -308,11 +308,11 @@ public class TronconUtils {
         SystemeReperageBorne srbStart = null;
         SystemeReperageBorne srbEnd = null;
         
-        if(sr.systemereperageborneId.size()>0){
-            srbStart = sr.systemereperageborneId.get(0);
+        if(sr.systemeReperageBorne.size()>0){
+            srbStart = sr.systemeReperageBorne.get(0);
         }
-        if(sr.systemereperageborneId.size()>1){
-            srbEnd = sr.systemereperageborneId.get(sr.systemereperageborneId.size()-1);
+        if(sr.systemeReperageBorne.size()>1){
+            srbEnd = sr.systemeReperageBorne.get(sr.systemeReperageBorne.size()-1);
         }
         
         BorneDigue bdStart = null;
@@ -326,7 +326,7 @@ public class TronconUtils {
             
             srbStart = new SystemeReperageBorne();
             srbStart.setBorneId(bdStart.getDocumentId());
-            sr.systemereperageborneId.add(srbStart);
+            sr.systemeReperageBorne.add(srbStart);
         }else{
             bdStart = bdRepo.get(srbStart.getBorneId());
         }
@@ -340,7 +340,7 @@ public class TronconUtils {
             
             srbEnd = new SystemeReperageBorne();
             srbEnd.setBorneId(bdEnd.getDocumentId());
-            sr.systemereperageborneId.add(srbEnd);
+            sr.systemeReperageBorne.add(srbEnd);
         }else{
             bdEnd = bdRepo.get(srbEnd.getBorneId());
         }
@@ -416,7 +416,7 @@ public class TronconUtils {
                 if(pos.getSystemeRepId()!=null && !pos.getSystemeRepId().isEmpty()){
                     final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
                     if(sr!=null){
-                        for(SystemeReperageBorne srb : sr.systemereperageborneId){
+                        for(SystemeReperageBorne srb : sr.systemeReperageBorne){
                             final String bid = srb.getBorneId();
                             final BorneDigue bd = session.getBorneDigueRepository().get(bid);
                             if(bd!=null){
@@ -538,7 +538,7 @@ public class TronconUtils {
             
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
-            for(SystemeReperageBorne srb : sr.systemereperageborneId){
+            for(SystemeReperageBorne srb : sr.systemeReperageBorne){
                 final String bid = srb.getBorneId();
                 final BorneDigue bd = session.getBorneDigueRepository().get(bid);
                 if(bd!=null){ 

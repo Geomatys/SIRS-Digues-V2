@@ -64,9 +64,9 @@ public class TronconUtilsTest extends CouchDBTestCase{
         final SystemeReperageBorne srb2 = new SystemeReperageBorne();
         srb2.setBorneId(borne2.getDocumentId());
         srb2.setValeurPR(20);
-        sr.getSystemereperageborneId().add(srb0);
-        sr.getSystemereperageborneId().add(srb1);
-        sr.getSystemereperageborneId().add(srb2);
+        sr.getSystemeReperageBorne().add(srb0);
+        sr.getSystemeReperageBorne().add(srb1);
+        sr.getSystemeReperageBorne().add(srb2);
         session.getSystemeReperageRepository().add(sr, troncon);
         
         //le troncon doit etre a jour avec la liste des bornes
@@ -111,7 +111,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         final SystemeReperage cut0sr = cut0Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut0sr.getDocumentId());
         assertEquals("SR", cut0sr.getLibelle());
-        final List<SystemeReperageBorne> cut0srbs = cut0sr.getSystemereperageborneId();
+        final List<SystemeReperageBorne> cut0srbs = cut0sr.getSystemeReperageBorne();
         assertEquals(1, cut0srbs.size());
         final SystemeReperageBorne cut0srb = cut0srbs.get(0);
         assertEquals(0.0f, cut0srb.getValeurPR(), DELTA);
@@ -160,7 +160,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         final SystemeReperage cut1sr = cut1Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut1sr.getDocumentId());
         assertEquals("SR", cut1sr.getLibelle());
-        final List<SystemeReperageBorne> cut1srbs = cut1sr.getSystemereperageborneId();
+        final List<SystemeReperageBorne> cut1srbs = cut1sr.getSystemeReperageBorne();
         assertEquals(2, cut1srbs.size());
         final SystemeReperageBorne cut1srb0 = cut1srbs.get(1);
         final SystemeReperageBorne cut1srb1 = cut1srbs.get(0);

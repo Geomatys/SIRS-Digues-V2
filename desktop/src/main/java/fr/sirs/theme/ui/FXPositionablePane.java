@@ -275,7 +275,7 @@ public class FXPositionablePane extends BorderPane {
         for(SystemeReperage sr : uiSRs.getItems()) {
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
-            for(SystemeReperageBorne srb : sr.systemereperageborneId){
+            for(SystemeReperageBorne srb : sr.systemeReperageBorne){
                 final String bid = srb.getBorneId();
                 final BorneDigue bd = session.getBorneDigueRepository().get(bid);
                 if(bd!=null){ 
@@ -613,7 +613,7 @@ public class FXPositionablePane extends BorderPane {
                     BorneDigue defaultStart = null, defaultEnd = null;
                     final ArrayList<BorneDigue> bornes = new ArrayList<>();
                     BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
-                    for (SystemeReperageBorne srb : newValue.systemereperageborneId) {
+                    for (SystemeReperageBorne srb : newValue.systemeReperageBorne) {
                         final String bid = srb.getBorneId();
                         final BorneDigue bd = borneRepo.get(bid);
                         if (bd != null) {
