@@ -15,7 +15,9 @@ import java.util.logging.Logger;
 import javax.imageio.spi.ServiceRegistry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
+import org.bouncycastle.asn1.crmf.ProofOfPossession;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -27,6 +29,7 @@ import org.geotoolkit.data.query.Selector;
 import org.geotoolkit.data.query.Source;
 import org.geotoolkit.data.query.TextStatement;
 import org.geotoolkit.db.JDBCFeatureStore;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.factory.FactoryFinder;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.type.DefaultName;
@@ -47,6 +50,7 @@ import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.PropertyName;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.w3._2005.atom.ContentType;
@@ -64,8 +68,9 @@ public class OwcExtentionSirs extends OwcExtension {
     public static final String CODE = "http://www.france-digues.fr/owc";
     public static final String KEY_BEANCLASS = "beanClass";
     public static final String KEY_SQLQUERY = "sqlQuery";
-    public static final String KEY_LOWER_EXTRA_DIMENSION = "lowerExtraDimension";
-    public static final String KEY_UPPER_EXTRA_DIMENSION = "upperExtraDimension";
+    public static final String ATT_KEY_EXTRA_DIMENSIONS = "extraDimensions";
+    public static final String ATT_KEY_LOWER_EXTRA_DIMENSION = "lower";
+    public static final String ATT_KEY_UPPER_EXTRA_DIMENSION = "upper";
 
     private static final List<MapItem> mapItems = new ArrayList();
     
@@ -102,6 +107,8 @@ public class OwcExtentionSirs extends OwcExtension {
     
     @Override
     public MapLayer createLayer(OfferingType offering) throws DataStoreException {
+        final MapLayer mapLayer;
+        FeatureMapLayer.DimensionDef datefilter = null;
         final List<Object> fields = offering.getOperationOrContentOrStyleSet();
         
         //rebuild parameters map
@@ -111,6 +118,18 @@ public class OwcExtentionSirs extends OwcExtension {
         for(Object field : fields){
             if(field instanceof JAXBElement){
                 field = ((JAXBElement)field).getValue();
+            }
+            if(field instanceof ContentType){
+                final ContentType content = (ContentType) field;
+                if(content.getOtherAttributes().get(ATT_KEY_EXTRA_DIMENSIONS)!=null){
+                    if(content.getOtherAttributes().get(ATT_KEY_LOWER_EXTRA_DIMENSION)!=null
+                        && content.getOtherAttributes().get(ATT_KEY_UPPER_EXTRA_DIMENSION)!=null){
+                        datefilter = new FeatureMapLayer.DimensionDef(
+                        CommonCRS.Temporal.JAVA.crs(), 
+                        GO2Utilities.FILTER_FACTORY.property(content.getOtherAttributes().get(ATT_KEY_LOWER_EXTRA_DIMENSION)), 
+                        GO2Utilities.FILTER_FACTORY.property(content.getOtherAttributes().get(ATT_KEY_UPPER_EXTRA_DIMENSION)));
+                    }
+                }
             }
             if(field instanceof ParameterType){
                 final ParameterType param = (ParameterType) field;
@@ -138,10 +157,10 @@ public class OwcExtentionSirs extends OwcExtension {
                 throw new DataStoreException(ex.getMessage(),ex);
             }
             if(filter==null){
-                return CorePlugin.createLayer(clazz);
+                mapLayer = CorePlugin.createLayer(clazz);
             }
             else{
-                return CorePlugin.createLayer(clazz, QueryBuilder.filtered( new DefaultName(clazz.getSimpleName()), filter));
+                mapLayer = CorePlugin.createLayer(clazz, QueryBuilder.filtered( new DefaultName(clazz.getSimpleName()), filter));
             }
         }else if(sqlQuery!=null){
             final Session session = Injector.getSession();
@@ -150,13 +169,17 @@ public class OwcExtentionSirs extends OwcExtension {
                 final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
                     JDBCFeatureStore.CUSTOM_SQL, sqlQuery, new DefaultName("requete"));
                 final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
-                return MapBuilder.createFeatureLayer(col);
+                mapLayer = MapBuilder.createFeatureLayer(col);
             } catch (SQLException ex) {
                 throw new DataStoreException(ex.getMessage(),ex);
             }
         }else{
             throw new DataStoreException("Invalid configuration, missing bean class name or sql query");
         }
+        if(datefilter!=null){
+            ((FeatureMapLayer)mapLayer).getExtraDimensions().add(datefilter);
+        }
+        return mapLayer;
     }
     
     @Override
@@ -195,33 +218,20 @@ public class OwcExtentionSirs extends OwcExtension {
         
         final List<FeatureMapLayer.DimensionDef> extraDimensions = fml.getExtraDimensions();
         for(final FeatureMapLayer.DimensionDef extraDimension : extraDimensions){
-            final Expression lower = extraDimension.getLower();
-//            
-//            final PropertyIsNull isNull = filterFactory.isNull(lower);
-//            offering.getOperationOrContentOrStyleSet().add(isNull);
-            DefaultPropertyName dpn = (DefaultPropertyName) extraDimension.getLower(); //filterFactory.p
-                                //DefaultPropertyName dpn = (DefaultPropertyName) extraDimension.getLower(); //filterFactory.property("jojo");
-//            if(lower!=null) offering.getOperationOrContentOrStyleSet().add(dpn);
             
-            EntryType et = ATOM_FACTORY.createEntryType();
-            et.getOtherAttributes().put(new QName(""), "");
-            
-            ContentType ct = ATOM_FACTORY.createContentType();
-            ct.getContent();
-            ct.getOtherAttributes().put(new QName("extra"), "dimensions");
-//            TextType tt = ATOM_FACTORY.createTextType();
-//            JAXBElement e;
-            offering.getOperationOrContentOrStyleSet().add(ATOM_FACTORY.createEntryTypeContent(ct));
-
-//            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_LOWER_EXTRA_DIMENSION, extraDimension.getLower().getClass().getName(), lower.));
-//            if(lower!=null) offering.getOperationOrContentOrStyleSet().add(toParameterValue(lower));
-//            final Expression upper = extraDimension.getUpper();
-//            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_UPPER_EXTRA_DIMENSION, extraDimension.getUpper().getClass().getName(), beanClass.getName()));
-//            if(upper!=null) offering.getOperationOrContentOrStyleSet().add(toParameterValue(upper));
-            final CoordinateReferenceSystem crs = extraDimension.getCrs();
-//            if(lower!=null && upper!=null) offering.getOperationOrContentOrStyleSet().add(STYLE_XML_IO.getTransformerXMLv110()..during(lower, upper));
-//            extraDimension.getCrs();
-//            STYLE_XML_IO.getTransformerXMLv110().visitExpression(upper);
+            if(extraDimension.getLower()!=null || extraDimension.getUpper()!=null){
+                final ContentType ct = ATOM_FACTORY.createContentType();
+                ct.getContent();
+                ct.getOtherAttributes().put(new QName(ATT_KEY_EXTRA_DIMENSIONS), ATT_KEY_EXTRA_DIMENSIONS);
+                
+                if(extraDimension.getLower() instanceof PropertyName)
+                    ct.getOtherAttributes().put(new QName(ATT_KEY_LOWER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getLower()).getPropertyName());
+                
+                if(extraDimension.getUpper() instanceof PropertyName)
+                    ct.getOtherAttributes().put(new QName(ATT_KEY_UPPER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getUpper()).getPropertyName());
+                
+                offering.getOperationOrContentOrStyleSet().add(ATOM_FACTORY.createEntryTypeContent(ct));
+            }
         }
         
         return offering;

@@ -51,19 +51,21 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
                 couchDbConnector,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
                 typeLargeurFrancBordImporter);
-        structureImporters.add(largeurFrancBordImporter);
         typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
                 accessDatabase, couchDbConnector);
         profilFrontFrancBordImporter = new SysEvtProfilFrontFrancBordImporter(
                 accessDatabase, couchDbConnector, 
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeProfilFrontFrancBordImporter);
-        structureImporters.add(profilFrontFrancBordImporter);
+        
+        // Commenté pour ignorer les tables d'événements.
+//        structureImporters.add(largeurFrancBordImporter);
+//        structureImporters.add(profilFrontFrancBordImporter);
     }
 
     private enum Columns {
         ID_ELEMENT_GEOMETRIE,
-//        ID_TYPE_ELEMENT_GEOMETRIE,
+        ID_TYPE_ELEMENT_GEOMETRIE,
 //        ID_SOURCE,
         ID_TRONCON_GESTION,
 //        DATE_DEBUT_VAL,
@@ -180,7 +182,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
     
     @Override
     public Objet importRow(Row row) throws IOException, AccessDbImporterException {
-        final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()));
+        final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString()));
         if(typeStructure==LargeurFrancBord.class){
             return largeurFrancBordImporter.importRow(row);
         } else if(typeStructure==ProfilFrontFrancBord.class){

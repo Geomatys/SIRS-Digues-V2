@@ -67,7 +67,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
      * @throws AccessDbImporterException
      */
     public Map<Integer, T> getById() throws IOException, AccessDbImporterException {
-        if (this.structures == null) {
+        if (structures == null) {
             compute();
         }
         return structures;
@@ -81,9 +81,9 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
      * @throws AccessDbImporterException
      */
     public Map<Integer, List<T>> getByTronconId() throws IOException, AccessDbImporterException {
-        if (this.structuresByTronconId == null) {
+        if (structuresByTronconId == null) {
             compute();
         }
-        return this.structuresByTronconId;
+        return structuresByTronconId;
     }
 }

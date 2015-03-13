@@ -17,6 +17,7 @@ import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -100,8 +101,12 @@ public class PrestationImporter extends GenericPrestationImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        this.structures = sysEvtPrestationImporter.getById();
-        this.structuresByTronconId = sysEvtPrestationImporter.getByTronconId();
+        structures = new HashMap<>();
+        structuresByTronconId = new HashMap<>();
+        
+        // Commenté pour ignorer la table d'événements.
+//        this.structures = sysEvtPrestationImporter.getById();
+//        this.structuresByTronconId = sysEvtPrestationImporter.getByTronconId();
         
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
@@ -169,8 +174,6 @@ public class PrestationImporter extends GenericPrestationImporter {
         }
     }
     
-    
-
     @Override
     public Prestation importRow(Row row) throws IOException, AccessDbImporterException {
         return sysEvtPrestationImporter.importRow(row);

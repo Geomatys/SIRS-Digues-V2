@@ -73,34 +73,36 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
                 accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 documentManager.getConventionImporter());
-        documentImporters.add(sysEvtConventionImporter);
         sysEvtProfilTraversImporter = new SysEvtProfilEnTraversImporter(
                 accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 documentManager.getProfilEnTraversImporter());
-        documentImporters.add(sysEvtProfilTraversImporter);
         sysEvtProfilLongImporter = new SysEvtProfilEnLongImporter(
                 accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 documentManager.getProfilEnLongImporter());
-        documentImporters.add(sysEvtProfilLongImporter);
         sysEvtRapportEtudeImporter = new SysEvtRapportEtudesImporter(
                 accessDatabase, couchDbConnector, 
                 borneDigueImporter, systemeReperageImporter, 
                 documentManager.getRapportEtudeImporter());
-        documentImporters.add(sysEvtRapportEtudeImporter);
         sysEvtJournalImporter = new SysEvtJournalImporter(accessDatabase, 
                 couchDbConnector, borneDigueImporter, 
                 systemeReperageImporter, documentManager.getJournalArticleImporter());
-        documentImporters.add(sysEvtJournalImporter);
         sysEvtMarcheImporter = new SysEvtMarcheImporter(accessDatabase, 
                 couchDbConnector, borneDigueImporter, 
                 systemeReperageImporter, documentManager.getMarcheImporter());
-        documentImporters.add(sysEvtMarcheImporter);
         sysEvtDocumentAGrandeEchelleImporter = new SysEvtDocumentAGrandeEchelleImporter(
                 accessDatabase, couchDbConnector, borneDigueImporter, 
                 systemeReperageImporter, documentManager.getDocumentAGrandeEchelleImporter());
-        documentImporters.add(sysEvtDocumentAGrandeEchelleImporter);
+        
+        // Commenté car on ignore les tables d'événements.
+//        documentImporters.add(sysEvtConventionImporter);
+//        documentImporters.add(sysEvtProfilTraversImporter);
+//        documentImporters.add(sysEvtProfilLongImporter);
+//        documentImporters.add(sysEvtRapportEtudeImporter);
+//        documentImporters.add(sysEvtJournalImporter);
+//        documentImporters.add(sysEvtMarcheImporter);
+//        documentImporters.add(sysEvtDocumentAGrandeEchelleImporter);
     }
     
     public DocumentManager getDocumentManager() {return this.documentManager;}

@@ -20,9 +20,9 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -205,10 +205,20 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            desordre.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            try{
+                desordre.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            catch(DateTimeParseException ex){
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            try{
+                desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            }
+            catch(DateTimeParseException ex){
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {

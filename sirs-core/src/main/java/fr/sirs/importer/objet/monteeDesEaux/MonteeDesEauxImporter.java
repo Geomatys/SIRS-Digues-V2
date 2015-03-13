@@ -16,6 +16,7 @@ import fr.sirs.importer.objet.TypeRefHeauImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -83,8 +84,12 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        this.structures = sysEvtMonteeDesEauHydroImporter.getById();
-        this.structuresByTronconId = sysEvtMonteeDesEauHydroImporter.getByTronconId();
+        structures = new HashMap<>();
+        structuresByTronconId = new HashMap<>();
+        
+        // Commenté pour ignorer la table d'événements.
+//        this.structures = sysEvtMonteeDesEauHydroImporter.getById();
+//        this.structuresByTronconId = sysEvtMonteeDesEauHydroImporter.getByTronconId();
         
        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

@@ -21,7 +21,7 @@ fr.sirs.core.model.Fondation
 fr.sirs.core.model.FrontFrancBord
 fr.sirs.core.model.LaisseCrue
 fr.sirs.core.model.LargeurFrancBord
-fr.sirs.core.model.LeveePoints
+fr.sirs.core.model.PointLeve
 fr.sirs.core.model.LeveProfilTravers
 fr.sirs.core.model.LigneEau
 fr.sirs.core.model.MaitreOeuvreMarche

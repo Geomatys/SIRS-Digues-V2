@@ -17,8 +17,10 @@ import fr.sirs.importer.IntervenantImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
@@ -93,10 +95,13 @@ public class DesordreImporter extends GenericDesordreImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-
-        // Remplissage initial des structures par les importateurs subordonnés.
-        structures = sysEvtDesordreImporter.getById();
-        structuresByTronconId = sysEvtDesordreImporter.getByTronconId();
+        
+        structures = new HashMap<>();
+        structuresByTronconId = new HashMap<>();
+        
+        // Commenté pour ignorer la table d'événements.
+//        this.structures = sysEvtDesordreImporter.getById();
+//        this.structuresByTronconId = sysEvtDesordreImporter.getByTronconId();
         
         // Parcours de la table pour compléter l'importation.
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
