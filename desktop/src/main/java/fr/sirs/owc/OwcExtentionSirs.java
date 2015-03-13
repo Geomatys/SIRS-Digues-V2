@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.spi.ServiceRegistry;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.data.FeatureCollection;
@@ -30,6 +31,7 @@ import org.geotoolkit.factory.FactoryFinder;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -38,11 +40,18 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.owc.gtkext.ParameterType;
 import static org.geotoolkit.owc.xml.OwcMarshallerPool.*;
 import org.geotoolkit.ogc.xml.v110.FilterType;
+import org.geotoolkit.owc.gtkext.ObjectFactory;
 import org.geotoolkit.owc.xml.v10.OfferingType;
+import org.geotoolkit.se.xml.v110.ParameterValueType;
 import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
+import org.w3._2005.atom.ContentType;
+import org.w3._2005.atom.EntryType;
+import org.w3._2005.atom.TextType;
 
 /**
  * Extension OWC pour SIRS.
@@ -55,6 +64,8 @@ public class OwcExtentionSirs extends OwcExtension {
     public static final String CODE = "http://www.france-digues.fr/owc";
     public static final String KEY_BEANCLASS = "beanClass";
     public static final String KEY_SQLQUERY = "sqlQuery";
+    public static final String KEY_LOWER_EXTRA_DIMENSION = "lowerExtraDimension";
+    public static final String KEY_UPPER_EXTRA_DIMENSION = "upperExtraDimension";
 
     private static final List<MapItem> mapItems = new ArrayList();
     
@@ -63,16 +74,19 @@ public class OwcExtentionSirs extends OwcExtension {
         while(ite.hasNext()){
             mapItems.addAll(ite.next().getMapItems());
         }
-    }
-
-    private final FilterFactory2 filterFactory;
-    
-    public OwcExtentionSirs() {
-        super(CODE,10);
         
         final Hints hints = new Hints();
         hints.put(Hints.FILTER_FACTORY, FilterFactory2.class);
         filterFactory = (FilterFactory2) FactoryFinder.getFilterFactory(hints);
+    }
+    private static final StyleXmlIO STYLE_XML_IO = new StyleXmlIO();
+    private static final ObjectFactory GEOTK_FACTORY = new ObjectFactory();
+
+    private static final FilterFactory2 filterFactory;
+    
+    public OwcExtentionSirs() {
+        super(CODE,10);
+        
     }
     
     @Override
@@ -108,8 +122,8 @@ public class OwcExtentionSirs extends OwcExtension {
             }
             if(field instanceof FilterType){
                 try {
-                    final StyleXmlIO io = new StyleXmlIO();
-                    filter = io.getTransformer110().visitFilter((FilterType)field);
+//                    final StyleXmlIO io = new StyleXmlIO();
+                    filter = STYLE_XML_IO.getTransformer110().visitFilter((FilterType)field);
                 } catch (FactoryException ex) {
                     Logger.getLogger(OwcExtentionSirs.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -158,8 +172,7 @@ public class OwcExtentionSirs extends OwcExtension {
         
         if(sqlQuery!=null){
             //write the blean class name
-            final List<Object> fieldList = offering.getOperationOrContentOrStyleSet();
-            fieldList.add(new ParameterType(KEY_SQLQUERY,String.class.getName(),sqlQuery));
+            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_SQLQUERY, String.class.getName(), sqlQuery));
         }else{
             final BeanFeatureSupplier supplier;
             try {
@@ -169,8 +182,7 @@ public class OwcExtentionSirs extends OwcExtension {
             }
             final Class beanClass = supplier.getBeanClass();
             //write the blean class name
-            final List<Object> fieldList = offering.getOperationOrContentOrStyleSet();
-            fieldList.add(new ParameterType(KEY_BEANCLASS,String.class.getName(),beanClass.getName()));
+            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_BEANCLASS, String.class.getName(), beanClass.getName()));
         }
         
         final Query query = fml.getQuery();
@@ -181,13 +193,47 @@ public class OwcExtentionSirs extends OwcExtension {
             }
         }
         
+        final List<FeatureMapLayer.DimensionDef> extraDimensions = fml.getExtraDimensions();
+        for(final FeatureMapLayer.DimensionDef extraDimension : extraDimensions){
+            final Expression lower = extraDimension.getLower();
+//            
+//            final PropertyIsNull isNull = filterFactory.isNull(lower);
+//            offering.getOperationOrContentOrStyleSet().add(isNull);
+            DefaultPropertyName dpn = (DefaultPropertyName) extraDimension.getLower(); //filterFactory.p
+                                //DefaultPropertyName dpn = (DefaultPropertyName) extraDimension.getLower(); //filterFactory.property("jojo");
+//            if(lower!=null) offering.getOperationOrContentOrStyleSet().add(dpn);
+            
+            EntryType et = ATOM_FACTORY.createEntryType();
+            et.getOtherAttributes().put(new QName(""), "");
+            
+            ContentType ct = ATOM_FACTORY.createContentType();
+            ct.getContent();
+            ct.getOtherAttributes().put(new QName("extra"), "dimensions");
+//            TextType tt = ATOM_FACTORY.createTextType();
+//            JAXBElement e;
+            offering.getOperationOrContentOrStyleSet().add(ATOM_FACTORY.createEntryTypeContent(ct));
+
+//            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_LOWER_EXTRA_DIMENSION, extraDimension.getLower().getClass().getName(), lower.));
+//            if(lower!=null) offering.getOperationOrContentOrStyleSet().add(toParameterValue(lower));
+//            final Expression upper = extraDimension.getUpper();
+//            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_UPPER_EXTRA_DIMENSION, extraDimension.getUpper().getClass().getName(), beanClass.getName()));
+//            if(upper!=null) offering.getOperationOrContentOrStyleSet().add(toParameterValue(upper));
+            final CoordinateReferenceSystem crs = extraDimension.getCrs();
+//            if(lower!=null && upper!=null) offering.getOperationOrContentOrStyleSet().add(STYLE_XML_IO.getTransformerXMLv110()..during(lower, upper));
+//            extraDimension.getCrs();
+//            STYLE_XML_IO.getTransformerXMLv110().visitExpression(upper);
+        }
+        
         return offering;
     }
     
-    private static FilterType toFilter(final Filter filter){
-        final StyleXmlIO io = new StyleXmlIO();
-        final FilterType visit = io.getTransformerXMLv110().visit(filter);
+    private static ParameterValueType toParameterValue(final Expression expression){
+        final ParameterValueType visit = STYLE_XML_IO.getTransformerXMLv110().visitExpression(expression);
         return visit;
+    }
+    
+    private static FilterType toFilter(final Filter filter){
+        return STYLE_XML_IO.getTransformerXMLv110().visit(filter);
     }
         
     private static Name getTypeName(MapLayer layer){
