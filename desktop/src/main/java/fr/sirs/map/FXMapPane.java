@@ -13,11 +13,8 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.Color;
 import java.awt.RenderingHints;
-import java.awt.geom.NoninvertibleTransformException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -76,7 +73,6 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
-import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
 /**
@@ -113,6 +109,9 @@ public class FXMapPane extends BorderPane {
     private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
     private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
     private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
+    
+//    TODO : ACTIVATE BACK LEGEND
+//    private final FXLegendDecoration legend = new FXLegendDecoration(Injector.getSession().getLegendTemplate(), false);
     
     public FXMapPane() {
         
@@ -174,6 +173,10 @@ public class FXMapPane extends BorderPane {
         topgrid.add(uiToolBar, 3, 0);
         topgrid.add(uiEditBar, 4, 0);
         topgrid.add(uiSplitBar, 5, 0);
+        // TODO : ACTIVATE BACK LEGEND
+//        final ToggleButton toggleButton = new ToggleButton("Légende");
+//        legend.visibleProperty().bind(toggleButton.selectedProperty());
+//        topgrid.add(toggleButton, 6, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
@@ -227,6 +230,9 @@ public class FXMapPane extends BorderPane {
                     uiMap2.getCanvas().setTemporalRange(time, time);
                     uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
                     uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    
+        // TODO : ACTIVATE BACK LEGEND
+//                    legend.setMap2D(uiMap1);
                     return null;
                 }
             };

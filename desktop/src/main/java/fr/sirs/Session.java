@@ -35,6 +35,10 @@ import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Insets;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -71,6 +75,8 @@ import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
+import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
+import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
@@ -216,7 +222,24 @@ public class Session extends SessionGen {
     
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
-
+    
+    //generate a template for the legend
+    final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
+            new DefaultBackgroundTemplate( //legend background
+                    new BasicStroke(2), //stroke
+                    Color.BLUE, //stroke paint
+                    Color.WHITE, // fill paint
+                    new Insets(10, 10, 10, 10), //border margins
+                    8 //round border
+            ),
+            2, //gap between legend elements
+            null, //glyph size, we can let it to null for the legend to use the best size
+            new Font("Serial", Font.PLAIN, 10), //Font used for style rules
+            true, // show layer names
+            new Font("Serial", Font.BOLD, 12), //Font used for layer names
+            true // display only visible layers
+    );
+        
     /**
      * 
      * @return the application task manager, designed to start users tasks in a 
@@ -599,5 +622,9 @@ public class Session extends SessionGen {
             return;
         }
         frame.getMapTab().getMap().focusOnElement(target);
+    }
+    
+    public DefaultLegendTemplate getLegendTemplate() {
+        return legendTemplate;
     }
 }
