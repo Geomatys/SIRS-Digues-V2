@@ -292,8 +292,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageFranchissementId"
         eType="#//RefOuvrageFranchissement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionBasId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="cruesSubmersion" upperBound="-1"
-        eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_acces" eSuperTypes="#//ObjetReseau">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -302,7 +300,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="listeNature" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="cruesSubmersion" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Voie_digue" eSuperTypes="#//ObjetReseau">
@@ -312,7 +310,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="revetementId" eType="#//RefRevetement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="cruesSubmersion" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Ouvrage_voirie" eSuperTypes="#//ObjetReseau">
