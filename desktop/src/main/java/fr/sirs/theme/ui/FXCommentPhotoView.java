@@ -29,20 +29,11 @@ import javafx.scene.web.WebView;
  */
 public class FXCommentPhotoView extends SplitPane {
 
-    @FXML
-    private ScrollBar uiPhotoScroll;
-
-    @FXML
-    private WebView uiCommentArea;
-
-    @FXML
-    private ImageView uiPhotoView;
-    
-    @FXML
-    private Label uiPhotoLibelle;
-    
-    @FXML
-    private Label uiPhotoDate;
+    @FXML private ScrollBar uiPhotoScroll;
+    @FXML private WebView uiCommentArea;
+    @FXML private ImageView uiPhotoView;
+    @FXML private Label uiPhotoLibelle;
+    @FXML private Label uiPhotoDate;
     
     private final SimpleObjectProperty<Element> valueProperty = new SimpleObjectProperty<>();
 

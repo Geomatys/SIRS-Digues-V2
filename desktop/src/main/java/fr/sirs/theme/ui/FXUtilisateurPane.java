@@ -51,6 +51,12 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         
         SIRS.loadFXML(this, Utilisateur.class);
         
+        elementProperty().addListener(this::initFields);
+        messageDigest = MessageDigest.getInstance("MD5");
+        
+        this.elementProperty().set(utilisateur);
+        this.administrableProperty().set(administrable);
+        
         ui_role.disableProperty().bind(new SecurityBinding());
         ui_login.disableProperty().bind(disableFieldsProperty());
         ui_login.editableProperty().bind(administrableProperty());
@@ -58,12 +64,6 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
         
         ui_role.getItems().addAll(Role.values());
-        
-        elementProperty().addListener(this::initFields);
-        messageDigest = MessageDigest.getInstance("MD5");
-        
-        this.elementProperty().set(utilisateur);
-        this.administrableProperty().set(administrable);
     }
     
     public BooleanProperty administrableProperty(){return administrableProperty;}
