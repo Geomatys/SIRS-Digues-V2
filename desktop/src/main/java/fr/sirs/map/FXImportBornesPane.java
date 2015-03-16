@@ -134,7 +134,7 @@ public class FXImportBornesPane extends BorderPane {
         uiSeparatorLabel.managedProperty().bind(uiSeparatorLabel.visibleProperty());
 
         uiPaneConfig.setVisible(false);
-        uiPaneConfig.managedProperty().bind(visibleProperty());
+        uiPaneConfig.managedProperty().bind(uiPaneConfig.visibleProperty());
 
         uiTable.setEditable(false);
         uiTable.setLoadAll(true);

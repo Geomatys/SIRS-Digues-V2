@@ -55,24 +55,25 @@
                   <ComboBox fx:id="uiAttY" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <GridPane hgap="5.0" vgap="5.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
                <children>
-                  <Label text="Code à utiliser : " HBox.hgrow="NEVER" />
-                  <ComboBox fx:id="uiCodeBox" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                  <Label text="Code à utiliser : " />
+                  <ComboBox fx:id="uiCodeBox" maxWidth="1.7976931348623157E308" minWidth="0.0" GridPane.columnIndex="1" />
+                  <Label text="Libellé à utiliser : " GridPane.rowIndex="1" />
+                  <ComboBox fx:id="uiLibelleBox" maxWidth="1.7976931348623157E308" minWidth="0.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Tronçon à affecter : " GridPane.rowIndex="2" />
+                  <ComboBox fx:id="uiTronconBox" maxWidth="1.7976931348623157E308" minWidth="0.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-               <children>
-                  <Label text="Libellé à utiliser : " HBox.hgrow="NEVER" />
-                  <ComboBox fx:id="uiLibelleBox" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-               <children>
-                  <Label text="Tronçon à affecter : " HBox.hgrow="NEVER" />
-                  <ComboBox fx:id="uiTronconBox" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
-               </children>
-            </HBox>
+            </GridPane>
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
