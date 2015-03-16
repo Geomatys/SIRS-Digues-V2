@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
@@ -20,6 +21,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -187,7 +189,10 @@ public class FXMainFrame extends BorderPane {
     @FXML 
     private void clearCache(){
         session.clearCache();
-        session.getTronconDigueRepository().clearCache();
+        final Collection<AbstractSIRSRepository> repos = session.getModelRepositories();
+        for(final AbstractSIRSRepository repo : repos){
+            repo.clearCache();
+        }
     }
     
     @FXML 

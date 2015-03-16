@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.DigueRepository;
 
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
@@ -271,6 +273,10 @@ public class Session extends SessionGen {
 
     public SQLQueryRepository getSqlQueryRepository() {
         return sqlQueryRepository;
+    }
+    
+    public Collection<AbstractSIRSRepository> getModelRepositories(){
+        return repositories.values();
     }
     
     void setFrame(FXMainFrame frame) {
