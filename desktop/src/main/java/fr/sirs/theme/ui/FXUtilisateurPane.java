@@ -2,6 +2,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.model.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +27,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
     private final MessageDigest messageDigest;
     private final BooleanProperty administrableProperty = new SimpleBooleanProperty(this, "administrableProperty", false);
+    private final Session session = Injector.getSession();
 
     // Propriétés de Utilisateur
     @FXML TextField ui_login;
@@ -34,6 +36,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     @FXML PasswordField ui_passwordConfirm;
     @FXML Label ui_labelConfirm;
     @FXML ComboBox<Role> ui_role;
+    
+    private String currentUserLogin;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when
@@ -55,6 +59,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         messageDigest = MessageDigest.getInstance("MD5");
         
         this.elementProperty().set(utilisateur);
+        if(utilisateur!=null){
+            currentUserLogin = utilisateur.getLogin();
+        }
         this.administrableProperty().set(administrable);
         
         ui_role.disableProperty().bind(new SecurityBinding());
@@ -102,11 +109,11 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     private class SecurityBinding extends BooleanBinding{
 
         SecurityBinding(){
-            super.bind(disableFieldsProperty(), elementProperty(), Injector.getSession().utilisateurProperty());
+            super.bind(disableFieldsProperty(), elementProperty(), session.utilisateurProperty());
         }
         @Override
         protected boolean computeValue() {
-            return disableFieldsProperty().get() || elementProperty().get().equals(Injector.getSession().utilisateurProperty().get());
+            return disableFieldsProperty().get() || elementProperty().get().equals(session.utilisateurProperty().get());
         }
         
     }
@@ -130,9 +137,10 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
             new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE).showAndWait();
             throw new Exception("L'identifiant utilisateur n'a pas été renseigné ! Modification non enregistrée.");
         }
-        else if(ui_login.isEditable()){ // Si on est susceptible d'avoir modifié le login.
+        else if(!ui_login.getText().equals(currentUserLogin)){ // Si on est susceptible d'avoir modifié le login.
             
-            final List<Utilisateur> utilisateurs = Injector.getSession().getUtilisateurRepository().getAll();
+            session.getUtilisateurRepository().clearCache();
+            final List<Utilisateur> utilisateurs = session.getUtilisateurRepository().getAll();
             for(final Utilisateur utilisateur : utilisateurs){
                 if(ui_login.getText().equals(utilisateur.getLogin())){
                     ui_labelLogin.setTextFill(Color.RED);
@@ -141,6 +149,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                 }
             }
             ui_labelLogin.setTextFill(Color.BLACK);
+            currentUserLogin = ui_login.getText();
+            elementProperty.get().setLogin(ui_login.getText());
         }
         
         // Vérification du mot de passe.

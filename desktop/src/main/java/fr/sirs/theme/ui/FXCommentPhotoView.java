@@ -6,6 +6,7 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -98,7 +99,12 @@ public class FXCommentPhotoView extends SplitPane {
              */
             final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
             // TODO : How to manage image loading error ? No exception is thrown here...
-            uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
+            if(imagePath!=null){
+                uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
+            }
+            else{
+                uiPhotoView.setImage(null);
+            }
             uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
             uiPhotoDate.textProperty().bind(selected.dateProperty().asString());
         } catch (IllegalStateException e) {
@@ -116,6 +122,5 @@ public class FXCommentPhotoView extends SplitPane {
         uiPhotoView.minHeight(0);
         uiPhotoView.fitWidthProperty().bind(((Region)uiPhotoView.getParent()).widthProperty());
         uiPhotoView.fitHeightProperty().bind(((Region)uiPhotoView.getParent()).heightProperty());
-        uiPhotoView.setPreserveRatio(true);
     }
 }
