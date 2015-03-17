@@ -6,18 +6,24 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
-import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
 
 /**
@@ -40,6 +46,19 @@ public class FXCommentPhotoView extends SplitPane {
 
     public FXCommentPhotoView() {
         SIRS.loadFXML(this);
+        
+        uiPhotoView.fitHeightProperty().bind(new DoubleBinding() {
+
+            {
+                bind(heightProperty());
+            }
+            
+            @Override
+            protected double computeValue() {
+                return heightProperty().get() - uiPhotoLibelle.getHeight() - uiPhotoDate.getHeight();
+            }
+        });
+        
         uiPhotoScroll.setBlockIncrement(1.0);
         uiPhotoScroll.setUnitIncrement(1.0);
         uiPhotoScroll.setMin(0);
@@ -88,6 +107,8 @@ public class FXCommentPhotoView extends SplitPane {
         final ObservableList<Photo> photos = ((Objet) valueProperty.get()).photo;
         final int imageIndex = uiPhotoScroll.valueProperty().intValue();
         if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
+            uiPhotoView.setImage(null);
+            uiPhotoLibelle.setText("");
             return;
         }
 
@@ -99,12 +120,7 @@ public class FXCommentPhotoView extends SplitPane {
              */
             final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
             // TODO : How to manage image loading error ? No exception is thrown here...
-            if(imagePath!=null){
-                uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
-            }
-            else{
-                uiPhotoView.setImage(null);
-            }
+            uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
             uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
             uiPhotoDate.textProperty().bind(selected.dateProperty().asString());
         } catch (IllegalStateException e) {
@@ -120,7 +136,5 @@ public class FXCommentPhotoView extends SplitPane {
          */
         uiPhotoView.minWidth(0);
         uiPhotoView.minHeight(0);
-        uiPhotoView.fitWidthProperty().bind(((Region)uiPhotoView.getParent()).widthProperty());
-        uiPhotoView.fitHeightProperty().bind(((Region)uiPhotoView.getParent()).heightProperty());
     }
 }
