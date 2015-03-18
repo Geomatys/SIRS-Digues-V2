@@ -195,11 +195,6 @@ public class FXMainFrame extends BorderPane {
         }
     }
     
-    @FXML 
-    private void refresh(){
-        session.clearCache();
-    }
-    
     private MenuItem toMenuItem(final Theme theme) {
         final List<Theme> subs = theme.getSubThemes();
         final MenuItem item;

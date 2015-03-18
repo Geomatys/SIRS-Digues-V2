@@ -407,6 +407,14 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 DocumentTroncon.class);
     }
 
+    public static final String DOCUMENTTRONCONBYDOCUMENTID = "DocumentTronconByDocumentId";
+
+    @View(name = DOCUMENTTRONCONBYDOCUMENTID, map = "classpath:DocumentTronconByDocumentId-map.js")
+    public List<DocumentTroncon> getDocumentTronconsByDocumentId(final String documentId) {
+        return db.queryView(createQuery(DOCUMENTTRONCONBYDOCUMENTID).key(documentId),
+                DocumentTroncon.class);
+    }
+
     public JacksonIterator<TronconDigue> getAllIterator() {
         return JacksonIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery("stream")));

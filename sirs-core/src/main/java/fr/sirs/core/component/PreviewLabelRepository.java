@@ -8,7 +8,9 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.support.Views;
 
@@ -68,7 +70,8 @@ public class PreviewLabelRepository extends
     
     public List<PreviewLabel> getPreviewLabels(Class type) {
         ArgumentChecks.ensureNonNull("Element type", type);
-        return getPreviewLabels(type.getCanonicalName());
+        if(type.isInterface()) return getPreviewLabelsFromInterface(type.getCanonicalName());
+        else return getPreviewLabels(type.getCanonicalName());
     }
 
     public List<PreviewLabel> getPreviewLabels(final String type) {
@@ -86,6 +89,20 @@ public class PreviewLabelRepository extends
             }
         }
         return result;
+    }
+
+    private List<PreviewLabel> getPreviewLabelsFromInterface(final String type) {
+        ArgumentChecks.ensureNonNull("Element type", type);
+        final List<PreviewLabel> previews = db.queryView(createQuery("all").includeDocs(false), PreviewLabel.class);
+        previews.removeIf((PreviewLabel t) -> {
+                try {
+                    return !Class.forName(type).isAssignableFrom(Class.forName(t.getType()));
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(PreviewLabelRepository.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return false;
+        });
+        return previews;
     }
 
     @Override

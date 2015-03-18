@@ -5,8 +5,8 @@ package fr.sirs;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Objet;
@@ -244,8 +244,10 @@ public final class SIRS extends SirsCore {
      */
     public static ObservableList<Objet> getStructures(final Set<String> objetIds, final Class objetClass) {
         ObservableList<Objet> result = FXCollections.observableArrayList();
-        if (objetClass == null || !Objet.class.isAssignableFrom(objetClass)
-                || objetIds == null || objetIds.isEmpty()) {
+        if (objetClass == null 
+                || !Objet.class.isAssignableFrom(objetClass)
+                || objetIds == null 
+                || objetIds.isEmpty()) {
             return result;
         }
         
@@ -262,6 +264,42 @@ public final class SIRS extends SirsCore {
         }
         
         return result;
+    }
+        
+    /**
+     * Retourne la liste d'{@link DocumentTroncon}s dont les identifiants sont passés dans 
+     * le {@link Set} d'entrée. La recherche s'effectue sur tous les tronçons
+     * de la base de donnée chargée. 
+     * 
+     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
+     * 
+     * @param objetIds Les identifiants des DocumentTroncon à retrouver.
+     * @return Une liste de DocumentTroncon. Elle peut être vide, mais jamais nulle.
+     */
+    public static ObservableList<DocumentTroncon> getDocumentTroncons(final Set<String> objetIds) {
+        ObservableList<DocumentTroncon> result = FXCollections.observableArrayList();
+        if (objetIds == null 
+                || objetIds.isEmpty()) {
+            return result;
+        }
+        
+        List<DocumentTroncon> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentTroncons();
+        if (allFromView != null) {
+            final Iterator<DocumentTroncon> it = allFromView.iterator();
+            DocumentTroncon o;
+            while (objetIds.size() > 0 && it.hasNext()) {
+                o = it.next();
+                if (objetIds.remove(o.getId())) {
+                    result.add(o);
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    public static ObservableList<DocumentTroncon> getDocumentTroncons(final String documentId){
+        return  FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
     }
     
     /**

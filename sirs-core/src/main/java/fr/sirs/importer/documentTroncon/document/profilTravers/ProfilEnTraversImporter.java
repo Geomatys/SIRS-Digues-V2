@@ -94,24 +94,24 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
         couchDbConnector.executeBulk(related.values());
     }
 
-    @Override
-    public void update() throws IOException, AccessDbImporterException {
-        if(related==null) compute();
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-        while(it.hasNext()){
-            final Row row = it.next();
-            final ProfilTravers profil = related.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
-            final List<DocumentTroncon> docs = getDocumentTroncons(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
-            if(docs!=null && !docs.isEmpty()){
-                switch(docs.size()){
-                    case 2: profil.setTronconB(getTronconId(docs.get(1)));
-                    case 1: profil.setTronconA(getTronconId(docs.get(0))); break;
-                    default: Logger.getLogger(ProfilEnTraversImporter.class.getName()).log(Level.SEVERE, "Trop de tonçons pour le profil en travers."); break;
-                }
-            }
-        }
-        couchDbConnector.executeBulk(related.values());
-    }
+//    @Override
+//    public void update() throws IOException, AccessDbImporterException {
+//        if(related==null) compute();
+//        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+//        while(it.hasNext()){
+//            final Row row = it.next();
+//            final ProfilTravers profil = related.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+//            final List<DocumentTroncon> docs = getDocumentTroncons(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+//            if(docs!=null && !docs.isEmpty()){
+//                switch(docs.size()){
+//                    case 2: profil.setTronconB(getTronconId(docs.get(1)));
+//                    case 1: profil.setTronconA(getTronconId(docs.get(0))); break;
+//                    default: Logger.getLogger(ProfilEnTraversImporter.class.getName()).log(Level.SEVERE, "Trop de tonçons pour le profil en travers."); break;
+//                }
+//            }
+//        }
+//        couchDbConnector.executeBulk(related.values());
+//    }
     
     private List<DocumentTroncon> getDocumentTroncons(final Integer profilId) throws IOException, AccessDbImporterException{
         final List<DocumentTroncon> result = new ArrayList<>();

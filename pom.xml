@@ -167,7 +167,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.34-SNAPSHOT</version>
+          <version>0.5.35-SNAPSHOT</version>
         </plugin>
         <plugin>
             <groupId>external.atlassian.jgitflow</groupId>

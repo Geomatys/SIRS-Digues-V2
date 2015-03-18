@@ -15,7 +15,6 @@
                       <Menu mnemonicParsing="false" text="Fichier">
                           <items>
                               <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="%preferences" />
-                        <MenuItem mnemonicParsing="false" onAction="#refresh" text="%refresh" />
                         <MenuItem mnemonicParsing="false" onAction="#clearCache" text="%clearCache" />
                         <MenuItem fx:id="uiCompte" mnemonicParsing="false" onAction="#openCompte" text="%count" />
                         <MenuItem mnemonicParsing="false" onAction="#changeUser" text="%changeUser" />
