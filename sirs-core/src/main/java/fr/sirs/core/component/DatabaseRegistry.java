@@ -237,8 +237,15 @@ public class DatabaseRegistry {
         RestTemplate template = new RestTemplate(new StdHttpClient.Builder().url(matcher.replaceFirst("")).build());
         String userContent = FileUtilities.getStringFromStream(DatabaseRegistry.class.getResourceAsStream("/fr/sirs/launcher/user-put.json"));
         
-        template.put("/_users/org.couchdb.user:"+username, 
-                userContent.replaceAll("\\$ID", username)
-                .replaceAll("\\$PASSWORD", password == null? "" : password));
+        // try to send user as database admin. If it's a fail, we will try to add him as simple user.
+        try {
+            template.put("/_config/admins/"+username, "\""+password+"\"");
+        } catch (DbAccessException e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot create an admin.", e);
+            template.put("/_users/org.couchdb.user:" + username,
+                    userContent.replaceAll("\\$ID", username)
+                    .replaceAll("\\$PASSWORD", password == null ? "" : password));
+        }
+        
     }
 }
