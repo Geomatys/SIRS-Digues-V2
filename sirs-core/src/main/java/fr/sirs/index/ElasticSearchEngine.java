@@ -28,7 +28,7 @@ public class ElasticSearchEngine implements Closeable {
     /**
      * List of fields to embed in search hits.
      */
-    private static final String[] HIT_FIELDS = new String[]{"pseudoId", "@class", "libelle"};
+    private static final String[] HIT_FIELDS = new String[]{"designation", "@class", "libelle"};
     
     private final Node node;
     private final Client client;

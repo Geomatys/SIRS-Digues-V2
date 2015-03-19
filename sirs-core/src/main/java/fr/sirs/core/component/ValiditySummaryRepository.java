@@ -12,7 +12,7 @@ import org.ektorp.ViewQuery;
 import org.ektorp.support.Views;
 
 @Views({
-        @View(name = "pseudoId", map="classpath:PseudoId-map.js"),
+        @View(name = "designation", map="classpath:PseudoId-map.js"),
         @View(name = "validation", map="classpath:Validation-map.js")})
 public class ValiditySummaryRepository extends
         CouchDbRepositorySupport<ValiditySummary> {
@@ -22,15 +22,15 @@ public class ValiditySummaryRepository extends
         initStandardDesignDocument();
     }
     
-    public List<ValiditySummary> getPseudoIdsForClass(final Class clazz){
+    public List<ValiditySummary> getDesignationsForClass(final Class clazz){
         ArgumentChecks.ensureNonNull("Class", clazz);
-        final ViewQuery viewQuery = createQuery("pseudoId").includeDocs(false).key(clazz.getCanonicalName());
+        final ViewQuery viewQuery = createQuery("designation").includeDocs(false).key(clazz.getCanonicalName());
         final List<ValiditySummary> usages = db.queryView(viewQuery, ValiditySummary.class);
         return usages;
     }
     
-    public List<ValiditySummary> getPseudoIds(){
-        final ViewQuery viewQuery = createQuery("pseudoId").includeDocs(false);
+    public List<ValiditySummary> getAllDesignations(){
+        final ViewQuery viewQuery = createQuery("designation").includeDocs(false);
         final List<ValiditySummary> usages = db.queryView(viewQuery, ValiditySummary.class);
         return usages;
     }

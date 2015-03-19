@@ -94,7 +94,7 @@ public interface Element extends Identifiable, Serializable {
      */
     String getDesignation();
     StringProperty designationProperty();
-    void setDesignation(String pseudoId);
+    void setDesignation(String designation);
     
     /**
      * Search in this object a contained {@link Element} with the given ID. If 

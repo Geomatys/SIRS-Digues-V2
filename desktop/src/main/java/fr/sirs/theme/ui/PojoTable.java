@@ -939,11 +939,11 @@ public class PojoTable extends BorderPane {
             final String prefix = bundle.getString("classAbrege")+" : ";
             final ComboBox<ValiditySummary> comboBox;
             if(tronconSourceProperty.get()==null){
-                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)));
+                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(pojoClass)));
             }
             else{
                 
-                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getPseudoIdsForClass(pojoClass)).filtered(new Predicate<ValiditySummary>() {
+                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(pojoClass)).filtered(new Predicate<ValiditySummary>() {
 
                     @Override
                     public boolean test(ValiditySummary t) {

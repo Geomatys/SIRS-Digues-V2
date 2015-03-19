@@ -55,7 +55,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
     public FXPseudoIdAnalysePane(final Class type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
-        validitySummaries = valididySummaryRepository.getPseudoIdsForClass(type);
+        validitySummaries = valididySummaryRepository.getDesignationsForClass(type);
 
         pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
         pseudoIds.setEditable(false);
