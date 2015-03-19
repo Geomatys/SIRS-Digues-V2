@@ -61,7 +61,7 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeCote.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeCote.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString()))));
+            typeCote.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString()))));
             typeCote.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())), typeCote);

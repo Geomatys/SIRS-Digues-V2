@@ -125,7 +125,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
                 }
                 
                 // Faute de mieux, on référence le document à grande échelle avec l'id du document.
-                documentGrandeEchelle.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+                documentGrandeEchelle.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
                 documentGrandeEchelle.setValid(true);
                 
                 related.put(row.getInt(Columns.ID_DOC.toString()), documentGrandeEchelle);

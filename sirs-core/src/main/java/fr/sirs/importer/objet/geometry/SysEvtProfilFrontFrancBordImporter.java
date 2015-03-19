@@ -212,7 +212,7 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
             profil.setTypeProfilFrancBordId(typesProfil.get(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())).getId());
         }
         
-        profil.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
+        profil.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
         profil.setValid(true);
         
         return profil;

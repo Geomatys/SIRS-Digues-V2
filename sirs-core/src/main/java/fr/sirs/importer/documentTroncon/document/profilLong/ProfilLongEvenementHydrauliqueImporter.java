@@ -99,7 +99,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
             }
             
             // Pas d'id car table de jointure : arbitrairement, on met l'id de l'événement hydrau
-            profilLongEvenementHydraulique.setPseudoId(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
+            profilLongEvenementHydraulique.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             
             profilLongEvenementHydraulique.setValid(true);
             

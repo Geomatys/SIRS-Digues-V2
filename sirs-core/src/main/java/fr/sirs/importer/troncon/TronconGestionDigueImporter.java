@@ -284,7 +284,7 @@ implements DocumentsUpdatable {
                 tronconDigue.setDigueId(d.getId());
             }
             
-            tronconDigue.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
+            tronconDigue.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
             tronconDigue.setValid(true);
             
             // Set the geometry

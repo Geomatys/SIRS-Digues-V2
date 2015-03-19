@@ -142,7 +142,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostale.textProperty().unbindBidirectional(oldValue.code_postalProperty());
             uiCommune.textProperty().unbindBidirectional(oldValue.paysProperty());
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
         if (newValue == null) return;
@@ -152,7 +152,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         orgsOfContact.clear();
         modifiedOrgs.clear();
                 
-        uiPseudoId.textProperty().bindBidirectional(newValue.pseudoIdProperty());
+        uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
         uiNom.textProperty().bindBidirectional(newValue.nomProperty());
         uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
         uiService.textProperty().bindBidirectional(newValue.serviceProperty());

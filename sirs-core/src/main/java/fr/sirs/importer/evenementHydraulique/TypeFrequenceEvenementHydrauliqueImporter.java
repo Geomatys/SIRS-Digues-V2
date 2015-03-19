@@ -60,7 +60,7 @@ class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeReferenceImpo
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeFrequence.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeFrequence.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())));
+            typeFrequence.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())));
             typeFrequence.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())), typeFrequence);

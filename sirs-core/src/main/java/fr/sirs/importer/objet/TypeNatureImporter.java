@@ -60,7 +60,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeNature.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeNature.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString()))));
+            typeNature.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString()))));
             typeNature.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString())), typeNature);

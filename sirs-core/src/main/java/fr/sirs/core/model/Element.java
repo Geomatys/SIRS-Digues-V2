@@ -86,15 +86,15 @@ public interface Element extends Identifiable, Serializable {
     void setValid(boolean valid);
     
     /**
-     * Manage the pseudo ID of an element. To handle with couchDB ids is not an 
-     * easy task, then elements can be given an ID, without guarantee 
-     * of unicity.
+     * Manage the designation of an element. To handle with couchDB ids is not 
+     * an easy task, then elements can be given an ID, without guarantee of 
+     * unicity.
      * 
      * @return 
      */
-    String getPseudoId();
-    StringProperty pseudoIdProperty();
-    void setPseudoId(String pseudoId);
+    String getDesignation();
+    StringProperty designationProperty();
+    void setDesignation(String pseudoId);
     
     /**
      * Search in this object a contained {@link Element} with the given ID. If 

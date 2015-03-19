@@ -216,7 +216,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
                 throw new AccessDbImporterException("L'organisme " + commune + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            communeTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_COMMUNE.toString())));
+            communeTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_COMMUNE.toString())));
             communeTroncon.setValid(true);
             
             communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), communeTroncon);

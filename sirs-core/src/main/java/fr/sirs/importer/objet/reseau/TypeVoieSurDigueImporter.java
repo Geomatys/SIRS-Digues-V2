@@ -60,7 +60,7 @@ class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeVoie.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeVoie.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString()))));
+            typeVoie.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString()))));
             typeVoie.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString())), typeVoie);

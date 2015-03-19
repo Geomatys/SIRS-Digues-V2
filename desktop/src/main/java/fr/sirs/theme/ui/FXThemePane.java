@@ -132,7 +132,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
         
         if (oldValue != null) {
             //unbind all bidirectionnal
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
         if (newValue == null) {    
@@ -157,7 +157,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             Injector.getSession().prepareToPrint(newValue);
             
-            uiPseudoId.textProperty().bindBidirectional(newValue.pseudoIdProperty());
+            uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
             
             // If we previously edited same type of element, we recycle edition panel.
             if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {

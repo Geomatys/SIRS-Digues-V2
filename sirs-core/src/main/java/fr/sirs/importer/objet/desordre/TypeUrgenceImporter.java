@@ -60,7 +60,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeUrgence.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeUrgence.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_URGENCE.toString())));
+            typeUrgence.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_URGENCE.toString())));
             typeUrgence.setValid(true);
             
             types.put(row.getInt(Columns.ID_TYPE_URGENCE.toString()), typeUrgence);

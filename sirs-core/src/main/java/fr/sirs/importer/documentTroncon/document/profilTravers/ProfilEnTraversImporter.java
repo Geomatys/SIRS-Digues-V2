@@ -83,7 +83,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 profil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            profil.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())));
+            profil.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())));
             profil.setValid(true);
             
             final List<LeveProfilTravers> leves = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));

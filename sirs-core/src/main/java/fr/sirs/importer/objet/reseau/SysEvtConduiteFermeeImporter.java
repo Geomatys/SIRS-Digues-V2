@@ -316,7 +316,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
                 conduiteFermee.setDiametre(row.getDouble(Columns.DIAMETRE.toString()).floatValue());
             }
             
-            conduiteFermee.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
+            conduiteFermee.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
             conduiteFermee.setValid(true);
             
             return conduiteFermee;

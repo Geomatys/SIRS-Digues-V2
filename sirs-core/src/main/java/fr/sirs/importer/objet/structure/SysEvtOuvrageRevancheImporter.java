@@ -296,7 +296,7 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
             ouvrage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        ouvrage.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        ouvrage.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         ouvrage.setValid(true);
         
         return ouvrage;

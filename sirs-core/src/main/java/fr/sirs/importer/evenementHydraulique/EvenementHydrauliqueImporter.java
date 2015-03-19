@@ -126,7 +126,7 @@ implements DocumentsUpdatable {
             if(meteoEvt!=null){
                 evenement.setEvenementMeteoIds(meteoEvt);
             }
-            evenement.setPseudoId(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
+            evenement.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             evenement.setValid(true);
             
             evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);

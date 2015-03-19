@@ -298,7 +298,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
             voie.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());
         }
 
-        voie.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
+        voie.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
         voie.setValid(true);
         
         return voie;

@@ -113,7 +113,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
             contactStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
-        contactStructure.setPseudoId(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
+        contactStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
         contactStructure.setValid(true);
         return contactStructure;
     }
@@ -135,7 +135,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
             organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
-        organismeStructure.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));
+        organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));
         organismeStructure.setValid(true);
         return organismeStructure;
     }

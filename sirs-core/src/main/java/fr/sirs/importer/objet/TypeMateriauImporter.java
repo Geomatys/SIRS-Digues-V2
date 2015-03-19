@@ -60,7 +60,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeMateriau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeMateriau.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString()))));
+            typeMateriau.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString()))));
             typeMateriau.setValid(true);
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString())), typeMateriau);
         }

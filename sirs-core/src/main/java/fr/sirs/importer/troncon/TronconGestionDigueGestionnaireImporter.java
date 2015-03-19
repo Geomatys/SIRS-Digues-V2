@@ -99,7 +99,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             }
             
             // Pas d'ID propre car table de jointure : on affecte arbitrairement l'id de l'organisme.
-            gestion.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
+            gestion.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
             gestion.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

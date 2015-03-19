@@ -86,7 +86,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
                 maitreOeuvreMarche.setOrganismeId(maitreOeuvre.getId());
                 
                 // Jointure, donc pas d'ID propre : on affecte l'id de l'organisme comme pseudo-id.
-                maitreOeuvreMarche.setPseudoId(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
+                maitreOeuvreMarche.setDesignation(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
                 maitreOeuvreMarche.setValid(true);
                 marche.getMaitreOeuvre().add(maitreOeuvreMarche);
             }

@@ -60,7 +60,7 @@ class TypeOuvrageTelecomNrjImporter extends GenericTypeReferenceImporter<RefOuvr
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeOuvrage.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_TELECOM_NRJ.toString()))));
+            typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_TELECOM_NRJ.toString()))));
             typeOuvrage.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_TELECOM_NRJ.toString())), typeOuvrage);

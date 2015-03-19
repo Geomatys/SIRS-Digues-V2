@@ -152,7 +152,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             
             profil.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
-            profil.setPseudoId(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
+            profil.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             profil.setValid(true);
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);

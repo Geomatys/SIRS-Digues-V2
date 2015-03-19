@@ -112,7 +112,7 @@ class GardienTronconGestionImporter extends GenericImporter {
                 throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            gardien.setPseudoId(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
+            gardien.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
             gardien.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

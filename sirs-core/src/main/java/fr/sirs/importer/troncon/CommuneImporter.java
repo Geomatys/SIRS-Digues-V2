@@ -70,7 +70,7 @@ class CommuneImporter extends GenericImporter {
                 commune.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            commune.setPseudoId(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
+            commune.setDesignation(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
             commune.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

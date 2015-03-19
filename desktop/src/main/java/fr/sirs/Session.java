@@ -559,7 +559,7 @@ public class Session extends SessionGen {
                         }
 
                         tab.setContent(content);
-                        element.pseudoIdProperty().addListener(new ChangeListener<String>() {
+                        element.designationProperty().addListener(new ChangeListener<String>() {
 
                             @Override
                             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -589,7 +589,7 @@ public class Session extends SessionGen {
             title += bundle.getString("classAbrege");
         } 
         
-        title += (element.getPseudoId()==null) ? "" : "-"+element.getPseudoId();
+        title += (element.getDesignation()==null) ? "" : "-"+element.getDesignation();
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {

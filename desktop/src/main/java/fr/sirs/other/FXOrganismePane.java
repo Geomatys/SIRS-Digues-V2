@@ -93,7 +93,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.code_postalProperty());
             uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.pseudoIdProperty());
+            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
         final Organisme organisme;
@@ -106,7 +106,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         }
         
         date_maj.valueProperty().bind(organisme.dateMajProperty());
-        uiPseudoId.textProperty().bindBidirectional(organisme.pseudoIdProperty());
+        uiPseudoId.textProperty().bindBidirectional(organisme.designationProperty());
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statut_juridiqueProperty());

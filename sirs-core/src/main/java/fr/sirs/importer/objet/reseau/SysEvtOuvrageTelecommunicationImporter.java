@@ -276,7 +276,7 @@ class SysEvtOuvrageTelecommunicationImporter extends GenericReseauImporter<Ouvra
             ouvrage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        ouvrage.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
+        ouvrage.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
         ouvrage.setValid(true);
         
         return ouvrage;

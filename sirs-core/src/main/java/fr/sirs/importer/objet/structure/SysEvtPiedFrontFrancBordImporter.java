@@ -290,7 +290,7 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
             pied.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        pied.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        pied.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         pied.setValid(true);
         
         return pied;

@@ -231,7 +231,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
                 ligneEau.getMesureId().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             }
             
-            ligneEau.setPseudoId(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+            ligneEau.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             ligneEau.setValid(true);
             
             return ligneEau;

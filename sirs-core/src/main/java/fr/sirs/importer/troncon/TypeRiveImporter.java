@@ -59,7 +59,7 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
                 typeRive.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            typeRive.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString()))));
+            typeRive.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString()))));
             typeRive.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())), typeRive);

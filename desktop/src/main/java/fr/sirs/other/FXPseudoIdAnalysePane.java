@@ -67,7 +67,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
 
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                return new SimpleObjectProperty<>(param.getValue().getPseudoId());
+                return new SimpleObjectProperty<>(param.getValue().getDesignation());
             }
         });
         pseudoIds.getColumns().add(propertyColumn);
@@ -159,21 +159,21 @@ public class FXPseudoIdAnalysePane extends BorderPane {
         final List<String> ids = new ArrayList<>();
         for (final ValiditySummary validitySummary : validitySummaries) {
 
-            if (validitySummary.getPseudoId() != null) {
-                if (!ids.contains(validitySummary.getPseudoId())) {
-                    ids.add(validitySummary.getPseudoId());
-                } else if (!doubleids.contains(validitySummary.getPseudoId())) {
-                    doubleids.add(validitySummary.getPseudoId());
+            if (validitySummary.getDesignation() != null) {
+                if (!ids.contains(validitySummary.getDesignation())) {
+                    ids.add(validitySummary.getDesignation());
+                } else if (!doubleids.contains(validitySummary.getDesignation())) {
+                    doubleids.add(validitySummary.getDesignation());
                 }
             }
-            ids.add(validitySummary.getPseudoId());
+            ids.add(validitySummary.getDesignation());
         }
 
         // Maintenant on sait quels sont les id doublons
         final List<ValiditySummary> referenceUsages = new ArrayList<>();
 
         for (final ValiditySummary validitySummary : validitySummaries) {
-            if (validitySummary.getPseudoId() != null && doubleids.contains(validitySummary.getPseudoId())) {
+            if (validitySummary.getDesignation() != null && doubleids.contains(validitySummary.getDesignation())) {
                 referenceUsages.add(validitySummary);
             }
         }

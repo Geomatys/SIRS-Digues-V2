@@ -88,7 +88,7 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
             }
             
             // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.
-            contactOrganisme.setPseudoId(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
+            contactOrganisme.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
             contactOrganisme.setValid(true);
             
             List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(Columns.ID_ORGANISME.toString()));

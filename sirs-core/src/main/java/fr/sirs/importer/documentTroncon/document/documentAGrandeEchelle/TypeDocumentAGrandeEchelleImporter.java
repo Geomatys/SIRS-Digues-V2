@@ -61,7 +61,7 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
                 typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            typeDocument.setPseudoId(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())));
+            typeDocument.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())));
             typeDocument.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);

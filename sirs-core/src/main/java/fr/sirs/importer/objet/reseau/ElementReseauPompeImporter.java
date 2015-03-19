@@ -107,7 +107,7 @@ class ElementReseauPompeImporter extends GenericImporter {
                 pompe.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            pompe.setPseudoId(String.valueOf(row.getInt(Columns.ID_POMPE.toString())));
+            pompe.setDesignation(String.valueOf(row.getInt(Columns.ID_POMPE.toString())));
             pompe.setValid(true);
             
             pompes.put(row.getInt(Columns.ID_POMPE.toString()), pompe);

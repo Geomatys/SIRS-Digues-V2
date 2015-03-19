@@ -90,15 +90,15 @@ public class SirsStringConverter extends StringConverter {
     public static String getDesignation(final PreviewLabel source) {
         final LabelMapper labelMapper = getLabelMapperForClass(source.getType());
         // If Designation is not null, we display it.
-        return (labelMapper == null || source.getPseudoId() == null) ? ""
-                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getPseudoId());
+        return (labelMapper == null || source.getDesignation() == null) ? ""
+                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getDesignation());
     }
     
     public static String getDesignation(final Element source) {
         final LabelMapper labelMapper = getLabelMapperForClass(source.getClass());
         // If Designation is not null, we display it.
-        return (labelMapper == null || source.getPseudoId() == null) ? ""
-                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getPseudoId());
+        return (labelMapper == null || source.getDesignation()== null) ? ""
+                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getDesignation());
     }
     
     @Override

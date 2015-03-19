@@ -82,7 +82,7 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
             }
 
             // Pas d'ID : on met arbitrairement celui de la ligne d'eau comme pseudo id.
-            mesure.setPseudoId(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+            mesure.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             mesure.setValid(true);
             
             // Set the list ByLigneEauId

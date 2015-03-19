@@ -228,7 +228,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter {
                 docTroncon.setSirsdocument(documentsGrandeEchelle.get(row.getInt(Columns.ID_DOC.toString())).getId());
             }
         }
-        docTroncon.setPseudoId(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+        docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
         docTroncon.setValid(true);
     }
 }

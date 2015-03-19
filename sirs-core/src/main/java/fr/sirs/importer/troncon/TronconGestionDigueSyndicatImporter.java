@@ -116,7 +116,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
                 }
             }
             
-            periodeSyndicale.setPseudoId(String.valueOf(row.getInt(Columns.ID_TRONCON_SYNDICAT.toString())));
+            periodeSyndicale.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_SYNDICAT.toString())));
             periodeSyndicale.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

@@ -60,7 +60,7 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 typeSeuil.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
-            typeSeuil.setPseudoId(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString()))));
+            typeSeuil.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString()))));
             typeSeuil.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString())), typeSeuil);

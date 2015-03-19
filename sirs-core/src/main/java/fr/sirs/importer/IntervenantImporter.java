@@ -109,7 +109,7 @@ public class IntervenantImporter extends GenericImporter {
                 intervenant.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-            intervenant.setPseudoId(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
+            intervenant.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
             intervenant.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

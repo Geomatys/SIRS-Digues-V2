@@ -98,7 +98,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
             marche.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
         }
         
-        marche.setPseudoId(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));
+        marche.setDesignation(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));
         
         marche.setValid(true);
         

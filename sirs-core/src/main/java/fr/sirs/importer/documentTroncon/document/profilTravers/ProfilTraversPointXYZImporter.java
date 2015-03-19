@@ -83,7 +83,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             }
             
             levePoint.setD(Double.NaN);
-            levePoint.setPseudoId(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
+            levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
             levePoint.setValid(true);
             
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);

@@ -105,7 +105,7 @@ public class DesordreObservationImporter extends GenericImporter {
                 observation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
         
-            observation.setPseudoId(String.valueOf(row.getInt(Columns.ID_OBSERVATION.toString())));
+            observation.setDesignation(String.valueOf(row.getInt(Columns.ID_OBSERVATION.toString())));
             observation.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

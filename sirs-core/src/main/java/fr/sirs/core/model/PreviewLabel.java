@@ -13,8 +13,8 @@ public class PreviewLabel implements Identifiable {
     @JsonProperty("objectId")
     private String objectId;
     
-    @JsonProperty("pseudoId")
-    private String pseudoId;
+    @JsonProperty("designation")
+    private String designation;
 
     public String getLabel() {
         return label;
@@ -48,12 +48,12 @@ public class PreviewLabel implements Identifiable {
         this.objectId = objectId;
     }
 
-    public String getPseudoId() {
-        return pseudoId;
+    public String getDesignation() {
+        return designation;
     }
 
-    public void setPseudoId(String pseudoId) {
-        this.pseudoId = pseudoId;
+    public void setDesignation(String designation) {
+        this.designation = designation;
     }
 
     @Override

@@ -955,7 +955,7 @@ public class PojoTable extends BorderPane {
 
                 @Override
                 public String toString(ValiditySummary object) {
-                    return prefix+object.getPseudoId() + ((object.getLabel()==null) ? "" : " - "+object.getLabel());
+                    return prefix+object.getDesignation() + ((object.getLabel()==null) ? "" : " - "+object.getLabel());
                 }
 
                 @Override

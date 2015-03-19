@@ -274,7 +274,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
             reseauEau.setTypeReseauHydroCielOuvertId(typesReseauHydroCielOuvert.get(row.getInt(Columns.ID_TYPE_RESEAU_EAU.toString())).getId());
         }
 
-        reseauEau.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
+        reseauEau.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
         reseauEau.setValid(true);
         
         return reseauEau;

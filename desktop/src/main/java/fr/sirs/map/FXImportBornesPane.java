@@ -335,7 +335,7 @@ public class FXImportBornesPane extends BorderPane {
                             BorneDigue newBorn = borneRepo.create();
                             newBorn.setGeometry(borneGeom);
                             if (codeProperty != null) {
-                                newBorn.setPseudoId(current.getPropertyValue(codeProperty).toString());
+                                newBorn.setDesignation(current.getPropertyValue(codeProperty).toString());
                             }
                             if (libelleProperty != null) {
                                 newBorn.setLibelle(current.getPropertyValue(libelleProperty).toString());

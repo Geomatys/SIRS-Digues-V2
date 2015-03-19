@@ -171,7 +171,7 @@ public class FXValidationPane extends BorderPane {
 
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                return new SimpleObjectProperty<>(param.getValue().getPseudoId());
+                return new SimpleObjectProperty<>(param.getValue().getDesignation());
             }
         });
         usages.getColumns().add(propertyColumn);

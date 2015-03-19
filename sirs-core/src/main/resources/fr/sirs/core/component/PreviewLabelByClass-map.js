@@ -5,10 +5,10 @@ function(doc) {
         else if (doc.nom) label=doc.nom
         else label=""
 
-        var pseudoId
-        if(doc.pseudoId) pseudoId=doc.pseudoId
-        else pseudoId=""
+        var designation
+        if(doc.designation) designation=doc.designation
+        else designation=""
 
-        emit(doc['@class'], {libelle: label, type: doc['@class'], objectId: doc._id, pseudoId: pseudoId})
+        emit(doc['@class'], {libelle: label, type: doc['@class'], objectId: doc._id, designation: designation})
     }
 }

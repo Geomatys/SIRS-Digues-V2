@@ -304,7 +304,7 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
             crete.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        crete.setPseudoId(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        crete.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         crete.setValid(true);
         
         return crete;
