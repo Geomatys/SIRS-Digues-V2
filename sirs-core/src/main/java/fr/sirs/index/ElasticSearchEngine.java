@@ -25,6 +25,11 @@ public class ElasticSearchEngine implements Closeable {
         DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString());
     }
     
+    /**
+     * List of fields to embed in search hits.
+     */
+    private static final String[] HIT_FIELDS = new String[]{"pseudoId", "@class", "libelle"};
+    
     private final Node node;
     private final Client client;
     public final String currentDbName;
@@ -68,7 +73,7 @@ public class ElasticSearchEngine implements Closeable {
      * @return ElasticSearch response, never null.
      */
     public SearchResponse search(final QueryBuilder query) {
-        return client.prepareSearch("_river").setTypes(currentDbName).setQuery(query)
+        return client.prepareSearch("_river").setTypes(currentDbName).addFields(HIT_FIELDS).setQuery(query)
                 .execute().actionGet();
     }
     
