@@ -4,7 +4,6 @@ package fr.sirs.query;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.SIRS;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;

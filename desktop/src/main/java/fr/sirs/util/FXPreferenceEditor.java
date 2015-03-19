@@ -30,7 +30,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
-import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.stage.Stage;
 import org.apache.sis.util.logging.Logging;
 

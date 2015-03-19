@@ -483,7 +483,7 @@ public class FXLauncherPane extends BorderPane {
                     
                 }catch(IOException | AccessDbImporterException ex){
                     LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                    new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.CLOSE).showAndWait();
+                    SIRS.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
                 }finally{
                     Platform.runLater(() -> {uiImportButton.setDisable(false);});
                 }
