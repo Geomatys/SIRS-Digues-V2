@@ -466,10 +466,6 @@ public class Session extends SessionGen {
 
     public void prepareToPrint(final Object object){
         objectToPrint=object;
-        // TODO : make in asynchronous task ?
-        if (object instanceof Element) {
-            focusOnMap((Element) object);
-        }
     }
     
     public Object getObjectToPrint(){return objectToPrint;}

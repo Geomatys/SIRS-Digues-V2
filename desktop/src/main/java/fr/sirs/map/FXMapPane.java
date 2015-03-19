@@ -176,7 +176,10 @@ public class FXMapPane extends BorderPane {
         // TODO : ACTIVATE BACK LEGEND
 //        final ToggleButton toggleButton = new ToggleButton("Légende");
 //        legend.visibleProperty().bind(toggleButton.selectedProperty());
-//        topgrid.add(toggleButton, 6, 0);
+//        final ButtonBar babar = new ButtonBar();
+//        babar.getButtons().add(toggleButton);
+//        babar.getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
+//        topgrid.add(babar, 6, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
