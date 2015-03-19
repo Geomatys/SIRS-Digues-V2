@@ -1192,8 +1192,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudoId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconA" eType="#//Troncon_Digue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconB" eType="#//Troncon_Digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//SIRSReferenceProfil">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
