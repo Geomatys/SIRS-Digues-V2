@@ -1678,7 +1678,7 @@
               <styles xmi:type="notation:SortingStyle" xmi:id="_vpJSRaYSEeSphvtX4JgPaw"/>
               <styles xmi:type="notation:FilteringStyle" xmi:id="_vpJSRqYSEeSphvtX4JgPaw"/>
             </children>
-            <styles xmi:type="notation:ShapeStyle" xmi:id="_vpJSQaYSEeSphvtX4JgPaw" fontName="Lucida Grande" fontHeight="8" italic="true" fillColor="12632256"/>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_vpJSQaYSEeSphvtX4JgPaw" fontName="Lucida Grande" fontHeight="8" italic="true"/>
             <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vpJSQqYSEeSphvtX4JgPaw" x="-460" y="48" width="120" height="123"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_KmdiYKYVEeSphvtX4JgPaw" type="2003" element="_Kldc0KYVEeSphvtX4JgPaw">
@@ -11039,12 +11039,11 @@
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
         <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_8BcRoM8EEeSy48T-tenx7w" backgroundStyle="Liquid">
-          <customFeatures>backgroundColor</customFeatures>
-          <customFeatures>foregroundColor</customFeatures>
           <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_8BcRoc8EEeSy48T-tenx7w"/>
           <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
           <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_8BcRos8EEeSy48T-tenx7w"/>
-          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="__HjG8M8EEeSy48T-tenx7w" red="192" green="192" blue="192"/>
+          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_8BcRo88EEeSy48T-tenx7w" red="255" green="255" blue="255"/>
+          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_8BcRpM8EEeSy48T-tenx7w" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_yXr8IKYSEeSphvtX4JgPaw" name="referencePapier : EString" tooltipText="">
@@ -11058,9 +11057,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_1P_mAKYSEeSphvtX4JgPaw" name="chemin : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SIRSReference/chemin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SIRSReference/chemin"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_1P_mAKYSEeSphvtX4JgPaw" name="referenceNumerique : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SIRSReference/referenceNumerique"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SIRSReference/referenceNumerique"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_1QANEKYSEeSphvtX4JgPaw" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_1QANEaYSEeSphvtX4JgPaw"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
