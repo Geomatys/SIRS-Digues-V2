@@ -125,7 +125,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             
             profil.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            profil.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            profil.setChemin(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
             profil.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
             

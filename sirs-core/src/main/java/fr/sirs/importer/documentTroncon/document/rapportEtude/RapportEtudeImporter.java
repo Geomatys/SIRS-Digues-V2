@@ -78,7 +78,7 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
             
             rapport.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
-            rapport.setReferenceNumerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+            rapport.setChemin(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
             if (row.getDate(Columns.DATE_RAPPORT.toString()) != null) {
                 rapport.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_RAPPORT.toString()).toString(), dateTimeFormatter));

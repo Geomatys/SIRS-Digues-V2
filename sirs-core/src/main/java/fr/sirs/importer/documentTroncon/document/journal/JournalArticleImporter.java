@@ -78,7 +78,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             
             articleJournal.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
-            articleJournal.setReferenceNumerique(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
+            articleJournal.setChemin(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
             articleJournal.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             

@@ -141,7 +141,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             
             leve.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            leve.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            leve.setChemin(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
             leve.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
             

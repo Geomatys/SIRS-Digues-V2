@@ -98,7 +98,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             
             convention.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
             
-            convention.setReferenceNumerique(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
+            convention.setChemin(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
             convention.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
