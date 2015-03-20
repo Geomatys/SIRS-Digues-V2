@@ -47,9 +47,9 @@ fr.sirs.core.model.PistePiedDigue
 fr.sirs.core.model.Pompe
 fr.sirs.core.model.Prestation
 fr.sirs.core.model.ProfilFrontFrancBord
-fr.sirs.core.model.ProfilLongEvenementHydraulique
+fr.sirs.core.model.ParametreHydrauliqueProfilLong
 fr.sirs.core.model.ProfilLong
-fr.sirs.core.model.ProfilTraversEvenementHydraulique
+fr.sirs.core.model.ParametreHydrauliqueProfilTravers
 fr.sirs.core.model.ProfilTravers
 fr.sirs.core.model.RapportEtude
 fr.sirs.core.model.RefConduiteFermee

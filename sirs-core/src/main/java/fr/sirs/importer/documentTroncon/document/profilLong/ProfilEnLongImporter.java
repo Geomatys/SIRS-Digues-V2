@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.PointLeve;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.ProfilLongEvenementHydraulique;
+import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
@@ -97,7 +97,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeReferences();
         final Map<Integer, List<PointLeve>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
-        final Map<Integer, List<ProfilLongEvenementHydraulique>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
+        final Map<Integer, List<ParametreHydrauliqueProfilLong>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -146,7 +146,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             }
             
             if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
-                profil.setProfilLongEvenementHydraulique(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
+                profil.setParametresHydrauliques(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             }
             
             

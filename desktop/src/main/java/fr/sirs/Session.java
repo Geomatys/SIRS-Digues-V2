@@ -583,17 +583,10 @@ public class Session extends SessionGen {
     
     public String generateElementTitle(final Element element) {
         String title="";
-
-        final ResourceBundle bundle = ResourceBundle.getBundle(element.getClass().getName());
-        if (bundle != null) {
-            title += bundle.getString("classAbrege");
-        } 
-        
-        title += (element.getDesignation()==null) ? "" : "-"+element.getDesignation();
         
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {
-            title += " : "+libelle;
+            title += libelle;
         }
         
         final Element parent = element.getParent();

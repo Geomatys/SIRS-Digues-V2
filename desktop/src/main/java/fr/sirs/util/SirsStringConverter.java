@@ -45,9 +45,9 @@ public class SirsStringConverter extends StringConverter {
         String text = "";
         if (item instanceof Contact) {
             final Contact c = (Contact) item;
-            text = c.getNom() + " " + c.getPrenom();
+            text = getDesignation((Element)item)+" : "+c.getNom() + " " + c.getPrenom();
         } else if (item instanceof Organisme) {
-            text = ((Organisme)item).getNom();
+            text = getDesignation((Element)item)+" : "+((Organisme)item).getNom();
         } else if (item instanceof Element) {
             text = getDesignation((Element)item);
         } else if (item instanceof ElementHit) {

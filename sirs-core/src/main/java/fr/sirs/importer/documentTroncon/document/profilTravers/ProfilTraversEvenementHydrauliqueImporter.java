@@ -3,7 +3,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.EvenementHydraulique;
-import fr.sirs.core.model.ProfilTraversEvenementHydraulique;
+import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  */
 class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
 
-    private Map<Integer, List<ProfilTraversEvenementHydraulique>> evenementHydrauByLeveId = null;
+    private Map<Integer, List<ParametreHydrauliqueProfilTravers>> evenementHydrauByLeveId = null;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     
     private ProfilTraversEvenementHydrauliqueImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
@@ -37,7 +37,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
     }
     
-    public Map<Integer, List<ProfilTraversEvenementHydraulique>> getEvenementHydrauliqueByLeveId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<ParametreHydrauliqueProfilTravers>> getEvenementHydrauliqueByLeveId() throws IOException, AccessDbImporterException{
         if(evenementHydrauByLeveId==null) compute();
         return evenementHydrauByLeveId;
     }
@@ -75,7 +75,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ProfilTraversEvenementHydraulique profilTraversEvenementHydraulique = new ProfilTraversEvenementHydraulique();
+            final ParametreHydrauliqueProfilTravers profilTraversEvenementHydraulique = new ParametreHydrauliqueProfilTravers();
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
@@ -103,7 +103,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             profilTraversEvenementHydraulique.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             profilTraversEvenementHydraulique.setValid(true);
             
-            List<ProfilTraversEvenementHydraulique> listByLeve = evenementHydrauByLeveId.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            List<ParametreHydrauliqueProfilTravers> listByLeve = evenementHydrauByLeveId.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }

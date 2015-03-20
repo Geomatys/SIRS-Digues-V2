@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.LeveProfilTravers;
+import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.core.model.TronconDigue;
@@ -29,7 +30,7 @@ import org.ektorp.CouchDbConnector;
 public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<ProfilTravers> {
     
     private ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
-    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
+//    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
     
     private ProfilEnTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -42,8 +43,8 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
             final DocumentImporter documentImporter){
         this(accessDatabase, couchDbConnector);
         this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
-        this.profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
-                accessDatabase, couchDbConnector, documentImporter);
+//        this.profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
+//                accessDatabase, couchDbConnector, documentImporter);
     }
     
     private enum Columns {
@@ -72,6 +73,8 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
         
         final Map<Integer, List<LeveProfilTravers>> levesImport = 
                 profilTraversDescriptionImporter.getLeveProfilTraversByProfilId();
+        final Map<Integer, List<ParametreHydrauliqueProfilTravers>> params = 
+                profilTraversDescriptionImporter.getParametreHydrauliqueProfilTraversByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
@@ -88,6 +91,9 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
             
             final List<LeveProfilTravers> leves = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if(leves!=null) profil.setLeves(leves);
+            
+            final List<ParametreHydrauliqueProfilTravers> param = params.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
+            if(param!=null) profil.setParametresHydrauliques(param);
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }

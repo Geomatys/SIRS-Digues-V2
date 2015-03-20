@@ -3,7 +3,7 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.EvenementHydraulique;
-import fr.sirs.core.model.ProfilLongEvenementHydraulique;
+import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  */
 class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
 
-    private Map<Integer, List<ProfilLongEvenementHydraulique>> evenementHydrauByProfilLongId = null;
+    private Map<Integer, List<ParametreHydrauliqueProfilLong>> evenementHydrauByProfilLongId = null;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     
     private ProfilLongEvenementHydrauliqueImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
@@ -37,7 +37,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
         this.evenementHydrauliqueImporter = evenementHydrauliqueImporter;
     }
     
-    public Map<Integer, List<ProfilLongEvenementHydraulique>> getEvenementHydrauliqueByProfilId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<ParametreHydrauliqueProfilLong>> getEvenementHydrauliqueByProfilId() throws IOException, AccessDbImporterException{
         if(evenementHydrauByProfilLongId==null) compute();
         return evenementHydrauByProfilLongId;
     }
@@ -76,7 +76,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ProfilLongEvenementHydraulique profilLongEvenementHydraulique = new ProfilLongEvenementHydraulique();
+            final ParametreHydrauliqueProfilLong profilLongEvenementHydraulique = new ParametreHydrauliqueProfilLong();
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 profilLongEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
@@ -103,7 +103,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
             
             profilLongEvenementHydraulique.setValid(true);
             
-            List<ProfilLongEvenementHydraulique> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
+            List<ParametreHydrauliqueProfilLong> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();
             }
