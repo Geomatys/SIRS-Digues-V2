@@ -109,7 +109,7 @@ public class PojoTable extends BorderPane {
     static{
         SPECIAL_DISPLAY_COLUMNS.add("author");
         SPECIAL_DISPLAY_COLUMNS.add("valid");
-        SPECIAL_DISPLAY_COLUMNS.add("pseudoId");
+        SPECIAL_DISPLAY_COLUMNS.add("designation");
     }
     
     protected final Class pojoClass;
@@ -167,7 +167,7 @@ public class PojoTable extends BorderPane {
     protected final SimpleObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
     
     /** Task object designed for asynchronous update of the elements contained in the table. */
-    private Task tableUpdater;
+    protected Task tableUpdater;
     
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
@@ -238,9 +238,9 @@ public class PojoTable extends BorderPane {
         //contruction des colonnes editable
         final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
         
-        //On commence par la colonne des pseudoId
+        //On commence par la colonne des désignations
         for(final PropertyDescriptor desc : properties){
-            if(desc.getName().equals("pseudoId")){
+            if(desc.getName().equals("designation")){
                 uiTable.getColumns().add(new PropertyColumn(desc));
             }
         }

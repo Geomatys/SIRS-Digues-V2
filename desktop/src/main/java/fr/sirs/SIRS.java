@@ -4,6 +4,7 @@ package fr.sirs;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
@@ -298,8 +299,44 @@ public final class SIRS extends SirsCore {
         return result;
     }
     
+    /**
+     * Return the DocumentTroncons linked to one document specified by the given
+     * id, from couchDB view. 
+     * 
+     * Note these DocumentTroncons are not the genuine ones, but copy of them, 
+     * that are not in their troncon container.
+     * 
+     * @param documentId
+     * @return 
+     */
     public static ObservableList<DocumentTroncon> getDocumentTroncons(final String documentId){
         return  FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+    }
+    
+    /**
+     * Return the DocumentTroncons linked to one document specified by the given
+     * id.
+     * 
+     * Note these DocumentTroncons are the genuine ones, referencing their own
+     * troncon container.
+     * 
+     * @param documentId
+     * @return 
+     */
+    public static ObservableList<DocumentTroncon> getTrueDocumentTroncons(final String documentId){
+        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
+        final ObservableList<DocumentTroncon> falseDocumentTroncons = FXCollections.observableArrayList(tronconDigueRepository.getDocumentTronconsByDocumentId(documentId));
+        
+        final ObservableList<DocumentTroncon> trueDocumentTroncons = FXCollections.observableArrayList();
+        
+        for (final DocumentTroncon falseDocumentTroncon : falseDocumentTroncons){
+            final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
+            final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
+            final DocumentTroncon trueDocumentTroncon = (DocumentTroncon) tronconDigue.getChildById(falseDocumentTroncon.getId());
+            trueDocumentTroncons.add(trueDocumentTroncon);
+        }
+        
+        return trueDocumentTroncons;
     }
     
     /**

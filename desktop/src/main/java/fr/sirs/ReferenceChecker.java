@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -445,7 +443,8 @@ public class ReferenceChecker extends Task<Void> {
             return null;
         }
 
-        final File file = File.createTempFile("tempReference", ".csv");
+        final File file = File.createTempFile("tempReference", ".csv"); 
+        file.deleteOnExit();
         final URLConnection connection = url.openConnection();
         try (final InputStream inputStream = connection.getInputStream()) {
 

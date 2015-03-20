@@ -13,11 +13,12 @@ import javafx.scene.control.TableColumn;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentTronconDocumentPojoTable extends PojoTable {
+public class DocumentTronconDocumentPojoTable extends ListenPropertyPojoTable {
     
     private final Function<DocumentTroncon, Void> addAction;
 
-    public DocumentTronconDocumentPojoTable(Class pojoClass, String title, final Function<DocumentTroncon, Void> addAction) {
+    public DocumentTronconDocumentPojoTable(Class pojoClass, String title, 
+            final Function<DocumentTroncon, Void> addAction) {
         super(pojoClass, title);
         this.addAction = addAction;
     }

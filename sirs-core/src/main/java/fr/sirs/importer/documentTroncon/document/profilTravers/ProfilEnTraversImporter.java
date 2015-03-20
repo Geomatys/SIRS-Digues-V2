@@ -112,28 +112,28 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
 //        }
 //        couchDbConnector.executeBulk(related.values());
 //    }
-    
-    private List<DocumentTroncon> getDocumentTroncons(final Integer profilId) throws IOException, AccessDbImporterException{
-        final List<DocumentTroncon> result = new ArrayList<>();
-        final Map<Integer, List<Integer>> leveIds = profilTraversDescriptionImporter.getLeveProfilTraversIdsByProfilId();
-        if(profilId==null || leveIds.get(profilId)==null) return result;
-        
-        for(final Integer leveId : leveIds.get(profilId)){
-            final DocumentTroncon[] documentTroncons = profilTraversTronconImporter.getDocumentTronconsByLeveId().get(leveId);
-            if(documentTroncons!=null){
-                for(int i=0; i<=1; i++){
-                    if(documentTroncons[i]!=null && !result.contains(documentTroncons[i])) result.add(documentTroncons[i]);
-                }
-            }
-        }
-        return result;
-    }
-    
-    private String getTronconId(final DocumentTroncon documentTroncon){
-        if(documentTroncon!=null
-                && documentTroncon.getParent()!=null
-                && documentTroncon.getParent() instanceof TronconDigue)
-            return documentTroncon.getParent().getId();
-        else return null;
-    }
+//    
+//    private List<DocumentTroncon> getDocumentTroncons(final Integer profilId) throws IOException, AccessDbImporterException{
+//        final List<DocumentTroncon> result = new ArrayList<>();
+//        final Map<Integer, List<Integer>> leveIds = profilTraversDescriptionImporter.getLeveProfilTraversIdsByProfilId();
+//        if(profilId==null || leveIds.get(profilId)==null) return result;
+//        
+//        for(final Integer leveId : leveIds.get(profilId)){
+//            final DocumentTroncon[] documentTroncons = profilTraversTronconImporter.getDocumentTronconsByLeveId().get(leveId);
+//            if(documentTroncons!=null){
+//                for(int i=0; i<=1; i++){
+//                    if(documentTroncons[i]!=null && !result.contains(documentTroncons[i])) result.add(documentTroncons[i]);
+//                }
+//            }
+//        }
+//        return result;
+//    }
+//    
+//    private String getTronconId(final DocumentTroncon documentTroncon){
+//        if(documentTroncon!=null
+//                && documentTroncon.getParent()!=null
+//                && documentTroncon.getParent() instanceof TronconDigue)
+//            return documentTroncon.getParent().getId();
+//        else return null;
+//    }
 }
