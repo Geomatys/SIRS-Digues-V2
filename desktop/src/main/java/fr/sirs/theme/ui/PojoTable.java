@@ -548,7 +548,7 @@ public class PojoTable extends BorderPane {
                 filteredValues = allValues;
             } else {
                 final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticEngine().search(QueryBuilders.queryString(str));
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
                 Iterator<SearchHit> iterator = search.getHits().iterator();
                 while (iterator.hasNext() && !currentThread.isInterrupted()) {
                     result.add(iterator.next().getId());

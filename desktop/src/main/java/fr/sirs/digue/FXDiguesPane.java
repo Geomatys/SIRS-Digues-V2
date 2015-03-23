@@ -13,12 +13,13 @@ import fr.sirs.theme.Theme;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.index.SearchEngine;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -45,8 +46,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.sis.referencing.CommonCRS;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -54,7 +55,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FXDiguesPane extends SplitPane implements DocumentListener{
+public class FXDiguesPane extends SplitPane implements DocumentListener {
 
     /** Cette géométrie sert de base pour tous les nouveaux troncons */
     private static final Geometry TRONCON_GEOM_WGS84;
@@ -65,6 +66,12 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
         });
         JTS.setCRS(TRONCON_GEOM_WGS84, CommonCRS.WGS84.normalizedGeographic());
     }
+    
+    private static final String[] SEARCH_CLASSES = new String[]{
+        TronconDigue.class.getCanonicalName(),
+        Digue.class.getCanonicalName(),
+        SystemeEndiguement.class.getCanonicalName()
+    };
     
     @Autowired
     private Session session;
@@ -254,20 +261,25 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
                 
                 //creation du filtre
                 final String str = currentSearch.get();
-                final Predicate<Element> filter;
-                if(str == null || str.isEmpty()){
-                    filter = null;
-                }else{
-                    final SearchEngine searchEngine = Injector.getSearchEngine();
+                Predicate<Element> filter = null;
+                if (str != null && !str.isEmpty()) {
+                    final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
                     final String type = TronconDigue.class.getSimpleName();
-                    final Set<String> result = new HashSet<>();
-                    try {
-                        result.addAll(searchEngine.search(type, str.split(" ")));
-                    } catch (ParseException | IOException ex) {
-                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
+                    final HashSet resultSet = new HashSet();
+                    HashSet tmp;
+                    for (final String className : SEARCH_CLASSES) {
+                        tmp = foundClasses.get(className);
+                        if (tmp != null && !tmp.isEmpty()) {
+                            resultSet.addAll(tmp);
+                        }
                     }
 
-                    filter = (Element t) -> {return result.contains(t.getDocumentId());};
+                    if (!resultSet.isEmpty()) {
+                        filter = (Element t) -> {
+                            return resultSet.contains(t.getDocumentId());
+                        };
+                    }
                 }
                 
                 //creation de l'arbre
@@ -344,28 +356,28 @@ public class FXDiguesPane extends SplitPane implements DocumentListener{
     }
 
     @Override
-    public void documentCreated(Element candidate) {
-        if(candidate instanceof SystemeEndiguement ||
-           candidate instanceof Digue ||
-           candidate instanceof TronconDigue){
+    public void documentCreated(Map<Class, List<Element>> candidate) {
+        if(candidate.get(SystemeEndiguement.class) != null  ||
+           candidate.get(Digue.class) != null ||
+           candidate.get(TronconDigue.class) != null) {
             updateTree();
         }
     }
 
     @Override
-    public void documentChanged(Element candidate) {
-        if(candidate instanceof SystemeEndiguement ||
-           candidate instanceof Digue ||
-           candidate instanceof TronconDigue){
+    public void documentChanged(Map<Class, List<Element>> candidate) {
+        if(candidate.get(SystemeEndiguement.class) != null  ||
+           candidate.get(Digue.class) != null ||
+           candidate.get(TronconDigue.class) != null) {
             updateTree();
         }
     }
 
     @Override
-    public void documentDeleted(Element candidate) {
-        if(candidate instanceof SystemeEndiguement ||
-           candidate instanceof Digue ||
-           candidate instanceof TronconDigue){
+    public void documentDeleted(Map<Class, List<Element>> candidate) {
+        if(candidate.get(SystemeEndiguement.class) != null  ||
+           candidate.get(Digue.class) != null ||
+           candidate.get(TronconDigue.class) != null) {
             updateTree();
         }
     }

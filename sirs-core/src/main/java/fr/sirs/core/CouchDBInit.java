@@ -4,7 +4,6 @@ package fr.sirs.core;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.index.ElasticSearchEngine;
-import fr.sirs.index.SearchEngine;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,7 +71,6 @@ public class CouchDBInit {
         final CouchDbConnector connector = couchsb.createConnector(databaseName,createIfNotExists);
         
         DocumentChangeEmiter changeEmmiter = null;
-        SearchEngine searchEngine = null;
         ElasticSearchEngine elasticEngine = null;
         if(setupListener){
             changeEmmiter = new DocumentChangeEmiter(connector);
@@ -85,7 +83,6 @@ public class CouchDBInit {
         applicationContextParent.refresh();
         applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
         if(setupListener){
-            applicationContextParent.getBeanFactory().registerSingleton(SEARCH_ENGINE, searchEngine);
             applicationContextParent.getBeanFactory().registerSingleton(ELASTIC_ENGINE, elasticEngine);
             applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
         }

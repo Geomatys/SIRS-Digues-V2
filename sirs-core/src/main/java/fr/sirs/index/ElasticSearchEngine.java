@@ -4,7 +4,11 @@ package fr.sirs.index;
 import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
@@ -12,9 +16,12 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.node.Node;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.SearchHits;
 
 /**
- *
+ * TODO : Improve configuration to allow nested documents (Crete, Photo, etc.) as return type. 
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
@@ -75,6 +82,35 @@ public class ElasticSearchEngine implements Closeable {
     public SearchResponse search(final QueryBuilder query) {
         return client.prepareSearch("_river").setTypes(currentDbName).addFields(HIT_FIELDS).setQuery(query)
                 .execute().actionGet();
+    }
+    
+    /**
+     * Search for documents, and return their types and Ids.
+     * @param query The query to execute.
+     * @return A map whose keys are types of found document and value is the list 
+     * of matching documents for a given type. Never null, but can be empty.
+     */
+    public HashMap<String, HashSet<String> > searchByClass(final QueryBuilder query) {
+        final HashMap<String, HashSet<String>> result = new HashMap<>();
+        SearchResponse response = search(query);
+        final SearchHits hits = response.getHits();
+
+        final Iterator<SearchHit> ite = hits.iterator();
+        while (ite.hasNext()) {
+            SearchHit hit = ite.next();
+            final SearchHitField fieldClass = hit.field("@class");
+            if (fieldClass != null && (fieldClass.getValue() instanceof String)) {
+                final String clazz = fieldClass.getValue();
+                HashSet<String> ids = result.get(clazz);
+                if (ids == null) {
+                    ids = new HashSet<>();
+                    result.put(clazz, ids);
+                }
+                ids.add(hit.id());
+            }
+        }
+
+        return result;
     }
     
     @Override
