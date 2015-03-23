@@ -8979,9 +8979,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_HX4owFrCEeS5fNILrts1cg" name="Deversoire" tooltipText="" outgoingEdges="_D7Ki4FrFEeS5fNILrts1cg" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//Deversoire"/>
-        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//Deversoire"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_HX4owFrCEeS5fNILrts1cg" name="Deversoir" tooltipText="" outgoingEdges="_D7Ki4FrFEeS5fNILrts1cg" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//Deversoir"/>
+        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//Deversoir"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
@@ -8995,8 +8995,8 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_dSUfwFrCEeS5fNILrts1cg" name="libelle : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/libelle"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/libelle"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/libelle"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/libelle"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_gr98IFrCEeS5fNILrts1cg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_gr98IVrCEeS5fNILrts1cg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -9006,8 +9006,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_ilzyoFrCEeS5fNILrts1cg" name="coteSurverse : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/coteSurverse"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/coteSurverse"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/coteSurverse"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/coteSurverse"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_lYpGoFrCEeS5fNILrts1cg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_lYpGoVrCEeS5fNILrts1cg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -9017,8 +9017,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_pLz2QFrCEeS5fNILrts1cg" name="typeSecurite : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/typeSecurite"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/typeSecurite"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/typeSecurite"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/typeSecurite"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_pLz2QVrCEeS5fNILrts1cg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_pLz2QlrCEeS5fNILrts1cg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -9028,8 +9028,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_rYkBsFrCEeS5fNILrts1cg" name="typeAlimentation : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/typeAlimentation"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoire/typeAlimentation"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/typeAlimentation"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Deversoir/typeAlimentation"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_rYkBsVrCEeS5fNILrts1cg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_rYkBslrCEeS5fNILrts1cg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -9040,8 +9040,8 @@
         </ownedElements>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_D7Ki4FrFEeS5fNILrts1cg" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_DOmFoEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//Deversoire"/>
-        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//Deversoire/@eGenericSuperTypes.0"/>
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//Deversoir"/>
+        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//Deversoir/@eGenericSuperTypes.0"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_D7Ki4VrFEeS5fNILrts1cg" targetArrow="InputClosedArrow" routingStyle="tree">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_D7Ki4lrFEeS5fNILrts1cg" red="136" green="136" blue="136"/>
