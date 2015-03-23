@@ -279,7 +279,7 @@ public class Loader extends Application {
                 updateMessage("Recherche des plugins");
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 7 + plugins.length;
+                final int total = 8 + plugins.length;
 
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
@@ -343,7 +343,13 @@ public class Loader extends Application {
                             + plugin.getLoadingMessage().getValue());
                     plugin.load();
                 }
-
+                
+                // MAP INITIALISATION //////////////////////////////////////////
+                //Affiche le contexte carto et le déplace à la date du jour
+                updateProgress(inc++, total);
+                updateMessage("Initialisation de la carte");
+                Injector.getSession().getMapContext().getAreaOfInterest();
+                
                 // COUCHDB TO SQL //////////////////////////////////////////////
                 updateMessage("Export vers la base RDBMS");
                 TaskManager.INSTANCE.submit("Export vers la base RDBMS", ()->{
@@ -353,7 +359,8 @@ public class Loader extends Application {
                 });                
 
                 updateProgress(inc++, total);
-
+                
+                // OVER
                 updateProgress(total, total);
                 updateMessage("Chargement terminé.");
                 Thread.sleep(400);
