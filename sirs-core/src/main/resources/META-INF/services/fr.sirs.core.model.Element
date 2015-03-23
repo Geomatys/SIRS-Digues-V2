@@ -11,7 +11,7 @@ fr.sirs.core.model.Convention
 fr.sirs.core.model.Crete
 fr.sirs.core.model.Departement
 fr.sirs.core.model.Desordre
-fr.sirs.core.model.Deversoire
+fr.sirs.core.model.Deversoir
 fr.sirs.core.model.Digue
 fr.sirs.core.model.DocumentGrandeEchelle
 fr.sirs.core.model.DocumentTroncon
