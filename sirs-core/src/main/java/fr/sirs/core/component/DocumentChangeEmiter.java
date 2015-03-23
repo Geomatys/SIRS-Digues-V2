@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * This component forward all document events to its listener.
@@ -31,10 +34,19 @@ import fr.sirs.core.model.Element;
  */
 public class DocumentChangeEmiter {
 
+    /** A pattern to identify new elements. They must have a revision number equal to 1 */
+    private static final Pattern FIRST_REVISION = Pattern.compile("^1\\D.*");
+    
     private final List<DocumentListener> listeners = new ArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CouchDbConnector connector;
 
+    /**
+     * Group all evenements spaced by less than specified bulk time in a single event shot.
+     */
+    public volatile long bulkTime = 1;
+    public volatile TimeUnit bulkUnit = TimeUnit.SECONDS;
+    
     public DocumentChangeEmiter(CouchDbConnector connector) {
         this.connector = connector;
     }
@@ -163,34 +175,48 @@ public class DocumentChangeEmiter {
 
     }
 
-    private void handlerChanges(ChangesFeed feed) {
+    private void handlerChanges(ChangesFeed feed) throws InterruptedException {
 
-        final DocumentChange change;
-        try {
-            change = feed.next();
-        } catch (InterruptedException e) {
-            return;
-        }
-
-        if (listeners.isEmpty())
-            return;
+        final Thread currentThread = Thread.currentThread();
+        final HashMap<Class, List<Element>> addedElements = new HashMap<>();
+        final HashMap<Class, List<Element>> changedElements = new HashMap<>();
+        final HashMap<Class, List<Element>> removedElements = new HashMap<>();
         
-
-        for (DocumentListener listener : listeners) {
-
+        while (!currentThread.isInterrupted()) {
+            final DocumentChange change = feed.next(bulkTime, bulkUnit);
+            if (change == null) break;
+            
             if (change.isDeleted()) {
-                retrieveDeletedElement(change.getId()).ifPresent(
-                        listener::documentDeleted);
-            } else if (change.getRevision().startsWith("1")) {
-                getElement(change.getId(), Optional.empty()).ifPresent(
-                        listener::documentCreated);
+                retrieveDeletedElement(change.getId()).ifPresent((Element e)-> putElement(e, removedElements));
+            } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
+                getElement(change.getId(), Optional.empty()).ifPresent((Element e)-> putElement(e, addedElements));
             } else {
-                getElement(change.getId(), Optional.empty()).ifPresent(
-                        listener::documentChanged);
+                getElement(change.getId(), Optional.empty()).ifPresent((Element e)-> putElement(e, changedElements));
+            }
+        }
+        
+        for (DocumentListener listener : listeners) {
+            if (!addedElements.isEmpty()) {
+                listener.documentCreated(addedElements);
+            }
+            if (!changedElements.isEmpty()) {
+                listener.documentChanged(changedElements);
+            }
+            if (!removedElements.isEmpty()) {
+                listener.documentDeleted(removedElements);
             }
         }
     }
 
+    private static void putElement(final Element e, final HashMap<Class, List<Element>> output) {
+        List<Element> registry = output.get(e.getClass());
+        if (registry == null) {
+            registry = new ArrayList<>();
+            output.put(e.getClass(), registry);
+        }
+        registry.add(e);
+    }
+    
     private void log(Exception e) {
         SirsCore.LOGGER.log(Level.WARNING, e.getMessage(), e);
     }

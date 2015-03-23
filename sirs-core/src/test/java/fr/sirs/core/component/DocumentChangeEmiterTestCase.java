@@ -16,6 +16,8 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.component.DigueRepository;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/spring/test/test-context.xml")
@@ -54,17 +56,17 @@ public class DocumentChangeEmiterTestCase implements DocumentListener {
     }
 
     @Override
-    public void documentDeleted(Element element) {
+    public void documentDeleted(Map<Class, List<Element>> element) {
         info("documentDeleted(" + element + ")");
     }
 
     @Override
-    public void documentChanged(Element element) {
+    public void documentChanged(Map<Class, List<Element>> element) {
         info("documentChanged(" + element + ")");
     }
 
     @Override
-    public void documentCreated(Element changed) {
+    public void documentCreated(Map<Class, List<Element>> changed) {
         info("documentCreated(" + changed + ")");
     }
 

@@ -56,7 +56,6 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
-import fr.sirs.map.BorneDigueCache;
 import fr.sirs.theme.DocumentTronconTheme;
 
 import java.awt.Color;
@@ -66,6 +65,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -104,7 +104,9 @@ import org.geotoolkit.style.StyleConstants;
 import static org.geotoolkit.style.StyleConstants.*;
 
 import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.Id;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.identity.FeatureId;
 import org.opengis.style.Fill;
 import org.opengis.style.Graphic;
 import org.opengis.style.GraphicStroke;
@@ -174,7 +176,7 @@ public class CorePlugin extends Plugin {
             SUPPLIERS.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
 
             //bornes
-            SUPPLIERS.put(BorneDigue.class, BorneDigueCache.getInstance().getSupplier());
+            SUPPLIERS.put(BorneDigue.class, new StructBeanSupplier(BorneDigue.class, () -> Injector.getSession().getBorneDigueRepository().getAll()));
 
             //structures
             SUPPLIERS.put(Crete.class, new StructBeanSupplier(Crete.class, () -> repository.getAllFromView(Crete.class)));
@@ -372,31 +374,47 @@ public class CorePlugin extends Plugin {
 
         public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
             super(clazz, "id", "geometry", 
-                (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t), 
+                (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),
                 null, SirsCore.getEpsgCode(), callable::get);
             Injector.getDocumentChangeEmiter().addListener(this);
         }
 
         @Override
-        public void documentCreated(Element changed) {
-            if (changed != null && getBeanClass().isAssignableFrom(changed.getClass())) {
-                fireFeaturesAdded(FF.id(Collections.singleton((FF.featureId(changed.getId())))));
+        public void documentCreated(Map<Class, List<Element>> added) {
+            if (added == null) return;
+            final Id filter = getIdFilter(added);
+            if (filter != null) {
+                fireFeaturesAdded(filter);
             }
         }
 
         @Override
-        public void documentChanged(Element changed) {
-            if (changed != null && getBeanClass().isAssignableFrom(changed.getClass())) {
-                fireFeaturesUpdated(FF.id(Collections.singleton((FF.featureId(changed.getId())))));
+        public void documentChanged(Map<Class, List<Element>> changed) {
+            if (changed == null) return;
+            final Id filter = getIdFilter(changed);
+            if (filter != null) {
+                fireFeaturesUpdated(filter);
             }
         }
 
         @Override
-        public void documentDeleted(Element deleteObject) {
-            if (deleteObject != null && getBeanClass().isAssignableFrom(deleteObject.getClass())) {
-                fireFeaturesDeleted(FF.id(Collections.singleton((FF.featureId(deleteObject.getId())))));
+        public void documentDeleted(Map<Class, List<Element>> deleteObject) {
+            if (deleteObject == null) return;
+            final Id filter = getIdFilter(deleteObject);
+            if (filter != null) {
+                fireFeaturesDeleted(filter);
             }
-        }        
+        }
+        
+        private final Id getIdFilter(final Map<Class, List<Element>> elementMap) {
+            final List<Element> elements = elementMap.get(getBeanClass());
+            if (elements == null || elements.isEmpty()) return null;
+            final HashSet<FeatureId> fIds = new HashSet<>();
+            for (Element e : elements) {
+                fIds.add(FF.featureId(e.getId()));
+            }
+            return FF.id(fIds);
+        }
     }
     
     private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
