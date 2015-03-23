@@ -45,8 +45,8 @@ import org.geotoolkit.internal.Loggers;
 @DefaultProperty("text")
 public abstract class AbstractPathTextField extends HBox {
     
-    public static final Image ICON_FIND = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FOLDER_OPEN, 16, Color.BLUE), null);
-    public static final Image ICON_FORWARD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FORWARD, 16, Color.BLUE), null);
+    public static final Image ICON_FIND = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FOLDER_OPEN, 16, Color.DARK_GRAY), null);
+    public static final Image ICON_FORWARD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FORWARD, 16, Color.DARK_GRAY), null);
 
     private final TextField inputText = new TextField();
     private final StringProperty textProperty = inputText.textProperty();
@@ -57,7 +57,6 @@ public abstract class AbstractPathTextField extends HBox {
     private final Button openPathButton = new Button("", new ImageView(ICON_FORWARD));
     
     public AbstractPathTextField() {
-        setStyle(inputText.getStyle());
         choosePathButton.setOnAction((ActionEvent e)-> {
             Loggers.JAVAFX.info("ACTION TRIGGERED !");
             Path chosen = choosePath();

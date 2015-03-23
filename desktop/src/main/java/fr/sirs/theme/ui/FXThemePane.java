@@ -108,17 +108,13 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     }
     
     @FXML
-    private void showOnMap(){
+    private void showOnMap() {
         final Element object = elementProperty.get();
         if (object instanceof Positionable) {
             final FXMapTab tab = session.getFrame().getMapTab();
+
+            tab.getMap().focusOnElement(object);
             tab.show();
-            final FXMap map = tab.getMap().getUiMap();
-            try {
-                map.getCanvas().setVisibleArea(JTS.toEnvelope(((Positionable) object).getGeometry()));
-            } catch (NoninvertibleTransformException | TransformException ex) {
-                throw new RuntimeException(ex);
-            }
         } else {
             new Alert(Alert.AlertType.INFORMATION, "L'élément courant n'est pas positionable sur la carte.", ButtonType.OK).show();
         }

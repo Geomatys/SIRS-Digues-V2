@@ -199,15 +199,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     }
     
     @FXML
-    private void showOnMap(){
+    private void showOnMap() {
         final FXMapTab tab = session.getFrame().getMapTab();
+        
+        tab.getMap().focusOnElement(elementProperty.get());
         tab.show();
-        final FXMap map = tab.getMap().getUiMap();
-        try {
-            map.getCanvas().setVisibleArea(JTS.toEnvelope(elementProperty.get().getGeometry()));
-        } catch (NoninvertibleTransformException | TransformException ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-        }
     }
     
     private void save(){

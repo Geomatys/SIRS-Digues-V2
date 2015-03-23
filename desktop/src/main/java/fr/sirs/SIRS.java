@@ -353,14 +353,6 @@ public final class SIRS extends SirsCore {
         } else if (pojo instanceof Organisme) {
             content = new FXOrganismePane((Organisme) pojo);
             
-        } else if (pojo instanceof ProfilTravers) {
-            content = new FXThemePane((ProfilTravers) pojo);
-            ((FXThemePane) content).setShowOnMapButton(false);
-            
-        } else if (pojo instanceof LeveProfilTravers){
-            content = new FXThemePane((LeveProfilTravers) pojo);
-            ((FXThemePane) content).setShowOnMapButton(false);
-            
         } else if (pojo instanceof TronconDigue) {
             final FXTronconDiguePane ctrl = new FXTronconDiguePane();
             ctrl.setElement((TronconDigue) pojo);

@@ -154,16 +154,12 @@ public class FXSystemeEndiguementPane extends BorderPane {
     }
     
     @FXML
-    private void showOnMap(){
+    private void showOnMap() {
         final SystemeEndiguement object = endiguementProp.get();
         final FXMapTab tab = session.getFrame().getMapTab();
+        
+        tab.getMap().focusOnElement(object);
         tab.show();
-        final FXMap map = tab.getMap().getUiMap();
-        try {
-            map.getCanvas().setVisibleArea(JTS.toEnvelope(object.getZoneProtegee()));
-        } catch (NoninvertibleTransformException | TransformException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     private class DigueTable extends PojoTable {
