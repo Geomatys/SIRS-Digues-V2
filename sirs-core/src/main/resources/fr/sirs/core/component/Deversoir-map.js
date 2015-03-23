@@ -1,7 +1,7 @@
 function(doc) {
    if(doc['@class']=='fr.sirs.core.model.TronconDigue') {
      for(i in doc.structures){
-        if(doc.structures[i]['@class']=='fr.sirs.core.model.Deversoire'){
+        if(doc.structures[i]['@class']=='fr.sirs.core.model.Deversoir'){
         	var newMap = {};
         	var myMap = doc.structures[i];
         	for (var i in myMap)

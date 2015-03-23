@@ -3,7 +3,7 @@
 package fr.sirs.theme;
 
 import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Deversoire;
+import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.TalusDigue;
@@ -45,8 +45,8 @@ public class StructuresTheme extends AbstractTronconTheme {
     private static final ThemeGroup GROUP8 = new ThemeGroup("Epis", "Tableau des épis", Epi.class,        
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Epi),
             (TronconDigue t, Object c) -> t.structures.remove(c));
-    private static final ThemeGroup GROUP9 = new ThemeGroup("Déversoirs", "Tableau des déversoirs", Deversoire.class,        
-            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Deversoire),
+    private static final ThemeGroup GROUP9 = new ThemeGroup("Déversoirs", "Tableau des déversoirs", Deversoir.class,        
+            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Deversoir),
             (TronconDigue t, Object c) -> t.structures.remove(c));
     
     

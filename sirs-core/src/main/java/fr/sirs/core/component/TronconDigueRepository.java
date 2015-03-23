@@ -12,7 +12,7 @@ import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Deversoire;
+import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Epi;
@@ -96,7 +96,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         initStandardDesignDocument();
         viewMap.put(CRETE, this::getAllCretes);
         viewMap.put(DESORDRE, this::getAllDesordres);
-        viewMap.put(DEVERSOIRE, this::getAllDeversoires);
+        viewMap.put(DEVERSOIR, this::getAllDeversoirs);
         viewMap.put(EPI, this::getAllEpis);
         viewMap.put(FONDATION, this::getAllFondations);
         viewMap.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
@@ -355,11 +355,11 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryView(createQuery(LIGNEEAU), LigneEau.class);
     }
 
-    public static final String DEVERSOIRE = "Deversoire";
+    public static final String DEVERSOIR = "Deversoir";
 
-    @View(name = DEVERSOIRE, map = "classpath:Deversoire-map.js")
-    public List<Deversoire> getAllDeversoires() {
-        return db.queryView(createQuery(DEVERSOIRE), Deversoire.class);
+    @View(name = DEVERSOIR, map = "classpath:Deversoir-map.js")
+    public List<Deversoir> getAllDeversoirs() {
+        return db.queryView(createQuery(DEVERSOIR), Deversoir.class);
     }
 
     public static final String PISTEPIEDDIGUE = "PistePiedDigue";

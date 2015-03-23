@@ -26,7 +26,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Deversoire;
+import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
@@ -185,7 +185,7 @@ public class CorePlugin extends Plugin {
             SUPPLIERS.put(PiedDigue.class, new StructBeanSupplier(PiedDigue.class, () -> repository.getAllFromView(PiedDigue.class)));
             SUPPLIERS.put(Fondation.class, new StructBeanSupplier(Fondation.class, () -> repository.getAllFromView(Fondation.class)));
             SUPPLIERS.put(Epi.class, new StructBeanSupplier(Epi.class, () -> repository.getAllFromView(Epi.class)));
-            SUPPLIERS.put(Deversoire.class, new StructBeanSupplier(Deversoire.class, () -> repository.getAllFromView(Deversoire.class)));
+            SUPPLIERS.put(Deversoir.class, new StructBeanSupplier(Deversoir.class, () -> repository.getAllFromView(Deversoir.class)));
 
             // Franc-bords
             SUPPLIERS.put(FrontFrancBord.class, new StructBeanSupplier(FrontFrancBord.class, () -> repository.getAllFromView(FrontFrancBord.class)));
@@ -272,7 +272,7 @@ public class CorePlugin extends Plugin {
                     getSupplier(TalusRisberme.class),
                     getSupplier(PiedDigue.class),
                     getSupplier(Epi.class),
-                    getSupplier(Deversoire.class),
+                    getSupplier(Deversoir.class),
                     getSupplier(Fondation.class));
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
