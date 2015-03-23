@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
-import org.geotoolkit.gui.javafx.util.FXFilePathField;
 
 /**
  * Définit les préférences liées à l'installation locale de l'application.
@@ -25,7 +24,7 @@ public class SirsPreferences extends Properties {
     
     public static enum PROPERTIES {
         
-        DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null, new FXFilePathField()),
+        DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null, null),
         REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/", null);
         
         public final String title;
