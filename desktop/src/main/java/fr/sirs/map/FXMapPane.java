@@ -258,13 +258,13 @@ public class FXMapPane extends BorderPane {
      * @param elementClass The particular class of element we want to retrieve on map.
      * @return The Map layer in which are contained elements of input type, or null.
      */
-    public MapLayer getMapLayerForElement(Class elementClass) {
-        if (TronconDigue.class.isAssignableFrom(elementClass)) {
+    private MapLayer getMapLayerForElement(Element element) {
+        if (element instanceof TronconDigue) {
             return getMapLayerForElement(CorePlugin.TRONCON_LAYER_NAME);
-        } else if (BorneDigue.class.isAssignableFrom(elementClass)) {
+        } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
         } else {
-            final LabelMapper mapper = new LabelMapper(elementClass);
+            final LabelMapper mapper = new LabelMapper(element.getClass());
             return getMapLayerForElement(mapper.mapClassName());
         }
     }
@@ -274,7 +274,7 @@ public class FXMapPane extends BorderPane {
      * @param layerName Identifier of the map layer to retrieve
      * @return The matching map layer, or null.
      */
-    public MapLayer getMapLayerForElement(String layerName) {
+    private MapLayer getMapLayerForElement(String layerName) {
         if (context == null) return null;
         for (MapLayer layer : context.layers()) {
             if (layer.getName().equalsIgnoreCase(layerName)) {
@@ -307,7 +307,7 @@ public class FXMapPane extends BorderPane {
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Recherche de la couche correspondante");
             
-            final MapLayer container = getMapLayerForElement(toFocusOn.getClass());
+            final MapLayer container = getMapLayerForElement(toFocusOn);
             if (!(container instanceof FeatureMapLayer)) {
                 return false;
             }

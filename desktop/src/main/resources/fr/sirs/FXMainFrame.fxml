@@ -74,7 +74,7 @@
                                         <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Description des ouvrages" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="Autres thématiques" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%unlocalizedThemes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
                                     </children>

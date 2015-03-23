@@ -10,6 +10,7 @@ import org.geotoolkit.data.bean.BeanStore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
+import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.DocumentsTheme;
@@ -22,11 +23,14 @@ import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
+import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
+import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
@@ -35,6 +39,7 @@ import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
@@ -46,9 +51,14 @@ import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.ProfilLong;
+import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
+import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.TalusDigue;
@@ -83,6 +93,7 @@ import org.apache.sis.util.ArraysExt;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -102,9 +113,11 @@ import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
 
 import static org.geotoolkit.style.StyleConstants.*;
+import org.opengis.filter.Filter;
 
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.Id;
+import org.opengis.filter.FilterVisitor;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.style.Fill;
@@ -243,6 +256,18 @@ public class CorePlugin extends Plugin {
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
+            final List<Class<? extends SIRSDocument>> listeDesTypesDeDocs = new ArrayList<>();
+            listeDesTypesDeDocs.add(Convention.class);
+            listeDesTypesDeDocs.add(ArticleJournal.class);
+            listeDesTypesDeDocs.add(Marche.class);
+            listeDesTypesDeDocs.add(RapportEtude.class);
+            listeDesTypesDeDocs.add(DocumentGrandeEchelle.class);
+            listeDesTypesDeDocs.add(ProfilLong.class);
+            listeDesTypesDeDocs.add(ProfilTravers.class);
+            for(final Class elementClass : listeDesTypesDeDocs){
+                final LabelMapper mapper = new LabelMapper(elementClass);
+                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+            }
             
             final Color[] colors = new Color[]{
                 Color.BLACK,
@@ -348,10 +373,11 @@ public class CorePlugin extends Plugin {
             items.add(mesuresLayer);
                         
             // Positionnement des documents
-            final BeanStore documentsStore = new BeanStore(getSupplier(DocumentTroncon.class));
+            final BeanStore documentsStore = new BeanStore(
+                    getSupplier(DocumentTroncon.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
-            documentsLayer.items().addAll( buildLayers(documentsStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            documentsLayer.items().addAll( buildLayers(documentsStore, listeDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(documentsLayer);
             
@@ -363,6 +389,45 @@ public class CorePlugin extends Plugin {
         }
         
         return items;
+    }
+    
+    private static class DocumentFilter<T extends SIRSDocument> implements Filter{
+
+        private final Class<T> documentClass;
+        private final List<PreviewLabel> previews;
+        private final Map<String, String> cache;
+        private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
+
+        public DocumentFilter(final Class<T> documentClass) {
+            this.documentClass = documentClass;
+            previews = PREVIEW_LABEL_REPOSITORY.getPreviewLabels(documentClass);
+            cache = new HashMap<>();
+            for(final PreviewLabel preview : previews){
+                cache.put(preview.getId(), preview.getType());
+            }
+        }
+        
+        @Override
+        public boolean evaluate(Object o) {
+            
+            
+            final BeanFeature beanFeature = (BeanFeature) o;
+            if(beanFeature.getProperty("sirsdocument")!=null){
+                final Object documentId = beanFeature.getPropertyValue("sirsdocument");
+                if(documentId!=null && documentId instanceof String){
+                    if(documentClass.getName().equals(cache.get((String) documentId))){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Object accept(FilterVisitor fv, Object o) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
     }
 
     /**
@@ -473,6 +538,51 @@ public class CorePlugin extends Plugin {
             
             layers.add(fml);
             i++;
+        }
+        return layers;
+    }
+    
+    /**
+     * Build DocumentTroncon layers for each provided SIRSdocument class.
+     * @param store
+     * @param documentClasses
+     * @param nameMap
+     * @param colors
+     * @param selectionStyle
+     * @param visible
+     * @return
+     * @throws DataStoreException 
+     */
+    private List<MapLayer> buildLayers(BeanStore store, List<Class<? extends SIRSDocument>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+        final List<MapLayer> layers = new ArrayList<>();
+        final org.geotoolkit.data.session.Session symSession = store.createSession(false);
+        int i=0;
+        for(Name name : store.getNames()){
+            for(final Class documentClass : documentClasses){
+                final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
+                final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
+                final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+                final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+
+                if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
+                    final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                            CommonCRS.Temporal.JAVA.crs(), 
+                            GO2Utilities.FILTER_FACTORY.property("date_debut"), 
+                            GO2Utilities.FILTER_FACTORY.property("date_fin")
+                    );
+                    fml.getExtraDimensions().add(datefilter);
+                }
+                fml.setVisible(visible);
+                fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+
+                final String str = nameMap.get(documentClass.getSimpleName());
+                fml.setName(str!=null ? str : documentClass.getSimpleName());
+
+                if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
+
+                layers.add(fml);
+                i++;
+            }
         }
         return layers;
     }
