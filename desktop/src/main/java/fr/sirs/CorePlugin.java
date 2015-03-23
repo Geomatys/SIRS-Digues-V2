@@ -13,7 +13,6 @@ import fr.sirs.core.component.DocumentListener;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.DocumentsTheme;
-import fr.sirs.theme.EmpriseCommunaleTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.FrancBordTheme;
 import fr.sirs.theme.MesureEvenementsTheme;
@@ -481,7 +480,6 @@ public class CorePlugin extends Plugin {
         themes.add(new PrestationsTheme());
         themes.add(new MesureEvenementsTheme());
         themes.add(new DocumentTronconTheme());
-        themes.add(new EmpriseCommunaleTheme());
         themes.add(new ProfilsEnTraversTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
