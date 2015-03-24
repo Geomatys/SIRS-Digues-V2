@@ -13,12 +13,10 @@ import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
-import fr.sirs.theme.DocumentsTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.FrancBordTheme;
 import fr.sirs.theme.MesureEvenementsTheme;
 import fr.sirs.theme.PrestationsTheme;
-import fr.sirs.theme.ProfilsEnTraversTheme;
 import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
@@ -66,6 +64,7 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.DocumentTronconTheme;
 
 import java.awt.Color;
@@ -73,7 +72,6 @@ import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -608,10 +606,15 @@ public class CorePlugin extends Plugin {
         themes.add(new PrestationsTheme());
         themes.add(new MesureEvenementsTheme());
         themes.add(new DocumentTronconTheme());
-        themes.add(new ProfilsEnTraversTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
-        themes.add(new DocumentsTheme());
+        themes.add(new DocumentTheme<>(ProfilTravers.class));
+        themes.add(new DocumentTheme<>(Convention.class));
+        themes.add(new DocumentTheme<>(ArticleJournal.class));
+        themes.add(new DocumentTheme<>(Marche.class));
+        themes.add(new DocumentTheme<>(RapportEtude.class));
+        themes.add(new DocumentTheme<>(DocumentGrandeEchelle.class));
+        themes.add(new DocumentTheme<>(ProfilLong.class));
         
     }
     
