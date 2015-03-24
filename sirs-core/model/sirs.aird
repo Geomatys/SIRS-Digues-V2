@@ -200,7 +200,7 @@
               <styles xmi:type="notation:FilteringStyle" xmi:id="_ND6IckffEeSoXJiONqf-1A"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_ND46UUffEeSoXJiONqf-1A" fontName="Lucida Grande" fontHeight="8" fillColor="10265827"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ND46UkffEeSoXJiONqf-1A" x="-384" y="292" width="120" height="127"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ND46UkffEeSoXJiONqf-1A" x="-384" y="292" width="120" height="107"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_j29NAEfgEeSoXJiONqf-1A" type="2003" element="_j2vxoEfgEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_j290EEfgEeSoXJiONqf-1A" type="5007"/>
@@ -2631,7 +2631,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_chraEWvmEeSz0bikHziHTg" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_chraEmvmEeSz0bikHziHTg" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_chraE2vmEeSz0bikHziHTg" points="[-59, 9, 749, -29]$[-749, 9, 59, -29]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_chraE2vmEeSz0bikHziHTg" points="[-59, 23, 853, -1]$[-853, 23, 59, -1]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_chsBJmvmEeSz0bikHziHTg" id="(0.5,0.4968553459119497)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_chsBJ2vmEeSz0bikHziHTg" id="(0.5,0.4942528735632184)"/>
           </edges>
@@ -3267,7 +3267,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_Ox-fIX-KEeSOeabJ-GPliw" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_Ox-fIn-KEeSOeabJ-GPliw" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_Ox-fI3-KEeSOeabJ-GPliw" points="[-13, 46, 1050, 56]$[-1039, 46, 24, 56]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_Ox-fI3-KEeSOeabJ-GPliw" points="[47, -10, 1110, 2]$[47, -18, 1110, -6]$[-526, -18, 537, -6]$[-526, -12, 537, 0]$[-1039, -12, 24, 0]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Ox_GNn-KEeSOeabJ-GPliw" id="(0.11475409836065574,0.1037037037037037)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Ox_GN3-KEeSOeabJ-GPliw" id="(0.8,0.13513513513513514)"/>
           </edges>
@@ -5101,9 +5101,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_SMlMgH-EEeSOeabJ-GPliw" name="referenceNumerique : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Photo/referenceNumerique"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Photo/referenceNumerique"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_SMlMgH-EEeSOeabJ-GPliw" name="chemin : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Photo/chemin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Photo/chemin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_SMlMgX-EEeSOeabJ-GPliw" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_SMlMgn-EEeSOeabJ-GPliw"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
