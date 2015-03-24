@@ -6,6 +6,7 @@
 package fr.sirs.util;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +19,7 @@ import javafx.stage.DirectoryChooser;
 public class FXDirectoryTextField extends AbstractPathTextField {
 
     @Override
-    protected Path choosePath() {
+    protected String chooseInputContent() {
         final DirectoryChooser chooser = new DirectoryChooser();
         String strPath = getText();
         if (strPath != null && !strPath.isEmpty()) {
@@ -33,8 +34,13 @@ public class FXDirectoryTextField extends AbstractPathTextField {
         if (returned == null) {
             return null;
         } else {
-            return returned.toPath();
+            return returned.getAbsolutePath();
         }
+    }
+
+    @Override
+    protected URI getURIForText(String inputText) throws Exception {
+        return new URI(inputText);
     }
     
 }

@@ -21,29 +21,57 @@ import org.geotoolkit.internal.Loggers;
  */
 public class DirectoryContent extends TextFieldCompletion {
     
+    /**
+     * A path which will be used as root when we will search paths available for
+     * input text. If set, all choices returned by {@link #getChoices(java.lang.String) }
+     * will be relative paths from specified root path.
+     */
+    public Path root;
+    
     public DirectoryContent(final TextInputControl source) {
         super(source);
     }
 
     @Override
-    protected ObservableList<String> getChoices(String text) {
+    protected ObservableList<String> getChoices(final String text) {
         final ArrayList<String> result = new ArrayList<>();
 
         try {
-            Path origin = Paths.get(text);
+            final Path origin;
+            if (root == null) {
+                if (text == null) {
+                    origin = Paths.get(System.getProperty("user.home"));
+                } else {
+                    origin = Paths.get(text);
+                }
+            } else {
+                if (text == null) {
+                    origin = root;
+                } else {
+                    origin = root.resolve(text);
+                }
+            }
+            
             if (Files.isRegularFile(origin)) {
-                result.add(origin.toString());
+                result.add(toString(origin));
             } else if (Files.isDirectory(origin)) {
-                Files.walk(origin, 1).forEach((final Path child) -> result.add(child.toString()));
+                Files.walk(origin, 1).forEach((final Path child) -> result.add(toString(child)));
             } else if (Files.isDirectory(origin.getParent())) {
                 final String fileStart = origin.getFileName().toString().toLowerCase();
                 Files.walk(origin.getParent(), 1)
-                        .filter((final Path p) -> p.getFileName().toString().toLowerCase().startsWith(fileStart))
-                        .forEach((final Path child) -> result.add(child.toString()));
+                        .filter((final Path p) -> {
+                            return (p.getFileName() != null && p.getFileName().toString().toLowerCase().startsWith(fileStart));
+                        })
+                        .forEach((final Path child) -> result.add(toString(child)));
             }
         } catch (Exception e) {
             Loggers.JAVAFX.log(Level.FINE, "Cannot find completion for input path", e);
         }
         return FXCollections.observableList(result);
+    }
+    
+    protected String toString(Path p) {
+        if (p == null) return "";
+        return (root != null)? root.relativize(p).toString() : p.toString();
     }
 }

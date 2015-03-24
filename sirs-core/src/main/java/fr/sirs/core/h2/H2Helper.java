@@ -43,7 +43,7 @@ public class H2Helper {
         int srid = SirsCore.getSrid();
         Path file = getDBFile(connector);
 
-        if (Files.isDirectory(SirsCore.H2_PATH) && Files.exists(SirsCore.H2_PATH)) {
+        if (Files.isDirectory(file.getParent())) {
             Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc)
@@ -108,29 +108,26 @@ public class H2Helper {
     private static void init(Connection conn, CouchDbConnector db, int srid) throws SQLException {
         SQLHelper.createTables(conn, srid);
         
-        List<String> allDocIds = db.getAllDocIds();
+        List<String> allDocIds = db.getAllDocIds();        
         DocHelper docHelper = new DocHelper(db);
         final Thread currentThread = Thread.currentThread();
         try {
             conn.setAutoCommit(false);
             for (String id : allDocIds) {
                 if (currentThread.isInterrupted()) return;
-                if (id.startsWith("$")) {
+                if (id.startsWith("$") || id.startsWith("_")) {
                     continue;
                 }
-                if (id.startsWith("_")) {
-                    continue;
-                }
+                
                 docHelper.getElement(id).map(
                         e -> SQLHelper.updateElement(conn, e));
-
+                
                 conn.commit();
             }
-
+            
             SQLHelper.addForeignKeys(conn);
         } catch (Exception e) {
             conn.rollback();
-            conn.close();
             throw e;
         }
     }

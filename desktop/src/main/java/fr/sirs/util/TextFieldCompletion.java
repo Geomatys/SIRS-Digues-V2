@@ -30,6 +30,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
 /**
@@ -52,23 +54,20 @@ public class TextFieldCompletion {
 
     public TextFieldCompletion(final TextInputControl textField) {
         this.textField = textField;
-        //this.textField.setOnKeyPressed((KeyEvent t)->popup.hide());
-        //this.textField.setOnKeyReleased(this::onKeyPress);
-        this.textField.setOnKeyPressed(this::onKeyPress);
-        this.textField.setOnMousePressed((MouseEvent e)->onKeyPress(null));
-        this.textField.textProperty().addListener(this::updateChoices);
         
         list.setMinSize(0, 0);
         
-        final ScrollPane scroll = new ScrollPane(list);
-        scroll.setFitToWidth(true);
-        scroll.setFitToHeight(true);
-        
         popup.setAutoHide(true);
-        popup.getContent().add(scroll);
-        final MultipleSelectionModel<String> sModel = list.getSelectionModel();
+        popup.getContent().add(list);
+        
+        // Event management
+        this.textField.setOnKeyPressed(this::onKeyPress);
+        this.textField.setOnMousePressed((MouseEvent e)->onKeyPress(null));
+        this.textField.setOnMouseClicked((MouseEvent e)->updateChoices(textField.textProperty(), null, textField.textProperty().get()));
+        this.textField.textProperty().addListener(this::updateChoices);
         
         // If user click or press enter on a popup item, we put selected value as text field value.
+        final MultipleSelectionModel<String> sModel = list.getSelectionModel();
         sModel.setSelectionMode(SelectionMode.SINGLE);
         list.setOnKeyPressed((KeyEvent event) -> {
             if(event.getCode()==KeyCode.ENTER){
@@ -80,7 +79,8 @@ public class TextFieldCompletion {
                 moveCaret(textField.getLength());
                 popup.hide();
             } else if (KeyCode.TAB.equals(event.getCode())) {
-                if (sModel.getSelectedIndex() >= list.getItems().size()-1) {
+                int selectedIndex = sModel.getSelectedIndex();
+                if (selectedIndex < 0 || selectedIndex >= list.getItems().size()-1) {
                     sModel.selectFirst();
                 } else {
                     sModel.selectNext();
@@ -118,16 +118,18 @@ public class TextFieldCompletion {
         }
         
         final KeyCode code = event.getCode();
-        final Point2D popupPos = textField.localToScreen(0, textField.getHeight());
         
         if (code == KeyCode.UP) {
             caretPos = -1;
             moveCaret(textField.getLength());
             
-        } else if (code == KeyCode.DOWN || KeyCode.TAB.equals(code)) {
+        } else if (code == KeyCode.DOWN) {
             if (!popup.isShowing()) {
-                popup.setWidth(list.getPrefWidth()+10);
-                popup.show(textField,popupPos.getX(),popupPos.getY());
+                final Point2D popupPos = textField.localToScreen(0, textField.getHeight());
+                if (popupPos != null) {
+                    popup.setWidth(list.getPrefWidth()+10);
+                    popup.show(textField,popupPos.getX(),popupPos.getY());
+                }
             }
             caretPos = -1;
             moveCaret(textField.getLength());
@@ -146,10 +148,11 @@ public class TextFieldCompletion {
             popup.hide();
         } else {
             final Point2D popupPos = textField.localToScreen(0, textField.getHeight());
-            popup.setWidth(list.getPrefWidth()+10);
-            popup.show(textField, popupPos.getX(), popupPos.getY());
+            if (popupPos != null) {
+                popup.setWidth(list.getPrefWidth() + 10);
+                popup.show(textField, popupPos.getX(), popupPos.getY());
+            }
         }
-        
     }
     
     private void moveCaret(int textLength) {
