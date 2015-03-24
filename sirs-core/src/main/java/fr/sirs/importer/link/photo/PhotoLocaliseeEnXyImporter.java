@@ -123,7 +123,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
             }
             
             if (row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString()) != null) {
-                photo.setPhotographe(intervenants.get(row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString())).getId());
+                photo.setPhotographeId(intervenants.get(row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString())).getId());
             }
             
             if (row.getInt(Columns.ID_DOC.toString()) != null) {

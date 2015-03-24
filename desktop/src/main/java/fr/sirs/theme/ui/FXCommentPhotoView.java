@@ -114,19 +114,24 @@ public class FXCommentPhotoView extends SplitPane {
 
         final Photo selected = photos.get(imageIndex);
 
-        try {
-            /* TODO : It appears that image relative path is stored in 
-             * libelle property. It's a bit strange, it should be watched.
-             */
-            final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
-            // TODO : How to manage image loading error ? No exception is thrown here...
-            uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
-            uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
-            uiPhotoDate.textProperty().bind(selected.dateProperty().asString());
-        } catch (IllegalStateException e) {
-            uiPhotoLibelle.setText(e.getLocalizedMessage());
-        } catch (IllegalArgumentException | MalformedURLException e) {
-            uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle());
+        if(selected==null || selected.getReferenceNumerique()==null || selected.getReferenceNumerique().isEmpty()){
+            uiPhotoLibelle.setText("Aucun fichier n'est associé à la photo.");
+        } 
+        else {
+            try {
+                /* TODO : It appears that image relative path is stored in 
+                 * libelle property. It's a bit strange, it should be watched.
+                 */
+                final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
+                // TODO : How to manage image loading error ? No exception is thrown here...
+                uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
+                uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
+                uiPhotoDate.textProperty().bind(selected.dateProperty().asString());
+            } catch (IllegalStateException e) {
+                uiPhotoLibelle.setText(e.getLocalizedMessage());
+            } catch (IllegalArgumentException | MalformedURLException e) {
+                uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle());
+            }
         }
         /* We want the image to be resized to fit it's stage bounding box, while
          * keeping its proportions as the original image.
