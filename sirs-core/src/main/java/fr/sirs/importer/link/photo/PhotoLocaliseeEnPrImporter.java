@@ -172,7 +172,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             
             photo.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PHOTO.toString())));
             
-            photo.setReferenceNumerique(cleanNullString(row.getString(Columns.NOM_FICHIER_PHOTO.toString())));
+            photo.setChemin(cleanNullString(row.getString(Columns.NOM_FICHIER_PHOTO.toString())));
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
                 photo.setCoteId(cotes.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());

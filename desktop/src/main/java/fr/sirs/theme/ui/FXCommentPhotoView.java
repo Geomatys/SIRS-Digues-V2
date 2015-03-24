@@ -12,18 +12,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
 
 /**
@@ -114,7 +107,7 @@ public class FXCommentPhotoView extends SplitPane {
 
         final Photo selected = photos.get(imageIndex);
 
-        if(selected==null || selected.getReferenceNumerique()==null || selected.getReferenceNumerique().isEmpty()){
+        if(selected==null || selected.getChemin()==null || selected.getChemin().isEmpty()){
             uiPhotoLibelle.setText("Aucun fichier n'est associé à la photo.");
         } 
         else {
@@ -122,7 +115,7 @@ public class FXCommentPhotoView extends SplitPane {
                 /* TODO : It appears that image relative path is stored in 
                  * libelle property. It's a bit strange, it should be watched.
                  */
-                final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getReferenceNumerique());
+                final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getChemin());
                 // TODO : How to manage image loading error ? No exception is thrown here...
                 uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
                 uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
