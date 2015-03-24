@@ -257,7 +257,9 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
             }
             
             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                conduiteFermee.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                if(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue())!=null){
+                    conduiteFermee.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                }
             }
             
             conduiteFermee.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
