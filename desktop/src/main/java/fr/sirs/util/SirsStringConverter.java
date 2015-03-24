@@ -11,6 +11,11 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Role;
+import static fr.sirs.core.model.Role.ADMIN;
+import static fr.sirs.core.model.Role.EXTERN;
+import static fr.sirs.core.model.Role.GUEST;
+import static fr.sirs.core.model.Role.USER;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -65,6 +70,12 @@ public class SirsStringConverter extends StringConverter {
             text = ((CoordinateReferenceSystem) item).getName().toString();
         } else if (item instanceof PropertyType) {
             text = ((PropertyType) item).getName().tip().toString();
+        } else if (item instanceof Role){
+            if(item==ADMIN) text="Administrateur";
+            else if(item==USER) text="Utilisateur";
+            else if(item==GUEST) text="Invité";
+            else if(item==EXTERN) text="Externe";
+            else text="";
         }
         
         // Whatever object we've got, if we can append a libelle, we do.

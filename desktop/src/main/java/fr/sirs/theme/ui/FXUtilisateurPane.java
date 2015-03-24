@@ -4,6 +4,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.*;
+import fr.sirs.util.SirsStringConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -71,6 +72,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
         
         ui_role.getItems().addAll(Role.values());
+        ui_role.setConverter(new SirsStringConverter());
     }
     
     public BooleanProperty administrableProperty(){return administrableProperty;}

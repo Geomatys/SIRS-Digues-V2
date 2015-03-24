@@ -19,6 +19,8 @@ import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.query.ElementHit;
+import fr.sirs.util.FXEnumTableCell;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.PropertyDescriptor;
@@ -93,7 +95,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -739,7 +740,7 @@ public class PojoTable extends BorderPane {
 
                     @Override
                     public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
-                        return new FXEnumTableCell<Element, Role>(Role.class);
+                        return new FXEnumTableCell<>(Role.class, new SirsStringConverter());
                     }
 
                 });     
