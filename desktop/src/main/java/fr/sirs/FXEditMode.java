@@ -1,22 +1,19 @@
 
 package fr.sirs;
 
+import static fr.sirs.SIRS.COLOR_INVALID_ICON;
+import static fr.sirs.SIRS.CSS_PATH;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Role;
 import java.io.IOException;
-import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,7 +62,7 @@ public class FXEditMode extends VBox {
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
-        getStylesheets().add("/fr/sirs/theme.css");
+        getStylesheets().add(CSS_PATH);
                 
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
@@ -74,22 +71,18 @@ public class FXEditMode extends VBox {
         uiConsult.setToggleGroup(group);
         uiEdit.setToggleGroup(group);
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(newValue==null) group.selectToggle(uiConsult);
-        });
+                if(newValue==null) group.selectToggle(uiConsult);
+            });
         
         authorIDProperty = new SimpleStringProperty();
         validProperty = new SimpleBooleanProperty();
-        validProperty.addListener(new ChangeListener<Boolean>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+        validProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 resetValidUIs(newValue);
-            }
-        });
+            });
         validProperty.set(true);
     }
     
-    public void resetValidUIs(final boolean valid){
+    private void resetValidUIs(final boolean valid){
         if(valid){
             uiImageValid.setImage(ICON_CHECK_CIRCLE);
             uiLabelValid.setText(VALID_TEXT);
@@ -98,7 +91,7 @@ public class FXEditMode extends VBox {
         else {
             uiImageValid.setImage(ICON_EXCLAMATION_CIRCLE);
             uiLabelValid.setText(INVALID_TEXT);
-            uiLabelValid.setTextFill(Color.valueOf("#aa0000"));
+            uiLabelValid.setTextFill(Color.valueOf(COLOR_INVALID_ICON));
         }
     }
     
