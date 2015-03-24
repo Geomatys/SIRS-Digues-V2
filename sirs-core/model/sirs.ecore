@@ -100,7 +100,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentId" eType="#//RefTypeDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/photo"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
@@ -1407,7 +1407,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true" eSuperTypes="#//SIRSFileReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1432,5 +1432,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObjetReseau" abstract="true" eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EReference" name="conventionIds" upperBound="-1"
         eType="#//Convention"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSFileReference" abstract="true" interface="true">
+    <eOperations name="getChemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="setChemin">
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
   </eClassifiers>
 </ecore:EPackage>
