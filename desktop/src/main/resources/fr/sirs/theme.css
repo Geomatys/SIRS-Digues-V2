@@ -192,8 +192,15 @@
 }
 
 .invalidRow {
-    -fx-background-color: #FFE4C4;
+    -fx-background-color: #FFEECE;
+    -fx-text-fill: #bb0000;
+}
+.invalidRow:odd {
+    -fx-background-color: #FFE0C0;
 }
 .invalidRow:selected {
-    -fx-background-color: #aF7454;
+    -fx-background-color: #DF7454;
+}
+.invalidRow:odd:selected {
+    -fx-background-color: #DF7454;
 }

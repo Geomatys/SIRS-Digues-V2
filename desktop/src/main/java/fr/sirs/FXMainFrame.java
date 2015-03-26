@@ -306,6 +306,10 @@ public class FXMainFrame extends BorderPane {
                     avoidFields.add("borneIds");
                 }
                 
+                if(obj instanceof Element){
+                    avoidFields.add("couchDBDocument");
+                }
+                
                 try {
                     fileToPrint = PrinterUtilities.print(obj, avoidFields);
                     fileToPrint.deleteOnExit();

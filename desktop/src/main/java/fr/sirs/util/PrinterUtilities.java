@@ -1,22 +1,24 @@
 package fr.sirs.util;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import static org.elasticsearch.index.mapper.MapperBuilders.source;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.display2d.service.OutputDef;
@@ -34,6 +36,7 @@ import org.xml.sax.SAXException;
  * hand and the instances on the other hand.</li>
  * </ul>
  * <p>These are tools for printing functionnalities.</p>
+ * 
  * @author Samuel Andrés (Geomatys)
  */
 public class PrinterUtilities {
@@ -86,11 +89,9 @@ public class PrinterUtilities {
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
         // Creates the Jasper Reports specific template from the generic template.
-        final JRDomWriter writer = new JRDomWriter(new FileInputStream(
-                "src/main/resources/fr/sirs/jrxml/metaTemplate.jrxml"));
+        final JRDomWriter writer = new JRDomWriter(PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplate.jrxml"));
         writer.setFieldsInterline(2);
-        final File template = File.createTempFile(objectToPrint.getClass().getSimpleName(), 
-                ".jrxml", new File("src/main/resources/fr/sirs/jrxml"));
+        final File template = File.createTempFile(objectToPrint.getClass().getSimpleName(), ".jrxml");
         template.deleteOnExit();
         writer.setOutput(template);
         writer.write(objectToPrint.getClass(), avoidFields);
@@ -98,46 +99,49 @@ public class PrinterUtilities {
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
         final JasperReport report = entry.getKey();
-        final FeatureType type = entry.getValue();
-        
-        // Build the feature from the object to print --------------------------
-        final Feature feature0 = FeatureUtilities.defaultFeature(type, "id0");
-        
-        final Method[] methods = objectToPrint.getClass().getMethods();
-        for(final Method method : methods) {
-            if (isGetter(method)) {
-                final String fieldName;
-                
-                if (method.getName().startsWith("is")) {
-                    fieldName = method.getName().substring(2, 3).toLowerCase()
-                            + method.getName().substring(3);
-                } else if (method.getName().startsWith("get")) {
-                    fieldName = method.getName().substring(3, 4).toLowerCase()
-                            + method.getName().substring(4);
-                } else {
-                    throw new Exception("This is an \"original\" getter.");
-                }
-                
-                if(!avoidFields.contains(fieldName)){
-                    feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
-                }
-            }
-        }
-        
-        // Build the feature collection ----------------------------------------
-        final FeatureCollection<Feature> featureCollection = FeatureStoreUtilities.collection(feature0);
+//        final FeatureType type = entry.getValue();
+//        
+//        // Build the feature from the object to print --------------------------
+//        final Feature feature0 = FeatureUtilities.defaultFeature(type, "id0");
+//        
+//        final Method[] methods = objectToPrint.getClass().getMethods();
+//        for(final Method method : methods) {
+//            if (isGetter(method)) {
+//                final String fieldName;
+//                
+//                if (method.getName().startsWith("is")) {
+//                    fieldName = method.getName().substring(2, 3).toLowerCase()
+//                            + method.getName().substring(3);
+//                } else if (method.getName().startsWith("get")) {
+//                    fieldName = method.getName().substring(3, 4).toLowerCase()
+//                            + method.getName().substring(4);
+//                } else {
+//                    throw new Exception("This is an \"original\" getter.");
+//                }
+//                
+//                if(!avoidFields.contains(fieldName)){
+//                    feature0.setPropertyValue(fieldName, method.invoke(objectToPrint));
+//                }
+//            }
+//        }
+//        
+//        // Build the feature collection ----------------------------------------
+//        final FeatureCollection<Feature> featureCollection = FeatureStoreUtilities.collection(feature0);
         
         // Generate the report -------------------------------------------------
-        final File fout = new File("src/test/resources/report"
-                        + objectToPrint.getClass().getSimpleName() + ".pdf");
-        OutputStream out = new FileOutputStream(fout);
-        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, 
-                out);
+        final File fout = File.createTempFile(objectToPrint.getClass().getSimpleName(), ".pdf");
+        fout.deleteOnExit();
+        final OutputStream out = new FileOutputStream(fout);
+        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, out);
         final Map<String, Object> parameters = new HashMap<>();
         
         
         parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-        JasperReportService.generateReport(report, featureCollection, parameters, output);
+//        JasperReportService.generateReport(report, featureCollection, parameters, output);
+        
+        final JRDataSource source = new ObjectDataSource(Collections.singletonList(objectToPrint));
+        final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
+        JasperReportService.generate(print, output);
         return fout;
     }
     

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -256,6 +257,11 @@ public class JRDomWriter {
         trs.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         trs.transform(source, result);
     }
+    
+    private String getFieldNameFromSetter(final Method setter){
+        return setter.getName().substring(3, 4).toLowerCase()
+                            + setter.getName().substring(4);
+    }
 
     /**
      * <p>This method modifies the body of the DOM.</p>
@@ -265,15 +271,12 @@ public class JRDomWriter {
      */
     private void writeObject(final Class classToMap, List<String> avoidFields) throws Exception {
         
-        if(avoidFields==null) avoidFields=new ArrayList<>();
-        
         // Sets the initial fields used by the template.------------------------
         final Method[] methods = classToMap.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
-                final String fieldName = method.getName().substring(3, 4).toLowerCase()
-                            + method.getName().substring(4);
-                if (!avoidFields.contains(fieldName)) {
+                final String fieldName = getFieldNameFromSetter(method);
+                if (avoidFields==null || !avoidFields.contains(fieldName)) {
                     SIRS.LOGGER.log(Level.FINE, fieldName);
                     this.writeField(method);
                 }
@@ -350,6 +353,8 @@ public class JRDomWriter {
      */
     private void writeDetail(final Class classToMap, List<String> avoidFields) throws Exception{
         
+        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName());
+        
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
         int i = 0;
@@ -357,8 +362,7 @@ public class JRDomWriter {
             if(PrinterUtilities.isSetter(method)){
                 
                 // Retrives the field name from the setter name.----------------
-                final String fieldName = method.getName().substring(3, 4).toLowerCase() 
-                        + method.getName().substring(4);
+                final String fieldName = getFieldNameFromSetter(method);
                 
                 // Provides a multiplied height for comment and description fields.
                 final int heightMultiplicator;
@@ -372,8 +376,8 @@ public class JRDomWriter {
                 }
                 
                 // Writes the field.--------------------------------------------
-                if(!avoidFields.contains(fieldName)){
-                    this.writeDetailField(fieldName, i, heightMultiplicator, markup);
+                if(avoidFields==null || !avoidFields.contains(fieldName)){
+                    this.writeDetailField(fieldName, i, heightMultiplicator, markup, resourceBundle);
                     i+=heightMultiplicator;
                 }
             }
@@ -393,7 +397,7 @@ public class JRDomWriter {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailField(final String field, final int order, final int heightMultiplicator, final Markup style){
+    private void writeDetailField(final String field, final int order, final int heightMultiplicator, final Markup style, final ResourceBundle resourceBundle){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -443,7 +447,13 @@ public class JRDomWriter {
         staticTextFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
         
         final Element text = this.document.createElement(TAG_TEXT);
-        final CDATASection labelField = this.document.createCDATASection(field);
+        
+        final CDATASection labelField;
+        if(resourceBundle!=null && resourceBundle.containsKey(field)){
+            labelField = this.document.createCDATASection(resourceBundle.getString(field));
+        } else{
+            labelField = this.document.createCDATASection(field);
+        }
         
         // Builds the DOM tree.-------------------------------------------------
         text.appendChild(labelField);

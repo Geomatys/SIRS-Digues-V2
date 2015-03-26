@@ -462,6 +462,7 @@ public class FXLauncherPane extends BorderPane {
                     
                     final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
                     final Utilisateur administrateur = utilisateurRepository.create();
+                    administrateur.setValid(true);
                     administrateur.setLogin(uiImportLogin.getText());
                     MessageDigest messageDigest=null;
                     try {

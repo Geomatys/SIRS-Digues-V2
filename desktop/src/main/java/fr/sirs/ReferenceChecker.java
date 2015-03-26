@@ -303,7 +303,7 @@ public class ReferenceChecker extends Task<Void> {
                     if (String.class.equals(type)) {
                         if ("id".equals(header)) {
                             setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
-                            referenceClass.getMethod("setPseudoId", String.class).invoke(referenceInstance, record.get(header));
+                            referenceClass.getMethod("setDesignation", String.class).invoke(referenceInstance, record.get(header));
                         } else {
                             setter.invoke(referenceInstance, record.get(header));
                         }

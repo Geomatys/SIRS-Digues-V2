@@ -14,6 +14,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.util.HashMap;
@@ -91,11 +92,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         
-        this.uiTree.setShowRoot(false);
-        this.uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
+        uiTree.setShowRoot(false);
+        uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
 
-        this.uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> {
-            Object obj = this.uiTree.getSelectionModel().getSelectedItem();
+        uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> {
+            Object obj = uiTree.getSelectionModel().getSelectedItem();
             if (obj instanceof TreeItem) {
                 obj = ((TreeItem) obj).getValue();
             }
@@ -128,7 +129,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
 //        uiAdd.getItems().add(new NewTronconMenuItem(null));
         uiAdd.setDisable(!session.nonGeometryEditionProperty().get());
         
-        this.updateTree();
+        updateTree();
         
         
         //listen to changes in the db to update tree
@@ -170,7 +171,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     public void displayElement(final Element obj) {
         AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
         uiRight.setCenter(ctrl);
-        this.session.prepareToPrint(obj);
+        session.prepareToPrint(obj);
     }
 
     private void deleteSelection(ActionEvent event) {
@@ -189,7 +190,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             );
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
-                FXDiguesPane.this.session.getSystemeEndiguementRepository().remove(se);
+                session.getSystemeEndiguementRepository().remove(se);
             }
                         
         }else if(obj instanceof Digue){
@@ -205,10 +206,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 final List<TronconDigue> troncons = session.getTronconDigueByDigue(digue);
                 for(TronconDigue td : troncons){
                     td.setDigueId(null);
-                    FXDiguesPane.this.session.getTronconDigueRepository().update(td);
+                    session.getTronconDigueRepository().update(td);
                 }
                 //on supprime la digue
-                FXDiguesPane.this.session.getDigueRepository().remove(digue);
+                session.getDigueRepository().remove(digue);
             }
         }else if(obj instanceof TronconDigue){
             final TronconDigue td = (TronconDigue) obj;
@@ -218,7 +219,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             );
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
-                FXDiguesPane.this.session.getTronconDigueRepository().remove(td);
+                session.getTronconDigueRepository().remove(td);
             }
         }
     }
@@ -389,6 +390,8 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             this.setOnAction((ActionEvent t) -> {
                 final TronconDigue troncon = new TronconDigue();
                 troncon.setLibelle("Tronçon vide");
+                troncon.setAuthor(session.getUtilisateur().getId());
+                troncon.setValid(!(session.getRole()==EXTERN));
                 if(parent!=null){
                     final Digue digue = (Digue) parent.getValue();
                     troncon.setDigueId(digue.getId());
@@ -404,7 +407,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                     troncon.setGeometry((Geometry) TRONCON_GEOM_WGS84.clone());
                 }
 
-                FXDiguesPane.this.session.getTronconDigueRepository().add(troncon);
+                session.getTronconDigueRepository().add(troncon);
                 //mise en place du SR élémentaire
                 TronconUtils.updateSRElementaire(troncon,session);
             });
@@ -418,13 +421,15 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             this.setOnAction((ActionEvent t) -> {
                 final Digue digue = new Digue();
                 digue.setLibelle("Digue vide");
-                FXDiguesPane.this.session.getDigueRepository().add(digue);
+                digue.setAuthor(session.getUtilisateur().getId());
+                digue.setValid(!(session.getRole()==EXTERN));
+                session.getDigueRepository().add(digue);
                 
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
                     se.getDigue().add(digue.getDocumentId());
                     digue.setSystemeEndiguement(se.getId());
-                    FXDiguesPane.this.session.getSystemeEndiguementRepository().update(se);
+                    session.getSystemeEndiguementRepository().update(se);
                 }
                 
             });
@@ -436,9 +441,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewSystemeMenuItem(TreeItem parent) {
             super("Créer un nouveau système d'endiguement",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final SystemeEndiguement candidate = new SystemeEndiguement();
-                candidate.setLibelle("Système vide");
-                FXDiguesPane.this.session.getSystemeEndiguementRepository().add(candidate);
+                final SystemeEndiguement systemeEndiguement = new SystemeEndiguement();
+                systemeEndiguement.setLibelle("Système vide");
+                systemeEndiguement.setAuthor(session.getUtilisateur().getId());
+                systemeEndiguement.setValid(!(session.getRole()==EXTERN));
+                session.getSystemeEndiguementRepository().add(systemeEndiguement);
             });
         }
     }
