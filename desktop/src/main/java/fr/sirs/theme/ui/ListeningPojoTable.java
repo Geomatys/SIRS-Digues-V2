@@ -53,9 +53,7 @@ public class ListeningPojoTable<T> extends PojoTable {
 
             @Override
             public void onChanged(ListChangeListener.Change<? extends T> c) {
-                System.out.println("Changement");
                 if(producer!=null){
-                    System.out.println("Pas null !");
                     setTableItems(producer);
                 }
             }
