@@ -25,17 +25,38 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
- * This is a special king of PojoTable that listen one specific property of its
+ * This is a special kind of PojoTable that listen one specific property of its
  * items in order to kwon if they had to be removed from the table view.
  * 
- * The purpose of this component is to be able to display elements separately 
- * from their parent element.
+ * This table is usefull for links without opposite in order to detect an object 
+ * that were associated to the "virtual container" of the table list is no 
+ * longer associated, or, may be, associated again.
+ * 
+ * For instance, let us consider two classes A and B, linked by an 
+ * unidirectional association : A -> B.
+ * 
+ * So, A has a lis of B ids and can observe it in order to update UIs when the 
+ * contend of the list changes. On the contrary, B has not its own list of A ids
+ * If a new link is added from an instance of A to an instance of B, this last 
+ * one cannot know the updates of this link because it doesn't handle it.
+ * 
+ * This table provides some mechanisms of listening between entities that are 
+ * known to have been associated.
+ * 
+ * 1- It adds a listener to the objects it is initially linked with, or that are 
+ * added to the table list.
+ * 
+ * 2- It continues to listen the objects that have been removed from the table 
+ * in order to detect if they are associated again.
+ * 
+ * 3- But it does not listen other objects, and so, it cannot know if they are 
+ * associated for the first time to the "virtual container".
  * 
  * @author Samuel Andrés (Geomatys)
  */
 public class ListenPropertyPojoTable extends PojoTable {
 
-    private Map<Element, ChangeListener> listeners = new HashMap<>();
+    private final Map<Element, ChangeListener> listeners = new HashMap<>();
     private Method propertyMethodToListen;
     private Object propertyReference;
     
@@ -138,6 +159,7 @@ public class ListenPropertyPojoTable extends PojoTable {
                         }
                     };
                     property.addListener(changeListener);
+                    listeners.put(element, changeListener);
                 }
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Logger.getLogger(ListenPropertyPojoTable.class.getName()).log(Level.SEVERE, null, ex);
