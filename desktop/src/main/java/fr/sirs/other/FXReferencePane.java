@@ -3,6 +3,7 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.ReferenceChecker;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.Session;
@@ -22,8 +23,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -48,7 +47,7 @@ public class FXReferencePane extends BorderPane {
     public FXReferencePane(final Class<ReferenceType> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName());
         referenceChecker = session.getReferenceChecker();
-        references = new ReferencePojoTable(type, bundle.getString("class"));
+        references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS));
         references.editableProperty().set(false);
         references.fichableProperty().set(false);
         references.detaillableProperty().set(false);

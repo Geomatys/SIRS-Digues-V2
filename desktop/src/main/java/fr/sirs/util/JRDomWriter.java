@@ -2,11 +2,11 @@
 package fr.sirs.util;
 
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -100,6 +100,23 @@ public class JRDomWriter {
     private static final String TAG_BOX = "box";
     private static final String TAG_BOTTOM_PEN = "bottomPen";
     
+    
+    private static final String BOOLEAN_PRIMITIVE_NAME = "boolean";
+    private static final String FLOAT_PRIMITIVE_NAME = "float";
+    private static final String DOUBLE_PRIMITIVE_NAME = "double";
+    private static final String INTEGER_PRIMITIVE_NAME = "int";
+    private static final String LONG_PRIMITIVE_NAME = "long";
+    
+    private static final String BOOLEAN_CANONICAL_NAME = "java.lang.Boolean";
+    private static final String FLOAT_CANONICAL_NAME = "java.lang.Float";
+    private static final String DOUBLE_CANONICAL_NAME = "java.lang.Double";
+    private static final String INTEGER_CANONICAL_NAME = "java.lang.Integer";
+    private static final String LONG_CANONICAL_NAME = "java.lang.Long";
+    
+    private static final String NULL_REPLACEMENT = "Non renseigné";
+    private static final String TRUE_REPLACEMENT = "Oui";
+    private static final String FALSE_REPLACEMENT = "Non";
+    
     // Jasper Reports attributes.
     private static final String ATT_MODE = "mode";
     private static enum Mode {
@@ -141,6 +158,7 @@ public class JRDomWriter {
     private static final String ATT_Y = "y";
     private static final String ATT_WIDTH = "width";
     private static final String ATT_IS_STRETCH_WITH_OVERFLOW = "isStretchWithOverflow";
+    private static final String ATT_IS_BLANK_WHEN_NULL = "isBlankWhenNull";
     private static final String ATT_POSITION_TYPE = "positionType";
     private static enum PositionType {
         FLOAT("Float"), FIX_RELATIVE_TO_TOP("FixRelativeToTop"), FIX_RELATIVE_TO_BOTTOM("FixRelativeToBottom");
@@ -307,8 +325,17 @@ public class JRDomWriter {
         // Creates the field element.-------------------------------------------
         final Element field = document.createElement(TAG_FIELD);
         field.setAttribute(ATT_NAME, fieldName);
-        if(!method.getParameterTypes()[0].isPrimitive())
+        if(!method.getParameterTypes()[0].isPrimitive()){
             field.setAttribute(ATT_CLASS, method.getParameterTypes()[0].getCanonicalName());
+        } else {
+            switch(method.getParameterTypes()[0].getCanonicalName()){
+                case BOOLEAN_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, BOOLEAN_CANONICAL_NAME);break;
+                case FLOAT_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, FLOAT_CANONICAL_NAME);break;
+                case DOUBLE_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, DOUBLE_CANONICAL_NAME);break;
+                case INTEGER_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, INTEGER_CANONICAL_NAME);break;
+                case LONG_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, LONG_CANONICAL_NAME);break;
+            }
+        }
         
         final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
         final CDATASection description = document.createCDATASection("Mettre ici une description du champ.");
@@ -331,8 +358,17 @@ public class JRDomWriter {
         final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
         
         // Sets the title.------------------------------------------------------
+        final String className;
+        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName());
+        if(resourceBundle!=null){
+            className = (resourceBundle.containsKey(BUNDLE_KEY_CLASS)) ?
+                    resourceBundle.getString(BUNDLE_KEY_CLASS) : classToMap.getSimpleName();
+        }
+        else{
+            className = classToMap.getSimpleName();
+        }
         ((CDATASection) text.getChildNodes().item(0)).setData(
-                "Fiche synoptique de " + classToMap.getSimpleName());
+                "Fiche synoptique de " + className);
         
         // Builds the DOM tree.-------------------------------------------------
         this.root.appendChild(this.title);
@@ -363,6 +399,7 @@ public class JRDomWriter {
                 
                 // Retrives the field name from the setter name.----------------
                 final String fieldName = getFieldNameFromSetter(method);
+                final Class fieldClass = method.getParameterTypes()[0];
                 
                 // Provides a multiplied height for comment and description fields.
                 final int heightMultiplicator;
@@ -377,7 +414,7 @@ public class JRDomWriter {
                 
                 // Writes the field.--------------------------------------------
                 if(avoidFields==null || !avoidFields.contains(fieldName)){
-                    this.writeDetailField(fieldName, i, heightMultiplicator, markup, resourceBundle);
+                    this.writeDetailField(fieldName, fieldClass, i, heightMultiplicator, markup, resourceBundle);
                     i+=heightMultiplicator;
                 }
             }
@@ -397,7 +434,7 @@ public class JRDomWriter {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailField(final String field, final int order, final int heightMultiplicator, final Markup style, final ResourceBundle resourceBundle){
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final int heightMultiplicator, final Markup style, final ResourceBundle resourceBundle){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -468,31 +505,39 @@ public class JRDomWriter {
         //if (c==Instant.class)
         //    textField.setAttribute(TAG_PATTERN, DATE_PATTERN);
         textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+//        if(fieldClass!=LocalDateTime.class)
+//            textField.setAttribute(ATT_IS_BLANK_WHEN_NULL, "true");
         
-        final Element textFieldReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
+        final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
         textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
         textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
         textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
         textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
         textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         
-        final Element textFieldTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
+        final Element textFieldTextElement = document.createElement(TAG_TEXT_ELEMENT);
         textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
         textFieldTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.JUSTIFIED.toString());
         if(style!=null && style!=Markup.NONE) 
             textFieldTextElement.setAttribute(ATT_MARKUP, style.toString());
         
-        final Element textFieldFont = this.document.createElement(TAG_FONT);
+        final Element textFieldFont = document.createElement(TAG_FONT);
         textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
         
-        final Element textFieldExpression = this.document.createElement(TAG_TEXT_FIELD_EXPRESSION);
+        final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
         
         // The content of the field is specific in case of Calendar field.------
         final CDATASection valueField;
         //if (c==Instant.class) 
         //    valueField = this.document.createCDATASection("$F{"+field+"}");
-        //else 
-            valueField = this.document.createCDATASection("$F{"+field+"}");
+        //else $F{permit_quantity}.equals(null) ? $F{fst_insp_qpqlml_quantity} : $F{permit_quantity}
+        
+        if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
+            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+        }
+        else{
+            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+field+"}");
+        }
         
         // Builds the DOM tree.-------------------------------------------------
         textFieldExpression.appendChild(valueField);

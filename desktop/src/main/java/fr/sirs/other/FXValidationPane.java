@@ -2,6 +2,7 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.Session;
@@ -97,7 +98,7 @@ public class FXValidationPane extends BorderPane {
                             setGraphic(null);
                         }
                         else{
-                            setText(getBundleForClass(item.getValue()).getString("class"));
+                            setText(getBundleForClass(item.getValue()).getString(BUNDLE_KEY_CLASS));
                             setTooltip(new Tooltip(item.getKey()));
                         }
                     }
@@ -114,7 +115,7 @@ public class FXValidationPane extends BorderPane {
                 else{
                     final ResourceBundle rb1 = getBundleForClass(o1.getValue());
                     final ResourceBundle rb2 = getBundleForClass(o2.getValue());
-                    return rb1.getString("class").compareTo(rb2.getString("class"));
+                    return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
             }
         });
@@ -142,7 +143,7 @@ public class FXValidationPane extends BorderPane {
                         }
                         else{
                             final ResourceBundle rb = getBundleForClass(item);
-                            setText((rb == null) ? null : rb.getString("class"));
+                            setText((rb == null) ? null : rb.getString(BUNDLE_KEY_CLASS));
                         }
                     }
                 };
@@ -160,7 +161,7 @@ public class FXValidationPane extends BorderPane {
                 else{
                     final ResourceBundle rb1 = getBundleForClass(elementClass1);
                     final ResourceBundle rb2 = getBundleForClass(elementClass2);
-                    return rb1.getString("class").compareTo(rb2.getString("class"));
+                    return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
             }
         });

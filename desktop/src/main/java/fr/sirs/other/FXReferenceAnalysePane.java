@@ -3,6 +3,7 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.Session;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.model.AvecLibelle;
@@ -76,7 +77,7 @@ public class FXReferenceAnalysePane extends BorderPane {
                     public ObservableValue<String> call(TableColumn.CellDataFeatures<ReferenceUsage, String> param) {
                         String type = param.getValue().getType();
                         if(bundles.get(type)==null) bundles.put(type, ResourceBundle.getBundle(type));
-                        type = bundles.get(type).getString("class");
+                        type = bundles.get(type).getString(BUNDLE_KEY_CLASS);
                         return new SimpleObjectProperty(type);
                     }
                 });
@@ -94,7 +95,7 @@ public class FXReferenceAnalysePane extends BorderPane {
                 setCenter(usages);
                 
                 final ResourceBundle topBundle = ResourceBundle.getBundle(reference.getClass().getName());
-                final Label uiTitle = new Label("Usages dans la base de la référence \""+ ((AvecLibelle)reference).getLibelle()+"\" ("+topBundle.getString("class")+")");
+                final Label uiTitle = new Label("Usages dans la base de la référence \""+ ((AvecLibelle)reference).getLibelle()+"\" ("+topBundle.getString(BUNDLE_KEY_CLASS)+")");
                 uiTitle.getStyleClass().add("pojotable-header");
                 uiTitle.setAlignment(Pos.CENTER);
                 uiTitle.setPadding(new Insets(5));

@@ -2,6 +2,7 @@ package fr.sirs.other;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -94,7 +95,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
         setCenter(pseudoIds);
 
         final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
-        final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString("class"));
+        final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString(BUNDLE_KEY_CLASS));
         uiTitle.getStyleClass().add("pojotable-header");
         uiTitle.setAlignment(Pos.CENTER);
         uiTitle.setPadding(new Insets(5));

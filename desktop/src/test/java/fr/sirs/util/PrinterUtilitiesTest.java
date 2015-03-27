@@ -61,28 +61,6 @@ public class PrinterUtilitiesTest {
     }
 
     /**
-     * Test of generateJasperReportsTemplate method, of class PrinterUtilities.
-     * @throws java.lang.Exception
-     */
-    @Test
-    @Ignore
-    public void testGenerateJasperReportsTemplate() throws Exception {
-        System.out.println("generateJasperReportsTemplate");
-        
-        final File rep = new File("../core/sirs-core-store/target/generated-sources/pojos/fr/sirs/model");
-        
-        final Pattern pattern = Pattern.compile("(.*)\\.java"); 
-        for (final String s : rep.list()) {  
-            final Matcher matcher = pattern.matcher(s);
-            while(matcher.find()){
-                final String className = matcher.group(1);
-                final Class classe = Class.forName("fr.sirs.model."+className);
-                PrinterUtilities.generateJasperReportsTemplate(classe);
-            }
-        }
-    }
-
-    /**
      * Test of print method for Digue, of class PrinterUtilities.
      * @throws java.lang.Exception
      */

@@ -9,10 +9,8 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
@@ -77,6 +75,9 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode(COLOR_VALID_ICON)),null);
     
     public static final String CSS_PATH = "/fr/sirs/theme.css";
+    
+    // Champs spéciaux des ResourceBundles
+    public static final String BUNDLE_KEY_CLASS = "class";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {

@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
@@ -16,6 +17,7 @@ import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
+import fr.sirs.util.SirsStringConverter;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.awt.Desktop;
 import java.io.File;
@@ -156,7 +158,7 @@ public class FXMainFrame extends BorderPane {
     private enum SummaryTab{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final SummaryTab typeOfSummary){
         final ResourceBundle bundle = ResourceBundle.getBundle(clazz.getName());
-        final MenuItem item = new MenuItem(bundle.getString("class"));
+        final MenuItem item = new MenuItem(bundle.getString(BUNDLE_KEY_CLASS));
         final EventHandler handler;
         
         if(typeOfSummary==SummaryTab.REFERENCE){
@@ -164,7 +166,7 @@ public class FXMainFrame extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bundle.getString("class"));
+                    final Tab tab = new FXFreeTab(bundle.getString(BUNDLE_KEY_CLASS));
                     tab.setContent(new FXReferencePane(clazz));
                     addTab(tab);
                 }
@@ -175,7 +177,7 @@ public class FXMainFrame extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bundle.getString("class"));
+                    final Tab tab = new FXFreeTab(bundle.getString(BUNDLE_KEY_CLASS));
                     tab.setContent(new FXPseudoIdAnalysePane(clazz));
                     addTab(tab);
                 }
@@ -300,6 +302,7 @@ public class FXMainFrame extends BorderPane {
                 final List avoidFields = new ArrayList<>();
                 avoidFields.add("geometry");
                 avoidFields.add("documentId");
+                avoidFields.add("id");
                 
                 if(obj instanceof TronconDigue){
                     avoidFields.add("stuctures");
@@ -311,7 +314,7 @@ public class FXMainFrame extends BorderPane {
                 }
                 
                 try {
-                    fileToPrint = PrinterUtilities.print(obj, avoidFields);
+                    fileToPrint = PrinterUtilities.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
                     fileToPrint.deleteOnExit();
 
                     final Desktop desktop = Desktop.getDesktop();
