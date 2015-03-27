@@ -730,62 +730,62 @@ public class PojoTable extends BorderPane {
         }
     }
     
-        private class EnumColumn extends TableColumn<Element, Role>{
-            private EnumColumn(PropertyDescriptor desc){
-                super(labelMapper.mapPropertyName(desc.getDisplayName()));
-                setEditable(true);
-                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-                setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
+    private class EnumColumn extends TableColumn<Element, Role>{
+        private EnumColumn(PropertyDescriptor desc){
+            super(labelMapper.mapPropertyName(desc.getDisplayName()));
+            setEditable(true);
+            setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+            setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
 
-                    @Override
-                    public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
-                        return new FXEnumTableCell<>(Role.class, new SirsStringConverter());
-                    }
+                @Override
+                public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
+                    return new FXEnumTableCell<>(Role.class, new SirsStringConverter());
+                }
 
-                });     
-                addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+            });     
+            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
 
-                    @Override
-                    public void handle(CellEditEvent<Element, Object> event) {
-                        final Object rowElement = event.getRowValue();
-                        new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
-                        elementEdited(event);
-                    }
-                });
-            }
+                @Override
+                public void handle(CellEditEvent<Element, Object> event) {
+                    final Object rowElement = event.getRowValue();
+                    new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
+                    elementEdited(event);
+                }
+            });
         }
-    
-        private class PasswordColumn extends TableColumn<Element, String>{
-            private PasswordColumn(PropertyDescriptor desc){
-                super(labelMapper.mapPropertyName(desc.getDisplayName()));
-                setEditable(true);
-                setCellValueFactory(new PropertyValueFactory<>("password"));
-                setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
+    }
 
-                    @Override
-                    public TableCell<Element, String> call(TableColumn<Element, String> param) {
-                        MessageDigest messageDigest = null;
-                        try {
-                            messageDigest = MessageDigest.getInstance("MD5");
-                        } catch (NoSuchAlgorithmException ex) {
-                            Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
-                        cell.setEditable(true);
-                        return cell;
-                    }
-                });
-                addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+    private class PasswordColumn extends TableColumn<Element, String>{
+        private PasswordColumn(PropertyDescriptor desc){
+            super(labelMapper.mapPropertyName(desc.getDisplayName()));
+            setEditable(true);
+            setCellValueFactory(new PropertyValueFactory<>("password"));
+            setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
 
-                    @Override
-                    public void handle(CellEditEvent<Element, Object> event) {
-                        final Element rowElement = event.getRowValue();
-                        new PropertyReference<>(rowElement.getClass(), "password").set(rowElement, event.getNewValue());
-                        elementEdited(event);
+                @Override
+                public TableCell<Element, String> call(TableColumn<Element, String> param) {
+                    MessageDigest messageDigest = null;
+                    try {
+                        messageDigest = MessageDigest.getInstance("MD5");
+                    } catch (NoSuchAlgorithmException ex) {
+                        Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                });
-            }
+                    final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
+                    cell.setEditable(true);
+                    return cell;
+                }
+            });
+            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
+
+                @Override
+                public void handle(CellEditEvent<Element, Object> event) {
+                    final Element rowElement = event.getRowValue();
+                    new PropertyReference<>(rowElement.getClass(), "password").set(rowElement, event.getNewValue());
+                    elementEdited(event);
+                }
+            });
         }
+    }
         
         
     public class PropertyColumn extends TableColumn<Element,Object>{

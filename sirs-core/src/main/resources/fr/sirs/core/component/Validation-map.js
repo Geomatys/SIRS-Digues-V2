@@ -25,6 +25,7 @@ function(doc) {
         var label;
         if(docu.nom) label = docu.nom;
         else if(docu.libelle) label = docu.libelle;
+        else if (docu.login) label=docu.login;
         emit(docu.valid, {docId: docu._id, docClass: docu['@class'], elementId: null, elementClass: null, author: docu.author, valid: docu.valid, designation: docu.designation, label: label});
     }
 
@@ -35,6 +36,7 @@ function(doc) {
         var label;
         if(object.nom) label = object.nom;
         else if(object.libelle) label = object.libelle;
+        else if (object.login) label=object.login;
         emit(object.valid, {docId: docu._id, docClass: docu['@class'], elementId: object.id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, label: label});
     }
 

@@ -16,7 +16,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
-import javafx.util.StringConverter;
 
 /**
  *
@@ -37,6 +36,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     @FXML PasswordField ui_passwordConfirm;
     @FXML Label ui_labelConfirm;
     @FXML ComboBox<Role> ui_role;
+    @FXML CheckBox ui_passwordChange;
     
     private String currentUserLogin;
 
@@ -68,8 +68,11 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         ui_role.disableProperty().bind(new SecurityBinding());
         ui_login.disableProperty().bind(disableFieldsProperty());
         ui_login.editableProperty().bind(administrableProperty());
+        ui_passwordChange.disableProperty().bind(disableFieldsProperty());
         ui_password.disableProperty().bind(disableFieldsProperty());
         ui_passwordConfirm.disableProperty().bind(disableFieldsProperty());
+        ui_password.editableProperty().bind(ui_passwordChange.selectedProperty());
+        ui_passwordConfirm.editableProperty().bind(ui_passwordChange.selectedProperty());
         
         ui_role.getItems().addAll(Role.values());
         ui_role.setConverter(new SirsStringConverter());
@@ -156,16 +159,18 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         }
         
         // Vérification du mot de passe.
-        if(ui_password == null
-                || ui_passwordConfirm == null
-                || !ui_password.getText().equals(ui_passwordConfirm.getText())){
-            ui_labelConfirm.setTextFill(Color.RED);
-            new Alert(Alert.AlertType.INFORMATION, "Le mot de passe et sa confirmation ne correspondent pas.", ButtonType.CLOSE).showAndWait();
-            throw new Exception("Les mots de passe ne correspondent pas ! Modification non enregistrée.");
-        } 
-        else{
-            elementProperty.get().setPassword(digest(ui_password.getText()));
-            ui_labelConfirm.setTextFill(Color.BLACK);
+        if(ui_passwordChange.isSelected()){// On vérifie que l'utilisateur a bien spécifié explicitement qu'il désirait changer de mot de passe.
+            if(ui_password == null
+                    || ui_passwordConfirm == null
+                    || !ui_password.getText().equals(ui_passwordConfirm.getText())){
+                ui_labelConfirm.setTextFill(Color.RED);
+                new Alert(Alert.AlertType.INFORMATION, "Le mot de passe et sa confirmation ne correspondent pas.", ButtonType.CLOSE).showAndWait();
+                throw new Exception("Les mots de passe ne correspondent pas ! Modification non enregistrée.");
+            } 
+            else{
+                elementProperty.get().setPassword(digest(ui_password.getText()));
+                ui_labelConfirm.setTextFill(Color.BLACK);
+            }
         }
     }
 }

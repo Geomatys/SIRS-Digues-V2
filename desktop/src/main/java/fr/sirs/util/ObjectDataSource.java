@@ -109,7 +109,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         } else if(Element.class.isAssignableFrom(clazz) && stringConverter!=null){
             propertyValueToPrint = stringConverter.toString(propertyValue);
         } else if(List.class.isAssignableFrom(clazz)) {
-            propertyValueToPrint = new ArrayList();
+            propertyValueToPrint = new PrintableArrayList(true);
             for(final Object o : (List) propertyValue){
                 ((List)propertyValueToPrint).add(parsePropertyValue(o, o.getClass()));
             }
@@ -117,6 +117,53 @@ public class ObjectDataSource<T> implements JRDataSource {
             propertyValueToPrint = propertyValue;
         }
         return propertyValueToPrint;
+    }
+    
+    /**
+     * Extention of ArrayList for redefining toString() in order to improve printing.
+     * 
+     * @param <E> 
+     */
+    private class PrintableArrayList<E> extends ArrayList<E>{
+
+        private final boolean ordered;
+        
+        /**
+         * 
+         * @param ordered Specifies if the list has to be ordered.
+         */
+        public PrintableArrayList(final boolean ordered) {
+            super();
+            this.ordered = ordered;
+        }
+        
+        /**
+         * Creates an unordered PrintableArrayList.
+         */
+        public PrintableArrayList(){
+            this(false);
+        }
+        
+        @Override
+        public String toString(){
+            Iterator<E> it = iterator();
+            if (! it.hasNext())
+                return "";
+
+            StringBuilder sb = new StringBuilder();
+            
+            int order = 0;
+            for (;;) {
+                E e = it.next();
+                if(ordered){
+                    sb.append(order++);
+                }
+                sb.append('-').append(' ');
+                sb.append(e == this ? "(this Collection)" : e);
+                if (! it.hasNext()) return sb.toString();
+                else sb.append('\n');
+            }
+        }
     }
     
 }

@@ -20,7 +20,7 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class SirsTableCell<S> extends FXTableCell<S, Object> {
+public class SirsTableCell<S, T> extends FXTableCell<S, T> {
     
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_LINK,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
@@ -41,7 +41,7 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
     }
 
     @Override
-    public void commitEdit(Object newValue) {
+    public void commitEdit(T newValue) {
         super.commitEdit(newValue);
     }
 
@@ -51,7 +51,7 @@ public class SirsTableCell<S> extends FXTableCell<S, Object> {
     }
 
     @Override
-    protected void updateItem(final Object item, final boolean empty) {
+    protected void updateItem(final T item, final boolean empty) {
         super.updateItem(item, empty);
         if(empty ||item == null){
             setText(null);

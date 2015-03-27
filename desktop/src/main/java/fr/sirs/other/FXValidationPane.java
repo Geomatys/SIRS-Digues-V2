@@ -10,6 +10,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.util.SirsTableCell;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -195,6 +196,7 @@ public class FXValidationPane extends BorderPane {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
             }
         });
+        authorColumn.setCellFactory((TableColumn<ValiditySummary, String> param) -> new SirsTableCell());
         usages.getColumns().add(authorColumn);
 
         final TableColumn<ValiditySummary, Object> validColumn = new ValidColumn();
