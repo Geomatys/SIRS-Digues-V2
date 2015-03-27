@@ -375,16 +375,16 @@ public class FXPositionablePane extends BorderPane {
         Point[] arrayGeom = availableBornes.keySet().toArray(new Point[0]);
         
         // Get nearest borne from our start geographic point.
-        Entry<Integer, double[]> computedRelative = LinearReferencingUtilities.calculateRelative(linearSource, arrayGeom, geoPoint);
+        Entry<Integer, Double> computedRelative = LinearReferencingUtilities.computeRelative(linearSource, arrayGeom, geoPoint);
         final int borneIndex = computedRelative.getKey();
         if (borneIndex < 0 || borneIndex >= availableBornes.size()) {
             throw new RuntimeException("Computing failed : no valid borne found.");
         }
-        double[] foundDistance = computedRelative.getValue();
-        if (foundDistance.length < 1) {
+        double foundDistance = computedRelative.getValue();
+        if (Double.isNaN(foundDistance) || Double.isInfinite(foundDistance)) {
             throw new RuntimeException("Computing failed : no valid distance found.");
         }
-        return new AbstractMap.SimpleEntry<>(availableBornes.get(arrayGeom[borneIndex]), foundDistance[0]);                
+        return new AbstractMap.SimpleEntry<>(availableBornes.get(arrayGeom[borneIndex]), foundDistance);                
     }
     
     /**
@@ -443,7 +443,7 @@ public class FXPositionablePane extends BorderPane {
                 distStart *= -1;
             }
 
-            return LinearReferencingUtilities.calculateCoordinate(currentTroncon.getGeometry(), borneStartPoint, distStart, 0);
+            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneStartPoint, distStart, 0);
         } else {
             return null;
         }
@@ -465,7 +465,7 @@ public class FXPositionablePane extends BorderPane {
                 distEnd *= -1;
             }
 
-            return LinearReferencingUtilities.calculateCoordinate(currentTroncon.getGeometry(), borneEndPoint, distEnd, 0);
+            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneEndPoint, distEnd, 0);
         } else {
             return null;
         }
@@ -818,6 +818,8 @@ public class FXPositionablePane extends BorderPane {
         TaskManager.INSTANCE.submit("Mise à jour d'une position", updater);
     }
     
+    
+    
     /**
      * Affect edited position information into bound {@link Positionable } object.
      * The method try to affect both geographic and linear referencement.
@@ -875,6 +877,9 @@ public class FXPositionablePane extends BorderPane {
         pos.setGeometry(structGeom);        
     }
     
+    /**
+     * Compute geographic start point from linear start position.
+     */
     private class GeographicStartFromLinear implements ChangeListener {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -906,6 +911,9 @@ public class FXPositionablePane extends BorderPane {
         }
     }
 
+    /**
+     * Compute geographic end point from linear ending position.
+     */
     private class GeographicEndFromLinear implements ChangeListener {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -936,7 +944,10 @@ public class FXPositionablePane extends BorderPane {
             }
         }
     }
-        
+
+    /**
+     * Compute linear starting position from geographic/projected start point.
+     */
     private class LinearStartFromGeographic implements ChangeListener {
 
         @Override
@@ -966,6 +977,9 @@ public class FXPositionablePane extends BorderPane {
         }
     }
     
+    /**
+     * Compute linear ending position from geographic/projected end point.
+     */
     private class LinearEndFromGeographic implements ChangeListener {
 
         @Override

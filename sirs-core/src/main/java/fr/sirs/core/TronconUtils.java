@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -21,9 +22,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
@@ -32,6 +34,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
+
+import static fr.sirs.core.LinearReferencingUtilities.*;
+import java.util.Iterator;
 
 /**
  *
@@ -46,142 +51,167 @@ public class TronconUtils {
     /**
      * 
      * @param troncon troncon a decouper
-     * @param segment partie du troncon a garder
+     * @param cutLinear partie du troncon a garder
      * @return nouveau troncon découpé
      */
-    public static TronconDigue cutTroncon(TronconDigue troncon, LineString segment, String newName, SessionGen session){
-        
+    public static TronconDigue cutTroncon(TronconDigue troncon, LineString cutLinear, String newName, SessionGen session) {
+        ArgumentChecks.ensureNonNull("Troncon to cut", troncon);
+        ArgumentChecks.ensureNonNull("Line string to extract", cutLinear);
+        ArgumentChecks.ensureNonNull("Database session", session);
+
+        /* First, we get index (as distance along the linear) of the bounds of new 
+         * tronçon segments. It will allow us to retrieve objects which are 
+         * projected in those bounds and must be effectively copied.
+         */
+        final LengthIndexedLine index = new LengthIndexedLine(troncon.getGeometry());
+        final double startDistance = index.project(cutLinear.getStartPoint().getCoordinate());
+        final double endDistance = index.project(cutLinear.getEndPoint().getCoordinate());
+
         final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
-        final BorneDigueRepository bdRepo = session.getBorneDigueRepository(); 
+        final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
         final TronconDigueRepository tdRepo = session.getTronconDigueRepository();
-        
+
         final TronconDigue tronconCp = troncon.copy();
-        tronconCp.setGeometry(segment);
+        tronconCp.setGeometry(cutLinear);
         tronconCp.setLibelle(newName);
         // On enlève toute réference vers un SR appartenant au tronçon copié
         tronconCp.setSystemeRepDefautId(null);
-        
-        final LinearReferencingUtilities.SegmentInfo[] parts = LinearReferencingUtilities.buildSegments((LineString) tronconCp.geometryProperty().get());
-        
-        //on recupere les bornes qui sont sur le troncon
-        final Map<String,BorneDigue> newBornes = new HashMap<>();
-        tronconCp.getBorneIds().clear();
-        for(String borneId : troncon.getBorneIds()){
-            final BorneDigue borne = bdRepo.get(borneId);
-            final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(parts, borne.getGeometry());
-            if(proj.perpendicularProjection){
-                //on copie la borne
-                final BorneDigue cp = borne.copy();
-                bdRepo.add(cp);
-                tronconCp.getBorneIds().add(cp.getDocumentId());
-                newBornes.put(borneId, cp);
+
+        //on évince toutes les bornes qui ne sont pas sur le nouveau tronçon. On 
+        // garde un index des ids de borne conservés, cela accélerera le tri sur
+        // les SR.
+        final SegmentInfo[] sourceTronconSegments = buildSegments((LineString) troncon.geometryProperty().get());
+        final ListIterator<String> borneIt = tronconCp.getBorneIds().listIterator();
+        final HashSet<String> keptBornes = new HashSet<>();
+        while (borneIt.hasNext()) {
+            final BorneDigue borne = bdRepo.get(borneIt.next());
+            final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
+            if (proj.distanceAlongLinear < startDistance || proj.distanceAlongLinear > endDistance) {
+                borneIt.remove();
+            } else {
+                keptBornes.add(borne.getId());
             }
         }
-        
-        //on sauvegarde maintenant car on va avoir besoin de la reference du nouveau troncon
-        tdRepo.add(tronconCp);
-        
-        //on copie et on enleve les bornes des SR et les SR vide
-        final Map<String,SystemeReperage> mapSrs = new HashMap<>();
-        for(SystemeReperage sr : srRepo.getByTroncon(troncon)){
+
+        /* On copie les SR du tronçon original. Pour chaque, on regarde si il contient
+         * des bornes référencées sur le nouveau tronçon. Si c'est le cas, on le 
+         * garde pour enregistrement à la fin de l'opération. On garde aussi une
+         * réference vers le SR original, pour pouvoir mettre à jour la position
+         * des structures.
+         */
+        final HashMap<String, SystemeReperage> newSRs = new HashMap<>();
+        for (final SystemeReperage sr : srRepo.getByTroncon(troncon)) {
             final SystemeReperage srCp = sr.copy();
-            srCp.systemeReperageBorne.clear();
-            srCp.setTronconId(tronconCp.getDocumentId());
-            final List<SystemeReperageBorne> lst = sr.getSystemeReperageBorne();
-            for(int i=lst.size()-1;i>=0;i--){
-                final SystemeReperageBorne srb = lst.get(i);
-                final BorneDigue borne = newBornes.get(srb.getBorneId());
-                if(newBornes.containsKey(srb.getBorneId())){
-                    final SystemeReperageBorne cp = srb.copy();
-                    cp.setBorneId(borne.getDocumentId());
-                    srCp.systemeReperageBorne.add(cp);
+            final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBorne().listIterator();
+            while (srBorneIt.hasNext()) {
+                if (!keptBornes.contains(srBorneIt.next().getBorneId())) {
+                    srBorneIt.remove();
                 }
             }
-            if(!srCp.systemeReperageBorne.isEmpty()){
-                // Si le SR d'origine était celui par défaut dans le tronçon 
-                // original, le SR copié sera celui par défaut dans le tronçon copié.
-                srRepo.add(srCp, tronconCp, sr.getId().equals(troncon.getSystemeRepDefautId()));
-                mapSrs.put(sr.getId(), srCp);
+            if (!srCp.systemeReperageBorne.isEmpty()) {
+                newSRs.put(sr.getId(), srCp);
             }
         }
-        
-        //on coupe les differents objets
-        tronconCp.structures.clear();
-                
-        Geometry linear = tronconCp.getGeometry();
-        
-        for(Objet obj : troncon.structures){
-            
-            //on vérifie que cet objet intersect le segment
-            Geometry objGeom = obj.getGeometry();
-            if(objGeom==null){
+
+        /* On va maintenant trier les structures du tronçon. Ceux qui sont en dehors
+         * du nouveau tronçon sont supprimés de ce dernier. Pour tout objet contenu,
+         * on met simplement à jour ses positions linéaires pour rester cohérent
+         * avec sa géométrie. Les objets qui intersectent le nouveau tronçons sont 
+         * quand à eux découpés.
+         */
+        final HashMap<SystemeReperage, List<Objet>> needSRIDUpdate = new HashMap<>();
+        ListIterator<Objet> structures = tronconCp.getStructures().listIterator();
+        while (structures.hasNext()) {
+            final Objet structure = structures.next();
+
+            //on vérifie que cet objet intersecte le segment
+            Geometry objGeom = structure.getGeometry();
+            if (objGeom == null) {
                 //on la calcule
-                objGeom = LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), obj, bdRepo);
+                objGeom = buildGeometry(troncon.getGeometry(), structure, bdRepo);
                 if (objGeom == null) {
-                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n"+obj);
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + structure);
                 }
-                obj.setGeometry(objGeom);
+                structure.setGeometry(objGeom);
             }
-            
-            if(!linear.intersects(objGeom)){
+
+            if (!cutLinear.intersects(objGeom)) {
+                structures.remove();
                 continue;
+            } else if (!cutLinear.contains(objGeom)) {
+                objGeom = cutLinear.intersection(objGeom);
+                structure.setGeometry(objGeom);
             }
-            
-            final Objet objCp = obj.copy();
-            tronconCp.structures.add(objCp);
-            
-            try{
-                if(mapSrs.containsKey(objCp.getSystemeRepId())){
-                    //le systeme de reperage existe toujours, on recalcule les positions relatives
-                    final SystemeReperage sr = mapSrs.get(objCp.getSystemeRepId());
-                    objCp.setSystemeRepId(sr.getId());
-                    
-                    //on sort les positions geographique
-                    final PosInfo infoOrig = new PosInfo(obj,troncon,session);                    
-                    objCp.setBorneDebutId(null);
-                    objCp.setBorneFinId(null);
-                    objCp.setPositionDebut(infoOrig.getGeoPointStart(null));
-                    objCp.setPositionFin(infoOrig.getGeoPointEnd(null));
-                    
-                    //on recalcule les positions relatives
-                    final PosInfo info = new PosInfo(objCp,tronconCp,session);
-                    final PosSR posSr = info.getForSR(sr);
-                    objCp.setBorneDebutId(posSr.borneStartId);
-                    objCp.setBorne_debut_distance((float)posSr.distanceStartBorne);
-                    objCp.setBorne_debut_aval(posSr.startAval);
-                    objCp.setBorneFinId(posSr.borneEndId);
-                    objCp.setBorne_fin_distance((float)posSr.distanceEndBorne);
-                    objCp.setBorne_fin_aval(posSr.endAval);
-                    objCp.setPositionDebut(null);
-                    objCp.setPositionFin(null);
-                    
-                }else{
-                    //on utilise les coordonnées géo reprojetées afin de s'assurer qu'ils sont sur le troncon
-                    final PosInfo info = new PosInfo(obj,troncon,session);
-                    final Point start = info.getGeoPointStart(null);
-                    final Point end = info.getGeoPointEnd(null);
-                    
-                    final LinearReferencingUtilities.ProjectedReference projectStart = LinearReferencingUtilities.projectReference(parts, start);
-                    final LinearReferencingUtilities.ProjectedReference projectEnd = LinearReferencingUtilities.projectReference(parts, end);   
-                    objCp.setSystemeRepId(null);              
-                    objCp.setBorneDebutId(null);
-                    objCp.setBorneFinId(null);
-                    objCp.setPositionDebut(GF.createPoint(projectStart.nearests[0]));
-                    objCp.setPositionFin(GF.createPoint(projectEnd.nearests[0]));
+
+            if (objGeom instanceof Point) {
+                structure.setPositionDebut((Point) objGeom);
+                structure.setPositionFin((Point) objGeom);
+            } else {
+                final LineString structureLine = asLineString(objGeom);
+                structure.setPositionDebut(structureLine.getStartPoint());
+                structure.setPositionFin(structureLine.getEndPoint());
+                structure.setGeometry(objGeom);
+            }
+
+            final SystemeReperage sr = newSRs.get(structure.getSystemeRepId());
+            if (sr == null) {
+                structure.setSystemeRepId(null);
+                structure.setBorneDebutId(null);
+                structure.setBorneFinId(null);
+                structure.setPR_debut(Float.NaN);
+                structure.setPR_fin(Float.NaN);
+                structure.setBorne_debut_distance(Float.NaN);
+                structure.setBorne_fin_distance(Float.NaN);
+            } else {
+                //le systeme de reperage existe toujours, on recalcule les positions relatives
+                final PosInfo info = new PosInfo(structure, tronconCp, session);
+                final PosSR posSr = info.getForSR(sr);
+
+                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
+                List<Objet> boundObjets = needSRIDUpdate.get(sr);
+                if (boundObjets == null) {
+                    boundObjets = new ArrayList<>();
+                    needSRIDUpdate.put(sr, boundObjets);
                 }
+                boundObjets.add(structure);
                 
-                final LineString geom = LinearReferencingUtilities.buildGeometry(linear, objCp, bdRepo);
-                objCp.setGeometry(geom);
-                
-            }catch(FactoryException | MismatchedDimensionException | TransformException ex){
-                SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                structure.setBorneDebutId(posSr.borneStartId);
+                structure.setBorne_debut_distance((float) posSr.distanceStartBorne);
+                structure.setBorne_debut_aval(posSr.startAval);
+                structure.setBorneFinId(posSr.borneEndId);
+                structure.setBorne_fin_distance((float) posSr.distanceEndBorne);
+                structure.setBorne_fin_aval(posSr.endAval);
+                structure.setPositionDebut(null);
+                structure.setPositionFin(null);
+            }
+        }
+
+        // On sauvegarde les modifications
+        // TODO : make it transactional.
+        tdRepo.add(tronconCp);
+        // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
+        final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
+        if (newDefaultSR != null) {
+            newDefaultSR.setTronconId(tronconCp.getDocumentId());
+            srRepo.add(newDefaultSR, tronconCp, true);
+        }
+        for (final SystemeReperage newSR : newSRs.values()) {
+            newSR.setTronconId(tronconCp.getDocumentId());
+            srRepo.add(newSR, tronconCp, false);
+        }
+        // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier 
+        // les objets du tronçon à leur SR.
+        if (!needSRIDUpdate.isEmpty()) {
+            Iterator<Map.Entry<SystemeReperage, List<Objet>>> it = needSRIDUpdate.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<SystemeReperage, List<Objet>> next = it.next();
+                for (final Objet o : next.getValue()) {
+                    o.setSystemeRepId(next.getKey().getId());
+                }
             }
             
+            tdRepo.update(tronconCp);
         }
-        
-        //on sauvegarde les modifications
-        tdRepo.update(tronconCp);
-        
         return tronconCp;
     }
     
@@ -370,7 +400,7 @@ public class TronconUtils {
      */
     public static void updatePositionableGeometry(TronconDigue troncon, SessionGen session){
         for(Objet obj : troncon.getStructures()){
-            final LineString structGeom = LinearReferencingUtilities.buildGeometry(
+            final LineString structGeom = buildGeometry(
                     troncon.getGeometry(), obj, session.getBorneDigueRepository());
             obj.setGeometry(structGeom);
         }     
@@ -382,7 +412,6 @@ public class TronconUtils {
 
         private final Positionable pos;
         private final SessionGen session;
-        private Map<String,BorneDigue> cacheBorne;
         private TronconDigue troncon;
         private Geometry linear;
         
@@ -409,106 +438,122 @@ public class TronconUtils {
             }
             return linear;
         }
-        
-        public Map<String,BorneDigue> getBorneCache(){
-            if(cacheBorne==null){
-                cacheBorne = new HashMap<>();
-                if(pos.getSystemeRepId()!=null && !pos.getSystemeRepId().isEmpty()){
-                    final SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
-                    if(sr!=null){
-                        for(SystemeReperageBorne srb : sr.systemeReperageBorne){
-                            final String bid = srb.getBorneId();
-                            final BorneDigue bd = session.getBorneDigueRepository().get(bid);
-                            if(bd!=null){
-                                cacheBorne.put(bid, bd);
-                            }
-                        }
-                    }
-                }
-            }
-            return cacheBorne;
-        }
-        
-        public Point getGeoPointStart(CoordinateReferenceSystem crs) throws 
-                FactoryException, MismatchedDimensionException, TransformException{
-            //calcule de la position geographique
+                
+        /**
+         * Get input Positionable start point in native CRS. If it does not exist,
+         * it's computed from linear position of the Positionable.
+         * @return A point, never null.
+         * @throws IllegalStateException If we cannot get nor compute any point.
+         */
+        public Point getGeoPointStart() {
             Point point = pos.getPositionDebut();
-            if(point==null){
+            //calcul de la position geographique
+            if (point == null) {
                 if (pos.getBorneDebutId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = getBorneCache().get(pos.getBorneDebutId()).getGeometry();
+                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
                     if (!pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
 
-                } else if (pos.getPositionFin()!= null) {
+                } else if (pos.getPositionFin() != null) {
                     point = pos.getPositionFin();
-                    
-                } else if (pos.getBorneFinId()!= null) {
-                    final Point bornePoint = getBorneCache().get(pos.getBorneFinId()).getGeometry();
+
+                } else if (pos.getBorneFinId() != null) {
+                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
                     if (!pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
-                    
+                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
+
                 } else {
                     throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
                 }
             }
-            
+            return point;
+        }
+        
+        /**
+         * Get input Positionable start point, reprojected in given CRS. If it does not exist,
+         * it's computed from linear position of the Positionable.
+         * @param crs
+         * @return A point, never null.
+         * @throws org.opengis.util.FactoryException If we cannot access Referencing module.
+         * @throws IllegalStateException If we cannot get nor compute any point.
+         * @throws org.opengis.referencing.operation.TransformException if an error happens during reprojecction.
+         */
+        public Point getGeoPointStart(CoordinateReferenceSystem crs) throws 
+                FactoryException, MismatchedDimensionException, TransformException{
+            Point point = getGeoPointStart();
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
             if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
                 final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
                 point = (Point) JTS.transform(point, trs);
             }
-            
             return point;
         }
         
-        public Point getGeoPointEnd(CoordinateReferenceSystem crs) throws 
-                FactoryException, MismatchedDimensionException, TransformException{
-            //calcule de la position geographique
+        /**
+         * Get input Positionable end point in native CRS. If it does not exist,
+         * it's computed from linear position of the Positionable.
+         * @return A point, never null.
+         * @throws IllegalStateException If we cannot get nor compute any point.
+         */
+        public Point getGeoPointEnd() {
             Point point = pos.getPositionFin();
+            //calcul de la position geographique
             if (point == null) {
-                
                 if (pos.getBorneFinId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = getBorneCache().get(pos.getBorneFinId()).getGeometry();
+                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
                     if (!pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
 
                 } else if (pos.getPositionDebut() != null) {
                     point = pos.getPositionDebut();
                     
                 } else if (pos.getBorneDebutId() != null) {
-                    final Point bornePoint = getBorneCache().get(pos.getBorneDebutId()).getGeometry();
+                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
                     if (!pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = LinearReferencingUtilities.calculateCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
                     
                 } else {
                     throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
                 }
             }
-            
+            return point;
+        }
+        
+        /**
+         * Get input Positionable end point, reprojected in given CRS. If it does not exist,
+         * it's computed from linear position of the Positionable.
+         * @param crs
+         * @return A point, never null.
+         * @throws org.opengis.util.FactoryException If we cannot access Referencing module.
+         * @throws IllegalStateException If we cannot get nor compute any point.
+         * @throws org.opengis.referencing.operation.TransformException if an error happens during reprojecction.
+         */
+        public Point getGeoPointEnd(CoordinateReferenceSystem crs) throws 
+                FactoryException, TransformException {            
+            Point point = getGeoPointEnd();
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
             if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
                 final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
                 point = (Point) JTS.transform(point, trs);
             }
-            
             return point;
         }
         
-        public PosSR getForSR() throws FactoryException, MismatchedDimensionException, TransformException{
+        public PosSR getForSR() {
             String srid = pos.getSystemeRepId();
             if(srid==null){
                 //On utilise le SR du troncon
@@ -532,9 +577,9 @@ public class TronconUtils {
             }
         }
         
-        public PosSR getForSR(SystemeReperage sr) throws FactoryException, MismatchedDimensionException, TransformException{
-            final Point startPoint = getGeoPointStart(null);
-            final Point endPoint = getGeoPointEnd(null);
+        public PosSR getForSR(SystemeReperage sr) {
+            final Point startPoint = getGeoPointStart();
+            final Point endPoint = getGeoPointEnd();
             
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
@@ -550,25 +595,24 @@ public class TronconUtils {
             final PosSR possr = new PosSR();
             possr.srid = sr.getDocumentId();
             
-            final Geometry linear = getTronconLinear();
+            final Geometry tmpLinear = getTronconLinear();
             
-            final Map.Entry<Integer,double[]> startRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), startPoint);
+            final Map.Entry<Integer, Double> startRef = computeRelative(tmpLinear, references.toArray(new Point[0]), startPoint);
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneStartId = startBorne.getDocumentId();
-            possr.distanceStartBorne = startRef.getValue()[0];
+            possr.distanceStartBorne = startRef.getValue();
             possr.startAval = possr.distanceStartBorne>=0;
             possr.distanceStartBorne = Math.abs(possr.distanceStartBorne);
             
-            final Map.Entry<Integer,double[]> endRef = LinearReferencingUtilities.calculateRelative(linear, references.toArray(new Point[0]), endPoint);
+            final Map.Entry<Integer, Double> endRef = computeRelative(tmpLinear, references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneEndId = endBorne.getDocumentId();
-            possr.distanceEndBorne = endRef.getValue()[0];
+            possr.distanceEndBorne = endRef.getValue();
             possr.endAval = possr.distanceEndBorne>=0;
             possr.distanceEndBorne = Math.abs(possr.distanceEndBorne);
             
             return possr;
         }
-        
     }
     
     public static final class PosSR{

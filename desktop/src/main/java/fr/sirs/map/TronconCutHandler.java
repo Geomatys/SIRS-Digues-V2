@@ -324,7 +324,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
 
                     final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
                     final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
-                    final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(segments, pt);
+                    final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, pt);
                 
                     //si le point de coupe est avant le debut ou apres la fin on ne le fait pas
                     if(proj.distanceAlongLinear<=0 || proj.distanceAlongLinear>=linear.getLength()){

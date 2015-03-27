@@ -259,7 +259,7 @@ public class FXSystemeReperagePane extends BorderPane {
         if(troncon==null || sr==null) return;
         
         final SystemeReperageBorne[] lst = uiBorneTable.getSelectionModel().getSelectedItems().toArray(new SystemeReperageBorne[0]);
-        final LinearReferencingUtilities.ProjectedReference[] projs = new LinearReferencingUtilities.ProjectedReference[lst.length];
+        final LinearReferencingUtilities.ProjectedPoint[] projs = new LinearReferencingUtilities.ProjectedPoint[lst.length];
         
         final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
         final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
@@ -305,8 +305,8 @@ public class FXSystemeReperagePane extends BorderPane {
             final BorneDigue borne = repo.get(borneId);
             final Point point = borne.getGeometry();
             
-            final LinearReferencingUtilities.ProjectedReference proj = LinearReferencingUtilities.projectReference(segments, point);
-            point.getCoordinate().setCoordinate(proj.nearests[0]);
+            final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, point);
+            point.getCoordinate().setCoordinate(proj.projected);
             
             repo.update(borne);
         }

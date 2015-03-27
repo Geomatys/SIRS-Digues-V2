@@ -55,6 +55,9 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void add(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         ArgumentChecks.ensureNonNull("SR to add", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to added SR", troncon);
+        if (entity.getTronconId() == null && troncon != null) {
+            entity.setTronconId(troncon.getId());
+        }
         super.add(entity);
         constraintBorneInTronconListBorne(entity,troncon, forceDefaultSR);
     }

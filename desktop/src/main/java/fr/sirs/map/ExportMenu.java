@@ -199,8 +199,8 @@ public class ExportMenu extends TreeMenuItem {
                 
                 try{
                     //on calcul les informations au besoin
-                    feature.setPropertyValue("positionDebut", info.getGeoPointStart(null));
-                    feature.setPropertyValue("positionFin", info.getGeoPointEnd(null));
+                    feature.setPropertyValue("positionDebut", info.getGeoPointStart());
+                    feature.setPropertyValue("positionFin", info.getGeoPointEnd());
                     final TronconUtils.PosSR possr = info.getForSR();
                     feature.setPropertyValue("systemeRepId", possr.srid);
                     feature.setPropertyValue("borneDebutId", possr.borneStartId);

@@ -1,6 +1,7 @@
 
 package fr.sirs.core;
 
+import com.esri.core.geometry.GeometryException;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.util.json.GeometryDeserializer;
@@ -10,11 +11,15 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.SystemeReperageBorne;
 
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.collections.transformation.SortedList;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.PathWalker;
@@ -27,7 +32,7 @@ import org.geotoolkit.referencing.LinearReferencing;
  * 
  * @author Johann Sorel (Geomatys)
  */
-public final class LinearReferencingUtilities extends LinearReferencing{
+public final class LinearReferencingUtilities extends LinearReferencing {
     
     /**
      * Create a JTS geometry for the input {@link Positionable}. Generated geometry
@@ -39,7 +44,7 @@ public final class LinearReferencingUtilities extends LinearReferencing{
      * @param repo The {@link BorneDigueRepository} to use to retrieve input {@link Positionable} bornes.
      * @return A line string for the given structure. Never null.
      */
-    public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, BorneDigueRepository repo){
+    public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, BorneDigueRepository repo) {
         
         final LineString troncon = asLineString(tronconGeom);
         SegmentInfo[] segments = buildSegments(troncon);
@@ -47,7 +52,7 @@ public final class LinearReferencingUtilities extends LinearReferencing{
         Point positionDebut = structure.getPositionDebut();
         Point positionFin = structure.getPositionFin();
         if (positionDebut != null || positionFin != null) {
-            ProjectedReference refDebut = null, refFin = null;
+            ProjectedPoint refDebut = null, refFin = null;
             if (positionDebut != null) refDebut = projectReference(segments, positionDebut);
             if (positionFin != null) refFin = projectReference(segments, positionFin);
             if (refDebut == null) refDebut = refFin;
@@ -74,14 +79,14 @@ public final class LinearReferencingUtilities extends LinearReferencing{
             final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
             if (borneDebut != null) {
                 final Point borneDebutGeom = borneDebut.getGeometry();
-                final double borneDebutDistance = calculateRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue()[0];
+                final double borneDebutDistance = computeRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue();
                 //conversion des distances au borne en distance par rapport au debut du troncon
                 distanceDebut += borneDebutDistance;
             }
             
             if (borneFin != null) {
                 final Point borneFinGeom = borneFin.getGeometry();
-                final double borneFinDistance = calculateRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue()[0];
+                final double borneFinDistance = computeRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue();
                 distanceFin += borneFinDistance;
             }
             
@@ -136,4 +141,81 @@ public final class LinearReferencingUtilities extends LinearReferencing{
         return geom;
     }
     
+    /**
+     * Compute PR value for the point referenced by input linear parameter.
+     * 
+     * @param refLinear Reference linear for bornes positions and relative distances.
+     * @param targetSR The system to express output PR into.
+     * @param refBorne Reference borne for the point.
+     * @param distanceFromRefBorne Distance of the point from its reference borne, along input linear. 
+     * Negative if direction goes downhill to uphill
+     * @return Value of the computed PR, or {@link Float.NaN} if we cannot compute any.
+     */
+    public static float computePR(final Geometry refLinear, final SystemeReperage targetSR, final BorneDigue refBorne, final double distanceFromRefBorne) {
+        ArgumentChecks.ensureNonNull("Reference linear", refLinear);
+        ArgumentChecks.ensureNonNull("Target SR", targetSR);
+        ArgumentChecks.ensureNonNull("Reference borne", refBorne);
+        ArgumentChecks.ensureFinite("Distance from reference borne", distanceFromRefBorne);
+        
+        if (targetSR.systemeReperageBorne == null || targetSR.systemeReperageBorne.size() < 2) {
+            throw new IllegalStateException("Input SR is invalid, it contains less than 2 bornes.");
+        }
+        
+        SegmentInfo[] refSegments = buildSegments(asLineString(refLinear));
+        projectReference(refSegments, refBorne.getGeometry());
+        
+        SortedList<SystemeReperageBorne> sortedBornes = targetSR.systemeReperageBorne.sorted((SystemeReperageBorne first, SystemeReperageBorne second) -> {
+            final float diff = first.getValeurPR() - second.getValeurPR();
+            if (diff > 0) return 1;
+            else if (diff < 0) return -1;
+            else return 0;            
+        });
+        
+        final float refBornePR;
+        float nearestPR;
+        SystemeReperageBorne tmpBorne = sortedBornes.get(0);
+        if (tmpBorne.getId().equals(refBorne.getId())) {
+            refBornePR = tmpBorne.getValeurPR();
+            nearestPR = sortedBornes.get(1).getValeurPR();
+        } else if ((tmpBorne = sortedBornes.get(sortedBornes.size()-1)).getId().equals(refBorne.getId())) {            
+            refBornePR = tmpBorne.getValeurPR();
+            nearestPR = sortedBornes.get(sortedBornes.size() -2).getValeurPR();
+        } else {
+            nearestPR = sortedBornes.get(0).getValeurPR();
+            for (int i = 1 ; i < sortedBornes.size() -2 ; i++) {
+                tmpBorne = sortedBornes.get(1);
+                if (tmpBorne.getId().equals(refBorne.getId())) {
+                    refBornePR = tmpBorne.getValeurPR();
+                    final float nextPR = sortedBornes.get(i+1).getValeurPR();
+                    if (nextPR -refBornePR < refBornePR -nearestPR) {
+                        nearestPR = nextPR;
+                    }
+                    break;
+                }
+                nearestPR = tmpBorne.getValeurPR();
+            } 
+        }
+        
+        return Float.NaN;
+    }
+    
+    /**
+     * Search which bornes of the given SR are enclosing given point. Input SR 
+     * bornes are projected on given linear for the analysis.
+     * 
+     * @param sourceLinear The set of segments composing reference linear.
+     * @param toGetBundaryFor The point for which we want enclosing bornes.
+     * @param possibleBornes List of points in which we'll pick bounding bornes.
+     */
+    public void getBoundingBornes(SegmentInfo[] sourceLinear, final Point toGetBundaryFor, final Point... possibleBornes) {
+        ProjectedPoint projectedPoint = projectReference(sourceLinear, toGetBundaryFor);
+        if (projectedPoint.segment == null) throw new RuntimeException("Cannot project point on linear."); // TODO : better exception
+        // We'll try to find bornes on the nearest possible segment.
+        if (projectedPoint.segmentIndex < 0) throw new RuntimeException("Cannot project point on linear."); // TODO : better exception       
+        for (final Point borne : possibleBornes) {
+            ProjectedPoint projBorne = projectReference(sourceLinear, borne);
+            if (projBorne.segmentIndex < 0) continue;
+        }
+        
+    }
 }

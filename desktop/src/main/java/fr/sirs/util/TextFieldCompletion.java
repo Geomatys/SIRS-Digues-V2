@@ -14,7 +14,6 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-
 package fr.sirs.util;
 
 import javafx.beans.value.ObservableValue;
@@ -23,15 +22,12 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
 /**

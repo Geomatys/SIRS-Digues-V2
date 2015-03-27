@@ -104,7 +104,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         //on verifie le systeme de reperage
         final String[] cut0brs = cut0.getBorneIds().toArray(new String[0]);
         assertEquals(1, cut0brs.length);
-        assertNotEquals(borne0.getDocumentId(), cut0brs[0]);
+        assertEquals(borne0.getDocumentId(), cut0brs[0]);
         
         final List<SystemeReperage> cut0Srs = session.getSystemeReperageRepository().getByTroncon(cut0);
         assertEquals(1, cut0Srs.size());
@@ -116,7 +116,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         final SystemeReperageBorne cut0srb = cut0srbs.get(0);
         assertEquals(0.0f, cut0srb.getValeurPR(), DELTA);
         final BorneDigue cut0b0 = session.getBorneDigueRepository().get(cut0srb.getBorneId());
-        assertNotEquals(borne0.getDocumentId(), cut0b0.getDocumentId());
+        assertEquals(borne0.getDocumentId(), cut0b0.getDocumentId());
         assertEquals("B0", cut0b0.getLibelle());
         assertTrue(GF.createPoint(new Coordinate(1, 1)).equals(cut0b0.getGeometry()));
         
@@ -150,10 +150,10 @@ public class TronconUtilsTest extends CouchDBTestCase{
         assertEquals(GF.createLineString(new Coordinate[]{new Coordinate(50, 0),new Coordinate(100, 0)}), cut1.getGeometry());
         
         //on verifie le systeme de reperage
-        final String[] cut1brs = cut1.getBorneIds().toArray(new String[0]);
-        assertEquals(2, cut1brs.length);
-        assertNotEquals(borne1.getDocumentId(), cut1brs[0]);
-        assertNotEquals(borne2.getDocumentId(), cut1brs[1]);
+        final List<String> cut1brs = cut1.getBorneIds();
+        assertEquals(2, cut1brs.size());
+        assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne1.getDocumentId()));
+        assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne2.getDocumentId()));
         
         final List<SystemeReperage> cut1Srs = session.getSystemeReperageRepository().getByTroncon(cut1);
         assertEquals(1, cut1Srs.size());
@@ -161,6 +161,12 @@ public class TronconUtilsTest extends CouchDBTestCase{
         assertNotEquals(sr.getDocumentId(), cut1sr.getDocumentId());
         assertEquals("SR", cut1sr.getLibelle());
         final List<SystemeReperageBorne> cut1srbs = cut1sr.getSystemeReperageBorne();
+        cut1srbs.sort((SystemeReperageBorne first, SystemeReperageBorne second) -> {
+            final float diff = first.getValeurPR() - second.getValeurPR();
+            if (diff > 0) return -1;
+            else if (diff < 0) return 1;
+            else return 0;            
+        });
         assertEquals(2, cut1srbs.size());
         final SystemeReperageBorne cut1srb0 = cut1srbs.get(1);
         final SystemeReperageBorne cut1srb1 = cut1srbs.get(0);
@@ -168,8 +174,8 @@ public class TronconUtilsTest extends CouchDBTestCase{
         assertEquals(20.0f, cut1srb1.getValeurPR(), DELTA);
         final BorneDigue cut1b0 = session.getBorneDigueRepository().get(cut1srb0.getBorneId());
         final BorneDigue cut1b1 = session.getBorneDigueRepository().get(cut1srb1.getBorneId());
-        assertNotEquals(borne0.getDocumentId(), cut1b0.getDocumentId());
-        assertNotEquals(borne1.getDocumentId(), cut1b1.getDocumentId());
+        assertEquals("Cut troncon shares its bornes with its parent.", borne1.getDocumentId(), cut1b0.getDocumentId());
+        assertEquals("Cut troncon shares its bornes with its parent.", borne2.getDocumentId(), cut1b1.getDocumentId());
         assertEquals("B1", cut1b0.getLibelle());
         assertEquals("B2", cut1b1.getLibelle());
         assertTrue(GF.createPoint(new Coordinate(51, 2)).equals(cut1b0.getGeometry()));

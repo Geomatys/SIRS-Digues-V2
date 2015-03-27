@@ -31,32 +31,32 @@ public class LinearReferencingUtilitiesTest {
         
         //point +0 forward +0 side
         Point reference = GF.createPoint(new Coordinate(0, 0));
-        Point result = LinearReferencingUtilities.calculateCoordinate(troncon,reference,0,0);
+        Point result = LinearReferencingUtilities.computeCoordinate(troncon,reference,0,0);
         Point expected = GF.createPoint(new Coordinate(0, 0));
         assertEquals(expected, result);
         
         //point +4 forward +0 side
         reference = GF.createPoint(new Coordinate(0, 0));
-        result = LinearReferencingUtilities.calculateCoordinate(troncon,reference,4,0);
+        result = LinearReferencingUtilities.computeCoordinate(troncon,reference,4,0);
         expected = GF.createPoint(new Coordinate(0, 4));
         assertEquals(expected, result);
         
         //point +4 forward +3 side
         reference = GF.createPoint(new Coordinate(0, 0));
-        result = LinearReferencingUtilities.calculateCoordinate(troncon,reference,4,3);
+        result = LinearReferencingUtilities.computeCoordinate(troncon,reference,4,3);
         expected = GF.createPoint(new Coordinate(3, 4));
         assertEquals(expected, result);
         
         //point +4 forward +3 side
         reference = GF.createPoint(new Coordinate(80, 12));
         //should be projected on linear as 80,10
-        result = LinearReferencingUtilities.calculateCoordinate(troncon,reference,-2,+4);
+        result = LinearReferencingUtilities.computeCoordinate(troncon,reference,-2,+4);
         expected = GF.createPoint(new Coordinate(78, 6));
         assertEquals(expected, result);
         
         //point before first segment and reference
         reference = GF.createPoint(new Coordinate(-2, 3));
-        result = LinearReferencingUtilities.calculateCoordinate(troncon,reference,-20,-6);
+        result = LinearReferencingUtilities.computeCoordinate(troncon,reference,-20,-6);
         expected = GF.createPoint(new Coordinate(-6, -17));
         assertEquals(expected, result);
         
@@ -77,40 +77,40 @@ public class LinearReferencingUtilitiesTest {
             GF.createPoint(new Coordinate(80, 3))
         };
         
-        Entry<Integer,double[]> result = LinearReferencingUtilities.calculateRelative(
+        Entry<Integer, Double> result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(0, 0)));
         assertEquals(0, (int)result.getKey());
-        assertArrayEquals(new double[]{0,0}, result.getValue(), DELTA);
+        assertEquals(0d, result.getValue(), DELTA);
         
         
-        result = LinearReferencingUtilities.calculateRelative(
+        result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(3, 5)));
         assertEquals(0, (int)result.getKey());
-        assertArrayEquals(new double[]{5,3}, result.getValue(), DELTA);
+        assertEquals(5, result.getValue(), DELTA);
         
         
-        result = LinearReferencingUtilities.calculateRelative(
+        result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(-2, 8)));
         assertEquals(1, (int)result.getKey());
-        assertArrayEquals(new double[]{-7,-2}, result.getValue(), DELTA);
+        assertEquals(-7, result.getValue(), DELTA);
         
         
-        result = LinearReferencingUtilities.calculateRelative(
+        result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(32, 60)));
         assertEquals(1, (int)result.getKey());
-        assertArrayEquals(new double[]{27,-50}, result.getValue(), DELTA);
+        assertEquals(27, result.getValue(), DELTA);
         
         
-        result = LinearReferencingUtilities.calculateRelative(
+        result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(42, -12)));
         assertEquals(1, (int)result.getKey());
-        assertArrayEquals(new double[]{37,22}, result.getValue(), DELTA);
+        assertEquals(37, result.getValue(), DELTA);
         
         
-        result = LinearReferencingUtilities.calculateRelative(
+        result = LinearReferencingUtilities.computeRelative(
                 troncon, references, GF.createPoint(new Coordinate(43, 13)));
         assertEquals(2, (int)result.getKey());
-        assertArrayEquals(new double[]{-37,-3}, result.getValue(), DELTA);
+        assertEquals(-37, result.getValue(), DELTA);
     }
     
     

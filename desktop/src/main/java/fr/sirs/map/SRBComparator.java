@@ -32,8 +32,8 @@ public class SRBComparator implements Comparator<SystemeReperageBorne>{
         final BorneDigue borne2 = repo.get(o2.getBorneId());
         final Point point1 = borne1.getGeometry();
         final Point point2 = borne2.getGeometry();
-        final LinearReferencingUtilities.ProjectedReference ref1 = LinearReferencingUtilities.projectReference(segments, point1);
-        final LinearReferencingUtilities.ProjectedReference ref2 = LinearReferencingUtilities.projectReference(segments, point2);
+        final LinearReferencingUtilities.ProjectedPoint ref1 = LinearReferencingUtilities.projectReference(segments, point1);
+        final LinearReferencingUtilities.ProjectedPoint ref2 = LinearReferencingUtilities.projectReference(segments, point2);
         
         return Double.compare(ref1.distanceAlongLinear, ref2.distanceAlongLinear);
     }
