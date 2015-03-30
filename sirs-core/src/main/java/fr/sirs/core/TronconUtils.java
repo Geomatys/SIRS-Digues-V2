@@ -36,11 +36,16 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
+import fr.sirs.core.model.Element;
 import java.util.Iterator;
+import org.geotoolkit.referencing.LinearReferencing;
 
 /**
- *
+ * A set of utility methods for manipulation of geometries of {@link Positionable}
+ * or {@link TronconDigue} objects.
+ * 
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 public class TronconUtils {
  
@@ -407,13 +412,126 @@ public class TronconUtils {
         session.getTronconDigueRepository().update(troncon);
     }
     
+    /**
+     * Compute PR value for the point referenced by input linear parameter.
+     * 
+     * @param refLinear Reference linear for bornes positions and relative distances.
+     * @param targetSR The system to express output PR into.
+     * @param toGetPRFor the point we want to compute a PR for.
+     * @param borneRepo Database  connection to read {@link BorneDigue} objects referenced in target {@link SystemeReperage}.
+     * @return Value of the computed PR, or {@link Float.NaN} if we cannot compute any.
+     */
+    public static float computePR(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final BorneDigueRepository borneRepo) {
+        ArgumentChecks.ensureNonNull("Reference linear", refLinear);
+        ArgumentChecks.ensureNonNull("Target SR", targetSR);
+        ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);
+        ArgumentChecks.ensureNonNull("Database connection", borneRepo);
+        
+        /* Compute PR for start position. We project its current location on its 
+         * parent linear, an try to find the nearest bornes which enclose it.
+         * If the object is located at start or end of the SR, we'll try to compute 
+         * it's PR from the nearest bornes, even if they're not bounding it.
+         * 
+         * To find nearest bornes, we project each borne of the SR on linear,
+         * then sort them by distance from our input projected positionable object.
+         * After that, we try to peek the nearest bornes, whose one is before and 
+         * the other is after our input object. If it is not possible, we will 
+         * get the closest, not matter which side they are.
+         * 
+         * To ease object manipulation, we'll store for each borne an array :
+         * - First element is the borne PR.
+         * - Second is the distance from the input point to the borne (negative if 
+         * borne is uphill from our object, positive if it's downhill).
+         */
+        ProjectedPoint startPoint = projectReference(refLinear, toGetPRFor);
+        double[][] prAndDistances = targetSR.systemeReperageBorne.stream()
+                .map((SystemeReperageBorne srBorne) -> {
+                    BorneDigue borne = borneRepo.get(srBorne.getBorneId());
+                    ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
+                    return new double[] {
+                            srBorne.getValeurPR(),
+                            startPoint.distanceAlongLinear - projBorne.distanceAlongLinear 
+                    };
+                })
+                .sorted(((double[] first, double[] second)-> {
+                    final double firstDistance = StrictMath.abs(first[1]);
+                    final double secondDistance = StrictMath.abs(second[1]);                    
+                    return Double.compare(firstDistance, secondDistance);
+                }))
+                .toArray((int size) -> {return new double[size][2];});
+        
+        final double[] nearestBorne = prAndDistances[0];
+        double[] secondBorne = prAndDistances[1];
+        
+        int borneCounter = 1;
+        final double nearestSignum = StrictMath.signum(nearestBorne[1]);
+        double secondSignum = StrictMath.signum(secondBorne[1]);
+        while (++borneCounter < prAndDistances.length && nearestSignum == secondSignum) {
+            secondSignum = StrictMath.signum(prAndDistances[borneCounter][1]);
+            if (secondSignum != nearestSignum) {
+                secondBorne = prAndDistances[borneCounter];
+            }
+        }
+        
+        final double upHillBorneDistance, downHillBorneDistance;
+        final double upHillBornePR, downHillBornePR;
+        if (nearestBorne[1] > secondBorne[1]) {
+            upHillBorneDistance = nearestBorne[1];
+            upHillBornePR = nearestBorne[0];
+            downHillBorneDistance = secondBorne[1];
+            downHillBornePR = secondBorne[0];
+        } else {
+            upHillBorneDistance = secondBorne[1];
+            upHillBornePR = secondBorne[0];
+            downHillBorneDistance = nearestBorne[1];
+            downHillBornePR = nearestBorne[0];
+        }
+        final double distanceBetweenBornes = StrictMath.abs(downHillBorneDistance - upHillBorneDistance);
+        final double prRatio = (downHillBornePR - upHillBornePR) / distanceBetweenBornes;
+        
+        return (float)(upHillBornePR + prRatio * upHillBorneDistance);
+    }
     
-    public static final class PosInfo{
+    /**
+     * Compute PR values (start and end point) for input {@link Positionable}.
+     * @param targetPos The Positionable object to compute PR for.
+     * @param session Connection to database, to retrieve SR and bornes.
+     */
+    public static void computePRs(final Positionable targetPos, final SessionGen session) {
+        ArgumentChecks.ensureNonNull("Input position to compute PR for.", targetPos);
+        ArgumentChecks.ensureNonNull("Database connection.", session);
+        
+        /* To be able to compute a PR, we need at least a valid linear position,
+         * which implies at least one valid borne and a distance to this borne.
+         * The borne must be contained in the current positionable target. 
+         * We also need the linear on which the object is projected.
+         */
+        final PosInfo objInfo = new PosInfo(targetPos, session);
+        LinearReferencing.SegmentInfo[] linearSegments = objInfo.getTronconSegments(false);
+        ArgumentChecks.ensureNonNull("Linear for position projection.", linearSegments);
+        
+        PosSR bornePosition = objInfo.getForSR();        
+        ArgumentChecks.ensureNonEmpty("SRID", bornePosition.srid);
+        
+        
+        BorneDigueRepository borneRepo = session.getBorneDigueRepository();        
+        SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
+        SystemeReperage currentSR = srRepo.get(bornePosition.srid);
+        
+        targetPos.setPR_debut(computePR(linearSegments, currentSR, objInfo.getGeoPointStart(), borneRepo));
+        targetPos.setPR_fin(computePR(linearSegments, currentSR, objInfo.getGeoPointEnd(), borneRepo));
+    }
+    
+    /**
+     * Utility object for manipulation of spatial information of a {@link Positionable} object.
+     */
+    public static final class PosInfo {
 
         private final Positionable pos;
         private final SessionGen session;
         private TronconDigue troncon;
         private Geometry linear;
+        private SegmentInfo[] linearSegments;
         
         public PosInfo(Positionable pos, SessionGen session) {
             this(pos,null,session);
@@ -425,20 +543,68 @@ public class TronconUtils {
             this.session = session;
         }
 
+        /**
+         * Try to retrieve {@link TronconDigue} on which thee current Positionable is defined.
+         * @return Troncon of the object, or null if we cannot retrieve it (no valid SR).
+         */
         public TronconDigue getTroncon() {
-            if(troncon==null){
-                troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
+            if (troncon == null && pos != null) {
+                if (pos.getParent() != null) {
+                    Element tmp = pos.getParent();
+                    while (tmp != null && !(tmp instanceof TronconDigue)) {
+                        tmp = tmp.getParent();
+                    }
+                    troncon = (TronconDigue) tmp;
+                }
+                // Maybe we have an incomplete version of the document, so we try by querying repository.
+                if (troncon == null) {
+                    try {
+                        troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
+                    } catch (Exception e) {
+                        troncon = null;
+                    }
+                }
+                // Last chance, we must try to get it from SR
+                if (troncon == null && pos.getSystemeRepId() != null) {
+                    SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
+                    if (sr.getTronconId() != null) {
+                        troncon = session.getTronconDigueRepository().get(sr.getTronconId());
+                    }
+                }
             }
+
             return troncon;
         }
         
+        /**
+         * Return the geometry object associated to the {@link TronconDigue} bound to
+         * the positionable.
+         * @return 
+         */
         public Geometry getTronconLinear(){
-            if(linear==null){
-                linear = getTroncon().getGeometry();
+            if(linear==null) {
+                if (getTroncon() != null) {
+                    linear = getTroncon().getGeometry();
+                }
             }
             return linear;
         }
-                
+        
+        /**
+         * Succession of segments which compose the geometry of the tronçon.
+         * @param forceRefresh True if we want to reload tronçon geometry from 
+         * database, false if we want to get it from cache.
+         * @return An ordered list of the segments of current tronçon.
+         */
+        public SegmentInfo[] getTronconSegments(final boolean forceRefresh) {
+            if (linearSegments == null || forceRefresh) {
+                final LineString tmpLinear = asLineString(getTronconLinear());
+                if (tmpLinear != null)
+                        linearSegments = buildSegments(tmpLinear);
+            }
+            return linearSegments;
+        }
+        
         /**
          * Get input Positionable start point in native CRS. If it does not exist,
          * it's computed from linear position of the Positionable.
@@ -456,7 +622,7 @@ public class TronconUtils {
                     if (!pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else if (pos.getPositionFin() != null) {
                     point = pos.getPositionFin();
@@ -467,7 +633,7 @@ public class TronconUtils {
                     if (!pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else {
                     throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
@@ -513,7 +679,7 @@ public class TronconUtils {
                     if (!pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else if (pos.getPositionDebut() != null) {
                     point = pos.getPositionDebut();
@@ -524,7 +690,7 @@ public class TronconUtils {
                     if (!pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconLinear(), bornePoint, dist, 0);
+                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
                     
                 } else {
                     throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
@@ -594,17 +760,15 @@ public class TronconUtils {
             
             final PosSR possr = new PosSR();
             possr.srid = sr.getDocumentId();
-            
-            final Geometry tmpLinear = getTronconLinear();
-            
-            final Map.Entry<Integer, Double> startRef = computeRelative(tmpLinear, references.toArray(new Point[0]), startPoint);
+                        
+            final Map.Entry<Integer, Double> startRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), startPoint);
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneStartId = startBorne.getDocumentId();
             possr.distanceStartBorne = startRef.getValue();
             possr.startAval = possr.distanceStartBorne>=0;
             possr.distanceStartBorne = Math.abs(possr.distanceStartBorne);
             
-            final Map.Entry<Integer, Double> endRef = computeRelative(tmpLinear, references.toArray(new Point[0]), endPoint);
+            final Map.Entry<Integer, Double> endRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneEndId = endBorne.getDocumentId();
             possr.distanceEndBorne = endRef.getValue();
@@ -624,5 +788,4 @@ public class TronconUtils {
         public double distanceEndBorne;
         public boolean endAval;
     }
-    
 }

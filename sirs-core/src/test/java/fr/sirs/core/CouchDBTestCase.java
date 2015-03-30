@@ -1,34 +1,31 @@
 package fr.sirs.core;
 
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.SirsDBInfoRepository;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
-import javax.annotation.PostConstruct;
 
 import org.ektorp.CouchDbConnector;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:/spring/test/test-context.xml")
 public abstract class CouchDBTestCase {
 
-    @Autowired
-    protected CouchDbConnector connector;
+    protected static CouchDbConnector connector;
 
-    @Autowired
-    private SirsDBInfoRepository sirsDBInfoRepository;
+    private static SirsDBInfoRepository sirsDBInfoRepository;
+    
+    static {        
+        final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
+        applicationContextParent.refresh();
 
-    @PostConstruct
-    public void init() {
+        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[]{
+            "classpath:/spring/test/test-context.xml"}, applicationContextParent);
+        
+        connector = applicationContext.getBean(CouchDbConnector.class);
+        sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
+        
         Optional<SirsDBInfo> init = sirsDBInfoRepository.init();
         if (!init.isPresent())
             sirsDBInfoRepository.create("1.0.1", "EPSG:2154");
@@ -49,5 +46,4 @@ public abstract class CouchDBTestCase {
     protected void log(String message) {
         SirsCore.LOGGER.log(Level.INFO, message);
     }
-
 }

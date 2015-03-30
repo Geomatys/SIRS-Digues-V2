@@ -11,40 +11,46 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.util.List;
+import org.apache.sis.test.DependsOnMethod;
+import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconUtilsTest extends CouchDBTestCase{
+public class TronconUtilsTest extends CouchDBTestCase {
     
     private static final float DELTA = 0.00001f;
     private static final GeometryFactory GF = new GeometryFactory();
     
-    /**
-     * Test du decoupage d'un troncon.
-     */
-    @Test
-    public void cutTest(){
-        
+    private static TronconDigue troncon;
+    private static BorneDigue borne0;
+    private static BorneDigue borne1;
+    private static BorneDigue borne2;
+    private static SystemeReperage sr;
+    private static Crete crete;
+    
+    @BeforeClass
+    public static void prepareData() {
         final SessionGen session = new SessionGen(connector);
-        
         //creation du troncon
-        TronconDigue troncon = new TronconDigue();
+        troncon = new TronconDigue();
         troncon.setLibelle("TC");
         troncon.setGeometry(GF.createLineString(new Coordinate[]{new Coordinate(0, 0),new Coordinate(100, 0)}));
         session.getTronconDigueRepository().add(troncon);
         
-        //create des bornes
-        final BorneDigue borne0 = new BorneDigue();
+        //creation des bornes
+        borne0 = new BorneDigue();
         borne0.setLibelle("B0");
         borne0.setGeometry(GF.createPoint(new Coordinate(1, 1)));
-        final BorneDigue borne1 = new BorneDigue();
+        borne1 = new BorneDigue();
         borne1.setLibelle("B1");
         borne1.setGeometry(GF.createPoint(new Coordinate(51, 2)));
-        final BorneDigue borne2 = new BorneDigue();
+        borne2 = new BorneDigue();
         borne2.setLibelle("B2");
         borne2.setGeometry(GF.createPoint(new Coordinate(99, -3)));
         session.getBorneDigueRepository().add(borne0);
@@ -52,7 +58,7 @@ public class TronconUtilsTest extends CouchDBTestCase{
         session.getBorneDigueRepository().add(borne2);
         
         //creation du systeme de reperage
-        final SystemeReperage sr = new SystemeReperage();
+        sr = new SystemeReperage();
         sr.setLibelle("SR");
         sr.setTronconId(troncon.getDocumentId());
         final SystemeReperageBorne srb0 = new SystemeReperageBorne();
@@ -69,6 +75,23 @@ public class TronconUtilsTest extends CouchDBTestCase{
         sr.getSystemeReperageBorne().add(srb2);
         session.getSystemeReperageRepository().add(sr, troncon);
         
+        //on ajoute une crète
+        crete = new Crete();
+        crete.setBorne_debut_aval(false);
+        crete.setBorne_debut_distance(0.5f);
+        crete.setBorne_fin_distance(0.3f);
+        crete.setBorne_fin_aval(true);
+        crete.setSystemeRepId(sr.getDocumentId());
+        crete.setBorneDebutId(borne0.getDocumentId());
+        crete.setBorneFinId(borne2.getDocumentId());
+        troncon.getStructures().add(crete);
+        session.getTronconDigueRepository().update(troncon);
+    }
+    
+    @Test
+    public void dataIntegrityTest() {
+        final SessionGen session = new SessionGen(connector);
+                
         //le troncon doit etre a jour avec la liste des bornes
         troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
         final String[] tcbids = troncon.getBorneIds().toArray(new String[0]);
@@ -77,23 +100,19 @@ public class TronconUtilsTest extends CouchDBTestCase{
         assertEquals(borne1.getId(), tcbids[1]);
         assertEquals(borne2.getId(), tcbids[2]);
         
-        //on ajoute une crète
-        final Crete crete = new Crete();
-        crete.setSystemeRepId(sr.getDocumentId());
-        crete.setBorneDebutId(borne0.getDocumentId());
-        crete.setBorne_debut_aval(false);
-        crete.setBorne_debut_distance(0.5f);
-        crete.setBorne_fin_distance(0.3f);
-        crete.setBorne_fin_aval(true);
-        crete.setBorneFinId(borne2.getDocumentId());
-        troncon.getStructures().add(crete);
-        session.getTronconDigueRepository().update(troncon);
-        
-        //on vérifie que reconstruit bien la geometrie
+        //on vérifie qu'on reconstruit bien la geometrie
         assertTrue(GF.createLineString(new Coordinate[]{new Coordinate(0.5, 0),new Coordinate(99.3, 0)}).equalsExact( 
                 LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, session.getBorneDigueRepository())
                 ,DELTA));
-        
+    }
+    
+    /**
+     * Test du decoupage d'un troncon.
+     */
+    @Test
+    @DependsOnMethod("dataIntegrityTest")
+    public void cutTest() {
+        final SessionGen session = new SessionGen(connector);
         //premiere decoupe -----------------------------------------------------
         final TronconDigue cut0 = TronconUtils.cutTroncon(troncon, 
                 GF.createLineString(new Coordinate[]{new Coordinate(0, 0),new Coordinate(50, 0)}),
@@ -201,6 +220,37 @@ public class TronconUtilsTest extends CouchDBTestCase{
         assertTrue(GF.createLineString(new Coordinate[]{new Coordinate(0.5, 0),new Coordinate(99.3, 0)}).equalsExact( 
                 LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, session.getBorneDigueRepository())
                 ,DELTA));
+    }
+    
+    
+    @Test
+    @DependsOnMethod("dataIntegrityTest")
+    public void computePRTest() {
+        final SessionGen session = new SessionGen(connector);
+        TronconUtils.computePRs(crete, session);
+        
+        /*
+         * Soit la fonction distanceProjetée(objet A, objet B) la distance entre 
+         * les objets A et B après projection sur le tronçon.
+         * Soit la fonction PR(BorneDigue b) la valeur du PR de la borne b.
+         */
+        // PR début Crête = (PR(borne1) - PR(borne0)) / DistanceProjetée(borne0, borne1) * distanceProjetée(borne0, crête) + PR(borne0)
+        // PR début Crête = (10 - 0) / 50 * 0.5 + 0
+        // PR début Crête = 0.1
+        assertEquals("PR de début de la Crête", -0.1, crete.getPR_debut(), DELTA);
+        
+        // PR fin Crête = (PR(borne2) - PR(borne1)) / DistanceProjetée(borne2, borne1) * distanceProjetée(borne2, crête) + PR(borne2)
+        // PR fin Crête = (20 - 10) / 48 * 0.3 + 20
+        // PR fin Crête = 0.1
+        assertEquals("PR de fin de la Crête", 20.0625, crete.getPR_fin(), DELTA);
+        
+        LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));        
+        float fictivePR = TronconUtils.computePR(segments, sr, GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(19, 0)), session.getBorneDigueRepository());
+        
+        // PR fictif = (PR(borne1) - PR(borne0)) / DistanceProjetée(borne1, borne0) * distanceProjetée(borne0, Point fictif) + PR(borne0)
+        // PR fictif = (10 - 0) / 50 * 18 + 0
+        // PR fictif = 3.6
+        assertEquals("PR de fin de la Crête", 3.6, fictivePR, DELTA);
     }
     
 }
