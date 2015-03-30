@@ -4,6 +4,7 @@ package fr.sirs;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
@@ -173,7 +174,7 @@ public final class SIRS extends SirsCore {
      * @param repo Le repository servant à retrouver les éléments depuis leur ID.
      * @return Une liste d'éléments. Peut être vide, mais jamais nulle.
      */
-    public static ObservableList<Element> toElementList(final List sourceList, final Repository repo) {
+    public static ObservableList<Element> toElementList(final List sourceList, final AbstractSIRSRepository repo) {
         if (sourceList == null) {
             return FXCollections.observableArrayList();
             
@@ -186,17 +187,20 @@ public final class SIRS extends SirsCore {
         } else if (repo == null) {
             return FXCollections.observableArrayList();
         } else {
-            ViewQuery q = new ViewQuery()
-                      .allDocs()
-                      .includeDocs(true)
-                      .keys(sourceList);
-            List r = Injector.getSession().getConnector().queryView(q, repo.getModelClass());
+            // Version de récupération "Bulk" : récupération de l'ensemble des documents dont les IDs sont spécifiés en une requête unique.
+//            ViewQuery q = new ViewQuery()
+//                      .allDocs()
+//                      .includeDocs(true)
+//                      .keys(sourceList);
+//            return FXCollections.observableArrayList(Injector.getSession().getConnector().queryView(q, repo.getModelClass()));
             
-            ObservableList resultList = FXCollections.observableArrayList(r);
-//            final Iterator<String> it = sourceList.iterator();
-//            while (it.hasNext()) {
-//                resultList.add(repo.get(it.next()));
-//            }
+            // Version de récupération "cache" : fes documents sont récupérés un par un à moins qu'ils ne soient dans le cache du repository 
+            // Restauration de cette version, car la duplication "Bulk" ne passe pas par le repository et duplique donc les instances déjà dans son cache.
+            final ObservableList resultList = FXCollections.observableArrayList(); 
+            final Iterator<String> it = sourceList.iterator();
+            while (it.hasNext()) {
+                resultList.add(repo.get(it.next()));
+            }
             return resultList;
         }
     }
