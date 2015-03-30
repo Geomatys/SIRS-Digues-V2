@@ -313,8 +313,6 @@ public class Loader extends Application {
                 updateMessage("Chargement des pilotes pour base de données...");
                 // loading drivers, some plugin systems requiere this call ,
                 // like netbeans RCP
-                Class.forName("org.apache.derby.jdbc.EmbeddedDriver")
-                        .newInstance();
                 Class.forName("org.postgresql.Driver").newInstance();
                 Class.forName("org.h2.Driver").newInstance();
 
