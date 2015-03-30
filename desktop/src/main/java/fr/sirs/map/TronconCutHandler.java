@@ -16,9 +16,11 @@ import fr.sirs.core.TronconUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -163,7 +165,17 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 d.show();
             });
 
-                // TODO : show a popup on success.
+            // TODO : show a popup on success.
+            submitted.setOnSucceeded((Event event) -> {
+                new Alert(Alert.AlertType.INFORMATION,
+                        "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
+                        ButtonType.OK).showAndWait();
+                try {
+                    Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date());
+                } catch (Exception ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
+                }
+            });
             // empty our handler, to allow new operation.
             editPane.tronconProperty().set(null);
         }
@@ -419,9 +431,10 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 }
             }
 
-            //on supprime l'ancien troncon
+            //on archive l'ancien troncon
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
-            session.getTronconDigueRepository().remove(toCut);
+            toCut.setDate_fin(LocalDateTime.now());
+            session.getTronconDigueRepository().update(toCut);
 
             return true;
         }

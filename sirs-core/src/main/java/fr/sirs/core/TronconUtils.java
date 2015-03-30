@@ -80,7 +80,7 @@ public class TronconUtils {
         //on évince toutes les bornes qui ne sont pas sur le nouveau tronçon. On 
         // garde un index des ids de borne conservés, cela accélerera le tri sur
         // les SR.
-        final SegmentInfo[] sourceTronconSegments = buildSegments((LineString) troncon.geometryProperty().get());
+        final SegmentInfo[] sourceTronconSegments = buildSegments(asLineString(troncon.geometryProperty().get()));
         final ListIterator<String> borneIt = tronconCp.getBorneIds().listIterator();
         final HashSet<String> keptBornes = new HashSet<>();
         while (borneIt.hasNext()) {

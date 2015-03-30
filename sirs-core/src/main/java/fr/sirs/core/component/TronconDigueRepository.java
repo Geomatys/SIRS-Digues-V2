@@ -453,7 +453,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     }
     
     /**
-     * Cette contraint s'assure de supprimer les SR et bornes associées au troncon
+     * Cette contrainte s'assure de supprimer les SR et bornes associées au troncon
      * en cas de suppression.
      * 
      */
@@ -464,16 +464,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         for(SystemeReperage sr : srs){
             srrepo.remove(sr, entity);
         }
-        //on supprime toutes les bornes du troncon
-        final BorneDigueRepository bdrepo = new BorneDigueRepository(db);
-        for(String bdid : entity.getBorneIds()){
-            try{
-                final BorneDigue bd = bdrepo.get(bdid);
-                bdrepo.remove(bd);
-            }catch(DocumentNotFoundException ex){
-                //la borne n'existe pas.
-            }
-        }
+        // TODO : Set an end date to bornes which are not used anymore.
     }
     
 }

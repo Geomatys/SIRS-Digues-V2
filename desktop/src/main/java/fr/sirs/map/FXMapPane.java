@@ -78,6 +78,7 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
 /**
@@ -253,6 +254,15 @@ public class FXMapPane extends BorderPane {
         return uiMap1;
     }
 
+    /**
+     * Ask map to display valid element at specified date.
+     * @param newTime Date to focus on map.
+     */
+    public void setTemporalRange(final Date newTime) throws TransformException {
+        uiMap1.getCanvas().setTemporalRange(newTime, newTime);
+        uiCoordBar1.getSliderview().moveTo(newTime.getTime() - TemporalConstants.DAY_MS * 8);
+    }
+    
     public void focusOnElement(Element target) {
         if (context == null) return;
         TaskManager.INSTANCE.submit(new FocusOnMap(target));
