@@ -14,6 +14,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.map.style.FXStyleClassifSinglePane;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.util.Collections;
@@ -59,11 +60,23 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
+import org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn;
+import org.geotoolkit.gui.javafx.contexttree.MapItemNameColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
+import org.geotoolkit.gui.javafx.contexttree.MapItemVisibleColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
+import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
+import org.geotoolkit.gui.javafx.layer.FXLayerStructure;
+import org.geotoolkit.gui.javafx.layer.FXLayerStylesPane;
+import org.geotoolkit.gui.javafx.layer.FXPropertiesPane;
+import org.geotoolkit.gui.javafx.layer.style.FXStyleAdvancedPane;
+import org.geotoolkit.gui.javafx.layer.style.FXStyleClassifRangePane;
+import org.geotoolkit.gui.javafx.layer.style.FXStyleColorMapPane;
+import org.geotoolkit.gui.javafx.layer.style.FXStyleSimplePane;
+import org.geotoolkit.gui.javafx.layer.style.FXStyleXMLPane;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXContextBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
@@ -74,6 +87,7 @@ import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
@@ -135,11 +149,42 @@ public class FXMapPane extends BorderPane {
         uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         uiTree = new FXMapContextTree();
+        uiTree.getTreetable().getColumns().clear();
+        uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
+        uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn(){
+            @Override
+            protected FXPropertiesPane createEditor(MapItem candidate) {
+                return new FXPropertiesPane(
+                    candidate,
+                    new FXLayerStylesPane(
+                            new FXStyleSimplePane(),
+                            new FXStyleColorMapPane(),
+                            new FXStyleClassifSinglePane(),
+                            new FXStyleClassifRangePane(),
+                            new FXStyleAdvancedPane(),
+                            new FXStyleXMLPane()
+                    )
+                );
+            }
+        });
+        uiTree.getTreetable().getColumns().add(new MapItemVisibleColumn());
+
         uiTree.getTreetable().setShowRoot(false);
         uiTree.getMenuItems().add(new OpacityItem());
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new EmptySelectionItem());
-        uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1));
+        uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1,
+            new FXLayerStructure(),
+            new FXFeatureTable(),
+            new FXLayerStylesPane(
+                    new FXStyleSimplePane(),
+                    new FXStyleColorMapPane(),
+                    new FXStyleClassifSinglePane(),
+                    new FXStyleClassifRangePane(),
+                    new FXStyleAdvancedPane(),
+                    new FXStyleXMLPane()
+            )
+        ));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
         uiTree.getMenuItems().add(new ExportMenu());
