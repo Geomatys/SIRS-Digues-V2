@@ -303,34 +303,34 @@ public class FXPositionablePane extends BorderPane {
             //pour chaque systeme de reperage
             for (SystemeReperage sr : uiSRs.getItems()) {
                 Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, startPoint);
-                boolean aval = false;
+                boolean aval = true;
                 double distanceBorne = computedLinear.getValue();
                 if (distanceBorne < 0) {
                     distanceBorne = -distanceBorne;
-                    aval = true;
+                    aval = false;
                 }
 
                 page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
                 page.append("<b>Début </b>");
                 page.append(computedLinear.getKey().getLibelle()).append(" à ");
                 page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en amont" : "en aval");
+                page.append(aval ? "en aval" : "en amont");
                 page.append("<br/>");
 
                 if (!startPoint.equals(endPoint)) {
                     computedLinear = computeLinearFromGeo(sr, endPoint);
-                    aval = false;
+                    aval = true;
                     distanceBorne = computedLinear.getValue();
                     if (distanceBorne < 0) {
                         distanceBorne = -distanceBorne;
-                        aval = true;
+                        aval = false;
                     }
                 }
 
                 page.append("<b>Fin&nbsp&nbsp </b>");
                 page.append(computedLinear.getKey().getLibelle()).append(" à ");
                 page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en amont" : "en aval");
+                page.append(aval ? "en aval" : "en amont");
                 page.append("<br/><br/>");
             }
         }
@@ -439,7 +439,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
             double distStart = distanceStart.doubleValue();
-            if (uiAvalStart.isSelected()) {
+            if (!uiAvalStart.isSelected()) {
                 distStart *= -1;
             }
 
@@ -461,7 +461,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
             double distEnd = distanceEnd.doubleValue();
-            if (uiAvalEnd.isSelected()) {
+            if (!uiAvalEnd.isSelected()) {
                 distEnd *= -1;
             }
 
@@ -963,7 +963,7 @@ public class FXPositionablePane extends BorderPane {
                         if (startPoint != null && sr != null) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, startPoint);
                             Platform.runLater(() -> {
-                                uiAvalStart.setSelected(computedLinear.getValue() < 0);
+                                uiAvalStart.setSelected(computedLinear.getValue() > 0);
                                 uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneStart.setValue(computedLinear.getKey());
                             });
@@ -995,7 +995,7 @@ public class FXPositionablePane extends BorderPane {
                         if (endPoint != null && sr != null) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, endPoint);
                             Platform.runLater(() -> {
-                                uiAvalEnd.setSelected(computedLinear.getValue() < 0);
+                                uiAvalEnd.setSelected(computedLinear.getValue() > 0);
                                 uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneEnd.setValue(computedLinear.getKey());
                             });
