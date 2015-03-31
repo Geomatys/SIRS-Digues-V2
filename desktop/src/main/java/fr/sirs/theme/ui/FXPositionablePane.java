@@ -37,6 +37,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -125,7 +126,7 @@ public class FXPositionablePane extends BorderPane {
     @FXML private FXNumberSpinner uiLatitudeEnd;
     
     /** A flag to notify when a component update is running, used to lock graphic components */
-    private final SimpleBooleanProperty computingRunning = new SimpleBooleanProperty(false);
+    private final SimpleIntegerProperty computingRunning = new SimpleIntegerProperty(0);
     
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
     private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
@@ -184,9 +185,10 @@ public class FXPositionablePane extends BorderPane {
         uiLongitudeEnd.disableProperty().bind(disabledBinding);
         uiLatitudeEnd.disableProperty().bind(disabledBinding);
         
-        // Bind progress display and field disabling to computing state. It allows to "lock" the component when updating its content.        
-        uiLoading.visibleProperty().bind(computingRunning);
-        disableProperty().bind(computingRunning);
+        // Bind progress display and field disabling to computing state. It allows to "lock" the component when updating its content.
+        BooleanBinding loadingState = computingRunning.greaterThan(0);
+        uiLoading.visibleProperty().bind(loadingState);
+        disableProperty().bind(loadingState);
         
         // Position mode : linear or geographic
         uiCoordPane.visibleProperty().bind(uiTypeCoord.selectedProperty());
@@ -222,8 +224,8 @@ public class FXPositionablePane extends BorderPane {
         uiLatitudeEnd.valueProperty().addListener(linearEndUpdater);
         
         // Update PR information
-        uiPRDebut.textProperty().bind(prDebut.asString());
-        uiPRFin.textProperty().bind(prFin.asString());
+        uiPRDebut.textProperty().bind(prDebut.asString("%f"));
+        uiPRFin.textProperty().bind(prFin.asString("%f"));
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
@@ -672,11 +674,11 @@ public class FXPositionablePane extends BorderPane {
                     SIRS.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                     throw new RuntimeException("La conversion des positions a échouée.", ex);
                 } finally {
-                    Platform.runLater(() -> computingRunning.set(false));
+                    Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                 }
             };
 
-            computingRunning.set(true);
+            computingRunning.set(computingRunning.get()+1);
             TaskManager.INSTANCE.submit("Conversion de points géographiques", pointConverter);
         }
                
@@ -697,7 +699,7 @@ public class FXPositionablePane extends BorderPane {
         currentTroncon = getTroncon();
         
         if (currentTroncon != null) {
-            Platform.runLater(()->computingRunning.set(true));
+            computingRunning.set(computingRunning.get()+1);
             TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
                 try {
                     final SystemeReperageRepository srRepo = Injector.getSession().getSystemeReperageRepository();
@@ -715,7 +717,7 @@ public class FXPositionablePane extends BorderPane {
                         uiSRs.getSelectionModel().select(defaultSR);
                     });
                 } finally {
-                    Platform.runLater(() -> computingRunning.set(false));
+                    Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                 }
             });
         }
@@ -741,7 +743,7 @@ public class FXPositionablePane extends BorderPane {
             uiBorneStart.setItems(emptyBornes);
             uiBorneEnd.setItems(emptyBornes);
         } else {
-            computingRunning.set(true);
+            computingRunning.set(computingRunning.get()+1);
             TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
                 try {
                     BorneDigue defaultStart = null, defaultEnd = null;
@@ -771,7 +773,7 @@ public class FXPositionablePane extends BorderPane {
                         uiBorneEnd.getSelectionModel().select(endopy);
                     });
                 } finally {
-                    Platform.runLater(() -> computingRunning.set(false));
+                    Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                 }
             });
         }
@@ -793,7 +795,7 @@ public class FXPositionablePane extends BorderPane {
         
         if(newValue==null) return;
         
-        computingRunning.set(true);
+        computingRunning.set(computingRunning.get()+1);
         final Runnable updater = () -> {
             try {
                 //creation de la liste des systemes de reperage
@@ -849,7 +851,7 @@ public class FXPositionablePane extends BorderPane {
                     }
                 });
             } finally {
-                computingRunning.set(false);
+                Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
             }
         };
         
@@ -901,7 +903,7 @@ public class FXPositionablePane extends BorderPane {
             // Update only if linear mode is selected. Otherwise, it means a modification on geographic
             // panel modified linear one, which throw back an event.
             if (uiTypeBorne.isSelected()) {
-                computingRunning.set(true);
+                computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point startPoint = computeGeoStartFromLinear();
@@ -922,7 +924,7 @@ public class FXPositionablePane extends BorderPane {
                         }
                         return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(false));
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                     }
                 });
             }
@@ -938,7 +940,7 @@ public class FXPositionablePane extends BorderPane {
             // Update only if linear mode is selected. Otherwise, it means a modification on geographic
             // panel modified linear one, which throw back an event.
             if (uiTypeBorne.isSelected()) {
-                computingRunning.set(true);
+                computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point endPoint = computeGeoEndFromLinear();
@@ -959,7 +961,7 @@ public class FXPositionablePane extends BorderPane {
                         }
                         return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(false));
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                     }
                 });
             }
@@ -976,7 +978,7 @@ public class FXPositionablePane extends BorderPane {
             // Update only if geographic mode is selected. Otherwise, it means a 
             // modification on linear panel has thrown back an event.
             if (uiTypeCoord.isSelected()) {
-                computingRunning.set(true);
+                computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point startPoint = getOrCreateStartPoint();
@@ -993,7 +995,7 @@ public class FXPositionablePane extends BorderPane {
                         }
                         return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(false));
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                     }
                 });
             }
@@ -1010,7 +1012,7 @@ public class FXPositionablePane extends BorderPane {
             // Update only if geographic mode is selected. Otherwise, it means a 
             // modification on linear panel has thrown back an event.
             if (uiTypeCoord.isSelected()) {
-                computingRunning.set(true);
+                computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point endPoint = getOrCreateEndPoint();
@@ -1027,7 +1029,7 @@ public class FXPositionablePane extends BorderPane {
                         }
                         return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(false));
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                     }
                 });
             }

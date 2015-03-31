@@ -54,6 +54,7 @@
 
 .label-header {
     -fx-text-fill: white;
+    -fx-font-weight: bold;
 }
 
 .blue-dark{
