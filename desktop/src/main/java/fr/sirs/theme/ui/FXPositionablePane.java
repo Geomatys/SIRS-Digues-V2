@@ -461,7 +461,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
             double distStart = distanceStart.doubleValue();
-            if (!uiAmontStart.isSelected()) {
+            if (uiAmontStart.isSelected()) {
                 distStart *= -1;
             }
 
@@ -483,7 +483,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
             double distEnd = distanceEnd.doubleValue();
-            if (!uiAmontEnd.isSelected()) {
+            if (uiAmontEnd.isSelected()) {
                 distEnd *= -1;
             }
 
@@ -784,6 +784,13 @@ public class FXPositionablePane extends BorderPane {
      * @param newValue Current focused positionable.
      */
     private void updateField(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {        
+        if (oldValue != null) {
+            uiAmontStart.selectedProperty().unbindBidirectional(oldValue.borne_debut_avalProperty());
+            uiAmontEnd.selectedProperty().unbindBidirectional(oldValue.borne_fin_avalProperty());
+            uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
+            uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
+        }
+        
         if(newValue==null) return;
         
         computingRunning.set(true);
@@ -848,8 +855,6 @@ public class FXPositionablePane extends BorderPane {
         
         TaskManager.INSTANCE.submit("Mise à jour d'une position", updater);
     }
-    
-    
     
     /**
      * Affect edited position information into bound {@link Positionable } object.
@@ -980,7 +985,7 @@ public class FXPositionablePane extends BorderPane {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, startPoint);
                             final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
-                                uiAmontStart.setSelected(computedLinear.getValue() > 0);
+                                uiAmontStart.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneStart.setValue(computedLinear.getKey());
                                 prDebut.set(computedPR);
@@ -1014,7 +1019,7 @@ public class FXPositionablePane extends BorderPane {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, endPoint);
                             final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
-                                uiAmontEnd.setSelected(computedLinear.getValue() > 0);
+                                uiAmontEnd.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneEnd.setValue(computedLinear.getKey());
                                 prFin.set(computedPR);
