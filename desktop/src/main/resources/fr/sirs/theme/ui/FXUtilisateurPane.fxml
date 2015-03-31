@@ -33,15 +33,15 @@
                   <Label fx:id="ui_labelLogin" text="%login" GridPane.rowIndex="0" />
                   <TextField fx:id="ui_login" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                   <!-- EString -->                 
-                  <Label text="%password" GridPane.rowIndex="3" />
-                  <PasswordField fx:id="ui_password" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label fx:id="ui_labelConfirm" text="%confirm" GridPane.rowIndex="4" />
-                  <PasswordField fx:id="ui_passwordConfirm" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <!-- EString -->                 
                   <Label text="%role" GridPane.rowIndex="1" />
                   <ComboBox fx:id="ui_role" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="%changePassword" GridPane.rowIndex="2" />
                   <CheckBox fx:id="ui_passwordChange" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <!-- EString -->                 
+                  <Label text="%password" GridPane.rowIndex="3" />
+                  <PasswordField fx:id="ui_password" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label fx:id="ui_labelConfirm" text="%confirm" GridPane.rowIndex="4" />
+                  <PasswordField fx:id="ui_passwordConfirm" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
             </children>
                <padding>

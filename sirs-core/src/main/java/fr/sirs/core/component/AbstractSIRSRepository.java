@@ -74,6 +74,13 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
 
     @Override
+    public void update(T entity) {
+        ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
+        super.update(entity);
+        cache.put(entity.getId(), entity); // Put the updated entity into cache in case the old entity is different.
+    }
+
+    @Override
     public void remove(T entity) {
         ArgumentChecks.ensureNonNull("Document à supprimer", entity);
         cache.remove(entity.getId());

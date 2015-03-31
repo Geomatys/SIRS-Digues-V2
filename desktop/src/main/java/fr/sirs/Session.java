@@ -591,7 +591,10 @@ public class Session extends SessionGen {
         
         final Element parent = element.getParent();
         if (parent instanceof AvecLibelle) {
-            title+=" ("+((AvecLibelle)parent).getLibelle()+")";
+            final String parentLibelle = ((AvecLibelle)parent).getLibelle();
+            if(parentLibelle!=null){
+                title+=" ("+parentLibelle+")";
+            }
         }
         return title;
     }

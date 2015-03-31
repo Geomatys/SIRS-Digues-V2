@@ -22,6 +22,7 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
        initStandardDesignDocument();
    }
     
+    @Override
     public Class<Utilisateur> getModelClass() {
         return Utilisateur.class;
     }

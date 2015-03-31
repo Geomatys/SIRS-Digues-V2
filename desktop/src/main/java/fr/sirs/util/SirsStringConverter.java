@@ -3,6 +3,7 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import fr.sirs.Session;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Organisme;
@@ -100,16 +101,26 @@ public class SirsStringConverter extends StringConverter {
 
     public static String getDesignation(final PreviewLabel source) {
         final LabelMapper labelMapper = getLabelMapperForClass(source.getType());
-        // If Designation is not null, we display it.
-        return (labelMapper == null || source.getDesignation() == null) ? ""
-                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getDesignation());
+        String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
+        if(source.getDesignation()!=null){
+            if(!"".equals(prefixedDesignation)){
+                prefixedDesignation+=" - ";
+            }
+            prefixedDesignation+=source.getDesignation();
+        }
+        return prefixedDesignation;
     }
     
     public static String getDesignation(final Element source) {
         final LabelMapper labelMapper = getLabelMapperForClass(source.getClass());
-        // If Designation is not null, we display it.
-        return (labelMapper == null || source.getDesignation()== null) ? ""
-                : (labelMapper.mapPropertyName("classAbrege") + " - " + source.getDesignation());
+        String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
+        if(source.getDesignation()!=null){
+            if(!"".equals(prefixedDesignation)){
+                prefixedDesignation+=" - ";
+            }
+            prefixedDesignation+=source.getDesignation();
+        }
+        return prefixedDesignation;
     }
     
     @Override

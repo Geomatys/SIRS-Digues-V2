@@ -12,13 +12,15 @@ import javafx.scene.control.TabPane;
  */
 public class DiguesTab extends FXFreeTab {
     
+    private final static String TITLE = "Systèmes d'endiguement";
+    
     private final TabPane tabs;
     private final FXDiguesPane ctrl;
 
     public DiguesTab(TabPane tabs) {
         this.tabs = tabs;
         this.ctrl = new FXDiguesPane();
-        setText("Ouvrages");
+        setText(TITLE);
         setContent(ctrl);
     }    
     

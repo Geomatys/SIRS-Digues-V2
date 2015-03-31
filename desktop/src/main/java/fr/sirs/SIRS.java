@@ -79,6 +79,7 @@ public final class SIRS extends SirsCore {
     
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";
+    public static final String BUNDLE_KEY_CLASS_ABREGE = "classAbrege";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {

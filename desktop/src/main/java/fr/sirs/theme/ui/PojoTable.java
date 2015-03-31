@@ -120,6 +120,8 @@ public class PojoTable extends BorderPane {
     
     // Editabilité du tableau (possibilité d'ajout et de suppression des éléments
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
+    // Editabilité des cellules tableau (possibilité d'ajout et de suppression des éléments
+    protected final BooleanProperty cellEditableProperty = new SimpleBooleanProperty();
     // Parcours fiche par fiche
     protected final BooleanProperty fichableProperty = new SimpleBooleanProperty(true);
     // Accès à la fiche détaillée d'un élément particulier
@@ -228,6 +230,7 @@ public class PojoTable extends BorderPane {
             deleteColumn.setVisible(newValue);
             //editCol.setVisible(newValue && detaillableProperty.get());
         });
+        cellEditableProperty.bind(editableProperty);
         detaillableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             editCol.setVisible(newValue && detaillableProperty.get());
         });
@@ -326,7 +329,7 @@ public class PojoTable extends BorderPane {
         uiTable.setTableMenuButtonVisible(true);
         // Load all elements only if the user gave us the repository.
         if (repo != null) {
-            setTableItems(()-> FXCollections.observableList(this.repo.getAll()));
+            setTableItems(()-> FXCollections.observableList(repo.getAll()));
         }
         
         final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
@@ -450,6 +453,9 @@ public class PojoTable extends BorderPane {
 
     public BooleanProperty editableProperty(){
         return editableProperty;
+    }
+    public BooleanProperty cellEditableProperty(){
+        return cellEditableProperty;
     }
     public BooleanProperty detaillableProperty(){
         return detaillableProperty;
@@ -733,13 +739,15 @@ public class PojoTable extends BorderPane {
     private class EnumColumn extends TableColumn<Element, Role>{
         private EnumColumn(PropertyDescriptor desc){
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
-            setEditable(true);
+            setEditable(false);
             setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
             setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
 
                 @Override
                 public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
-                    return new FXEnumTableCell<>(Role.class, new SirsStringConverter());
+                    final TableCell<Element, Role> cell = new FXEnumTableCell<>(Role.class, new SirsStringConverter());
+                    cell.setEditable(false);
+                    return cell;
                 }
 
             });     
@@ -758,7 +766,7 @@ public class PojoTable extends BorderPane {
     private class PasswordColumn extends TableColumn<Element, String>{
         private PasswordColumn(PropertyDescriptor desc){
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
-            setEditable(true);
+            setEditable(false);
             setCellValueFactory(new PropertyValueFactory<>("password"));
             setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
 
@@ -771,7 +779,7 @@ public class PojoTable extends BorderPane {
                         Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
-                    cell.setEditable(true);
+                    cell.setEditable(false);
                     return cell;
                 }
             });
@@ -846,7 +854,7 @@ public class PojoTable extends BorderPane {
                 
                 setEditable(isEditable);
                 if (isEditable) {
-                    editableProperty().bind(editableProperty);
+                    editableProperty().bind(cellEditableProperty);
                 }
             }
         }  

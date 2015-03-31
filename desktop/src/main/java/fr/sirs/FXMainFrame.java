@@ -41,9 +41,11 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -64,6 +66,13 @@ public class FXMainFrame extends BorderPane {
     private DiguesTab diguesTab;
     private Tab searchTab;
     
+    private static final String BUNDLE_KEY_ADMINISTATION = "administration";
+    private static final String BUNDLE_KEY_USERS = "users";
+    private static final String BUNDLE_KEY_VALIDATION = "designations";
+    private static final String BUNDLE_KEY_REFERENCES = "references";
+    private static final String BUNDLE_KEY_DESIGNATIONS = "designations";
+    private static final String BUNDLE_KEY_SEARCH = "search";
+    
     /** A cache to get back tab as long as their displayed in application, 
      * allowing fast search on Theme keys.
      */ 
@@ -74,8 +83,9 @@ public class FXMainFrame extends BorderPane {
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
         
-        final ProgressMonitor pm = new ProgressMonitor(TaskManager.INSTANCE);
-        ((BorderPane) uiMenu.getParent()).setRight(pm);
+        final ToolBar pm = new ToolBar(new ProgressMonitor(TaskManager.INSTANCE));
+        pm.prefHeightProperty().bind(uiMenu.heightProperty());
+        ((HBox) uiMenu.getParent()).getChildren().add(pm);
         
         // Load themes
         final Theme[] themes = Plugins.getThemes();
@@ -89,10 +99,10 @@ public class FXMainFrame extends BorderPane {
         }
         
         if(session.getRole()==Role.ADMIN){
-            final Menu uiAdmin = new Menu(bundle.getString("administration"));
+            final Menu uiAdmin = new Menu(bundle.getString(BUNDLE_KEY_ADMINISTATION));
             uiMenu.getMenus().add(1, uiAdmin);  
             
-            final MenuItem uiUserAdmin = new MenuItem(bundle.getString("utilisateurs"));
+            final MenuItem uiUserAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_USERS));
             uiUserAdmin.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -101,7 +111,7 @@ public class FXMainFrame extends BorderPane {
                 }
             });
             
-            final MenuItem uiDocsAdmin = new MenuItem(bundle.getString("validation"));
+            final MenuItem uiDocsAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
             uiDocsAdmin.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -110,14 +120,14 @@ public class FXMainFrame extends BorderPane {
                 }
             });
              
-            final Menu uiRefs = new Menu(bundle.getString("references"));
+            final Menu uiRefs = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
         
             // Load references
             for(final Class reference : Session.getReferences()){
                 uiRefs.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
             }
             
-            final Menu uiPseudoId = new Menu(bundle.getString("pseudoIds"));
+            final Menu uiPseudoId = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
             for(final Class elementClass : Session.getElements()){
                 if(!Session.getReferences().contains(elementClass)){
                     uiPseudoId.getItems().add(toMenuItem(elementClass, SummaryTab.MODEL));
@@ -239,7 +249,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     private void openSearchTab(ActionEvent event) {
         if (searchTab == null || !uiTabs.equals(searchTab.getTabPane())) {
-            searchTab = new Tab(bundle.getString("search"));
+            searchTab = new Tab(bundle.getString(BUNDLE_KEY_SEARCH));
             final FXSearchPane searchPane = new FXSearchPane();
             searchTab.setContent(searchPane);
             uiTabs.getTabs().add(searchTab);
@@ -338,7 +348,7 @@ public class FXMainFrame extends BorderPane {
     }
     
     private void openUsersTab(){
-        final Tab usersTab = new Tab(bundle.getString("utilisateurs"));
+        final Tab usersTab = new Tab(bundle.getString(BUNDLE_KEY_USERS));
         
         final PojoTable usersTable = new PojoTable(session.getUtilisateurRepository(), "Table des utilisateurs"){
             @Override
@@ -355,12 +365,14 @@ public class FXMainFrame extends BorderPane {
                 super.deletePojos(pojoList.toArray(new Element[0]));
             }
         };
+        usersTable.cellEditableProperty().unbind();
+        usersTable.cellEditableProperty().set(false);
         usersTab.setContent(usersTable);
         addTab(usersTab);
     }
 
     private void openDocsTab(){
-        final Tab docsTab = new Tab("Validation");
+        final Tab docsTab = new Tab(bundle.getString(BUNDLE_KEY_VALIDATION));
         docsTab.setContent(new FXValidationPane());
 //        final PojoTable docsTable = new PojoTable(session.getPreviewLabelRepository(), "Table des documents");
         addTab(docsTab);
