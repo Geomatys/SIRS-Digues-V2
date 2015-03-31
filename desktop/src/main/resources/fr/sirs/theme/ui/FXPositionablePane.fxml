@@ -16,38 +16,53 @@
       <StackPane BorderPane.alignment="CENTER">
          <children>
             <BorderPane>
-               <top>
-                  <GridPane styleClass="pos-top" BorderPane.alignment="CENTER">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="NEVER" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                      <ColumnConstraints hgrow="NEVER" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="SOMETIMES" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <HBox GridPane.columnIndex="2">
-                           <children>
-                              <ToggleButton fx:id="uiTypeCoord" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" selected="true" styleClass="state-button-left" text="Coordonnée" />
-                              <ToggleButton fx:id="uiTypeBorne" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" styleClass="state-button-right" text="Borne" />
-                           </children>
-                        </HBox>
-                        <Label styleClass="label-header" text="Positionnement" />
-                        <Button fx:id="uiImport" mnemonicParsing="false" onAction="#importCoord" styleClass="buttonbar-button" GridPane.columnIndex="4" />
-                        <Button fx:id="uiView" mnemonicParsing="false" onAction="#viewAllSR" styleClass="buttonbar-button" GridPane.columnIndex="5" />
-                     </children>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                  </GridPane>
-               </top>
+                <top>
+                    <VBox styleClass="pos-top">
+                        <children>
+                            <GridPane BorderPane.alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                <children>
+                                    <HBox GridPane.columnIndex="2">
+                                        <children>
+                                            <ToggleButton fx:id="uiTypeCoord" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" selected="true" styleClass="state-button-left" text="Coordonnée" />
+                                            <ToggleButton fx:id="uiTypeBorne" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" styleClass="state-button-right" text="Borne" />
+                                        </children>
+                                    </HBox>
+                                    <Label styleClass="label-header" text="Positionnement" />
+                                    <Button fx:id="uiImport" mnemonicParsing="false" onAction="#importCoord" styleClass="buttonbar-button" GridPane.columnIndex="4" />
+                                    <Button fx:id="uiView" mnemonicParsing="false" onAction="#viewAllSR" styleClass="buttonbar-button" GridPane.columnIndex="5" />
+                                </children>
+                                <BorderPane.margin>
+                                    <Insets />
+                                </BorderPane.margin>
+                                <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                </padding>
+                            </GridPane>
+                            <HBox spacing="5d" >  
+                                <children>                    
+                                    <Label alignment="BASELINE_LEFT" styleClass="label-header" text="PR de début :"/>
+                                    <Label alignment="BASELINE_LEFT" fx:id="uiPRDebut" styleClass="label-header" text=""/>
+                                    <Label alignment="BASELINE_RIGHT" styleClass="label-header" text="PR de fin :"/>
+                                    <Label alignment="BASELINE_RIGHT" fx:id="uiPRFin" styleClass="label-header" text=""/>
+                                </children>
+                                <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                </padding>
+                            </HBox>
+                        </children>
+                    </VBox>
+                </top>
                <center>
                   <StackPane BorderPane.alignment="CENTER">
                      <children>
@@ -98,10 +113,10 @@
                               <FXNumberSpinner fx:id="uiDistanceStart" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
                               <FXNumberSpinner fx:id="uiDistanceEnd" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
                               <Label text="Fin" GridPane.rowIndex="3" />
-                              <Label text="En aval" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                              <Label text="En amont de la borne" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="uiAvalStart" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                              <CheckBox fx:id="uiAvalEnd" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                              <CheckBox fx:id="uiAmontStart" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                              <CheckBox fx:id="uiAmontEnd" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                               <ComboBox fx:id="uiBorneStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <ComboBox fx:id="uiBorneEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <Label text="Systeme de Reperage" />

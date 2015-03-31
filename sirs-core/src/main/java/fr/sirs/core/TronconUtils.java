@@ -619,7 +619,7 @@ public class TronconUtils {
                     //calcule a partir des bornes
                     final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
-                    if (!pos.getBorne_debut_aval()) {
+                    if (pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
@@ -630,7 +630,7 @@ public class TronconUtils {
                 } else if (pos.getBorneFinId() != null) {
                     final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
-                    if (!pos.getBorne_fin_aval()) {
+                    if (pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
@@ -676,7 +676,7 @@ public class TronconUtils {
                     //calcule a partir des bornes
                     final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
-                    if (!pos.getBorne_fin_aval()) {
+                    if (pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
@@ -687,7 +687,7 @@ public class TronconUtils {
                 } else if (pos.getBorneDebutId() != null) {
                     final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
-                    if (!pos.getBorne_debut_aval()) {
+                    if (pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
@@ -765,14 +765,14 @@ public class TronconUtils {
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneStartId = startBorne.getDocumentId();
             possr.distanceStartBorne = startRef.getValue();
-            possr.startAval = possr.distanceStartBorne>=0;
+            possr.startAval = possr.distanceStartBorne < 0;
             possr.distanceStartBorne = Math.abs(possr.distanceStartBorne);
             
             final Map.Entry<Integer, Double> endRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneEndId = endBorne.getDocumentId();
             possr.distanceEndBorne = endRef.getValue();
-            possr.endAval = possr.distanceEndBorne>=0;
+            possr.endAval = possr.distanceEndBorne < 0;
             possr.distanceEndBorne = Math.abs(possr.distanceEndBorne);
             
             return possr;

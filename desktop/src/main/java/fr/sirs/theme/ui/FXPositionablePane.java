@@ -10,6 +10,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TronconUtils;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -35,13 +36,13 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -52,6 +53,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -69,6 +71,7 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -97,13 +100,19 @@ public class FXPositionablePane extends BorderPane {
     @FXML private ToggleButton uiTypeCoord;
     @FXML private ProgressIndicator uiLoading;
     
+    // PR Information
+    @FXML private Label uiPRDebut;
+    @FXML private Label uiPRFin;
+    private final SimpleFloatProperty prDebut = new SimpleFloatProperty();
+    private volatile SimpleFloatProperty prFin = new SimpleFloatProperty();
+    
     // Borne mode
     @FXML private GridPane uiBornePane;
     @FXML private ComboBox<SystemeReperage> uiSRs;
     @FXML private ComboBox<BorneDigue> uiBorneStart;
     @FXML private ComboBox<BorneDigue> uiBorneEnd;
-    @FXML private CheckBox uiAvalStart;
-    @FXML private CheckBox uiAvalEnd;
+    @FXML private CheckBox uiAmontStart;
+    @FXML private CheckBox uiAmontEnd;
     @FXML private FXNumberSpinner uiDistanceStart;
     @FXML private FXNumberSpinner uiDistanceEnd;
     
@@ -126,6 +135,7 @@ public class FXPositionablePane extends BorderPane {
      * Reference to TronconDigue parent of the current positionable
      */
     private TronconDigue currentTroncon;
+    private LinearReferencing.SegmentInfo[] tronconSegments;
 
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
@@ -164,8 +174,8 @@ public class FXPositionablePane extends BorderPane {
         uiSRs.disableProperty().bind(disabledBinding);
         uiBorneStart.disableProperty().bind(disabledBinding);
         uiBorneEnd.disableProperty().bind(disabledBinding);
-        uiAvalStart.disableProperty().bind(disabledBinding);
-        uiAvalEnd.disableProperty().bind(disabledBinding);
+        uiAmontStart.disableProperty().bind(disabledBinding);
+        uiAmontEnd.disableProperty().bind(disabledBinding);
         uiDistanceStart.disableProperty().bind(disabledBinding);
         uiDistanceEnd.disableProperty().bind(disabledBinding);
         
@@ -194,12 +204,12 @@ public class FXPositionablePane extends BorderPane {
         //compute back geographic points when linear referencing changes.
         final GeographicStartFromLinear geoStartUpdater = new GeographicStartFromLinear();
         uiBorneStart.getSelectionModel().selectedItemProperty().addListener(geoStartUpdater);
-        uiAvalStart.selectedProperty().addListener(geoStartUpdater);
+        uiAmontStart.selectedProperty().addListener(geoStartUpdater);
         uiDistanceStart.valueProperty().addListener(geoStartUpdater);
         
         final GeographicEndFromLinear geoEndUpdater = new GeographicEndFromLinear();
         uiBorneEnd.getSelectionModel().selectedItemProperty().addListener(geoEndUpdater);
-        uiAvalEnd.selectedProperty().addListener(geoEndUpdater);
+        uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
         uiDistanceEnd.valueProperty().addListener(geoEndUpdater);
         
         // Compute back linear referencing when geographic changes
@@ -211,6 +221,9 @@ public class FXPositionablePane extends BorderPane {
         uiLongitudeEnd.valueProperty().addListener(linearEndUpdater);
         uiLatitudeEnd.valueProperty().addListener(linearEndUpdater);
         
+        // Update PR information
+        uiPRDebut.textProperty().bind(prDebut.asString());
+        uiPRFin.textProperty().bind(prFin.asString());
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
@@ -309,12 +322,14 @@ public class FXPositionablePane extends BorderPane {
                     distanceBorne = -distanceBorne;
                     aval = false;
                 }
+                float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
 
                 page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
                 page.append("<b>Début </b>");
                 page.append(computedLinear.getKey().getLibelle()).append(" à ");
                 page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en aval" : "en amont");
+                page.append(aval ? "en aval" : "en amont").append('.');
+                page.append(" Valeur du PR : ").append(computedPR).append('.');
                 page.append("<br/>");
 
                 if (!startPoint.equals(endPoint)) {
@@ -325,12 +340,14 @@ public class FXPositionablePane extends BorderPane {
                         distanceBorne = -distanceBorne;
                         aval = false;
                     }
+                    computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
                 }
 
                 page.append("<b>Fin&nbsp&nbsp </b>");
                 page.append(computedLinear.getKey().getLibelle()).append(" à ");
                 page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en aval" : "en amont");
+                page.append(aval ? "en aval" : "en amont").append('.');
+                page.append(" Valeur du PR : ").append(computedPR).append('.');
                 page.append("<br/><br/>");
             }
         }
@@ -367,7 +384,7 @@ public class FXPositionablePane extends BorderPane {
         ArgumentChecks.ensureNonNull("Geographic point", geoPoint);
         
         // Get troncon geometry
-        final Geometry linearSource = getSourceLinear(targetSR);
+        final LinearReferencing.SegmentInfo[] linearSource = getSourceLinear(targetSR);
         if (linearSource == null) throw new IllegalStateException("No computing can be done without a source linear object.");
         
         // Get list of bornes which can be possibly used.
@@ -393,17 +410,22 @@ public class FXPositionablePane extends BorderPane {
      * geometry of the currently edited {@link Positionable}.
      * @return The linear associated, or null if we cannot get it.
      */
-    private Geometry getSourceLinear(final SystemeReperage source) {
-        Geometry linearSource = (currentTroncon == null)? null : currentTroncon.getGeometry();
-        if (linearSource == null) {
-            if (source != null && source.getTronconId() != null) {
-                TronconDigue tmpTroncon = Injector.getSession().getTronconDigueRepository().get(source.getTronconId());
-                if (tmpTroncon != null) {
-                    linearSource = tmpTroncon.getGeometry();
+    private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
+        if (tronconSegments == null) {
+            Geometry linearSource = (currentTroncon == null) ? null : currentTroncon.getGeometry();
+            if (linearSource == null) {
+                if (source != null && source.getTronconId() != null) {
+                    TronconDigue tmpTroncon = Injector.getSession().getTronconDigueRepository().get(source.getTronconId());
+                    if (tmpTroncon != null) {
+                        linearSource = tmpTroncon.getGeometry();
+                    }
                 }
             }
+            if (linearSource != null) {
+                tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(linearSource));
+            }
         }
-        return linearSource;
+        return tronconSegments;
     }
 
     /**
@@ -439,7 +461,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
             double distStart = distanceStart.doubleValue();
-            if (!uiAvalStart.isSelected()) {
+            if (!uiAmontStart.isSelected()) {
                 distStart *= -1;
             }
 
@@ -461,7 +483,7 @@ public class FXPositionablePane extends BorderPane {
             //calcul à partir des bornes
             final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
             double distEnd = distanceEnd.doubleValue();
-            if (!uiAvalEnd.isSelected()) {
+            if (!uiAmontEnd.isSelected()) {
                 distEnd *= -1;
             }
 
@@ -471,6 +493,14 @@ public class FXPositionablePane extends BorderPane {
         }
     }
         
+    /**
+     * Try to get geographic / projected start position from this component fields.
+     * If geographic pane fields are not filled, we will try to compute them from
+     * linear referencing information, using {@link #computeGeoStartFromLinear() }.
+     * 
+     * @return Geographic / projected start point defined, or null. Returned point 
+     * CRS is always {@link #baseCrs}.
+     */
     private Point getOrCreateStartPoint() {
         Point ptStart = null;
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
@@ -500,7 +530,15 @@ public class FXPositionablePane extends BorderPane {
         
         return ptStart;
     }
-    
+            
+    /**
+     * Try to get geographic / projected end position from this component fields.
+     * If geographic pane fields are not filled, we will try to compute them from
+     * linear referencing information, using {@link #computeGeoEndFromLinear() }.
+     * 
+     * @return Geographic / projected end point defined, or null. Returned point 
+     * CRS is always {@link #baseCrs}.
+     */
     private Point getOrCreateEndPoint() {
         Point ptEnd = null;
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
@@ -745,17 +783,10 @@ public class FXPositionablePane extends BorderPane {
      * @param oldValue Previous positionable focused by the component.
      * @param newValue Current focused positionable.
      */
-    private void updateField(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-        if (oldValue != null) {
-            uiAvalStart.selectedProperty().unbindBidirectional(oldValue.borne_debut_avalProperty());
-            uiAvalEnd.selectedProperty().unbindBidirectional(oldValue.borne_fin_avalProperty());
-            uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
-            uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
-        }
-        
+    private void updateField(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {        
         if(newValue==null) return;
         
-        computingRunning.set(true);        
+        computingRunning.set(true);
         final Runnable updater = () -> {
             try {
                 //creation de la liste des systemes de reperage
@@ -765,8 +796,8 @@ public class FXPositionablePane extends BorderPane {
                     @Override
                     public void run() {
                         //Bindings
-                        uiAvalStart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
-                        uiAvalEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
+                        uiAmontStart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
+                        uiAmontEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
                         uiDistanceStart.valueProperty().bindBidirectional(newValue.borne_debut_distanceProperty());
                         uiDistanceEnd.valueProperty().bindBidirectional(newValue.borne_fin_distanceProperty());
                         
@@ -811,7 +842,7 @@ public class FXPositionablePane extends BorderPane {
                     }
                 });
             } finally {
-                computingRunning.set(false);  
+                computingRunning.set(false);
             }
         };
         
@@ -839,37 +870,16 @@ public class FXPositionablePane extends BorderPane {
         final BorneDigue borneStart = uiBorneStart.getSelectionModel().selectedItemProperty().get();
         final BorneDigue borneEnd = uiBorneEnd.getSelectionModel().selectedItemProperty().get();
 
-        // Get PRs from selected SR and bornes.
-        SystemeReperageBorne startPR = null, endPR = null;
-        if (selectedSR != null) {
-            if (borneStart != null) {
-                FilteredList<SystemeReperageBorne> filtered = selectedSR.systemeReperageBorne.filtered((SystemeReperageBorne pr)->pr.getId().equals(borneStart.getId()));
-                if (!filtered.isEmpty()) {
-                    startPR = filtered.get(0);
-                }
-            }
-            
-            if (borneEnd != null) {
-                FilteredList<SystemeReperageBorne> filtered = selectedSR.systemeReperageBorne.filtered((SystemeReperageBorne pr)->pr.getId().equals(borneEnd.getId()));
-                if (!filtered.isEmpty()) {
-                    endPR = filtered.get(0);
-                }
-            }
-            
-            // If we've got only one defined PR, we set the same value for both.
-            if (startPR == null && endPR != null) {
-                startPR = endPR;
-            } else if (endPR == null && startPR != null) {
-                endPR = startPR;
-            }
-        }
-        
+        // Get PRs from selected SR and bornes.        
         pos.setSystemeRepId((selectedSR != null) ? selectedSR.getId() : null);
-        pos.pR_debutProperty().setValue(startPR == null? null : startPR.getValeurPR());
-        pos.pR_finProperty().setValue(endPR == null? null : endPR.getValeurPR());
-
+        
         pos.setBorneDebutId((borneStart != null) ? borneStart.getId() : null);
         pos.setBorneFinId((borneEnd != null) ? borneEnd.getId() : null);
+        
+        // Do not bind them bidirectionally to avoid affecting cached objects if 
+        // we do not save changes.
+        pos.pR_debutProperty().setValue(prDebut.get());
+        pos.pR_finProperty().setValue(prFin.get());
         
         //maj de la geometrie du positionable
         final LineString structGeom = LinearReferencingUtilities.buildGeometry(
@@ -897,9 +907,12 @@ public class FXPositionablePane extends BorderPane {
                             }
                             final double x = startPoint.getX();
                             final double y = startPoint.getY();
+                            final SystemeReperage sr = uiSRs.getValue();
+                            float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
                                 uiLongitudeStart.valueProperty().set(x);
                                 uiLatitudeStart.valueProperty().set(y);
+                                prDebut.set(computedPR);
                             });
                         }
                         return null;
@@ -931,9 +944,12 @@ public class FXPositionablePane extends BorderPane {
                             }
                             final double x = endPoint.getX();
                             final double y = endPoint.getY();
+                            final SystemeReperage sr = uiSRs.getValue();
+                            float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
                                 uiLongitudeEnd.valueProperty().set(x);
                                 uiLatitudeEnd.valueProperty().set(y);
+                                prFin.set(computedPR);
                             });
                         }
                         return null;
@@ -962,10 +978,12 @@ public class FXPositionablePane extends BorderPane {
                         final SystemeReperage sr = uiSRs.getValue();
                         if (startPoint != null && sr != null) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, startPoint);
+                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
-                                uiAvalStart.setSelected(computedLinear.getValue() > 0);
+                                uiAmontStart.setSelected(computedLinear.getValue() > 0);
                                 uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneStart.setValue(computedLinear.getKey());
+                                prDebut.set(computedPR);
                             });
                         }
                         return null;
@@ -994,10 +1012,12 @@ public class FXPositionablePane extends BorderPane {
                         final SystemeReperage sr = uiSRs.getValue();
                         if (endPoint != null && sr != null) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, endPoint);
+                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
-                                uiAvalEnd.setSelected(computedLinear.getValue() > 0);
+                                uiAmontEnd.setSelected(computedLinear.getValue() > 0);
                                 uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneEnd.setValue(computedLinear.getKey());
+                                prFin.set(computedPR);
                             });
                         }
                         return null;
