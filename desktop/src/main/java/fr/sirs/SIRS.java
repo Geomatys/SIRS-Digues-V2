@@ -39,11 +39,13 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
-import org.ektorp.ViewQuery;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
@@ -383,6 +385,8 @@ public final class SIRS extends SirsCore {
     public static void initCombo(ComboBox comboBox, final ObservableList items, final Object current) {
         comboBox.setConverter(new SirsStringConverter());
         comboBox.setEditable(true);
+//        comboBox.setButtonCell(new ComboBoxListCell(ComboBoxListCell.Style.BUTTON));
+//        comboBox.setCellFactory((Object param) -> {return new ComboBoxListCell(ComboBoxListCell.Style.LIST);});
         
         comboBox.setItems(items);
         comboBox.getSelectionModel().select(current);
@@ -401,4 +405,31 @@ public final class SIRS extends SirsCore {
         d.setHeight(500);
         return d;
     }
+    
+//    private static class ComboBoxListCell extends ListCell {
+//        
+//        private final Style style;
+//        public enum Style {
+//            BUTTON,
+//            LIST;
+//        }
+//
+//        public ComboBoxListCell(Style style) {
+//            super();
+//            this.style = style;
+////            if(style==Style.BUTTON){
+////                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+////            }
+//        }
+//        
+//        @Override
+//        protected void updateItem(Object item, boolean empty) {
+//            super.updateItem(item, empty);
+//            //if(item instanceof Element){
+////            if(style==Style.BUTTON){
+////                setGraphic(new ImageView(SIRS.ICON_EYE));
+////            }
+//            //}
+//        }
+//    }
 }

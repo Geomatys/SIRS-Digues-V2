@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import javafx.beans.property.BooleanProperty;
@@ -29,7 +30,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
@@ -74,7 +77,8 @@ public class FXValidationPane extends BorderPane {
         usages = new TableView<>();
         usages.setEditable(false);
 
-        usages.getColumns().add(new StateColumn());
+        usages.getColumns().add(new DeleteColumn());
+        usages.getColumns().add(new ViewColumn());
         
         
 
@@ -262,9 +266,9 @@ public class FXValidationPane extends BorderPane {
         return bundles.get(type);
     }
 
-    public class StateButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {
+    public class ViewButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {
 
-        public StateButtonTableCell(Node graphic) {
+        public ViewButtonTableCell(Node graphic) {
             super(false, graphic, (Object t) -> true, new Function<Object, Object>() {
                 @Override
                 public Object apply(Object t) {
@@ -302,9 +306,9 @@ public class FXValidationPane extends BorderPane {
         }
     }
 
-    private class StateColumn extends TableColumn<ValiditySummary, Object> {
+    private class ViewColumn extends TableColumn<ValiditySummary, Object> {
 
-        public StateColumn() {
+        public ViewColumn() {
             super("Détail");
             setEditable(false);
             setSortable(false);
@@ -327,10 +331,77 @@ public class FXValidationPane extends BorderPane {
                 @Override
                 public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
 
-                    return new StateButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
+                    return new ViewButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
                 }
             });
         }
+    }
+    
+    
+
+    private class DeleteColumn extends TableColumn<ValiditySummary, Object>{
+        
+        public DeleteColumn() {
+            super("Suppression");            
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+            
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
+                @Override
+                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
+            });
+            
+
+            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
+
+                @Override
+                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
+                    return new ButtonTableCell<>(
+                        false, new ImageView(GeotkFX.ICON_DELETE) , (Object t) -> true, (Object t) -> {
+                            if (t != null && t instanceof ValiditySummary) {
+                                final Session session = Injector.getSession();
+                                final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
+                                final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
+
+                                // Si l'elementid est null, c'est que l'élément est le document lui-même
+                                if (((ValiditySummary) t).getElementId() == null) {
+                                    if(!docu.getValid()){
+                                        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
+                                        final Optional<ButtonType> res = confirm.showAndWait();
+                                        if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                                            repo.remove(docu);
+                                            usages.getItems().remove(t);
+                                        }
+                                    }else{
+                                        new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
+                                    }
+                                } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
+                                else {
+                                    final Element elt = docu.getChildById(((ValiditySummary) t).getElementId());
+                                    if(!elt.getValid()){
+                                        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
+                                        final Optional<ButtonType> res = confirm.showAndWait();
+                                        if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                                            docu.removeChild(elt);
+                                            repo.update(docu);
+                                            usages.getItems().remove(t);
+                                        }
+                                    } else{
+                                        new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
+                                    }
+                                }
+                            }
+                            return t;
+                        });
+                }
+            });
+        }  
     }
 
     private class ValidButtonTableCell extends TableCell<ValiditySummary, Object> {
@@ -422,10 +493,5 @@ public class FXValidationPane extends BorderPane {
                 }
             });
         }
-    }
-    
-    public static void main(String[] args) {
-        BooleanProperty jojo = new SimpleBooleanProperty();
-        System.out.println(jojo.get());
     }
 }

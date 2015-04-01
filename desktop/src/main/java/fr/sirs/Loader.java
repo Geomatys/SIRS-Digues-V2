@@ -46,6 +46,7 @@ import fr.sirs.core.h2.H2Helper;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -259,7 +260,13 @@ public class Loader extends Application {
             final Session session = Injector.getBean(Session.class);
             session.setFrame(frame);
             final Stage stage = new Stage();
-            stage.setTitle("SIRS-Digues V2");
+            String userInfo = "";
+            String login = session.getUtilisateur().getLogin();
+            String role = new SirsStringConverter().toString(session.getRole());
+            if(!"".equals(login) || !"".equals(role)){
+                userInfo += " - Connecté en tant que "+session.getUtilisateur().getLogin()+ " ("+role+")";
+            }
+            stage.setTitle("SIRS-Digues V2"+userInfo);
             stage.setScene(new Scene(frame));
             stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
             stage.setMaximized(true);

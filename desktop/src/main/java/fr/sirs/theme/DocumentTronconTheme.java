@@ -29,25 +29,25 @@ public class DocumentTronconTheme extends AbstractTronconTheme {
     
     private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
 
-    private static final ThemeGroup GROUP1 = new ThemeGroup("Conventions localisées", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP1 = new ThemeGroup("Conventions localisées", "Conventions localisées", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<Convention>(Convention.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP2 = new ThemeGroup("Articles localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP2 = new ThemeGroup("Articles localisés", "Articles localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ArticleJournal>(ArticleJournal.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP3 = new ThemeGroup("Marchés localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP3 = new ThemeGroup("Marchés localisés", "Marchés localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<Marche>(Marche.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP4 = new ThemeGroup("Rapports d'étude localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP4 = new ThemeGroup("Rapports d'étude localisés", "Rapports d'étude localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<RapportEtude>(RapportEtude.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP5 = new ThemeGroup("Documents à grande échelle localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP5 = new ThemeGroup("Documents à grande échelle localisés", "Documents à grande échelle localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<DocumentGrandeEchelle>(DocumentGrandeEchelle.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long localisés", "Profils en long localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilLong>(ProfilLong.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilTravers>(ProfilTravers.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     

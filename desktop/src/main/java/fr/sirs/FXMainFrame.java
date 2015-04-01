@@ -68,7 +68,7 @@ public class FXMainFrame extends BorderPane {
     
     private static final String BUNDLE_KEY_ADMINISTATION = "administration";
     private static final String BUNDLE_KEY_USERS = "users";
-    private static final String BUNDLE_KEY_VALIDATION = "designations";
+    private static final String BUNDLE_KEY_VALIDATION = "validation";
     private static final String BUNDLE_KEY_REFERENCES = "references";
     private static final String BUNDLE_KEY_DESIGNATIONS = "designations";
     private static final String BUNDLE_KEY_SEARCH = "search";
