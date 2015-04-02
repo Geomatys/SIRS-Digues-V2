@@ -44,10 +44,12 @@ public class DocumentTronconDocumentPojoTable extends ListenPropertyPojoTable {
         for (Element pojo : pojos) {
             final DocumentTroncon dt = (DocumentTroncon) pojo;
             final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-            final TronconDigue tronconDigue = tronconDigueRepository.get(dt.getDocumentId());
-            if(tronconDigue!=null && tronconDigue.getDocumentTroncon().contains(dt)){
-                tronconDigue.getDocumentTroncon().remove(dt);
-                tronconDigueRepository.update(tronconDigue);
+            if(dt.getDocumentId()!=null){
+                final TronconDigue tronconDigue = tronconDigueRepository.get(dt.getDocumentId());
+                if(tronconDigue!=null && tronconDigue.getDocumentTroncon().contains(dt)){
+                    tronconDigue.getDocumentTroncon().remove(dt);
+                    tronconDigueRepository.update(tronconDigue);
+                }
             }
             items.remove(pojo);
         }

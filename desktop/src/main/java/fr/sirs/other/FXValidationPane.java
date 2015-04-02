@@ -388,7 +388,7 @@ public class FXValidationPane extends BorderPane {
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
-                                            docu.removeChild(elt);
+                                            elt.getParent().removeChild(elt);
                                             repo.update(docu);
                                             usages.getItems().remove(t);
                                         }
