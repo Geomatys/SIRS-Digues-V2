@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javafx.stage.DirectoryChooser;
+import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
 
 /**
  *

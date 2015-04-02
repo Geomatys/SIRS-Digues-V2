@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
+import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
 
 /**
  *
