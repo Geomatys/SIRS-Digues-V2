@@ -45,8 +45,8 @@ public class FXOpenElementEditorAction extends FXMapAction {
     public FXOpenElementEditorAction(final FXMap map) {
         super(map, "informations sur l'élément", "Ouvre la fiche du tronçon/structure.", SIRS.ICON_INFO_BLACK_16);
 
-        final Session session = Injector.getSession();
-        this.disabledProperty().bind(session.geometryEditionProperty().not());
+//        final Session session = Injector.getSession();
+//        this.disabledProperty().bind(session.geometryEditionProperty().not());
 
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
