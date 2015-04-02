@@ -26,9 +26,13 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
+import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.digue.DiguesTab;
+import fr.sirs.query.ElementHit;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
@@ -53,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
@@ -234,7 +239,7 @@ public class Session extends SessionGen {
             ),
             2, //gap between legend elements
             null, //glyph size, we can let it to null for the legend to use the best size
-            new Font("Serial", Font.PLAIN, 10), //Font used for style rules
+            new Font("Serial", Font.PLAIN, 11), //Font used for style rules
             true, // show layer names
             new Font("Serial", Font.BOLD, 12), //Font used for layer names
             true // display only visible layers
@@ -542,6 +547,13 @@ public class Session extends SessionGen {
         }
     }
     
+    public void showEditionTab(final Object element) {
+        Optional<? extends Element> foundElement = getElement(element);
+        if (foundElement.isPresent()) {
+            getFrame().addTab(getOrCreateElementTab(foundElement.get()));
+        }
+    }
+    
     public FXFreeTab getOrCreateElementTab(final Element element) {
         if (element instanceof TronconDigue) {
             DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
@@ -599,14 +611,75 @@ public class Session extends SessionGen {
         return title;
     }
     
-    // TODO : Implement
-    public Element getCompleteElement(Element e) {
-        if (e.getCouchDBDocument() != null) {
-            return e;
-        } else {
-            String documentId = e.getDocumentId();
+    /**
+     * Take an element in input, and return the same, but with its {@link Element#parentProperty() }
+     * and {@link Element#getCouchDBDocument() } set.
+     * 
+     * @param e The element we want to get parent for.
+     * @return The same element, completed with its parent, Or a null value if we 
+     * cannot get full version of thee element.
+     */
+    public Optional<? extends Element> getCompleteElement(Element e) {
+        if (e != null) {
+            if (e.getCouchDBDocument() != null) {
+                return Optional.of(e);
+            } else {
+                String documentId = e.getDocumentId();
+                if (documentId != null && !documentId.isEmpty()) {
+                    PreviewLabel label = previewLabelRepository.get(documentId);
+                    AbstractSIRSRepository targetRepo = getRepositoryForType(label.getType());
+                    if (targetRepo != null) {
+                        Identifiable parent = targetRepo.get(documentId);
+                        if (parent instanceof Element) {
+                            return Optional.ofNullable(((Element) parent).getChildById(e.getId()));
+                        }
+                    }
+                }
+            }
         }
-        throw new IllegalArgumentException("Complete element cannot be rebuilt for : "+e);
+        return Optional.empty();
+    }
+    
+    /**
+     * Analyse input object to find a matching {@link Element} registered in database.
+     * @param toGetElementFor The object which represents the Element to retrieve.
+     * Can be a {@link PreviewLabel}, {@link ValiditySummary}, or {@link  ElementHit}
+     * @return An optional which contains the found value, if any.
+     */
+    public Optional<? extends Element> getElement(final Object toGetElementFor) {
+        if (toGetElementFor instanceof Element) {
+            return getCompleteElement((Element)toGetElementFor);
+            
+        } else if (toGetElementFor instanceof PreviewLabel) {
+            PreviewLabel label = (PreviewLabel)toGetElementFor;
+            AbstractSIRSRepository repository = getRepositoryForType(label.getType());
+            Identifiable tmp = repository.get(label.getId());
+            if (tmp instanceof Element) {
+                return Optional.of((Element)tmp);
+            }
+            
+        } else if (toGetElementFor instanceof ValiditySummary) {
+            ValiditySummary summary = (ValiditySummary) toGetElementFor;
+            AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
+            Identifiable tmp = repository.get(summary.getDocId());
+            if (tmp instanceof Element) {
+                if (summary.getElementId() != null) {
+                    return Optional.of(((Element)tmp).getChildById(summary.getElementId()));
+                } else {
+                    return Optional.of((Element)tmp);
+                }
+            }
+            
+        } else if (toGetElementFor instanceof ElementHit) {
+            ElementHit hit = (ElementHit) toGetElementFor;
+            AbstractSIRSRepository repository = getRepositoryForType(hit.geteElementClassName());
+            Identifiable tmp = repository.get(hit.getDocumentId());
+            if (tmp instanceof Element) {
+                return Optional.of((Element)tmp);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     public void focusOnMap(Element target) {
@@ -618,5 +691,19 @@ public class Session extends SessionGen {
     
     public DefaultLegendTemplate getLegendTemplate() {
         return legendTemplate;
+    }
+    
+    public String getElementType(final Object o) {
+        if (o instanceof Element) {
+            return o.getClass().getCanonicalName();
+        } else if (o instanceof PreviewLabel) {
+            return ((PreviewLabel)o).getType();
+        } else if (o instanceof ValiditySummary) {
+            return ((ValiditySummary)o).getElementClass();
+        } else if (o instanceof ElementHit) {
+            return ((ElementHit)o).geteElementClassName();
+        } else {
+            return null;
+        }
     }
 }

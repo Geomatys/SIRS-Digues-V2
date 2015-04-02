@@ -167,21 +167,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.40-SNAPSHOT</version>
-        </plugin>
-        <plugin>
-            <groupId>external.atlassian.jgitflow</groupId>
-            <artifactId>jgitflow-maven-plugin</artifactId>
-            <version>1.0-m4.3</version>
-            <configuration>
-                <flowInitContext>
-                    <masterBranchName>master</masterBranchName>
-                    <developBranchName>develop</developBranchName>
-                    <featureBranchPrefix>feature-</featureBranchPrefix>
-                    <releaseBranchPrefix>release-</releaseBranchPrefix>
-                    <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
-                </flowInitContext>
-            </configuration>
+          <version>0.5.41-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>

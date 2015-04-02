@@ -71,6 +71,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_INFO_BLACK_16 = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_INFO, 16, Color.BLACK),null);
     public static final Image ICON_EYE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EYE, 16, Color.BLACK),null);
     public static final Image ICON_EDIT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE_O, 16, Color.BLACK),null);
+    public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
     
     public static final String COLOR_INVALID_ICON = "#aa0000";
     public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode(COLOR_INVALID_ICON)),null);
@@ -376,7 +377,7 @@ public final class SIRS extends SirsCore {
         return content;
     }
     
-        /**
+    /**
      * initialize ComboBox items using input list. We also activate completion.
      * @param comboBox The combo box to set value on.
      * @param items The items we want into the ComboBox.
