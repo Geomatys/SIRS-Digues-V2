@@ -189,21 +189,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
             super(false, graphic, (Object t) -> true, new Function<Object, Object>() {
                 @Override
                 public Object apply(Object t) {
-
-                    if (t != null && t instanceof ValiditySummary) {
-                        final Session session = Injector.getSession();
-                        final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
-                        final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
-
-                        // Si l'elementid est null, c'est que l'élément est le document lui-même
-                        if (((ValiditySummary) t).getElementId() == null) {
-                            session.getFrame().addTab(session.getOrCreateElementTab(docu));
-                        } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
-                        else {
-                            final Element elt = docu.getChildById(((ValiditySummary) t).getElementId());
-                            session.getFrame().addTab(session.getOrCreateElementTab(elt));
-                        }
-                    }
+                    Injector.getSession().showEditionTab(t);
                     return t;
                 }
             });

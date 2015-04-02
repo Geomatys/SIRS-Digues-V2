@@ -901,8 +901,7 @@ public class CorePlugin extends Plugin {
             setText(Injector.getSession().generateElementTitle(candidate));
 
             setOnAction((ActionEvent event) -> {
-                Injector.getSession().getFrame().addTab(
-                        Injector.getSession().getOrCreateElementTab(candidate));
+                Injector.getSession().showEditionTab(candidate);
             });
         }
     }

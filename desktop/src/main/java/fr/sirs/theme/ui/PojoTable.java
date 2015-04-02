@@ -716,23 +716,13 @@ public class PojoTable extends BorderPane {
         return result;
     }
         
-    public static void editElement(Object pojo){
-        if (pojo instanceof ElementHit) {
-            final ElementHit hit = (ElementHit) pojo;
-            try {
-                pojo = (Element) Injector.getSession().getConnector().get(hit.geteElementClass(), hit.getDocumentId());
-            } catch (ClassNotFoundException ex) {
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            }
-        }
-        
+    public static void editElement(Object pojo) {
         try {
-            Injector.getSession().getFrame().addTab(Injector.getSession().getOrCreateElementTab((Element)pojo));
+            Injector.getSession().showEditionTab(pojo);
         } catch (Exception ex) {
             Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
             d.showAndWait();
             throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
-            
         }
     }
     

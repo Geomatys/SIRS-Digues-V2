@@ -8,13 +8,11 @@ import fr.sirs.Injector;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
-import fr.sirs.core.Repository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.map.FXMapTab;
-import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
@@ -26,10 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  *

@@ -153,7 +153,7 @@ public class FXMapPane extends BorderPane {
         uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
         uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn(){
             @Override
-            protected FXPropertiesPane createEditor(MapItem candidate) {
+            protected FXPropertiesPane createEditor(MapLayer candidate) {
                 return new FXPropertiesPane(
                     candidate,
                     new FXLayerStylesPane(
@@ -173,18 +173,6 @@ public class FXMapPane extends BorderPane {
         uiTree.getMenuItems().add(new OpacityItem());
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new EmptySelectionItem());
-        uiTree.getMenuItems().add(new LayerPropertiesItem(uiMap1,
-            new FXLayerStructure(),
-            new FXFeatureTable(),
-            new FXLayerStylesPane(
-                    new FXStyleSimplePane(),
-                    new FXStyleColorMapPane(),
-                    new FXStyleClassifSinglePane(),
-                    new FXStyleClassifRangePane(),
-                    new FXStyleAdvancedPane(),
-                    new FXStyleXMLPane()
-            )
-        ));
         uiTree.getMenuItems().add(new SeparatorMenuItem());
         uiTree.getMenuItems().add(new ZoomToItem(uiMap1));
         uiTree.getMenuItems().add(new ExportMenu());

@@ -158,7 +158,6 @@ public class FXOpenElementEditorAction extends FXMapAction {
     }
 
     private static void displayElement(Element e) {
-        final Session session = Injector.getSession();
-        session.getFrame().addTab(session.getOrCreateElementTab(e));
+        Injector.getSession().showEditionTab(e);
     }
 }
