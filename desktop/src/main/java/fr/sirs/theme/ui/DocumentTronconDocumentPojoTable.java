@@ -2,6 +2,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
@@ -13,19 +14,19 @@ import javafx.scene.control.TableColumn;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentTronconDocumentPojoTable extends ListenPropertyPojoTable {
+public class DocumentTronconDocumentPojoTable<T extends AbstractDocumentTroncon> extends ListenPropertyPojoTable {
     
-    private final Function<DocumentTroncon, Void> addAction;
+    private final Function<T, Void> addAction;
 
-    public DocumentTronconDocumentPojoTable(Class pojoClass, String title, 
-            final Function<DocumentTroncon, Void> addAction) {
+    public DocumentTronconDocumentPojoTable(Class<T> pojoClass, String title, 
+            final Function<T, Void> addAction) {
         super(pojoClass, title);
         this.addAction = addAction;
     }
     
     @Override
     protected Object createPojo() {
-        final DocumentTroncon documentTroncon = (DocumentTroncon) super.createPojo();
+        final T documentTroncon = (T) super.createPojo();
         addAction.apply(documentTroncon);
         return documentTroncon;
     }

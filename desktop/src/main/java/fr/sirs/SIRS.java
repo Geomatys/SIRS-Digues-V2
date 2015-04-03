@@ -15,6 +15,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
@@ -330,7 +331,7 @@ public final class SIRS extends SirsCore {
         try {
             final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
             final Class clazz = Class.forName(previewLabel.getType());
-            if(clazz==DocumentTronconProfilTravers.class){
+            if(clazz==ProfilTravers.class){
                 return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
             } else {
                 return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
@@ -351,20 +352,32 @@ public final class SIRS extends SirsCore {
      * @param documentId
      * @return 
      */
-    public static ObservableList<DocumentTroncon> getTrueDocumentTroncons(final String documentId){
-        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-        final ObservableList<DocumentTroncon> falseDocumentTroncons = FXCollections.observableArrayList(tronconDigueRepository.getDocumentTronconsByDocumentId(documentId));
-        
-        final ObservableList<DocumentTroncon> trueDocumentTroncons = FXCollections.observableArrayList();
-        
-        for (final DocumentTroncon falseDocumentTroncon : falseDocumentTroncons){
-            final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
-            final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
-            final DocumentTroncon trueDocumentTroncon = (DocumentTroncon) tronconDigue.getChildById(falseDocumentTroncon.getId());
-            trueDocumentTroncons.add(trueDocumentTroncon);
+    public static ObservableList<? extends AbstractDocumentTroncon> getTrueDocumentTroncons(final String documentId){
+        try {
+            final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
+            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
+            final Class clazz = Class.forName(previewLabel.getType());
+            final ObservableList<AbstractDocumentTroncon> falseDocumentTroncons;
+            if(clazz==ProfilTravers.class){
+                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
+            } else {
+                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+            }
+
+            final ObservableList<AbstractDocumentTroncon> trueDocumentTroncons = FXCollections.observableArrayList();
+
+            for (final AbstractDocumentTroncon falseDocumentTroncon : falseDocumentTroncons){
+                final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
+                final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
+                final AbstractDocumentTroncon trueDocumentTroncon = (AbstractDocumentTroncon) tronconDigue.getChildById(falseDocumentTroncon.getId());
+                trueDocumentTroncons.add(trueDocumentTroncon);
+            }
+
+            return trueDocumentTroncons;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return trueDocumentTroncons;
+        return null;
     }
     
     /**
