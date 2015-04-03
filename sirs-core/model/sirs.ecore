@@ -23,14 +23,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//SystemeReperage"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="documentTroncon" upperBound="-1"
-        eType="#//DocumentTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documentTroncon" upperBound="-1"
+        eType="#//AbstractDocumentTroncon" containment="true" eOpposite="#//AbstractDocumentTroncon/troncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
@@ -45,7 +45,7 @@
         eType="#//OrganismeStructure" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactStructure" upperBound="-1"
         eType="#//ContactStructure" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photo" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
@@ -92,17 +92,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DocumentTroncon" eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="taille" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentTroncon" eSuperTypes="#//AbstractDocumentTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDocumentId" eType="#//RefTypeDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
-        eOpposite="#//Troncon_Digue/photo"/>
+        eOpposite="#//Troncon_Digue/photos"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -550,7 +547,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -563,7 +560,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="contacts" upperBound="-1"
         eType="#//ContactConvention" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -580,7 +577,7 @@
         eType="#//MaitreOeuvreMarche" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitre_ouvrage" eType="#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -593,7 +590,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/rapportEtude"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1097,7 +1094,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1242,7 +1239,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//SIRSDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//SIRSDefaultDocument">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1256,7 +1253,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="leveePoints" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeve" upperBound="-1"
         eType="#//PointLeve" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionProfilLongSurDigueId"
         eType="#//RefPositionProfilLongSurDigue"/>
@@ -1438,5 +1435,23 @@
     <eOperations name="setChemin">
       <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentTronconProfilTravers" eSuperTypes="#//AbstractDocumentTroncon">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//ProfilTravers"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
+        eType="#//Photo" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSDefaultDocument" abstract="true"
+      interface="true" eSuperTypes="#//SIRSDocument"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDocumentTroncon" abstract="true"
+      eSuperTypes="#//Positionable">
+    <eOperations name="getSirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    <eOperations name="setSirsdocument">
+      <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
+        eOpposite="#//Troncon_Digue/documentTroncon"/>
   </eClassifiers>
 </ecore:EPackage>

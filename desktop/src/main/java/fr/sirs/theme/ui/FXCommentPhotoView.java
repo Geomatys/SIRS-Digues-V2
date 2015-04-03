@@ -69,9 +69,9 @@ public class FXCommentPhotoView extends SplitPane {
         }
         final Objet obj = (Objet) newValue;
         uiCommentArea.getEngine().loadContent(obj.getCommentaire());
-        if (obj.photo != null && obj.photo.size() > 1 ) {
+        if (obj.photos != null && obj.photos.size() > 1 ) {
             uiPhotoScroll.setVisible(true);
-            uiPhotoScroll.setMax(obj.photo.size()-1);
+            uiPhotoScroll.setMax(obj.photos.size()-1);
         } else {
             uiPhotoScroll.setVisible(false);
         }
@@ -97,7 +97,7 @@ public class FXCommentPhotoView extends SplitPane {
             return;
         }
 
-        final ObservableList<Photo> photos = ((Objet) valueProperty.get()).photo;
+        final ObservableList<Photo> photos = ((Objet) valueProperty.get()).photos;
         final int imageIndex = uiPhotoScroll.valueProperty().intValue();
         if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
             uiPhotoView.setImage(null);

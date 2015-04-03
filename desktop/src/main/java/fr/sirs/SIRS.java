@@ -6,12 +6,15 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.DocumentTronconProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
@@ -32,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -76,6 +81,12 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode(COLOR_VALID_ICON)),null);
     
     public static final String CSS_PATH = "/fr/sirs/theme.css";
+    
+    // Champs spéciaux des classes utilisés dans le code
+    public static final String DATE_DEBUT_FIELD = "date_debut";
+    public static final String DATE_FIN_FIELD = "date_fin";
+    
+    public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";
@@ -283,17 +294,17 @@ public final class SIRS extends SirsCore {
      * @param objetIds Les identifiants des DocumentTroncon à retrouver.
      * @return Une liste de DocumentTroncon. Elle peut être vide, mais jamais nulle.
      */
-    public static ObservableList<DocumentTroncon> getDocumentTroncons(final Set<String> objetIds) {
-        ObservableList<DocumentTroncon> result = FXCollections.observableArrayList();
+    public static ObservableList<AbstractDocumentTroncon> getDocumentTroncons(final Set<String> objetIds, final Class<? extends AbstractDocumentTroncon> documentTronconClass) {
+        ObservableList<AbstractDocumentTroncon> result = FXCollections.observableArrayList();
         if (objetIds == null 
                 || objetIds.isEmpty()) {
             return result;
         }
         
-        List<DocumentTroncon> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentTroncons();
+        List<? extends AbstractDocumentTroncon> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentsFromView(documentTronconClass.getSimpleName());
         if (allFromView != null) {
-            final Iterator<DocumentTroncon> it = allFromView.iterator();
-            DocumentTroncon o;
+            final Iterator<? extends AbstractDocumentTroncon> it = allFromView.iterator();
+            AbstractDocumentTroncon o;
             while (objetIds.size() > 0 && it.hasNext()) {
                 o = it.next();
                 if (objetIds.remove(o.getId())) {
@@ -315,8 +326,19 @@ public final class SIRS extends SirsCore {
      * @param documentId
      * @return 
      */
-    public static ObservableList<DocumentTroncon> getDocumentTroncons(final String documentId){
-        return  FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+    public static ObservableList<? extends AbstractDocumentTroncon> getDocumentTroncons(final String documentId){
+        try {
+            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
+            final Class clazz = Class.forName(previewLabel.getType());
+            if(clazz==DocumentTronconProfilTravers.class){
+                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
+            } else {
+                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
     /**

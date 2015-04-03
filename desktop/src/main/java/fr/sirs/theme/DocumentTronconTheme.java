@@ -4,10 +4,12 @@ package fr.sirs.theme;
 
 import fr.sirs.Injector;
 import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.DocumentTronconProfilTravers;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilLong;
@@ -47,7 +49,7 @@ public class DocumentTronconTheme extends AbstractTronconTheme {
     private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long localisés", "Profils en long localisés", DocumentTroncon.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilLong>(ProfilLong.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", DocumentTroncon.class, 
+    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", DocumentTronconProfilTravers.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilTravers>(ProfilTravers.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     
@@ -74,7 +76,7 @@ public class DocumentTronconTheme extends AbstractTronconTheme {
 
         @Override
         public boolean test(Object t) {
-            final String documentId = ((DocumentTroncon) t).getSirsdocument();
+            final String documentId = ((AbstractDocumentTroncon) t).getSirsdocument();
             if(documentId!=null){
                 if(documentClass.getName().equals(cache.get(documentId))){
                     return true;

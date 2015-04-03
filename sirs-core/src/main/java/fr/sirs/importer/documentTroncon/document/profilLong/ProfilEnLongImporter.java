@@ -142,7 +142,7 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             }
             
             if(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
-                profil.setLeveePoints(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
+                profil.setPointsLeve(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             }
             
             if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){

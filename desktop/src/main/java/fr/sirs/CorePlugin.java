@@ -3,6 +3,8 @@
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
+import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
+import static fr.sirs.SIRS.DATE_FIN_FIELD;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.geotoolkit.data.bean.BeanStore;
@@ -30,6 +32,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.DocumentTronconProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -233,6 +236,7 @@ public class CorePlugin extends Plugin {
             
             // Documents positionnés
             SUPPLIERS.put(DocumentTroncon.class, new StructBeanSupplier(DocumentTroncon.class, () -> repository.getAllDocumentTroncons()));
+            SUPPLIERS.put(DocumentTronconProfilTravers.class, new StructBeanSupplier(DocumentTronconProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
 
             // Emprises communales
             SUPPLIERS.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
@@ -254,18 +258,26 @@ public class CorePlugin extends Plugin {
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            final List<Class<? extends SIRSDocument>> listeDesTypesDeDocs = new ArrayList<>();
-            listeDesTypesDeDocs.add(Convention.class);
-            listeDesTypesDeDocs.add(ArticleJournal.class);
-            listeDesTypesDeDocs.add(Marche.class);
-            listeDesTypesDeDocs.add(RapportEtude.class);
-            listeDesTypesDeDocs.add(DocumentGrandeEchelle.class);
-            listeDesTypesDeDocs.add(ProfilLong.class);
-            listeDesTypesDeDocs.add(ProfilTravers.class);
-            for(final Class elementClass : listeDesTypesDeDocs){
+            final Map<String, List<Class<? extends SIRSDocument>>> mapDesTypesDeDocs = new HashMap<>();
+            final List<Class<? extends SIRSDocument>> documentTronconsList = new ArrayList<>();
+            documentTronconsList.add(Convention.class);
+            documentTronconsList.add(ArticleJournal.class);
+            documentTronconsList.add(Marche.class);
+            documentTronconsList.add(RapportEtude.class);
+            documentTronconsList.add(DocumentGrandeEchelle.class);
+            documentTronconsList.add(ProfilLong.class);
+            for(final Class elementClass : documentTronconsList){
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
+            final List<Class<? extends SIRSDocument>> documentTronconProfilTraversList = new ArrayList<>();
+            documentTronconProfilTraversList.add(ProfilTravers.class);
+            for(final Class elementClass : documentTronconProfilTraversList){
+                final LabelMapper mapper = new LabelMapper(elementClass);
+                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+            }
+            mapDesTypesDeDocs.put(DocumentTroncon.class.getSimpleName(), documentTronconsList);
+            mapDesTypesDeDocs.put(DocumentTronconProfilTravers.class.getSimpleName(), documentTronconProfilTraversList);
             
             final Color[] colors = new Color[]{
                 Color.BLACK,
@@ -372,10 +384,10 @@ public class CorePlugin extends Plugin {
                         
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
-                    getSupplier(DocumentTroncon.class));
+                    getSupplier(DocumentTroncon.class), getSupplier(DocumentTronconProfilTravers.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
-            documentsLayer.items().addAll( buildLayers(documentsStore, listeDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
+            documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(documentsLayer);
             
@@ -488,11 +500,11 @@ public class CorePlugin extends Plugin {
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
-            if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
+            if(col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD)!=null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD)!=null){
                 final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(), 
-                        GO2Utilities.FILTER_FACTORY.property("date_debut"), 
-                        GO2Utilities.FILTER_FACTORY.property("date_fin")
+                        GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD), 
+                        GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
                 );
                 fml.getExtraDimensions().add(datefilter);
             }
@@ -518,11 +530,11 @@ public class CorePlugin extends Plugin {
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
-            if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
+            if(col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD)!=null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD)!=null){
                 final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(), 
-                        GO2Utilities.FILTER_FACTORY.property("date_debut"), 
-                        GO2Utilities.FILTER_FACTORY.property("date_fin")
+                        GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD), 
+                        GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
                 );
                 fml.getExtraDimensions().add(datefilter);
             }
@@ -551,35 +563,37 @@ public class CorePlugin extends Plugin {
      * @return
      * @throws DataStoreException 
      */
-    private List<MapLayer> buildLayers(BeanStore store, List<Class<? extends SIRSDocument>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    private List<MapLayer> buildLayers(BeanStore store, Map<String, List<Class<? extends SIRSDocument>>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
         for(Name name : store.getNames()){
-            for(final Class documentClass : documentClasses){
+            for(final Class documentClass : documentClasses.get(name.getLocalPart())){
                 final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
-                final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
-                final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
-                final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+                if(col.getFeatureType()!=null){
+                    final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
+                    final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+                    final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
 
-                if(col.getFeatureType().getDescriptor("date_debut")!=null && col.getFeatureType().getDescriptor("date_fin")!=null){
-                    final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
-                            CommonCRS.Temporal.JAVA.crs(), 
-                            GO2Utilities.FILTER_FACTORY.property("date_debut"), 
-                            GO2Utilities.FILTER_FACTORY.property("date_fin")
-                    );
-                    fml.getExtraDimensions().add(datefilter);
+                    if(col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD)!=null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD)!=null){
+                        final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                                CommonCRS.Temporal.JAVA.crs(), 
+                                GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD), 
+                                GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
+                        );
+                        fml.getExtraDimensions().add(datefilter);
+                    }
+                    fml.setVisible(visible);
+                    fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+
+                    final String str = nameMap.get(documentClass.getSimpleName());
+                    fml.setName(str!=null ? str : documentClass.getSimpleName());
+
+                    if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
+
+                    layers.add(fml);
+                    i++;
                 }
-                fml.setVisible(visible);
-                fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-
-                final String str = nameMap.get(documentClass.getSimpleName());
-                fml.setName(str!=null ? str : documentClass.getSimpleName());
-
-                if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
-
-                layers.add(fml);
-                i++;
             }
         }
         return layers;

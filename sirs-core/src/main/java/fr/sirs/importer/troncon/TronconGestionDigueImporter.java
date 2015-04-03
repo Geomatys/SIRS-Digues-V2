@@ -11,6 +11,7 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.ContactTroncon;
@@ -183,7 +184,7 @@ implements DocumentsUpdatable {
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
         final Map<Integer, List<CommuneTroncon>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
-        final Map<Integer, List<DocumentTroncon>> documents = documentImporter.getDocumentsByTronconId();
+        final Map<Integer, List<AbstractDocumentTroncon>> documents = documentImporter.getDocumentsByTronconId();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -309,7 +310,7 @@ implements DocumentsUpdatable {
                 try{
                     final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
                     str.setGeometry(structGeom);
-                    for(final Photo photo : str.getPhoto()){
+                    for(final Photo photo : str.getPhotos()){
                         try{
                             final LineString photoGeom = LinearReferencingUtilities.buildGeometry(structGeom, photo, borneDigueRepository);
                             photo.setGeometry(photoGeom);
@@ -321,7 +322,7 @@ implements DocumentsUpdatable {
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
-            for(final DocumentTroncon doc : troncon.getDocumentTroncon()){
+            for(final AbstractDocumentTroncon doc : troncon.getDocumentTroncon()){
                 try{
                     final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
                     doc.setGeometry(docGeom);

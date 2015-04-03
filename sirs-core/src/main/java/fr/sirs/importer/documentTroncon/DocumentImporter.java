@@ -3,6 +3,7 @@ package fr.sirs.importer.documentTroncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
@@ -35,7 +36,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericDocumentImporter implements DocumentsUpdatable {
+public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTroncon> implements DocumentsUpdatable {
     
     private final DocumentManager documentManager;
     private final List<GenericDocumentRelatedImporter> documentRelatedImporters;
@@ -245,19 +246,29 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
         while(it.hasNext()){
             final Row row = it.next();
             final Integer rowId = row.getInt(Columns.ID_DOC.toString());
-            final DocumentTroncon docTroncon = documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
-            
+            final AbstractDocumentTroncon docTroncon = importRow(row);
+            //documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+                    documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
+
+                    // Set the list ByTronconId
+                    List<AbstractDocumentTroncon> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                    if (listByTronconId == null) {
+                        listByTronconId = new ArrayList<>();
+                        documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    }
+                    listByTronconId.add(docTroncon);
             // Compute only if docTroncon is one proper value of this table (does not exist into one SYS_EVT table)
-            if(properDocumentTroncons.get(rowId)!=null){
-                importRow(row, docTroncon);
-            }
+//            if(properDocumentTroncons.get(rowId)!=null){
+//                importRow(row, docTroncon);
+//            }
         }
     }
     
     
 
     @Override
-    void importRow(Row row, DocumentTroncon docTroncon) throws IOException, AccessDbImporterException {
+    AbstractDocumentTroncon importRow(Row row) throws IOException, AccessDbImporterException {
         
         final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
         final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();
@@ -265,36 +276,38 @@ public class DocumentImporter extends GenericDocumentImporter implements Documen
         final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
 
             if (classeDocument != null) {
-                docTroncon.setTypeDocumentId(classeDocument.getCanonicalName());
+//                docTroncon.setTypeDocumentId(classeDocument.getCanonicalName());
                 
                 if (classeDocument.equals(Convention.class)) {
-                    sysEvtConventionImporter.importRow(row, docTroncon);
+                    return sysEvtConventionImporter.importRow(row);
                 } 
                 else if (classeDocument.equals(DocumentGrandeEchelle.class)){
-                    sysEvtDocumentAGrandeEchelleImporter.importRow(row, docTroncon);
+                    return sysEvtDocumentAGrandeEchelleImporter.importRow(row);
                 }
                 else if(classeDocument.equals(ArticleJournal.class)){
-                    sysEvtJournalImporter.importRow(row, docTroncon);
+                    return sysEvtJournalImporter.importRow(row);
                 }
                 else if(classeDocument.equals(Marche.class)){
-                    sysEvtMarcheImporter.importRow(row, docTroncon);
+                    return sysEvtMarcheImporter.importRow(row);
                 }
                 else if(classeDocument.equals(ProfilLong.class)){
-                    sysEvtProfilLongImporter.importRow(row, docTroncon);
+                    return sysEvtProfilLongImporter.importRow(row);
                 }
                 else if(classeDocument.equals(ProfilTravers.class)){
-                    sysEvtProfilTraversImporter.importRow(row, docTroncon);
+                    return sysEvtProfilTraversImporter.importRow(row);
                 }
                 else if(classeDocument.equals(RapportEtude.class)){
-                    sysEvtRapportEtudeImporter.importRow(row, docTroncon);
+                    return sysEvtRapportEtudeImporter.importRow(row);
                 }
                 else {
                     SirsCore.LOGGER.log(Level.FINE, "Type de document non pris en charge : ID = " + row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
+                    return null;
                 }
             } else {
                 SirsCore.LOGGER.log(Level.FINE, "Type de document inconnu !");
+                    return null;
             }
                 
-            docTroncon.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
+//            docTroncon.setTypeDocumentId(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())).getId());
     }
 }

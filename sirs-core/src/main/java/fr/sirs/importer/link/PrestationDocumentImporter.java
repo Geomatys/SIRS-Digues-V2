@@ -2,6 +2,7 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.Prestation;
@@ -69,7 +70,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
     protected void compute() throws IOException, AccessDbImporterException {
         
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
-        final Map<Integer, DocumentTroncon> documents = documentImporter.getDocuments();
+        final Map<Integer, AbstractDocumentTroncon> documents = documentImporter.getDocuments();
         final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
         final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         
@@ -78,7 +79,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             final Row row = it.next();
             
             final Prestation prestation = prestations.get(row.getInt(Columns.ID_PRESTATION.toString()));
-            final DocumentTroncon document = documents.get(row.getInt(Columns.ID_DOC.toString()));
+            final DocumentTroncon document = (DocumentTroncon)documents.get(row.getInt(Columns.ID_DOC.toString()));
             
             if(prestation!=null && document!=null){
                 if(document.getSirsdocument()!=null){

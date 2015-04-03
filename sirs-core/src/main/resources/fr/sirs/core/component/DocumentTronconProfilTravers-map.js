@@ -1,14 +1,14 @@
 function(doc) {
    if(doc['@class']=='fr.sirs.core.model.TronconDigue') {
-     for(d in doc.documentTroncon){
-        if(doc.documentTroncon[i]['@class']=='fr.sirs.core.model.DocumentTroncon'){
+     for(i in doc.documentTroncon){
+        if(doc.documentTroncon[i]['@class']=='fr.sirs.core.model.DocumentTronconProfilTravers'){
             var newMap = {};
-            var myMap = doc.documentTroncon[d];
+            var myMap = doc.documentTroncon[i];
             for (var i in myMap)
              newMap[i] = myMap[i];
              newMap["documentId"] = doc._id;
-             emit(newMap["sirsdocument"], newMap) 
-         }
+             emit(doc._id, newMap)    
+        }
      }
    }
 }

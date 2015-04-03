@@ -9,12 +9,13 @@ import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
-import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.DocumentTronconProfilTravers;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -50,7 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.DocumentNotFoundException;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
@@ -88,43 +88,46 @@ import org.ektorp.DocumentNotFoundException;
         @View(name = "byDigueId", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
     
-    private final HashMap<String, Callable<List<? extends Objet>>> viewMap = new HashMap();
+    private final HashMap<String, Callable<List<? extends Objet>>> viewMapObjets = new HashMap();
+    private final HashMap<String, Callable<List<? extends AbstractDocumentTroncon>>> viewMapDocuments = new HashMap();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
         super(TronconDigue.class, db);
         initStandardDesignDocument();
-        viewMap.put(CRETE, this::getAllCretes);
-        viewMap.put(DESORDRE, this::getAllDesordres);
-        viewMap.put(DEVERSOIR, this::getAllDeversoirs);
-        viewMap.put(EPI, this::getAllEpis);
-        viewMap.put(FONDATION, this::getAllFondations);
-        viewMap.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
-        viewMap.put(LAISSECRUE, this::getAllLaisseCrues);
-        viewMap.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
-        viewMap.put(LIGNEEAU, this::getAllLigneEaus);
-        viewMap.put(MONTEEEAUX, this::getAllMonteeEaux);
-        viewMap.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
-        viewMap.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
-        viewMap.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
-        viewMap.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
-        viewMap.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
-        viewMap.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
-        viewMap.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
-        viewMap.put(PIEDDIGUE, this::getAllPiedDigues);
-        viewMap.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
-        viewMap.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
-        viewMap.put(PRESTATION, this::getAllPrestations);
-        viewMap.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
-        viewMap.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
-        viewMap.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
-        viewMap.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
-        viewMap.put(SOMMETRISBERME, this::getAllSommetRisbermes);
-        viewMap.put(STATIONPOMPAGE, this::getAllStationPompages);
-        viewMap.put(TALUSDIGUE, this::getAllTalusDigues);
-        viewMap.put(TALUSRISBERME, this::getAllTalusRisbermes);
-        viewMap.put(VOIEACCES, this::getAllVoieAccess);
-        viewMap.put(VOIEDIGUE, this::getAllVoieDigues);
+        viewMapObjets.put(CRETE, this::getAllCretes);
+        viewMapObjets.put(DESORDRE, this::getAllDesordres);
+        viewMapObjets.put(DEVERSOIR, this::getAllDeversoirs);
+        viewMapObjets.put(EPI, this::getAllEpis);
+        viewMapObjets.put(FONDATION, this::getAllFondations);
+        viewMapObjets.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
+        viewMapObjets.put(LAISSECRUE, this::getAllLaisseCrues);
+        viewMapObjets.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
+        viewMapObjets.put(LIGNEEAU, this::getAllLigneEaus);
+        viewMapObjets.put(MONTEEEAUX, this::getAllMonteeEaux);
+        viewMapObjets.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
+        viewMapObjets.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
+        viewMapObjets.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
+        viewMapObjets.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
+        viewMapObjets.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
+        viewMapObjets.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
+        viewMapObjets.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
+        viewMapObjets.put(PIEDDIGUE, this::getAllPiedDigues);
+        viewMapObjets.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
+        viewMapObjets.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
+        viewMapObjets.put(PRESTATION, this::getAllPrestations);
+        viewMapObjets.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
+        viewMapObjets.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
+        viewMapObjets.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
+        viewMapObjets.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
+        viewMapObjets.put(SOMMETRISBERME, this::getAllSommetRisbermes);
+        viewMapObjets.put(STATIONPOMPAGE, this::getAllStationPompages);
+        viewMapObjets.put(TALUSDIGUE, this::getAllTalusDigues);
+        viewMapObjets.put(TALUSRISBERME, this::getAllTalusRisbermes);
+        viewMapObjets.put(VOIEACCES, this::getAllVoieAccess);
+        viewMapObjets.put(VOIEDIGUE, this::getAllVoieDigues);
+        viewMapDocuments.put(DOCUMENTTRONCON, this::getAllDocumentTroncons);
+        viewMapDocuments.put(DOCUMENTTRONCONPROFILTRAVERS, this::getAllDocumentTronconProfilTravers);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -415,6 +418,22 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 DocumentTroncon.class);
     }
 
+    public static final String DOCUMENTTRONCONPROFILTRAVERS = "DocumentTronconProfilTravers";
+
+    @View(name = DOCUMENTTRONCONPROFILTRAVERS, map = "classpath:DocumentTronconProfilTravers-map.js")
+    public List<DocumentTronconProfilTravers> getAllDocumentTronconProfilTravers() {
+        return db.queryView(createQuery(DOCUMENTTRONCONPROFILTRAVERS),
+                DocumentTronconProfilTravers.class);
+    }
+
+    public static final String DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID = "DocumentTronconProfilTraversByDocumentId";
+
+    @View(name = DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID, map = "classpath:DocumentTronconProfilTraversByDocumentId-map.js")
+    public List<DocumentTronconProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
+        return db.queryView(createQuery(DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID).key(documentId),
+                DocumentTronconProfilTravers.class);
+    }
+
     public JacksonIterator<TronconDigue> getAllIterator() {
         return JacksonIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery("stream")));
@@ -438,7 +457,30 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
      * the given name.
      */    
     public List<? extends Objet> getAllFromView(String view) {
-        final Callable<List<? extends Objet>> callable = viewMap.get(view);
+        final Callable<List<? extends Objet>> callable = viewMapObjets.get(view);
+        if (callable != null) {
+            try {
+                return callable.call();
+            } catch (RuntimeException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            } 
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Get all elements of the queried view. The view identifiers can be found as
+     * public static variables of the current class. It generally is the name of 
+     * a structure (Ex : Crete, Desordre, etc.).
+     * @param view The view to query.
+     * @return The result of the executed view, or null if there's no view with 
+     * the given name.
+     */    
+    public List<? extends AbstractDocumentTroncon> getAllDocumentsFromView(String view) {
+        final Callable<List<? extends AbstractDocumentTroncon>> callable = viewMapDocuments.get(view);
         if (callable != null) {
             try {
                 return callable.call();

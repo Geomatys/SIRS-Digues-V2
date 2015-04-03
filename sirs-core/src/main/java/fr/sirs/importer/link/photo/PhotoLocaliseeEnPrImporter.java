@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
@@ -134,7 +135,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, DocumentTroncon> docTroncons = documentImporter.getDocuments();
+        final Map<Integer, AbstractDocumentTroncon> docTroncons = documentImporter.getDocuments();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
         final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypeReferences();
@@ -285,7 +286,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 case SYS_EVT_TALUS_FRANC_BORD:
                 case SYS_EVT_TALUS_RISBERME:
                     final Objet structure = objetManager.getElementStructureImporter().getById().get(id);
-                    structure.getPhoto().add(photo);
+                    structure.getPhotos().add(photo);
                     break;
                 // RESEAUX
                 case SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE:
@@ -301,19 +302,19 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 case SYS_EVT_STATION_DE_POMPAGE:
                 case SYS_EVT_VOIE_SUR_DIGUE:
                     final Objet reseau = objetManager.getElementReseauImporter().getById().get(id);
-                    reseau.getPhoto().add(photo);
+                    reseau.getPhotos().add(photo);
                     break;
                 // GEOMETRIES
                 case SYS_EVT_PROFIL_FRONT_FRANC_BORD:
                 case SYS_EVT_LARGEUR_FRANC_BORD:
                     final Objet geometrie = objetManager.getElementGeometryImporter().getById().get(id);
-                    geometrie.getPhoto().add(photo);
+                    geometrie.getPhotos().add(photo);
                     break;
                 // DESORDRES
                 case SYS_EVT_DESORDRE:
                     final Desordre desordre = objetManager.getDesordreImporter().getById().get(id);
                     if(desordre!=null){
-                        desordre.getPhoto().add(photo);
+                        desordre.getPhotos().add(photo);
                     } else {
                         SirsCore.LOGGER.log(Level.FINE, "Désordre null : "+id);
                     }
@@ -321,17 +322,17 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 // PRESTATIONS
                 case SYS_EVT_PRESTATION:
                     final Prestation prestation = objetManager.getPrestationImporter().getById().get(id);
-                    prestation.getPhoto().add(photo);
+                    prestation.getPhotos().add(photo);
                     break;
                 // MONTEES DES EAUX
                 case SYS_EVT_MONTEE_DES_EAUX_HYDRO:
                     final MonteeEaux monteeEaux = objetManager.getMonteeDesEauxImporter().getById().get(id);
-                    monteeEaux.getPhoto().add(photo);
+                    monteeEaux.getPhotos().add(photo);
                     break;
                 // LAISSE CRUES
                 case SYS_EVT_LAISSE_CRUE:
                     final LaisseCrue laisseCrue = objetManager.getLaisseCrueImporter().getById().get(id);
-                    laisseCrue.getPhoto().add(photo);
+                    laisseCrue.getPhotos().add(photo);
                     break;
                 default:
                     SirsCore.LOGGER.log(Level.FINE, "Autre photo : "+tableName);

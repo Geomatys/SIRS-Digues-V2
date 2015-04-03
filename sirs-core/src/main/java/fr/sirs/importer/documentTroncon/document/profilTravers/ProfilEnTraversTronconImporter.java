@@ -2,6 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -21,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class ProfilEnTraversTronconImporter extends GenericImporter {
 
-    private Map<Integer, DocumentTroncon[]> documentTronconsByLeve = null;
+    private Map<Integer, AbstractDocumentTroncon[]> documentTronconsByLeve = null;
     private DocumentImporter documentImporter;
     
     private ProfilEnTraversTronconImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
@@ -35,7 +36,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
         this.documentImporter = documentImporter;
     }
     
-    public Map<Integer, DocumentTroncon[]> getDocumentTronconsByLeveId() throws IOException, AccessDbImporterException{
+    public Map<Integer, AbstractDocumentTroncon[]> getDocumentTronconsByLeveId() throws IOException, AccessDbImporterException{
         if(documentTronconsByLeve==null) compute();
         return documentTronconsByLeve;
     }
@@ -70,14 +71,14 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         documentTronconsByLeve = new HashMap<>();
         
-        final Map<Integer, DocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
+        final Map<Integer, AbstractDocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            DocumentTroncon[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            AbstractDocumentTroncon[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if(docTroncons==null){
-                docTroncons = new DocumentTroncon[2];
+                docTroncons = new AbstractDocumentTroncon[2];
                 docTroncons[0]=documents.get(row.getInt(Columns.ID_DOC.toString()));//row.getInt(Columns.ID_DOC.toString());
                 documentTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), docTroncons);
             }

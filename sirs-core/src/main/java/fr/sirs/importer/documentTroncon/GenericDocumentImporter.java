@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
@@ -16,10 +16,10 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-abstract class GenericDocumentImporter extends GenericImporter {
+abstract class GenericDocumentImporter<T extends AbstractDocumentTroncon> extends GenericImporter {
     
-    protected Map<Integer, DocumentTroncon> documentTroncons = null;
-    protected Map<Integer, List<DocumentTroncon>> documentTronconByTronconId = null;
+    protected Map<Integer, T> documentTroncons = null;
+    protected Map<Integer, List<T>> documentTronconByTronconId = null;
     
     protected BorneDigueImporter borneDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
@@ -47,7 +47,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, DocumentTroncon> getPrecomputedDocuments() throws IOException, AccessDbImporterException {
+    public Map<Integer, T> getPrecomputedDocuments() throws IOException, AccessDbImporterException {
         if (documentTroncons == null)  preCompute();
         return documentTroncons;
     }
@@ -58,7 +58,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
-    public Map<Integer, List<DocumentTroncon>> getPrecomputedDocumentsByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<T>> getPrecomputedDocumentsByTronconId() throws IOException, AccessDbImporterException {
         if (documentTronconByTronconId == null)  preCompute();
         return documentTronconByTronconId;
     }
@@ -70,7 +70,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public Map<Integer, DocumentTroncon> getDocuments() throws IOException, AccessDbImporterException {
+    public Map<Integer, T> getDocuments() throws IOException, AccessDbImporterException {
         if (documentTroncons == null)  preCompute();
         if (!computed)  compute();
         return documentTroncons;
@@ -82,7 +82,7 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException
      * @throws AccessDbImporterException 
      */
-    public Map<Integer, List<DocumentTroncon>> getDocumentsByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<T>> getDocumentsByTronconId() throws IOException, AccessDbImporterException {
         if (documentTronconByTronconId == null)  preCompute();
         if (!computed)  compute();
         return documentTronconByTronconId;
@@ -102,6 +102,6 @@ abstract class GenericDocumentImporter extends GenericImporter {
      * @throws IOException 
      * @throws AccessDbImporterException
      */
-    abstract void importRow(final Row row, final DocumentTroncon docTroncon) 
+    abstract T importRow(final Row row) 
             throws IOException, AccessDbImporterException;
 }

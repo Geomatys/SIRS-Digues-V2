@@ -34,7 +34,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
+class SysEvtProfilEnLongImporter extends GenericDocumentImporter<DocumentTroncon> {
 
     private final ProfilEnLongImporter profilLongImporter;
     
@@ -140,21 +140,32 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final DocumentTroncon docTroncon = documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
-            
-            importRow(row, docTroncon);
+            final DocumentTroncon docTroncon = importRow(row);
+
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
+
+            // Set the list ByTronconId
+            List<DocumentTroncon> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if (listByTronconId == null) {
+                listByTronconId = new ArrayList<>();
+                documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+            }
+            listByTronconId.add(docTroncon);
             
         }
         computed=true;
     }
 
     @Override
-    void importRow(Row row, DocumentTroncon docTroncon) throws IOException, AccessDbImporterException {
+    DocumentTroncon importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, ProfilLong> profilsLong = profilLongImporter.getRelated();
 
+        final DocumentTroncon docTroncon = new DocumentTroncon();
+        
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
             docTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
@@ -236,5 +247,6 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter {
 
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
         docTroncon.setValid(true);
+        return docTroncon;
     }
 }
