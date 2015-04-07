@@ -709,7 +709,7 @@ public class CorePlugin extends Plugin {
                 STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
         
-        if(graduation){
+        if (graduation) {
             final GraduationSymbolizer bigGrad = new GraduationSymbolizer();
             //tous les 100metres
             final GraduationSymbolizer.Graduation g1 = new GraduationSymbolizer.Graduation();
@@ -735,7 +735,8 @@ public class CorePlugin extends Plugin {
             final MutableRule ruleDistant = SF.rule(bigGrad);
             ruleDistant.setMinScaleDenominator(3000);
             
-            MutableRule others = SF.rule(line1, direction);
+            // For graduation symbolizer, green wide stroke is desactivated, to ease edition.
+            MutableRule others = SF.rule(direction);
             
             MutableFeatureTypeStyle ftStyle = SF.featureTypeStyle();
             ftStyle.rules().add(ruleClose);

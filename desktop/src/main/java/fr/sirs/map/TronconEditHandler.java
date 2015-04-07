@@ -10,21 +10,20 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -40,8 +39,6 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -59,8 +56,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
+import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -69,9 +68,13 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.ItemListener;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.util.collection.CollectionChangeEvent;
+import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -79,7 +82,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconEditHandler extends FXAbstractNavigationHandler {
+public class TronconEditHandler extends FXAbstractNavigationHandler implements ItemListener {
 
     private static final int CROSS_SIZE = 5;
     
@@ -101,7 +104,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
     private EditionHelper helper;
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     private final Session session;
-        
+
+    private Id selectionFilter;
     
     public TronconEditHandler(final FXMap map) {
         super(map);
@@ -124,10 +128,13 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
             }
             updateGeometry();
 
+            selectionFilter = GO2Utilities.FILTER_FACTORY.id(
+                    Collections.singleton(new DefaultFeatureId(newValue.getId())));
+            
             if (Platform.isFxApplicationThread()) {
-                map.getCanvas().repaint();
+                tronconLayer.setSelectionFilter(selectionFilter);
             } else {
-                Platform.runLater(() -> map.getCanvas().repaint());
+                Platform.runLater(() -> tronconLayer.setSelectionFilter(selectionFilter));
             }
         });
     }
@@ -159,6 +166,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
                 layer.setSelectable(true);
+                tronconLayer.addItemListener(this);
             }
         }
         
@@ -184,6 +192,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
                 } catch (URISyntaxException ex) {
                     SIRS.LOGGER.log(Level.WARNING, null, ex);
                 }
+                tronconLayer.removeItemListener(this);
+                tronconLayer.setSelectionFilter(null);
+                selectionFilter = null;
             }
             return true;
         }
@@ -264,6 +275,25 @@ public class TronconEditHandler extends FXAbstractNavigationHandler {
 
         final Digue digue = choiceBox.getValue();        
         return new AbstractMap.SimpleImmutableEntry<>(nameField.getText(),digue);
+    }
+
+    @Override
+    public void itemChange(CollectionChangeEvent<MapItem> event) {
+        // nothing to do;
+    }
+
+    /**
+     * We force focus on currently edited {@link TronconDigue}.
+     * @param evt 
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt == null) return;
+        if (MapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) {
+            if (selectionFilter != null && !selectionFilter.equals(evt.getNewValue())) {
+                tronconLayer.setSelectionFilter(selectionFilter);
+            }
+        }
     }
     
     private class MouseListen extends FXPanMouseListen {
