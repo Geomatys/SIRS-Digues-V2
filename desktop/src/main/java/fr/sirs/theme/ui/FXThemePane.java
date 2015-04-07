@@ -11,6 +11,7 @@ import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.map.FXMapTab;
 import java.lang.reflect.Constructor;
@@ -36,6 +37,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
     
+    @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
     @FXML private TextField uiPseudoId;
     @FXML private FXDateField date_maj;
@@ -126,10 +128,17 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
             uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
-        if (newValue == null) {    
+        if (newValue == null) {
+            uiHeaderLabel.setText("Aucune information disponible");
             setCenter(new Label("Pas d'éditeur disponible."));
             specificThemePane = null;
         } else {
+            try {
+                uiHeaderLabel.setText("Informations sur un(e) "+new LabelMapper(newValue.getClass()).mapClassName());
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Header label cannot be updated.", e);
+                uiHeaderLabel.setText("Informations sur un ouvrage");
+            }
             // Keep parent reference, so we can now if it has been switched at save.
             couchDbDocument = newValue.getCouchDBDocument();
             

@@ -12,7 +12,7 @@
          <top>
             <VBox BorderPane.alignment="CENTER">
                <children>
-                  <HBox>
+                  <HBox VBox.vgrow="NEVER">
                      <children>
                           <MenuBar fx:id="uiMenu" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                               <menus>
