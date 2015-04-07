@@ -809,6 +809,8 @@ public class FXPositionablePane extends BorderPane {
                         uiDistanceStart.valueProperty().bindBidirectional(newValue.borne_debut_distanceProperty());
                         uiDistanceEnd.valueProperty().bindBidirectional(newValue.borne_fin_distanceProperty());
                         
+                        prDebut.set(newValue.getPR_debut());
+                        prFin.set(newValue.getPR_fin());
                         // Mise à jour automatique de la liste des SRs si le parent
                         // du positionable change.
                         if (newValue.parentProperty() != null) {
