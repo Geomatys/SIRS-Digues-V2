@@ -412,7 +412,7 @@ public class FXLauncherPane extends BorderPane {
     }
 
     @FXML
-    void createFromAccess(ActionEvent event) {
+    synchronized void createFromAccess(ActionEvent event) {
         final String dbName = cleanDbName(uiImportName.getText());
         if(dbName.isEmpty()){
             new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
