@@ -30,43 +30,13 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.sql.SQLHelper;
+import javafx.concurrent.Task;
 
 public class H2Helper {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
     
     private static FeatureStore STORE = null;
-    
-    public static synchronized void exportDataToRDBMS(CouchDbConnector connector, SirsDBInfoRepository sirsDBInfoRepository)
-            throws IOException {
-
-        int srid = SirsCore.getSrid();
-        Path file = getDBFile(connector);
-
-        if (Files.isDirectory(file.getParent())) {
-            Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                        throws IOException {
-                    Files.delete(dir);
-                    return super.postVisitDirectory(dir, exc);
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file,
-                        BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return super.visitFile(file, attrs);
-                }
-            });
-        }
-        try (Connection conn = createConnection(connector)) {
-            init(conn, connector, srid);
-
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
 
     private static Connection createConnection(CouchDbConnector connector) throws SQLException {
         Path file = getDBFile(connector);
@@ -105,33 +75,6 @@ public class H2Helper {
         return file;
     }
     
-    private static void init(Connection conn, CouchDbConnector db, int srid) throws SQLException {
-        SQLHelper.createTables(conn, srid);
-        
-        List<String> allDocIds = db.getAllDocIds();        
-        DocHelper docHelper = new DocHelper(db);
-        final Thread currentThread = Thread.currentThread();
-        try {
-            conn.setAutoCommit(false);
-            for (String id : allDocIds) {
-                if (currentThread.isInterrupted()) return;
-                if (id.startsWith("$") || id.startsWith("_")) {
-                    continue;
-                }
-                
-                docHelper.getElement(id).map(
-                        e -> SQLHelper.updateElement(conn, e));
-                
-                conn.commit();
-            }
-            
-            SQLHelper.addForeignKeys(conn);
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        }
-    }
-    
     public static void dumbSchema(Connection connection, Path file) throws SQLException {
         Statement stat = null;
         String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
@@ -145,4 +88,81 @@ public class H2Helper {
         }
     }
 
+    /**
+     * A task which export a couchDb database content to SQL database.
+     */
+    public static class ExportToRDBMS extends Task<Boolean> {
+
+        private final CouchDbConnector couchConnector;
+
+        public ExportToRDBMS(CouchDbConnector connector) {
+            couchConnector = connector;
+            updateTitle("Export vers la base RDBMS");
+        }
+
+        @Override
+        protected Boolean call() throws Exception {
+            
+            updateMessage("Nettoyage de la base.");
+            Path file = getDBFile(couchConnector);
+            if (Files.isDirectory(file.getParent())) {
+                Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                            throws IOException {
+                        Files.delete(dir);
+                        return super.postVisitDirectory(dir, exc);
+                    }
+
+                    @Override
+                    public FileVisitResult visitFile(Path file,
+                            BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return super.visitFile(file, attrs);
+                    }
+                });
+            }
+            
+            try (Connection conn = createConnection(couchConnector)) {
+                updateMessage("Création des tables.");
+                int srid = SirsCore.getSrid();
+                SQLHelper.createTables(conn, srid);
+                
+                updateMessage("Création de la liste des éléments à insérer.");
+                List<String> allDocIds = couchConnector.getAllDocIds();
+                DocHelper docHelper = new DocHelper(couchConnector);
+                
+                updateMessage("Insertion des éléments");
+                int currentProgress = 0;
+                updateProgress(currentProgress++, allDocIds.size());                
+                final Thread currentThread = Thread.currentThread();
+                try {
+                    conn.setAutoCommit(false);
+                    for (String id : allDocIds) {
+                        if (currentThread.isInterrupted()) {
+                            return false;
+                        }
+                        if (id.startsWith("$") || id.startsWith("_")) {
+                            continue;
+                        }
+
+                        docHelper.getElement(id).map(
+                                e -> SQLHelper.insertElement(conn, e));
+
+                        conn.commit();
+                        updateProgress(currentProgress++, allDocIds.size());   
+                    }
+
+                    updateProgress(-1, -1);
+                    updateMessage("Mise à jour des clés étrangères");
+                    SQLHelper.addForeignKeys(conn);
+                    
+                } catch (Exception e) {
+                    conn.rollback();
+                    throw e;
+                }
+            }
+            return true;
+        }
+    }
 }

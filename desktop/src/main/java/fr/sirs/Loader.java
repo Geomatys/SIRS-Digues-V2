@@ -40,7 +40,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
 import static fr.sirs.core.model.Role.EXTERN;
@@ -54,7 +53,6 @@ import java.util.List;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Window;
 import org.controlsfx.dialog.ExceptionDialog;
 
 /**
@@ -369,11 +367,7 @@ public class Loader extends Application {
                 
                 // COUCHDB TO SQL //////////////////////////////////////////////
                 updateMessage("Export vers la base RDBMS");
-                TaskManager.INSTANCE.submit("Export vers la base RDBMS", ()->{
-                        H2Helper.exportDataToRDBMS(context.getBean(CouchDbConnector.class), context.getBean(SirsDBInfoRepository.class));
-                        SIRS.LOGGER.info("RDBMS EXPORT FINISHED");
-                        return true;
-                });                
+                TaskManager.INSTANCE.submit(new H2Helper.ExportToRDBMS(context.getBean(CouchDbConnector.class)));                
 
                 updateProgress(inc++, total);
                 
