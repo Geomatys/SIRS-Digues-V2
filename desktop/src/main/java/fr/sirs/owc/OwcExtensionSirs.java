@@ -2,22 +2,19 @@ package fr.sirs.owc;
 
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
-import org.geotoolkit.owc.xml.OwcExtension;
 import fr.sirs.Plugin;
+import fr.sirs.Plugins;
+import org.geotoolkit.owc.xml.OwcExtension;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.h2.H2Helper;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.spi.ServiceRegistry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
-import org.bouncycastle.asn1.crmf.ProofOfPossession;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -30,11 +27,8 @@ import org.geotoolkit.data.query.Source;
 import org.geotoolkit.data.query.TextStatement;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.factory.FactoryFinder;
-import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.Name;
-import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -43,19 +37,14 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.owc.gtkext.ParameterType;
 import static org.geotoolkit.owc.xml.OwcMarshallerPool.*;
 import org.geotoolkit.ogc.xml.v110.FilterType;
-import org.geotoolkit.owc.gtkext.ObjectFactory;
 import org.geotoolkit.owc.xml.v10.OfferingType;
 import org.geotoolkit.se.xml.v110.ParameterValueType;
 import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.w3._2005.atom.ContentType;
-import org.w3._2005.atom.EntryType;
-import org.w3._2005.atom.TextType;
 import org.w3c.dom.Element;
 
 /**
@@ -63,57 +52,37 @@ import org.w3c.dom.Element;
  * 
  * @author Samuel Andrés (Geomatys)
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
-public class OwcExtentionSirs extends OwcExtension {
+public class OwcExtensionSirs extends OwcExtension {
     
     public static final String CODE = "http://www.france-digues.fr/owc";
-    public static final String KEY_BEANCLASS = "beanClass";
+    public static final String KEY_LAYER_NAME = "beanClass";
     public static final String KEY_SQLQUERY = "sqlQuery";
     public static final String ATT_KEY_EXTRA_DIMENSIONS = "extraDimensions";
     public static final String ATT_KEY_LOWER_EXTRA_DIMENSION = "lower";
     public static final String ATT_KEY_UPPER_EXTRA_DIMENSION = "upper";
-
-    private static final List<MapItem> mapItems = new ArrayList();
     
-    static {
-        final Iterator<Plugin> ite = ServiceRegistry.lookupProviders(Plugin.class);
-        while(ite.hasNext()){
-            mapItems.addAll(ite.next().getMapItems());
-        }
-        
-        final Hints hints = new Hints();
-        hints.put(Hints.FILTER_FACTORY, FilterFactory2.class);
-        filterFactory = (FilterFactory2) FactoryFinder.getFilterFactory(hints);
-    }
     private static final StyleXmlIO STYLE_XML_IO = new StyleXmlIO();
-    private static final ObjectFactory GEOTK_FACTORY = new ObjectFactory();
-
-    private static final FilterFactory2 filterFactory;
     
-    public OwcExtentionSirs() {
-        super(CODE,10);
-        
+    public OwcExtensionSirs() {
+        super(CODE, 10);
     }
     
     @Override
     public boolean canHandle(MapLayer layer) {
-        if(layer instanceof FeatureMapLayer){
-            final FeatureMapLayer fml = (FeatureMapLayer) layer;
-            final FeatureCollection collection = fml.getCollection();
-            final FeatureStore store = collection.getSession().getFeatureStore();
-            return (store instanceof BeanStore && getTypeName(layer) != null) || getSQLQuery(layer)!=null;
-        }
-        return false;
+        return layer.getUserProperty(Plugin.PLUGIN_FLAG) != null || getSQLQuery(layer) != null;
     }
     
     @Override
     public MapLayer createLayer(OfferingType offering) throws DataStoreException {
         final MapLayer mapLayer;
-        FeatureMapLayer.DimensionDef datefilter = null;
+        FeatureMapLayer.DimensionDef dateFilter = null;
         final List<Object> fields = offering.getOperationOrContentOrStyleSet();
         
         //rebuild parameters map
-        String beanClassName = null;
+        String layerName = null;
+        String pluginName = null;
         String sqlQuery = null;
         Filter filter = null;
         for(Object field : fields){
@@ -125,18 +94,20 @@ public class OwcExtentionSirs extends OwcExtension {
                 if(content.getAttribute(ATT_KEY_EXTRA_DIMENSIONS)!=null){
                     if(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)!=null
                         && content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION)!=null){
-                        datefilter = new FeatureMapLayer.DimensionDef(
+                        dateFilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(), 
                         GO2Utilities.FILTER_FACTORY.property(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)), 
                         GO2Utilities.FILTER_FACTORY.property(content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION)));
                     }
                 }
             }
-            if(field instanceof ParameterType){
+            if (field instanceof ParameterType) {
                 final ParameterType param = (ParameterType) field;
-                if(KEY_BEANCLASS.equals(param.getKey())){
-                    beanClassName = param.getValue();
-                }else if(KEY_SQLQUERY.equals(param.getKey())){
+                if (Plugin.PLUGIN_FLAG.equals(param.getKey())) {
+                    pluginName = param.getValue();
+                } else if (KEY_LAYER_NAME.equals(param.getKey())) {
+                    layerName = param.getValue();
+                } else if (KEY_SQLQUERY.equals(param.getKey())) {
                     sqlQuery = param.getValue();
                 }
             }
@@ -145,24 +116,23 @@ public class OwcExtentionSirs extends OwcExtension {
 //                    final StyleXmlIO io = new StyleXmlIO();
                     filter = STYLE_XML_IO.getTransformer110().visitFilter((FilterType)field);
                 } catch (FactoryException ex) {
-                    Logger.getLogger(OwcExtentionSirs.class.getName()).log(Level.SEVERE, null, ex);
+                    SirsCore.LOGGER.log(Level.WARNING, null, ex);
                 }
             }
         }
         
-        if(beanClassName!=null){
-            final Class clazz;
-            try {
-                clazz = Class.forName(beanClassName);
-            } catch (ClassNotFoundException ex) {
-                throw new DataStoreException(ex.getMessage(),ex);
+        if (layerName != null && pluginName != null) {
+            final Plugin plugin = Plugins.getPlugin(pluginName);
+            if (plugin == null) {
+                throw new DataStoreException("No SIRS plugin found for name "+pluginName);
             }
-            if(filter==null){
-                mapLayer = CorePlugin.createLayer(clazz);
+            mapLayer = getLayerByName(plugin.getMapItems(), layerName);
+            if (mapLayer == null) {
+                throw new DataStoreException("No layer named "+layerName+" found in plugin "+pluginName);
+            } else {
+                mapLayer.getUserProperties().put(Plugin.PLUGIN_FLAG, pluginName);
             }
-            else{
-                mapLayer = CorePlugin.createLayer(clazz, QueryBuilder.filtered( new DefaultName(clazz.getSimpleName()), filter));
-            }
+            
         }else if(sqlQuery!=null){
             final Session session = Injector.getSession();
             try {
@@ -175,66 +145,80 @@ public class OwcExtentionSirs extends OwcExtension {
                 throw new DataStoreException(ex.getMessage(),ex);
             }
         }else{
-            throw new DataStoreException("Invalid configuration, missing bean class name or sql query");
+            throw new DataStoreException("Invalid configuration, missing plugin source or sql query");
         }
-        if(datefilter!=null){
-            ((FeatureMapLayer)mapLayer).getExtraDimensions().add(datefilter);
+        
+        if (mapLayer instanceof FeatureMapLayer && (filter != null || dateFilter != null)) {
+            final FeatureMapLayer featureMapLayer = (FeatureMapLayer) mapLayer;
+            if (filter != null) {
+                QueryBuilder queryBuilder = new QueryBuilder(featureMapLayer.getQuery());
+                queryBuilder.setFilter(filter);
+                featureMapLayer.setQuery(queryBuilder.buildQuery());
+            }
+            if (dateFilter != null) {
+                featureMapLayer.getExtraDimensions().add(dateFilter);
+            }
         }
         return mapLayer;
     }
     
     @Override
     public OfferingType createOffering(MapLayer mapLayer) {
+        String sqlQuery = null, pluginName = null;
+        final Object pluginProvider = mapLayer.getUserProperty(Plugin.PLUGIN_FLAG);
+        if (pluginProvider instanceof String) {
+            pluginName = (String) pluginProvider;
+        } else {
+            sqlQuery = getSQLQuery(mapLayer);
+        }
+        
+        if (sqlQuery == null && pluginName == null) {
+            throw new IllegalArgumentException("Provided layer is neither provided by a SIRS plugin, nor by an SQL query.");
+        }
+              
         final OfferingType offering = OWC_FACTORY.createOfferingType();
         offering.setCode(CODE);
         
-        final FeatureMapLayer fml = (FeatureMapLayer) mapLayer;
-        final FeatureCollection collection = fml.getCollection();
-        final FeatureStore store = collection.getSession().getFeatureStore();
-        final Name typeName = getTypeName(fml);
-        final String sqlQuery = getSQLQuery(mapLayer);
-        
-        if(sqlQuery!=null){
-            //write the blean class name
+        if (sqlQuery != null) {
             offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_SQLQUERY, String.class.getName(), sqlQuery));
-        }else{
-            final BeanFeatureSupplier supplier;
-            try {
-                supplier = ((BeanStore)store).getBeanSupplier(typeName);
-            } catch (DataStoreException ex) {
-                throw new IllegalStateException(ex.getMessage(),ex);
-            }
-            final Class beanClass = supplier.getBeanClass();
-            //write the blean class name
-            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_BEANCLASS, String.class.getName(), beanClass.getName()));
-        }
-        
-        final Query query = fml.getQuery();
-        if (query!=null){
-            final Filter filter = query.getFilter();
-            if(filter!=null){
-                offering.getOperationOrContentOrStyleSet().add(toFilter(filter));
-            }
-        }
-        
-        final List<FeatureMapLayer.DimensionDef> extraDimensions = fml.getExtraDimensions();
-        for(final FeatureMapLayer.DimensionDef extraDimension : extraDimensions){
             
-            if(extraDimension.getLower()!=null || extraDimension.getUpper()!=null){
-                final ContentType ct = ATOM_FACTORY.createContentType();
-                ct.getContent();
-                ct.getOtherAttributes().put(new QName(ATT_KEY_EXTRA_DIMENSIONS), ATT_KEY_EXTRA_DIMENSIONS);
-                
-                if(extraDimension.getLower() instanceof PropertyName)
-                    ct.getOtherAttributes().put(new QName(ATT_KEY_LOWER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getLower()).getPropertyName());
-                
-                if(extraDimension.getUpper() instanceof PropertyName)
-                    ct.getOtherAttributes().put(new QName(ATT_KEY_UPPER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getUpper()).getPropertyName());
-                
-                offering.getOperationOrContentOrStyleSet().add(ATOM_FACTORY.createEntryTypeContent(ct));
+        } else {
+            //write source plugin and layer names.
+            offering.getOperationOrContentOrStyleSet().add(new ParameterType(Plugin.PLUGIN_FLAG, String.class.getName(), pluginName));
+            offering.getOperationOrContentOrStyleSet().add(new ParameterType(KEY_LAYER_NAME, String.class.getName(), mapLayer.getName()));
+        }
+
+        if (mapLayer instanceof FeatureMapLayer) {
+            final FeatureMapLayer fml = (FeatureMapLayer) mapLayer;
+            final Query query = fml.getQuery();
+            if (query != null) {
+                final Filter filter = query.getFilter();
+                if (filter != null) {
+                    offering.getOperationOrContentOrStyleSet().add(toFilter(filter));
+                }
+            }
+
+            // ADDITIONAL DIMENSIONS
+            final List<FeatureMapLayer.DimensionDef> extraDimensions = fml.getExtraDimensions();
+            for (final FeatureMapLayer.DimensionDef extraDimension : extraDimensions) {
+
+                if (extraDimension.getLower() != null || extraDimension.getUpper() != null) {
+                    final ContentType ct = ATOM_FACTORY.createContentType();
+                    ct.getContent();
+                    ct.getOtherAttributes().put(new QName(ATT_KEY_EXTRA_DIMENSIONS), ATT_KEY_EXTRA_DIMENSIONS);
+
+                    if (extraDimension.getLower() instanceof PropertyName) {
+                        ct.getOtherAttributes().put(new QName(ATT_KEY_LOWER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getLower()).getPropertyName());
+                    }
+
+                    if (extraDimension.getUpper() instanceof PropertyName) {
+                        ct.getOtherAttributes().put(new QName(ATT_KEY_UPPER_EXTRA_DIMENSION), ((PropertyName) extraDimension.getUpper()).getPropertyName());
+                    }
+
+                    offering.getOperationOrContentOrStyleSet().add(ATOM_FACTORY.createEntryTypeContent(ct));
+                }
             }
         }
-        
         return offering;
     }
     
@@ -270,6 +254,24 @@ public class OwcExtentionSirs extends OwcExtension {
             if(source instanceof TextStatement){
                 final TextStatement stmt = (TextStatement)source;
                 return stmt.getStatement();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Find a map layer named as requested in input map item list.
+     * @param items The item to search into. Their children will be searched recursively.
+     * @param layerName Name of the layer to retrieve.
+     * @return The first map layer found for given name, or null if we cannot find any.
+     */
+    private static MapLayer getLayerByName(final List<MapItem> items, final String layerName) {
+        for (final MapItem item : items) {
+            if (item instanceof MapLayer && layerName.equals(item.getName())) {
+                return (MapLayer) item;
+            } else if (!item.items().isEmpty()) {
+                MapLayer layerByName = getLayerByName(item.items(), layerName);
+                if (layerByName != null) return layerByName;
             }
         }
         return null;

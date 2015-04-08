@@ -56,6 +56,10 @@ public class Plugins {
         return REGISTERED_PLUGINS;
     }
     
+    /**
+     * @param pluginName Name of the plugin to retrieve.
+     * @return The registered plugin for given name, or null.
+     */
     public static Plugin getPlugin(final String pluginName) {
         return getPluginMap().get(pluginName);
     }

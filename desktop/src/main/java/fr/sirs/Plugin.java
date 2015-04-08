@@ -28,6 +28,8 @@ import org.geotoolkit.map.MapItem;
  */
 public class Plugin {
     
+    public static String PLUGIN_FLAG = "pluginSirs";
+    
     protected String name;
     /** Message affiché lors du chargement du plugin */
     protected final SimpleStringProperty loadingMessage = new SimpleStringProperty("");

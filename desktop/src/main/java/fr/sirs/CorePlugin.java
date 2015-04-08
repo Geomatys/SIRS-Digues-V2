@@ -176,85 +176,78 @@ public class CorePlugin extends Plugin {
         
     };
     
-    private static final HashMap<Class, BeanFeatureSupplier> SUPPLIERS = new HashMap<Class, BeanFeatureSupplier>();
+    private final HashMap<Class, BeanFeatureSupplier> suppliers = new HashMap<Class, BeanFeatureSupplier>();
     
     public CorePlugin() {
         name = NAME;
     }
 
-    private static synchronized HashMap<Class,BeanFeatureSupplier> getSuppliers() {
-        if (SUPPLIERS.isEmpty()) {
-            final TronconDigueRepository repository = Injector.getSession().getTronconDigueRepository();
+    private synchronized void loadDataSuppliers() {
+        suppliers.clear();
+            final TronconDigueRepository repository = getSession().getTronconDigueRepository();
 
             //troncons
-            SUPPLIERS.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
+            suppliers.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
 
             //bornes
-            SUPPLIERS.put(BorneDigue.class, new StructBeanSupplier(BorneDigue.class, () -> Injector.getSession().getBorneDigueRepository().getAll()));
+            suppliers.put(BorneDigue.class, new StructBeanSupplier(BorneDigue.class, () -> getSession().getBorneDigueRepository().getAll()));
 
             //structures
-            SUPPLIERS.put(Crete.class, new StructBeanSupplier(Crete.class, () -> repository.getAllFromView(Crete.class)));
-            SUPPLIERS.put(OuvrageRevanche.class, new StructBeanSupplier(OuvrageRevanche.class, () -> repository.getAllFromView(OuvrageRevanche.class)));
-            SUPPLIERS.put(TalusDigue.class, new StructBeanSupplier(TalusDigue.class, () -> repository.getAllFromView(TalusDigue.class)));
-            SUPPLIERS.put(SommetRisberme.class, new StructBeanSupplier(SommetRisberme.class, () -> repository.getAllFromView(SommetRisberme.class)));
-            SUPPLIERS.put(TalusRisberme.class, new StructBeanSupplier(TalusRisberme.class, () -> repository.getAllFromView(TalusRisberme.class)));
-            SUPPLIERS.put(PiedDigue.class, new StructBeanSupplier(PiedDigue.class, () -> repository.getAllFromView(PiedDigue.class)));
-            SUPPLIERS.put(Fondation.class, new StructBeanSupplier(Fondation.class, () -> repository.getAllFromView(Fondation.class)));
-            SUPPLIERS.put(Epi.class, new StructBeanSupplier(Epi.class, () -> repository.getAllFromView(Epi.class)));
-            SUPPLIERS.put(Deversoir.class, new StructBeanSupplier(Deversoir.class, () -> repository.getAllFromView(Deversoir.class)));
+            suppliers.put(Crete.class, new StructBeanSupplier(Crete.class, () -> repository.getAllFromView(Crete.class)));
+            suppliers.put(OuvrageRevanche.class, new StructBeanSupplier(OuvrageRevanche.class, () -> repository.getAllFromView(OuvrageRevanche.class)));
+            suppliers.put(TalusDigue.class, new StructBeanSupplier(TalusDigue.class, () -> repository.getAllFromView(TalusDigue.class)));
+            suppliers.put(SommetRisberme.class, new StructBeanSupplier(SommetRisberme.class, () -> repository.getAllFromView(SommetRisberme.class)));
+            suppliers.put(TalusRisberme.class, new StructBeanSupplier(TalusRisberme.class, () -> repository.getAllFromView(TalusRisberme.class)));
+            suppliers.put(PiedDigue.class, new StructBeanSupplier(PiedDigue.class, () -> repository.getAllFromView(PiedDigue.class)));
+            suppliers.put(Fondation.class, new StructBeanSupplier(Fondation.class, () -> repository.getAllFromView(Fondation.class)));
+            suppliers.put(Epi.class, new StructBeanSupplier(Epi.class, () -> repository.getAllFromView(Epi.class)));
+            suppliers.put(Deversoir.class, new StructBeanSupplier(Deversoir.class, () -> repository.getAllFromView(Deversoir.class)));
 
             // Franc-bords
-            SUPPLIERS.put(FrontFrancBord.class, new StructBeanSupplier(FrontFrancBord.class, () -> repository.getAllFromView(FrontFrancBord.class)));
-            SUPPLIERS.put(PiedFrontFrancBord.class, new StructBeanSupplier(PiedFrontFrancBord.class, () -> repository.getAllFromView(PiedFrontFrancBord.class)));
+            suppliers.put(FrontFrancBord.class, new StructBeanSupplier(FrontFrancBord.class, () -> repository.getAllFromView(FrontFrancBord.class)));
+            suppliers.put(PiedFrontFrancBord.class, new StructBeanSupplier(PiedFrontFrancBord.class, () -> repository.getAllFromView(PiedFrontFrancBord.class)));
 
             // Réseaux de voirie
-            SUPPLIERS.put(VoieAcces.class, new StructBeanSupplier(VoieAcces.class, () -> repository.getAllFromView(VoieAcces.class)));
-            SUPPLIERS.put(OuvrageFranchissement.class, new StructBeanSupplier(OuvrageFranchissement.class, () -> repository.getAllFromView(OuvrageFranchissement.class)));
-            SUPPLIERS.put(OuvertureBatardable.class, new StructBeanSupplier(OuvertureBatardable.class, () -> repository.getAllFromView(OuvertureBatardable.class)));
-            SUPPLIERS.put(VoieDigue.class, new StructBeanSupplier(VoieDigue.class, () -> repository.getAllFromView(VoieDigue.class)));
-            SUPPLIERS.put(OuvrageVoirie.class, new StructBeanSupplier(OuvrageVoirie.class, () -> repository.getAllFromView(OuvrageVoirie.class)));
+            suppliers.put(VoieAcces.class, new StructBeanSupplier(VoieAcces.class, () -> repository.getAllFromView(VoieAcces.class)));
+            suppliers.put(OuvrageFranchissement.class, new StructBeanSupplier(OuvrageFranchissement.class, () -> repository.getAllFromView(OuvrageFranchissement.class)));
+            suppliers.put(OuvertureBatardable.class, new StructBeanSupplier(OuvertureBatardable.class, () -> repository.getAllFromView(OuvertureBatardable.class)));
+            suppliers.put(VoieDigue.class, new StructBeanSupplier(VoieDigue.class, () -> repository.getAllFromView(VoieDigue.class)));
+            suppliers.put(OuvrageVoirie.class, new StructBeanSupplier(OuvrageVoirie.class, () -> repository.getAllFromView(OuvrageVoirie.class)));
 
             // Réseaux et ouvrages
-            SUPPLIERS.put(StationPompage.class, new StructBeanSupplier(StationPompage.class, () -> repository.getAllFromView(StationPompage.class)));
-            SUPPLIERS.put(ReseauHydrauliqueFerme.class, new StructBeanSupplier(ReseauHydrauliqueFerme.class, () -> repository.getAllFromView(ReseauHydrauliqueFerme.class)));
-            SUPPLIERS.put(OuvrageHydrauliqueAssocie.class, new StructBeanSupplier(OuvrageHydrauliqueAssocie.class, () -> repository.getAllFromView(OuvrageHydrauliqueAssocie.class)));
-            SUPPLIERS.put(ReseauTelecomEnergie.class, new StructBeanSupplier(ReseauTelecomEnergie.class, () -> repository.getAllFromView(ReseauTelecomEnergie.class)));
-            SUPPLIERS.put(OuvrageTelecomEnergie.class, new StructBeanSupplier(OuvrageTelecomEnergie.class, () -> repository.getAllFromView(OuvrageTelecomEnergie.class)));
-            SUPPLIERS.put(ReseauHydroCielOuvert.class, new StructBeanSupplier(ReseauHydroCielOuvert.class, () -> repository.getAllFromView(ReseauHydroCielOuvert.class)));
-            SUPPLIERS.put(OuvrageParticulier.class, new StructBeanSupplier(OuvrageParticulier.class, () -> repository.getAllFromView(OuvrageParticulier.class)));
+            suppliers.put(StationPompage.class, new StructBeanSupplier(StationPompage.class, () -> repository.getAllFromView(StationPompage.class)));
+            suppliers.put(ReseauHydrauliqueFerme.class, new StructBeanSupplier(ReseauHydrauliqueFerme.class, () -> repository.getAllFromView(ReseauHydrauliqueFerme.class)));
+            suppliers.put(OuvrageHydrauliqueAssocie.class, new StructBeanSupplier(OuvrageHydrauliqueAssocie.class, () -> repository.getAllFromView(OuvrageHydrauliqueAssocie.class)));
+            suppliers.put(ReseauTelecomEnergie.class, new StructBeanSupplier(ReseauTelecomEnergie.class, () -> repository.getAllFromView(ReseauTelecomEnergie.class)));
+            suppliers.put(OuvrageTelecomEnergie.class, new StructBeanSupplier(OuvrageTelecomEnergie.class, () -> repository.getAllFromView(OuvrageTelecomEnergie.class)));
+            suppliers.put(ReseauHydroCielOuvert.class, new StructBeanSupplier(ReseauHydroCielOuvert.class, () -> repository.getAllFromView(ReseauHydroCielOuvert.class)));
+            suppliers.put(OuvrageParticulier.class, new StructBeanSupplier(OuvrageParticulier.class, () -> repository.getAllFromView(OuvrageParticulier.class)));
 
             // Désordres
-            SUPPLIERS.put(Desordre.class, new StructBeanSupplier(Desordre.class, () -> repository.getAllFromView(Desordre.class)));
+            suppliers.put(Desordre.class, new StructBeanSupplier(Desordre.class, () -> repository.getAllFromView(Desordre.class)));
 
             // Prestations
-            SUPPLIERS.put(Prestation.class, new StructBeanSupplier(Prestation.class, () -> repository.getAllFromView(Prestation.class)));
+            suppliers.put(Prestation.class, new StructBeanSupplier(Prestation.class, () -> repository.getAllFromView(Prestation.class)));
 
             // Mesures d'évènements
-            SUPPLIERS.put(LaisseCrue.class, new StructBeanSupplier(LaisseCrue.class, () -> repository.getAllFromView(LaisseCrue.class)));
-            SUPPLIERS.put(MonteeEaux.class, new StructBeanSupplier(MonteeEaux.class, () -> repository.getAllFromView(MonteeEaux.class)));
-            SUPPLIERS.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> repository.getAllFromView(LigneEau.class)));
+            suppliers.put(LaisseCrue.class, new StructBeanSupplier(LaisseCrue.class, () -> repository.getAllFromView(LaisseCrue.class)));
+            suppliers.put(MonteeEaux.class, new StructBeanSupplier(MonteeEaux.class, () -> repository.getAllFromView(MonteeEaux.class)));
+            suppliers.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> repository.getAllFromView(LigneEau.class)));
             
             // Documents positionnés
-            SUPPLIERS.put(DocumentTroncon.class, new StructBeanSupplier(DocumentTroncon.class, () -> repository.getAllDocumentTroncons()));
-            SUPPLIERS.put(DocumentTronconProfilTravers.class, new StructBeanSupplier(DocumentTronconProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
+            suppliers.put(DocumentTroncon.class, new StructBeanSupplier(DocumentTroncon.class, () -> repository.getAllDocumentTroncons()));
+            suppliers.put(DocumentTronconProfilTravers.class, new StructBeanSupplier(DocumentTronconProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
 
             // Emprises communales
-            SUPPLIERS.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
-        }
-        return SUPPLIERS;
-    }
-    
-    private static synchronized BeanFeatureSupplier getSupplier(Class clazz){
-        return getSuppliers().get(clazz);
+            suppliers.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
     }
     
     @Override
     public List<MapItem> getMapItems() {
-        final List<MapItem> items = new ArrayList<>();
-                
+        final List<MapItem> items = new ArrayList<>();                
         try{
             final Map<String,String> nameMap = new HashMap<>();
-            for(Class elementClass : getSuppliers().keySet()){
+            for(Class elementClass : suppliers.keySet()) {
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
@@ -293,24 +286,24 @@ public class CorePlugin extends Plugin {
             };
             
             //troncons
-            final BeanStore tronconStore = new BeanStore(getSupplier(TronconDigue.class));
+            final BeanStore tronconStore = new BeanStore(suppliers.get(TronconDigue.class));
             items.addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
             
             //bornes
-            final BeanStore borneStore = new BeanStore(getSupplier(BorneDigue.class));
+            final BeanStore borneStore = new BeanStore(suppliers.get(BorneDigue.class));
             items.addAll(buildLayers(borneStore,BORNE_LAYER_NAME,createBorneStyle(),createBorneSelectionStyle(),true));
             
             //structures
             final BeanStore structStore = new BeanStore(
-                    getSupplier(Crete.class),
-                    getSupplier(OuvrageRevanche.class),
-                    getSupplier(TalusDigue.class),
-                    getSupplier(SommetRisberme.class),
-                    getSupplier(TalusRisberme.class),
-                    getSupplier(PiedDigue.class),
-                    getSupplier(Epi.class),
-                    getSupplier(Deversoir.class),
-                    getSupplier(Fondation.class));
+                    suppliers.get(Crete.class),
+                    suppliers.get(OuvrageRevanche.class),
+                    suppliers.get(TalusDigue.class),
+                    suppliers.get(SommetRisberme.class),
+                    suppliers.get(TalusRisberme.class),
+                    suppliers.get(PiedDigue.class),
+                    suppliers.get(Epi.class),
+                    suppliers.get(Deversoir.class),
+                    suppliers.get(Fondation.class));
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
             structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createStructureSelectionStyle(),false));
@@ -319,8 +312,8 @@ public class CorePlugin extends Plugin {
             
             // Franc-bords
             final BeanStore fbStore = new BeanStore(
-                    getSupplier(FrontFrancBord.class),
-                    getSupplier(PiedFrontFrancBord.class));
+                    suppliers.get(FrontFrancBord.class),
+                    suppliers.get(PiedFrontFrancBord.class));
             final MapItem fbLayer = MapBuilder.createItem();
             fbLayer.setName("Francs-bords");
             fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -329,11 +322,11 @@ public class CorePlugin extends Plugin {
             
             // Réseaux de voirie
             final BeanStore rvStore = new BeanStore(
-                    getSupplier(VoieAcces.class),
-                    getSupplier(OuvrageFranchissement.class),
-                    getSupplier(OuvertureBatardable.class),
-                    getSupplier(VoieDigue.class),
-                    getSupplier(OuvrageVoirie.class));
+                    suppliers.get(VoieAcces.class),
+                    suppliers.get(OuvrageFranchissement.class),
+                    suppliers.get(OuvertureBatardable.class),
+                    suppliers.get(VoieDigue.class),
+                    suppliers.get(OuvrageVoirie.class));
             final MapItem rvLayer = MapBuilder.createItem();
             rvLayer.setName("Réseaux de voirie");
             rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -342,13 +335,13 @@ public class CorePlugin extends Plugin {
             
             // Réseaux et ouvrages
             final BeanStore roStore = new BeanStore(
-                    getSupplier(StationPompage.class),
-                    getSupplier(ReseauHydrauliqueFerme.class),
-                    getSupplier(OuvrageHydrauliqueAssocie.class),
-                    getSupplier(ReseauTelecomEnergie.class),
-                    getSupplier(OuvrageTelecomEnergie.class),
-                    getSupplier(ReseauHydroCielOuvert.class),
-                    getSupplier(OuvrageParticulier.class));  
+                    suppliers.get(StationPompage.class),
+                    suppliers.get(ReseauHydrauliqueFerme.class),
+                    suppliers.get(OuvrageHydrauliqueAssocie.class),
+                    suppliers.get(ReseauTelecomEnergie.class),
+                    suppliers.get(OuvrageTelecomEnergie.class),
+                    suppliers.get(ReseauHydroCielOuvert.class),
+                    suppliers.get(OuvrageParticulier.class));  
             final MapItem roLayer = MapBuilder.createItem();
             roLayer.setName("Réseaux et ouvrages");
             roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -356,7 +349,7 @@ public class CorePlugin extends Plugin {
             items.add(roLayer);          
             
             // Désordres
-            final BeanStore desordreStore = new BeanStore(getSupplier(Desordre.class));
+            final BeanStore desordreStore = new BeanStore(suppliers.get(Desordre.class));
             final MapItem desordresLayer = MapBuilder.createItem();
             desordresLayer.setName("Désordres");
             desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -364,7 +357,7 @@ public class CorePlugin extends Plugin {
             items.add(desordresLayer);
             
             // Prestations
-            final BeanStore prestaStore = new BeanStore(getSupplier(Prestation.class));
+            final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
             prestaLayer.setName("Prestations");
             prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -373,9 +366,9 @@ public class CorePlugin extends Plugin {
                         
             // Mesures d'évènements
             final BeanStore mesuresStore = new BeanStore(
-                    getSupplier(LaisseCrue.class),
-                    getSupplier(MonteeEaux.class),
-                    getSupplier(LigneEau.class));
+                    suppliers.get(LaisseCrue.class),
+                    suppliers.get(MonteeEaux.class),
+                    suppliers.get(LigneEau.class));
             final MapItem mesuresLayer = MapBuilder.createItem();
             mesuresLayer.setName("Mesures d'évènements");
             mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -384,7 +377,7 @@ public class CorePlugin extends Plugin {
                         
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
-                    getSupplier(DocumentTroncon.class), getSupplier(DocumentTronconProfilTravers.class));
+                    suppliers.get(DocumentTroncon.class), suppliers.get(DocumentTronconProfilTravers.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -392,7 +385,7 @@ public class CorePlugin extends Plugin {
             items.add(documentsLayer);
             
             // Emprises communales
-            //final BeanStore communesStore = new BeanStore(getSupplier(CommuneTroncon.class));               
+            //final BeanStore communesStore = new BeanStore(suppliers.get(CommuneTroncon.class));               
             
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -612,6 +605,7 @@ public class CorePlugin extends Plugin {
     
     @Override
     public void load() throws SQLException, IOException {
+        loadDataSuppliers();
         themes.add(new StructuresTheme());
         themes.add(new FrancBordTheme());
         themes.add(new ReseauxDeVoirieTheme());
@@ -632,8 +626,8 @@ public class CorePlugin extends Plugin {
         
     }
     
-    public static MapLayer createLayer(final Class beanClass, final Query query){
-        final BeanFeatureSupplier supplier = getSupplier(beanClass);
+    public MapLayer createLayer(final Class beanClass, final Query query){
+        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
         final BeanStore store = new BeanStore(supplier);
         
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
@@ -643,8 +637,8 @@ public class CorePlugin extends Plugin {
         return layer;
     }
 
-    public static MapLayer createLayer(Class beanClass) throws DataStoreException {
-        final BeanFeatureSupplier supplier = getSupplier(beanClass);
+    public MapLayer createLayer(Class beanClass) throws DataStoreException {
+        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
         final BeanStore store = new BeanStore(supplier);
         return createLayer(beanClass, QueryBuilder.all(store.getNames().iterator().next()));
     }
@@ -910,13 +904,13 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static class ViewFormItem extends MenuItem {
+    private class ViewFormItem extends MenuItem {
 
         public ViewFormItem(Element candidate) {
-            setText(Injector.getSession().generateElementTitle(candidate));
+            setText(getSession().generateElementTitle(candidate));
 
             setOnAction((ActionEvent event) -> {
-                Injector.getSession().showEditionTab(candidate);
+                getSession().showEditionTab(candidate);
             });
         }
     }

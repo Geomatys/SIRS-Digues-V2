@@ -74,6 +74,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
@@ -365,7 +366,11 @@ public class Session extends SessionGen {
                 mapContext.items().add(0,sirsGroup);
 
                 for(Plugin plugin : Plugins.getPlugins()){
-                    sirsGroup.items().addAll(plugin.getMapItems());
+                    List<MapItem> mapItems = plugin.getMapItems();
+                    for (final MapItem item : mapItems) {
+                        setPluginProvider(item, plugin);
+                    }
+                    sirsGroup.items().addAll(mapItems);
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds(true));
 
@@ -397,6 +402,18 @@ public class Session extends SessionGen {
         return mapContext;
     }
 
+    /**
+     * Mark the given map item and all of its layers as provided by input plugin.
+     * @param mapItem The map item to mark. Cannot be null
+     * @param provider The plugin which provided the item. Cannot be null.
+     */
+    private static void setPluginProvider(final MapItem mapItem, final Plugin provider) {        
+        mapItem.getUserProperties().put(Plugin.PLUGIN_FLAG, provider.name);
+        for (final MapItem child : mapItem.items()) {
+            setPluginProvider(child, provider);
+        }
+    }
+    
     public synchronized MapItem getSirsLayerGroup() {
         getMapContext();
         return sirsGroup;

@@ -65,11 +65,8 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemNameColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemVisibleColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
-import org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
-import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
-import org.geotoolkit.gui.javafx.layer.FXLayerStructure;
 import org.geotoolkit.gui.javafx.layer.FXLayerStylesPane;
 import org.geotoolkit.gui.javafx.layer.FXPropertiesPane;
 import org.geotoolkit.gui.javafx.layer.style.FXStyleAdvancedPane;
@@ -87,7 +84,6 @@ import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
-import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
@@ -111,7 +107,6 @@ public class FXMapPane extends BorderPane {
         MAPHINTS.put(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
     }
     
-    private MapContext context;
     private final SplitPane mapsplit = new SplitPane();
     private final FXContextBar uiCtxBar;
     private final FXAddDataBar uiAddBar;
@@ -129,9 +124,6 @@ public class FXMapPane extends BorderPane {
     private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
     private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
     private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
-    
-//    TODO : ACTIVATE BACK LEGEND
-//    private final FXLegendDecoration legend = new FXLegendDecoration(Injector.getSession().getLegendTemplate(), false);
     
     public FXMapPane() {
         
@@ -212,13 +204,6 @@ public class FXMapPane extends BorderPane {
         topgrid.add(uiToolBar, 3, 0);
         topgrid.add(uiEditBar, 4, 0);
         topgrid.add(uiSplitBar, 5, 0);
-        // TODO : ACTIVATE BACK LEGEND
-//        final ToggleButton toggleButton = new ToggleButton("Légende");
-//        legend.visibleProperty().bind(toggleButton.selectedProperty());
-//        final ButtonBar babar = new ButtonBar();
-//        babar.getButtons().add(toggleButton);
-//        babar.getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
-//        topgrid.add(babar, 6, 0);
         
         final ColumnConstraints col0 = new ColumnConstraints();
         final ColumnConstraints col1 = new ColumnConstraints();
@@ -258,7 +243,7 @@ public class FXMapPane extends BorderPane {
         //Affiche le contexte carto et le déplace à la date du jour
         TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
             
-            context = Injector.getSession().getMapContext();
+            final MapContext context = Injector.getSession().getMapContext();
             
             // Affect context and bounds in a JavaFX thread, because it will affect UI (Note : it should not, and may be fixed in a future version).
             final Task t = new Task() {
@@ -272,9 +257,6 @@ public class FXMapPane extends BorderPane {
                     uiMap2.getCanvas().setTemporalRange(time, time);
                     uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
                     uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
-                    
-        // TODO : ACTIVATE BACK LEGEND
-//                    legend.setMap2D(uiMap1);
                     return null;
                 }
             };
@@ -297,7 +279,6 @@ public class FXMapPane extends BorderPane {
     }
     
     public void focusOnElement(Element target) {
-        if (context == null) return;
         TaskManager.INSTANCE.submit(new FocusOnMap(target));
     }
     
@@ -336,6 +317,7 @@ public class FXMapPane extends BorderPane {
      * @return The matching map layer, or null.
      */
     private MapLayer getMapLayerForElement(String layerName) {
+        final MapContext context = Injector.getSession().getMapContext();
         if (context == null) return null;
         for (MapLayer layer : context.layers()) {
             if (layer.getName().equalsIgnoreCase(layerName)) {
