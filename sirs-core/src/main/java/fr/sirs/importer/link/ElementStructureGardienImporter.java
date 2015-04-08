@@ -3,7 +3,7 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactStructure;
+import fr.sirs.core.model.GardeObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -71,7 +71,7 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
             
             if(structure!=null && intervenant!=null){
-                final ContactStructure contactStructure = new ContactStructure();
+                final GardeObjet contactStructure = new GardeObjet();
                 
                 contactStructure.setContactId(intervenant.getId());
             
@@ -92,7 +92,7 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
                 contactStructure.setValid(true);
                 contactStructure.setTypeContact(intervenant.getClass().getSimpleName());
                 
-                structure.getContactStructure().add(contactStructure);
+                structure.getGardes().add(contactStructure);
             }
         }
     }

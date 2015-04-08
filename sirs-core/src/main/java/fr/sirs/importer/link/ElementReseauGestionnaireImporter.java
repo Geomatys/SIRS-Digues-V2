@@ -3,10 +3,10 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -75,7 +75,7 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(reseau!=null && organisme!=null){
-                final OrganismeStructure organismeStructure = new OrganismeStructure();
+                final GestionObjet organismeStructure = new GestionObjet();
                 
                 organismeStructure.setOrganismeId(organisme.getId());
             
@@ -101,7 +101,7 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
                 organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
                 organismeStructure.setValid(true);
                 
-                reseau.getOrganismeStructure().add(organismeStructure);
+                reseau.getGestions().add(organismeStructure);
             }
         }
     }

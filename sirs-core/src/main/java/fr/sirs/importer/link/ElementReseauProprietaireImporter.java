@@ -4,11 +4,10 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactStructure;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.OrganismeStructure;
+import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.IntervenantImporter;
@@ -86,25 +85,23 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
             if(reseau!=null && (intervenant!=null || organisme!=null)){
             
                 if(intervenant!=null){
-                    final ContactStructure contactStructure = readContactStructure(row);
+                    final ProprieteObjet contactStructure = readContactStructure(row);
                     contactStructure.setContactId(intervenant.getId());
-                    contactStructure.setTypeContact(intervenant.getClass().getSimpleName());
-                    reseau.getContactStructure().add(contactStructure);
+                    reseau.getProprietes().add(contactStructure);
                 }
                 else{
-                    final OrganismeStructure organismeStructure = readOrganismeStructure(row);
+                    final ProprieteObjet organismeStructure = readOrganismeStructure(row);
                     organismeStructure.setOrganismeId(organisme.getId());
-                    organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
-                    reseau.getOrganismeStructure().add(organismeStructure);
+                    reseau.getProprietes().add(organismeStructure);
                 }
             }
         }
     }
     
     
-    private ContactStructure readContactStructure(final Row row){
+    private ProprieteObjet readContactStructure(final Row row){
         
-        final ContactStructure contactStructure = new ContactStructure();
+        final ProprieteObjet contactStructure = new ProprieteObjet();
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
             try{
@@ -128,9 +125,9 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
     }
     
     
-    private OrganismeStructure readOrganismeStructure(final Row row){
+    private ProprieteObjet readOrganismeStructure(final Row row){
         
-        final OrganismeStructure organismeStructure = new OrganismeStructure();
+        final ProprieteObjet organismeStructure = new ProprieteObjet();
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
             try{

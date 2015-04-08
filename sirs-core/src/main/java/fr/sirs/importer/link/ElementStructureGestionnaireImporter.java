@@ -2,9 +2,9 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.OrganismeStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -71,7 +71,7 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(structure!=null && organisme!=null){
-                final OrganismeStructure organismeStructure = new OrganismeStructure();
+                final GestionObjet organismeStructure = new GestionObjet();
                 
                 organismeStructure.setOrganismeId(organisme.getId());
             
@@ -92,7 +92,7 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
                 organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
                 organismeStructure.setValid(true);
-                structure.getOrganismeStructure().add(organismeStructure);
+                structure.getGestions().add(organismeStructure);
             }
         }
     }
