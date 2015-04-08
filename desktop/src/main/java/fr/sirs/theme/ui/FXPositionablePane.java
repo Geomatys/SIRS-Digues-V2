@@ -223,8 +223,8 @@ public class FXPositionablePane extends BorderPane {
         uiLatitudeEnd.valueProperty().addListener(linearEndUpdater);
         
         // Update PR information
-        uiPRDebut.textProperty().bind(prDebut.asString("%f"));
-        uiPRFin.textProperty().bind(prFin.asString("%f"));
+        uiPRDebut.textProperty().bind(prDebut.asString("%.2f"));
+        uiPRFin.textProperty().bind(prFin.asString("%.2f"));
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
