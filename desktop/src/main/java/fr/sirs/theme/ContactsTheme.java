@@ -19,7 +19,7 @@ import javafx.scene.layout.BorderPane;
 public class ContactsTheme extends Theme {
 
     public ContactsTheme() {
-        super("Contacts", Type.OTHER);
+        super("Organismes et personnes physiques", Type.OTHER);
     }
 
     @Override
@@ -31,14 +31,14 @@ public class ContactsTheme extends Theme {
         final boolean editable = ((session.getRole()==Role.ADMIN) 
                 || (session.getRole()==Role.USER) 
                 || (session.getRole()==Role.EXTERN));
-        final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Liste des contacts");
+        final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Personnes physiques");
         tableContact.editableProperty().set(editable);
-        final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Liste des organismes");
+        final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Organismes");
         tableOrganisme.editableProperty().set(editable);
         
-        final Tab tabIntervenant = new Tab("Intervenant");
+        final Tab tabIntervenant = new Tab("Personnes physiques");
         tabIntervenant.setContent(tableContact);
-        final Tab tabOrganisme = new Tab("Organisme");
+        final Tab tabOrganisme = new Tab("Organismes");
         tabOrganisme.setContent(tableOrganisme);
         
         tabPane.getTabs().add(tabIntervenant);

@@ -3,7 +3,8 @@ package fr.sirs.importer.troncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ContactTroncon;
+import fr.sirs.core.model.SyndicTroncon;
+import fr.sirs.core.model.Syndicat;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -22,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  */
 class TronconGestionDigueSyndicatImporter extends GenericImporter {
 
-    private Map<Integer, List<ContactTroncon>> syndicatsByTronconId = null;
+    private Map<Integer, List<SyndicTroncon>> syndicatsByTronconId = null;
     private final SyndicatImporter syndicatImporter;
 
     TronconGestionDigueSyndicatImporter(final Database accessDatabase,
@@ -64,7 +65,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    public Map<Integer, List<ContactTroncon>> getSyndicatsByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<SyndicTroncon>> getSyndicatsByTronconId() throws IOException, AccessDbImporterException {
         if (syndicatsByTronconId == null) compute();
         return syndicatsByTronconId;
     }
@@ -87,14 +88,13 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         syndicatsByTronconId = new HashMap<>();
 
-        final Map<Integer, Contact> syndicats = syndicatImporter.getSyndicats();
+        final Map<Integer, Syndicat> syndicats = syndicatImporter.getSyndicats();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactTroncon periodeSyndicale = new ContactTroncon();
+            final SyndicTroncon periodeSyndicale = new SyndicTroncon();
             
-            periodeSyndicale.setTypeContact("Syndicat");
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
                 periodeSyndicale.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
@@ -108,9 +108,9 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
 
             // Set the references.
             if(row.getInt(Columns.ID_SYNDICAT.toString())!=null){
-                final Contact syndicat = syndicats.get(row.getInt(Columns.ID_SYNDICAT.toString()));
+                final Syndicat syndicat = syndicats.get(row.getInt(Columns.ID_SYNDICAT.toString()));
                 if (syndicat.getId() != null) {
-                    periodeSyndicale.setContactId(syndicat.getId());
+                    periodeSyndicale.setSyndicatId(syndicat.getId());
                 } else {
                     throw new AccessDbImporterException("Le contact " + syndicat + " n'a pas encore d'identifiant CouchDb !");
                 }
@@ -120,7 +120,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
             periodeSyndicale.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = syndicatsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<SyndicTroncon> listeGestions = syndicatsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }

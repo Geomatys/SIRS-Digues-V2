@@ -185,7 +185,9 @@
                         </SplitPane>
                      </content>
                         </Tab>
-                        <Tab fx:id="uiContactTab" text="Contacts" />
+                        <Tab fx:id="uiGestionsTab" text="Gestionnaires" />
+                  <Tab fx:id="uiProprietesTab" text="Propriétaires" />
+                  <Tab fx:id="uiGardesTab" text="Gardiens" />
                     </tabs>
                     <BorderPane.margin>
                         <Insets />

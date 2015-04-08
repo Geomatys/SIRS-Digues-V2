@@ -2,7 +2,7 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.ContactTroncon;
+import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  */
 class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
-    private Map<Integer, List<ContactTroncon>> gestionsByTronconId = null;
+    private Map<Integer, List<GestionTroncon>> gestionsByTronconId = null;
     private final OrganismeImporter organismeImporter;
 
     TronconGestionDigueGestionnaireImporter(final Database accessDatabase,
@@ -43,12 +43,12 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
     /**
      *
-     * @return A map containing all ContactTroncon instances accessibles from
+     * @return A map containing all GestionTroncon instances accessibles from
      * the internal database <em>TronconGestion</em> identifier.
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    public Map<Integer, List<ContactTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
+    public Map<Integer, List<GestionTroncon>> getGestionsByTronconId() throws IOException, AccessDbImporterException {
         if (gestionsByTronconId == null) compute();
         return gestionsByTronconId;
     }
@@ -76,9 +76,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactTroncon gestion = new ContactTroncon();
-            
-            gestion.setTypeContact("Gestionnaire");
+            final GestionTroncon gestion = new GestionTroncon();
 
             if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
                 gestion.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
@@ -103,7 +101,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             gestion.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ContactTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }

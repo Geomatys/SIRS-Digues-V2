@@ -10,9 +10,11 @@ import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.core.component.SystemeReperageRepository;
-import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.GestionTroncon;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.RefTypeTroncon;
 import static fr.sirs.core.model.Role.EXTERN;
@@ -21,10 +23,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.geom.NoninvertibleTransformException;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -50,10 +50,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDateField;
-import org.opengis.referencing.operation.TransformException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -85,8 +82,12 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
     
     // Onglet "Contacts"
-    @FXML private Tab uiContactTab;
-    private final ContactTable uiContactTable = new ContactTable();
+    @FXML private Tab uiGestionsTab;
+    private final GestionsTable uiGestionsTable = new GestionsTable();
+    @FXML private Tab uiProprietesTab;
+    private final ProprietesTable uiProprietesTable = new ProprietesTable();
+    @FXML private Tab uiGardesTab;
+    private final GardesTable uiGardesTable = new GardesTable();
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
@@ -116,7 +117,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiSRAdd.disableProperty().bind(editSR.not());
         uiSRDelete.disableProperty().bind(editSR.not());
         
-        uiContactTable.editableProperty().bind(editBind);
+        uiGestionsTable.editableProperty().bind(editBind);
+        uiProprietesTable.editableProperty().bind(editBind);
+        uiGardesTable.editableProperty().bind(editBind);
         
         // Troncon change listener
         elementProperty.addListener(this::initFields);
@@ -152,7 +155,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             }
         });
         
-        uiContactTab.setContent(uiContactTable);
+        uiGestionsTab.setContent(uiGestionsTable);
+        uiProprietesTab.setContent(uiProprietesTable);
+        uiGardesTab.setContent(uiGardesTable);
     }
     
     public ObjectProperty<TronconDigue> tronconProperty(){
@@ -337,8 +342,12 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
             //liste des systemes de reperage
             uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByTroncon(newValue)));
-            uiContactTable.setParentElement(newValue);
-            uiContactTable.setTableItems(() -> (ObservableList) newValue.contacts);
+            uiGestionsTable.setParentElement(newValue);
+            uiGestionsTable.setTableItems(() -> (ObservableList) newValue.gestions);
+            uiProprietesTable.setParentElement(newValue);
+            uiProprietesTable.setTableItems(() -> (ObservableList) newValue.proprietes);
+            uiGardesTable.setParentElement(newValue);
+            uiGardesTable.setTableItems(() -> (ObservableList) newValue.gardes);
 
         }
         initializing = false;
@@ -349,10 +358,34 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         // Nothing to do ?
     }
     
-    private final class ContactTable extends PojoTable{
+    private final class GestionsTable extends PojoTable{
 
-        public ContactTable() {
-            super(ContactTroncon.class, "Liste des contacts");
+        public GestionsTable() {
+            super(GestionTroncon.class, "Périodes de gestion");
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            //on ne sauvegarde pas, le formulaire conteneur s'en charge
+        }
+    }
+    
+    private final class ProprietesTable extends PojoTable{
+
+        public ProprietesTable() {
+            super(ProprieteTroncon.class, "Périodes de propriétés");
+        }
+
+        @Override
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
+            //on ne sauvegarde pas, le formulaire conteneur s'en charge
+        }
+    }
+    
+    private final class GardesTable extends PojoTable{
+
+        public GardesTable() {
+            super(GardeTroncon.class, "Périodes de gardiennage");
         }
 
         @Override

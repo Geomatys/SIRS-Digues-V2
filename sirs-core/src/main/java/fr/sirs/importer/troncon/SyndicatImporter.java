@@ -2,7 +2,7 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.Syndicat;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.GenericImporter;
@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  */
 class SyndicatImporter extends GenericImporter {
 
-    private Map<Integer, Contact> syndicats = null;
+    private Map<Integer, Syndicat> syndicats = null;
 
     SyndicatImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -34,7 +34,7 @@ class SyndicatImporter extends GenericImporter {
         DATE_DERNIERE_MAJ
     };
 
-    public Map<Integer, Contact> getSyndicats() throws IOException {
+    public Map<Integer, Syndicat> getSyndicats() throws IOException {
         if (syndicats == null) compute();
         return syndicats;
     }
@@ -60,9 +60,9 @@ class SyndicatImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Contact syndicat = new Contact();
+            final Syndicat syndicat = new Syndicat();
             
-            syndicat.setNom(cleanNullString(row.getString(Columns.LIBELLE_SYNDICAT.toString())));
+            syndicat.setLibelle(cleanNullString(row.getString(Columns.LIBELLE_SYNDICAT.toString())));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 syndicat.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));

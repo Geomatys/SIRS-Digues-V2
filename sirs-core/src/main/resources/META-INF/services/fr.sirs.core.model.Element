@@ -6,7 +6,6 @@ fr.sirs.core.model.ContactConvention
 fr.sirs.core.model.Contact
 fr.sirs.core.model.ContactOrganisme
 fr.sirs.core.model.ContactStructure
-fr.sirs.core.model.ContactTroncon
 fr.sirs.core.model.Convention
 fr.sirs.core.model.Crete
 fr.sirs.core.model.Departement
@@ -15,10 +14,13 @@ fr.sirs.core.model.Deversoir
 fr.sirs.core.model.Digue
 fr.sirs.core.model.DocumentGrandeEchelle
 fr.sirs.core.model.DocumentTroncon
+fr.sirs.core.model.DocumentTronconProfilTravers
 fr.sirs.core.model.Epi
 fr.sirs.core.model.EvenementHydraulique
 fr.sirs.core.model.Fondation
 fr.sirs.core.model.FrontFrancBord
+fr.sirs.core.model.GardeTroncon
+fr.sirs.core.model.GestionTroncon
 fr.sirs.core.model.LaisseCrue
 fr.sirs.core.model.LargeurFrancBord
 fr.sirs.core.model.PointLeve
@@ -40,6 +42,7 @@ fr.sirs.core.model.OuvrageParticulier
 fr.sirs.core.model.OuvrageRevanche
 fr.sirs.core.model.OuvrageTelecomEnergie
 fr.sirs.core.model.OuvrageVoirie
+fr.sirs.core.model.ParametreHydrauliqueProfilLong
 fr.sirs.core.model.Photo
 fr.sirs.core.model.PiedDigue
 fr.sirs.core.model.PiedFrontFrancBord
@@ -47,7 +50,7 @@ fr.sirs.core.model.PistePiedDigue
 fr.sirs.core.model.Pompe
 fr.sirs.core.model.Prestation
 fr.sirs.core.model.ProfilFrontFrancBord
-fr.sirs.core.model.ParametreHydrauliqueProfilLong
+fr.sirs.core.model.ProprieteTroncon
 fr.sirs.core.model.ProfilLong
 fr.sirs.core.model.ParametreHydrauliqueProfilTravers
 fr.sirs.core.model.ProfilTravers
@@ -106,6 +109,8 @@ fr.sirs.core.model.ReseauHydroCielOuvert
 fr.sirs.core.model.ReseauTelecomEnergie
 fr.sirs.core.model.SommetRisberme
 fr.sirs.core.model.StationPompage
+fr.sirs.core.model.Syndicat
+fr.sirs.core.model.SyndicTroncon
 fr.sirs.core.model.SystemeEndiguement
 fr.sirs.core.model.SystemeReperageBorne
 fr.sirs.core.model.SystemeReperage

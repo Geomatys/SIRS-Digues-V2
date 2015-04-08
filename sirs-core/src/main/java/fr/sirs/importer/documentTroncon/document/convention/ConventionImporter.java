@@ -6,7 +6,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 
 import fr.sirs.core.model.ContactConvention;
-import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefConvention;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;

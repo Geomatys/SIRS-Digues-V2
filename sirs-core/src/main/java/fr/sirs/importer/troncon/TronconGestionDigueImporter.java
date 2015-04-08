@@ -14,12 +14,14 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractDocumentTroncon;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
-import fr.sirs.core.model.ContactTroncon;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.ProprieteTroncon;
+import fr.sirs.core.model.SyndicTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
@@ -100,10 +102,11 @@ implements DocumentsUpdatable {
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
         tronconGestionDigueGardienImporter = new GardienTronconGestionImporter(
-                accessDatabase, couchDbConnector, intervenantImporter);
+                accessDatabase, couchDbConnector, systemeReperageImporter, 
+                borneDigueImporter,intervenantImporter);
         tronconGestionDigueProprietaireImporter = new ProprietaireTronconGestionImporter(
-                accessDatabase, couchDbConnector, intervenantImporter, 
-                organismeImporter);
+                accessDatabase, couchDbConnector, systemeReperageImporter, 
+                borneDigueImporter, intervenantImporter, organismeImporter);
         syndicatImporter = new SyndicatImporter(accessDatabase, couchDbConnector);
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
         this.documentImporter = documentImporter;
@@ -175,10 +178,10 @@ implements DocumentsUpdatable {
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
         final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeReferences();
-        final Map<Integer, List<ContactTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
-        final Map<Integer, List<ContactTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
-        final Map<Integer, List<ContactTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
-        final Map<Integer, List<ContactTroncon>> syndicatsByTroncon = tronconGestionDigueSyndicatImporter.getSyndicatsByTronconId();
+        final Map<Integer, List<GestionTroncon>> gestionsByTroncon = tronconGestionDigueGestionnaireImporter.getGestionsByTronconId();
+        final Map<Integer, List<GardeTroncon>> gardiensByTroncon = tronconGestionDigueGardienImporter.getGardiensByTronconId();
+        final Map<Integer, List<ProprieteTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
+        final Map<Integer, List<SyndicTroncon>> syndicatsByTroncon = tronconGestionDigueSyndicatImporter.getSyndicatsByTronconId();
         final Map<Integer, List<BorneDigue>> bornesByTroncon = borneDigueImporter.getBorneDigueByTronconId();
         final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
@@ -220,24 +223,17 @@ implements DocumentsUpdatable {
 
 
             // Set simple references.
-            List<ContactTroncon> contacts;
+            final List<GestionTroncon> gestions = gestionsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(gestions!=null) tronconDigue.setGestions(gestions);
             
-            final List<ContactTroncon> gestions = gestionsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            contacts=gestions;
+            final List<GardeTroncon> gardes = gardiensByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(gardes!=null) tronconDigue.setGardes(gardes);
             
-            final List<ContactTroncon> gardiens = gardiensByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(contacts != null && gardiens!=null) contacts.addAll(gardiens);
-            else if(contacts==null) contacts=gardiens;
+            final List<ProprieteTroncon> proprietes = propriosByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(proprietes!=null) tronconDigue.setProprietes(proprietes);
             
-            final List<ContactTroncon> proprietaires = propriosByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(contacts != null && proprietaires!=null) contacts.addAll(proprietaires);
-            else if (contacts==null) contacts=proprietaires;
-            
-            final List<ContactTroncon> syndicats = syndicatsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(contacts != null && syndicats!=null) contacts.addAll(syndicats);
-            else if (contacts==null) contacts=syndicats;
-            
-            if(contacts!=null) tronconDigue.setContacts(contacts);
+            final List<SyndicTroncon> syndicats = syndicatsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            if(syndicats!=null) tronconDigue.setSyndics(syndicats);
             // Fin des contacts
             
             final List<CommuneTroncon> communesTroncons = communes.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
