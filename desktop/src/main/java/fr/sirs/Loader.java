@@ -54,6 +54,7 @@ import java.util.List;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Window;
 import org.controlsfx.dialog.ExceptionDialog;
 
 /**
@@ -254,27 +255,38 @@ public class Loader extends Application {
      * Display the main frame.
      */
     private static synchronized void showMainStage() throws IOException {
-        FXMainFrame frame = Injector.getSession().getFrame();
+        final Session session = Injector.getSession();
+        FXMainFrame frame = session.getFrame();
         if (frame == null) {
             frame = new FXMainFrame();
-            final Session session = Injector.getBean(Session.class);
             session.setFrame(frame);
-            final Stage stage = new Stage();
+        }
+        
+        Scene mainScene = frame.getScene();
+        if (mainScene == null) {
+            mainScene = new Scene(frame);
+        }
+        
+        final Stage mainStage;
+        if (mainScene.getWindow() instanceof Stage) {
+            mainStage = (Stage) mainScene.getWindow();
+        } else {
+            mainStage = new Stage();
             String userInfo = "";
             String login = session.getUtilisateur().getLogin();
             String role = new SirsStringConverter().toString(session.getRole());
             if(!"".equals(login) || !"".equals(role)){
                 userInfo += " - Connecté en tant que "+session.getUtilisateur().getLogin()+ " ("+role+")";
             }
-            stage.setTitle("SIRS-Digues V2"+userInfo);
-            stage.setScene(new Scene(frame));
-            stage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
-            stage.setMaximized(true);
-            stage.show();
-            stage.setMinWidth(800);
-            stage.setMinHeight(600);
+            mainStage.setTitle("SIRS-Digues V2"+userInfo);
+            mainStage.setScene(mainScene);
+            mainStage.setMaximized(true);
+            mainStage.setMinWidth(800);
+            mainStage.setMinHeight(600);
+            mainStage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
         }
-        
+            
+        mainStage.show();
         frame.getMapTab().show();
     }
 
