@@ -14,6 +14,8 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.RefRive;
+import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
@@ -38,6 +40,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -66,6 +69,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
+import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.ItemListener;
@@ -210,20 +214,24 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         }
     }
     
-    public static Entry<String,Digue> showTronconDialog() {
+    /**
+     * Show a dialog allowing user to create a new {@link TronconDigue} by setting
+     * its libelle, {@link Digue} and {@link RefRive}. Other fields as Geometry are
+     * left null.
+     * @return Return the new troncon, or null if user has cancelled dialog.
+     */
+    public static TronconDigue showTronconDialog() {
         final Session session = Injector.getBean(Session.class);
         final List<Digue> digues = session.getDigues();
-        final ChoiceBox<Digue> choiceBox = new ChoiceBox<>(FXCollections.observableList(digues));
-        choiceBox.setConverter(new StringConverter<Digue>() {
-            @Override
-            public String toString(Digue object) {
-                return object.getLibelle();
-            }
-            @Override
-            public Digue fromString(String string) {
-                return null;
-            }
-        });
+        final ComboBox<Digue> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
+        final ComboBox<RefRive> rives = new ComboBox<RefRive>(
+                FXCollections.observableList(session.getRefRiveRepository().getAll()));
+        
+        final SirsStringConverter strConverter = new SirsStringConverter();
+        diguesChoice.setConverter(strConverter);
+        diguesChoice.setEditable(true);
+        new ComboBoxCompletion(diguesChoice);
+        rives.setConverter(strConverter);
 
         final TextField nameField = new TextField();
         
@@ -247,7 +255,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         bp.add(new Label("Nom du tronçon"), 0, 0);
         bp.add(nameField, 0, 1);
         bp.add(new Label("Rattacher à la digue"), 0, 2);
-        bp.add(choiceBox, 0, 3);
+        bp.add(diguesChoice, 0, 3);
+        bp.add(new Label("Sur la rive"), 0, 4);
+        bp.add(rives, 0, 5);
         
         final Button finishBtn = new Button("Terminer");
         // Do not allow creation of a troncon without a name.
@@ -272,9 +282,24 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         
         dialog.setScene(new Scene(main));
         dialog.showAndWait();
-
-        final Digue digue = choiceBox.getValue();        
-        return new AbstractMap.SimpleImmutableEntry<>(nameField.getText(),digue);
+  
+        
+        String tronconName = nameField.getText();
+        if (tronconName == null || tronconName.isEmpty()) {
+            return null;
+        } else {
+            TronconDigue tmpTroncon = new TronconDigue();
+            tmpTroncon.setLibelle(tronconName);
+            final Digue digue = diguesChoice.getValue();
+            if (digue != null) {
+                tmpTroncon.setDigueId(digue.getId());
+            }
+            final RefRive rive = rives.getValue();
+            if (rive != null) {
+                tmpTroncon.setTypeRiveId(rive.getId());
+            }
+            return tmpTroncon;
+        }
     }
 
     @Override
@@ -338,12 +363,10 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     
                     final MenuItem createItem = new MenuItem("Créer un nouveau tronçon");
                     createItem.setOnAction((ActionEvent event) -> {
-                        final Entry<String, Digue> entry = showTronconDialog();
-                        if (entry.getKey() == null || entry.getKey().isEmpty()) {
+                        final TronconDigue tmpTroncon = showTronconDialog();
+                        if (tmpTroncon == null) {
                             return;
                         }
-                        TronconDigue tmpTroncon = new TronconDigue();
-                        tmpTroncon.setLibelle(entry.getKey());
 
                         final Coordinate coord1 = helper.toCoord(e.getX() - 20, e.getY());
                         final Coordinate coord2 = helper.toCoord(e.getX() + 20, e.getY());
@@ -352,9 +375,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             //convertion from base crs
                             geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), SirsCore.getEpsgCode(), true));
                             JTS.setCRS(geom, SirsCore.getEpsgCode());
-                            if (entry.getValue() != null) {
-                                tmpTroncon.setDigueId(entry.getValue().getId());
-                            }
                             tmpTroncon.setGeometry(geom);
 
                             //sauvegarde du troncon

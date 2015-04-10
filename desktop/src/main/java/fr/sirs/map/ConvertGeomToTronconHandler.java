@@ -114,12 +114,8 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
                     }
                     
                     if(geom !=null) {
-                        final Map.Entry<String, Digue> entry = showTronconDialog();
-                        final Session session = Injector.getBean(Session.class);
-                        final TronconDigue troncon = new TronconDigue();
-                        troncon.setLibelle(entry.getKey());
-                        if(entry.getValue()!=null) troncon.setDigueId(entry.getValue().getId());
-
+                        final TronconDigue troncon = showTronconDialog();
+                        if (troncon == null) return;
                         try{
                             //convertion from data crs to base crs
                             geom = JTS.transform(geom, CRS.findMathTransform(
@@ -129,6 +125,7 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
                             troncon.setGeometry(geom);
 
                             //save troncon
+                            final Session session = Injector.getBean(Session.class);
                             session.getTronconDigueRepository().add(troncon);
                             TronconUtils.updateSRElementaire(troncon,session);
                             
