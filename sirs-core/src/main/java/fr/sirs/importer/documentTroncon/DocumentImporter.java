@@ -66,7 +66,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
                 couchDbConnector);
         documentManager = new DocumentManager(accessDatabase, couchDbConnector, 
                 organismeImporter, intervenantImporter, 
-                evenementHydrauliqueImporter, typeDocumentImporter, this);
+                evenementHydrauliqueImporter, typeDocumentImporter);
         
         documentRelatedImporters = documentManager.getDocumentRelatedImporters();
         
@@ -169,7 +169,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
         return DbImporter.TableName.DOCUMENT.toString();
     }
 
-    private Map<Integer, DocumentTroncon> properDocumentTroncons = new HashMap<>();
+    private final Map<Integer, DocumentTroncon> properDocumentTroncons = new HashMap<>();
     
     @Override
     protected void preCompute() throws IOException, AccessDbImporterException {
@@ -226,6 +226,8 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
                     
                     documentTronconByTronconId.get(troncon).add(documentTroncon);
                 }
+                documentTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+                documentTroncon.setValid(true);
             }
         }
     }
@@ -245,8 +247,9 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final Integer rowId = row.getInt(Columns.ID_DOC.toString());
             final AbstractDocumentTroncon docTroncon = importRow(row);
+            docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+            docTroncon.setValid(true);
             //documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                     documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
@@ -271,7 +274,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
     AbstractDocumentTroncon importRow(Row row) throws IOException, AccessDbImporterException {
         
         final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
-        final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();
+//        final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();
         
         final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
 

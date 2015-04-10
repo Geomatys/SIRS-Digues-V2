@@ -102,7 +102,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DocumentTroncon" eSuperTypes="#//AbstractDocumentTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
@@ -1178,9 +1177,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeve" upperBound="-1"
-        eType="#//PointLeve" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveXYZ" upperBound="-1"
+        eType="#//PointLeveXYZ" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveDZ" upperBound="-1"
+        eType="#//PointLeveDZ" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1225,18 +1225,19 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="origineProfilLongId" eType="#//RefOrigineProfilLong"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeve" upperBound="-1"
-        eType="#//PointLeve" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveDZ" upperBound="-1"
+        eType="#//PointLeveDZ" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionProfilLongSurDigueId"
         eType="#//RefPositionProfilLongSurDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parametresHydrauliques"
         upperBound="-1" eType="#//ParametreHydrauliqueProfilLong" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveXYZ" upperBound="-1"
+        eType="#//PointLeveXYZ" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1279,12 +1280,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PointLeve">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PointLeve" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="z" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="d" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1395,6 +1392,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierPlanEnsemble"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierCoupeImage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="ReferenceType" abstract="true" interface="true"/>
@@ -1416,10 +1414,13 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DocumentTronconProfilTravers" eSuperTypes="#//AbstractDocumentTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureId" eType="#//Objet"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//ProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//Photo" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="levePositionIds" upperBound="-1"
+        eType="#//LevePositionProfilTravers">
+      <eAnnotations source="owner"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDefaultDocument" abstract="true"
       interface="true" eSuperTypes="#//SIRSDocument"/>
@@ -1482,5 +1483,30 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementId" eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleId" upperBound="-1"
         eType="#//ArticleJournal"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LevePositionProfilTravers">
+    <eAnnotations source="generation"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cotePiedDigueRiviere" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteSommetRisbermeRiviere"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteSommetRisbermeTerre"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cotePiedDigueTerre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="leveId" lowerBound="1"
+        eType="#//LeveProfilTravers"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PointLeveDZ" eSuperTypes="#//PointLeve">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="d" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PointLeveXYZ" eSuperTypes="#//PointLeve">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
 </ecore:EPackage>

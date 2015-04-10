@@ -332,12 +332,12 @@ public class DbImporter {
      PRESTATION_EVENEMENT_HYDRAU,
      PRESTATION_INTERVENANT,
      PROFIL_EN_LONG,
-//     PROFIL_EN_LONG_DZ, // Même sort que PROFIL_EN_TRAVERS_DZ ?
+     PROFIL_EN_LONG_DZ, // Même sort que PROFIL_EN_TRAVERS_DZ ?
      PROFIL_EN_LONG_EVT_HYDRAU,
      PROFIL_EN_LONG_XYZ,
      PROFIL_EN_TRAVERS,
      PROFIL_EN_TRAVERS_DESCRIPTION,
-//     PROFIL_EN_TRAVERS_DZ, // Ne sera probablement plus dans la v2 (à confirmer)
+     PROFIL_EN_TRAVERS_DZ, // Ne sera probablement plus dans la v2 (à confirmer)
      PROFIL_EN_TRAVERS_EVT_HYDRAU,
 //     PROFIL_EN_TRAVERS_STRUCTUREL, // Ne sera plus dans la v2
      PROFIL_EN_TRAVERS_TRONCON,

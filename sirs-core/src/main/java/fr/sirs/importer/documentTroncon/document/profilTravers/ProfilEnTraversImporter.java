@@ -2,15 +2,11 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,8 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -30,7 +24,7 @@ import org.ektorp.CouchDbConnector;
 public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<ProfilTravers> {
     
     private ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
-//    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
+    private ProfilEnTraversTronconImporter profilTraversTronconImporter;
     
     private ProfilEnTraversImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
@@ -39,12 +33,15 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
 
     public ProfilEnTraversImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
-            final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter,
-            final DocumentImporter documentImporter){
+            final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter){
         this(accessDatabase, couchDbConnector);
         this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
-//        this.profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
-//                accessDatabase, couchDbConnector, documentImporter);
+        profilTraversTronconImporter = new ProfilEnTraversTronconImporter(
+                accessDatabase, couchDbConnector, profilTraversDescriptionImporter);
+    }
+    
+    public ProfilEnTraversTronconImporter getProfilEnTraversTronconImporter(){
+        return profilTraversTronconImporter;
     }
     
     private enum Columns {

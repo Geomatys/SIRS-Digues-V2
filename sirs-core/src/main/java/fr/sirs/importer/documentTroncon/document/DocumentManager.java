@@ -39,8 +39,7 @@ public class DocumentManager {
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final TypeDocumentImporter typeDocumentImporter,
-            final DocumentImporter documentImporter){
+            final TypeDocumentImporter typeDocumentImporter){
         
         conventionImporter = new ConventionImporter(accessDatabase, 
                 couchDbConnector, intervenantImporter, organismeImporter);
@@ -69,8 +68,7 @@ public class DocumentManager {
                 typeSystemeReleveProfilImporter, organismeImporter, 
                 evenementHydrauliqueImporter);
         profilEnTraversImporter = new ProfilEnTraversImporter(accessDatabase, 
-                couchDbConnector, profilTraversDescriptionImporter, 
-                documentImporter);
+                couchDbConnector, profilTraversDescriptionImporter);
         documentRelatedImporters.add(profilEnTraversImporter);
         
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 

@@ -167,6 +167,9 @@ public class PojoTable extends BorderPane {
     
     /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
     protected final SimpleObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
+    /** The element to set as owner for any created element using {@linkplain #createPojo() }. 
+     On the contrary to the parent, the owner purpose is not to contain the created pojo, but to reference it.*/
+    protected final SimpleObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
     
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected Task tableUpdater;
@@ -428,16 +431,16 @@ public class PojoTable extends BorderPane {
      * la PojoTable.
      */
     public void setParentElement(final Element parentElement) {
-        this.parentElementProperty.set(parentElement);
+        parentElementProperty.set(parentElement);
     }
     
     /**
      * 
      * @return L'élément à affecter en tant que parent de tout élément créé via 
-     * cette table. Peut-être nul.
+     * cette table. Peut être nul.
      */
     public Element getParentElement() {
-        return this.parentElementProperty.get();
+        return parentElementProperty.get();
     }
         
     /**
@@ -446,7 +449,35 @@ public class PojoTable extends BorderPane {
      *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
      */
     public SimpleObjectProperty<Element> parentElementProperty() {
-        return this.parentElementProperty;
+        return parentElementProperty;
+    }
+    
+    /**
+     * Définit l'élément en paramètre comme principal référent de tout élément créé via cette table.
+     * 
+     * @param parentElement L'élément qui doit devenir le principal référent de tout objet créé via 
+     * la PojoTable.
+     */
+    public void setOwnerElement(final Element parentElement) {
+        ownerElementProperty.set(parentElement);
+    }
+    
+    /**
+     * 
+     * @return L'élément principal référent de tout élément créé via 
+     * cette table. Peut être nul.
+     */
+    public Element getOwnerElement() {
+        return ownerElementProperty.get();
+    }
+        
+    /**
+     * 
+     * @return La propriété contenant l'élément à affecter en tant que principal référent de
+     *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
+     */
+    public SimpleObjectProperty<Element> ownerElementProperty() {
+        return ownerElementProperty;
     }
     
     protected ObservableList<Element> getAllValues(){return allValues;}
@@ -624,8 +655,12 @@ public class PojoTable extends BorderPane {
             if (repo != null && createNewProperty.get()) {
                 repo.remove(pojo);
             }
+            
             if (parentElementProperty.get() != null) {
                 parentElementProperty.get().removeChild(pojo);
+            }else if(ownerElementProperty.get() != null){
+                ownerElementProperty.get().removeChild(pojo);
+                repo.remove(pojo);
             }
             items.remove(pojo);
         }
@@ -705,9 +740,20 @@ public class PojoTable extends BorderPane {
             final Element newlyCreated = (Element)result;
             newlyCreated.setAuthor(session.getUtilisateur().getId());
             newlyCreated.setValid(!(session.getRole()==Role.EXTERN));
+            
+            /* Dans le cas où on a un parent, il n'est pas nécessaire de faire
+            addChild(), car la liste des éléments de la table est directement 
+            cette liste d'éléments enfants, sur laquelle on fait un add().*/
             if (parentElementProperty.get() != null) {
                 // this should do nothing for new 
                 newlyCreated.setParent(parentElementProperty.get());
+            } 
+            /* Mais dans le cas où on a un référant principal, il faut faire un
+            addChild(), car la liste des éléments de la table n'est pas une 
+            liste d'éléments enfants. Le référant principal n'a qu'une liste 
+            d'identifiants qu'il convient de mettre à jour avec addChild().*/
+            else if(ownerElementProperty.get() != null){
+                ownerElementProperty.get().addChild(newlyCreated);
             }
             uiTable.getItems().add((Element)result);
         } else {

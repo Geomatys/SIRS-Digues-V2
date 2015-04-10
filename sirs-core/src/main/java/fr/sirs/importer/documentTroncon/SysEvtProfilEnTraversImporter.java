@@ -6,8 +6,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.DocumentTroncon;
 import fr.sirs.core.model.DocumentTronconProfilTravers;
+import fr.sirs.core.model.LevePositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
@@ -163,6 +163,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<DocumentTron
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, ProfilTravers> profilsTravers = profilTraversImporter.getRelated();
+        final Map<Integer, List<LevePositionProfilTravers>> levePositions = profilTraversImporter.getProfilEnTraversTronconImporter().getByLocalisationId();
         
         final DocumentTronconProfilTravers docTroncon = new DocumentTronconProfilTravers();
         final GeometryFactory geometryFactory = new GeometryFactory();
@@ -230,6 +231,13 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<DocumentTron
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
             docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
+        
+        if(levePositions.get(row.getInt(Columns.ID_DOC.toString()))!=null){
+            for(final LevePositionProfilTravers levePosition : levePositions.get(row.getInt(Columns.ID_DOC.toString()))){
+                docTroncon.getLevePositionIds().add(levePosition.getId());
+            }
+        }
+        
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
         docTroncon.setValid(true);
         

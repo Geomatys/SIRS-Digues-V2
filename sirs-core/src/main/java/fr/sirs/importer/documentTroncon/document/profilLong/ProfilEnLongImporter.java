@@ -2,10 +2,11 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.PointLeve;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
+import fr.sirs.core.model.PointLeveDZ;
+import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
@@ -33,7 +34,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
     private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private final TypePositionProfilLongImporter typePositionProfilLongImporter;
     private final TypeOrigineProfilLongImporter typeOrigineProfilLongImporter;
-    private final ProfilLongPointXYZImporter profilTraversPointXYZImporter;
+    private final ProfilLongPointXYZImporter profilLongPointXYZImporter;
+    private final ProfilLongPointDZImporter profilLongPointDZImporter;
     private final ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
     
     private final OrganismeImporter organismeImporter;
@@ -52,7 +54,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
                 accessDatabase, couchDbConnector);
         this.typeOrigineProfilLongImporter = new TypeOrigineProfilLongImporter(
                 accessDatabase, couchDbConnector);
-        profilTraversPointXYZImporter = new ProfilLongPointXYZImporter(accessDatabase, couchDbConnector);
+        profilLongPointXYZImporter = new ProfilLongPointXYZImporter(accessDatabase, couchDbConnector);
+        profilLongPointDZImporter = new ProfilLongPointDZImporter(accessDatabase, couchDbConnector);
     }
     
     private enum Columns {
@@ -96,7 +99,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeReferences();
-        final Map<Integer, List<PointLeve>> pointsByLeve = profilTraversPointXYZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<PointLeveXYZ>> pointsByLeveXYZ = profilLongPointXYZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<PointLeveDZ>> pointsByLeveDZ = profilLongPointDZImporter.getLeveePointByProfilId();
         final Map<Integer, List<ParametreHydrauliqueProfilLong>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
@@ -141,8 +145,12 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
                 profil.setPositionProfilLongSurDigueId(typesPositionProfil.get(row.getInt(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())).getId());
             }
             
-            if(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
-                profil.setPointsLeve(pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
+            if(pointsByLeveXYZ.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setPointsLeveXYZ(pointsByLeveXYZ.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
+            }
+            
+            if(pointsByLeveDZ.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){
+                profil.setPointsLeveDZ(pointsByLeveDZ.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString())));
             }
             
             if(evenementsHydrauliques.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()))!=null){

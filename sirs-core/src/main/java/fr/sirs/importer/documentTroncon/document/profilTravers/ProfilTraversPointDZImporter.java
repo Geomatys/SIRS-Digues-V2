@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.PointLeve;
+import fr.sirs.core.model.PointLeveDZ;
 import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -19,32 +19,31 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilTraversPointXYZImporter extends GenericImporter {
+class ProfilTraversPointDZImporter extends GenericImporter {
 
-    private Map<Integer, PointLeveXYZ> points = null;
-    private Map<Integer, List<PointLeveXYZ>> pointsByLeve = null;
+    private Map<Integer, PointLeveDZ> points = null;
+    private Map<Integer, List<PointLeveDZ>> pointsByProfil = null;
     
-    ProfilTraversPointXYZImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
+    ProfilTraversPointDZImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, PointLeveXYZ> getLeveePoints() throws IOException, AccessDbImporterException{
+    public Map<Integer, PointLeveDZ> getLeveePoints() throws IOException, AccessDbImporterException{
         if(points==null) compute();
         return points;
     }
     
-    public Map<Integer, List<PointLeveXYZ>> getLeveePointByLeveId() throws IOException, AccessDbImporterException{
-        if(pointsByLeve==null) compute();
-        return pointsByLeve;
+    public Map<Integer, List<PointLeveDZ>> getLeveePointByLeveId() throws IOException, AccessDbImporterException{
+        if(pointsByProfil==null) compute();
+        return pointsByProfil;
     }
     
     private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_POINT,
-        X,
-        Y,
+        DISTANCE,
         Z,
-//        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
+        DATE_DERNIERE_MAJ
     }
     
     @Override
@@ -58,25 +57,21 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ.toString();
+        return DbImporter.TableName.PROFIL_EN_TRAVERS_DZ.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         points = new HashMap<>();
-        pointsByLeve = new HashMap<>();
+        pointsByProfil = new HashMap<>();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final PointLeveXYZ levePoint = new PointLeveXYZ();
+            final PointLeveDZ levePoint = new PointLeveDZ();
             
-            if (row.getDouble(Columns.X.toString()) != null) {
-                levePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
-            }
-            
-            if (row.getDouble(Columns.Y.toString()) != null) {
-                levePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
+            if (row.getDouble(Columns.DISTANCE.toString()) != null) {
+                levePoint.setD(row.getDouble(Columns.DISTANCE.toString()).doubleValue());
             }
             
             if (row.getDouble(Columns.Z.toString()) != null) {
@@ -85,15 +80,14 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
             levePoint.setValid(true);
-            
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
-            List<PointLeveXYZ> listByLeve = pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
-            if (listByLeve == null) {
-                listByLeve = new ArrayList<>();
-                pointsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByLeve);
+            List<PointLeveDZ> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
+            if (listByProfil == null) {
+                listByProfil = new ArrayList<>();
+                pointsByProfil.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), listByProfil);
             }
-            listByLeve.add(levePoint);
+            listByProfil.add(levePoint);
         }
     }
 }

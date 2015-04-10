@@ -24,7 +24,6 @@ fr.sirs.core.model.GestionObjet
 fr.sirs.core.model.GestionTroncon
 fr.sirs.core.model.LaisseCrue
 fr.sirs.core.model.LargeurFrancBord
-fr.sirs.core.model.PointLeve
 fr.sirs.core.model.LeveProfilTravers
 fr.sirs.core.model.LigneEau
 fr.sirs.core.model.MaitreOeuvreMarche
@@ -47,6 +46,8 @@ fr.sirs.core.model.Photo
 fr.sirs.core.model.PiedDigue
 fr.sirs.core.model.PiedFrontFrancBord
 fr.sirs.core.model.PistePiedDigue
+fr.sirs.core.model.PointLeveDZ
+fr.sirs.core.model.PointLeveXYZ
 fr.sirs.core.model.Pompe
 fr.sirs.core.model.Prestation
 fr.sirs.core.model.ProfilFrontFrancBord
