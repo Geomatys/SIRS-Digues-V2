@@ -273,7 +273,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
             
             if(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())!=null){
                 if(pompes.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()))!=null){
-                    stationPompage.setPompeIds(pompes.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
+                    stationPompage.setPompes(pompes.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
                 }
             }
             
