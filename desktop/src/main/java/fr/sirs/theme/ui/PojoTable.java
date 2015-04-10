@@ -660,7 +660,6 @@ public class PojoTable extends BorderPane {
                 parentElementProperty.get().removeChild(pojo);
             }else if(ownerElementProperty.get() != null){
                 ownerElementProperty.get().removeChild(pojo);
-                repo.remove(pojo);
             }
             items.remove(pojo);
         }

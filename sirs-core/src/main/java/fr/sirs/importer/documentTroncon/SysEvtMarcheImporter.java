@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
@@ -34,7 +34,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtMarcheImporter extends GenericDocumentImporter<DocumentTroncon> {
+class SysEvtMarcheImporter extends GenericDocumentImporter<PositionDocument> {
 
     private final MarcheImporter conventionImporter;
     
@@ -124,7 +124,7 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<DocumentTroncon> {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final DocumentTroncon documentTroncon = new DocumentTroncon();
+            final PositionDocument documentTroncon = new PositionDocument();
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -141,13 +141,13 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<DocumentTroncon> {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final DocumentTroncon docTroncon = importRow(row);
+            final PositionDocument docTroncon = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
 
             // Set the list ByTronconId
-            List<DocumentTroncon> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<PositionDocument> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
                 documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -158,13 +158,13 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<DocumentTroncon> {
     }
 
     @Override
-    DocumentTroncon importRow(Row row) throws IOException, AccessDbImporterException {
+    PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Marche> conventions = conventionImporter.getRelated();
 
-        final DocumentTroncon docTroncon = new DocumentTroncon();
+        final PositionDocument docTroncon = new PositionDocument();
         final GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {

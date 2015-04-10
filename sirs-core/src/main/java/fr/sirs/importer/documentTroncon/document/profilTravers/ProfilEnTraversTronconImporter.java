@@ -111,7 +111,9 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             levePositionProfilTravers.setLeveId(leves.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())).getId());
             
             // Faute d'identifiant spécifique, on attribue celui du levé par défaut
-            levePositionProfilTravers.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
+            levePositionProfilTravers.setDesignation(
+                    String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))+"/"+String.valueOf(row.getInt(Columns.ID_DOC.toString()))
+            );
             levePositionProfilTravers.setValid(true);
 
             levesPositionProfilTravers.add(levePositionProfilTravers);

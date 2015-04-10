@@ -12,8 +12,6 @@ fr.sirs.core.model.Desordre
 fr.sirs.core.model.Deversoir
 fr.sirs.core.model.Digue
 fr.sirs.core.model.DocumentGrandeEchelle
-fr.sirs.core.model.DocumentTroncon
-fr.sirs.core.model.DocumentTronconProfilTravers
 fr.sirs.core.model.Epi
 fr.sirs.core.model.EvenementHydraulique
 fr.sirs.core.model.Fondation
@@ -49,6 +47,8 @@ fr.sirs.core.model.PistePiedDigue
 fr.sirs.core.model.PointLeveDZ
 fr.sirs.core.model.PointLeveXYZ
 fr.sirs.core.model.Pompe
+fr.sirs.core.model.PositionDocument
+fr.sirs.core.model.PositionDocumentProfilTravers
 fr.sirs.core.model.Prestation
 fr.sirs.core.model.ProfilFrontFrancBord
 fr.sirs.core.model.ProprieteObjet

@@ -9,13 +9,13 @@ import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
-import fr.sirs.core.model.AbstractDocumentTroncon;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentTroncon;
-import fr.sirs.core.model.DocumentTronconProfilTravers;
+import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.PositionDocumentProfilTravers;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -89,7 +89,7 @@ import org.apache.sis.util.ArgumentChecks;
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
     
     private final HashMap<String, Callable<List<? extends Objet>>> viewMapObjets = new HashMap();
-    private final HashMap<String, Callable<List<? extends AbstractDocumentTroncon>>> viewMapDocuments = new HashMap();
+    private final HashMap<String, Callable<List<? extends AbstractPositionDocument>>> viewMapDocuments = new HashMap();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
@@ -126,8 +126,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(TALUSRISBERME, this::getAllTalusRisbermes);
         viewMapObjets.put(VOIEACCES, this::getAllVoieAccess);
         viewMapObjets.put(VOIEDIGUE, this::getAllVoieDigues);
-        viewMapDocuments.put(DOCUMENTTRONCON, this::getAllDocumentTroncons);
-        viewMapDocuments.put(DOCUMENTTRONCONPROFILTRAVERS, this::getAllDocumentTronconProfilTravers);
+        viewMapDocuments.put(POSITIONDOCUMENT, this::getAllDocumentTroncons);
+        viewMapDocuments.put(POSITIONDOCUMENTPROFILTRAVERS, this::getAllDocumentTronconProfilTravers);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -402,36 +402,36 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 PiedFrontFrancBord.class);
     }
 
-    public static final String DOCUMENTTRONCON = "DocumentTroncon";
+    public static final String POSITIONDOCUMENT = "PositionDocument";
 
-    @View(name = DOCUMENTTRONCON, map = "classpath:DocumentTroncon-map.js")
-    public List<DocumentTroncon> getAllDocumentTroncons() {
-        return db.queryView(createQuery(DOCUMENTTRONCON),
-                DocumentTroncon.class);
+    @View(name = POSITIONDOCUMENT, map = "classpath:PositionDocument-map.js")
+    public List<PositionDocument> getAllDocumentTroncons() {
+        return db.queryView(createQuery(POSITIONDOCUMENT),
+                PositionDocument.class);
     }
 
-    public static final String DOCUMENTTRONCONBYDOCUMENTID = "DocumentTronconByDocumentId";
+    public static final String POSITIONDOCUMENTBYDOCUMENTID = "PositionDocumentByDocumentId";
 
-    @View(name = DOCUMENTTRONCONBYDOCUMENTID, map = "classpath:DocumentTronconByDocumentId-map.js")
-    public List<DocumentTroncon> getDocumentTronconsByDocumentId(final String documentId) {
-        return db.queryView(createQuery(DOCUMENTTRONCONBYDOCUMENTID).key(documentId),
-                DocumentTroncon.class);
+    @View(name = POSITIONDOCUMENTBYDOCUMENTID, map = "classpath:PositionDocumentByDocumentId-map.js")
+    public List<PositionDocument> getDocumentTronconsByDocumentId(final String documentId) {
+        return db.queryView(createQuery(POSITIONDOCUMENTBYDOCUMENTID).key(documentId),
+                PositionDocument.class);
     }
 
-    public static final String DOCUMENTTRONCONPROFILTRAVERS = "DocumentTronconProfilTravers";
+    public static final String POSITIONDOCUMENTPROFILTRAVERS = "PositionDocumentProfilTravers";
 
-    @View(name = DOCUMENTTRONCONPROFILTRAVERS, map = "classpath:DocumentTronconProfilTravers-map.js")
-    public List<DocumentTronconProfilTravers> getAllDocumentTronconProfilTravers() {
-        return db.queryView(createQuery(DOCUMENTTRONCONPROFILTRAVERS),
-                DocumentTronconProfilTravers.class);
+    @View(name = POSITIONDOCUMENTPROFILTRAVERS, map = "classpath:PositionDocumentProfilTravers-map.js")
+    public List<PositionDocumentProfilTravers> getAllDocumentTronconProfilTravers() {
+        return db.queryView(createQuery(POSITIONDOCUMENTPROFILTRAVERS),
+                PositionDocumentProfilTravers.class);
     }
 
-    public static final String DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID = "DocumentTronconProfilTraversByDocumentId";
+    public static final String POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID = "PositionDocumentProfilTraversByDocumentId";
 
-    @View(name = DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID, map = "classpath:DocumentTronconProfilTraversByDocumentId-map.js")
-    public List<DocumentTronconProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
-        return db.queryView(createQuery(DOCUMENTTRONCONPROFILTRAVERSBYDOCUMENTID).key(documentId),
-                DocumentTronconProfilTravers.class);
+    @View(name = POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID, map = "classpath:PositionDocumentProfilTraversByDocumentId-map.js")
+    public List<PositionDocumentProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
+        return db.queryView(createQuery(POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID).key(documentId),
+                PositionDocumentProfilTravers.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {
@@ -479,8 +479,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
      * @return The result of the executed view, or null if there's no view with 
      * the given name.
      */    
-    public List<? extends AbstractDocumentTroncon> getAllDocumentsFromView(String view) {
-        final Callable<List<? extends AbstractDocumentTroncon>> callable = viewMapDocuments.get(view);
+    public List<? extends AbstractPositionDocument> getAllDocumentsFromView(String view) {
+        final Callable<List<? extends AbstractPositionDocument>> callable = viewMapDocuments.get(view);
         if (callable != null) {
             try {
                 return callable.call();

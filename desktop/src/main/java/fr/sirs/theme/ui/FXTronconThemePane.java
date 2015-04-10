@@ -5,7 +5,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
@@ -69,7 +69,7 @@ public class FXTronconThemePane extends BorderPane {
     public SimpleObjectProperty<TronconDigue> currentTronconProperty(){return currentTronconProperty;}
     
     private TronconThemePojoTable getPojoTable(final AbstractTronconTheme.ThemeGroup group){
-        if(group.getDataClass()==DocumentTroncon.class) return new TronconThemeDocumentTronconPojoTable(group);
+        if(group.getDataClass()==PositionDocument.class) return new TronconThemePositionDocumentPojoTable(group);
         else return new TronconThemeObjetPojoTable(group);
     }
 }

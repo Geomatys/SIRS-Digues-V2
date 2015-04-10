@@ -6,11 +6,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.AbstractDocumentTroncon;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
@@ -135,7 +135,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, AbstractDocumentTroncon> docTroncons = documentImporter.getDocuments();
+        final Map<Integer, AbstractPositionDocument> docTroncons = documentImporter.getDocuments();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
         final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypeReferences();

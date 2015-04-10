@@ -6,11 +6,11 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractDocumentTroncon;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentTroncon;
-import fr.sirs.core.model.DocumentTronconProfilTravers;
+import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.PositionDocumentProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
@@ -295,17 +295,17 @@ public final class SIRS extends SirsCore {
      * @param objetIds Les identifiants des DocumentTroncon à retrouver.
      * @return Une liste de DocumentTroncon. Elle peut être vide, mais jamais nulle.
      */
-    public static ObservableList<AbstractDocumentTroncon> getDocumentTroncons(final Set<String> objetIds, final Class<? extends AbstractDocumentTroncon> documentTronconClass) {
-        ObservableList<AbstractDocumentTroncon> result = FXCollections.observableArrayList();
+    public static ObservableList<AbstractPositionDocument> getDocumentTroncons(final Set<String> objetIds, final Class<? extends AbstractPositionDocument> documentTronconClass) {
+        ObservableList<AbstractPositionDocument> result = FXCollections.observableArrayList();
         if (objetIds == null 
                 || objetIds.isEmpty()) {
             return result;
         }
         
-        List<? extends AbstractDocumentTroncon> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentsFromView(documentTronconClass.getSimpleName());
+        List<? extends AbstractPositionDocument> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentsFromView(documentTronconClass.getSimpleName());
         if (allFromView != null) {
-            final Iterator<? extends AbstractDocumentTroncon> it = allFromView.iterator();
-            AbstractDocumentTroncon o;
+            final Iterator<? extends AbstractPositionDocument> it = allFromView.iterator();
+            AbstractPositionDocument o;
             while (objetIds.size() > 0 && it.hasNext()) {
                 o = it.next();
                 if (objetIds.remove(o.getId())) {
@@ -327,7 +327,7 @@ public final class SIRS extends SirsCore {
      * @param documentId
      * @return 
      */
-    public static ObservableList<? extends AbstractDocumentTroncon> getDocumentTroncons(final String documentId){
+    public static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
         try {
             final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
             final Class clazz = Class.forName(previewLabel.getType());
@@ -352,24 +352,24 @@ public final class SIRS extends SirsCore {
      * @param documentId
      * @return 
      */
-    public static ObservableList<? extends AbstractDocumentTroncon> getTrueDocumentTroncons(final String documentId){
+    public static ObservableList<? extends AbstractPositionDocument> getTrueDocumentTroncons(final String documentId){
         try {
             final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
             final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
             final Class clazz = Class.forName(previewLabel.getType());
-            final ObservableList<AbstractDocumentTroncon> falseDocumentTroncons;
+            final ObservableList<AbstractPositionDocument> falseDocumentTroncons;
             if(clazz==ProfilTravers.class){
                 falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
             } else {
                 falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
             }
 
-            final ObservableList<AbstractDocumentTroncon> trueDocumentTroncons = FXCollections.observableArrayList();
+            final ObservableList<AbstractPositionDocument> trueDocumentTroncons = FXCollections.observableArrayList();
 
-            for (final AbstractDocumentTroncon falseDocumentTroncon : falseDocumentTroncons){
+            for (final AbstractPositionDocument falseDocumentTroncon : falseDocumentTroncons){
                 final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
                 final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
-                final AbstractDocumentTroncon trueDocumentTroncon = (AbstractDocumentTroncon) tronconDigue.getChildById(falseDocumentTroncon.getId());
+                final AbstractPositionDocument trueDocumentTroncon = (AbstractPositionDocument) tronconDigue.getChildById(falseDocumentTroncon.getId());
                 trueDocumentTroncons.add(trueDocumentTroncon);
             }
 

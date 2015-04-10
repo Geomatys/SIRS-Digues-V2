@@ -1,6 +1,6 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
@@ -12,19 +12,19 @@ import org.apache.sis.util.logging.Logging;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconThemeDocumentTronconPojoTable extends TronconThemePojoTable<DocumentTroncon>{
+public class TronconThemePositionDocumentPojoTable extends TronconThemePojoTable<PositionDocument>{
 
-    public TronconThemeDocumentTronconPojoTable(AbstractTronconTheme.ThemeGroup group) {
+    public TronconThemePositionDocumentPojoTable(AbstractTronconTheme.ThemeGroup group) {
         super(group);
     }
 
     @Override
-    protected DocumentTroncon createPojo() {
-        DocumentTroncon pojo = null;
+    protected PositionDocument createPojo() {
+        PositionDocument pojo = null;
         try {
             final TronconDigue trc = troncon.get();
             final Constructor pojoConstructor = pojoClass.getConstructor();
-            pojo = (DocumentTroncon) pojoConstructor.newInstance();
+            pojo = (PositionDocument) pojoConstructor.newInstance();
             trc.getDocumentTroncon().add(pojo);
             pojo.setParent(trc);
             pojo.setAuthor(session.getUtilisateur().getId());

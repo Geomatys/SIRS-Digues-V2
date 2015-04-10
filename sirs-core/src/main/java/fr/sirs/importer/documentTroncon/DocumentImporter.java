@@ -3,11 +3,11 @@ package fr.sirs.importer.documentTroncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.AbstractDocumentTroncon;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
@@ -36,7 +36,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTroncon> implements DocumentsUpdatable {
+public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDocument> implements DocumentsUpdatable {
     
     private final DocumentManager documentManager;
     private final List<GenericDocumentRelatedImporter> documentRelatedImporters;
@@ -169,7 +169,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
         return DbImporter.TableName.DOCUMENT.toString();
     }
 
-    private final Map<Integer, DocumentTroncon> properDocumentTroncons = new HashMap<>();
+    private final Map<Integer, PositionDocument> properDocumentTroncons = new HashMap<>();
     
     @Override
     protected void preCompute() throws IOException, AccessDbImporterException {
@@ -179,7 +179,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
         
         // Begin feeding the map (accessible by doc id) by objects form SYS_EVT tables.
         for (final GenericDocumentImporter gdi : documentImporters){
-            final Map<Integer, DocumentTroncon> byDocId = gdi.getPrecomputedDocuments();
+            final Map<Integer, PositionDocument> byDocId = gdi.getPrecomputedDocuments();
             if(byDocId!=null){
                 for (final Integer key : byDocId.keySet()){
                     // If the key used in one SYS_EVT table has ever been used into another one, throws an exception.
@@ -192,7 +192,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
                 }
             }
             
-            final Map<Integer, List<DocumentTroncon>> byTronconId = gdi.getPrecomputedDocumentsByTronconId();
+            final Map<Integer, List<PositionDocument>> byTronconId = gdi.getPrecomputedDocumentsByTronconId();
             if(byTronconId!=null){
                 for(final Integer key : byTronconId.keySet()){
                     
@@ -215,7 +215,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
             
             // If the document does not ever exists, add it.
             if(documentTroncons.get(rowId)==null){
-                final DocumentTroncon documentTroncon = new DocumentTroncon();
+                final PositionDocument documentTroncon = new PositionDocument();
                 documentTroncons.put(rowId, documentTroncon);
                 properDocumentTroncons.put(rowId, documentTroncon); // Memorize it for computation purpose.
                 
@@ -247,7 +247,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final AbstractDocumentTroncon docTroncon = importRow(row);
+            final AbstractPositionDocument docTroncon = importRow(row);
             docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
             docTroncon.setValid(true);
             //documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
@@ -255,7 +255,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
                     documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
 
                     // Set the list ByTronconId
-                    List<AbstractDocumentTroncon> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                    List<AbstractPositionDocument> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                     if (listByTronconId == null) {
                         listByTronconId = new ArrayList<>();
                         documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -271,7 +271,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractDocumentTr
     
 
     @Override
-    AbstractDocumentTroncon importRow(Row row) throws IOException, AccessDbImporterException {
+    AbstractPositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
         
         final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
 //        final Map<Integer, RefTypeDocument> typesDocument = typeDocumentImporter.getTypeDocument();

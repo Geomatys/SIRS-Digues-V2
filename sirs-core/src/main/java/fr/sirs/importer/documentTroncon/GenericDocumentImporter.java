@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.AbstractDocumentTroncon;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.GenericImporter;
@@ -16,7 +16,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-abstract class GenericDocumentImporter<T extends AbstractDocumentTroncon> extends GenericImporter {
+abstract class GenericDocumentImporter<T extends AbstractPositionDocument> extends GenericImporter {
     
     protected Map<Integer, T> documentTroncons = null;
     protected Map<Integer, List<T>> documentTronconByTronconId = null;

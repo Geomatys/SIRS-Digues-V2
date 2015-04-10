@@ -206,5 +206,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             listIdsByProfil.add(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
         }
+        couchDbConnector.executeBulk(leves.values());
     }
 }

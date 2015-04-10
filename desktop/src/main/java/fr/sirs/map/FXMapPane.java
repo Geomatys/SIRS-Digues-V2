@@ -9,7 +9,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.PreviewLabelRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.DocumentTroncon;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PreviewLabel;
@@ -292,9 +292,9 @@ public class FXMapPane extends BorderPane {
             return getMapLayerForElement(CorePlugin.TRONCON_LAYER_NAME);
         } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
-        } else if (element instanceof DocumentTroncon) {
+        } else if (element instanceof PositionDocument) {
             final PreviewLabelRepository previewLabelRepository = Injector.getSession().getPreviewLabelRepository();
-            final String documentId = ((DocumentTroncon)element).getSirsdocument();
+            final String documentId = ((PositionDocument)element).getSirsdocument();
             final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
             Class documentClass = null; 
             try {
