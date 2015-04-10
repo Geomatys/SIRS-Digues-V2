@@ -69,6 +69,7 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -110,7 +111,9 @@ public class FXPositionablePane extends BorderPane {
     @FXML private GridPane uiBornePane;
     @FXML private ComboBox<SystemeReperage> uiSRs;
     @FXML private ComboBox<BorneDigue> uiBorneStart;
+    private final ComboBoxCompletion startBorneCompletion;
     @FXML private ComboBox<BorneDigue> uiBorneEnd;
+    private final ComboBoxCompletion endBorneCompletion;
     @FXML private CheckBox uiAmontStart;
     @FXML private CheckBox uiAmontEnd;
     @FXML private FXNumberSpinner uiDistanceStart;
@@ -147,7 +150,12 @@ public class FXPositionablePane extends BorderPane {
         uiSRs.setConverter(sirsStringConverter);
         uiCRSs.setConverter(sirsStringConverter);
         uiBorneStart.setConverter(sirsStringConverter);
+        uiBorneStart.setEditable(true);
         uiBorneEnd.setConverter(sirsStringConverter);
+        uiBorneEnd.setEditable(true);
+        
+        startBorneCompletion = new ComboBoxCompletion(uiBorneStart);
+        endBorneCompletion = new ComboBoxCompletion(uiBorneEnd);
         
         //liste par défaut des systemes de coordonnées
         final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();
@@ -204,12 +212,14 @@ public class FXPositionablePane extends BorderPane {
         
         //compute back geographic points when linear referencing changes.
         final GeographicStartFromLinear geoStartUpdater = new GeographicStartFromLinear();
-        uiBorneStart.getSelectionModel().selectedItemProperty().addListener(geoStartUpdater);
+        uiBorneStart.valueProperty().addListener(geoStartUpdater);
+        uiBorneStart.focusedProperty().addListener(geoStartUpdater);
         uiAmontStart.selectedProperty().addListener(geoStartUpdater);
         uiDistanceStart.valueProperty().addListener(geoStartUpdater);
         
         final GeographicEndFromLinear geoEndUpdater = new GeographicEndFromLinear();
-        uiBorneEnd.getSelectionModel().selectedItemProperty().addListener(geoEndUpdater);
+        uiBorneEnd.valueProperty().addListener(geoEndUpdater);
+        uiBorneEnd.focusedProperty().addListener(geoEndUpdater);
         uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
         uiDistanceEnd.valueProperty().addListener(geoEndUpdater);
         
@@ -902,8 +912,9 @@ public class FXPositionablePane extends BorderPane {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
             // Update only if linear mode is selected. Otherwise, it means a modification on geographic
-            // panel modified linear one, which throw back an event.
-            if (uiTypeBorne.isSelected()) {
+            // panel modified linear one, which throw back an event. We do not update if borne combo box 
+            // is currently selected, as user could be browsing in borne list.
+            if (uiTypeBorne.isSelected() && !uiBorneStart.isFocused()) {
                 computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
@@ -939,8 +950,9 @@ public class FXPositionablePane extends BorderPane {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
             // Update only if linear mode is selected. Otherwise, it means a modification on geographic
-            // panel modified linear one, which throw back an event.
-            if (uiTypeBorne.isSelected()) {
+            // panel modified linear one, which throw back an event. We do not update if borne combo box 
+            // is currently selected, as user could be browsing in borne list.
+            if (uiTypeBorne.isSelected() && !uiBorneEnd.isFocused()) {
                 computingRunning.set(computingRunning.get()+1);
                 TaskManager.INSTANCE.submit(() -> {
                     try {
