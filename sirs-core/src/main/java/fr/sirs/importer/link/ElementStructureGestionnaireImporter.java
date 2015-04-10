@@ -86,8 +86,6 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                     organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
                 }
-            
-                organismeStructure.setTypeOrganisme(organisme.getClass().getSimpleName());
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
                 organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
