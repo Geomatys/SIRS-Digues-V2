@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TextInputControl;
+import org.geotoolkit.gui.javafx.util.TextFieldCompletion;
 import org.geotoolkit.internal.Loggers;
 
 /**
