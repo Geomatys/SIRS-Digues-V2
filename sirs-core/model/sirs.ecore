@@ -492,7 +492,7 @@
         eType="#//Desordre" eOpposite="#//Desordre/evenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/evenementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementMeteoIds" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="meteos" upperBound="-1"
         eType="#//Meteo" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

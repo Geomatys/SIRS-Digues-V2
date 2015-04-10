@@ -124,7 +124,7 @@ implements DocumentsUpdatable {
             
             final List<Meteo> meteoEvt = meteos.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
             if(meteoEvt!=null){
-                evenement.setEvenementMeteoIds(meteoEvt);
+                evenement.setMeteos(meteoEvt);
             }
             evenement.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
             evenement.setValid(true);
