@@ -28,17 +28,23 @@ import org.slf4j.LoggerFactory;
 import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
-import fr.sirs.core.component.SirsDBInfoRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.SQLHelper;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import javafx.concurrent.Task;
+import org.ektorp.StreamingViewResult;
+import org.ektorp.ViewResult;
 
 public class H2Helper {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
+    private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
     
     private static FeatureStore STORE = null;
 
-    private static Connection createConnection(CouchDbConnector connector) throws SQLException {
+    public static Connection createConnection(CouchDbConnector connector) throws SQLException {
         Path file = getDBFile(connector);
         Connection connection = DriverManager.getConnection(
                 "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
@@ -69,7 +75,7 @@ public class H2Helper {
         return STORE;
     }
 
-    private static Path getDBFile(CouchDbConnector connector) {
+    public static Path getDBFile(CouchDbConnector connector) {
         final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
         Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
         return file;
@@ -102,7 +108,6 @@ public class H2Helper {
 
         @Override
         protected Boolean call() throws Exception {
-            
             updateMessage("Nettoyage de la base.");
             Path file = getDBFile(couchConnector);
             if (Files.isDirectory(file.getParent())) {
@@ -122,45 +127,56 @@ public class H2Helper {
                     }
                 });
             }
-            
+
             try (Connection conn = createConnection(couchConnector)) {
                 updateMessage("Création des tables.");
                 int srid = SirsCore.getSrid();
                 SQLHelper.createTables(conn, srid);
-                
+                conn.setAutoCommit(false);
+
                 updateMessage("Création de la liste des éléments à insérer.");
                 List<String> allDocIds = couchConnector.getAllDocIds();
+                Iterator<String> idIt = allDocIds.iterator();
+                while (idIt.hasNext()) {
+                    if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
+                        idIt.remove();
+                    }
+                }
                 DocHelper docHelper = new DocHelper(couchConnector);
-                
+
                 updateMessage("Insertion des éléments");
                 int currentProgress = 0;
-                updateProgress(currentProgress++, allDocIds.size());                
+                updateProgress(currentProgress, allDocIds.size());
                 final Thread currentThread = Thread.currentThread();
-                try {
-                    conn.setAutoCommit(false);
-                    for (String id : allDocIds) {
+
+                try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
+                    Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
+                    while (iterator.hasNext()) {
                         if (currentThread.isInterrupted()) {
                             return false;
                         }
-                        if (id.startsWith("$") || id.startsWith("_")) {
+
+                        final ViewResult.Row currentRow = iterator.next();
+                        if (UNMANAGED_IDS.matcher(currentRow.getId()).matches()) {
                             continue;
                         }
 
-                        docHelper.getElement(id).map(
-                                e -> SQLHelper.insertElement(conn, e));
-
-                        conn.commit();
-                        updateProgress(currentProgress++, allDocIds.size());   
+                        Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
+                        if (element.isPresent()) {
+                            SQLHelper.insertElement(conn, element.get());
+                            conn.commit();
+                            updateProgress(currentProgress++, allDocIds.size());
+                        }
                     }
 
-                    updateProgress(-1, -1);
-                    updateMessage("Mise à jour des clés étrangères");
-                    SQLHelper.addForeignKeys(conn);
-                    
                 } catch (Exception e) {
                     conn.rollback();
                     throw e;
                 }
+                
+                updateProgress(-1, -1);
+                updateMessage("Mise à jour des clés étrangères");
+                SQLHelper.addForeignKeys(conn);
             }
             return true;
         }
