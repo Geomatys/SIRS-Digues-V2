@@ -5,8 +5,11 @@ import static fr.sirs.SIRS.CSS_PATH;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,13 +19,13 @@ import javafx.geometry.VPos;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.util.StringConverter;
 import static org.geotoolkit.db.JDBCFeatureStore.JDBC_PROPERTY_RELATION;
 import org.geotoolkit.db.reverse.RelationMetaModel;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -150,20 +153,14 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.add(uiPropertyValue, 2, 0);
              
         //autocompletion sur les champs
-        final TextFieldCompletion textFieldCompletion = new TextFieldCompletion(uiPropertyName){
-            @Override
-            protected ObservableList<String> getChoices(String text) {
-                return FXSQLFilterEditor.this.getChoices();
-            }
-        };
+        final TextFieldCompletion textFieldCompletion = new columnCompletor(uiPropertyName);
         
         uiConditionBox.getSelectionModel().selectedItemProperty().addListener(this::setFilterProperty);
         uiPropertyName.textProperty().addListener(this::setFilterProperty);
         uiPropertyValue.textProperty().addListener(this::setFilterProperty);
     }
 
-    public ObservableList<String> getChoices() {
-        final String text = uiPropertyName.getText();
+    protected ObservableList<String> getChoices(final String text) {
         if (type != null && text != null && !text.isEmpty()) {
             final String[] parts = text.split("/");
 
@@ -297,5 +294,56 @@ public class FXSQLFilterEditor extends GridPane {
         }
     }
     
-    
+    private class columnCompletor extends TextFieldCompletion {
+
+        public columnCompletor(TextInputControl textField) {
+            super(textField);
+        }
+
+        @Override
+        protected ObservableList<String> getChoices(String text) {
+            // If there's no text to analyze, 
+            if (text == null || text.isEmpty()) return choices;
+            final String[] joinedTypes = text.split("/");
+            if (joinedTypes.length < 1) return choices;
+            
+            ObservableList<String> result = FXCollections.observableArrayList();
+            Stream<PropertyType> parentTypes = Stream.of(type);
+            for (int i = 0 ; i < joinedTypes.length ; i++) {
+                final Pattern filter = Pattern.compile(joinedTypes[i]);
+                
+                parentTypes.flatMap((PropertyType t) -> {
+                    // First, we check if we've got an association and should browse joined type.
+                    if (t instanceof AssociationType) {
+                        t = ((AssociationType)t).getRelatedType();
+                    }
+                    
+                    // Get all sub-types of the current one if any.
+                    if (t instanceof ComplexType) {
+                        final ArrayList<PropertyType> types = new ArrayList<>();
+                        types.add(t);
+                        for (final PropertyDescriptor p : ((ComplexType)t).getDescriptors()) {
+                            if (p.getType() != null) {
+                                types.add(p.getType());
+                            }
+                        }
+                        return types.stream();
+                    } else {
+                        return Stream.of(t);
+                    }
+                })
+                        // We keep only sub-types whose name has common parts with input text.
+                        .filter((PropertyType toFilter)-> {return filter.matcher(toFilter.getName().getLocalPart()).find();});
+            }
+            
+            return FXCollections.observableList(parentTypes.map((PropertyType prop) -> {
+                final StringBuilder nameBuilder = new StringBuilder(prop.getName().getLocalPart());
+                while (prop.getSuper() != null) {
+                    prop = prop.getSuper();
+                    nameBuilder.insert(0, '/').insert(0, prop.getName().getLocalPart());
+                }
+                return nameBuilder.toString();
+            }).collect(Collectors.toList()));
+        }
+    }
 }
