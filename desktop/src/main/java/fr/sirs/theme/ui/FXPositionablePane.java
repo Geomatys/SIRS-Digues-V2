@@ -8,6 +8,8 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import static fr.sirs.SIRS.ICON_IMPORT;
+import static fr.sirs.SIRS.ICON_VIEWOTHER;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -91,8 +93,6 @@ public class FXPositionablePane extends BorderPane {
     
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
     
-    public static final Image ICON_IMPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
-    public static final Image ICON_VIEWOTHER  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
     
     @FXML private Button uiImport;
     @FXML private Button uiView;

@@ -15,7 +15,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionDocumentProfilTravers;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
@@ -126,8 +126,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(TALUSRISBERME, this::getAllTalusRisbermes);
         viewMapObjets.put(VOIEACCES, this::getAllVoieAccess);
         viewMapObjets.put(VOIEDIGUE, this::getAllVoieDigues);
-        viewMapDocuments.put(POSITIONDOCUMENT, this::getAllDocumentTroncons);
-        viewMapDocuments.put(POSITIONDOCUMENTPROFILTRAVERS, this::getAllDocumentTronconProfilTravers);
+        viewMapDocuments.put(POSITION_DOCUMENT, this::getAllDocumentTroncons);
+        viewMapDocuments.put(POSITION_PROFIL_TRAVERS, this::getAllDocumentTronconProfilTravers);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -402,36 +402,36 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 PiedFrontFrancBord.class);
     }
 
-    public static final String POSITIONDOCUMENT = "PositionDocument";
+    public static final String POSITION_DOCUMENT = "PositionDocument";
 
-    @View(name = POSITIONDOCUMENT, map = "classpath:PositionDocument-map.js")
+    @View(name = POSITION_DOCUMENT, map = "classpath:PositionDocument-map.js")
     public List<PositionDocument> getAllDocumentTroncons() {
-        return db.queryView(createQuery(POSITIONDOCUMENT),
+        return db.queryView(createQuery(POSITION_DOCUMENT),
                 PositionDocument.class);
     }
 
-    public static final String POSITIONDOCUMENTBYDOCUMENTID = "PositionDocumentByDocumentId";
+    public static final String POSITION_DOCUMENT_BY_DOCUMENT_ID = "PositionDocumentByDocumentId";
 
-    @View(name = POSITIONDOCUMENTBYDOCUMENTID, map = "classpath:PositionDocumentByDocumentId-map.js")
+    @View(name = POSITION_DOCUMENT_BY_DOCUMENT_ID, map = "classpath:PositionDocumentByDocumentId-map.js")
     public List<PositionDocument> getDocumentTronconsByDocumentId(final String documentId) {
-        return db.queryView(createQuery(POSITIONDOCUMENTBYDOCUMENTID).key(documentId),
+        return db.queryView(createQuery(POSITION_DOCUMENT_BY_DOCUMENT_ID).key(documentId),
                 PositionDocument.class);
     }
 
-    public static final String POSITIONDOCUMENTPROFILTRAVERS = "PositionDocumentProfilTravers";
+    public static final String POSITION_PROFIL_TRAVERS = "PositionProfilTravers";
 
-    @View(name = POSITIONDOCUMENTPROFILTRAVERS, map = "classpath:PositionDocumentProfilTravers-map.js")
-    public List<PositionDocumentProfilTravers> getAllDocumentTronconProfilTravers() {
-        return db.queryView(createQuery(POSITIONDOCUMENTPROFILTRAVERS),
-                PositionDocumentProfilTravers.class);
+    @View(name = POSITION_PROFIL_TRAVERS, map = "classpath:PositionProfilTravers-map.js")
+    public List<PositionProfilTravers> getAllDocumentTronconProfilTravers() {
+        return db.queryView(createQuery(POSITION_PROFIL_TRAVERS),
+                PositionProfilTravers.class);
     }
 
-    public static final String POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID = "PositionDocumentProfilTraversByDocumentId";
+    public static final String POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID = "PositionProfilTraversByDocumentId";
 
-    @View(name = POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID, map = "classpath:PositionDocumentProfilTraversByDocumentId-map.js")
-    public List<PositionDocumentProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
-        return db.queryView(createQuery(POSITIONDOCUMENTPROFILTRAVERSBYDOCUMENTID).key(documentId),
-                PositionDocumentProfilTravers.class);
+    @View(name = POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID, map = "classpath:PositionProfilTraversByDocumentId-map.js")
+    public List<PositionProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
+        return db.queryView(createQuery(POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID).key(documentId),
+                PositionProfilTravers.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {

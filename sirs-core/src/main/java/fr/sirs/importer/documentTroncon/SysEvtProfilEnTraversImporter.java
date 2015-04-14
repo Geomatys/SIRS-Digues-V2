@@ -7,7 +7,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.LevePositionProfilTravers;
-import fr.sirs.core.model.PositionDocumentProfilTravers;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
@@ -35,7 +35,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionDocumentProfilTravers> {
+class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionProfilTravers> {
 
     private final ProfilEnTraversImporter profilTraversImporter;
     
@@ -125,7 +125,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionDocu
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocumentProfilTravers documentTroncon = new PositionDocumentProfilTravers();
+            final PositionProfilTravers documentTroncon = new PositionProfilTravers();
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -141,13 +141,13 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionDocu
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocumentProfilTravers docTroncon = importRow(row);
+            final PositionProfilTravers docTroncon = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
 
             // Set the list ByTronconId
-            List<PositionDocumentProfilTravers> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<PositionProfilTravers> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
                 documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -158,14 +158,14 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionDocu
     }
 
     @Override
-    PositionDocumentProfilTravers importRow(Row row) throws IOException, AccessDbImporterException {
+    PositionProfilTravers importRow(Row row) throws IOException, AccessDbImporterException {
         
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, ProfilTravers> profilsTravers = profilTraversImporter.getRelated();
         final Map<Integer, List<LevePositionProfilTravers>> levePositions = profilTraversImporter.getProfilEnTraversTronconImporter().getByLocalisationId();
         
-        final PositionDocumentProfilTravers docTroncon = new PositionDocumentProfilTravers();
+        final PositionProfilTravers docTroncon = new PositionProfilTravers();
         final GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {

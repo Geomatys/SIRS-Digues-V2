@@ -8,16 +8,17 @@ import com.sun.javafx.property.PropertyReference;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import static fr.sirs.SIRS.DESIGNATION_FIELD;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.ValiditySummary;
-import fr.sirs.query.ElementHit;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -53,6 +54,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -65,6 +67,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
@@ -105,6 +108,8 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Samuel Andrés (Geomatys)
  */
 public class PojoTable extends BorderPane {
+    
+    private static final String BUTTON_STYLE = "btn-without-style";
     private static final List<String> SPECIAL_DISPLAY_COLUMNS = new ArrayList<>();
     static{
         SPECIAL_DISPLAY_COLUMNS.add("author");
@@ -137,6 +142,8 @@ public class PojoTable extends BorderPane {
     Cette propriété sert alors à limiter la recherche à un tronçon donné (de 
     manière à ne relier entre eux que des "objets" du même tronçon.*/
     protected final StringProperty tronconSourceProperty = new SimpleStringProperty(null);
+    /* Importer des points. Default : false */
+    protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
     
         
     // Icônes de la barre d'action
@@ -145,6 +152,7 @@ public class PojoTable extends BorderPane {
     protected final Button uiSearch;
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
+    protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT));
     protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE);
     private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE);
     protected final ToggleButton uiFicheMode = new ToggleButton();
@@ -246,7 +254,7 @@ public class PojoTable extends BorderPane {
         
         //On commence par la colonne des désignations
         for(final PropertyDescriptor desc : properties){
-            if(desc.getName().equals("designation")){
+            if(desc.getName().equals(DESIGNATION_FIELD)){
                 uiTable.getColumns().add(new PropertyColumn(desc));
             }
         }
@@ -254,13 +262,11 @@ public class PojoTable extends BorderPane {
         for (final PropertyDescriptor desc : properties) {
             if (!SPECIAL_DISPLAY_COLUMNS.contains(desc.getName())) {
                 final TableColumn col;
-                // Colonne de mots de passe simplifiée : ne marche pas très bien.
                 if ("password".equals(desc.getDisplayName())) {
                     col = new PasswordColumn(desc);
                 } else if (desc.getReadMethod().getReturnType().isEnum()) {
                     col = new EnumColumn(desc);
                 } else {
-
                     col = new PropertyColumn(desc);
                 }
                 uiTable.getColumns().add(col);
@@ -274,7 +280,7 @@ public class PojoTable extends BorderPane {
          */
         uiSearch = new Button(null, searchNone);
         uiSearch.textProperty().bind(currentSearch);
-        uiSearch.getStyleClass().add("btn-without-style");
+        uiSearch.getStyleClass().add(BUTTON_STYLE);
         uiSearch.setOnAction((ActionEvent event) -> {search();});
         uiSearch.getStyleClass().add("label-header");
         uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
@@ -287,7 +293,7 @@ public class PojoTable extends BorderPane {
         searchEditionToolbar.getStyleClass().add("buttonbar");
         searchEditionToolbar.getChildren().add(uiSearch);
                 
-        uiAdd.getStyleClass().add("btn-without-style");
+        uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction((ActionEvent event) -> {
             final Object p;
             if(createNewProperty.get()){
@@ -305,7 +311,7 @@ public class PojoTable extends BorderPane {
         });
         uiAdd.disableProperty().bind(editableProperty.not());
 
-        uiDelete.getStyleClass().add("btn-without-style");
+        uiDelete.getStyleClass().add(BUTTON_STYLE);
         uiDelete.setOnAction((ActionEvent event) -> {
             final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
             if (elements.length > 0) {
@@ -350,18 +356,18 @@ public class PojoTable extends BorderPane {
         navigationToolbar.getStyleClass().add("buttonbarleft");
         
         uiCurrent.setFont(Font.font(20));
-        uiCurrent.getStyleClass().add("btn-without-style"); 
+        uiCurrent.getStyleClass().add(BUTTON_STYLE); 
         uiCurrent.setAlignment(Pos.CENTER);
         uiCurrent.setTextFill(Color.WHITE);
         uiCurrent.setOnAction(this::goTo);
         
-        uiPrevious.getStyleClass().add("btn-without-style"); 
+        uiPrevious.getStyleClass().add(BUTTON_STYLE); 
         uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
         uiPrevious.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectPrevious();
         });        
 
-        uiNext.getStyleClass().add("btn-without-style"); 
+        uiNext.getStyleClass().add(BUTTON_STYLE); 
         uiNext.setTooltip(new Tooltip("Fiche suivante."));
         uiNext.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectNext();
@@ -370,7 +376,7 @@ public class PojoTable extends BorderPane {
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
         uiFicheMode.setGraphic(playIcon);
-        uiFicheMode.getStyleClass().add("btn-without-style"); 
+        uiFicheMode.getStyleClass().add(BUTTON_STYLE); 
         uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
         
         // Update counter when we change selected element.
@@ -417,6 +423,32 @@ public class PojoTable extends BorderPane {
         uiFicheMode.disableProperty().bind(fichableProperty.not());
 
         searchEditionToolbar.getChildren().add(0, uiFicheMode);
+        
+        uiImport.getStyleClass().add(BUTTON_STYLE);
+        uiImport.disableProperty().bind(editableProperty.not());
+        uiImport.visibleProperty().bind(importPointProperty);
+        uiImport.managedProperty().bind(importPointProperty);
+        uiImport.setTooltip(new Tooltip("Importer des points"));
+        uiImport.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                final FXAbstractImportPointLeve importCoord;
+                if(pojoClass==PointLeveXYZ.class) importCoord = new FXImportXYZ(PojoTable.this);
+                else importCoord = new FXImportDZ(PojoTable.this);
+                
+                final Dialog dialog = new Dialog();
+                final DialogPane pane = new DialogPane();
+                pane.getButtonTypes().add(ButtonType.CLOSE);
+                pane.setContent(importCoord);
+                dialog.setDialogPane(pane);
+                dialog.setResizable(true);
+                dialog.setTitle("Import de points");
+                dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
+                dialog.show();
+            }
+        });
+        searchEditionToolbar.getChildren().add(1, uiImport);
         
         topPane.setLeft(navigationToolbar);
     }
@@ -505,6 +537,9 @@ public class PojoTable extends BorderPane {
     }
     public StringProperty tronconSourceProperty() {
         return tronconSourceProperty;
+    }
+    public BooleanProperty importPointProperty() {
+        return importPointProperty;
     }
     
     /**

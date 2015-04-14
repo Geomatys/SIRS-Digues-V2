@@ -12,14 +12,17 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
+import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.query.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.util.StringConverter;
 import org.opengis.feature.PropertyType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -120,6 +123,23 @@ public class SirsStringConverter extends StringConverter {
             }
             prefixedDesignation+=source.getDesignation();
         }
+        
+        if(source instanceof PositionDocument){
+            if(((PositionDocument)source).getSirsdocument()!=null){
+                final PreviewLabel preview = Injector.getSession().getPreviewLabelRepository().get(((PositionDocument)source).getSirsdocument());
+                if(preview!=null && preview.getType()!=null){
+                    try {
+                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getType()));
+                        if(documentLabelMapper!=null){
+                            prefixedDesignation+=" ["+documentLabelMapper.mapClassName()+"] ";
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(SirsStringConverter.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        
         return prefixedDesignation;
     }
     

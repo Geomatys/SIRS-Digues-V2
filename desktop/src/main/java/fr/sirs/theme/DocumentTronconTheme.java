@@ -9,7 +9,7 @@ import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionDocumentProfilTravers;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilLong;
@@ -49,7 +49,7 @@ public class DocumentTronconTheme extends AbstractTronconTheme {
     private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long localisés", "Profils en long localisés", PositionDocument.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilLong>(ProfilLong.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", PositionDocumentProfilTravers.class, 
+    private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", PositionProfilTravers.class, 
             (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilTravers>(ProfilTravers.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     

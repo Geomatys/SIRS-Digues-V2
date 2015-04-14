@@ -4,17 +4,18 @@ package fr.sirs.theme.ui;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.PointLeveXYZ;
+import fr.sirs.core.model.Role;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.logging.Level;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -48,24 +49,18 @@ import org.opengis.util.FactoryException;
 
 /**
  *
- * @author Johann Sorel (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  */
-public class FXImportCoordinate extends FXAbstractImportCoordinate {
+public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
     
     @FXML private ComboBox<PropertyType> uiAttX;
     @FXML private ComboBox<PropertyType> uiAttY;
     
-    private final ObjectProperty<Feature> selectionProperty = new SimpleObjectProperty<>();
-    private final Positionable positionable;
-    
-    public FXImportCoordinate(Positionable pos) {
-        super();
-        this.positionable = pos;
+    FXImportXYZ(final PojoTable pojoTable) {
+        super(pojoTable);
         
         uiAttX.setConverter(stringConverter);
         uiAttY.setConverter(stringConverter);
-        
-        uiPaneImport.disableProperty().bind(selectionProperty.isNull());        
     }
 
     @FXML
@@ -75,7 +70,7 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
         
         uiPaneConfig.setDisable(true);
         
-        selectionProperty.set(null);
+        selectionProperty.removeAll(selectionProperty);
         
         try{
             if(url.toLowerCase().endsWith(".shp")){
@@ -98,12 +93,16 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             
             //liste des propriétés
             final Collection<? extends PropertyType> properties = col.getFeatureType().getProperties(true);
+            uiAttDesignation.setItems(FXCollections.observableArrayList(properties));
             uiAttX.setItems(FXCollections.observableArrayList(properties));
             uiAttY.setItems(FXCollections.observableArrayList(properties));
+            uiAttZ.setItems(FXCollections.observableArrayList(properties));
             
             if(!properties.isEmpty()){
+                uiAttDesignation.getSelectionModel().clearAndSelect(0);
                 uiAttX.getSelectionModel().clearAndSelect(0);
                 uiAttY.getSelectionModel().clearAndSelect(0);
+                uiAttZ.getSelectionModel().clearAndSelect(0);
             }
             
             //on ecoute la selection
@@ -116,14 +115,13 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
                     
-                    selectionProperty.set(null);
+                    selectionProperty.removeAll(selectionProperty);
                     final Id filter = layer.getSelectionFilter();
                     try {
                         final FeatureCollection selection = layer.getCollection().subCollection(QueryBuilder.filtered(typeName, filter));
                         final FeatureIterator iterator = selection.iterator();
                         while(iterator.hasNext()){
-                            selectionProperty.set(iterator.next());
-                            break;
+                            selectionProperty.add(iterator.next());
                         }
                         iterator.close();
                     } catch (DataStoreException ex) {
@@ -140,50 +138,52 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
         
     }
     
-    @FXML
-    void importStart(ActionEvent event) {
-        final Point pt = getSelectionPoint();
-        if(pt==null) return;
-        positionable.setPositionDebut(pt);
-    }
-
-    @FXML
-    void importEnd(ActionEvent event) {
-        final Point pt = getSelectionPoint();
-        if(pt==null) return;
-        positionable.setPositionFin(pt);
-    }
-    
-    private Point getSelectionPoint(){
-        final Feature feature = selectionProperty.get();
+    @Override
+    protected ObservableList<PointLeveXYZ> getSelectionPoint(){
+        final ObservableList<Feature> features = selectionProperty;
+        final ObservableList<PointLeveXYZ> leves = FXCollections.observableArrayList();
         
-        Point geom;
-        final CoordinateReferenceSystem dataCrs;
-                
-        if(uiPaneConfig.isDisable()){
-            //shapefile
-            geom = ((Geometry)feature.getDefaultGeometryProperty().getValue()).getCentroid();
-            dataCrs = feature.getType().getCoordinateReferenceSystem();
+        for(final Feature feature : features){
+            final PointLeveXYZ leve = new PointLeveXYZ();
+            Point geom;
+            final CoordinateReferenceSystem dataCrs;
+
+            // X/Y
+            if(uiPaneConfig.isDisable()){
+                //shapefile
+                geom = ((Geometry)feature.getDefaultGeometryProperty().getValue()).getCentroid();
+                dataCrs = feature.getType().getCoordinateReferenceSystem();
+
+            }else{
+                //csv
+                final String attX = String.valueOf(feature.getPropertyValue(uiAttX.getValue().getName().tip().toString()));
+                final String attY = String.valueOf(feature.getPropertyValue(uiAttY.getValue().getName().tip().toString()));
+                geom = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(Double.valueOf(attX), Double.valueOf(attY)));
+                dataCrs = uiCRS.getValue();
+            }
+
+            //transform to RGF93 
+            try{
+                final MathTransform trs = CRS.findMathTransform(dataCrs, SirsCore.getEpsgCode(), true);
+                geom = (Point) JTS.transform(geom, trs);
+                JTS.setCRS(geom, SirsCore.getEpsgCode());
+
+            }catch(TransformException | FactoryException ex){
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
+            }
+            leve.setX(geom.getX());
+            leve.setY(geom.getY());
             
-        }else{
-            //csv
-            final String attX = String.valueOf(feature.getPropertyValue(uiAttX.getValue().getName().tip().toString()));
-            final String attY = String.valueOf(feature.getPropertyValue(uiAttY.getValue().getName().tip().toString()));
-            geom = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(Double.valueOf(attX), Double.valueOf(attY)));
-            dataCrs = uiCRS.getValue();
+            // Z
+            leve.setZ(Double.valueOf(String.valueOf(feature.getPropertyValue(uiAttZ.getValue().getName().tip().toString()))));
+            
+            leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
+            
+            leve.setAuthor(Injector.getSession().getUtilisateur().getId());
+            leve.setValid(!(Injector.getSession().getRole()==Role.EXTERN));
+            leves.add(leve);
         }
-        
-        //transform to RGF93 
-        try{
-            final MathTransform trs = CRS.findMathTransform(dataCrs, SirsCore.getEpsgCode(), true);
-            geom = (Point) JTS.transform(geom, trs);
-            JTS.setCRS(geom, SirsCore.getEpsgCode());
-
-        }catch(TransformException | FactoryException ex){
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-            new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
-        }
-
-        return geom;
+        return leves;
     }
 }

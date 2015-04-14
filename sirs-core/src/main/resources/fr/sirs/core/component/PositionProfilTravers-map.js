@@ -1,7 +1,7 @@
 function(doc) {
    if(doc['@class']=='fr.sirs.core.model.TronconDigue') {
      for(i in doc.documentTroncon){
-        if(doc.documentTroncon[i]['@class']=='fr.sirs.core.model.PositionDocumentProfilTravers'){
+        if(doc.documentTroncon[i]['@class']=='fr.sirs.core.model.PositionProfilTravers'){
             var newMap = {};
             var myMap = doc.documentTroncon[i];
             for (var i in myMap)

@@ -1171,9 +1171,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="originesProfil" eType="#//RefOrigineProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveXYZ" upperBound="-1"
-        eType="#//PointLeveXYZ" containment="true"/>
+        eType="#//PointLeveXYZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveDZ" upperBound="-1"
-        eType="#//PointLeveDZ" containment="true"/>
+        eType="#//PointLeveDZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1224,13 +1228,17 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveDZ" upperBound="-1"
-        eType="#//PointLeveDZ" containment="true"/>
+        eType="#//PointLeveDZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionProfilLongSurDigueId"
         eType="#//RefPositionProfilLongSurDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parametresHydrauliques"
         upperBound="-1" eType="#//ParametreHydrauliqueProfilLong" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pointsLeveXYZ" upperBound="-1"
-        eType="#//PointLeveXYZ" containment="true"/>
+        eType="#//PointLeveXYZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1404,7 +1412,7 @@
       <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PositionDocumentProfilTravers" eSuperTypes="#//AbstractPositionDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="PositionProfilTravers" eSuperTypes="#//AbstractPositionDocument">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//ProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"

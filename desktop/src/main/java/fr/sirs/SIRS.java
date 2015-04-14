@@ -9,8 +9,6 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionDocumentProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
@@ -75,6 +73,8 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_EYE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EYE, 16, Color.BLACK),null);
     public static final Image ICON_EDIT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE_O, 16, Color.BLACK),null);
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
+    public static final Image ICON_IMPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
+    public static final Image ICON_VIEWOTHER  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
     
     public static final String COLOR_INVALID_ICON = "#aa0000";
     public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode(COLOR_INVALID_ICON)),null);
@@ -86,6 +86,7 @@ public final class SIRS extends SirsCore {
     // Champs spéciaux des classes utilisés dans le code
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
+    public static final String DESIGNATION_FIELD = "designation";
     
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     

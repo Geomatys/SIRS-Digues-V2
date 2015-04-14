@@ -32,7 +32,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionDocumentProfilTravers;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -236,7 +236,7 @@ public class CorePlugin extends Plugin {
             
             // Documents positionnés
             suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> repository.getAllDocumentTroncons()));
-            suppliers.put(PositionDocumentProfilTravers.class, new StructBeanSupplier(PositionDocumentProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
+            suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
 
             // Emprises communales
             suppliers.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
@@ -270,7 +270,7 @@ public class CorePlugin extends Plugin {
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             mapDesTypesDeDocs.put(PositionDocument.class.getSimpleName(), documentTronconsList);
-            mapDesTypesDeDocs.put(PositionDocumentProfilTravers.class.getSimpleName(), documentTronconProfilTraversList);
+            mapDesTypesDeDocs.put(PositionProfilTravers.class.getSimpleName(), documentTronconProfilTraversList);
             
             final Color[] colors = new Color[]{
                 Color.BLACK,
@@ -377,7 +377,7 @@ public class CorePlugin extends Plugin {
                         
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
-                    suppliers.get(PositionDocument.class), suppliers.get(PositionDocumentProfilTravers.class));
+                    suppliers.get(PositionDocument.class), suppliers.get(PositionProfilTravers.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );

@@ -27,6 +27,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
@@ -588,6 +589,16 @@ public class Session extends SessionGen {
                         }
 
                         tab.setContent(content);
+                        if(element instanceof PositionDocument){
+                            final PositionDocument positionDocument = (PositionDocument) element;
+                            positionDocument.sirsdocumentProperty().addListener(new ChangeListener<String>() {
+
+                                @Override
+                                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                                    tab.setTextAbrege(generateElementTitle(element));
+                                }
+                            });
+                        }
                         element.designationProperty().addListener(new ChangeListener<String>() {
 
                             @Override

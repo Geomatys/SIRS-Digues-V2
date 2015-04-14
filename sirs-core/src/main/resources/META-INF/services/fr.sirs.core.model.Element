@@ -47,7 +47,7 @@ fr.sirs.core.model.PointLeveDZ
 fr.sirs.core.model.PointLeveXYZ
 fr.sirs.core.model.Pompe
 fr.sirs.core.model.PositionDocument
-fr.sirs.core.model.PositionDocumentProfilTravers
+fr.sirs.core.model.PositionProfilTravers
 fr.sirs.core.model.Prestation
 fr.sirs.core.model.ProfilFrontFrancBord
 fr.sirs.core.model.ProprieteObjet
