@@ -67,7 +67,7 @@ public class PrestationIntervenantImporter extends GenericEntityLinker {
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
             
             if(prestation!=null && intervenant!=null){
-                prestation.getIntervenant().add(intervenant.getId());
+                prestation.getIntervenantsIds().add(intervenant.getId());
             }
         }
     }

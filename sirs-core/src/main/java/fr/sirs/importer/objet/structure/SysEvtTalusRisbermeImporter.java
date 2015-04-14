@@ -280,7 +280,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
 
         talusRisberme.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-        talusRisberme.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
+        talusRisberme.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
             talusRisberme.setFonctionHautId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());

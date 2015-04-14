@@ -444,11 +444,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 }
                 
                 if(row.getInt(Columns.ID_ORG_STOCKAGE_BATARDEAUX.toString())!=null){
-                    ouverture.setOrganismesStockantsId(organismes.get(row.getInt(Columns.ID_ORG_STOCKAGE_BATARDEAUX.toString())).getId());
+                    ouverture.setOrganismeStockantId(organismes.get(row.getInt(Columns.ID_ORG_STOCKAGE_BATARDEAUX.toString())).getId());
                 }
                 
                 if(row.getInt(Columns.ID_ORG_MANIP_BATARDEAUX.toString())!=null){
-                    ouverture.setOrganismesManipulateursId(organismes.get(row.getInt(Columns.ID_ORG_MANIP_BATARDEAUX.toString())).getId());
+                    ouverture.setOrganismeManipulateurId(organismes.get(row.getInt(Columns.ID_ORG_MANIP_BATARDEAUX.toString())).getId());
                 }
                 
                 if(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())!=null){

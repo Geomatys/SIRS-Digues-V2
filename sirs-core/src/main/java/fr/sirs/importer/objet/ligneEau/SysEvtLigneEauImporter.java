@@ -224,11 +224,11 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
             }
             
             if(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
-                ligneEau.getMesureId().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+                ligneEau.getMesures().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             }
                 
             if(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
-                ligneEau.getMesureId().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+                ligneEau.getMesures().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             }
             
             ligneEau.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));

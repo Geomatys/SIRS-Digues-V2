@@ -75,8 +75,10 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
         related = new HashMap<>();
         
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeReferences();
-        final Map<Integer, List<ContactConvention>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
-        final Map<Integer, List<ContactConvention>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
+//        final Map<Integer, List<ContactConvention>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
+//        final Map<Integer, List<ContactConvention>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
+        final Map<Integer, List<String>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationsSignatairesIds();
+        final Map<Integer, List<String>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantsSignatairesIds();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -105,16 +107,26 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
                 convention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-             List<ContactConvention> contacts;
+//             List<ContactConvention> contacts;
+//            
+//            final List<ContactConvention> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+//            contacts=organisationsSignataires;
+//            
+//            final List<ContactConvention> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+//            if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
+//            else if(contacts==null) contacts=intervenantsSignataires;
+//            
+//            if(contacts!=null) convention.setContacts(contacts);
             
-            final List<ContactConvention> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
-            contacts=organisationsSignataires;
+            final List<String> organismesSignatairesIds = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            if(organismesSignatairesIds!=null){
+                convention.setOrganismesSignatairesIds(organismesSignatairesIds);
+            }
             
-            final List<ContactConvention> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
-            if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
-            else if(contacts==null) contacts=intervenantsSignataires;
-            
-            if(contacts!=null) convention.setContacts(contacts);
+            final List<String> intervenantsSignatairesIds = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            if(intervenantsSignatairesIds!=null){
+                convention.setContactsSignatairesIds(intervenantsSignatairesIds);
+            }
 
             convention.setDesignation(String.valueOf(row.getInt(Columns.ID_CONVENTION.toString())));
             convention.setValid(true);

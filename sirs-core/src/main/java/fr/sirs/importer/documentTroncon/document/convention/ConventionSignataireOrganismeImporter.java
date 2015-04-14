@@ -27,6 +27,7 @@ import org.ektorp.CouchDbConnector;
 class ConventionSignataireOrganismeImporter extends GenericImporter {
 
     private Map<Integer, List<ContactConvention>> signatairesByConventionId = null;
+    private Map<Integer, List<String>> signatairesIdsByConventionId = null;
     private OrganismeImporter organismeImporter;
 
     private ConventionSignataireOrganismeImporter(final Database accessDatabase,
@@ -58,6 +59,11 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
         if (signatairesByConventionId == null) compute();
         return signatairesByConventionId;
     }
+    
+    public Map<Integer, List<String>> getOrganisationsSignatairesIds() throws IOException, AccessDbImporterException {
+        if (signatairesIdsByConventionId == null) compute();
+        return signatairesIdsByConventionId;
+    }
 
     @Override
     protected List<String> getUsedColumns() {
@@ -76,6 +82,7 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         signatairesByConventionId = new HashMap<>();
+        signatairesIdsByConventionId = new HashMap<>();
 
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
@@ -84,7 +91,6 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
             final Row row = it.next();
             final ContactConvention signataire = new ContactConvention();
             
-            signataire.setTypeContact("Signataire");
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 signataire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
@@ -109,6 +115,19 @@ class ConventionSignataireOrganismeImporter extends GenericImporter {
             } else {
                 throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
             }
+            signatairesByConventionId.put(row.getInt(Columns.ID_CONVENTION.toString()), listeSignataires);
+            
+            
+            List<String> listeSignatairesIds = signatairesIdsByConventionId.get(row.getInt(Columns.ID_CONVENTION.toString()));
+            if(listeSignatairesIds == null){
+                listeSignatairesIds = new ArrayList<>();
+            }
+            if (organisme.getId() != null) {
+                listeSignatairesIds.add(organisme.getId());
+            } else {
+                throw new AccessDbImporterException("L'organisme " + organisme + " n'a pas encore d'identifiant CouchDb !");
+            }
+            signatairesIdsByConventionId.put(row.getInt(Columns.ID_CONVENTION.toString()), listeSignatairesIds);
         }
     }
 }

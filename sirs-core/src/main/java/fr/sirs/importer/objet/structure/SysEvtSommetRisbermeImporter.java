@@ -281,7 +281,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
             
             sommetRisberme.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-            sommetRisberme.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
+            sommetRisberme.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
             
             if(row.getInt(Columns.ID_TYPE_MATERIAU.toString())!=null){
                 sommetRisberme.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());

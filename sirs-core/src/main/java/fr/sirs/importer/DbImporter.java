@@ -3,11 +3,10 @@ package fr.sirs.importer;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.CouchDBInit;
-import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.CommuneRepository;
@@ -231,7 +230,7 @@ public class DbImporter {
      CONVENTION,
      CONVENTION_SIGNATAIRES_PM,
      CONVENTION_SIGNATAIRES_PP,
-     DEPARTEMENT,
+//     DEPARTEMENT, // Plus dans le nouveau modèle
      DESORDRE,
      DESORDRE_ELEMENT_RESEAU,
      DESORDRE_ELEMENT_STRUCTURE,
@@ -902,23 +901,26 @@ public class DbImporter {
                             "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             final DbImporter importer = new DbImporter(couchDbConnector);
-            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_donnees2.mdb")),
-                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_carto2.mdb")),null);
+            importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_donnees.mdb")),
+                    DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_carto.mdb")),null);
             
-            SirsCore.LOGGER.log(Level.FINE, "=======================");
-            importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {
-                SirsCore.LOGGER.log(Level.FINE, column.getName());
-            });
-            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
-
-            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
-            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){
-                SirsCore.LOGGER.log(Level.FINE, row.toString());
+//            SirsCore.LOGGER.log(Level.FINE, "=======================");
+//            importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {
+//                SirsCore.LOGGER.log(Level.FINE, column.getName());
+//            });
+//            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
+//
+//            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
+            for(final Index index :importer.getDatabase().getTable(TableName.ELEMENT_RESEAU.toString()).getIndexes()){
+                System.out.println(index);
             }
-            SirsCore.LOGGER.log(Level.FINE, "=======================");
-            
-            importer.cleanDb();
-            importer.importation();
+//            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){
+//                SirsCore.LOGGER.log(Level.FINE, row.toString());
+//            }
+//            SirsCore.LOGGER.log(Level.FINE, "=======================");
+//            
+//            importer.cleanDb();
+//            importer.importation();
             
             SirsCore.LOGGER.log(Level.FINE, "fin de l'importation !");
 

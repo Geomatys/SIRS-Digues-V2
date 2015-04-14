@@ -1,6 +1,7 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.LeveProfilTravers;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
@@ -28,7 +29,13 @@ public class PreviewLabelRepository extends
 
     public String getPreview(String id) {
         final PreviewLabel p = get(id);
-        return p==null? null : p.getLabel();
+        if(p==null){
+            return null;
+        } else if(p.getLabel()==null || "".equals(p.getLabel())){
+            return p.getDesignation();
+        } else {
+            return p.getLabel();
+        }
     }
     
     @Override

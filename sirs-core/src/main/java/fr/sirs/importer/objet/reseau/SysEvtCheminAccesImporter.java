@@ -274,7 +274,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
 
         if (row.getString(Columns.N_SECTEUR.toString()) != null) {
             try {
-                voie.setNumero_secteur(Integer.parseInt(row.getString(Columns.N_SECTEUR.toString())));
+                voie.setNumeroSecteur(Integer.parseInt(row.getString(Columns.N_SECTEUR.toString())));
             } catch (NumberFormatException e) {
                 SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }

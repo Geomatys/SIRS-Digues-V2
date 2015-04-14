@@ -76,7 +76,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
             
         marche.setLibelle(row.getString(Columns.LIBELLE_MARCHE.toString()));
 
-        marche.setMaitre_ouvrage(organismes.get(row.getInt(Columns.ID_MAITRE_OUVRAGE.toString())).getId());
+        marche.setMaitreOuvrageId(organismes.get(row.getInt(Columns.ID_MAITRE_OUVRAGE.toString())).getId());
 
         if (row.getDate(Columns.DATE_DEBUT_MARCHE.toString()) != null) {
             marche.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_MARCHE.toString()).toString(), dateTimeFormatter));
@@ -91,7 +91,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         }
 
         if (row.getInt(Columns.N_OPERATION.toString()) != null) {
-            marche.setNum_operation(row.getInt(Columns.N_OPERATION.toString()));
+            marche.setNumOperation(row.getInt(Columns.N_OPERATION.toString()));
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

@@ -186,7 +186,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
 
         desordre.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
         desordre.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
-        desordre.setLieu_dit(row.getString(Columns.LIEU_DIT_DESORDRE.toString()));
+        desordre.setLieuDit(row.getString(Columns.LIEU_DIT_DESORDRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_DESORDRE.toString()) != null) {
             desordre.setTypeDesordreId(typesDesordre.get(row.getInt(Columns.ID_TYPE_DESORDRE.toString())).getId());
@@ -256,7 +256,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (observations.get(row.getInt(Columns.ID_DESORDRE.toString())) != null) {
-            desordre.setObservationSuivi(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
+            desordre.setObservations(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
         }
         
         desordre.setDesignation(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));

@@ -248,7 +248,7 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
 
         crete.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-        crete.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
+        crete.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
             crete.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());

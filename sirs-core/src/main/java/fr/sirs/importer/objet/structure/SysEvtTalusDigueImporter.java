@@ -282,7 +282,7 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
 
         talus.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-        talus.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
+        talus.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
             talus.setEpaisseur_sommet(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());

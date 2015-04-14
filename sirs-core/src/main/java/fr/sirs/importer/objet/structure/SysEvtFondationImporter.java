@@ -280,7 +280,7 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
 
         fondation.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-        fondation.setNum_couche(row.getInt(Columns.N_COUCHE.toString()));
+        fondation.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
             fondation.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
