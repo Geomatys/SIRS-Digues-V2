@@ -8,6 +8,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PositionDocument;
@@ -295,17 +296,22 @@ public class FXMapPane extends BorderPane {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
         } else if (element instanceof AbstractPositionDocument) {
             final PreviewLabelRepository previewLabelRepository = Injector.getSession().getPreviewLabelRepository();
-            final String documentId = ((AbstractPositionDocument)element).getSirsdocument();
-            final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
-            Class documentClass = null; 
-            try {
-                documentClass = Class.forName(previewLabel.getType());
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+            if(element instanceof AbstractPositionDocumentAssociable){
+                final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument();
+                final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
+                Class documentClass = null; 
+                try {
+                    documentClass = Class.forName(previewLabel.getType());
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                final LabelMapper mapper = new LabelMapper(documentClass);
+                return getMapLayerForElement(mapper.mapClassName());
             }
-            
-            final LabelMapper mapper = new LabelMapper(documentClass);
-            return getMapLayerForElement(mapper.mapClassName());
+            else{
+                throw new UnsupportedOperationException("Does not support unassociable document positions");
+            }
         } else {
             final LabelMapper mapper = new LabelMapper(element.getClass());
             return getMapLayerForElement(mapper.mapClassName());

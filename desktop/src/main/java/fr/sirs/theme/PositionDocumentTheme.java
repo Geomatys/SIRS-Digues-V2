@@ -5,6 +5,7 @@ package fr.sirs.theme;
 import fr.sirs.Injector;
 import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
@@ -27,36 +28,49 @@ import java.util.function.Predicate;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentTronconTheme extends AbstractTronconTheme {
+public class PositionDocumentTheme extends AbstractTronconTheme {
     
     private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
 
     private static final ThemeGroup GROUP1 = new ThemeGroup("Conventions localisées", "Conventions localisées", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<Convention>(Convention.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(Convention.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     private static final ThemeGroup GROUP2 = new ThemeGroup("Articles localisés", "Articles localisés", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ArticleJournal>(ArticleJournal.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(ArticleJournal.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     private static final ThemeGroup GROUP3 = new ThemeGroup("Marchés localisés", "Marchés localisés", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<Marche>(Marche.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(Marche.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     private static final ThemeGroup GROUP4 = new ThemeGroup("Rapports d'étude localisés", "Rapports d'étude localisés", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<RapportEtude>(RapportEtude.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(RapportEtude.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     private static final ThemeGroup GROUP5 = new ThemeGroup("Documents à grande échelle localisés", "Documents à grande échelle localisés", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<DocumentGrandeEchelle>(DocumentGrandeEchelle.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(DocumentGrandeEchelle.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
-    private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long localisés", "Profils en long localisés", PositionDocument.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilLong>(ProfilLong.class)),
+    private static final ThemeGroup GROUP6 = new ThemeGroup("Profils en long", "Profils en long", ProfilLong.class, 
+            (TronconDigue t) -> t.documentTroncon.filtered(new PositionDocumentPredicate(ProfilLong.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     private static final ThemeGroup GROUP7 = new ThemeGroup("Profils en travers localisés", "Profils en travers localisés", PositionProfilTravers.class, 
-            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate<ProfilTravers>(ProfilTravers.class)),
+            (TronconDigue t) -> t.documentTroncon.filtered(new DocumentPredicate(ProfilTravers.class)),
             (TronconDigue t, Object c) -> t.documentTroncon.remove(c));
     
     
     
-    public DocumentTronconTheme() {
+    public PositionDocumentTheme() {
         super("Documents localisés", GROUP1, GROUP2, GROUP3, GROUP4, GROUP5, GROUP6, GROUP7);
+    }
+    
+    private static class PositionDocumentPredicate<T extends AbstractPositionDocument> implements Predicate{
+        private final Class<T> positionDocumentClass;
+        
+        PositionDocumentPredicate(final Class<T> positionDocumentClass){
+            this.positionDocumentClass = positionDocumentClass;
+        }
+
+        @Override
+        public boolean test(Object t) {
+            return positionDocumentClass.isAssignableFrom(t.getClass());
+        }
     }
     
     private static class DocumentPredicate<T extends SIRSDocument> implements Predicate{
@@ -76,7 +90,7 @@ public class DocumentTronconTheme extends AbstractTronconTheme {
 
         @Override
         public boolean test(Object t) {
-            final String documentId = ((AbstractPositionDocument) t).getSirsdocument();
+            final String documentId = ((AbstractPositionDocumentAssociable) t).getSirsdocument();
             if(documentId!=null){
                 if(documentClass.getName().equals(cache.get(documentId))){
                     return true;

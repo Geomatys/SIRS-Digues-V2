@@ -15,6 +15,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.PointLeve;
 import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
@@ -41,6 +42,12 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.FloatBinding;
+import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -268,7 +275,8 @@ public class PojoTable extends BorderPane {
                     col = new EnumColumn(desc);
                 } else {
                     col = new PropertyColumn(desc);
-                }
+                    col.sortableProperty().bind(importPointProperty.not());
+                } 
                 uiTable.getColumns().add(col);
             }
         }
@@ -449,6 +457,10 @@ public class PojoTable extends BorderPane {
             }
         });
         searchEditionToolbar.getChildren().add(1, uiImport);
+        
+        if(pojoClass==PointLeveXYZ.class){
+            uiTable.getColumns().add(new DistanceComputedPropertyColumn());
+        }
         
         topPane.setLeft(navigationToolbar);
     }
@@ -864,7 +876,61 @@ public class PojoTable extends BorderPane {
             });
         }
     }
+    
+    private static abstract class PointLeveBinding<T extends PointLeve> extends DoubleBinding {
         
+        protected final T pointLeve;
+        
+        public PointLeveBinding(final T pointLeve){
+            this.pointLeve = pointLeve;
+        }
+        
+    }
+    
+    private static class DistanceBinding extends PointLeveBinding<PointLeveXYZ> {
+        
+        protected final PointLeveXYZ origine;
+        
+        public DistanceBinding(final PointLeveXYZ pointLeve, final PointLeveXYZ origine){
+            super(pointLeve);
+            this.origine = origine;
+            super.bind(pointLeve.xProperty(), pointLeve.yProperty(), origine.xProperty(), origine.yProperty());
+        }
+
+        @Override
+        protected double computeValue() {
+            return Math.sqrt(Math.pow(pointLeve.getX() - origine.getX(), 2) + Math.pow(pointLeve.getY() - origine.getY(), 2));
+        }
+        
+    }
+        
+    private static abstract class ComputedPropertyColumn extends TableColumn<Element, Double>{
+        public ComputedPropertyColumn(){
+            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+            setText("Distance calculée");
+            setEditable(false);
+        }
+    }
+    
+    private static class DistanceComputedPropertyColumn extends ComputedPropertyColumn{
+        public DistanceComputedPropertyColumn(){
+            super();
+            setCellValueFactory(new Callback<CellDataFeatures<Element, Double>, ObservableValue<Double>>() {
+
+                @Override
+                public ObservableValue<Double> call(CellDataFeatures<Element, Double> param) {
+                    final Element origine = getTableView().getItems().get(0);;
+                    if(param.getValue() instanceof PointLeveXYZ 
+                            && origine instanceof PointLeveXYZ){
+                        return new DistanceBinding((PointLeveXYZ) param.getValue(), (PointLeveXYZ) origine).asObject();
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            });
+        }
+    }
         
     public class PropertyColumn extends TableColumn<Element,Object>{
         

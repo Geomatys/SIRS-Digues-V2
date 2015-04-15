@@ -100,7 +100,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
@@ -544,7 +544,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -561,7 +561,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactsSignatairesIds"
         upperBound="-1" eType="#//Contact"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -578,7 +578,7 @@
         eType="#//MaitreOeuvreMarche" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOuvrageId" eType="#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -591,7 +591,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/rapportEtude"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1075,7 +1075,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSReference #//SIRSDefaultDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1178,6 +1178,12 @@
         eType="#//PointLeveDZ" containment="true">
       <eAnnotations source="importPoint"/>
     </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1214,10 +1220,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//SIRSDefaultDocument">
-    <eAnnotations source="generation">
-      <details key="document" value="true"/>
-    </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//AbstractPositionDocument">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeSystemesReleveId" eType="#//RefSystemeReleveProfil"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
@@ -1239,6 +1242,9 @@
         eType="#//PointLeveXYZ" containment="true">
       <eAnnotations source="importPoint"/>
     </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1379,19 +1385,19 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true" eSuperTypes="#//SIRSFileReference">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSReference" abstract="true" interface="true"
+      eSuperTypes="#//SIRSFileReference">
+    <eOperations name="getReferencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="setReferencePapier">
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SIRSReferenceProfil" abstract="true"
-      eSuperTypes="#//SIRSReference">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierPlanEnsemble"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nomFichierCoupeImage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      interface="true" eSuperTypes="#//SIRSReference">
+    <eOperations name="getReferenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="setReferenceCalque">
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeId" eType="#//RapportEtude"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true"/>
@@ -1412,7 +1418,7 @@
       <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PositionProfilTravers" eSuperTypes="#//AbstractPositionDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="PositionProfilTravers" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//ProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
@@ -1426,10 +1432,6 @@
       interface="true" eSuperTypes="#//SIRSDocument"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractPositionDocument" abstract="true"
       eSuperTypes="#//Positionable">
-    <eOperations name="getSirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
-    <eOperations name="setSirsdocument">
-      <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
-    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
         eOpposite="#//Troncon_Digue/documentTroncon"/>
   </eClassifiers>
@@ -1508,5 +1510,20 @@
   <eClassifiers xsi:type="ecore:EClass" name="PointLeveXYZ" eSuperTypes="#//PointLeve">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SIRSDefaultReference" abstract="true"
+      eSuperTypes="#//SIRSReference">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractPositionDocumentAssociable"
+      abstract="true" eSuperTypes="#//AbstractPositionDocument">
+    <eOperations name="getSirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    <eOperations name="setSirsdocument">
+      <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    </eOperations>
   </eClassifiers>
 </ecore:EPackage>

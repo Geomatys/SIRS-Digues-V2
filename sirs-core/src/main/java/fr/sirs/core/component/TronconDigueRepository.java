@@ -36,6 +36,7 @@ import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.PistePiedDigue;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.ProfilFrontFrancBord;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -126,8 +127,9 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(TALUSRISBERME, this::getAllTalusRisbermes);
         viewMapObjets.put(VOIEACCES, this::getAllVoieAccess);
         viewMapObjets.put(VOIEDIGUE, this::getAllVoieDigues);
-        viewMapDocuments.put(POSITION_DOCUMENT, this::getAllDocumentTroncons);
-        viewMapDocuments.put(POSITION_PROFIL_TRAVERS, this::getAllDocumentTronconProfilTravers);
+        viewMapDocuments.put(POSITION_DOCUMENT, this::getAllPositionDocuments);
+        viewMapDocuments.put(POSITION_PROFIL_TRAVERS, this::getAllPositionProfilTravers);
+        viewMapDocuments.put(PROFIL_LONG, this::getAllProfilLongs);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -405,7 +407,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public static final String POSITION_DOCUMENT = "PositionDocument";
 
     @View(name = POSITION_DOCUMENT, map = "classpath:PositionDocument-map.js")
-    public List<PositionDocument> getAllDocumentTroncons() {
+    public List<PositionDocument> getAllPositionDocuments() {
         return db.queryView(createQuery(POSITION_DOCUMENT),
                 PositionDocument.class);
     }
@@ -413,7 +415,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public static final String POSITION_DOCUMENT_BY_DOCUMENT_ID = "PositionDocumentByDocumentId";
 
     @View(name = POSITION_DOCUMENT_BY_DOCUMENT_ID, map = "classpath:PositionDocumentByDocumentId-map.js")
-    public List<PositionDocument> getDocumentTronconsByDocumentId(final String documentId) {
+    public List<PositionDocument> getPositionDocumentsByDocumentId(final String documentId) {
         return db.queryView(createQuery(POSITION_DOCUMENT_BY_DOCUMENT_ID).key(documentId),
                 PositionDocument.class);
     }
@@ -421,7 +423,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public static final String POSITION_PROFIL_TRAVERS = "PositionProfilTravers";
 
     @View(name = POSITION_PROFIL_TRAVERS, map = "classpath:PositionProfilTravers-map.js")
-    public List<PositionProfilTravers> getAllDocumentTronconProfilTravers() {
+    public List<PositionProfilTravers> getAllPositionProfilTravers() {
         return db.queryView(createQuery(POSITION_PROFIL_TRAVERS),
                 PositionProfilTravers.class);
     }
@@ -429,9 +431,17 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public static final String POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID = "PositionProfilTraversByDocumentId";
 
     @View(name = POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID, map = "classpath:PositionProfilTraversByDocumentId-map.js")
-    public List<PositionProfilTravers> getDocumentTronconProfilTraversByDocumentId(final String documentId) {
+    public List<PositionProfilTravers> getPositionProfilTraversByDocumentId(final String documentId) {
         return db.queryView(createQuery(POSITION_PROFIL_TRAVERS_BY_DOCUMENT_ID).key(documentId),
                 PositionProfilTravers.class);
+    }
+
+    public static final String PROFIL_LONG = "ProfilLong";
+
+    @View(name = PROFIL_LONG, map = "classpath:ProfilLong-map.js")
+    public List<ProfilLong> getAllProfilLongs() {
+        return db.queryView(createQuery(PROFIL_LONG),
+                ProfilLong.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {

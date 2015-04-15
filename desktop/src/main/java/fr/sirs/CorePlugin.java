@@ -5,6 +5,8 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Geometry;
 import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
+import static fr.sirs.SIRS.MODEL_PACKAGE;
+import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.geotoolkit.data.bean.BeanStore;
@@ -23,6 +25,8 @@ import fr.sirs.theme.ReseauxDeVoirieTheme;
 import fr.sirs.theme.ReseauxEtOuvragesTheme;
 import fr.sirs.theme.StructuresTheme;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
@@ -68,7 +72,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.theme.DocumentTheme;
-import fr.sirs.theme.DocumentTronconTheme;
+import fr.sirs.theme.PositionDocumentTheme;
 
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
@@ -82,6 +86,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
@@ -235,8 +240,9 @@ public class CorePlugin extends Plugin {
             suppliers.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> repository.getAllFromView(LigneEau.class)));
             
             // Documents positionnés
-            suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> repository.getAllDocumentTroncons()));
-            suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> repository.getAllDocumentTronconProfilTravers()));
+            suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> repository.getAllPositionDocuments()));
+            suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> repository.getAllPositionProfilTravers()));
+            suppliers.put(ProfilLong.class, new StructBeanSupplier(ProfilLong.class, () -> repository.getAllProfilLongs()));
 
             // Emprises communales
             suppliers.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
@@ -251,26 +257,33 @@ public class CorePlugin extends Plugin {
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            final Map<String, List<Class<? extends SIRSDocument>>> mapDesTypesDeDocs = new HashMap<>();
-            final List<Class<? extends SIRSDocument>> documentTronconsList = new ArrayList<>();
+            final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
+            final List<Class> documentTronconsList = new ArrayList<>();
             documentTronconsList.add(Convention.class);
             documentTronconsList.add(ArticleJournal.class);
             documentTronconsList.add(Marche.class);
             documentTronconsList.add(RapportEtude.class);
             documentTronconsList.add(DocumentGrandeEchelle.class);
-            documentTronconsList.add(ProfilLong.class);
+            
             for(final Class elementClass : documentTronconsList){
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            final List<Class<? extends SIRSDocument>> documentTronconProfilTraversList = new ArrayList<>();
+            final List<Class> documentTronconProfilTraversList = new ArrayList<>();
             documentTronconProfilTraversList.add(ProfilTravers.class);
             for(final Class elementClass : documentTronconProfilTraversList){
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            mapDesTypesDeDocs.put(PositionDocument.class.getSimpleName(), documentTronconsList);
-            mapDesTypesDeDocs.put(PositionProfilTravers.class.getSimpleName(), documentTronconProfilTraversList);
+            final List<Class> profilLongList = new ArrayList<>();
+            profilLongList.add(ProfilLong.class);
+            for(final Class elementClass : profilLongList){
+                final LabelMapper mapper = new LabelMapper(elementClass);
+                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+            }
+            mapDesTypesDeDocs.put(PositionDocument.class, documentTronconsList);
+            mapDesTypesDeDocs.put(PositionProfilTravers.class, documentTronconProfilTraversList);
+            mapDesTypesDeDocs.put(ProfilLong.class, profilLongList);
             
             final Color[] colors = new Color[]{
                 Color.BLACK,
@@ -377,7 +390,9 @@ public class CorePlugin extends Plugin {
                         
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
-                    suppliers.get(PositionDocument.class), suppliers.get(PositionProfilTravers.class));
+                    suppliers.get(PositionDocument.class), 
+                    suppliers.get(PositionProfilTravers.class), 
+                    suppliers.get(ProfilLong.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -394,34 +409,43 @@ public class CorePlugin extends Plugin {
         return items;
     }
     
-    private static class DocumentFilter<T extends SIRSDocument> implements Filter{
+    private static class DocumentFilter<T> implements Filter{
 
-        private final Class<T> documentClass;
-        private final List<PreviewLabel> previews;
-        private final Map<String, String> cache;
+        private final Class<T> clazz;
+        private List<PreviewLabel> previews;
+        private Map<String, String> cache;
         private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
 
-        public DocumentFilter(final Class<T> documentClass) {
-            this.documentClass = documentClass;
-            previews = PREVIEW_LABEL_REPOSITORY.getPreviewLabels(documentClass);
-            cache = new HashMap<>();
-            for(final PreviewLabel preview : previews){
-                cache.put(preview.getId(), preview.getType());
+        public DocumentFilter(final Class<T> clazz) {
+            this.clazz = clazz;
+            
+            // Si la classe fournie est un sirsDocument, on aura besoin du cache dans la méthode evaluate(), donc on l'initialise.
+            if(SIRSDocument.class.isAssignableFrom(clazz)){
+                previews = PREVIEW_LABEL_REPOSITORY.getPreviewLabels(clazz);
+                cache = new HashMap<>();
+                for(final PreviewLabel preview : previews){
+                    cache.put(preview.getId(), preview.getType());
+                }
             }
         }
         
         @Override
         public boolean evaluate(Object o) {
             
-            
             final BeanFeature beanFeature = (BeanFeature) o;
-            if(beanFeature.getProperty("sirsdocument")!=null){
-                final Object documentId = beanFeature.getPropertyValue("sirsdocument");
+            // Si la classe fournie est un sirsDocument, on doit pouvoir trouver la propriété qui pointe dessus
+            if(SIRSDocument.class.isAssignableFrom(clazz)
+                    && beanFeature.getProperty(SIRSDOCUMENT_REFERENCE)!=null){
+                final Object documentId = beanFeature.getPropertyValue(SIRSDOCUMENT_REFERENCE);
                 if(documentId!=null && documentId instanceof String){
-                    if(documentClass.getName().equals(cache.get((String) documentId))){
-                        return true;
-                    }
+                    return clazz.getName().equals(cache.get((String) documentId));
                 }
+            }
+            
+            // Sinon il doit s'agir d'une position de document, mais qui ne réfère pas un document.
+            else if(AbstractPositionDocument.class.isAssignableFrom(clazz) 
+                    && !AbstractPositionDocumentAssociable.class.isAssignableFrom(clazz)){
+                return clazz.getSimpleName().equals(beanFeature.getType().getName().getLocalPart());
             }
             return false;
         }
@@ -556,37 +580,43 @@ public class CorePlugin extends Plugin {
      * @return
      * @throws DataStoreException 
      */
-    private List<MapLayer> buildLayers(BeanStore store, Map<String, List<Class<? extends SIRSDocument>>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    private List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
         for(Name name : store.getNames()){
-            for(final Class documentClass : documentClasses.get(name.getLocalPart())){
-                final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
-                if(col.getFeatureType()!=null){
-                    final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
-                    final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
-                    final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+            final Class<? extends AbstractPositionDocument> positionDocumentClass;  
+            try {
+                positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.getLocalPart());
+                for(final Class documentClass : documentClasses.get(positionDocumentClass)){
+                    final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
+                    if(col.getFeatureType()!=null){
+                        final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
+                        final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+                        final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
 
-                    if(col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD)!=null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD)!=null){
-                        final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
-                                CommonCRS.Temporal.JAVA.crs(), 
-                                GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD), 
-                                GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
-                        );
-                        fml.getExtraDimensions().add(datefilter);
+                        if(col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD)!=null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD)!=null){
+                            final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                                    CommonCRS.Temporal.JAVA.crs(), 
+                                    GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD), 
+                                    GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
+                            );
+                            fml.getExtraDimensions().add(datefilter);
+                        }
+                        fml.setVisible(visible);
+                        fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+
+                        final String str = nameMap.get(documentClass.getSimpleName());
+                        fml.setName(str!=null ? str : documentClass.getSimpleName());
+
+                        if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
+
+                        layers.add(fml);
+                        i++;
                     }
-                    fml.setVisible(visible);
-                    fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-
-                    final String str = nameMap.get(documentClass.getSimpleName());
-                    fml.setName(str!=null ? str : documentClass.getSimpleName());
-
-                    if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
-
-                    layers.add(fml);
-                    i++;
                 }
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(CorePlugin.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return layers;
@@ -613,7 +643,7 @@ public class CorePlugin extends Plugin {
         themes.add(new DesordreTheme());
         themes.add(new PrestationsTheme());
         themes.add(new MesureEvenementsTheme());
-        themes.add(new DocumentTronconTheme());
+        themes.add(new PositionDocumentTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
         themes.add(new DocumentTheme<>(ProfilTravers.class));
@@ -622,7 +652,7 @@ public class CorePlugin extends Plugin {
         themes.add(new DocumentTheme<>(Marche.class));
         themes.add(new DocumentTheme<>(RapportEtude.class));
         themes.add(new DocumentTheme<>(DocumentGrandeEchelle.class));
-        themes.add(new DocumentTheme<>(ProfilLong.class));
+//        themes.add(new DocumentTheme<>(ProfilLong.class));
         
     }
     

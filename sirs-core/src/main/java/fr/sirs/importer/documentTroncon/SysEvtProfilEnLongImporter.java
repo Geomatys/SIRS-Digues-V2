@@ -34,7 +34,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtProfilEnLongImporter extends GenericDocumentImporter<PositionDocument> {
+class SysEvtProfilEnLongImporter extends GenericDocumentImporter<ProfilLong> {
 
     private final ProfilEnLongImporter profilLongImporter;
     
@@ -124,7 +124,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<PositionDocumen
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocument documentTroncon = new PositionDocument();
+            final ProfilLong documentTroncon = new ProfilLong();
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -140,13 +140,13 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<PositionDocumen
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocument docTroncon = importRow(row);
+            final ProfilLong docTroncon = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
 
             // Set the list ByTronconId
-            List<PositionDocument> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<ProfilLong> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
                 documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -158,13 +158,18 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<PositionDocumen
     }
 
     @Override
-    PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
+    ProfilLong importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, ProfilLong> profilsLong = profilLongImporter.getRelated();
 
-        final PositionDocument docTroncon = new PositionDocument();
+        final ProfilLong docTroncon;
+        if(profilsLong.get(row.getInt(Columns.ID_DOC.toString()))!=null){
+            docTroncon = profilsLong.get(row.getInt(Columns.ID_DOC.toString()));
+        } else{
+            docTroncon = new ProfilLong();
+        }
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
             docTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
@@ -214,12 +219,21 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<PositionDocumen
          3- Ainsi que du fait que les ID_PROFIL_EN_LONG de la table 
          PROFIL_EN_LONG sont égaux aux ID_DOC des tables DOCUMENT et
          SYS_EVT_PROFIL_EN_LONG
+        
+        =========
+        
+        Cela provien en fait de ce que les profils en long sont une espèce d'hybride
+        entre un document et une position de document associée à un seul document.
+        
+        On les considèrera donc comme des positions de documents "étendues" par des attributs de documents "non localisés".
+        
          */
-        if (row.getInt(Columns.ID_DOC.toString()) != null) {
-            if (profilsLong.get(row.getInt(Columns.ID_DOC.toString())) != null) {
-                docTroncon.setSirsdocument(profilsLong.get(row.getInt(Columns.ID_DOC.toString())).getId());
-            }
-        }
+//        if (row.getInt(Columns.ID_DOC.toString()) != null) {
+//            if (profilsLong.get(row.getInt(Columns.ID_DOC.toString())) != null) {
+//                docTroncon.setSirsdocument(profilsLong.get(row.getInt(Columns.ID_DOC.toString())).getId());
+//            }
+//        }
+        
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
             docTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());

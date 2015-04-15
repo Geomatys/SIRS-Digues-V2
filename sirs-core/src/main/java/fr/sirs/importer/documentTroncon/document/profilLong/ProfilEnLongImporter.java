@@ -12,9 +12,9 @@ import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import fr.sirs.importer.documentTroncon.document.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilLong> {
+public class ProfilEnLongImporter extends GenericImporter {
     
     private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private final TypePositionProfilLongImporter typePositionProfilLongImporter;
@@ -39,6 +39,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
     private final ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
     
     private final OrganismeImporter organismeImporter;
+    
+    protected Map<Integer, ProfilLong> related = null;
 
     public ProfilEnLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -72,8 +74,8 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
 //        ID_DOC_RAPPORT_ETUDES, // Mettre une référence vers UN rapport d'études
         COMMENTAIRE,
 //        ID_SYSTEME_REP_DZ,
-        NOM_FICHIER_PLAN_ENSEMBLE,
-        NOM_FICHIER_COUPE_IMAGE,
+//        NOM_FICHIER_PLAN_ENSEMBLE,
+//        NOM_FICHIER_COUPE_IMAGE,
         DATE_DERNIERE_MAJ,
     }
     
@@ -89,6 +91,11 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
     @Override
     public String getTableName() {
         return DbImporter.TableName.PROFIL_EN_LONG.toString();
+    }
+    
+    public Map<Integer, ProfilLong> getRelated() throws IOException, AccessDbImporterException{
+        if(related==null) compute();
+        return related;
     }
 
     @Override
@@ -133,9 +140,9 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             
             profil.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
             
-            profil.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
-            
-            profil.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
+//            profil.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
+//            
+//            profil.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
             
             if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())!=null){
                 profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());
@@ -165,6 +172,6 @@ public class ProfilEnLongImporter extends GenericDocumentRelatedImporter<ProfilL
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), profil);
         }
-        couchDbConnector.executeBulk(related.values());
+        
     }
 }

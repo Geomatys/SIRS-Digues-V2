@@ -28,9 +28,10 @@ public class DocumentManager {
     private final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
     private final JournalArticleImporter journalArticleImporter;
     private final MarcheImporter marcheImporter;
-    private final ProfilEnLongImporter profilEnLongImporter;
     private final ProfilEnTraversImporter profilEnTraversImporter;
     private final RapportEtudeImporter rapportEtudeImporter;
+    
+    private final ProfilEnLongImporter profilEnLongImporter;
     
     private final List<GenericDocumentRelatedImporter> documentRelatedImporters = new ArrayList<>();
     
@@ -57,11 +58,6 @@ public class DocumentManager {
         final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter = 
                 new TypeSystemeReleveProfilImporter(accessDatabase, couchDbConnector);
         
-        profilEnLongImporter = new ProfilEnLongImporter(accessDatabase, 
-                couchDbConnector, organismeImporter, 
-                evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
-        documentRelatedImporters.add(profilEnLongImporter);
-        
         ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter = 
                 new ProfilEnTraversDescriptionImporter(
                 accessDatabase, couchDbConnector, 
@@ -74,6 +70,11 @@ public class DocumentManager {
         rapportEtudeImporter = new RapportEtudeImporter(accessDatabase, 
                 couchDbConnector);
         documentRelatedImporters.add(rapportEtudeImporter);
+        
+        // OTHER IMPORTERS : NOT DOCUMENT RELATED !!!!!!!
+        profilEnLongImporter = new ProfilEnLongImporter(accessDatabase, 
+                couchDbConnector, organismeImporter, 
+                evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
     }
 
     public ConventionImporter getConventionImporter() {
@@ -92,10 +93,6 @@ public class DocumentManager {
         return marcheImporter;
     }
 
-    public ProfilEnLongImporter getProfilEnLongImporter() {
-        return profilEnLongImporter;
-    }
-
     public ProfilEnTraversImporter getProfilEnTraversImporter() {
         return profilEnTraversImporter;
     }
@@ -108,4 +105,8 @@ public class DocumentManager {
         return documentRelatedImporters;
     }
     
+    // OTHER IMPORTERS : NOT DOCUMENT RELATED !!!!!!!
+    public ProfilEnLongImporter getProfilEnLongImporter() {
+        return profilEnLongImporter;
+    }
 }

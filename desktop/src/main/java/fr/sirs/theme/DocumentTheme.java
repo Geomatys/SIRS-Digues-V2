@@ -30,7 +30,7 @@ public class DocumentTheme<T extends SIRSDocument> extends Theme {
         THEME_NAMES.put(RapportEtude.class, "Rapports d'étude");
         THEME_NAMES.put(DocumentGrandeEchelle.class, "Documents à grande échelle");
         THEME_NAMES.put(ArticleJournal.class, "Articles de presse");
-        THEME_NAMES.put(ProfilLong.class, "Profils en long");
+//        THEME_NAMES.put(ProfilLong.class, "Profils en long");
         THEME_NAMES.put(ProfilTravers.class, "Profils en travers");
     }
         

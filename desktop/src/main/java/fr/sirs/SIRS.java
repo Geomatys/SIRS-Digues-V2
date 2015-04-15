@@ -93,6 +93,8 @@ public final class SIRS extends SirsCore {
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";
     public static final String BUNDLE_KEY_CLASS_ABREGE = "classAbrege";
+    
+    public static final String MODEL_PACKAGE="fr.sirs.core.model";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {
@@ -325,17 +327,19 @@ public final class SIRS extends SirsCore {
      * Note these DocumentTroncons are not the genuine ones, but copy of them, 
      * that are not in their troncon container.
      * 
+     * @deprecated 
      * @param documentId
      * @return 
      */
-    public static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
+    @Deprecated
+    private static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
         try {
             final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
             final Class clazz = Class.forName(previewLabel.getType());
             if(clazz==ProfilTravers.class){
-                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
+                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
             } else {
-                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
@@ -360,9 +364,9 @@ public final class SIRS extends SirsCore {
             final Class clazz = Class.forName(previewLabel.getType());
             final ObservableList<AbstractPositionDocument> falseDocumentTroncons;
             if(clazz==ProfilTravers.class){
-                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconProfilTraversByDocumentId(documentId));
+                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
             } else {
-                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getDocumentTronconsByDocumentId(documentId));
+                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
             }
 
             final ObservableList<AbstractPositionDocument> trueDocumentTroncons = FXCollections.observableArrayList();

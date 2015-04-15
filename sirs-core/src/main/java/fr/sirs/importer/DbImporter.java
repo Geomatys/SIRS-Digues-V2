@@ -16,7 +16,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.MarcheRepository;
 import fr.sirs.core.component.OrganismeRepository;
-import fr.sirs.core.component.ProfilLongRepository;
+//import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.component.RefConduiteFermeeRepository;
@@ -147,7 +147,7 @@ public class DbImporter {
     private final RefFonctionRepository refFonctionRepository;
     private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
     private final RefTypeDocumentRepository refTypeDocumentRepository;
-    private final ProfilLongRepository profilLongRepository;
+//    private final ProfilLongRepository profilLongRepository;
     private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
     private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
     private final ArticleJournalRepository articleJournalRepository;
@@ -624,8 +624,8 @@ public class DbImporter {
         repositories.add(refOrigineProfilTraversRepository);
         refTypeDocumentRepository = new RefTypeDocumentRepository(couchDbConnector);
         repositories.add(refTypeDocumentRepository);
-        profilLongRepository = new ProfilLongRepository(couchDbConnector);
-        repositories.add(profilLongRepository);
+//        profilLongRepository = new ProfilLongRepository(couchDbConnector);
+//        repositories.add(profilLongRepository);
         refPositionProfilLongSurDigueRepository = new RefPositionProfilLongSurDigueRepository(couchDbConnector);
         repositories.add(refPositionProfilLongSurDigueRepository);
         refOrigineProfilLongRepository = new RefOrigineProfilLongRepository(couchDbConnector);
