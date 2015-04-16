@@ -185,7 +185,7 @@ public class ExportMenu extends TreeMenuItem {
     
     private static class FillCoordCollection extends WrapFeatureCollection{
         
-        public FillCoordCollection(FeatureCollection<?> originalFC) {
+        public FillCoordCollection(FeatureCollection originalFC) {
             super(originalFC);
         }
 

@@ -386,8 +386,8 @@ public class FXMapPane extends BorderPane {
             } else {
                 return false; // no zoom possible
             }
-            FeatureCollection<? extends Feature> subCollection
-                    = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
+            FeatureCollection subCollection =
+                    fLayer.getCollection().subCollection(queryBuilder.buildQuery());
             
             Envelope tmpEnvelope = subCollection.getEnvelope();
             if (tmpEnvelope == null) {
