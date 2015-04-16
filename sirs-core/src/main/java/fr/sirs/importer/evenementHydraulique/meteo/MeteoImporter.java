@@ -76,7 +76,7 @@ public class MeteoImporter extends GenericImporter {
             }
             
             if(row.getDouble(Columns.VITESSE_VENT.toString())!=null){
-                meteo.setVitesse_vent(row.getDouble(Columns.VITESSE_VENT.toString()).floatValue());
+                meteo.setVitesseVent(row.getDouble(Columns.VITESSE_VENT.toString()).floatValue());
             }
             
             if(row.getInt(Columns.ID_TYPE_ORIENTATION_VENT.toString())!=null){

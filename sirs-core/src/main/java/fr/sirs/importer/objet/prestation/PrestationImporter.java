@@ -142,11 +142,11 @@ public class PrestationImporter extends GenericPrestationImporter {
             }
             
             if (row.getDouble(Columns.COUT_AU_METRE.toString()) != null) {
-                objet.setCout_metre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
+                objet.setCoutMetre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.COUT_GLOBAL.toString()) != null) {
-                objet.setCout_global(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
+                objet.setCoutGlobal(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
             }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){

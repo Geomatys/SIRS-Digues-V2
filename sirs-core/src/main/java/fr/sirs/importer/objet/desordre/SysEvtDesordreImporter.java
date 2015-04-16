@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.ObservationSuivi;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -150,7 +150,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypeReferences();
-        final Map<Integer, List<ObservationSuivi>> observations = desordreObservationImporter.getObservationsByDesordreId();
+        final Map<Integer, List<Observation>> observations = desordreObservationImporter.getObservationsByDesordreId();
 
         final Desordre desordre = new Desordre();
 

@@ -93,14 +93,14 @@ implements DocumentsUpdatable {
             evenement.setLibelle(row.getString(Columns.NOM_EVENEMENT_HYDRAU.toString()));
             
             if(row.getDouble(Columns.VITESSE_MOYENNE.toString())!=null){
-                evenement.setVitesse_moy(row.getDouble(Columns.VITESSE_MOYENNE.toString()).floatValue());
+                evenement.setVitesseMoy(row.getDouble(Columns.VITESSE_MOYENNE.toString()).floatValue());
             }
             
             if(row.getDouble(Columns.DEBIT_MOYEN.toString())!=null){
-                evenement.setDebit_moy(row.getDouble(Columns.DEBIT_MOYEN.toString()).floatValue());
+                evenement.setDebitMoy(row.getDouble(Columns.DEBIT_MOYEN.toString()).floatValue());
             }
             
-            evenement.setModeleur_hydraulique(row.getString(Columns.NOM_MODELEUR_HYDRAU.toString()));
+            evenement.setModeleurHydraulique(row.getString(Columns.NOM_MODELEUR_HYDRAU.toString()));
             
             evenement.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             

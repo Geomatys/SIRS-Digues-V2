@@ -8,7 +8,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.ObservationSuivi;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
@@ -28,8 +28,8 @@ import org.ektorp.CouchDbConnector;
  */
 public class DesordreObservationImporter extends GenericImporter {
     
-    private Map<Integer, ObservationSuivi> observations = null;
-    private Map<Integer, List<ObservationSuivi>> observationsByDesordreId = null;
+    private Map<Integer, Observation> observations = null;
+    private Map<Integer, List<Observation>> observationsByDesordreId = null;
     private final TypeUrgenceImporter typeUrgenceImporter;
     private final IntervenantImporter intervenantImporter;
 
@@ -70,7 +70,7 @@ public class DesordreObservationImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ObservationSuivi observation = new ObservationSuivi();
+            final Observation observation = new Observation();
             
             if(row.getInt(Columns.ID_TYPE_URGENCE.toString())!=null){
                 observation.setUrgenceId(typesUrgence.get(row.getInt(Columns.ID_TYPE_URGENCE.toString())).getId());
@@ -82,7 +82,7 @@ public class DesordreObservationImporter extends GenericImporter {
             
             if (row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()) != null) {
                 try{
-                    observation.setDate_observation(LocalDateTime.parse(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()).toString(), dateTimeFormatter));
+                    observation.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()).toString(), dateTimeFormatter));
                 }
                 catch(DateTimeParseException e){
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
@@ -98,7 +98,7 @@ public class DesordreObservationImporter extends GenericImporter {
             }
             
             if (row.getInt(Columns.NBR_DESORDRE.toString()) != null) {
-                observation.setNombre_desordres(row.getInt(Columns.NBR_DESORDRE.toString()));
+                observation.setNombreDesordres(row.getInt(Columns.NBR_DESORDRE.toString()));
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
@@ -112,7 +112,7 @@ public class DesordreObservationImporter extends GenericImporter {
             observations.put(row.getInt(Columns.ID_OBSERVATION.toString()), observation);
 
             // Set the list ByTronconId
-            List<ObservationSuivi> listByTronconId = observationsByDesordreId.get(row.getInt(Columns.ID_DESORDRE.toString()));
+            List<Observation> listByTronconId = observationsByDesordreId.get(row.getInt(Columns.ID_DESORDRE.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
             }
@@ -121,13 +121,13 @@ public class DesordreObservationImporter extends GenericImporter {
         }
     }
     
-    public Map<Integer, List<ObservationSuivi>> getObservationsByDesordreId() 
+    public Map<Integer, List<Observation>> getObservationsByDesordreId() 
             throws IOException, AccessDbImporterException{
         if(observationsByDesordreId==null) compute();
         return observationsByDesordreId;
     }
     
-    public Map<Integer, ObservationSuivi> getObservations() 
+    public Map<Integer, Observation> getObservations() 
             throws IOException, AccessDbImporterException{
         if(observations==null) compute();
         return observations;
