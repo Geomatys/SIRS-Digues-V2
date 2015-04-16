@@ -3,12 +3,11 @@ package fr.sirs.query;
 
 import static fr.sirs.SIRS.CSS_PATH;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -45,6 +44,7 @@ import org.opengis.filter.expression.PropertyName;
  */
 public class FXSQLFilterEditor extends GridPane {
 
+    private static final String PARENT_DESCRIPTORS = "parentDescriptorsKey";
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final int SPACING = 5;
     private static final Image DIV_HAUT = new Image("/fr/sirs/div_haut.png");
@@ -159,35 +159,6 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyName.textProperty().addListener(this::setFilterProperty);
         uiPropertyValue.textProperty().addListener(this::setFilterProperty);
     }
-
-    protected ObservableList<String> getChoices(final String text) {
-        if (type != null && text != null && !text.isEmpty()) {
-            final String[] parts = text.split("/");
-
-            final ObservableList<String> candidates = FXCollections.observableArrayList();
-            final StringBuilder sb = new StringBuilder();
-
-            ComplexType ct = type;
-            for (int i = 0; i < parts.length; i++) {
-                PropertyDescriptor desc = ct.getDescriptor(parts[i]);
-                if (desc == null) {
-                    break;
-                }
-                final PropertyType propType = desc.getType();
-                if (propType instanceof AssociationType) {
-                    ct = (ComplexType) ((AssociationType) propType).getRelatedType();
-                    sb.append(parts[i]).append('/');
-                }
-            }
-
-            if (ct != null) {
-                candidates.addAll(listProps(sb.toString(), ct));
-            }
-            return candidates;
-        }
-
-        return choices;
-    }
     
     public void setChoices(ObservableList<String> choices) {
         this.choices.setAll(choices);
@@ -206,10 +177,10 @@ public class FXSQLFilterEditor extends GridPane {
     
     private static List<String> listProps(String base, ComplexType ct){
         final List<String> lst = new ArrayList<>();
-        for(PropertyDescriptor desc : ct.getDescriptors()){
-            final RelationMetaModel relation = (RelationMetaModel)desc.getUserData().get(JDBC_PROPERTY_RELATION);
-            if(relation==null || relation.isImported()){
-                lst.add(base+desc.getName().getLocalPart());
+        for (PropertyDescriptor desc : ct.getDescriptors()) {
+            final String descName = getName(desc);
+            if (descName != null && !descName.isEmpty()) {
+                lst.add(base + descName);
             }
         }
         Collections.sort(lst);
@@ -294,12 +265,15 @@ public class FXSQLFilterEditor extends GridPane {
         }
     }
     
+    /**
+     * Text field completion for SQL column names.
+     */
     private class columnCompletor extends TextFieldCompletion {
 
         public columnCompletor(TextInputControl textField) {
             super(textField);
         }
-
+        
         @Override
         protected ObservableList<String> getChoices(String text) {
             // If there's no text to analyze, 
@@ -307,43 +281,85 @@ public class FXSQLFilterEditor extends GridPane {
             final String[] joinedTypes = text.split("/");
             if (joinedTypes.length < 1) return choices;
             
-            ObservableList<String> result = FXCollections.observableArrayList();
-            Stream<PropertyType> parentTypes = Stream.of(type);
-            for (int i = 0 ; i < joinedTypes.length ; i++) {
-                final Pattern filter = Pattern.compile(joinedTypes[i]);
-                
-                parentTypes.flatMap((PropertyType t) -> {
-                    // First, we check if we've got an association and should browse joined type.
-                    if (t instanceof AssociationType) {
-                        t = ((AssociationType)t).getRelatedType();
-                    }
-                    
-                    // Get all sub-types of the current one if any.
-                    if (t instanceof ComplexType) {
-                        final ArrayList<PropertyType> types = new ArrayList<>();
-                        types.add(t);
-                        for (final PropertyDescriptor p : ((ComplexType)t).getDescriptors()) {
-                            if (p.getType() != null) {
-                                types.add(p.getType());
-                            }
-                        }
-                        return types.stream();
-                    } else {
-                        return Stream.of(t);
-                    }
-                })
-                        // We keep only sub-types whose name has common parts with input text.
-                        .filter((PropertyType toFilter)-> {return filter.matcher(toFilter.getName().getLocalPart()).find();});
-            }
-            
-            return FXCollections.observableList(parentTypes.map((PropertyType prop) -> {
-                final StringBuilder nameBuilder = new StringBuilder(prop.getName().getLocalPart());
-                while (prop.getSuper() != null) {
-                    prop = prop.getSuper();
-                    nameBuilder.insert(0, '/').insert(0, prop.getName().getLocalPart());
+            final ArrayList<Pattern> filters = new ArrayList<>();
+            for (final String section : joinedTypes) {
+                if (section == null || section.isEmpty()) {
+                    break;
+                } else {
+                    filters.add(Pattern.compile(section));
                 }
-                return nameBuilder.toString();
-            }).collect(Collectors.toList()));
+            }
+            ObservableList<String> choices = FXCollections.observableArrayList();
+            for (final PropertyDescriptor desc : type.getDescriptors()) {
+                choices.addAll(analyzeDescriptor("", desc, filters, 0));
+            }
+            return choices;
         }
+    }
+    
+    final ArrayList<String> analyzeDescriptor(final String prefix, final PropertyDescriptor descriptor, final List<Pattern> filters, int filterIndex) {
+        final ArrayList<String> result = new ArrayList<>();
+        final String descriptorName = getName(descriptor);
+        if (descriptorName == null || descriptorName.isEmpty()) return result;
+        
+        final Matcher matcher = filters.get(filterIndex++).matcher(descriptorName);
+        /*
+         * Search for correspondance with given filter. If the match is complete, 
+         * we will search for children matching the next step of the filter sequence.
+        If there's no more fiter, we will return all children as suggestion.
+         * If the match is partial, it means user search for a field in the current 
+         * level, so we won't pollute output list with next level elements.
+         */
+        if (matcher.matches()) {
+            final String currentLabel = prefix + ((prefix.isEmpty() || prefix.endsWith("/")) ? "" : "/") + descriptorName;
+            result.add(currentLabel);
+            Collection<PropertyDescriptor> children = getChildren(descriptor);
+            if (!children.isEmpty()) {
+                if (filterIndex < filters.size()) {
+                    for (final PropertyDescriptor child : children) {
+                        result.addAll(analyzeDescriptor(currentLabel, child, filters, filterIndex));
+                    }
+                } else {
+                    final String newPrefix = currentLabel + "/";
+                    for (final PropertyDescriptor child : children) {
+                        final String childName = getName(child);
+                        if (childName != null && !childName.isEmpty()) {
+                            result.add(newPrefix + childName);
+                        }
+                    }
+                }
+            }
+
+        } else if (matcher.find()) {
+            result.add(prefix + ((prefix.isEmpty() || prefix.endsWith("/")) ? "" : "/") + descriptorName);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Try to find property desciptors pointed as subtypes by the current descriptor.
+     * @param parent The descriptor to get nested descriptors from.
+     * @return descriptors pointed by input descriptor's {@link PropertyType} if 
+     * it's a {@link ComplexType} or {@link AssociationType}. Otherwise, an empty 
+     * list is returned.
+     */
+    public static Collection<PropertyDescriptor> getChildren(final PropertyDescriptor parent) {
+        PropertyType type = parent.getType();
+        if (type instanceof AssociationType) {
+            type = ((AssociationType)type).getRelatedType();
+        }
+        if (type instanceof ComplexType) {
+            return ((ComplexType)type).getDescriptors();
+        }
+        return new ArrayList();
+    }
+    
+    public static String getName(final PropertyDescriptor pDesc) {
+        final RelationMetaModel relation = (RelationMetaModel) pDesc.getUserData().get(JDBC_PROPERTY_RELATION);
+        if (relation == null || relation.isImported()) {
+            return pDesc.getName().getLocalPart();
+        }
+        return "";
     }
 }

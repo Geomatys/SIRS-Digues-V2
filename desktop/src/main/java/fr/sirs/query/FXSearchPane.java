@@ -46,6 +46,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -126,7 +127,7 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiSQLModelOptions;
     @FXML private GridPane uiSQLQueryOptions;
     @FXML private GridPane uiAdminOptions;
-    @FXML private ChoiceBox<String> uiDBTable;
+    @FXML private ComboBox<String> uiTableChoice;
     @FXML private BorderPane uiFilterPane;
     @FXML private TextArea uiSQLText;
     @FXML private Button uiExportQueries;
@@ -166,9 +167,9 @@ public class FXSearchPane extends BorderPane {
             return observableNames;
         });
         
-        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiDBTable.setItems(h2Names.getValue())));
+        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiTableChoice.setItems(h2Names.getValue())));
         
-        uiDBTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        uiTableChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if(newValue!=null){
@@ -402,7 +403,7 @@ public class FXSearchPane extends BorderPane {
     }
     
     private String buildSQLQueryFromFilter() throws DataStoreException {
-        final String tableName = uiDBTable.getValue();
+        final String tableName = uiTableChoice.getValue();
         if (tableName == null) {
             return null;
         }
