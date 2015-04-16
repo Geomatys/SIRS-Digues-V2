@@ -30,8 +30,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class CouchDBInit {
     
-    
     private static final Logger LOGGER = LoggerFactory.getLogger(CouchDBInit.class);
+    
+    private static final int SOCKET_TIMEOUT = 45000;
+    private static final int CONNECTION_TIMEOUT = 5000;
     
     public static final String DB_CONNECTOR = "connector";
     public static final String SEARCH_ENGINE = "searchEngine";
@@ -66,7 +68,11 @@ public class CouchDBInit {
         final String user = loginInfo[0];
         final String password = loginInfo[1];
         
-        final HttpClient httpClient = new StdHttpClient.Builder().url(databaseUrl).build();
+        final HttpClient httpClient = new StdHttpClient.Builder()
+                .url(databaseUrl)
+                .connectionTimeout(CONNECTION_TIMEOUT)
+                .socketTimeout(SOCKET_TIMEOUT)
+                .build();
         final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
         final CouchDbConnector connector = couchsb.createConnector(databaseName,createIfNotExists);
         
