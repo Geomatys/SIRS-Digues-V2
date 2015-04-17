@@ -23,7 +23,6 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.AbstractMap;
@@ -32,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -45,7 +45,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -60,7 +59,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -68,8 +66,6 @@ import javafx.scene.web.WebView;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.font.FontAwesomeIcons;
-import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
@@ -592,33 +588,42 @@ public class FXPositionablePane extends BorderPane {
      * if we cannot find it.
      */
     private TronconDigue getTroncon() {
-        Positionable pos = positionableProperty.get();
-        if (pos == null) return null;
-        TronconDigue troncon = null;
-        if (pos.getParent() != null) {
-            Element tmp = pos.getParent();
-            while (tmp != null && !(tmp instanceof TronconDigue)) {
-                tmp = tmp.getParent();
+        if (currentTroncon == null) {
+            Positionable pos = positionableProperty.get();
+            if (pos == null) {
+                return null;
             }
-            troncon = (TronconDigue) tmp;
-        }
-        // Maybe we have an incomplete version of the document, so we try by querying repository.
-        if (troncon == null) {
-            try {
-                troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
-            } catch (Exception e) {
-                troncon = null;
+            if (pos.getParent() != null) {
+                Element tmp = pos.getParent();
+                while (tmp != null && !(tmp instanceof TronconDigue)) {
+                    tmp = tmp.getParent();
+                }
+                currentTroncon = (TronconDigue) tmp;
+            }
+            // Maybe we have an incomplete version of the document, so we try by querying repository.
+            if (currentTroncon == null) {
+                try {
+                    currentTroncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
+                } catch (Exception e) {
+                    // Last chance, we must try to get it from SR
+                    if (currentTroncon == null && pos.getSystemeRepId() != null) {
+                        SystemeReperage sr = Injector.getSession().getSystemeReperageRepository().get(pos.getSystemeRepId());
+                        if (sr.getTronconId() != null) {
+                            currentTroncon = Injector.getSession().getTronconDigueRepository().get(sr.getTronconId());
+                        }
+                    }
+                }
             }
         }
-        // Last chance, we must try to get it from SR
-        if (troncon == null && pos.getSystemeRepId() != null) {
-            SystemeReperage sr = Injector.getSession().getSystemeReperageRepository().get(pos.getSystemeRepId());
-            if (sr.getTronconId() != null) {
-                troncon = Injector.getSession().getTronconDigueRepository().get(sr.getTronconId());
-            }
+        return currentTroncon;
+    }
+    
+    private Optional<SystemeReperage> getDefaultSR() {
+        currentTroncon = getTroncon();
+        if (currentTroncon.getSystemeRepDefautId() != null) {
+            return Optional.of(Injector.getSession().getSystemeReperageRepository().get(currentTroncon.getSystemeRepDefautId()));
         }
-            
-        return troncon;
+        return Optional.empty();
     }
     
     /**
@@ -801,6 +806,7 @@ public class FXPositionablePane extends BorderPane {
             uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
             uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
         }
+        currentTroncon = null;
         
         if(newValue==null) return;
         
@@ -926,8 +932,10 @@ public class FXPositionablePane extends BorderPane {
                             }
                             final double x = startPoint.getX();
                             final double y = startPoint.getY();
-                            final SystemeReperage sr = uiSRs.getValue();
-                            float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
+                            final Optional<SystemeReperage> sr = getDefaultSR();
+                            float computedPR = sr.isPresent()? 
+                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository())
+                                    : Float.NaN;
                             Platform.runLater(() -> {
                                 uiLongitudeStart.valueProperty().set(x);
                                 uiLatitudeStart.valueProperty().set(y);
@@ -964,8 +972,10 @@ public class FXPositionablePane extends BorderPane {
                             }
                             final double x = endPoint.getX();
                             final double y = endPoint.getY();
-                            final SystemeReperage sr = uiSRs.getValue();
-                            float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
+                            final Optional<SystemeReperage> sr = getDefaultSR();
+                            float computedPR = sr.isPresent()? 
+                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository())
+                                    : Float.NaN;
                             Platform.runLater(() -> {
                                 uiLongitudeEnd.valueProperty().set(x);
                                 uiLatitudeEnd.valueProperty().set(y);
@@ -995,10 +1005,10 @@ public class FXPositionablePane extends BorderPane {
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point startPoint = getOrCreateStartPoint();
-                        final SystemeReperage sr = uiSRs.getValue();
-                        if (startPoint != null && sr != null) {
-                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, startPoint);
-                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, Injector.getSession().getBorneDigueRepository());
+                        final Optional<SystemeReperage> sr = getDefaultSR();
+                        if (startPoint != null && sr.isPresent()) {
+                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), startPoint);
+                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
                                 uiAmontStart.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
@@ -1029,10 +1039,10 @@ public class FXPositionablePane extends BorderPane {
                 TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point endPoint = getOrCreateEndPoint();
-                        final SystemeReperage sr = uiSRs.getValue();
-                        if (endPoint != null && sr != null) {
-                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr, endPoint);
-                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
+                        final Optional<SystemeReperage> sr = getDefaultSR();
+                        if (endPoint != null && sr.isPresent()) {
+                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), endPoint);
+                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository());
                             Platform.runLater(() -> {
                                 uiAmontEnd.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));

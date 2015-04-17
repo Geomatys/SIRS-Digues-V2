@@ -51,6 +51,7 @@
                             </GridPane>
                             <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5d">  
                                 <children>
+                              <Label style="-fx-font-style: italic;" styleClass="label-header" text="SR par défaut :" HBox.hgrow="NEVER" />
                                     <HBox alignment="BASELINE_CENTER" maxWidth="1.7976931348623157E308" spacing="5d" HBox.hgrow="ALWAYS">  
                                         <children>                    
                                             <Label alignment="BASELINE_LEFT" styleClass="label-header" text="PR de début :" />

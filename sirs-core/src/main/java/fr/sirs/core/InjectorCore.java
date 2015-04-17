@@ -1,20 +1,21 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package fr.sirs.core;
 
-package fr.sirs;
-
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.index.ElasticSearchEngine;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  *
- * @author Olivier Nouguier (Géomatys)
- * @author Samuel Andrés (Géomatys)
+ * @author Alexis Manin (Geomatys)
  */
-@Component
-public class Injector extends InjectorCore {
+public class InjectorCore implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
@@ -32,10 +33,6 @@ public class Injector extends InjectorCore {
     public static <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
         
-    }
-    
-    public static Session getSession(){
-        return getBean(Session.class);
     }
     
     public static DocumentChangeEmiter getDocumentChangeEmiter(){

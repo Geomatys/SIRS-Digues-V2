@@ -164,8 +164,6 @@ public class TronconUtils {
                 structure.setSystemeRepId(null);
                 structure.setBorneDebutId(null);
                 structure.setBorneFinId(null);
-                structure.setPR_debut(Float.NaN);
-                structure.setPR_fin(Float.NaN);
                 structure.setBorne_debut_distance(Float.NaN);
                 structure.setBorne_fin_distance(Float.NaN);
             } else {
@@ -610,13 +608,12 @@ public class TronconUtils {
         LinearReferencing.SegmentInfo[] linearSegments = objInfo.getTronconSegments(false);
         ArgumentChecks.ensureNonNull("Linear for position projection.", linearSegments);
         
-        PosSR bornePosition = objInfo.getForSR();        
-        ArgumentChecks.ensureNonEmpty("SRID", bornePosition.srid);
-        
+        final String srid = objInfo.getTroncon().getSystemeRepDefautId();        
+        ArgumentChecks.ensureNonEmpty("SRID ", srid);
         
         BorneDigueRepository borneRepo = session.getBorneDigueRepository();        
         SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
-        SystemeReperage currentSR = srRepo.get(bornePosition.srid);
+        SystemeReperage currentSR = srRepo.get(srid);
         
         targetPos.setPR_debut(computePR(linearSegments, currentSR, objInfo.getGeoPointStart(), borneRepo));
         targetPos.setPR_fin(computePR(linearSegments, currentSR, objInfo.getGeoPointEnd(), borneRepo));
@@ -643,6 +640,13 @@ public class TronconUtils {
             this.session = session;
         }
 
+        public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear, SessionGen session) {
+            this.pos = pos;
+            this.troncon = troncon;
+            this.linearSegments = linear;
+            this.session = session;
+        }
+        
         /**
          * Try to retrieve {@link TronconDigue} on which thee current Positionable is defined.
          * @return Troncon of the object, or null if we cannot retrieve it (no valid SR).
