@@ -2,9 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.PointLeve;
-import fr.sirs.core.model.PointLeveDZ;
-import fr.sirs.core.model.PointLeveXYZ;
+import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -22,19 +20,19 @@ import org.ektorp.CouchDbConnector;
  */
 class ProfilLongPointDZImporter extends GenericImporter {
 
-    private Map<Integer, PointLeveDZ> points = null;
-    private Map<Integer, List<PointLeveDZ>> pointsByProfil = null;
+    private Map<Integer, PrZProfilLong> points = null;
+    private Map<Integer, List<PrZProfilLong>> pointsByProfil = null;
     
     ProfilLongPointDZImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
     
-    public Map<Integer, PointLeveDZ> getLeveePoints() throws IOException, AccessDbImporterException{
+    public Map<Integer, PrZProfilLong> getLeveePoints() throws IOException, AccessDbImporterException{
         if(points==null) compute();
         return points;
     }
     
-    public Map<Integer, List<PointLeveDZ>> getLeveePointByProfilId() throws IOException, AccessDbImporterException{
+    public Map<Integer, List<PrZProfilLong>> getLeveePointByProfilId() throws IOException, AccessDbImporterException{
         if(pointsByProfil==null) compute();
         return pointsByProfil;
     }
@@ -70,7 +68,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final PointLeveDZ levePoint = new PointLeveDZ();
+            final PrZProfilLong levePoint = new PrZProfilLong();
             
             if (row.getDouble(Columns.PR_CALCULE.toString()) != null) {
                 levePoint.setD(row.getDouble(Columns.PR_CALCULE.toString()).doubleValue());
@@ -84,7 +82,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
             levePoint.setValid(true);
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
-            List<PointLeveDZ> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
+            List<PrZProfilLong> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByProfil == null) {
                 listByProfil = new ArrayList<>();
                 pointsByProfil.put(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()), listByProfil);

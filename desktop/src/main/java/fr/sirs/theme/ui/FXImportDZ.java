@@ -3,7 +3,11 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.model.DZLeveProfilTravers;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.PointLeveDZ;
+import fr.sirs.core.model.PrZProfilLong;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -130,7 +134,17 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
         final ObservableList<PointLeveDZ> leves = FXCollections.observableArrayList();
         
         for(final Feature feature : features){
-            final PointLeveDZ leve = new PointLeveDZ();
+            final PointLeveDZ leve;
+            
+            
+            
+            if(pojoTable.getParentElement() instanceof LeveProfilTravers){
+                leve = new DZLeveProfilTravers();
+            } else if(pojoTable.getParentElement() instanceof ProfilLong){
+                leve = new PrZProfilLong();
+            } else {
+                throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
+            }
             
             // DZ
             leve.setD(Double.valueOf(String.valueOf(feature.getPropertyValue(uiAttD.getValue().getName().tip().toString()))));

@@ -2,6 +2,7 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.DZLeveProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
@@ -10,6 +11,7 @@ import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
+import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -129,8 +131,8 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         final Map<Integer, RefTypeProfilTravers> typesProfil = typeProfilTraversImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilTravers> typesOrigineProfil = typeOrigineProfilTraversImporter.getTypeReferences();
         final Map<Integer, List<ParametreHydrauliqueProfilTravers>> evenementsHydrauliques = profilTraversEvenementHydrauliqueImporter.getEvenementHydrauliqueByLeveId();
-        final Map<Integer, List<PointLeveXYZ>> pointsByLeveXYZ = profilTraversPointXYZImporter.getLeveePointByLeveId();
-        final Map<Integer, List<PointLeveDZ>> pointsByLeveDZ = profilTraversPointDZImporter.getLeveePointByLeveId();
+        final Map<Integer, List<XYZLeveProfilTravers>> pointsByLeveXYZ = profilTraversPointXYZImporter.getLeveePointByLeveId();
+        final Map<Integer, List<DZLeveProfilTravers>> pointsByLeveDZ = profilTraversPointDZImporter.getLeveePointByLeveId();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){

@@ -7,8 +7,12 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.PointLeveXYZ;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
+import fr.sirs.core.model.XYZLeveProfilTravers;
+import fr.sirs.core.model.XYZProfilLong;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Collection;
@@ -144,7 +148,16 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
         final ObservableList<PointLeveXYZ> leves = FXCollections.observableArrayList();
         
         for(final Feature feature : features){
-            final PointLeveXYZ leve = new PointLeveXYZ();
+            final PointLeveXYZ leve;
+            
+            if(pojoTable.getParentElement() instanceof LeveProfilTravers){
+                leve = new XYZLeveProfilTravers();
+            } else if(pojoTable.getParentElement() instanceof ProfilLong){
+                leve = new XYZProfilLong();
+            } else {
+                throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
+            }
+            
             Point geom;
             final CoordinateReferenceSystem dataCrs;
 

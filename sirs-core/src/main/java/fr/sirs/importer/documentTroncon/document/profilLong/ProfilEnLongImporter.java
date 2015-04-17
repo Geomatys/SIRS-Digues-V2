@@ -7,10 +7,12 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.core.model.PointLeveDZ;
 import fr.sirs.core.model.PointLeveXYZ;
+import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
@@ -112,8 +114,8 @@ public class ProfilEnLongImporter extends GenericImporter {
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeReferences();
-        final Map<Integer, List<PointLeveXYZ>> pointsByLeveXYZ = profilLongPointXYZImporter.getLeveePointByProfilId();
-        final Map<Integer, List<PointLeveDZ>> pointsByLeveDZ = profilLongPointDZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<XYZProfilLong>> pointsByLeveXYZ = profilLongPointXYZImporter.getLeveePointByProfilId();
+        final Map<Integer, List<PrZProfilLong>> pointsByLeveDZ = profilLongPointDZImporter.getLeveePointByProfilId();
         final Map<Integer, List<ParametreHydrauliqueProfilLong>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
