@@ -2,9 +2,9 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import fr.sirs.core.model.PointLeve;
-import fr.sirs.core.model.PointLeveXYZ;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -18,8 +18,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 /**
@@ -77,60 +80,32 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
         while(it.hasNext()){
             final Row row = it.next();
             final XYZLeveProfilTravers levePoint = new XYZLeveProfilTravers();
-            
-            
-            
-            
-            
-//        GeometryFactory geometryFactory = new GeometryFactory();
-//        final MathTransform lambertToRGF;
-//        try {
-//            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
-//
-//            try {
-//
-//                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-//                    Point x = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                            row.getDouble(Columns.X_DEBUT.toString()),
-//                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-//                }
-//            } catch (MismatchedDimensionException | TransformException ex) {
-//                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//            try {
-//
-//                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-//                    crete.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-//                            row.getDouble(Columns.X_FIN.toString()),
-//                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-//                }
-//            } catch (MismatchedDimensionException | TransformException ex) {
-//                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        } catch (FactoryException ex) {
-//            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
 
-            
-            
-            
-            
-            if (row.getDouble(Columns.X.toString()) != null) {
-                levePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+                try {
+
+                    if (row.getDouble(Columns.X.toString()) != null && row.getDouble(Columns.Y.toString()) != null) {
+                        Point point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X.toString()),
+                                row.getDouble(Columns.Y.toString()))), lambertToRGF);
+                        levePoint.setX(point.getX());
+                        levePoint.setY(point.getY());
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             }
-            
-            if (row.getDouble(Columns.Y.toString()) != null) {
-                levePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
-            }
-            
-            
-            
-            
+
             if (row.getDouble(Columns.Z.toString()) != null) {
-                levePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
+                levePoint.setZ(row.getDouble(Columns.Z.toString()));
             }
-            
+
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
             levePoint.setValid(true);
             

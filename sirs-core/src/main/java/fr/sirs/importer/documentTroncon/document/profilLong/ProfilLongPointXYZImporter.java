@@ -2,6 +2,9 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -12,7 +15,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
@@ -71,16 +82,29 @@ class ProfilLongPointXYZImporter extends GenericImporter {
             final Row row = it.next();
             final XYZProfilLong levePoint = new XYZProfilLong();
             
-            if (row.getDouble(Columns.X.toString()) != null) {
-                levePoint.setX(row.getDouble(Columns.X.toString()).doubleValue());
-            }
-            
-            if (row.getDouble(Columns.Y.toString()) != null) {
-                levePoint.setY(row.getDouble(Columns.Y.toString()).doubleValue());
+            GeometryFactory geometryFactory = new GeometryFactory();
+            final MathTransform lambertToRGF;
+            try {
+                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+
+                try {
+
+                    if (row.getDouble(Columns.X.toString()) != null && row.getDouble(Columns.Y.toString()) != null) {
+                        Point point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                                row.getDouble(Columns.X.toString()),
+                                row.getDouble(Columns.Y.toString()))), lambertToRGF);
+                        levePoint.setX(point.getX());
+                        levePoint.setY(point.getY());
+                    }
+                } catch (MismatchedDimensionException | TransformException ex) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FactoryException ex) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             }
             
             if (row.getDouble(Columns.Z.toString()) != null) {
-                levePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
+                levePoint.setZ(row.getDouble(Columns.Z.toString()));
             }
             
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));

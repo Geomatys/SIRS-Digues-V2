@@ -446,7 +446,7 @@ public class PojoTable extends BorderPane {
             @Override
             public void handle(ActionEvent event) {
                 final FXAbstractImportPointLeve importCoord;
-                if(pojoClass==PointLeveXYZ.class) importCoord = new FXImportXYZ(PojoTable.this);
+                if(PointLeveXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(PojoTable.this);
                 else importCoord = new FXImportDZ(PojoTable.this);
                 
                 final Dialog dialog = new Dialog();
@@ -462,7 +462,7 @@ public class PojoTable extends BorderPane {
         });
         searchEditionToolbar.getChildren().add(1, uiImport);
         
-        if(pojoClass==PointLeveXYZ.class){
+        if(PointLeveXYZ.class.isAssignableFrom(pojoClass)){
             uiTable.getColumns().add(new DistanceComputedPropertyColumn());
         }
         
