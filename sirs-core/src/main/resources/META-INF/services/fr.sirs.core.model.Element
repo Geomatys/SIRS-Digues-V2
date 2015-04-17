@@ -29,7 +29,7 @@ fr.sirs.core.model.MesureLigneEau
 fr.sirs.core.model.MesureMonteeEaux
 fr.sirs.core.model.Meteo
 fr.sirs.core.model.MonteeEaux
-fr.sirs.core.model.ObservationSuivi
+fr.sirs.core.model.Observation
 fr.sirs.core.model.Organisme
 fr.sirs.core.model.OuvertureBatardable
 fr.sirs.core.model.OuvrageFranchissement

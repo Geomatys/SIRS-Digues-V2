@@ -16,7 +16,6 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.MarcheRepository;
 import fr.sirs.core.component.OrganismeRepository;
-//import fr.sirs.core.component.ProfilLongRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.component.RapportEtudeRepository;
 import fr.sirs.core.component.RefConduiteFermeeRepository;
@@ -127,7 +126,6 @@ public class DbImporter {
     private final SystemeReperageRepository systemeReperageRepository;
     private final BorneDigueRepository borneDigueRepository;
     private final RefRiveRepository refRiveRepository;
-//    private final DocumentTronconRepository documentTronconRepository;
     private final ConventionRepository conventionRepository; 
     private final RefConventionRepository refConventionRepository;
     private final ProfilTraversRepository profilTraversRepository;
@@ -147,7 +145,6 @@ public class DbImporter {
     private final RefFonctionRepository refFonctionRepository;
     private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
     private final RefTypeDocumentRepository refTypeDocumentRepository;
-//    private final ProfilLongRepository profilLongRepository;
     private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
     private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
     private final ArticleJournalRepository articleJournalRepository;
@@ -336,7 +333,7 @@ public class DbImporter {
      PROFIL_EN_LONG_XYZ,
      PROFIL_EN_TRAVERS,
      PROFIL_EN_TRAVERS_DESCRIPTION,
-     PROFIL_EN_TRAVERS_DZ, // Ne sera probablement plus dans la v2 (à confirmer)
+     PROFIL_EN_TRAVERS_DZ, // Ne sera probablement plus dans la v2 (à confirmer) // SI !
      PROFIL_EN_TRAVERS_EVT_HYDRAU,
 //     PROFIL_EN_TRAVERS_STRUCTUREL, // Ne sera plus dans la v2
      PROFIL_EN_TRAVERS_TRONCON,
@@ -579,8 +576,6 @@ public class DbImporter {
         repositories.add(borneDigueRepository);
         refRiveRepository = new RefRiveRepository(couchDbConnector);
         repositories.add(refRiveRepository);
-//        documentTronconRepository = new DocumentTronconRepository(couchDbConnector);
-//        repositories.add(documentTronconRepository);
         conventionRepository = new ConventionRepository(couchDbConnector);
         repositories.add(conventionRepository);
         refConventionRepository = new RefConventionRepository(couchDbConnector);
@@ -624,8 +619,6 @@ public class DbImporter {
         repositories.add(refOrigineProfilTraversRepository);
         refTypeDocumentRepository = new RefTypeDocumentRepository(couchDbConnector);
         repositories.add(refTypeDocumentRepository);
-//        profilLongRepository = new ProfilLongRepository(couchDbConnector);
-//        repositories.add(profilLongRepository);
         refPositionProfilLongSurDigueRepository = new RefPositionProfilLongSurDigueRepository(couchDbConnector);
         repositories.add(refPositionProfilLongSurDigueRepository);
         refOrigineProfilLongRepository = new RefOrigineProfilLongRepository(couchDbConnector);
@@ -911,7 +904,7 @@ public class DbImporter {
 //            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
 //
 //            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
-            for(final Index index :importer.getDatabase().getTable(TableName.ELEMENT_RESEAU.toString()).getIndexes()){
+            for(final Index index :importer.getDatabase().getTable(TableName.PROFIL_EN_LONG.toString()).getIndexes()){
                 System.out.println(index);
             }
 //            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){

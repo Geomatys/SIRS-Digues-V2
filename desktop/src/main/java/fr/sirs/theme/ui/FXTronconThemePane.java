@@ -6,7 +6,9 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import fr.sirs.util.SirsStringConverter;
@@ -69,7 +71,11 @@ public class FXTronconThemePane extends BorderPane {
     public SimpleObjectProperty<TronconDigue> currentTronconProperty(){return currentTronconProperty;}
     
     private TronconThemePojoTable getPojoTable(final AbstractTronconTheme.ThemeGroup group){
-        if(group.getDataClass()==PositionDocument.class) return new TronconThemePositionDocumentPojoTable(group);
-        else return new TronconThemeObjetPojoTable(group);
+        if(group.getDataClass() == PositionDocument.class
+                || group.getDataClass() == PositionProfilTravers.class
+                || group.getDataClass() == ProfilLong.class) 
+            return new TronconThemePositionDocumentPojoTable(group);
+        else 
+            return new TronconThemeObjetPojoTable(group);
     }
 }

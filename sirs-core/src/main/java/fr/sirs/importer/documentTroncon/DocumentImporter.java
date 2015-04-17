@@ -65,7 +65,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDo
         this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
                 couchDbConnector);
         documentManager = new DocumentManager(accessDatabase, couchDbConnector, 
-                organismeImporter, intervenantImporter, 
+                organismeImporter, intervenantImporter, systemeReperageImporter,
                 evenementHydrauliqueImporter, typeDocumentImporter);
         
         documentRelatedImporters = documentManager.getDocumentRelatedImporters();

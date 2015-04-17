@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="SrIds" nsURI="http://fr.sirs/digues/1" nsPrefix="sirs">
-  <eClassifiers xsi:type="ecore:EClass" name="Troncon_Digue">
+  <eClassifiers xsi:type="ecore:EClass" name="TronconDigue">
     <eAnnotations source="generation">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -39,8 +39,8 @@
         eType="#//SyndicTroncon" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
-        eOpposite="#//Troncon_Digue/structures"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//TronconDigue"
+        eOpposite="#//TronconDigue/structures"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -95,7 +95,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeReperageBorne" upperBound="-1"
         eType="#//SystemeReperageBorne" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//Troncon_Digue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//TronconDigue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -105,8 +105,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//Troncon_Digue"
-        eOpposite="#//Troncon_Digue/photos"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//TronconDigue"
+        eOpposite="#//TronconDigue/photos"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -194,7 +194,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureBasId" eType="#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouverture_batardable" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardable" upperBound="-1"
         eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/ouvrage_revanche"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
@@ -217,7 +217,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="moyenManipBatardeauxId"
         eType="#//RefMoyenManipBatardeaux"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_revanche" upperBound="-1"
-        eType="#//OuvrageRevanche" eOpposite="#//OuvrageRevanche/ouverture_batardable"/>
+        eType="#//OuvrageRevanche" eOpposite="#//OuvrageRevanche/ouvertureBatardable"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TalusDigue" eSuperTypes="#//Objet">
@@ -1245,6 +1245,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referencePapier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDzId" eType="#//SystemeReperage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
     <eAnnotations source="generation">
@@ -1432,8 +1433,8 @@
       interface="true" eSuperTypes="#//SIRSDocument"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractPositionDocument" abstract="true"
       eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//Troncon_Digue"
-        eOpposite="#//Troncon_Digue/documentTroncon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon" eType="#//TronconDigue"
+        eOpposite="#//TronconDigue/documentTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GestionTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>

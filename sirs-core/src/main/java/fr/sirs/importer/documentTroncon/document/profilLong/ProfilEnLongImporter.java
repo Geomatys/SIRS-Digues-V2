@@ -10,10 +10,12 @@ import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.RefOrigineProfilLong;
 import fr.sirs.core.model.RefPositionProfilLongSurDigue;
 import fr.sirs.core.model.RefSystemeReleveProfil;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.documentTroncon.document.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
@@ -37,6 +39,7 @@ public class ProfilEnLongImporter extends GenericImporter {
     private final ProfilLongPointXYZImporter profilLongPointXYZImporter;
     private final ProfilLongPointDZImporter profilLongPointDZImporter;
     private final ProfilLongEvenementHydrauliqueImporter profilLongEvenementHydrauliqueImporter;
+    private final SystemeReperageImporter systemeReperageImporter;
     
     private final OrganismeImporter organismeImporter;
     
@@ -45,10 +48,12 @@ public class ProfilEnLongImporter extends GenericImporter {
     public ProfilEnLongImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final OrganismeImporter organismeImporter,
+            final SystemeReperageImporter systemeReperageImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter){
         super(accessDatabase, couchDbConnector);
         this.organismeImporter = organismeImporter;
+        this.systemeReperageImporter = systemeReperageImporter;
         this.typeSystemeReleveProfilImporter = typeSystemeReleveProfilImporter;
         this.profilLongEvenementHydrauliqueImporter = new ProfilLongEvenementHydrauliqueImporter(
                 accessDatabase, couchDbConnector, evenementHydrauliqueImporter);
@@ -73,7 +78,7 @@ public class ProfilEnLongImporter extends GenericImporter {
         ID_TYPE_ORIGINE_PROFIL_EN_LONG,
 //        ID_DOC_RAPPORT_ETUDES, // Mettre une référence vers UN rapport d'études
         COMMENTAIRE,
-//        ID_SYSTEME_REP_DZ,
+        ID_SYSTEME_REP_DZ,
 //        NOM_FICHIER_PLAN_ENSEMBLE,
 //        NOM_FICHIER_COUPE_IMAGE,
         DATE_DERNIERE_MAJ,
@@ -103,6 +108,7 @@ public class ProfilEnLongImporter extends GenericImporter {
         related = new HashMap<>();
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
+        final Map<Integer, SystemeReperage> srs = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, RefSystemeReleveProfil> systemesReleve = typeSystemeReleveProfilImporter.getTypeReferences();
         final Map<Integer, RefPositionProfilLongSurDigue> typesPositionProfil = typePositionProfilLongImporter.getTypeReferences();
         final Map<Integer, RefOrigineProfilLong> typesOrigineProfil = typeOrigineProfilLongImporter.getTypeReferences();
@@ -143,6 +149,10 @@ public class ProfilEnLongImporter extends GenericImporter {
 //            profil.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
 //            
 //            profil.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
+            
+            if(row.getInt(Columns.ID_SYSTEME_REP_DZ.toString())!=null){
+                profil.setSystemeRepDzId(srs.get(row.getInt(Columns.ID_SYSTEME_REP_DZ.toString())).getId());
+            }
             
             if(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())!=null){
                 profil.setOrigineProfilLongId(typesOrigineProfil.get(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())).getId());

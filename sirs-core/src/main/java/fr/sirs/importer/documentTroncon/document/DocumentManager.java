@@ -3,6 +3,7 @@ package fr.sirs.importer.documentTroncon.document;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.documentTroncon.TypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
@@ -39,6 +40,7 @@ public class DocumentManager {
             final CouchDbConnector couchDbConnector,
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
+            final SystemeReperageImporter systemeReperageImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeDocumentImporter typeDocumentImporter){
         
@@ -73,7 +75,7 @@ public class DocumentManager {
         
         // OTHER IMPORTERS : NOT DOCUMENT RELATED !!!!!!!
         profilEnLongImporter = new ProfilEnLongImporter(accessDatabase, 
-                couchDbConnector, organismeImporter, 
+                couchDbConnector, organismeImporter, systemeReperageImporter,
                 evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
     }
 

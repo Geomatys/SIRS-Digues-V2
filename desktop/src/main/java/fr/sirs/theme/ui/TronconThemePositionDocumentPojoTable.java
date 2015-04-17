@@ -1,5 +1,6 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
@@ -12,15 +13,15 @@ import org.apache.sis.util.logging.Logging;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconThemePositionDocumentPojoTable extends TronconThemePojoTable<PositionDocument>{
+public class TronconThemePositionDocumentPojoTable extends TronconThemePojoTable<AbstractPositionDocument>{
 
     public TronconThemePositionDocumentPojoTable(AbstractTronconTheme.ThemeGroup group) {
         super(group);
     }
 
     @Override
-    protected PositionDocument createPojo() {
-        PositionDocument pojo = null;
+    protected AbstractPositionDocument createPojo() {
+        AbstractPositionDocument pojo = null;
         try {
             final TronconDigue trc = troncon.get();
             final Constructor pojoConstructor = pojoClass.getConstructor();
