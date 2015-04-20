@@ -884,17 +884,21 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static MutableStyle createStructureStyle(Color col){
+    private static MutableStyle createStructureStyle(Color col) {
+        return createStructureStyle(col, null);
+    }
+    
+    public static MutableStyle createStructureStyle(Color col, final String geometryName) {
         final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,line1Stroke,LITERAL_ZERO_FLOAT);
+                geometryName,DEFAULT_DESCRIPTION,NonSI.PIXEL,line1Stroke,LITERAL_ZERO_FLOAT);
         
         
         final Stroke line2Stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(1),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,line2Stroke,LITERAL_ZERO_FLOAT);
+                geometryName,DEFAULT_DESCRIPTION,NonSI.PIXEL,line2Stroke,LITERAL_ZERO_FLOAT);
         
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
@@ -907,7 +911,7 @@ public class CorePlugin extends Plugin {
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT, 
                 size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",geometryName,DEFAULT_DESCRIPTION,NonSI.PIXEL,graphic);
         
         final MutableRule ruleLongObjects = SF.rule(line1,line2);
         ruleLongObjects.setFilter(

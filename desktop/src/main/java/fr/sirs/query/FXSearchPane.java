@@ -1,6 +1,7 @@
 
 package fr.sirs.query;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
@@ -84,6 +85,7 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.Name;
@@ -94,8 +96,11 @@ import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
+import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.RandomStyleBuilder;
+import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
+import org.opengis.style.PointSymbolizer;
 
 /**
  *
@@ -535,9 +540,15 @@ public class FXSearchPane extends BorderPane {
         final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
                 JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("requete"));
         final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
-        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
+        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, getStyleForType(col.getFeatureType()));
         layer.setName(query);
         return layer;
     }
     
+    private static MutableStyle getStyleForType(final FeatureType fType) {
+        final PropertyType geomType = (fType.getProperty("geometry") != null)? 
+                fType.getProperty("geometry") :  null;
+        
+        return CorePlugin.createStructureStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
+    } 
 }
