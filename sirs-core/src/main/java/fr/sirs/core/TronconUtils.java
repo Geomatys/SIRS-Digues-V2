@@ -413,97 +413,70 @@ public class TronconUtils {
     
     
     
-//    public static float switchSRForPR(
-//            final SegmentInfo[] refLinear, final SystemeReperage currentSR, 
-//            final SystemeReperage targetSR, final float initialPR, final BorneDigueRepository borneRepo){
-//            //final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final BorneDigueRepository borneRepo) {
-////        ArgumentChecks.ensureNonNull("Reference linear", refLinear);
-////        ArgumentChecks.ensureNonNull("Target SR", targetSR);
-////        ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);
-////        ArgumentChecks.ensureNonNull("Database connection", borneRepo);
-//        
-//        
-//        Float[] bornesPRinCurrentSR = currentSR.systemeReperageBorne.stream().map((SystemeReperageBorne srBorne) ->{
-//           return srBorne.getValeurPR();
-//        }).sorted().toArray((int size) -> {return new Float[size];});
-//        
-//        
-//        
-//        
-//        
-//        
-//        
-//        Float[] bornesPRinTargetSR = targetSR.systemeReperageBorne.stream().map((SystemeReperageBorne srBorne) ->{
-//           return srBorne.getValeurPR();
-//        }).sorted().toArray((int size) -> {return new Float[size];});
-//        
-//        
-//        
-//        
-//        /* Compute PR for start position. We project its current location on its 
-//         * parent linear, an try to find the nearest bornes which enclose it.
-//         * If the object is located at start or end of the SR, we'll try to compute 
-//         * it's PR from the nearest bornes, even if they're not bounding it.
-//         * 
-//         * To find nearest bornes, we project each borne of the SR on linear,
-//         * then sort them by distance from our input projected positionable object.
-//         * After that, we try to peek the nearest bornes, whose one is before and 
-//         * the other is after our input object. If it is not possible, we will 
-//         * get the closest, not matter which side they are.
-//         * 
-//         * To ease object manipulation, we'll store for each borne an array :
-//         * - First element is the borne PR.
-//         * - Second is the distance from the input point to the borne (negative if 
-//         * borne is uphill from our object, positive if it's downhill).
-//         */
-//        ProjectedPoint startPoint = projectReference(refLinear, toGetPRFor);
-//        double[][] prAndDistancesOfTargetSR = targetSR.systemeReperageBorne.stream()
-//                .map((SystemeReperageBorne srBorne) -> {
-//                    BorneDigue borne = borneRepo.get(srBorne.getBorneId());
-//                    ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
-//                    return new double[] {
-//                            srBorne.getValeurPR(),
-//                            startPoint.distanceAlongLinear - projBorne.distanceAlongLinear 
-//                    };
-//                })
-//                .sorted(((double[] first, double[] second)-> {
-//                    final double firstDistance = StrictMath.abs(first[1]);
-//                    final double secondDistance = StrictMath.abs(second[1]);                    
-//                    return Double.compare(firstDistance, secondDistance);
-//                }))
-//                .toArray((int size) -> {return new double[size][2];});
-//        
-//        final double[] nearestBorne = prAndDistancesOfTargetSR[0];
-//        double[] secondBorne = prAndDistancesOfTargetSR[1];
-//        
-//        int borneCounter = 1;
-//        final double nearestSignum = StrictMath.signum(nearestBorne[1]);
-//        double secondSignum = StrictMath.signum(secondBorne[1]);
-//        while (++borneCounter < prAndDistancesOfTargetSR.length && nearestSignum == secondSignum) {
-//            secondSignum = StrictMath.signum(prAndDistancesOfTargetSR[borneCounter][1]);
-//            if (secondSignum != nearestSignum) {
-//                secondBorne = prAndDistancesOfTargetSR[borneCounter];
-//            }
-//        }
-//        
-//        final double upHillBorneDistance, downHillBorneDistance;
-//        final double upHillBornePR, downHillBornePR;
-//        if (nearestBorne[1] > secondBorne[1]) {
-//            upHillBorneDistance = nearestBorne[1];
-//            upHillBornePR = nearestBorne[0];
-//            downHillBorneDistance = secondBorne[1];
-//            downHillBornePR = secondBorne[0];
-//        } else {
-//            upHillBorneDistance = secondBorne[1];
-//            upHillBornePR = secondBorne[0];
-//            downHillBorneDistance = nearestBorne[1];
-//            downHillBornePR = nearestBorne[0];
-//        }
-//        final double distanceBetweenBornes = StrictMath.abs(downHillBorneDistance - upHillBorneDistance);
-//        final double prRatio = (downHillBornePR - upHillBornePR) / distanceBetweenBornes;
-//        
-//        return (float)(upHillBornePR + prRatio * upHillBorneDistance);
-//    }
+    public static float switchSRForPR(
+            final SegmentInfo[] refLinear, 
+            final SystemeReperage defaultSR, 
+            final SystemeReperage prZSR, 
+            final double initialPR, final BorneDigueRepository borneRepo){
+        ArgumentChecks.ensureNonNull("Reference linear", refLinear);
+        ArgumentChecks.ensureNonNull("Target (default) SR", defaultSR);
+        ArgumentChecks.ensureNonNull("Previous SR", prZSR);
+        ArgumentChecks.ensureNonNull("Database connection", borneRepo);
+        
+        
+        // Map des bornes du SR de saisie des PR/Z : la clef contient le PR des bornes dans le SR de saisi. La valeur contient l'id de la borne.
+        final Map.Entry<Float, String>[] bornesPRinCurrentSR = 
+                prZSR.systemeReperageBorne.stream().map((SystemeReperageBorne srBorne) ->{
+           return new HashMap.SimpleEntry<Float, String>(srBorne.getValeurPR(), srBorne.getBorneId());
+        }).sorted((HashMap.SimpleEntry<Float, String> first, HashMap.SimpleEntry<Float, String> second)-> {
+                    return Float.compare(first.getKey(), second.getKey());// On trie suivant la valeurs des PR qui est en clef.
+                }).toArray((int size) -> {return new Map.Entry[size];});
+        
+        Map.Entry<Float, String> nearestBorne = bornesPRinCurrentSR[0];
+        Map.Entry<Float, String> secondBorne = bornesPRinCurrentSR[1];
+        int borneCnt = 1;
+        while(++borneCnt<bornesPRinCurrentSR.length && initialPR>bornesPRinCurrentSR[borneCnt].getKey()){
+            nearestBorne=bornesPRinCurrentSR[borneCnt-1];
+            secondBorne=bornesPRinCurrentSR[borneCnt];
+        }
+        
+        final double initialRatio = (initialPR-nearestBorne.getKey())/(secondBorne.getKey()-nearestBorne.getKey());
+        
+        final BorneDigue nearestBorneDigue = borneRepo.get(nearestBorne.getValue());
+        final BorneDigue secondBorneDigue = borneRepo.get(secondBorne.getValue());
+        
+        //Distance du point dont le PR est initialPr sur le troncon ?
+        
+        //=> distance de la nearestborne sur le troncon : 
+        final ProjectedPoint projNearestBorne = projectReference(refLinear, nearestBorneDigue.getGeometry());
+        //=> distance de la secondBorneDigue sur le troncon : 
+        final ProjectedPoint projSecondBorne = projectReference(refLinear, secondBorneDigue.getGeometry());
+        
+        
+        //=> distance sur le troncon du point dont le PR est initialPR :
+        final double distanceOrigineTroncon = projNearestBorne.distanceAlongLinear + (projSecondBorne.distanceAlongLinear - projNearestBorne.distanceAlongLinear)*initialRatio;
+        
+        
+        
+        // On parcours les segments
+        SegmentInfo bonSegment = null;
+        double distanceSurLeBonSegment = distanceOrigineTroncon;
+        for (final SegmentInfo segmentInfo : refLinear){
+            if(segmentInfo.endDistance>distanceOrigineTroncon){
+                bonSegment = segmentInfo; break;
+            } else {
+                distanceSurLeBonSegment-=segmentInfo.length;
+            }
+        }
+        
+        if(bonSegment!=null){
+            final Point initialPointPR = GO2Utilities.JTS_FACTORY.createPoint(bonSegment.getPoint(distanceSurLeBonSegment, 0));
+            return computePR(refLinear, defaultSR, initialPointPR, borneRepo);
+        }
+        else{
+            throw new SirsCoreRuntimeExecption("Unable to compute segment for the given PR and SRs.");
+        }
+    }
     
     
     

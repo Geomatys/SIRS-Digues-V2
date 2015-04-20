@@ -14,6 +14,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleClassifSinglePane;
@@ -297,20 +298,25 @@ public class FXMapPane extends BorderPane {
         } else if (element instanceof AbstractPositionDocument) {
             final PreviewLabelRepository previewLabelRepository = Injector.getSession().getPreviewLabelRepository();
             if(element instanceof AbstractPositionDocumentAssociable){
-                final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument();
-                final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
-                Class documentClass = null; 
-                try {
-                    documentClass = Class.forName(previewLabel.getType());
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                if(element instanceof PositionProfilTravers){
+                    return getMapLayerForElement(new LabelMapper(PositionProfilTravers.class).mapClassName());
+                } else {
+                    final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
+                    final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
+                    Class documentClass = null; 
+                    try {
+                        documentClass = Class.forName(previewLabel.getType());
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
-                final LabelMapper mapper = new LabelMapper(documentClass);
-                return getMapLayerForElement(mapper.mapClassName());
+                    final LabelMapper mapper = new LabelMapper(documentClass);
+                    return getMapLayerForElement(mapper.mapClassName());
+                }
             }
-            else{
-                throw new UnsupportedOperationException("Does not support unassociable document positions");
+            else{// Les profils en long ne sont associés à aucun document
+                final LabelMapper mapper = new LabelMapper(element.getClass());
+                return getMapLayerForElement(mapper.mapClassName());
             }
         } else {
             final LabelMapper mapper = new LabelMapper(element.getClass());
