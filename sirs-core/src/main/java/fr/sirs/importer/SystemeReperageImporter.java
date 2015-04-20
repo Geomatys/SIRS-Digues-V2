@@ -57,16 +57,16 @@ public class SystemeReperageImporter extends GenericImporter implements Document
         DATE_DERNIERE_MAJ
     };
     
-    /**
-     * 
-     * @return A map containing the SystemeRepLineaire instances references by
-     * the tronconDigue internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
-        if(systemesReperageByTronconId==null) compute();
-        return systemesReperageByTronconId;
-    }
+//    /**
+//     * 
+//     * @return A map containing the SystemeRepLineaire instances references by
+//     * the tronconDigue internal database identifier.
+//     * @throws IOException 
+//     */
+//    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
+//        if(systemesReperageByTronconId==null) compute();
+//        return systemesReperageByTronconId;
+//    }
 
     /**
      * 

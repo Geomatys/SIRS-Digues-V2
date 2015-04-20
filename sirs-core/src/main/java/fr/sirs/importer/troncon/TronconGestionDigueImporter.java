@@ -184,7 +184,7 @@ implements DocumentsUpdatable {
         final Map<Integer, List<ProprieteTroncon>> propriosByTroncon = tronconGestionDigueProprietaireImporter.getProprietairesByTronconId();
         final Map<Integer, List<SyndicTroncon>> syndicatsByTroncon = tronconGestionDigueSyndicatImporter.getSyndicatsByTronconId();
         final Map<Integer, List<BorneDigue>> bornesByTroncon = borneDigueImporter.getBorneDigueByTronconId();
-        final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
+//        final Map<Integer, List<SystemeReperage>> systemesReperageByTroncon = systemeReperageImporter.getSystemeRepLineaireByTronconId();
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
         final Map<Integer, List<CommuneTroncon>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
@@ -214,6 +214,8 @@ implements DocumentsUpdatable {
             if (row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()) != null) {
                 tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
+                
+            tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
 
             // Register the troncon to retrieve a CouchDb ID.
             tronconDigueRepository.add(tronconDigue);
@@ -248,17 +250,6 @@ implements DocumentsUpdatable {
                     bornesIds.add(borne.getId());
                 });
                 tronconDigue.setBorneIds(bornesIds);
-            }
-
-            final List<SystemeReperage> systemesRep = systemesReperageByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(systemesRep!=null){
-                final List<String> systemesRepIds = new ArrayList<>();
-                systemesRep.stream().forEach((systemeRep) -> {
-                    systemesRepIds.add(systemeRep.getId());
-                    //systemeRep.setTronconId(tronconDigue.getId());
-                    });
-                //tronconDigue.setSystemeReperageIds(systemesRepIds);
-                tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
             }
             
             if (row.getInt(Columns.ID_TYPE_RIVE.toString()) != null) {

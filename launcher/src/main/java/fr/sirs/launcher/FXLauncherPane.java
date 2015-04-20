@@ -15,6 +15,7 @@ import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
@@ -380,7 +381,7 @@ public class FXLauncherPane extends BorderPane {
                     sirsDBInfoRepository.create(version, epsgCode);
                     
                     final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                    final Utilisateur administrateur = utilisateurRepository.create();
+                    final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
                     administrateur.setValid(true);
                     administrateur.setLogin(uiCreateLogin.getText());
                     MessageDigest messageDigest=null;
@@ -461,7 +462,7 @@ public class FXLauncherPane extends BorderPane {
                     sirsDBInfoRepository.create(version, epsgCode);
                     
                     final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                    final Utilisateur administrateur = utilisateurRepository.create();
+                    final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
                     administrateur.setValid(true);
                     administrateur.setLogin(uiImportLogin.getText());
                     MessageDigest messageDigest=null;
