@@ -645,12 +645,19 @@ public class Session extends SessionGen {
      * 
      * @param e The element we want to get parent for.
      * @return The same element, completed with its parent, Or a null value if we 
-     * cannot get full version of thee element.
+     * cannot get full version of the element.
      */
     public Optional<? extends Element> getCompleteElement(Element e) {
         if (e != null) {
             if (e.getCouchDBDocument() != null) {
-                return Optional.of(e);
+                // For objects like {@link tronconDigue}, we force reload, because 
+                //they're root objects. It means checking their document do not 
+                //ensure they're complete. 
+                if (e.getCouchDBDocument() == e) {
+                    return Optional.of((Element)getRepositoryForClass(e.getClass()).get(e.getId()));
+                } else {
+                    return Optional.of(e);
+                }
             } else {
                 String documentId = e.getDocumentId();
                 if (documentId != null && !documentId.isEmpty()) {

@@ -52,9 +52,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public T get(String id) {
         try {
-            return cache.getOrCreate(id, () -> {
-                return super.get(id);
-            });
+            return cache.getOrCreate(id, () -> beforeCache(super.get(id)));
         } catch (Exception ex) {
             // should never happen...
             throw new RuntimeException(ex);
@@ -70,14 +68,17 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
         super.add(entity);
-        cache.put(entity.getId(), entity);
+        cache.put(entity.getId(), beforeCache(entity));
     }
 
     @Override
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
         super.update(entity);
-        cache.put(entity.getId(), entity); // Put the updated entity into cache in case the old entity is different.
+        // Put the updated entity into cache in case the old entity is different.
+        if (entity != cache.get(entity.getId())) {
+            cache.put(entity.getId(), beforeCache(entity));
+        }
     }
 
     @Override
@@ -124,14 +125,23 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         final ArrayList<T> result = new ArrayList<>(source.size());
         for (T element : source) {
             try {
-                result.add(cache.getOrCreate(element.getId(), () -> {
-                    return element;
-                }));
+                result.add(cache.getOrCreate(element.getId(), () -> beforeCache(element)));
             } catch (Exception ex) {
                 // Should never happen ...
                 throw new RuntimeException(ex);
             }
         }
         return result;        
+    }
+    
+    /**
+     * Perform an operation before caching an object. By default, nothing is done,
+     * but implementations can override this to work with an element before putting
+     * it in cache. 
+     * @param toCache The object which will be cached.
+     * @return The object to cache. By default, the one in parameter.
+     */
+    protected T beforeCache(final T toCache) {
+        return toCache;
     }
 }

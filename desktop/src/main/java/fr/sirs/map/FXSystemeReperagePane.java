@@ -400,7 +400,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final TronconDigue troncon = tronconProperty().get();
         if(troncon==null){
             uiSrComboBox.setItems(FXCollections.emptyObservableList());
-        }else{
+        } else {
             mode.set(Mode.NONE);
             final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
@@ -414,6 +414,11 @@ public class FXSystemeReperagePane extends BorderPane {
                     }
                 }
             }
+            
+            // In case default SR change from another panel
+            troncon.systemeRepDefautIdProperty().addListener((ObservableValue<? extends String> srObservable, String oldSR, String newSR) -> {
+                uiDefaultSRCheckBox.setSelected(newSR.equals(uiSrComboBox.getValue() == null? null : uiSrComboBox.getValue().getId()));
+            });
         }
     }
     

@@ -518,5 +518,10 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         }
         // TODO : Set an end date to bornes which are not used anymore.
     }
-    
+
+    @Override
+    protected TronconDigue beforeCache(TronconDigue toCache) {
+        new DefaultSRChangeListener(toCache);
+        return toCache;
+    }
 }

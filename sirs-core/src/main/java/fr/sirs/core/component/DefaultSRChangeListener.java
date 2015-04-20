@@ -16,17 +16,26 @@ import javafx.scene.control.ButtonType;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 import fr.sirs.core.model.Objet;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- *
+ * Watch over default SR property of a {@link TronconDigue}, in order to compute
+ * PRs of attached objects if its value change.
  * @author Alexis Manin (Geomatys)
  */
 public class DefaultSRChangeListener implements ChangeListener<String> {
 
     private static final String CONFIRMATION_TEXT = "Êtes-vous sûr de vouloir changer le SR par défaut ? Les PRs de tous les objets associés au tronçon seront recalculés.";
+    private static final String ALREADY_RUNNING_TEXT = "Un calcul sur le SR du tronçon est déjà en cours. Veuillez attendre qu'il soit complété.";
+    
     
     final WeakReference<TronconDigue> target;
+    /** 
+     * Used as a flag to inform that current detected change has been introduced
+     * by a reset from here.
+     */
     private String previousValue;
+    private Task task;
     
     public DefaultSRChangeListener(final TronconDigue troncon) {
         target = new WeakReference<>(troncon);
@@ -35,18 +44,37 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
         } 
     }
 
+    /**
+     * Called when the default SR of a tronçon changes. We ask user if he really
+     * want to change this parameter, because it will induce update of all 
+     * calculate PRs for the objects on the current {@link TronconDigue}.
+     * If user agree, we launch computing, otherwise we reset value.
+     * 
+     * @param observable The default SR observable property
+     * @param oldValue The previous value for the SR property.
+     * @param newValue The set value for default SR property.
+     */
     @Override
     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-        if (previousValue != null && previousValue.equals(newValue)) {
-            previousValue = null;
-            
-        } else {
-            TronconDigue troncon = target.get();
-            if (troncon != null) {
+        TronconDigue troncon = target.get();
+        if (troncon != null) {
+            // Value reset
+            if (previousValue != null && previousValue.equals(newValue)) {
+                previousValue = null;
+
+            // Another task still running
+            } else if (task != null && !task.isDone()) {
+                new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show();
+                previousValue = oldValue;
+                troncon.setSystemeRepDefautId(oldValue);
+
+            // Ask user if he's sure of his change. 
+            } else {
                 final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, CONFIRMATION_TEXT, ButtonType.NO, ButtonType.YES);
                 Optional<ButtonType> result = confirmation.showAndWait();
                 if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-                    // TODO : Task which compute new PRs.
+                    task = new ComputePRForStructures(troncon);
+                    TaskManager.INSTANCE.submit(task);
                 } else {
                     previousValue = oldValue;
                     troncon.setSystemeRepDefautId(oldValue);
@@ -55,6 +83,10 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
         }
     }
     
+    /**
+     * A task which will iterate over all objects of a {@link TronconDigue} to update
+     * their PRs.
+     */
     private static class ComputePRForStructures extends Task<Boolean> {
 
         private final TronconDigue troncon;
@@ -65,6 +97,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
         
         @Override
         protected Boolean call() throws Exception {
+            // For optimisation purpose, we linear geometry before iteration.
             updateMessage("Calcul des paramètres de projection");
             final LineString lineString = LinearReferencing.asLineString(troncon.getGeometry());
             ArgumentChecks.ensureNonNull("Linéaire de réference", lineString);
@@ -79,7 +112,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             updateMessage("Parcours des objets");
             updateProgress(currentProgress, progressMax);
             for (final Objet current : troncon.getStructures()) {
-                final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, session);
+                final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, troncon, linear, session);
                 
                 Point startPoint = position.getGeoPointStart();
                 current.setPR_debut(TronconUtils.computePR(linear, sr, startPoint, session.getBorneDigueRepository()));
@@ -95,6 +128,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             }
             
             updateMessage("Mise à jour de la base de données");
+            InjectorCore.getBean(SessionGen.class).getTronconDigueRepository().update(troncon);
             
             return true;
         }
