@@ -173,7 +173,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         final SystemeReperageRepository repo = session.getSystemeReperageRepository();
         
         final TronconDigue troncon = elementProperty.get();
-        final SystemeReperage sr = new SystemeReperage();
+        final SystemeReperage sr = Injector.getSession().getElementCreator().createElement(SystemeReperage.class);
         sr.setLibelle("Nouveau SR");
         sr.setTronconId(troncon.getId());
         repo.add(sr, troncon);

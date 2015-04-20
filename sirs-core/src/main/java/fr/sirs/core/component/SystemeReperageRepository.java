@@ -2,6 +2,9 @@
 
 package fr.sirs.core.component;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.model.ElementCreator;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +32,21 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
        initStandardDesignDocument();
    }
     
+    @Override
     public Class<SystemeReperage> getModelClass() {
         return SystemeReperage.class;
     }
     
+    @Override
     public SystemeReperage create(){
-        return new SystemeReperage();
+        final SessionGen session = InjectorCore.getBean(SessionGen.class);
+        if(session!=null && session instanceof OwnableSession){
+            final ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
+            return elementCreator.createElement(SystemeReperage.class);
+        } else {
+            throw new SirsCoreRuntimeExecption("Pas de session courante");
+        }
+//        return new SystemeReperage();
     }
     
     public List<SystemeReperage> getByTroncon(final TronconDigue troncon) {

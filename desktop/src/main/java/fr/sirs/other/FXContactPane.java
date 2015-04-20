@@ -229,7 +229,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
 
         @Override
         protected Object createPojo() {
-            final ContactOrganisme co = new ContactOrganisme();
+            final ContactOrganisme co = Injector.getSession().getElementCreator().createElement(ContactOrganisme.class);
             co.setValid(session.getRole()!=Role.EXTERN);
             co.setAuthor(session.getUtilisateur().getId());
             co.setContactId(elementProperty.get().getId());

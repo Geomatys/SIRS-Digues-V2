@@ -1,5 +1,6 @@
 package fr.sirs.core.component;
 
+import fr.sirs.core.InjectorCore;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
@@ -9,11 +10,13 @@ import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
+import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Epi;
@@ -151,7 +154,14 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
 
     @Override
     public TronconDigue create() {
-        return new TronconDigue();
+        final SessionGen session = InjectorCore.getBean(SessionGen.class);
+        if(session!=null && session instanceof OwnableSession){
+            final ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
+            return elementCreator.createElement(TronconDigue.class);
+        } else {
+            throw new SirsCoreRuntimeExecption("Pas de session courante");
+        }
+//        return new TronconDigue();
     }
 
     /**

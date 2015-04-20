@@ -388,10 +388,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewTronconMenuItem(TreeItem parent) {
             super("Créer un nouveau tronçon",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final TronconDigue troncon = new TronconDigue();
+                final TronconDigue troncon = Injector.getSession().getElementCreator().createElement(TronconDigue.class);
                 troncon.setLibelle("Tronçon vide");
-                troncon.setAuthor(session.getUtilisateur().getId());
-                troncon.setValid(!(session.getRole()==EXTERN));
+//                troncon.setAuthor(session.getUtilisateur().getId());
+//                troncon.setValid(!(session.getRole()==EXTERN));
                 if(parent!=null){
                     final Digue digue = (Digue) parent.getValue();
                     troncon.setDigueId(digue.getId());
@@ -419,10 +419,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewDigueMenuItem(TreeItem parent) {
             super("Créer une nouvelle digue",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final Digue digue = new Digue();
+                final Digue digue = Injector.getSession().getElementCreator().createElement(Digue.class);
                 digue.setLibelle("Digue vide");
-                digue.setAuthor(session.getUtilisateur().getId());
-                digue.setValid(!(session.getRole()==EXTERN));
+//                digue.setAuthor(session.getUtilisateur().getId());
+//                digue.setValid(!(session.getRole()==EXTERN));
                 session.getDigueRepository().add(digue);
                 
                 if(parent!=null){
@@ -441,10 +441,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewSystemeMenuItem(TreeItem parent) {
             super("Créer un nouveau système d'endiguement",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final SystemeEndiguement systemeEndiguement = new SystemeEndiguement();
+                final SystemeEndiguement systemeEndiguement = Injector.getSession().getElementCreator().createElement(SystemeEndiguement.class);
                 systemeEndiguement.setLibelle("Système vide");
-                systemeEndiguement.setAuthor(session.getUtilisateur().getId());
-                systemeEndiguement.setValid(!(session.getRole()==EXTERN));
+//                systemeEndiguement.setAuthor(session.getUtilisateur().getId());
+//                systemeEndiguement.setValid(!(session.getRole()==EXTERN));
                 session.getSystemeEndiguementRepository().add(systemeEndiguement);
             });
         }

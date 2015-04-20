@@ -376,7 +376,7 @@ public class FXSystemeReperagePane extends BorderPane {
         }
         
         //reference dans le SR
-        final SystemeReperageBorne srb = new SystemeReperageBorne();
+        final SystemeReperageBorne srb = Injector.getSession().getElementCreator().createElement(SystemeReperageBorne.class);
         srb.borneIdProperty().set(borne.getDocumentId());
         srb.valeurPRProperty().set(0);
         

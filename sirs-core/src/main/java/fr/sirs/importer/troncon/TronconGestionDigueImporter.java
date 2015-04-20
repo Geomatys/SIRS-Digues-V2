@@ -15,6 +15,7 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.CommuneTroncon;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.RefRive;
@@ -192,7 +193,7 @@ implements DocumentsUpdatable {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final TronconDigue tronconDigue = new TronconDigue();
+            final TronconDigue tronconDigue = ElementCreator.createAnonymValidElement(TronconDigue.class);
             
             if(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()))!=null){
                 tronconDigue.setDocumentTroncon(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
@@ -277,12 +278,12 @@ implements DocumentsUpdatable {
                 }
             } else {
                 final Digue d = new Digue();
+                d.setValid(true);
                 digueRepository.add(d);
                 tronconDigue.setDigueId(d.getId());
             }
             
             tronconDigue.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
-            tronconDigue.setValid(true);
             
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));

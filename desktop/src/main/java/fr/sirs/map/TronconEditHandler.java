@@ -288,7 +288,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         if (tronconName == null || tronconName.isEmpty()) {
             return null;
         } else {
-            TronconDigue tmpTroncon = new TronconDigue();
+            final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(TronconDigue.class);
             tmpTroncon.setLibelle(tronconName);
             final Digue digue = diguesChoice.getValue();
             if (digue != null) {

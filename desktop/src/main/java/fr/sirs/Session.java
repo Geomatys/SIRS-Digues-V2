@@ -4,6 +4,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.OwnableSession;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PreviewLabel;
@@ -59,7 +61,6 @@ import java.util.Properties;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -75,7 +76,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
@@ -103,7 +103,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Johann Sorel
  */
 @Component
-public class Session extends SessionGen {
+public class Session extends SessionGen implements OwnableSession {
     
     public static String FLAG_SIRSLAYER = "SirsLayer";
     
@@ -112,12 +112,14 @@ public class Session extends SessionGen {
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceChecker referenceChecker;
     public ReferenceChecker getReferenceChecker(){return referenceChecker;}
+    private final ElementCreator elementCreator;
     
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
     private final ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
     public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
+    @Override
     public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
     public void setUtilisateur(final Utilisateur utilisateur){
         utilisateurProperty.set(utilisateur);
@@ -147,6 +149,9 @@ public class Session extends SessionGen {
             nonGeometryEditionProperty.set(false);
         }
     }
+    
+    @Override
+    public ElementCreator getElementCreator(){return elementCreator;}
     
     private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
     public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
@@ -283,6 +288,7 @@ public class Session extends SessionGen {
             referenceUrl = SirsPreferences.PROPERTIES.REFERENCE_URL.getDefaultValue();
         }
         referenceChecker = new ReferenceChecker(referenceUrl);
+        elementCreator = new ElementCreator(this);
     }
 
     public CouchDbConnector getConnector() {

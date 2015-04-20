@@ -36,6 +36,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
+import fr.sirs.core.component.OwnableSession;
 import fr.sirs.core.model.Element;
 import java.util.Iterator;
 import java.util.function.IntFunction;
@@ -317,6 +318,8 @@ public class TronconUtils {
      * @param troncon 
      */
     public static void updateSRElementaire(TronconDigue troncon, SessionGen session){
+        
+        final OwnableSession ownableSession = (OwnableSession) session;
                 
         final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
         final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
@@ -333,7 +336,7 @@ public class TronconUtils {
         
         //on le crée s'il n'existe pas
         if(sr==null){
-            sr = new SystemeReperage();
+            sr = srRepo.create();
             sr.setLibelle(SR_ELEMENTAIRE);
             sr.setTronconId(troncon.getDocumentId());
             srRepo.add(sr,troncon);
@@ -353,12 +356,12 @@ public class TronconUtils {
         BorneDigue bdEnd = null;
         if(srbStart==null){
             //creation de la borne de début
-            bdStart = new BorneDigue();
+            bdStart = bdRepo.create();
             bdStart.setLibelle("Début du tronçon");
             bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
             bdRepo.add(bdStart);
             
-            srbStart = new SystemeReperageBorne();
+            srbStart = ownableSession.getElementCreator().createElement(SystemeReperageBorne.class);
             srbStart.setBorneId(bdStart.getDocumentId());
             sr.systemeReperageBorne.add(srbStart);
         }else{
@@ -367,12 +370,12 @@ public class TronconUtils {
         
         if(srbEnd==null){
             //creation de la borne de début
-            bdEnd = new BorneDigue();
+            bdEnd = ownableSession.getElementCreator().createElement(BorneDigue.class);
             bdEnd.setLibelle("Fin du tronçon");
             bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
             bdRepo.add(bdEnd);
             
-            srbEnd = new SystemeReperageBorne();
+            srbEnd = ownableSession.getElementCreator().createElement(SystemeReperageBorne.class);
             srbEnd.setBorneId(bdEnd.getDocumentId());
             sr.systemeReperageBorne.add(srbEnd);
         }else{

@@ -1,6 +1,8 @@
 package fr.sirs.core.component;
 
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Identifiable;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,4 +146,12 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     protected T beforeCache(final T toCache) {
         return toCache;
     }
+    
+//    @Override
+//    public T create(){
+//        final SessionGen session = InjectorCore.getBean(SessionGen.class);
+//        if(session!=null && session instanceof OwnableSession){
+//            ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
+//        }
+//    }
 }

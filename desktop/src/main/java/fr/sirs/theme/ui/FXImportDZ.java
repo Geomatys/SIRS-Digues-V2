@@ -139,9 +139,9 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
             
             
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){
-                leve = new DZLeveProfilTravers();
+                leve = Injector.getSession().getElementCreator().createElement(DZLeveProfilTravers.class);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
-                leve = new PrZProfilLong();
+                leve = Injector.getSession().getElementCreator().createElement(PrZProfilLong.class);
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }
