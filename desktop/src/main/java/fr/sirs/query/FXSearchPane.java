@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -62,11 +64,14 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -226,14 +231,24 @@ public class FXSearchPane extends BorderPane {
     @FXML
     private void viewDBModel(ActionEvent event) {
         
-        final Image image = new Image("/fr/sirs/diagram.jpg");
-        final ImageView view = new ImageView(image);
-        
         final Stage stage = new Stage();
-        final ScrollPane scroll = new ScrollPane(view);
-        final Scene scene = new Scene(scroll);
         
-        stage.setScene(scene);
+        final WebView webView = new WebView();
+        final String url = this.getClass().getResource("/fr/sirs/model.html").toExternalForm();  
+        webView.getEngine().load(url);
+        webView.setOnScroll(new EventHandler<ScrollEvent>() {
+
+            @Override
+            public void handle(ScrollEvent event) {
+                final double zoom = webView.getZoom();
+                if(event.getDeltaY()>0)
+                    webView.setZoom(zoom * 1.1);
+                else if(event.getDeltaY()<0)
+                    webView.setZoom(zoom * .9);
+            }
+        });
+        
+        stage.setScene(new Scene(webView));
         stage.setTitle("Modèle");
         stage.setWidth(800);
         stage.setHeight(600);

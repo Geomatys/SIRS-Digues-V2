@@ -2,7 +2,6 @@ fr.sirs.core.model.ArticleJournal
 fr.sirs.core.model.BorneDigue
 fr.sirs.core.model.Commune
 fr.sirs.core.model.CommuneTroncon
-fr.sirs.core.model.ContactConvention
 fr.sirs.core.model.Contact
 fr.sirs.core.model.ContactOrganisme
 fr.sirs.core.model.Convention
