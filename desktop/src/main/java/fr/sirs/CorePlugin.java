@@ -41,6 +41,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
+import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LigneEau;
@@ -59,6 +60,7 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
@@ -243,6 +245,10 @@ public class CorePlugin extends Plugin {
             suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> repository.getAllPositionDocuments()));
             suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> repository.getAllPositionProfilTravers()));
             suppliers.put(ProfilLong.class, new StructBeanSupplier(ProfilLong.class, () -> repository.getAllProfilLongs()));
+            
+            // Propriétés et gardiennages de troncons
+            suppliers.put(ProprieteTroncon.class, new StructBeanSupplier(ProprieteTroncon.class, () -> repository.getAllProprietes()));
+            suppliers.put(GardeTroncon.class, new StructBeanSupplier(GardeTroncon.class, () -> repository.getAllGardes()));
 
             // Emprises communales
             suppliers.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
@@ -398,6 +404,16 @@ public class CorePlugin extends Plugin {
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(documentsLayer);
+            
+            // Proprietes et gardes
+            final BeanStore periodesLocaliseesTroncon = new BeanStore(
+                    suppliers.get(ProprieteTroncon.class), 
+                    suppliers.get(GardeTroncon.class));
+            final MapItem periodesLocaliseesLayer = MapBuilder.createItem();
+            periodesLocaliseesLayer.setName("Propriétés et gardiennages");
+            periodesLocaliseesLayer.items().addAll(buildLayers(periodesLocaliseesTroncon, nameMap, colors, createStructureSelectionStyle(), false));
+            periodesLocaliseesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            items.add(periodesLocaliseesLayer);
             
             // Emprises communales
             //final BeanStore communesStore = new BeanStore(suppliers.get(CommuneTroncon.class));               

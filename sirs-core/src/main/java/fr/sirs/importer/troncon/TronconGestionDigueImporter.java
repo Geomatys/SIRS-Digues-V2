@@ -320,6 +320,22 @@ implements DocumentsUpdatable {
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }
             }
+            for(final GardeTroncon doc : troncon.getGardes()){
+                try{
+                    final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
+                    doc.setGeometry(docGeom);
+                }catch(IllegalArgumentException e){
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+                }
+            }
+            for(final ProprieteTroncon doc : troncon.getProprietes()){
+                try{
+                    final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
+                    doc.setGeometry(docGeom);
+                }catch(IllegalArgumentException e){
+                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+                }
+            }
             
             //Update the repository
             tronconDigueRepository.update(troncon);

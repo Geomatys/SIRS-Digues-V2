@@ -22,6 +22,7 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.FrontFrancBord;
+import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.LigneEau;
@@ -34,12 +35,14 @@ import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.PeriodeLocaliseeTroncon;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.PistePiedDigue;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ProfilLong;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydroCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -94,6 +97,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     
     private final HashMap<String, Callable<List<? extends Objet>>> viewMapObjets = new HashMap();
     private final HashMap<String, Callable<List<? extends AbstractPositionDocument>>> viewMapDocuments = new HashMap();
+    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
@@ -133,6 +137,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapDocuments.put(POSITION_DOCUMENT, this::getAllPositionDocuments);
         viewMapDocuments.put(POSITION_PROFIL_TRAVERS, this::getAllPositionProfilTravers);
         viewMapDocuments.put(PROFIL_LONG, this::getAllProfilLongs);
+        viewMapPeriodesTroncon.put(GARDE_TRONCON, this::getAllGardes);
+        viewMapPeriodesTroncon.put(PROPRIETE_TRONCON, this::getAllProprietes);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -452,6 +458,22 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public List<ProfilLong> getAllProfilLongs() {
         return db.queryView(createQuery(PROFIL_LONG),
                 ProfilLong.class);
+    }
+
+    public static final String GARDE_TRONCON = "GardeTroncon";
+
+    @View(name = GARDE_TRONCON, map = "classpath:GardeTroncon-map.js")
+    public List<GardeTroncon> getAllGardes() {
+        return db.queryView(createQuery(GARDE_TRONCON),
+                GardeTroncon.class);
+    }
+
+    public static final String PROPRIETE_TRONCON = "ProprieteTroncon";
+
+    @View(name = PROPRIETE_TRONCON, map = "classpath:ProprieteTroncon-map.js")
+    public List<ProprieteTroncon> getAllProprietes() {
+        return db.queryView(createQuery(PROPRIETE_TRONCON),
+                ProprieteTroncon.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {

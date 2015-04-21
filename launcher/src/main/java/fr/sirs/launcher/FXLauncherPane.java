@@ -739,7 +739,7 @@ public class FXLauncherPane extends BorderPane {
                     return null;
                 }
             }));
-        }  
+        }
     }
     
     protected void deleteDatabase(final String databaseName){
