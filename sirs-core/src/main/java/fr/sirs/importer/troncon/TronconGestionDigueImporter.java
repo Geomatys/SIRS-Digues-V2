@@ -215,8 +215,10 @@ implements DocumentsUpdatable {
                 tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
             }
                 
-            tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
-
+            if(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())!=null){
+                tronconDigue.setSystemeRepDefautId(systemesReperageById.get(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())).getId());
+            }
+            
             // Register the troncon to retrieve a CouchDb ID.
             tronconDigueRepository.add(tronconDigue);
             

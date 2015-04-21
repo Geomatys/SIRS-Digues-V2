@@ -2,6 +2,7 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import fr.sirs.Injector;
 
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
@@ -14,6 +15,7 @@ import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
@@ -49,8 +51,11 @@ import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -64,8 +69,15 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -731,11 +743,101 @@ public class FXLauncherPane extends BorderPane {
     }
     
     protected void deleteDatabase(final String databaseName){
-        try {
-            DatabaseRegistry.dropLocalDB(databaseName);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        new IdentificationStage(databaseName).showAndWait();
         updateLocalDbList();
+    }
+    
+    private static final class IdentificationStage extends Stage{
+        
+        private final String dbName;
+        private final Button cancel;
+        private final Button ok;
+        private final TextField login;
+        private final PasswordField password;
+        private final Label label;
+        
+        private IdentificationStage(final String databaseName){
+            super();
+            setTitle("Identification");
+            this.dbName = databaseName;
+            label = new Label("Veuillez vous identifier comme utilisateur de la base");
+            cancel = new Button("Annuler");
+            ok = new Button("Effacer la base");
+            login = new TextField();
+            password = new PasswordField();
+            
+            cancel.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    hide();
+                }
+            });
+            
+            ok.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+
+                    try {
+                        final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
+                        final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
+                        final CouchDbConnector connector = couchsb.createConnector(dbName, true);
+
+                        final UtilisateurRepository utilisateurRepository = new UtilisateurRepository(connector);//session.getUtilisateurRepository();
+
+                        MessageDigest messageDigest = null;
+                        try {
+                            messageDigest = MessageDigest.getInstance("MD5");
+
+                            final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
+                            final String encryptedPassword = new String(messageDigest.digest(password.getText().getBytes()));
+                            boolean allowedToDropDB = false;
+                            for (final Utilisateur utilisateur : utilisateurs) {
+                                if (encryptedPassword.equals(utilisateur.getPassword())) {
+                                    allowedToDropDB = true;
+                                    break;
+                                }
+                            }
+
+                            if (allowedToDropDB) {
+                                try {
+                                    DatabaseRegistry.dropLocalDB(dbName);
+                                    hide();
+                                } catch (MalformedURLException ex) {
+                                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            } else {
+                                new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
+                            }
+
+                        } catch (NoSuchAlgorithmException ex) {
+                            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            });
+
+            final GridPane gridpane = new GridPane();
+            gridpane.add(label, 0, 0, 2, 1);
+            gridpane.add(new Label("Login : "), 0, 1);
+            gridpane.add(login, 1, 1);
+            gridpane.add(new Label("Mot de passe : "), 0, 2);
+            gridpane.add(password, 1, 2);
+            gridpane.add(cancel, 0, 3);
+            gridpane.add(ok, 1, 3);
+            gridpane.setHgap(5);
+            gridpane.setVgap(5);
+            gridpane.setPadding(new Insets(10));
+            
+            final Scene scene = new Scene(gridpane);
+            setScene(scene);
+            
+        }
     }
 }
