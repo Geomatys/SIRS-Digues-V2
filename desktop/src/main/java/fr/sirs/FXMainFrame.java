@@ -307,30 +307,32 @@ public class FXMainFrame extends BorderPane {
             @Override
             public void run() {
 
-                final Object obj = session.getObjectToPrint();
-                final File fileToPrint;
-                final List avoidFields = new ArrayList<>();
-                avoidFields.add("geometry");
-                avoidFields.add("documentId");
-                avoidFields.add("id");
-                
-                if(obj instanceof TronconDigue){
-                    avoidFields.add("stuctures");
-                    avoidFields.add("borneIds");
-                }
-                
-                if(obj instanceof Element){
-                    avoidFields.add("couchDBDocument");
-                }
-                
-                try {
-                    fileToPrint = PrinterUtilities.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
-                    fileToPrint.deleteOnExit();
+                for(final Element obj : session.getObjectToPrint()){
+                    
+                    final File fileToPrint;
+                    final List avoidFields = new ArrayList<>();
+                    avoidFields.add("geometry");
+                    avoidFields.add("documentId");
+                    avoidFields.add("id");
 
-                    final Desktop desktop = Desktop.getDesktop();
-                    desktop.open(fileToPrint);
-                } catch (Exception e) {
-                    Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
+                    if(obj instanceof TronconDigue){
+                        avoidFields.add("stuctures");
+                        avoidFields.add("borneIds");
+                    }
+
+                    if(obj instanceof Element){
+                        avoidFields.add("couchDBDocument");
+                    }
+
+                    try {
+                        fileToPrint = PrinterUtilities.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
+                        fileToPrint.deleteOnExit();
+
+                        final Desktop desktop = Desktop.getDesktop();
+                        desktop.open(fileToPrint);
+                    } catch (Exception e) {
+                        Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
+                    }
                 }
             }
         };

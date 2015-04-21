@@ -20,7 +20,7 @@ import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXThemePane;
+import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
@@ -409,7 +409,7 @@ public final class SIRS extends SirsCore {
             content = ctrl;
             
         } else {
-            content = new FXThemePane((Element) pojo);
+            content = new FXElementContainerPane((Element) pojo);
         }
         return content;
     }

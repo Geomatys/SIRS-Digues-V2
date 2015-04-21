@@ -235,7 +235,7 @@ public class PojoTable extends BorderPane {
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTable.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-            session.prepareToPrint(newValue);
+            session.prepareToPrint(uiTable.getSelectionModel().getSelectedItems());
         });
                 
         // Colonnes de suppression et d'ouverture d'éditeur.

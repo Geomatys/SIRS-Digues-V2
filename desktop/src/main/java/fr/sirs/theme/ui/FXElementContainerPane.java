@@ -32,7 +32,7 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
+public class FXElementContainerPane<T extends Element> extends AbstractFXElementPane<T> {
     
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
@@ -46,7 +46,7 @@ public class FXThemePane<T extends Element> extends AbstractFXElementPane<T> {
 
     private Element couchDbDocument;
     
-    public FXThemePane(final T theme) {
+    public FXElementContainerPane(final T theme) {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
         

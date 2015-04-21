@@ -214,7 +214,7 @@ public class Session extends SessionGen implements OwnableSession {
         }
     }
     
-    private Object objectToPrint = null;
+    private List<Element> objectsToPrint = null;
     
     private MapContext mapContext;
     private final MapItem sirsGroup = MapBuilder.createItem();
@@ -493,11 +493,16 @@ public class Session extends SessionGen implements OwnableSession {
         repositories.get("TronconDigueRepository").remove(tronconDigue);
     }
 
-    public void prepareToPrint(final Object object){
-        objectToPrint=object;
+    public void prepareToPrint(final Element object){
+        objectsToPrint = new ArrayList<>();
+        objectsToPrint.add(object);
+    }
+
+    public void prepareToPrint(final List<Element> objects){
+        objectsToPrint = objects;
     }
     
-    public Object getObjectToPrint(){return objectToPrint;}
+    public List<Element> getObjectToPrint(){return objectsToPrint;}
     
     /**
      * Récupération des attributes simple pour affichage dans les tables.
@@ -582,6 +587,11 @@ public class Session extends SessionGen implements OwnableSession {
         if (element instanceof TronconDigue) {
             DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
             diguesTab.getDiguesController().displayTronconDigue((TronconDigue) element);
+            diguesTab.setOnSelectionChanged((Event event) -> {
+                if (diguesTab.isSelected()) {
+                    prepareToPrint(element);
+                }
+            });
             return diguesTab;
         } else {
             try {
