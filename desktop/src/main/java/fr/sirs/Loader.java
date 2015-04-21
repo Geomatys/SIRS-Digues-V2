@@ -28,7 +28,6 @@ import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
 
-import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.image.jai.Registry;
@@ -53,6 +52,7 @@ import java.util.List;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
 
 /**
@@ -60,61 +60,17 @@ import org.controlsfx.dialog.ExceptionDialog;
  * @author Johann Sorel (Geomatys)
  */
 public class Loader extends Application {
-
-    private static String DATABASE_URL = "http://geouser:geopw@localhost:5984";
-    private static String DATABASE_NAME = "sirs";
-    
-    private String databaseUrl;
-    private String databaseName;
     
     private final Stage splashStage;
+    private final String databaseName;
     
-    public Loader() {
-        this(DATABASE_URL, DATABASE_NAME);
-    }
-    
-    public Loader(String databaseUrl, String databaseName) {
-        ArgumentChecks.ensureNonEmpty("Database URL", databaseUrl);
+    public Loader(String databaseName) {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
-        this.databaseUrl = databaseUrl;
         this.databaseName = databaseName;
-        SIRS.LOGGER.log(Level.INFO, "Chosen database : "+this.databaseName);
-        
         // Initialize splash screen
         splashStage = new Stage(StageStyle.TRANSPARENT);
         splashStage.setTitle("SIRS-Digues V2");
         splashStage.initStyle(StageStyle.TRANSPARENT);
-    }
-    
-    
-    /**
-     * The main() method is ignored in correctly deployed JavaFX application.
-     * main() serves only as fallback in case the application can not be
-     * launched through deployment artifacts, e.g., in IDEs with limited FX
-     * support. NetBeans ignores main().
-     *
-     * TODO : Remove the main, we should always launch application using 
-     * Launcher module.
-     * 
-     * @param args the command line arguments
-     * @throws java.io.IOException If configuration file cannot be read.
-     */
-    public static void main(String[] args) throws IOException {
-        if (args.length == 0) {
-            final File propFile = new File("params.run");
-            final Properties prop = new Properties();
-            prop.load(new FileInputStream(propFile));
-            args = new String[]{
-                prop.getProperty("url"),
-                prop.getProperty("database")
-            };
-        }
-        
-        SIRS.LOGGER.log(Level.INFO, "Starting application with : "+Arrays.toString(args));
-        if(args.length>0 && args[0]!=null) DATABASE_URL = args[0];
-        if(args.length>1 && args[1]!=null) DATABASE_NAME = args[1];
-        
-        launch(args);
     }
 
     @Override
@@ -344,11 +300,8 @@ public class Loader extends Application {
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des index ...");
-                final ClassPathXmlApplicationContext context = CouchDBInit
-                        .create(databaseUrl,
-                                databaseName,
-                                "classpath:/fr/sirs/spring/application-context.xml",
-                                false, true);
+                final ClassPathXmlApplicationContext context = CouchDBInit.create(
+                        databaseName, false, true);
                 Injector.getSession().setApplicationContext(context);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////

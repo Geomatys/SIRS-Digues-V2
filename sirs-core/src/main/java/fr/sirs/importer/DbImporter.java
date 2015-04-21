@@ -890,8 +890,7 @@ public class DbImporter {
                 //work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
         try {
-            final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
-                            "http://geouser:geopw@localhost:5984", "sirs", "classpath:/fr/sirs/spring/couchdb-context.xml", true, false);
+            final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create("sirs", true, false);
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             final DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_donnees.mdb")),

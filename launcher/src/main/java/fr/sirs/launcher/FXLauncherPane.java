@@ -2,7 +2,6 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import fr.sirs.Injector;
 
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
@@ -11,13 +10,10 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
-import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
 import fr.sirs.core.component.UtilisateurRepository;
-import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
@@ -34,13 +30,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
@@ -53,7 +49,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -69,15 +64,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -85,10 +74,6 @@ import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbInstance;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
@@ -104,7 +89,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class FXLauncherPane extends BorderPane {
 
     private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
-    private static final String URL_LOCAL = "http://geouser:geopw@localhost:5984";
     
     /**
      * Si le serveur de plugins ne pointe pas sur une liste valide de {@link PluginInfo}
@@ -157,22 +141,14 @@ public class FXLauncherPane extends BorderPane {
     private URL serverURL;
     private PluginList local = new PluginList();
     private PluginList distant = new PluginList();
+    
+    private final DatabaseRegistry localRegistry;
         
-    public FXLauncherPane() {
-        final Class cdtClass = getClass();
-        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
-        loader.setController(this);
-        loader.setRoot(this);
-        //in special environement like osgi or other, we must use the proper class loaders
-        //not necessarly the one who loaded the FXMLLoader class
-        loader.setClassLoader(cdtClass.getClassLoader());
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "An error occurred while loading application libraries", ex);
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
+    public FXLauncherPane() throws IOException {
+        SIRS.loadFXML(this);
+        
+        localRegistry = new DatabaseRegistry();
+        
         errorLabel.setTextFill(Color.RED);
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
@@ -262,7 +238,7 @@ public class FXLauncherPane extends BorderPane {
      * sur le serveur de mise à jour (si l'utilisateur a donné une URL valide).
      */
     private void updateLocalDbList(){
-        final ObservableList<String> names = FXCollections.observableList(listLocalDatabase());
+        final ObservableList<String> names = FXCollections.observableList(listLocalDatabases());
         uiLocalBaseTable.setItems(names);
         if(!names.isEmpty()){
             uiLocalBaseTable.getSelectionModel().select(0);
@@ -321,7 +297,7 @@ public class FXLauncherPane extends BorderPane {
             SIRS.setLauncher((Stage) currentWindow);
         }
         currentWindow.hide();
-        runDesktop(URL_LOCAL, db);
+        runDesktop(db);
     }
 
     @FXML
@@ -332,9 +308,7 @@ public class FXLauncherPane extends BorderPane {
         }
         
         final String distantUrl = uiDistantUrl.getText();
-        final String localUrl = URL_LOCAL+"/"+uiDistantName.getText();
-        
-        DatabaseRegistry.newLocalDBFromRemote(distantUrl, localUrl, uiDistantSync.isSelected());
+        localRegistry.synchronizeDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
         
         //aller au panneau principale
         Platform.runLater(() -> {
@@ -351,7 +325,7 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
-        if(listLocalDatabase().contains(dbName)){
+        if(listLocalDatabases().contains(dbName)){
             new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
             return;
         }
@@ -369,57 +343,42 @@ public class FXLauncherPane extends BorderPane {
         }catch(Exception ex){
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
-        final String epsgCode = epsg;
-        final String version = "1.0.0";
         
+        final String epsgCode = epsg;        
         uiCreateButton.setDisable(true);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                   
-                    final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
-                    final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-                    final CouchDbConnector connector = couchsb.createConnector(dbName,true);
-
-                    final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
-                    applicationContextParent.refresh();
-                    applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
-
-                    final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
-                        "classpath:/fr/sirs/spring/couchdb-context.xml"}, applicationContextParent);
-                    
-                    SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
-                    sirsDBInfoRepository.create(version, epsgCode);
-                    
-                    final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                    final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
-                    administrateur.setValid(true);
-                    administrateur.setLogin(uiCreateLogin.getText());
-                    MessageDigest messageDigest=null;
-                    try {
-                        messageDigest = MessageDigest.getInstance("MD5");
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
-                    administrateur.setRole(Role.ADMIN);
-                    utilisateurRepository.add(administrateur);
-                    
-                    applicationContext.close();
-                    
-                    //aller au panneau principale
-                    Platform.runLater(() -> {
-                        uiTabPane.getSelectionModel().clearAndSelect(0);
-                        updateLocalDbList();
-                    });
-                    
-                }catch(Exception ex){
-                    LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                    new Alert(Alert.AlertType.ERROR,ex.getMessage(),ButtonType.CLOSE).showAndWait();
-                }finally{
-                    Platform.runLater(() -> {uiCreateButton.setDisable(false);});
+        new Thread(() -> {
+            try (ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(dbName, true, false)) {
+                SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
+                sirsDBInfoRepository.create(epsgCode);
+                final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
+                final Utilisateur administrateur = utilisateurRepository.create();
+                administrateur.setValid(true);
+                administrateur.setLogin(uiCreateLogin.getText());
+                MessageDigest messageDigest = null;
+                try {
+                    messageDigest = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException ex) {
+                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
+                administrateur.setRole(Role.ADMIN);
+                utilisateurRepository.add(administrateur);
+                
+                //aller au panneau principal
+                Platform.runLater(() -> {
+                    uiTabPane.getSelectionModel().clearAndSelect(0);
+                    updateLocalDbList();
+                });
+                
+            } catch (Exception ex) {
+                LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                Platform.runLater(() -> {
+                    SIRS.newExceptionDialog("La création de la base a échoué.", ex).showAndWait();
+                });
+            } finally {
+                Platform.runLater(() -> {
+                    uiCreateButton.setDisable(false);
+                });
             }
         }).start();
     }
@@ -432,7 +391,7 @@ public class FXLauncherPane extends BorderPane {
             return;
         }
         
-        if(listLocalDatabase().contains(dbName)){
+        if(listLocalDatabases().contains(dbName)){
             new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
             return;
         }
@@ -451,59 +410,49 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         final String epsgCode = epsg;
-        final String version = "1.0.0";
-        
+
         uiImportButton.setDisable(true);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    final File mainDbFile = new File(uiImportDBData.getText());
-                    final File cartoDbFile = new File(uiImportDBCarto.getText());
-                    
-                    final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(
-                            URL_LOCAL, dbName, "classpath:/fr/sirs/spring/couchdb-context.xml",true,false);
-                    final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
-                    DbImporter importer = new DbImporter(couchDbConnector);
-                    importer.setDatabase(DatabaseBuilder.open(mainDbFile),
-                            DatabaseBuilder.open(cartoDbFile),uiImportCRS.crsProperty().get());
-                    importer.cleanDb();
-                    importer.importation();
-                    
-                    SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
-                    sirsDBInfoRepository.create(version, epsgCode);
-                    
-                    final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                    final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
-                    administrateur.setValid(true);
-                    administrateur.setLogin(uiImportLogin.getText());
-                    MessageDigest messageDigest=null;
-                    try {
-                        messageDigest = MessageDigest.getInstance("MD5");
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
-                    administrateur.setRole(Role.ADMIN);
-                    utilisateurRepository.add(administrateur);
-                    
-                    applicationContext.close();
-                    
-                    //aller au panneau principale
-                    Platform.runLater(() -> {
-                        uiTabPane.getSelectionModel().clearAndSelect(0);
-                        updateLocalDbList();
-                    });
-                    
-                }catch(IOException | AccessDbImporterException ex){
-                    LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                    SIRS.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
-                }finally{
-                    Platform.runLater(() -> {uiImportButton.setDisable(false);});
+        new Thread(() -> {
+            try (ClassPathXmlApplicationContext appCtx = CouchDBInit.create(dbName, true, false)) {
+                final File mainDbFile = new File(uiImportDBData.getText());
+                final File cartoDbFile = new File(uiImportDBCarto.getText());
+                final CouchDbConnector couchDbConnector = appCtx.getBean(CouchDbConnector.class);
+                DbImporter importer = new DbImporter(couchDbConnector);
+                importer.setDatabase(DatabaseBuilder.open(mainDbFile),
+                        DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
+                importer.cleanDb();
+                importer.importation();
+                SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
+                sirsDBInfoRepository.create(epsgCode);
+                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
+                final Utilisateur administrateur = utilisateurRepository.create();
+                administrateur.setValid(true);
+                administrateur.setLogin(uiImportLogin.getText());
+                MessageDigest messageDigest = null;
+                try {
+                    messageDigest = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException ex) {
+                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
+                administrateur.setRole(Role.ADMIN);
+                utilisateurRepository.add(administrateur);
+
+                //aller au panneau principale
+                Platform.runLater(() -> {
+                    uiTabPane.getSelectionModel().clearAndSelect(0);
+                    updateLocalDbList();
+                });
+
+            } catch (IOException | AccessDbImporterException ex) {
+                LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                SIRS.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
+            } finally {
+                Platform.runLater(() -> {
+                    uiImportButton.setDisable(false);
+                });
             }
         }).start();
-        
     }
 
     @FXML
@@ -564,12 +513,12 @@ public class FXLauncherPane extends BorderPane {
         return name.trim();
     }
     
-    private static void runDesktop(final String serverUrl, final String database){
+    private static void runDesktop(final String database){
         try {
             Plugins.loadPlugins();
-            (SIRS.LOADER = new Loader(serverUrl, database)).start(null);
+            (SIRS.LOADER = new Loader(database)).start(null);
         } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Cannot run desktop application with database " + serverUrl + ":" + database, ex);
+            LOGGER.log(Level.WARNING, "Cannot run desktop application with database : " + database, ex);
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
     }
@@ -591,18 +540,13 @@ public class FXLauncherPane extends BorderPane {
         prefs.put("path", path.getAbsolutePath());
     }
  
-    private static List<String> listLocalDatabase() {
-        List<String> dbs = new ArrayList<>();
-        
+    private List<String> listLocalDatabases() {
         try {
-            dbs = DatabaseRegistry.listSirsDatabase(new URL(URL_LOCAL));
-        } catch (MalformedURLException ex) {
-            LOGGER.log(Level.WARNING, "Invalid database URL : "+URL_LOCAL, ex);
+            return localRegistry.listSirsDatabases();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unexpected error while searching for local database in "+URL_LOCAL, e);
+            SIRS.newExceptionDialog("Impossible de lister les bases locales.", e);
+            return Collections.EMPTY_LIST;
         }
-        
-        return dbs;
     }
     
     /**
@@ -734,7 +678,11 @@ public class FXLauncherPane extends BorderPane {
                     final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
                             ButtonType.NO, ButtonType.YES).showAndWait().get();
                     if(ButtonType.YES == res){
-                        deleteDatabase(t);
+                        try {
+                            deleteDatabase(t);
+                        } catch (Exception ex) {
+                            SIRS.newExceptionDialog("Impossible de supprimer "+t, ex).show();
+                        }
                     }
                     return null;
                 }
@@ -742,13 +690,12 @@ public class FXLauncherPane extends BorderPane {
         }
     }
     
-    protected void deleteDatabase(final String databaseName){
-        
+    protected void deleteDatabase(final String databaseName) {        
         new IdentificationStage(databaseName).showAndWait();
         updateLocalDbList();
     }
     
-    private static final class IdentificationStage extends Stage{
+    private final class IdentificationStage extends Stage{
         
         private final String dbName;
         private final Button cancel;
@@ -779,11 +726,7 @@ public class FXLauncherPane extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-
-                    try {
-                        final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
-                        final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-                        final CouchDbConnector connector = couchsb.createConnector(dbName, true);
+                        final CouchDbConnector connector = localRegistry.connectToDatabase(dbName, false);
 
                         final UtilisateurRepository utilisateurRepository = new UtilisateurRepository(connector);//session.getUtilisateurRepository();
 
@@ -803,9 +746,9 @@ public class FXLauncherPane extends BorderPane {
 
                             if (allowedToDropDB) {
                                 try {
-                                    DatabaseRegistry.dropLocalDB(dbName);
+                                    localRegistry.dropDatabase(dbName);
                                     hide();
-                                } catch (MalformedURLException ex) {
+                                } catch (IOException ex) {
                                     Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             } else {
@@ -815,11 +758,6 @@ public class FXLauncherPane extends BorderPane {
                         } catch (NoSuchAlgorithmException ex) {
                             Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                         }
-
-                    } catch (MalformedURLException ex) {
-                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
                 }
             });
 

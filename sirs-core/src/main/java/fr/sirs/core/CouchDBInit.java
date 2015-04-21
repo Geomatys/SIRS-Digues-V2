@@ -1,6 +1,7 @@
 
 package fr.sirs.core;
 
+import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.index.ElasticSearchEngine;
@@ -8,14 +9,9 @@ import fr.sirs.index.ElasticSearchEngine;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbInstance;
 import org.geotoolkit.internal.io.IOUtilities;
 import org.geotoolkit.internal.io.Installation;
 import org.geotoolkit.referencing.operation.transform.NTv2Transform;
@@ -24,16 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Utilitaire de creation de la connexion a la base CouchDB.
+ * Utilitaire de creation de la connexion a la base CouchDB locale.
  * 
  * @author Johann Sorel (Geomatys)
  */
 public class CouchDBInit {
-    
+    private static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(CouchDBInit.class);
-    
-    private static final int SOCKET_TIMEOUT = 45000;
-    private static final int CONNECTION_TIMEOUT = 5000;
     
     public static final String DB_CONNECTOR = "connector";
     public static final String SEARCH_ENGINE = "searchEngine";
@@ -55,36 +48,21 @@ public class CouchDBInit {
     }
     
     
-    public static ClassPathXmlApplicationContext create(String databaseUrl, String databaseName, 
-            String configFile, boolean createIfNotExists, boolean setupListener) throws MalformedURLException, IOException {
+    public static ClassPathXmlApplicationContext create(String databaseName, boolean createIfNotExists, boolean setupListener) throws IOException {
         
-        final URL dbURL = new URL(databaseUrl);
-        //http://user:password@address.com
-        final String userPass = dbURL.getUserInfo();
-        final String[] loginInfo;
-        if (userPass == null || (loginInfo = userPass.split(":")).length < 2) {
-            throw new IllegalArgumentException("Missing user and password in database URL : "+dbURL.toExternalForm());
-        }
-        final String user = loginInfo[0];
-        final String password = loginInfo[1];
-        
-        final HttpClient httpClient = new StdHttpClient.Builder()
-                .url(databaseUrl)
-                .connectionTimeout(CONNECTION_TIMEOUT)
-                .socketTimeout(SOCKET_TIMEOUT)
-                .build();
-        final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-        final CouchDbConnector connector = couchsb.createConnector(databaseName,createIfNotExists);
+        DatabaseRegistry dbRegistry = new DatabaseRegistry();
+        final CouchDbConnector connector = dbRegistry.connectToDatabase(databaseName, createIfNotExists);
         
         DocumentChangeEmiter changeEmmiter = null;
         ElasticSearchEngine elasticEngine = null;
         if(setupListener){
             changeEmmiter = new DocumentChangeEmiter(connector);
-            //searchEngine = new SearchEngine(databaseName, connector, changeEmmiter);
-            elasticEngine = new ElasticSearchEngine(dbURL.getHost(), (dbURL.getPort() < 0)? 5984 : dbURL.getPort(), databaseName, user, password);
+            final URL dbURL = dbRegistry.couchDbUrl;
+            elasticEngine = new ElasticSearchEngine(dbURL.getHost(), (dbURL.getPort() < 0)? 5984 : dbURL.getPort(), databaseName, dbRegistry.getUsername(), dbRegistry.getUserPass());
             changeEmmiter.start();
         }
         
+        // Initializing application context will load application repositories, which will publish their views on the new database.
         final ClassPathXmlApplicationContext applicationContextParent = new ClassPathXmlApplicationContext();
         applicationContextParent.refresh();
         applicationContextParent.getBeanFactory().registerSingleton(DB_CONNECTOR, connector);
@@ -93,8 +71,8 @@ public class CouchDBInit {
             applicationContextParent.getBeanFactory().registerSingleton(CHANGE_EMITTER, changeEmmiter);
         }
 
-        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext( new String[]{
-            configFile}, applicationContextParent);
+        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+                new String[]{SPRING_CONTEXT}, applicationContextParent);
 
         applicationContext.getBean(SirsDBInfoRepository.class).init().ifPresent(info->LOGGER.info(info.toString()));        
         

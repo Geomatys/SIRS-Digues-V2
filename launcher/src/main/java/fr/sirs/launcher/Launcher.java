@@ -3,9 +3,11 @@ package fr.sirs.launcher;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import java.io.IOException;
 
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -87,9 +89,17 @@ public class Launcher extends Application {
         };
         epsgIniter.setOnSucceeded((WorkerStateEvent event) -> {
             splashLabel.setText("Lancement de l'application");
-            primaryStage.setScene(new Scene(new FXLauncherPane()));
-            splashStage.close();
-            primaryStage.show();
+            
+            FXLauncherPane launcherPane;
+            try {
+                launcherPane = new FXLauncherPane();
+                primaryStage.setScene(new Scene(launcherPane));
+                splashStage.close();
+                primaryStage.show();
+            } catch (IOException ex) {
+                SIRS.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
+                System.exit(1);
+            }
         });
 
         epsgIniter.setOnFailed((WorkerStateEvent event) -> {

@@ -23,8 +23,10 @@ public class SirsPreferences extends Properties {
     public static enum PROPERTIES {
         
         DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null),
-        REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/");
-        
+        REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/"),
+        DEFAULT_LOCAL_USER("Administrateur CouchDB local", "Login de l'administrateur pour la base couchDB locale.", "geouser"),
+        DEFAULT_LOCAL_PASS("Mot de passe de l'administrateur CouchDB", "Le mot de passe de l'utilisateur CouchDB spécifié ici.", "geopw"),
+        COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/");
         public final String title;
         public final String description;
         public final String defaultValue;
@@ -70,6 +72,16 @@ public class SirsPreferences extends Properties {
     public void reload() throws IOException {
         try (final InputStream stream = Files.newInputStream(PREFERENCES_PATH, StandardOpenOption.READ)) {
             this.load(stream);
+        }
+        
+        for (final PROPERTIES prop : PROPERTIES.values()) {
+            try {
+                getProperty(prop);
+            } catch (IllegalStateException e) {
+                if (prop.getDefaultValue() != null) {
+                    setProperty(prop.name(), prop.getDefaultValue());
+                }
+            }
         }
     }
     

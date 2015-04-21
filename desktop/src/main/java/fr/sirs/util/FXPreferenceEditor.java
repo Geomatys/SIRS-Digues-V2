@@ -11,7 +11,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -41,6 +40,7 @@ import java.lang.reflect.Method;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.Property;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.PasswordField;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -57,6 +57,7 @@ public class FXPreferenceEditor extends Stage {
 
     static {
         EDITOR_OVERRIDES.put(DOCUMENT_ROOT, new FXDirectoryTextField());
+        EDITOR_OVERRIDES.put(DEFAULT_LOCAL_PASS, new PasswordField());
     }
 
     final BorderPane root = new BorderPane();

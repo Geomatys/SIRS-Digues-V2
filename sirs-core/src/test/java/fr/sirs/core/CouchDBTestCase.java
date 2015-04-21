@@ -28,7 +28,7 @@ public abstract class CouchDBTestCase {
         
         Optional<SirsDBInfo> init = sirsDBInfoRepository.init();
         if (!init.isPresent())
-            sirsDBInfoRepository.create("1.0.1", "EPSG:2154");
+            sirsDBInfoRepository.create("EPSG:2154");
     }
 
     public void test() {

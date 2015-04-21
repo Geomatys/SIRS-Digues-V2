@@ -30,13 +30,11 @@ public class SirsDBInfoRepository {
         } catch (DocumentNotFoundException e) {
             return Optional.empty();
         }
-
-
     }
 
-    public SirsDBInfo create(String version, String epsgCode) {
+    public SirsDBInfo create(String epsgCode) {
         SirsDBInfo sirsDBInfo = new SirsDBInfo();
-        sirsDBInfo.setVersion(version);
+        sirsDBInfo.setVersion(SirsCore.getVersion());
         sirsDBInfo.setEpsgCode(epsgCode);
         sirsDBInfo.setUuid(UUID.randomUUID().toString());
         db.create("$sirs", sirsDBInfo);
