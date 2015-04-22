@@ -65,8 +65,8 @@ public class ElementReseauConduiteFermeeImporter extends GenericObjetLinker {
             
             if(conduiteFermee!=null && stationPompage!=null){
                 
-                conduiteFermee.getStation_pompage().add(stationPompage.getId());
-                stationPompage.getReseau_hydraulique_ferme().add(conduiteFermee.getId());
+                conduiteFermee.getStationPompageIds().add(stationPompage.getId());
+                stationPompage.getReseauHydrauliqueFermeIds().add(conduiteFermee.getId());
                 
                 associations.add(new AbstractMap.SimpleEntry<>(conduiteFermee, stationPompage));
             }

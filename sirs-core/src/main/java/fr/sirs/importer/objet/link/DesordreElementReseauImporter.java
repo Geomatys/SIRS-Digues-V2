@@ -81,28 +81,28 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
                 
                 if (elementReseau.getClass().equals(classeElementReseau)) {
                     if (elementReseau instanceof VoieDigue) {
-                        desordre.getVoie_digue().add(elementReseau.getId());
+                        desordre.getVoieDigueIds().add(elementReseau.getId());
                     } 
                     else if (elementReseau instanceof OuvrageParticulier){
-                        desordre.getOuvrage_particulier().add(elementReseau.getId());
+                        desordre.getOuvrageParticulierIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof OuvrageHydrauliqueAssocie){
-                        desordre.getOuvrag_hydraulique_associe().add(elementReseau.getId());
+                        desordre.getOuvrageHydrauliqueAssocieIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof OuvrageTelecomEnergie){
-                        desordre.getOuvrage_telecom_energie().add(elementReseau.getId());
+                        desordre.getOuvrageTelecomEnergieIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof OuvrageVoirie){
-                        desordre.getOuvrage_voirie().add(elementReseau.getId());
+                        desordre.getOuvrageVoirieIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof ReseauTelecomEnergie){
-                        desordre.getReseau_telecom_energie().add(elementReseau.getId());
+                        desordre.getReseauTelecomEnergieIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof ReseauHydroCielOuvert){
-                        desordre.getReseau_hydro_ciel_ouvert().add(elementReseau.getId());
+                        desordre.getReseauHydrauliqueCielOuvertIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof ReseauHydrauliqueFerme){
-                        desordre.getReseau_hydraulique_ferme().add(elementReseau.getId());
+                        desordre.getReseauHydrauliqueFermeIds().add(elementReseau.getId());
                     }
                     else {
                         SirsCore.LOGGER.log(Level.FINE, elementReseau.getClass().getSimpleName());

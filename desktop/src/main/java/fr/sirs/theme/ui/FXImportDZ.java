@@ -133,9 +133,9 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
         final ObservableList<Feature> features = selectionProperty;
         final ObservableList<PointLeveDZ> leves = FXCollections.observableArrayList();
         
+        
         for(final Feature feature : features){
             final PointLeveDZ leve;
-            
             
             
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){

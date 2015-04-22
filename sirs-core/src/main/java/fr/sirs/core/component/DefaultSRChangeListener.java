@@ -3,7 +3,10 @@ package fr.sirs.core.component;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.lang.ref.WeakReference;
@@ -16,6 +19,13 @@ import javafx.scene.control.ButtonType;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.PointLeveDZ;
+import fr.sirs.core.model.PositionProfilTravers;
+import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.ProfilLong;
+import fr.sirs.core.model.ProprieteTroncon;
+import java.util.logging.Level;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
@@ -102,28 +112,40 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             final LineString lineString = LinearReferencing.asLineString(troncon.getGeometry());
             ArgumentChecks.ensureNonNull("Linéaire de réference", lineString);
             final LinearReferencing.SegmentInfo[] linear = LinearReferencing.buildSegments(lineString);
-            final SessionGen session = InjectorCore.getBean(SessionGen.class);
+            
             
             ArgumentChecks.ensureNonNull("SR par défaut", troncon.getSystemeRepDefautId());
-            SystemeReperage sr = session.getSystemeReperageRepository().get(troncon.getSystemeRepDefautId());
                     
-            final int progressMax = troncon.getStructures().size();
+            final int progressMax = troncon.getStructures().size()
+                    + troncon.getDocumentTroncon().size()
+                    + troncon.getProprietes().size()
+                    + troncon.getGardes().size();
             int currentProgress = 0;
             updateMessage("Parcours des objets");
             updateProgress(currentProgress, progressMax);
             for (final Objet current : troncon.getStructures()) {
-                final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, troncon, linear, session);
-                
-                Point startPoint = position.getGeoPointStart();
-                current.setPR_debut(TronconUtils.computePR(linear, sr, startPoint, session.getBorneDigueRepository()));
-                
-                Point endPoint = position.getGeoPointEnd();
-                if (startPoint.equals(endPoint)) {
-                    current.setPR_fin(current.getPR_fin());
-                } else {
-                    current.setPR_fin(TronconUtils.computePR(linear, sr, endPoint, session.getBorneDigueRepository()));
+                recomputePositionable(current, linear);
+                for(final Photo photo : current.getPhotos()){
+                    recomputePositionable(photo, linear);
                 }
+                updateProgress(currentProgress++, progressMax);
+            }
+            for (final AbstractPositionDocument current : troncon.getDocumentTroncon()) {
+                recomputePositionable(current, linear);
+                if(current instanceof PositionProfilTravers){
+                    for(final Photo photo : ((PositionProfilTravers) current).getPhotos()){
+                        recomputePositionable(photo, linear);
+                    }
+                } 
                 
+                updateProgress(currentProgress++, progressMax);
+            }
+            for (final ProprieteTroncon current : troncon.getProprietes()) {
+                recomputePositionable(current, linear);
+                updateProgress(currentProgress++, progressMax);
+            }
+            for (final GardeTroncon current : troncon.getGardes()) {
+                recomputePositionable(current, linear);
                 updateProgress(currentProgress++, progressMax);
             }
             
@@ -131,6 +153,27 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             InjectorCore.getBean(SessionGen.class).getTronconDigueRepository().update(troncon);
             
             return true;
+        }
+        
+        private void recomputePositionable(final Positionable current, final LinearReferencing.SegmentInfo[] linear){
+            try{
+                final SessionGen session = InjectorCore.getBean(SessionGen.class);
+                final SystemeReperage sr = session.getSystemeReperageRepository().get(troncon.getSystemeRepDefautId());
+
+                final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, troncon, linear, session);
+
+                final Point startPoint = position.getGeoPointStart();
+                current.setPR_debut(TronconUtils.computePR(linear, sr, startPoint, session.getBorneDigueRepository()));
+
+                final Point endPoint = position.getGeoPointEnd();
+                if (startPoint.equals(endPoint)) {
+                    current.setPR_fin(current.getPR_fin());
+                } else {
+                    current.setPR_fin(TronconUtils.computePR(linear, sr, endPoint, session.getBorneDigueRepository()));
+                }
+            } catch (RuntimeException ex){
+                SirsCore.LOGGER.log(Level.FINE, ex.getMessage());
+            }
         }
         
     }

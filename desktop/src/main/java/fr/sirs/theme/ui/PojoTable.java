@@ -948,9 +948,9 @@ public class PojoTable extends BorderPane {
             
             final double result = TronconUtils.switchSRForPR(
                     posInfo.getTronconSegments(false), 
-                    Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()),
-                    Injector.getSession().getSystemeReperageRepository().get(profilLong.getSystemeRepDzId()),
                     pointLeve.getD(),
+                    Injector.getSession().getSystemeReperageRepository().get(profilLong.getSystemeRepDzId()),
+                    Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()),
                     Injector.getSession().getBorneDigueRepository());
             return result;
         }

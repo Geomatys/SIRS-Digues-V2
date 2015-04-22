@@ -63,8 +63,8 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjetLinker {
             final ReseauTelecomEnergie reseau = (ReseauTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrage!=null && reseau!=null){
-                ouvrage.getReseau_telecom_energie().add(reseau.getId());
-                reseau.getOuvrage_telecom_energie().add(ouvrage.getId());
+                ouvrage.getReseauTelecomEnergieIds().add(reseau.getId());
+                reseau.getOuvrageTelecomEnergieIds().add(ouvrage.getId());
                 
                 associations.add(new AbstractMap.SimpleEntry<>(ouvrage, reseau));
             }

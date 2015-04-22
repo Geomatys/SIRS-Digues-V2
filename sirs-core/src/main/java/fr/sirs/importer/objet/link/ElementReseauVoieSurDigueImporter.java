@@ -75,7 +75,7 @@ DATE_DERNIERE_MAJ
 
                     if(reseau instanceof ReseauHydrauliqueFerme){
                         final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
-                        reseauFerme.getReseau_hydro_ciel_ouvert().add(voieDigue.getId());
+                        reseauFerme.getReseauHydrauliqueCielOuvertIds().add(voieDigue.getId());
                 
                         associations.add(new AbstractMap.SimpleEntry<>(reseauVoieDigue, reseauFerme));
                     }

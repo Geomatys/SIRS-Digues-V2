@@ -71,8 +71,8 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
                 
                 if(reseau instanceof ReseauHydrauliqueFerme){
                     final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
-                    reseauFerme.getReseau_hydro_ciel_ouvert().add(reseauCielOuvert.getId());
-                    reseauCielOuvert.getReseau_hydraulique_ferme().add(reseauFerme.getId());
+                    reseauFerme.getReseauHydrauliqueCielOuvertIds().add(reseauCielOuvert.getId());
+                    reseauCielOuvert.getReseauHydrauliqueFermeIds().add(reseauFerme.getId());
                 
                     associations.add(new AbstractMap.SimpleEntry<>(reseauCielOuvert, reseauFerme));
                 }

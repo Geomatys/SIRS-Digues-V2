@@ -21,8 +21,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneIds" upperBound="-1"
         eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTronconId" eType="#//RefTypeTroncon"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
-        eType="#//Photo" eOpposite="#//Photo/troncon_digue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDefautId" eType="#//SystemeReperage"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -105,8 +103,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="troncon_digue" eType="#//TronconDigue"
-        eOpposite="#//TronconDigue/photos"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -325,8 +321,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pompes" upperBound="-1"
         eType="#//Pompe" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
-        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/station_pompage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
+        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/stationPompageIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Pompe">
@@ -351,20 +347,20 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="utilisationConduiteId"
         eType="#//RefUtilisationConduite"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeConduiteFermeeId" eType="#//RefConduiteFermee"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="station_pompage" upperBound="-1"
-        eType="#//StationPompage" eOpposite="#//StationPompage/reseau_hydraulique_ferme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydro_ciel_ouvert"
-        upperBound="-1" eType="#//ReseauHydroCielOuvert" eOpposite="#//ReseauHydroCielOuvert/reseau_hydraulique_ferme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_hydraulique_associe"
-        upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/reseau_hydraulique_ferme"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="stationPompageIds" upperBound="-1"
+        eType="#//StationPompage" eOpposite="#//StationPompage/reseauHydrauliqueFermeIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
+        upperBound="-1" eType="#//ReseauHydroCielOuvert" eOpposite="#//ReseauHydroCielOuvert/reseauHydrauliqueFermeIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
+        upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/reseauHydrauliqueFermeIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageHydrauliqueAssocie" eSuperTypes="#//ObjetReseau">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageHydroAssocieId"
         eType="#//RefOuvrageHydrauliqueAssocie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
-        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/ouvrage_hydraulique_associe"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
+        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/ouvrageHydrauliqueAssocieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauTelecomEnergie" eSuperTypes="#//ObjetReseau">
@@ -374,24 +370,24 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="implantaitonId" eType="#//RefImplantation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauTelecomEnergieId"
         eType="#//RefReseauTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_telecom_energie"
-        upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/reseau_telecom_energie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
+        upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/reseauTelecomEnergieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageTelecomEnergie" eSuperTypes="#//ObjetReseau">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageTelecomEnergieId"
         eType="#//RefOuvrageTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_telecom_energie"
-        upperBound="-1" eType="#//ReseauTelecomEnergie" eOpposite="#//ReseauTelecomEnergie/ouvrage_telecom_energie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
+        upperBound="-1" eType="#//ReseauTelecomEnergie" eOpposite="#//ReseauTelecomEnergie/ouvrageTelecomEnergieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauHydroCielOuvert" eSuperTypes="#//ObjetReseau">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauHydroCielOuvertId"
         eType="#//RefReseauHydroCielOuvert"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
-        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/reseau_hydro_ciel_ouvert"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
+        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/reseauHydrauliqueCielOuvertIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageParticulier" eSuperTypes="#//ObjetReseau">
@@ -424,21 +420,21 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="#//RefTypeDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydraulique_ferme"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
         upperBound="-1" eType="#//ReseauHydrauliqueFerme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrag_hydraulique_associe"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
         upperBound="-1" eType="#//OuvrageHydrauliqueAssocie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_telecom_energie"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
         upperBound="-1" eType="#//ReseauTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_telecom_energie"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
         upperBound="-1" eType="#//OuvrageTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseau_hydro_ciel_ouvert"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
         upperBound="-1" eType="#//ReseauHydroCielOuvert"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_particulier" upperBound="-1"
-        eType="#//OuvrageParticulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voie_digue" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
+        upperBound="-1" eType="#//OuvrageParticulier"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
         eType="#//VoieDigue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrage_voirie" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
         eType="#//OuvrageVoirie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/desordre"/>

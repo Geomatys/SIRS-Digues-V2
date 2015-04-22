@@ -65,8 +65,8 @@ public class ElementReseauAutreOuvrageHydrauImporter extends GenericObjetLinker 
             final ReseauHydrauliqueFerme reseauHydrau = (ReseauHydrauliqueFerme) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(ouvrageHydrauliqueAssocie!=null && reseauHydrau!=null){
-                ouvrageHydrauliqueAssocie.getReseau_hydraulique_ferme().add(reseauHydrau.getId());
-                reseauHydrau.getOuvrage_hydraulique_associe().add(ouvrageHydrauliqueAssocie.getId());
+                ouvrageHydrauliqueAssocie.getReseauHydrauliqueFermeIds().add(reseauHydrau.getId());
+                reseauHydrau.getOuvrageHydrauliqueAssocieIds().add(ouvrageHydrauliqueAssocie.getId());
                 
                 associations.add(new AbstractMap.SimpleEntry<>(ouvrageHydrauliqueAssocie, reseauHydrau));
             }
