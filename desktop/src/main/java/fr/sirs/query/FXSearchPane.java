@@ -386,7 +386,7 @@ public class FXSearchPane extends BorderPane {
         if(querygroup==null){
             querygroup = MapBuilder.createItem();
             querygroup.setName("Requêtes");
-            context.items().add(0,querygroup);
+            context.items().add(querygroup);
         }
         
         querygroup.items().add(layer);
