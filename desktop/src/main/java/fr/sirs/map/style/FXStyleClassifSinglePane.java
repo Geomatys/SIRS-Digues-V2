@@ -21,8 +21,8 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
 
     @Override
     protected MutableRule createRule(PropertyName property, Object obj) {
-        final PreviewLabel lbl = Injector.getSession().getPreviewLabelRepository().get(String.valueOf(obj));
-        String desc = obj.toString();
+        String desc = String.valueOf(obj);
+        final PreviewLabel lbl = Injector.getSession().getPreviewLabelRepository().get(desc);
         if(lbl!=null){
             desc = lbl.getLabel();
         }
