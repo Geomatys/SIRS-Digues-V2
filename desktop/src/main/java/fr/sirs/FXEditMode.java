@@ -12,7 +12,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -112,7 +111,7 @@ public class FXEditMode extends VBox {
                     // Si le role du visiteur fait partie des roles autorisés à éditer
                     if (session.getRole() == role) {
 
-                        // Dans le cas des externes, il y a une vérificatin supplémentaire à effectuer
+                        // Dans le cas des externes, il y a une vérification supplémentaire à effectuer
                         if (session.getRole() == Role.EXTERN) {
                             // Si l'utilisateur est bien l'auteur et que le document n'est pas validé
                             if (session.getUtilisateur().getId().equals(authorIDProperty().get())
@@ -130,6 +129,11 @@ public class FXEditMode extends VBox {
                 return editionGranted;
             }
         }.not());
+        
+        // Edition par défaut à l'ouverture d'une fiche pour les utilisateurs autorisés à éditer.
+        if(!uiEdit.isDisabled()){
+            uiEdit.setSelected(true);
+        }
     }
 
     public void setSaveAction(Runnable saveAction) {
