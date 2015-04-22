@@ -4,14 +4,13 @@ import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.CommuneRepository;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.ConventionRepository;
+import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.MarcheRepository;
@@ -103,7 +102,7 @@ import org.geotoolkit.lang.Setup;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  *
@@ -889,8 +888,7 @@ public class DbImporter {
                 Setup.initialize(null);
                 //work in lazy mode, do your best for lenient datum shift
                 Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-        try {
-            final ClassPathXmlApplicationContext applicationContext = CouchDBInit.create("sirs", true, false);
+        try (final ConfigurableApplicationContext applicationContext = new DatabaseRegistry().connectToSirsDatabase("sirs", true, false, false)) {;
             final CouchDbConnector couchDbConnector = applicationContext.getBean(CouchDbConnector.class);
             final DbImporter importer = new DbImporter(couchDbConnector);
             importer.setDatabase(DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_donnees.mdb")),

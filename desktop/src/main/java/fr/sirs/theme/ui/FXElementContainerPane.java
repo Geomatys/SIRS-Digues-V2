@@ -26,6 +26,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
@@ -99,7 +100,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             
             repo.update(couchDbDocument);
         } catch (Exception e) {
-            SIRS.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }

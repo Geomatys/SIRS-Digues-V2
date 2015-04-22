@@ -58,6 +58,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
@@ -156,7 +157,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 // Warn user that something has gone wrong.
                 final Dialog d;
                 if (submitted.getException() != null) {
-                    d = SIRS.newExceptionDialog(null, submitted.getException());
+                    d = GeotkFX.newExceptionDialog(null, submitted.getException());
                 } else {
                     d = new Alert(Alert.AlertType.ERROR, "Cause : erreur inconnue.", ButtonType.OK);
                 }

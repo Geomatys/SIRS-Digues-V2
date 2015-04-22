@@ -2,10 +2,12 @@ package fr.sirs.core;
 
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
@@ -15,11 +17,15 @@ import org.apache.sis.geometry.GeneralEnvelope;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.factory.Hints;
+import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.internal.io.IOUtilities;
+import org.geotoolkit.internal.io.Installation;
 import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
+import org.geotoolkit.referencing.operation.transform.NTv2Transform;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
@@ -29,6 +35,8 @@ public class SirsCore {
 
     public static final Logger LOGGER = Logging.getLogger(SirsCore.class);
     public static final String NAME = "sirs";
+    
+    public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
     
     public static final Path CONFIGURATION_PATH;    
     static {
@@ -93,10 +101,14 @@ public class SirsCore {
     } 
     
     /**
-     * Initialise la base EPSG utilisée par l'application. Si elle n'existe pas, 
-     * elle sera créée. Dans tous les cas, on force le chargement de la base 
-     * dans le système, ce qui permet de lever les potentiels problèmes au 
-     * démarrage.
+     * Initialise la base EPSG et la grille NTV2 utilisée par l'application. Si  
+     * elles n'existent pas, elles seront créées. Dans tous les cas, on force le 
+     * chargement de la base EPSG dans le système, ce qui permet de lever les 
+     * potentiels problèmes au démarrage.
+     * Si la création de la bdd EPSG rate, on renvoie une exception, car aucun
+     * réferencement spatial ne peut être effecctué sans elle. En revanche, la 
+     * grille NTV2 n'est utile que pour des besoins de précision. Si son installation
+     * rate, on n'afficche juste un message d'avertissement.
      * @throws FactoryException
      * @throws IOException 
      */
@@ -120,6 +132,20 @@ public class SirsCore {
         
         // force loading epsg
         CRS.decode("EPSG:3395");
+        
+        // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
+        final File directory = Installation.NTv2.directory(true);
+        if (!new File(directory, NTv2Transform.RGF93).isFile()) {
+            directory.mkdirs();
+            final File out = new File(directory, NTv2Transform.RGF93);
+            try {
+                out.createNewFile();
+                IOUtilities.copy(SirsCore.class.getResourceAsStream("/fr/sirs/ntv2/ntf_r93.gsb"), new FileOutputStream(out));
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
+                GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourrait apparaître au sein de l'application.", ex).show();
+            }
+        }
     }
 
     public static int getSrid() {

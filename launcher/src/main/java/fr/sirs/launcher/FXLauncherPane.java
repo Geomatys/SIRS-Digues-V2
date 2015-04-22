@@ -7,12 +7,14 @@ import fr.sirs.Loader;
 import fr.sirs.Plugins;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
@@ -80,11 +82,13 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
+ * @author Samuel Andres (Geomatys)
  */
 public class FXLauncherPane extends BorderPane {
 
@@ -347,7 +351,7 @@ public class FXLauncherPane extends BorderPane {
         final String epsgCode = epsg;        
         uiCreateButton.setDisable(true);
         new Thread(() -> {
-            try (ClassPathXmlApplicationContext applicationContext = CouchDBInit.create(dbName, true, false)) {
+            try (ConfigurableApplicationContext applicationContext = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.create(epsgCode);
                 final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
@@ -373,7 +377,7 @@ public class FXLauncherPane extends BorderPane {
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 Platform.runLater(() -> {
-                    SIRS.newExceptionDialog("La création de la base a échoué.", ex).showAndWait();
+                    GeotkFX.newExceptionDialog("La création de la base a échoué.", ex).showAndWait();
                 });
             } finally {
                 Platform.runLater(() -> {
@@ -413,7 +417,7 @@ public class FXLauncherPane extends BorderPane {
 
         uiImportButton.setDisable(true);
         new Thread(() -> {
-            try (ClassPathXmlApplicationContext appCtx = CouchDBInit.create(dbName, true, false)) {
+            try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
                 final CouchDbConnector couchDbConnector = appCtx.getBean(CouchDbConnector.class);
@@ -446,7 +450,7 @@ public class FXLauncherPane extends BorderPane {
 
             } catch (IOException | AccessDbImporterException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                SIRS.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
+                GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
             } finally {
                 Platform.runLater(() -> {
                     uiImportButton.setDisable(false);
@@ -544,7 +548,7 @@ public class FXLauncherPane extends BorderPane {
         try {
             return localRegistry.listSirsDatabases();
         } catch (Exception e) {
-            SIRS.newExceptionDialog("Impossible de lister les bases locales.", e);
+            GeotkFX.newExceptionDialog("Impossible de lister les bases locales.", e);
             return Collections.EMPTY_LIST;
         }
     }
@@ -681,7 +685,7 @@ public class FXLauncherPane extends BorderPane {
                         try {
                             deleteDatabase(t);
                         } catch (Exception ex) {
-                            SIRS.newExceptionDialog("Impossible de supprimer "+t, ex).show();
+                            GeotkFX.newExceptionDialog("Impossible de supprimer "+t, ex).show();
                         }
                     }
                     return null;
@@ -704,7 +708,7 @@ public class FXLauncherPane extends BorderPane {
         private final PasswordField password;
         private final Label label;
         
-        private IdentificationStage(final String databaseName){
+        private IdentificationStage(final String databaseName) {
             super();
             setTitle("Identification");
             this.dbName = databaseName;
@@ -726,12 +730,11 @@ public class FXLauncherPane extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-                        final CouchDbConnector connector = localRegistry.connectToDatabase(dbName, false);
+                        try (final ConfigurableApplicationContext ctx = localRegistry.connectToSirsDatabase(dbName, false, false, false)) {
 
-                        final UtilisateurRepository utilisateurRepository = new UtilisateurRepository(connector);//session.getUtilisateurRepository();
+                            final UtilisateurRepository utilisateurRepository = ctx.getBean(Session.class).getUtilisateurRepository();
 
-                        MessageDigest messageDigest = null;
-                        try {
+                            MessageDigest messageDigest = null;
                             messageDigest = MessageDigest.getInstance("MD5");
 
                             final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
@@ -745,18 +748,14 @@ public class FXLauncherPane extends BorderPane {
                             }
 
                             if (allowedToDropDB) {
-                                try {
-                                    localRegistry.dropDatabase(dbName);
-                                    hide();
-                                } catch (IOException ex) {
-                                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                                }
+                                localRegistry.dropDatabase(dbName);
+                                hide();
                             } else {
                                 new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
                             }
 
-                        } catch (NoSuchAlgorithmException ex) {
-                            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                           throw new SirsCoreRuntimeExecption(ex);
                         }
                 }
             });

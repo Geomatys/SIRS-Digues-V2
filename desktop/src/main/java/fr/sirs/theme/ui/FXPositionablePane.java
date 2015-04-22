@@ -69,6 +69,7 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -683,9 +684,7 @@ public class FXPositionablePane extends BorderPane {
                         });
                     }
                 } catch (Exception ex) {
-                    // TODO : do we really need to log here ?
-                    SIRS.LOGGER.log(Level.WARNING, "La conversion des positions a échouée.", ex);
-                    SIRS.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+                    GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                     throw new RuntimeException("La conversion des positions a échouée.", ex);
                 } finally {
                     Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));

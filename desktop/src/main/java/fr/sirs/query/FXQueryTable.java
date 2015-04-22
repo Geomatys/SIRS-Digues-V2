@@ -95,7 +95,7 @@ public class FXQueryTable extends BorderPane{
                 table.getItems().addAll(SQLQueries.openQueryFile(outputFile.toPath()));
             } catch (IOException ex) {
                 SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
-                SIRS.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
+                GeotkFX.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
             }
         }
     }

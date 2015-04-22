@@ -1,7 +1,5 @@
 package fr.sirs.core.component;
 
-import static fr.sirs.core.CouchDBInit.DB_CONNECTOR;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,18 +12,16 @@ import java.util.stream.Stream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.ReplicationCommand;
-import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.SirsDBInfo;
+import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,23 +31,21 @@ import org.geotoolkit.util.FileUtilities;
 
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.geometry.HPos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
+import org.ektorp.ActiveTask;
+import org.ektorp.ReplicationTask;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Create a wrapper for connections on a couchDb service.
@@ -236,19 +230,60 @@ public class DatabaseRegistry {
      * Connect to database with given name on current CouchDb service.
      * @param dbName Name of the database to create.
      * @param createIfNotExists True to create the database if it does not exists. false otherwise.
+     * @param initIndex True if we must start an elastic search index (creates an {@link ElasticSearchEngine}) on database.
+     * @param initChangeListener True if we must start a {@link DocumentChangeEmiter} on database changes, false otherwise.
      * @return A connector to queried database.
      */
-    public CouchDbConnector connectToDatabase(String dbName, final boolean createIfNotExists) {
+    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, final boolean createIfNotExists, final boolean initIndex, final boolean initChangeListener) {
         try {
-            return couchDbInstance.createConnector(dbName, createIfNotExists);
-        } catch (DbAccessException e) {
-            try {
-                handleAccessException();
-            } catch (IOException ex) {
-                e.addSuppressed(ex);
+            CouchDbConnector connector = couchDbInstance.createConnector(dbName, createIfNotExists);
+            // Initializing application context will load application repositories, which will publish their views on the new database.
+            final ClassPathXmlApplicationContext parentContext = new ClassPathXmlApplicationContext();
+            parentContext.refresh();
+            parentContext.getBeanFactory().registerSingleton(CouchDbConnector.class.getSimpleName(), connector);
+
+            final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
+                    new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
+
+            appContext.getBean(SirsDBInfoRepository.class).init().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
+
+            if (initIndex) {
+
+                ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
+                        couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbName, username, userPass);
+                appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
+            }
+
+            if (initChangeListener) {
+                DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
+                appContext.getBeanFactory().registerSingleton(DocumentChangeEmiter.class.getSimpleName(), changeEmmiter);
+                changeEmmiter.start();
+            }
+
+            return appContext;
+
+            // If an exception occurs, we check if its due to an authorization problem. If true, we ask for new login and retry.
+        } catch (RuntimeException e) {
+            Throwable tmpEx = e;
+            boolean accessException = false;
+            while (!accessException && tmpEx != null) {
+                if (tmpEx instanceof DbAccessException) {
+                    accessException = true;
+                } else {
+                    tmpEx = tmpEx.getCause();
+                }
+            }
+            if (accessException) {
+                try {
+                    handleAccessException();
+                } catch (IOException ex) {
+                    e.addSuppressed(ex);
+                    throw e;
+                }
+                return connectToSirsDatabase(dbName, createIfNotExists, initIndex, initChangeListener);
+            } else {
                 throw e;
             }
-            return connectToDatabase(dbName, createIfNotExists);
         }
     }
 
@@ -378,38 +413,28 @@ public class DatabaseRegistry {
 
     private String cancelReplication(String databaseURL) {
         getReplicationTasksBySourceOrTarget(databaseURL)
-                .map(t -> t.get("replication_id"))
-                .filter(n -> n != null)
-                .map(t -> t.asText())
+                .map(t -> t.getReplicationId())
                 .map(id -> new ReplicationCommand.Builder().id(id).cancel(true)
                         .build())
                 .forEach(cmd -> couchDbInstance.replicate(cmd));
         return databaseURL;
     }
 
-    Stream<JsonNode> getReplicationTasks() {
-        HttpResponse httpResponse = couchDbInstance.getConnection().get(
-                "/_active_tasks");
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            List<JsonNode> tasks = objectMapper.readValue(httpResponse
-                    .getContent(), objectMapper.getTypeFactory()
-                    .constructCollectionType(List.class, JsonNode.class));
-
-            return tasks.stream().filter(
-                    t -> t.get("type") == null ? false : t.get("type").asText()
-                            .equals("replication"));
-
-        } catch (IOException e) {
-            throw new SirsCoreRuntimeExecption(e);
+    ArrayList<ReplicationTask> getReplicationTasks() {
+        Collection<ActiveTask> activeTasks = couchDbInstance.getActiveTasks();
+        final ArrayList result = new ArrayList();
+        for (final ActiveTask task : activeTasks) {
+            if (task instanceof ReplicationTask) {
+                result.add(task);
+            }
         }
+        return result;
     }
 
-    Stream<JsonNode> getReplicationTasksBySourceOrTarget(String dst) {
-        return getReplicationTasks().filter(
-                t -> match(t.get("target"), dst) || match(t.get("source"), dst));
+    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(String dst) {
+        final String dbName = dst.replaceFirst("/$", "").substring(dst.lastIndexOf('/'));
+        return getReplicationTasks().stream().filter(
+                t -> (t.getSourceDatabaseName().equals(dbName) || t.getTargetDatabaseName().equals(dbName)));
     }
     
     ////////////////////////////////////////////////////////////////////////////
@@ -417,15 +442,6 @@ public class DatabaseRegistry {
     // MINOR UTILITY METHODS
     //
     ////////////////////////////////////////////////////////////////////////////
-    
-    private static boolean match(JsonNode jsonNode, String dst) {
-        if (jsonNode == null)
-            return false;
-        String dst2 = jsonNode.asText();
-        int i = dst.indexOf('@');
-        int j = dst2.indexOf('@');
-        return dst.substring(i).equals(dst2.substring(j));
-    }
     
     /**
      * Build an {@link  URL} object from given string. Add protocol http prefix 

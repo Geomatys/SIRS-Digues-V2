@@ -10,7 +10,6 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
@@ -50,6 +49,7 @@ import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.LayerListener;
 import org.geotoolkit.map.MapBuilder;
@@ -204,7 +204,7 @@ public class FXImportBornesPane extends BorderPane {
         try {
             col = TaskManager.INSTANCE.submit(openTask).get();
         } catch (Exception e) {
-            SIRS.newExceptionDialog("Impossible d'ouvrir le fichier séléctionné.", e).show();
+            GeotkFX.newExceptionDialog("Impossible d'ouvrir le fichier séléctionné.", e).show();
             return;
         }
         FeatureType fType = col.getFeatureType();
@@ -254,7 +254,7 @@ public class FXImportBornesPane extends BorderPane {
                         uiImportButton.setDisable(false);
                     }
                 } catch (DataStoreException ex) {
-                    SIRS.newExceptionDialog("Une erreur est survenue lors de la mise à jour de la sélection.", ex).show();
+                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de la mise à jour de la sélection.", ex).show();
                 }
             }
         });
@@ -362,7 +362,7 @@ public class FXImportBornesPane extends BorderPane {
                 new Alert(Alert.AlertType.WARNING, "Aucune borne n'a pu être importée.", ButtonType.OK).showAndWait();
             }
         } catch (Exception ex) {
-            SIRS.newExceptionDialog("Une erreur s'est produite pendant l'import des bornes.", ex).show();
+            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant l'import des bornes.", ex).show();
         }
     }
 

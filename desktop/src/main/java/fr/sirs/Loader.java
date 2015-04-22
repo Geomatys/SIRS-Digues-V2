@@ -3,10 +3,7 @@ package fr.sirs;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.USER;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,10 +31,9 @@ import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.lang.Setup;
 import org.geotoolkit.sld.xml.JAXBSLDUtilities;
 import org.geotoolkit.sld.xml.StyleXmlIO;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import fr.sirs.core.CouchDBInit;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.DatabaseRegistry;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
@@ -54,6 +50,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
+import org.geotoolkit.internal.GeotkFX;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  *
@@ -179,7 +177,7 @@ public class Loader extends Application {
                                         } catch (Throwable ex) {
                                             try {
                                                 SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
-                                                ExceptionDialog exDialog = SIRS.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
+                                                ExceptionDialog exDialog = GeotkFX.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
                                                 exDialog.setOnHidden((DialogEvent de)-> System.exit(1));
                                                 exDialog.show();
                                                 
@@ -300,8 +298,8 @@ public class Loader extends Application {
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des index ...");
-                final ClassPathXmlApplicationContext context = CouchDBInit.create(
-                        databaseName, false, true);
+                final ConfigurableApplicationContext context = 
+                        new DatabaseRegistry().connectToSirsDatabase(databaseName, true, true, true);
                 Injector.getSession().setApplicationContext(context);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////

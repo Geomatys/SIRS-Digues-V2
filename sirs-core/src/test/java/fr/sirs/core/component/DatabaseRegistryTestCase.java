@@ -1,7 +1,5 @@
 package fr.sirs.core.component;
 
-import java.net.MalformedURLException;
-
 import org.junit.Test;
 
 import fr.sirs.core.CouchDBTestCase;
@@ -25,7 +23,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
     @Test
     public void initDatabase() throws IOException {
-        new DatabaseRegistry().connectToDatabase("sirs_dup", true);
+        new DatabaseRegistry().connectToSirsDatabase("sirs_dup", true, true, true);
     }
 
     @DependsOnMethod("initDatabase")
@@ -48,7 +46,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
     @Test
     public void getReplicationTasksByTarget() throws IOException {
         new DatabaseRegistry().getReplicationTasksBySourceOrTarget(REPLICATION_DEST).forEach(
-                t -> System.out.println(t.get("replication_id").asText()));
+                t -> System.out.println(t.getReplicationId()));
 
     }
 

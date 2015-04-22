@@ -46,7 +46,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.sis.util.ArgumentChecks;
-import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
@@ -430,17 +429,5 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         
         new ComboBoxCompletion(comboBox);
-    }
-    
-    public static ExceptionDialog newExceptionDialog(final String headerText, final Throwable t) {
-        ArgumentChecks.ensureNonNull("Exception to display", t);
-        ExceptionDialog d = new ExceptionDialog(t);
-        d.setResizable(true);
-        if (headerText != null) {
-            d.setHeaderText(headerText);
-        }
-        d.setWidth(400);
-        d.setHeight(500);
-        return d;
     }
 }

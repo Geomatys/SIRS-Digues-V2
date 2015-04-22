@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -46,7 +45,6 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -59,7 +57,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -85,22 +82,20 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
-import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.style.RandomStyleBuilder;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
-import org.opengis.style.PointSymbolizer;
 
 /**
  *
@@ -277,7 +272,7 @@ public class FXSearchPane extends BorderPane {
             queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
+            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
             return;
         }
         
@@ -314,7 +309,7 @@ public class FXSearchPane extends BorderPane {
             queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            SIRS.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
+            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
             return;
         }
         if (queries.isEmpty()) {
@@ -347,7 +342,7 @@ public class FXSearchPane extends BorderPane {
                             SQLQueries.saveQueriesInFile(selected, outputFile.toPath());
                         } catch (IOException ex) {
                             SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
-                            SIRS.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
+                            GeotkFX.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
                         }
                     }
                 }
@@ -403,7 +398,7 @@ public class FXSearchPane extends BorderPane {
             uiSQLText.setText(buildSQLQueryFromFilter());
         } catch (DataStoreException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible de construire une requête SQL depuis le panneau de filtres.", ex);
-            SIRS.newExceptionDialog("Impossible de construire une requête SQL depuis le panneau de filtres.", ex).show();
+            GeotkFX.newExceptionDialog("Impossible de construire une requête SQL depuis le panneau de filtres.", ex).show();
         }
     }
     

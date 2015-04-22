@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -97,13 +98,13 @@ public class Launcher extends Application {
                 splashStage.close();
                 primaryStage.show();
             } catch (IOException ex) {
-                SIRS.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
+                GeotkFX.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
                 System.exit(1);
             }
         });
 
         epsgIniter.setOnFailed((WorkerStateEvent event) -> {
-            SIRS.newExceptionDialog("Impossible de se connecter à la base EPSG.", event.getSource().getException()).showAndWait();
+            GeotkFX.newExceptionDialog("Impossible de se connecter à la base EPSG.", event.getSource().getException()).showAndWait();
             System.exit(1);
         });
 

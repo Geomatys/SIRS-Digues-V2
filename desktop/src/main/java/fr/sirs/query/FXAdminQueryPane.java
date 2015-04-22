@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Level;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -34,6 +33,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  * A panel which allows an administrator to send locally saved queries into CouchDB,
@@ -261,7 +261,7 @@ public class FXAdminQueryPane extends BorderPane {
             adminPanel = new FXAdminQueryPane();
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
-            SIRS.newExceptionDialog("Une erreur est survenue lors de la construction des listes de requêtes.", ex).show();
+            GeotkFX.newExceptionDialog("Une erreur est survenue lors de la construction des listes de requêtes.", ex).show();
             return;
         }
 

@@ -88,7 +88,7 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.style.DefaultDescription;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * La session contient toutes les données chargées dans l'instance courante de 
@@ -165,9 +165,9 @@ public class Session extends SessionGen implements OwnableSession {
     public Role getRole(){return role.get();}
     ////////////////////////////////////////////////////////////////////////////
     
-    private ClassPathXmlApplicationContext applicationContext;
-    public ClassPathXmlApplicationContext getApplicationContext(){return applicationContext;}
-    public void setApplicationContext(final ClassPathXmlApplicationContext applicationContext){
+    private ConfigurableApplicationContext applicationContext;
+    public ConfigurableApplicationContext getApplicationContext(){return applicationContext;}
+    public void setApplicationContext(final ConfigurableApplicationContext applicationContext) {
         this.applicationContext=applicationContext;
     }
 
@@ -188,8 +188,6 @@ public class Session extends SessionGen implements OwnableSession {
     static {
         final Properties SORTED_PROPERTIES = new Properties();
         final Properties SORTED_OVERRIDES = new Properties();
-//        SORTED_PROPERTIES.load(Session.class.getResourceAsStream("/fr/sirs/model/fields.properties"));
-//        SORTED_OVERRIDES.load(Session.class.getResourceAsStream("/fr/sirs/model/fields.properties"));
         
         for(Entry entry : SORTED_PROPERTIES.entrySet()){
             final String name = (String) entry.getKey();
