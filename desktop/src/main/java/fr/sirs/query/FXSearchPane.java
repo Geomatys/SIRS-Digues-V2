@@ -7,25 +7,32 @@ import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.ValiditySummaryRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.h2.H2Helper;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
+import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.FXValiditySummaryToElementTableColumn;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -64,7 +71,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
@@ -121,12 +127,12 @@ public class FXSearchPane extends BorderPane {
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
     
-    //Recherche plein texte
+    // Recherche plein texte
     @FXML private ToggleButton uiTogglePlainText;
     @FXML private GridPane uiPlainTextPane;
     @FXML private TextField uiElasticKeywords;
     
-    //recherche SQL
+    // Recherche SQL
     @FXML private ToggleButton uiToggleSQL;
     @FXML private GridPane uiSQLPane;
     @FXML private GridPane uiSQLModelOptions;
@@ -137,6 +143,14 @@ public class FXSearchPane extends BorderPane {
     @FXML private TextArea uiSQLText;
     @FXML private Button uiExportQueries;
     private FXSQLFilterEditor uiFilterEditor;
+    
+    // Recherche par désignation
+    @FXML private ToggleButton uiToggleDesignation;
+    @FXML private GridPane uiDesignationPane;
+    @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
+    @FXML private TextField uiDesignation;
+    private TableView<ValiditySummary> designations;
+    private List<ValiditySummary> validitySummaries;
     
     
     private final Session session;
@@ -156,6 +170,18 @@ public class FXSearchPane extends BorderPane {
         final ToggleGroup group = new ToggleGroup();
         uiTogglePlainText.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
+        uiToggleDesignation.setToggleGroup(group);
+        
+        final List<Class<? extends Element>> modelClasses = Session.getElements();
+        modelClasses.removeIf(new Predicate<Class<? extends Element>>() {
+
+            @Override
+            public boolean test(Class<? extends Element> t) {
+                return ReferenceType.class.isAssignableFrom(t);
+            }
+        });
+        uiDesignationClass.setItems(FXCollections.observableArrayList(modelClasses));
+        uiDesignationClass.setConverter(new SirsStringConverter());
         
         uiTogglePlainText.setSelected(true);
 
@@ -206,6 +232,9 @@ public class FXSearchPane extends BorderPane {
         
         uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
+        
+        uiDesignationPane.visibleProperty().bind(uiToggleDesignation.selectedProperty());
+        uiDesignationPane.managedProperty().bind(uiDesignationPane.visibleProperty());
         
         final SimpleBooleanProperty isAdmin = new ReadOnlyBooleanWrapper(Role.ADMIN.equals(Injector.getSession().getRole()));
         uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(isAdmin));
@@ -503,6 +532,8 @@ public class FXSearchPane extends BorderPane {
                     final String query = getCurrentSQLQuery();
                     searchSQL(query);
                 }
+            } else if(uiToggleDesignation.isSelected()){
+                searchDesignation(uiDesignationClass.getValue());
             }
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -526,6 +557,105 @@ public class FXSearchPane extends BorderPane {
             vBox.setPadding(new Insets(10));
             setCenter(vBox);
         }
+    }
+    
+    private void searchDesignation(final Class<? extends Element> type){
+        final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
+
+        validitySummaries = session.getValiditySummaryRepository().getDesignationsForClass(type);
+        validitySummaries.removeIf(new Predicate<ValiditySummary>() {
+
+            @Override
+            public boolean test(ValiditySummary t) {
+                if(uiDesignation.getText()==null || "".equals(uiDesignation.getText())){
+                    return t.getDesignation()!=null || !"".equals(t.getDesignation());
+                } else {
+                    return !uiDesignation.getText().equals(t.getDesignation());
+                }
+            }
+        });
+
+        designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
+        designations.setEditable(false);
+
+        designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
+
+        final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
+        propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                return new SimpleObjectProperty<>(param.getValue().getDesignation());
+            }
+        });
+        designations.getColumns().add(propertyColumn);
+        
+        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
+        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+                return new SimpleObjectProperty(param.getValue().getLabel());
+            }
+        });
+        designations.getColumns().add(labelColumn);
+        setCenter(designations);
+//
+//        final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
+//        final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString(BUNDLE_KEY_CLASS));
+//        uiTitle.getStyleClass().add("pojotable-header");
+//        uiTitle.setAlignment(Pos.CENTER);
+//        uiTitle.setPadding(new Insets(5));
+//        uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
+//
+//        final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
+//        choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
+//
+//            @Override
+//            public String toString(ValiditySummaryChoice object) {
+//                final String result;
+//                switch (object) {
+//                    case DOUBLON:
+//                        result = "Doublons";
+//                        break;
+//                    case ALL:
+//                    default:
+//                        result = "Tous";
+//                }
+//                return result;
+//            }
+//
+//            @Override
+//            public ValiditySummaryChoice fromString(String string) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//            }
+//        });
+//        choiceBox.setValue(ValiditySummaryChoice.ALL);
+//        choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ValiditySummaryChoice>() {
+//
+//            @Override
+//            public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
+//                final List<ValiditySummary> referenceUsages;
+//                switch (choiceBox.getSelectionModel().getSelectedItem()) {
+//                    case DOUBLON:
+//                        referenceUsages = doublons();
+//                        break;
+//                    case ALL:
+//                    default:
+//                        referenceUsages = validitySummaries;
+//                }
+//                designations.setItems(FXCollections.observableArrayList(referenceUsages));
+//            }
+//        });
+//
+//        final HBox hBox = new HBox(choiceBox);
+//        hBox.setAlignment(Pos.CENTER);
+//        hBox.setPadding(new Insets(20));
+//        hBox.setSpacing(100);
+//
+//        final VBox vBox = new VBox(uiTitle, hBox);
+//
+//        setTop(vBox);
     }
 
     private void searchSQL(String query){

@@ -78,9 +78,9 @@ public class ReferenceChecker extends Task<Void> {
         return serverClassNameReferencesNotLocal;
     }
 
-    private List<Class> localClassReferences;
+    private List<Class<? extends ReferenceType>> localClassReferences;
 
-    public List<Class> getLocalClassReferences() {
+    public List<Class<? extends ReferenceType>> getLocalClassReferences() {
         return localClassReferences;
     }
 

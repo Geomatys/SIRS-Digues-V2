@@ -726,39 +726,8 @@ public class FXLauncherPane extends BorderPane {
                 }
             });
             
-            ok.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                        try (final ConfigurableApplicationContext ctx = localRegistry.connectToSirsDatabase(dbName, false, false, false)) {
-
-                            final UtilisateurRepository utilisateurRepository = ctx.getBean(Session.class).getUtilisateurRepository();
-
-                            MessageDigest messageDigest = null;
-                            messageDigest = MessageDigest.getInstance("MD5");
-
-                            final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
-                            final String encryptedPassword = new String(messageDigest.digest(password.getText().getBytes()));
-                            boolean allowedToDropDB = false;
-                            for (final Utilisateur utilisateur : utilisateurs) {
-                                if (encryptedPassword.equals(utilisateur.getPassword())) {
-                                    allowedToDropDB = true;
-                                    break;
-                                }
-                            }
-
-                            if (allowedToDropDB) {
-                                localRegistry.dropDatabase(dbName);
-                                hide();
-                            } else {
-                                new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
-                            }
-
-                        } catch (Exception ex) {
-                           throw new SirsCoreRuntimeExecption(ex);
-                        }
-                }
-            });
+            ok.setOnAction(new IdenfificationHandler());
+            password.onActionProperty().bind(ok.onActionProperty());
 
             final GridPane gridpane = new GridPane();
             gridpane.add(label, 0, 0, 2, 1);
@@ -782,46 +751,33 @@ public class FXLauncherPane extends BorderPane {
             @Override
             public void handle(ActionEvent event) {
 
-                try {
-                    final HttpClient httpClient = new StdHttpClient.Builder().url(URL_LOCAL).build();
-                    final CouchDbInstance couchsb = new StdCouchDbInstance(httpClient);
-                    final CouchDbConnector connector = couchsb.createConnector(dbName, true);
+                try (final ConfigurableApplicationContext ctx = localRegistry.connectToSirsDatabase(dbName, false, false, false)) {
 
-                    final UtilisateurRepository utilisateurRepository = new UtilisateurRepository(connector);//session.getUtilisateurRepository();
+                    final UtilisateurRepository utilisateurRepository = ctx.getBean(Session.class).getUtilisateurRepository();
 
                     MessageDigest messageDigest = null;
-                    try {
-                        messageDigest = MessageDigest.getInstance("MD5");
+                    messageDigest = MessageDigest.getInstance("MD5");
 
-                        final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
-                        final String encryptedPassword = new String(messageDigest.digest(password.getText().getBytes()));
-                        boolean allowedToDropDB = false;
-                        for (final Utilisateur utilisateur : utilisateurs) {
-                            if (encryptedPassword.equals(utilisateur.getPassword())) {
-                                allowedToDropDB = true;
-                                break;
-                            }
+                    final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
+                    final String encryptedPassword = new String(messageDigest.digest(password.getText().getBytes()));
+                    boolean allowedToDropDB = false;
+                    for (final Utilisateur utilisateur : utilisateurs) {
+                        if (encryptedPassword.equals(utilisateur.getPassword())) {
+                            allowedToDropDB = true;
+                            break;
                         }
-
-                        if (allowedToDropDB) {
-                            try {
-                                DatabaseRegistry.dropLocalDB(dbName);
-                                hide();
-                            } catch (MalformedURLException ex) {
-                                Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        } else {
-                            new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
-                        }
-
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                    if (allowedToDropDB) {
+                        localRegistry.dropDatabase(dbName);
+                        hide();
+                    } else {
+                        new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
+                    }
 
+                } catch (Exception ex) {
+                   throw new SirsCoreRuntimeExecption(ex);
+                }
             }
         }
     }

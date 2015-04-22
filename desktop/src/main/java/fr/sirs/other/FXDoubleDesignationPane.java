@@ -9,6 +9,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.util.FXValiditySummaryToElementTableColumn;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,50 +41,38 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXPseudoIdAnalysePane extends BorderPane {
+public class FXDoubleDesignationPane extends BorderPane {
 
-    private TableView<ValiditySummary> pseudoIds;
+    private TableView<ValiditySummary> designations;
     private final Session session = Injector.getSession();
-    final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
-    final List<ValiditySummary> validitySummaries;
-    private final Map<String, ResourceBundle> bundles = new HashMap<>();
+    private final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
+    private final List<ValiditySummary> validitySummaries;
 
     private enum ValiditySummaryChoice {
-
         DOUBLON, ALL
     };
 
-    public FXPseudoIdAnalysePane(final Class type) {
-        final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
+    public FXDoubleDesignationPane(final Class type) {
+        final ResourceBundle vsBundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
         validitySummaries = valididySummaryRepository.getDesignationsForClass(type);
 
-        pseudoIds = new TableView<>(FXCollections.observableArrayList(validitySummaries));
-        pseudoIds.setEditable(false);
+        designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
+        designations.setEditable(false);
 
-        pseudoIds.getColumns().add(new StateColumn());
+        designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
-        final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-        propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<ValiditySummary, String> designationColumn = new TableColumn<>(vsBundle.getString("pseudoId"));
+        designationColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             }
         });
-        pseudoIds.getColumns().add(propertyColumn);
-
-        final TableColumn<ValiditySummary, String> objectIdColumn = new TableColumn<>(bundle.getString("elementId"));
-        objectIdColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                return new SimpleObjectProperty(param.getValue().getElementId());
-            }
-        });
-        pseudoIds.getColumns().add(objectIdColumn);
-//                
-        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
+        designations.getColumns().add(designationColumn);
+        
+        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(vsBundle.getString("label"));
         labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
 
             @Override
@@ -91,8 +80,8 @@ public class FXPseudoIdAnalysePane extends BorderPane {
                 return new SimpleObjectProperty(param.getValue().getLabel());
             }
         });
-        pseudoIds.getColumns().add(labelColumn);
-        setCenter(pseudoIds);
+        designations.getColumns().add(labelColumn);
+        setCenter(designations);
 
         final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
         final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString(BUNDLE_KEY_CLASS));
@@ -137,7 +126,7 @@ public class FXPseudoIdAnalysePane extends BorderPane {
                     default:
                         referenceUsages = validitySummaries;
                 }
-                pseudoIds.setItems(FXCollections.observableArrayList(referenceUsages));
+                designations.setItems(FXCollections.observableArrayList(referenceUsages));
             }
         });
 
@@ -179,62 +168,6 @@ public class FXPseudoIdAnalysePane extends BorderPane {
             }
         }
         return referenceUsages;
-    }
-
-    public class StateButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {
-
-        private final Node defaultGraphic;
-
-        public StateButtonTableCell(Node graphic) {
-            super(false, graphic, (Object t) -> true, new Function<Object, Object>() {
-                @Override
-                public Object apply(Object t) {
-                    Injector.getSession().showEditionTab(t);
-                    return t;
-                }
-            });
-            defaultGraphic = graphic;
-        }
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (item != null) {
-                button.setGraphic(new ImageView(SIRS.ICON_EYE));
-            }
-        }
-    }
-
-    private class StateColumn extends TableColumn<ValiditySummary, Object> {
-
-        public StateColumn() {
-            super("Détail");
-            setEditable(false);
-            setSortable(false);
-            setResizable(true);
-            setPrefWidth(70);
-//            setPrefWidth(24);
-//            setMinWidth(24);
-//            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_MOVEUP));
-
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
-                @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-
-            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
-
-                @Override
-                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
-
-                    return new StateButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
-                }
-            });
-        }
     }
 
 }

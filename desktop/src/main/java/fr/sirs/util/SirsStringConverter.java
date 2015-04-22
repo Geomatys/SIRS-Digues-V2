@@ -80,6 +80,10 @@ public class SirsStringConverter extends StringConverter {
             else if(item==GUEST) text="Invité";
             else if(item==EXTERN) text="Externe";
             else text="";
+        } else if (item instanceof Class){
+            if(Element.class.isAssignableFrom((Class) item)){
+                return getLabelMapperForClass((Class) item).mapClassName();
+            }
         }
         
         // Whatever object we've got, if we can append a libelle, we do.

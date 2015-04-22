@@ -322,8 +322,8 @@ public class Session extends SessionGen implements OwnableSession {
     }
         
     // REFERENCES
-    private static final List<Class> REFERENCES = new ArrayList<>();
-    private static final List<Class> ELEMENTS = new ArrayList<>();
+    private static final List<Class<? extends ReferenceType>> REFERENCES = new ArrayList<>();
+    private static final List<Class<? extends Element>> ELEMENTS = new ArrayList<>();
     private static void initReferences(){
         
         final ServiceLoader<ReferenceType> serviceLoader = ServiceLoader.load(ReferenceType.class);
@@ -352,8 +352,8 @@ public class Session extends SessionGen implements OwnableSession {
         initElements();
     }
     
-    public static List<Class> getReferences(){return REFERENCES;}
-    public static List<Class> getElements(){return ELEMENTS;}
+    public static List<Class<? extends ReferenceType>> getReferences(){return REFERENCES;}
+    public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
 
     /**
      * MapContext affiché pour toute l'application.

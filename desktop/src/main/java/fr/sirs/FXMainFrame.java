@@ -10,7 +10,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.other.FXPseudoIdAnalysePane;
+import fr.sirs.other.FXDoubleDesignationPane;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
@@ -167,8 +167,8 @@ public class FXMainFrame extends BorderPane {
     
     private enum SummaryTab{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final SummaryTab typeOfSummary){
-        final ResourceBundle bundle = ResourceBundle.getBundle(clazz.getName());
-        final MenuItem item = new MenuItem(bundle.getString(BUNDLE_KEY_CLASS));
+        final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+        final MenuItem item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
         final EventHandler handler;
         
         if(typeOfSummary==SummaryTab.REFERENCE){
@@ -176,7 +176,7 @@ public class FXMainFrame extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bundle.getString(BUNDLE_KEY_CLASS));
+                    final Tab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
                     tab.setContent(new FXReferencePane(clazz));
                     addTab(tab);
                 }
@@ -187,8 +187,8 @@ public class FXMainFrame extends BorderPane {
 
                 @Override
                 public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bundle.getString(BUNDLE_KEY_CLASS));
-                    tab.setContent(new FXPseudoIdAnalysePane(clazz));
+                    final Tab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
+                    tab.setContent(new FXDoubleDesignationPane(clazz));
                     addTab(tab);
                 }
             };
