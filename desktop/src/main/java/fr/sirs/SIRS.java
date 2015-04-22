@@ -399,8 +399,8 @@ public final class SIRS extends SirsCore {
             content = new FXOrganismePane((Organisme) pojo);
             
         } else if (pojo instanceof TronconDigue) {
-            final FXTronconDiguePane ctrl = new FXTronconDiguePane();
-            ctrl.setElement((TronconDigue) pojo);
+            final FXTronconDiguePane ctrl = new FXTronconDiguePane((TronconDigue) pojo);
+//            ctrl.setElement((TronconDigue) pojo);
             content = ctrl;
             
         } else if (pojo instanceof Digue) {

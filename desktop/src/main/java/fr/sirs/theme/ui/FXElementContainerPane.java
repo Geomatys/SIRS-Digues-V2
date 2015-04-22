@@ -47,19 +47,20 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
     private Element couchDbDocument;
     
-    public FXElementContainerPane(final T theme) {
+    public FXElementContainerPane(final T element) {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
         
         uiMode.setSaveAction(this::save);
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
+        uiMode.requireEditionForElement(element);
         disableFieldsProperty().bind(uiMode.editionState().not());
         
         uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         elementProperty.addListener(this::initPane);
         
-        setElement((T) theme);
+        setElement((T) element);
     }
     
     public void setShowOnMapButton(final boolean isShown){

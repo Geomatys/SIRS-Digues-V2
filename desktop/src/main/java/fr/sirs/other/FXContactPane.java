@@ -77,6 +77,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         this.orgRepository = session.getOrganismeRepository();
         
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
+        uiMode.requireEditionForElement(contact);
         disableFieldsProperty().bind(uiMode.editionState().not());
         uiNom.disableProperty().bind(disableFieldsProperty());
         uiPrenom.disableProperty().bind(disableFieldsProperty());

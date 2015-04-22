@@ -92,12 +92,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
     
-    public FXTronconDiguePane() {
+    public FXTronconDiguePane(final TronconDigue troncon) {
         SIRS.loadFXML(this, TronconDigue.class);
         Injector.injectDependencies(this);
         
         //mode edition
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
+        uiMode.requireEditionForElement(troncon);
         uiMode.setSaveAction(this::save);
         final BooleanProperty editBind = uiMode.editionState();
         final BooleanBinding editSR = Bindings.and(editBind, new SimpleBooleanProperty(session.getRole()!=USER));
@@ -123,6 +124,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         
         // Troncon change listener
         elementProperty.addListener(this::initFields);
+        setElement(troncon);
            
         // Layout
         uiSrTab.setCenter(srController);

@@ -5,6 +5,7 @@ import static fr.sirs.SIRS.COLOR_INVALID_ICON;
 import static fr.sirs.SIRS.CSS_PATH;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
@@ -24,6 +25,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import org.apache.sis.util.ArgumentChecks;
 
 /**
  *
@@ -129,10 +131,18 @@ public class FXEditMode extends VBox {
                 return editionGranted;
             }
         }.not());
-        
-        // Edition par défaut à l'ouverture d'une fiche pour les utilisateurs autorisés à éditer.
+    }
+    
+    private void requireEdition(){
         if(!uiEdit.isDisabled()){
             uiEdit.setSelected(true);
+        }
+    }
+    
+    public void requireEditionForElement(final Element element){
+        ArgumentChecks.ensureNonNull("element", element);
+        if(element.getDesignation()==null || "".equals(element.getDesignation())){
+            requireEdition();
         }
     }
 

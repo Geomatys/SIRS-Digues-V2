@@ -60,6 +60,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         date_maj.setDisable(true);
 
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
+        uiMode.requireEditionForElement(organisme);
         disableFieldsProperty().bind(uiMode.editionState().not());
         for (final Node child : uiDescriptionGrid.getChildren()) {
             if (!(child instanceof Label)) {

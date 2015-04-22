@@ -9,24 +9,16 @@ import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.logging.Level;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
@@ -56,6 +48,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         //mode edition
         uiMode.setSaveAction(this::save);
         uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
+        uiMode.requireEditionForElement(digue);
         disableFieldsProperty().bind(uiMode.editionState().not());
         
         libelle.disableProperty().bind(disableFieldsProperty());
