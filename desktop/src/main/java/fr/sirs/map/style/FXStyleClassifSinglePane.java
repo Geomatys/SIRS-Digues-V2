@@ -20,7 +20,7 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
     }
 
     @Override
-    protected MutableRule createRule(PropertyName property, Object obj) {
+    protected MutableRule createRule(PropertyName property, Object obj, int idx) {
         String desc = String.valueOf(obj);
         final PreviewLabel lbl = Injector.getSession().getPreviewLabelRepository().get(desc);
         if(lbl!=null){
@@ -30,7 +30,7 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
         final MutableStyleFactory sf = GeotkFX.getStyleFactory();
         final FilterFactory ff = GeotkFX.getFilterFactory();
 
-        final MutableRule r = sf.rule(createSymbolizer());
+        final MutableRule r = sf.rule(createSymbolizer(idx));
         r.setFilter(ff.equals(property, ff.literal(obj)));
         r.setDescription(sf.description(desc,desc));
         r.setName(desc);

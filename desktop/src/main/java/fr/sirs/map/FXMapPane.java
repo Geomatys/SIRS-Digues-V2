@@ -11,13 +11,12 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.map.style.FXStyleClassifSinglePane;
+import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.util.Collections;
@@ -43,6 +42,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.apache.sis.util.ArgumentChecks;
@@ -53,7 +53,6 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.factory.Hints;
-import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.GeometryDescriptor;
@@ -70,13 +69,6 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemVisibleColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
-import org.geotoolkit.gui.javafx.layer.FXLayerStylesPane;
-import org.geotoolkit.gui.javafx.layer.FXPropertiesPane;
-import org.geotoolkit.gui.javafx.layer.style.FXStyleAdvancedPane;
-import org.geotoolkit.gui.javafx.layer.style.FXStyleClassifRangePane;
-import org.geotoolkit.gui.javafx.layer.style.FXStyleColorMapPane;
-import org.geotoolkit.gui.javafx.layer.style.FXStyleSimplePane;
-import org.geotoolkit.gui.javafx.layer.style.FXStyleXMLPane;
 import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXContextBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
@@ -148,18 +140,10 @@ public class FXMapPane extends BorderPane {
         uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
         uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn(){
             @Override
-            protected FXPropertiesPane createEditor(MapLayer candidate) {
-                return new FXPropertiesPane(
-                    candidate,
-                    new FXLayerStylesPane(
-                            new FXStyleSimplePane(),
-                            new FXStyleColorMapPane(),
-                            new FXStyleClassifSinglePane(),
-                            new FXStyleClassifRangePane(),
-                            new FXStyleAdvancedPane(),
-                            new FXStyleXMLPane()
-                    )
-                );
+            protected Pane createEditor(MapLayer candidate) {
+                final FXStyleAggregatedPane pane = new FXStyleAggregatedPane();
+                pane.init(candidate);
+                return pane;
             }
         });
         uiTree.getTreetable().getColumns().add(new MapItemVisibleColumn());
