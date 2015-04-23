@@ -367,7 +367,7 @@ public class Session extends SessionGen implements OwnableSession {
 
             try {
                 //sirs layers
-                sirsGroup.setName("Système de digue");
+                sirsGroup.setName("Description des ouvrages");
                 mapContext.items().add(0,sirsGroup);
 
                 for(Plugin plugin : Plugins.getPlugins()){
