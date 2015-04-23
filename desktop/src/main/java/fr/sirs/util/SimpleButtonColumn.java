@@ -1,6 +1,7 @@
 package fr.sirs.util;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Alert;
@@ -39,10 +40,9 @@ public class SimpleButtonColumn<S, T> extends TableColumn<S, T> {
     public SimpleButtonColumn(
             final Image buttonIcon, 
             final Callback<CellDataFeatures<S, T>, ObservableValue<T>> cellValueFactory, 
-            final Function<T, Boolean> buttonVisiblePredicate, 
+            final Predicate<T> buttonVisiblePredicate, 
             final Function<T, T> buttonAction, 
             final String tooltip) {
-        
         super();
         setSortable(false);
         setResizable(false);

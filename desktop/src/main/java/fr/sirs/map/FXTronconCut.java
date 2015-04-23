@@ -5,10 +5,10 @@ import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.json.GeometryDeserializer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
@@ -25,7 +25,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -39,7 +38,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -192,40 +190,30 @@ public class FXTronconCut extends VBox {
         ARCHIVER
     }
     
-    private class DeleteColumn extends TableColumn{
+    private class DeleteColumn extends SimpleButtonColumn {
 
         public DeleteColumn() {
-            super("Suppression");          
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
-                @Override
-                public ObservableValue call(TableColumn.CellDataFeatures param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-            setCellFactory(new Callback<TableColumn, TableCell>() {
+            super(GeotkFX.ICON_DELETE,
+                    new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
+                        @Override
+                        public ObservableValue call(TableColumn.CellDataFeatures param) {
+                            return new SimpleObjectProperty<>(param.getValue());
+                        }
+                    },
+                    (Object t) -> true, 
+                    new Function() {
 
-                public TableCell call(TableColumn param) {
-                    return new ButtonTableCell(
-                            false,new ImageView(GeotkFX.ICON_DELETE), (Object t) -> true, new Function() {
-                                @Override
-                                public Object apply(Object t) {
-                                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?",
-                                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                                    if(ButtonType.YES == res){
-                                        uiCutTable.getItems().remove(t);
-                                    }
-                                    return null;
-                                }
-                            }); 
-                }
-            });
+                        public Object apply(Object t) {
+                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
+                            if (ButtonType.YES == res) {
+                                uiCutTable.getItems().remove(t);
+                            }
+                            return null;
+                        }
+                    },
+                    null
+            );
         }  
     }
     

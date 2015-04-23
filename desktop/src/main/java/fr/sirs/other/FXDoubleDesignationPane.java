@@ -1,41 +1,29 @@
 package fr.sirs.other;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
-import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.util.FXValiditySummaryToElementTableColumn;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.internal.GeotkFX;
 
 /**
  *

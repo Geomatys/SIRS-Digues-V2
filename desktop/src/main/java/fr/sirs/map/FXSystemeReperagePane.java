@@ -12,6 +12,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.util.Comparator;
@@ -53,7 +54,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
@@ -454,38 +454,28 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
     
-    public class DeleteColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
+    public class DeleteColumn extends SimpleButtonColumn<SystemeReperageBorne, SystemeReperageBorne> {
 
         public DeleteColumn() {
-            super("Suppression");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<SystemeReperageBorne, SystemeReperageBorne>, ObservableValue<SystemeReperageBorne>>() {
-                @Override
-                public ObservableValue<SystemeReperageBorne> call(TableColumn.CellDataFeatures<SystemeReperageBorne, SystemeReperageBorne> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-            setCellFactory((TableColumn<SystemeReperageBorne, SystemeReperageBorne> param) -> new ButtonTableCell<>(
-                    false,new ImageView(GeotkFX.ICON_DELETE), (SystemeReperageBorne t) -> true, new Function<SystemeReperageBorne, SystemeReperageBorne>() {
-                @Override
-                public SystemeReperageBorne apply(SystemeReperageBorne t) {
-                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
-                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                    if(ButtonType.YES == res){
-                        final SystemeReperage sr = systemeReperageProperty().get();
-                        sr.getSystemeReperageBorne().remove(t);
-                        updateBorneTable(null, null, null);
-                    }
-                    return null;
-                }
-            }));
-        }  
+            super(GeotkFX.ICON_DELETE,
+                    (TableColumn.CellDataFeatures<SystemeReperageBorne, SystemeReperageBorne> param) -> new SimpleObjectProperty<>(param.getValue()),
+                    (SystemeReperageBorne t) -> true, 
+                    new Function<SystemeReperageBorne, SystemeReperageBorne>() {
+
+                        public SystemeReperageBorne apply(SystemeReperageBorne t) {
+                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
+                            if (ButtonType.YES == res) {
+                                final SystemeReperage sr = systemeReperageProperty().get();
+                                sr.getSystemeReperageBorne().remove(t);
+                                updateBorneTable(null, null, null);
+                            }
+                            return null;
+                        }
+                    },
+                    "Supprimer le système de repérage"
+            );
+        }
     }
     
     public class NameColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
