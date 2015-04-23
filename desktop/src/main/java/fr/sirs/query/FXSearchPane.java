@@ -686,8 +686,12 @@ public class FXSearchPane extends BorderPane {
     }
     
     private static MutableStyle getStyleForType(final FeatureType fType) {
-        final PropertyType geomType = (fType.getProperty("geometry") != null)? 
-                fType.getProperty("geometry") :  null;
+        PropertyType geomType;
+        try {
+            geomType = (fType.getProperty("geometry") != null)? fType.getProperty("geometry") : null;
+        } catch (IllegalArgumentException e) {
+            geomType = null;
+        }
         
         return CorePlugin.createStructureStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
     } 
