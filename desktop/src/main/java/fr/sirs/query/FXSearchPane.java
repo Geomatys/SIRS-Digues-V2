@@ -35,6 +35,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -58,6 +61,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
@@ -66,6 +70,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -127,12 +132,24 @@ public class FXSearchPane extends BorderPane {
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
     
-    // Recherche plein texte
-    @FXML private ToggleButton uiTogglePlainText;
+    // 1- Recherche simple
+    @FXML private ToggleButton uiToggleSimple;
+    @FXML private ToggleGroup simpleRadio;
+    @FXML private GridPane uiSimplePane;
+    // a) Recherche texte
+    @FXML private RadioButton uiRadioPlainText;
     @FXML private GridPane uiPlainTextPane;
     @FXML private TextField uiElasticKeywords;
     
-    // Recherche SQL
+    // b) Recherche par désignation
+    @FXML private RadioButton uiRadioDesignation;
+    @FXML private GridPane uiDesignationPane;
+    @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
+    @FXML private TextField uiDesignation;
+    private TableView<ValiditySummary> designations;
+    private List<ValiditySummary> validitySummaries;
+    
+    // 2- Recherche SQL
     @FXML private ToggleButton uiToggleSQL;
     @FXML private GridPane uiSQLPane;
     @FXML private GridPane uiSQLModelOptions;
@@ -143,14 +160,6 @@ public class FXSearchPane extends BorderPane {
     @FXML private TextArea uiSQLText;
     @FXML private Button uiExportQueries;
     private FXSQLFilterEditor uiFilterEditor;
-    
-    // Recherche par désignation
-    @FXML private ToggleButton uiToggleDesignation;
-    @FXML private GridPane uiDesignationPane;
-    @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
-    @FXML private TextField uiDesignation;
-    private TableView<ValiditySummary> designations;
-    private List<ValiditySummary> validitySummaries;
     
     
     private final Session session;
@@ -168,9 +177,8 @@ public class FXSearchPane extends BorderPane {
         
         //affichage des panneaux coord/borne
         final ToggleGroup group = new ToggleGroup();
-        uiTogglePlainText.setToggleGroup(group);
+        uiToggleSimple.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
-        uiToggleDesignation.setToggleGroup(group);
         
         final List<Class<? extends Element>> modelClasses = Session.getElements();
         modelClasses.removeIf(new Predicate<Class<? extends Element>>() {
@@ -183,7 +191,7 @@ public class FXSearchPane extends BorderPane {
         uiDesignationClass.setItems(FXCollections.observableArrayList(modelClasses));
         uiDesignationClass.setConverter(new SirsStringConverter());
         
-        uiTogglePlainText.setSelected(true);
+        uiToggleSimple.setSelected(true);
 
         //h2 connection
         Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
@@ -200,16 +208,14 @@ public class FXSearchPane extends BorderPane {
         
         h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiTableChoice.setItems(h2Names.getValue())));
         
-        uiTableChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(newValue!=null){
-                    try {
-                        FeatureType type = h2Store.getFeatureType(newValue);
-                        uiFilterEditor.setType(type);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
+        uiTableChoice.getSelectionModel().selectedItemProperty().addListener(
+            (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            if(newValue!=null){
+                try {
+                    FeatureType type = h2Store.getFeatureType(newValue);
+                    uiFilterEditor.setType(type);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -221,8 +227,12 @@ public class FXSearchPane extends BorderPane {
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
         // VISIBILITY RULES
-        uiPlainTextPane.visibleProperty().bind(uiTogglePlainText.selectedProperty());
-        uiPlainTextPane.managedProperty().bind(uiPlainTextPane.visibleProperty());
+        uiSimplePane.visibleProperty().bind(uiToggleSimple.selectedProperty());
+        uiSimplePane.managedProperty().bind(uiSimplePane.visibleProperty());
+        simpleRadio.selectedToggleProperty().addListener(
+            (ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
+            setCenter(null);
+        });
         
         uiSQLPane.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiSQLPane.managedProperty().bind(uiSQLPane.visibleProperty());
@@ -233,7 +243,25 @@ public class FXSearchPane extends BorderPane {
         uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
         
-        uiDesignationPane.visibleProperty().bind(uiToggleDesignation.selectedProperty());
+        uiPlainTextPane.visibleProperty().bind(new BooleanBinding() {
+
+            {super.bind(uiRadioPlainText.selectedProperty(), uiToggleSimple.selectedProperty());}
+            
+            @Override
+            protected boolean computeValue() {
+                return uiRadioPlainText.isSelected() && uiToggleSimple.isSelected();
+            }
+        });
+        uiPlainTextPane.managedProperty().bind(uiPlainTextPane.visibleProperty());
+        uiDesignationPane.visibleProperty().bind(new BooleanBinding() {
+
+            {super.bind(uiRadioDesignation.selectedProperty(), uiToggleSimple.selectedProperty());}
+            
+            @Override
+            protected boolean computeValue() {
+                return uiRadioDesignation.isSelected() && uiToggleSimple.isSelected();
+            }
+        });
         uiDesignationPane.managedProperty().bind(uiDesignationPane.visibleProperty());
         
         final SimpleBooleanProperty isAdmin = new ReadOnlyBooleanWrapper(Role.ADMIN.equals(Injector.getSession().getRole()));
@@ -470,60 +498,12 @@ public class FXSearchPane extends BorderPane {
     private void search(ActionEvent event) {
         
         try{
-            if(uiTogglePlainText.isSelected()){
-                final TableColumn editCol = new PojoTable.EditColumn(PojoTable::editElement);
-
-                final TableColumn<ElementHit,String> typeCol = new TableColumn<>();
-                typeCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ElementHit, String>, ObservableValue<String>>() {
-                    @Override
-                    public ObservableValue<String> call(TableColumn.CellDataFeatures<ElementHit, String> param) {
-                        String str = param.getValue().geteElementClassName();
-                        String[] split = str.split("\\.");
-                        str = split[split.length-1];
-                        return new SimpleObjectProperty(str);
-                    }
-                });
-
-                final TableColumn<ElementHit,Object> libelleCol = new TableColumn<>();
-                libelleCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ElementHit, Object>, ObservableValue<Object>>() {
-                    @Override
-                    public ObservableValue<Object> call(TableColumn.CellDataFeatures<ElementHit, Object> param) {
-                        return new SimpleObjectProperty(param.getValue());
-                    }
-                });
-                libelleCol.setCellFactory(new Callback<TableColumn<ElementHit, Object>, TableCell<ElementHit, Object>>() {
-                    @Override
-                    public TableCell<ElementHit, Object> call(TableColumn<ElementHit, Object> param) {
-                        return new SirsTableCell<>();
-                    }
-                });
-
-                final TableView<ElementHit> uiTable = new TableView<>();
-                uiTable.setPlaceholder(new Label(""));
-                uiTable.getColumns().add(editCol);
-                uiTable.getColumns().add(typeCol);
-                uiTable.getColumns().add(libelleCol);
-
-
-                final ElasticSearchEngine engine = Injector.getElasticSearchEngine();
-                final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
-
-                final SearchResponse response = engine.search(qb);
-                final SearchHits hits = response.getHits();
-                
-                final List<ElementHit> results = new ArrayList<>();
-                final Iterator<SearchHit> ite = hits.iterator();
-                while(ite.hasNext()){
-                    final SearchHit hit = ite.next();
-                    results.add(new ElementHit(hit));
+            if(uiToggleSimple.isSelected()){
+                if(uiRadioDesignation.isSelected()){
+                    searchDesignation();
+                } else if (uiRadioPlainText.isSelected()){
+                    searchText();
                 }
-
-                uiTable.setItems(FXCollections.observableList(results));
-                
-                final ScrollPane scroll = new ScrollPane(uiTable);
-                scroll.setFitToHeight(true);
-                scroll.setFitToWidth(true);
-                setCenter(scroll);
                 
             } else if(uiToggleSQL.isSelected()) {
                 if(h2Store==null) {
@@ -532,9 +512,7 @@ public class FXSearchPane extends BorderPane {
                     final String query = getCurrentSQLQuery();
                     searchSQL(query);
                 }
-            } else if(uiToggleDesignation.isSelected()){
-                searchDesignation(uiDesignationClass.getValue());
-            }
+            } 
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             
@@ -559,21 +537,62 @@ public class FXSearchPane extends BorderPane {
         }
     }
     
-    private void searchDesignation(final Class<? extends Element> type){
+    private void searchText(){
+        final TableColumn editCol = new PojoTable.EditColumn(PojoTable::editElement);
+
+        final TableColumn<ElementHit,String> typeCol = new TableColumn<>();
+        typeCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, String> param) -> {
+                String str = param.getValue().geteElementClassName();
+                String[] split = str.split("\\.");
+                str = split[split.length-1];
+                return new SimpleObjectProperty(str);
+            });
+
+        final TableColumn<ElementHit,Object> libelleCol = new TableColumn<>();
+        libelleCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, Object> param) -> {
+                return new SimpleObjectProperty(param.getValue());
+            });
+        libelleCol.setCellFactory((TableColumn<ElementHit, Object> param) -> {
+                return new SirsTableCell<>();
+            });
+
+        final TableView<ElementHit> uiTable = new TableView<>();
+        uiTable.setPlaceholder(new Label(""));
+        uiTable.getColumns().add(editCol);
+        uiTable.getColumns().add(typeCol);
+        uiTable.getColumns().add(libelleCol);
+
+
+        final ElasticSearchEngine engine = Injector.getElasticSearchEngine();
+        final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
+
+        final SearchResponse response = engine.search(qb);
+        final SearchHits hits = response.getHits();
+
+        final List<ElementHit> results = new ArrayList<>();
+        final Iterator<SearchHit> ite = hits.iterator();
+        while(ite.hasNext()){
+            final SearchHit hit = ite.next();
+            results.add(new ElementHit(hit));
+        }
+
+        uiTable.setItems(FXCollections.observableList(results));
+
+        final ScrollPane scroll = new ScrollPane(uiTable);
+        scroll.setFitToHeight(true);
+        scroll.setFitToWidth(true);
+        setCenter(scroll);
+    }
+    
+    private void searchDesignation(){
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
-        validitySummaries = session.getValiditySummaryRepository().getDesignationsForClass(type);
-        validitySummaries.removeIf(new Predicate<ValiditySummary>() {
-
-            @Override
-            public boolean test(ValiditySummary t) {
-                if(uiDesignation.getText()==null || "".equals(uiDesignation.getText())){
-                    return t.getDesignation()!=null || !"".equals(t.getDesignation());
-                } else {
-                    return !uiDesignation.getText().equals(t.getDesignation());
-                }
-            }
-        });
+        validitySummaries = session.getValiditySummaryRepository().getDesignationsForClass(uiDesignationClass.getValue());
+        validitySummaries.removeIf((ValiditySummary t) -> {
+                return (uiDesignation.getText()==null || "".equals(uiDesignation.getText())) ?
+                        (t.getDesignation()!=null || !"".equals(t.getDesignation())) : 
+                        !uiDesignation.getText().equals(t.getDesignation());
+            });
 
         designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
         designations.setEditable(false);
@@ -581,81 +600,17 @@ public class FXSearchPane extends BorderPane {
         designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
         final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-        propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
-            }
-        });
+            });
         designations.getColumns().add(propertyColumn);
         
         final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
-        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLabel());
-            }
-        });
+            });
         designations.getColumns().add(labelColumn);
         setCenter(designations);
-//
-//        final ResourceBundle topBundle = ResourceBundle.getBundle(type.getName());
-//        final Label uiTitle = new Label("Occurrences des désignations pour les entités " + topBundle.getString(BUNDLE_KEY_CLASS));
-//        uiTitle.getStyleClass().add("pojotable-header");
-//        uiTitle.setAlignment(Pos.CENTER);
-//        uiTitle.setPadding(new Insets(5));
-//        uiTitle.setPrefWidth(USE_COMPUTED_SIZE);
-//
-//        final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
-//        choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
-//
-//            @Override
-//            public String toString(ValiditySummaryChoice object) {
-//                final String result;
-//                switch (object) {
-//                    case DOUBLON:
-//                        result = "Doublons";
-//                        break;
-//                    case ALL:
-//                    default:
-//                        result = "Tous";
-//                }
-//                return result;
-//            }
-//
-//            @Override
-//            public ValiditySummaryChoice fromString(String string) {
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//            }
-//        });
-//        choiceBox.setValue(ValiditySummaryChoice.ALL);
-//        choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ValiditySummaryChoice>() {
-//
-//            @Override
-//            public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
-//                final List<ValiditySummary> referenceUsages;
-//                switch (choiceBox.getSelectionModel().getSelectedItem()) {
-//                    case DOUBLON:
-//                        referenceUsages = doublons();
-//                        break;
-//                    case ALL:
-//                    default:
-//                        referenceUsages = validitySummaries;
-//                }
-//                designations.setItems(FXCollections.observableArrayList(referenceUsages));
-//            }
-//        });
-//
-//        final HBox hBox = new HBox(choiceBox);
-//        hBox.setAlignment(Pos.CENTER);
-//        hBox.setPadding(new Insets(20));
-//        hBox.setSpacing(100);
-//
-//        final VBox vBox = new VBox(uiTitle, hBox);
-//
-//        setTop(vBox);
     }
 
     private void searchSQL(String query){

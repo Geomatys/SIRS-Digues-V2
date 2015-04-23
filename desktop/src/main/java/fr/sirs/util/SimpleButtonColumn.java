@@ -2,17 +2,13 @@ package fr.sirs.util;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
