@@ -12,10 +12,13 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.LOGIN_DEFAULT_GUEST;
+import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
@@ -355,18 +358,21 @@ public class FXLauncherPane extends BorderPane {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.create(epsgCode);
                 final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                final Utilisateur administrateur = utilisateurRepository.create();
-                administrateur.setValid(true);
-                administrateur.setLogin(uiCreateLogin.getText());
-                MessageDigest messageDigest = null;
-                try {
-                    messageDigest = MessageDigest.getInstance("MD5");
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
-                administrateur.setRole(Role.ADMIN);
-                utilisateurRepository.add(administrateur);
+//                final Utilisateur administrateur = utilisateurRepository.create();
+//                administrateur.setValid(true);
+//                administrateur.setLogin(uiCreateLogin.getText());
+//                MessageDigest messageDigest = null;
+//                try {
+//                    messageDigest = MessageDigest.getInstance("MD5");
+//                } catch (NoSuchAlgorithmException ex) {
+//                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                administrateur.setPassword(new String(messageDigest.digest(uiCreatePassword.getText().getBytes())));
+//                administrateur.setRole(Role.ADMIN);
+//                utilisateurRepository.add(administrateur);
+                
+                createDefaultUsers(utilisateurRepository, uiCreateLogin.getText(), uiCreatePassword.getText());
+                
                 
                 //aller au panneau principal
                 Platform.runLater(() -> {
@@ -385,6 +391,29 @@ public class FXLauncherPane extends BorderPane {
                 });
             }
         }).start();
+    }
+    
+    
+    private void createDefaultUsers(final UtilisateurRepository utilisateurRepository, final String adminLogin, final String adminPassword){
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
+        administrateur.setLogin(adminLogin);
+        administrateur.setPassword(new String(messageDigest.digest(adminPassword.getBytes())));
+        administrateur.setRole(Role.ADMIN);
+        utilisateurRepository.add(administrateur);
+        
+        
+        final Utilisateur defaultGuest = ElementCreator.createAnonymValidElement(Utilisateur.class);
+        defaultGuest.setLogin(LOGIN_DEFAULT_GUEST);
+        defaultGuest.setPassword(new String(messageDigest.digest("".getBytes())));
+        defaultGuest.setRole(Role.GUEST);
+        utilisateurRepository.add(defaultGuest);
     }
 
     @FXML
@@ -429,18 +458,20 @@ public class FXLauncherPane extends BorderPane {
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.create(epsgCode);
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
-                final Utilisateur administrateur = utilisateurRepository.create();
-                administrateur.setValid(true);
-                administrateur.setLogin(uiImportLogin.getText());
-                MessageDigest messageDigest = null;
-                try {
-                    messageDigest = MessageDigest.getInstance("MD5");
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
-                administrateur.setRole(Role.ADMIN);
-                utilisateurRepository.add(administrateur);
+//                final Utilisateur administrateur = utilisateurRepository.create();
+//                administrateur.setValid(true);
+//                administrateur.setLogin(uiImportLogin.getText());
+//                MessageDigest messageDigest = null;
+//                try {
+//                    messageDigest = MessageDigest.getInstance("MD5");
+//                } catch (NoSuchAlgorithmException ex) {
+//                    Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                administrateur.setPassword(new String(messageDigest.digest(uiImportPassword.getText().getBytes())));
+//                administrateur.setRole(Role.ADMIN);
+//                utilisateurRepository.add(administrateur);
+                
+                createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
 
                 //aller au panneau principale
                 Platform.runLater(() -> {

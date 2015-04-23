@@ -2,6 +2,8 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.LOGIN_DEFAULT_GUEST;
+import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
 import fr.sirs.core.model.*;
 import fr.sirs.util.SirsStringConverter;
@@ -57,7 +59,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         SIRS.loadFXML(this, Utilisateur.class);
         
         elementProperty().addListener(this::initFields);
-        messageDigest = MessageDigest.getInstance("MD5");
+        messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
         
         this.elementProperty().set(utilisateur);
         if(utilisateur!=null){
@@ -134,15 +136,25 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     @Override
     public void preSave() throws Exception {
         
-        // Vérification de l'identifiant.
-        if(ui_login == null 
+        // Vérification de l'identifiant : 
+        
+        // Interdiction du compte de l'invité par défaut
+        if(LOGIN_DEFAULT_GUEST.equals(currentUserLogin)){
+            new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez pas modifier le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
+            throw new Exception("Le compte de l'invité par défaut n'est pas modifiable. Modification non enregistrée.");
+        }
+        
+        // Interdiction d'un indentifiant vide (qui écraserait l'invité par défaut).
+        else if(ui_login == null 
                 || ui_login.getText()==null 
                 || "".equals(ui_login.getText())){
             ui_labelLogin.setTextFill(Color.RED);
             new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE).showAndWait();
             throw new Exception("L'identifiant utilisateur n'a pas été renseigné ! Modification non enregistrée.");
         }
-        else if(!ui_login.getText().equals(currentUserLogin)){ // Si on est susceptible d'avoir modifié le login.
+        
+        // Sinon, si on est susceptible d'avoir modifié le login.
+        else if(!ui_login.getText().equals(currentUserLogin)){ 
             
             session.getUtilisateurRepository().clearCache();
             final List<Utilisateur> utilisateurs = session.getUtilisateurRepository().getAll();

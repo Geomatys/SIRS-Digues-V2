@@ -10,6 +10,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.other.FXDoubleDesignationPane;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.other.FXReferencePane;
@@ -357,11 +358,19 @@ public class FXMainFrame extends BorderPane {
             protected void deletePojos(final Element... pojos) {
                 final List<Element> pojoList = new ArrayList<>();
                 for (final Element pojo : pojos) {
-                    if(pojo.equals(session.getUtilisateur())){
-                        new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
-                    }
-                    else{
-                        pojoList.add(pojo);
+                    if(pojo instanceof Utilisateur){
+                        final Utilisateur utilisateur = (Utilisateur) pojo;
+                        // On interdit la suppression de l'utilisateur courant !
+                        if(utilisateur.equals(session.getUtilisateur())){
+                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
+                        } 
+                        // On interdit également la suppression de l'invité par défaut !
+                        else if ("".equals(utilisateur.getLogin())){
+                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
+                        }
+                        else{
+                            pojoList.add(pojo);
+                        }
                     }
                 }
                 super.deletePojos(pojoList.toArray(new Element[0]));
