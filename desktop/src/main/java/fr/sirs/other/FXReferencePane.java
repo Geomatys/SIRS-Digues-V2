@@ -212,10 +212,6 @@ public class FXReferencePane extends BorderPane {
             setSortable(false);
             setResizable(true);
             setPrefWidth(70);
-//            setPrefWidth(24);
-//            setMinWidth(24);
-//            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_MOVEUP));
             
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>() {
                 @Override
@@ -223,9 +219,6 @@ public class FXReferencePane extends BorderPane {
                     return new SimpleObjectProperty<>(param.getValue());
                 }
             });
-            
-            
-            
             
             setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
 

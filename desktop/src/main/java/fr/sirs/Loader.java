@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.USER;
 
@@ -141,7 +142,7 @@ public class Loader extends Application {
                         MessageDigest messageDigest = null;
                         String encryptedPassword = null;
                         try {
-                            messageDigest = MessageDigest.getInstance("MD5");
+                            messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
                             encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
                         } catch (NoSuchAlgorithmException ex) {
                             Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);

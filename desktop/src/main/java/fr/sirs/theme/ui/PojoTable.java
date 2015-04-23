@@ -11,6 +11,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.DESIGNATION_FIELD;
+import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -859,7 +860,7 @@ public class PojoTable extends BorderPane {
                 public TableCell<Element, String> call(TableColumn<Element, String> param) {
                     MessageDigest messageDigest = null;
                     try {
-                        messageDigest = MessageDigest.getInstance("MD5");
+                        messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
                     } catch (NoSuchAlgorithmException ex) {
                         Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
                     }
