@@ -44,6 +44,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.ektorp.ActiveTask;
+import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -206,9 +207,8 @@ public class DatabaseRegistry {
     /**
      * List SIRS application databases found on current CouchDb server.
      * @return The name of all databases which contain SIRS data.
-     * @throws IOException If an error happens while connecting to database.
      */
-    public List<String> listSirsDatabases() throws IOException {
+    public List<String> listSirsDatabases() {
         final List<String> dbList = couchDbInstance.getAllDatabases();
         
         List<String> res = new ArrayList<>();
@@ -357,6 +357,7 @@ public class DatabaseRegistry {
     
     /**
      * Synchronize two databases content.
+     * 
      * @param src The name of the first database if it's in current service, complete URL otherwise.
      * @param dest Name of the second database if it's in current service, complete URL otherwise.
      * @param continuous A flag to indicate if databases should be kept synchronized over time (true) or just once.
@@ -384,6 +385,39 @@ public class DatabaseRegistry {
                 throw e;
             }
         }
+    }
+    
+    /**
+     * Copy source database content to destination database. If destination database 
+     * does not exists, it will be created. If the continuous flag is set, destination
+     * database will pull source database changes over time.
+     * 
+     * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
+     * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
+     * @param continuous true if destination database must stay up to date with source content, false otherwise.
+     * @return A
+     */
+    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto, final boolean continuous) {
+        try {
+            ReplicationCommand cmd = new ReplicationCommand.Builder()
+                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .createTarget(true).build();
+
+            return couchDbInstance.replicate(cmd);
+        } catch (DbAccessException e) {
+            try {
+                handleAccessException();
+                return copyDatabase(dbToCopy, dbToPasteInto, continuous);
+            } catch (IOException ex) {
+                e.addSuppressed(ex);
+                throw e;
+            }
+        }
+    }
+    
+    public ReplicationStatus cancelCopy(final ReplicationStatus operationStatus) {
+        return couchDbInstance.replicate(new ReplicationCommand.Builder()
+                .id(operationStatus.getId()).cancel(true).build());
     }
     
     public void startReplication(CouchDbConnector connector,

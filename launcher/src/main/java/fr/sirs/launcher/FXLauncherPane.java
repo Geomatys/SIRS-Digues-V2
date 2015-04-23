@@ -22,6 +22,7 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
+import fr.sirs.util.SimpleButtonColumn;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
@@ -68,6 +70,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -79,6 +83,7 @@ import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
@@ -165,6 +170,7 @@ public class FXLauncherPane extends BorderPane {
         
         uiLocalBaseTable.getColumns().clear();
         uiLocalBaseTable.getColumns().add(new DeleteColumn());
+        uiLocalBaseTable.getColumns().add(new CopyColumn());
         uiLocalBaseTable.getColumns().add(column);
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -664,39 +670,75 @@ public class FXLauncherPane extends BorderPane {
     }        
     
     
-    public class DeleteColumn extends TableColumn<String,String>{
+    public class DeleteColumn extends SimpleButtonColumn<String, String> {
 
         public DeleteColumn() {
-            super();            
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-            setCellFactory((TableColumn<String, String> param) -> new ButtonTableCell<>(
-                    false,new ImageView(GeotkFX.ICON_DELETE), (String t) -> true, new Function<String, String>() {
-                @Override
-                public String apply(String t) {
-                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", 
-                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                    if(ButtonType.YES == res){
-                        try {
-                            deleteDatabase(t);
-                        } catch (Exception ex) {
-                            GeotkFX.newExceptionDialog("Impossible de supprimer "+t, ex).show();
+            super(
+                    GeotkFX.ICON_DELETE,
+                    (TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()),
+                    (String t) -> true,
+                    (String toDelete) -> {
+                        final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                ButtonType.NO, ButtonType.YES).showAndWait().get();
+                        if (ButtonType.YES == res) {
+                            try {
+                                deleteDatabase(toDelete);
+                            } catch (Exception ex) {
+                                GeotkFX.newExceptionDialog("Impossible de supprimer " + toDelete, ex).show();
+                            }
                         }
-                    }
-                    return null;
-                }
-            }));
+                        return toDelete;
+                    },
+                    "Supprimer la base locale."
+            );
+        }
+    }
+    
+    /**
+     * A table coumn offering to copy a local database to another.
+     */
+    public class CopyColumn extends SimpleButtonColumn<String,String> {
+        
+        public CopyColumn() {
+            super(
+                    GeotkFX.ICON_DUPLICATE,
+                    (TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()),
+                    (String t) -> true,
+                    (String sourceDb) -> {
+                        final TextInputDialog nameChoice = new TextInputDialog();
+                        nameChoice.setHeaderText("Veuillez donner un nom pour la base de destination.");
+                        Optional<String> result = nameChoice.showAndWait();
+
+                        Alert alert = new Alert(
+                                Alert.AlertType.WARNING,
+                                "Vous allez ajouter vos données dans une base DÉJÀ EXISTANTE. Êtes-vous sûr ?",
+                                ButtonType.NO, ButtonType.YES);
+
+                        // TODO : Remove when jvm will be fixed to give a proper default size.
+                        alert.setHeight(300);
+                        alert.setWidth(400);
+                        alert.setResizable(true);
+
+                        if (result.isPresent() && !result.get().isEmpty()) {
+                            final String destDbName = result.get();
+                            if (!localRegistry.listSirsDatabases().contains(destDbName)
+                            || ButtonType.YES.equals(alert.showAndWait().get())) {
+
+                                ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName, false);
+                                if (!copyStatus.isOk()) {
+                                    localRegistry.cancelCopy(copyStatus);
+                                    new Alert(
+                                            Alert.AlertType.WARNING,
+                                            "Un problème est survenu pendant la copie. Certaines données poourraient ne pas avoir été copiées.",
+                                            ButtonType.NO, ButtonType.YES).show();
+                                }
+                                updateLocalDbList();
+                            }
+                        }
+                        return null;
+                    },
+                    "Copier la base locale (pas de synchronisation)."
+            );
         }
     }
     
