@@ -10,16 +10,14 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ValiditySummaryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.util.FXValiditySummaryToElementTableColumn;
 import fr.sirs.util.SirsTableCell;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -56,44 +54,24 @@ public class FXValidationPane extends BorderPane {
     private TableView<ValiditySummary> usages;
     private final Session session = Injector.getSession();
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    final ValiditySummaryRepository validitySummaryRepository = session.getValiditySummaryRepository();
-    
-    public static final Callback<TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary>, ObservableValue<ValiditySummary>> DEFAULT_CELL_VALUE_FACTORY
-            = new Callback<TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary>, ObservableValue<ValiditySummary>>() {
-
-                @Override
-                public ObservableValue<ValiditySummary> call(TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            };
+    private final ValiditySummaryRepository validitySummaryRepository = session.getValiditySummaryRepository();
     
     private enum ValiditySummaryChoice{VALID, INVALID, ALL};
 
     public FXValidationPane() {
         final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
 
-        final List<ValiditySummary> referenceUsages = validitySummaryRepository.getValidation();
-
         usages = new TableView<>();
         usages.setEditable(false);
 
         usages.getColumns().add(new DeleteColumn());
-        usages.getColumns().add(new ViewColumn());
-        
-        
+        usages.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
         final TableColumn<ValiditySummary, Map.Entry<String, String>> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
-        docClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>>, ObservableValue<Map.Entry<String, String>>>() {
-
-                @Override
-                public ObservableValue<Map.Entry<String, String>> call(TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>> param) {
+        docClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>> param) -> {
                     return new SimpleObjectProperty<>(new HashMap.SimpleImmutableEntry<String, String>(param.getValue().getDocId(), param.getValue().getDocClass()));
-                }
-            });
-        docClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, Map.Entry<String, String>>, TableCell<ValiditySummary, Map.Entry<String, String>>>() {
-
-            @Override
-            public TableCell<ValiditySummary, Map.Entry<String, String>> call(TableColumn<ValiditySummary, Map.Entry<String, String>> param) {
+                });
+        docClassColumn.setCellFactory((TableColumn<ValiditySummary, Map.Entry<String, String>> param) -> {
                 return new TableCell<ValiditySummary, Map.Entry<String, String>>() {
                     @Override
                     protected void updateItem(Map.Entry<String, String> item, boolean empty) {
@@ -108,12 +86,8 @@ public class FXValidationPane extends BorderPane {
                         }
                     }
                 };
-            }
-        });
-        docClassColumn.setComparator(new Comparator<Map.Entry<String, String>>() {
-
-            @Override
-            public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
+            });
+        docClassColumn.setComparator((Map.Entry<String, String> o1, Map.Entry<String, String> o2) -> {
                 if(o1==null && o2==null) return 0;
                 if(o1==null && o2!=null) return -1;
                 if(o1!=null && o2==null) return 1;
@@ -122,22 +96,14 @@ public class FXValidationPane extends BorderPane {
                     final ResourceBundle rb2 = getBundleForClass(o2.getValue());
                     return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
-            }
-        });
+            });
         usages.getColumns().add(docClassColumn);
         
         final TableColumn<ValiditySummary, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
-        elementClassColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        elementClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                     return new SimpleStringProperty(param.getValue().getElementClass());
-                }
-            });
-        elementClassColumn.setCellFactory(new Callback<TableColumn<ValiditySummary, String>, TableCell<ValiditySummary, String>>() {
-
-            @Override
-            public TableCell<ValiditySummary, String> call(TableColumn<ValiditySummary, String> param) {
+                });
+        elementClassColumn.setCellFactory((TableColumn<ValiditySummary, String> param) -> {
                 return new TableCell<ValiditySummary, String>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
@@ -152,12 +118,8 @@ public class FXValidationPane extends BorderPane {
                         }
                     }
                 };
-            }
-        });
-        elementClassColumn.setComparator(new Comparator<String>() {
-
-            @Override
-            public int compare(String o1, String o2) {
+            });
+        elementClassColumn.setComparator((String o1, String o2) -> {
                 final String elementClass1 = o1;
                 final String elementClass2 = o2;
                 if(elementClass1==null && elementClass2==null) return 0;
@@ -168,47 +130,33 @@ public class FXValidationPane extends BorderPane {
                     final ResourceBundle rb2 = getBundleForClass(elementClass2);
                     return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
-            }
-        });
+            });
         usages.getColumns().add(elementClassColumn);
 
         final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-        propertyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
-            }
-        });
+            });
         usages.getColumns().add(propertyColumn);
         
         final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
-        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLabel());
-            }
-        });
+            });
         usages.getColumns().add(labelColumn);
 
         final TableColumn<ValiditySummary, String> authorColumn = new TableColumn<>(bundle.getString("author"));
-        authorColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+        authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
-            }
-        });
+            });
         authorColumn.setCellFactory((TableColumn<ValiditySummary, String> param) -> new SirsTableCell());
         usages.getColumns().add(authorColumn);
 
-        final TableColumn<ValiditySummary, Object> validColumn = new ValidColumn();
-        usages.getColumns().add(validColumn);
+        usages.getColumns().add(new ValidColumn());
 
         setCenter(usages);
 
-        usages.setItems(FXCollections.observableArrayList(referenceUsages));
+        usages.setItems(FXCollections.observableArrayList(validitySummaryRepository.getValidation()));
 
         final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
         choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
@@ -235,14 +183,14 @@ public class FXValidationPane extends BorderPane {
 
             @Override
             public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
-                final List<ValiditySummary> referenceUsages;
+                final List<ValiditySummary> requiredList;
                 switch(choiceBox.getSelectionModel().getSelectedItem()){
-                    case VALID: referenceUsages = validitySummaryRepository.getValidation(true); break;
-                    case INVALID: referenceUsages = validitySummaryRepository.getValidation(false); break;
+                    case VALID: requiredList = validitySummaryRepository.getValidation(true); break;
+                    case INVALID: requiredList = validitySummaryRepository.getValidation(false); break;
                     case ALL:
-                    default: referenceUsages= validitySummaryRepository.getValidation();
+                    default: requiredList= validitySummaryRepository.getValidation();
                 }
-                usages.setItems(FXCollections.observableArrayList(referenceUsages));
+                usages.setItems(FXCollections.observableArrayList(requiredList));
             }
         });
         
@@ -252,8 +200,6 @@ public class FXValidationPane extends BorderPane {
         hBox.setSpacing(100);
 
         setTop(hBox);
-        
-
     }
 
     private ResourceBundle getBundleForClass(final String type) {
@@ -265,67 +211,9 @@ public class FXValidationPane extends BorderPane {
         }
         return bundles.get(type);
     }
-
-    public class ViewButtonTableCell extends ButtonTableCell<ValiditySummary, Object> {
-
-        public ViewButtonTableCell(Node graphic) {
-            super(false, graphic, (Object t) -> true, new Function<Object, Object>() {
-                @Override
-                public Object apply(Object t) {
-                    Injector.getSession().showEditionTab(t);
-                    return t;
-                }
-            });
-        }
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            if(empty || item==null){
-                setText(null);
-                setGraphic(null);
-            }
-            else{
-                setGraphic(button);
-                button.setGraphic(new ImageView(SIRS.ICON_EYE));
-            }
-        }
-    }
-
-    private class ViewColumn extends TableColumn<ValiditySummary, Object> {
-
-        public ViewColumn() {
-            super("Détail");
-            setEditable(false);
-            setSortable(false);
-            setResizable(true);
-            setPrefWidth(70);
-//            setPrefWidth(24);
-//            setMinWidth(24);
-//            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_MOVEUP));
-
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
-                @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-
-            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
-
-                @Override
-                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
-
-                    return new ViewButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
-                }
-            });
-        }
-    }
-    
     
 
-    private class DeleteColumn extends TableColumn<ValiditySummary, Object>{
+    private class DeleteColumn extends TableColumn<ValiditySummary, ValiditySummary>{
         
         public DeleteColumn() {
             super("Suppression");            
@@ -336,61 +224,54 @@ public class FXValidationPane extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
             
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
-                @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
+            setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) -> {
                     return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
+                });
             
 
-            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
-
-                @Override
-                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
+            setCellFactory((TableColumn<ValiditySummary, ValiditySummary> param) -> {
                     return new ButtonTableCell<>(
-                        false, new ImageView(GeotkFX.ICON_DELETE) , (Object t) -> true, (Object t) -> {
-                            if (t != null && t instanceof ValiditySummary) {
+                        false, new ImageView(GeotkFX.ICON_DELETE) , (ValiditySummary t) -> true, (ValiditySummary vSummary) -> {
+                            if (vSummary != null) {
                                 final Session session = Injector.getSession();
-                                final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
-                                final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
+                                final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
+                                final Element docu = (Element) repo.get(vSummary.getDocId());
 
                                 // Si l'elementid est null, c'est que l'élément est le document lui-même
-                                if (((ValiditySummary) t).getElementId() == null) {
+                                if (vSummary.getElementId() == null) {
                                     if(!docu.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             repo.remove(docu);
-                                            usages.getItems().remove(t);
+                                            usages.getItems().remove(vSummary);
                                         }
                                     }else{
                                         new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
                                     }
                                 } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
                                 else {
-                                    final Element elt = docu.getChildById(((ValiditySummary) t).getElementId());
+                                    final Element elt = docu.getChildById(vSummary.getElementId());
                                     if(!elt.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             elt.getParent().removeChild(elt);
                                             repo.update(docu);
-                                            usages.getItems().remove(t);
+                                            usages.getItems().remove(vSummary);
                                         }
                                     } else{
                                         new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
                                     }
                                 }
                             }
-                            return t;
+                            return vSummary;
                         });
-                }
-            });
+                });
         }  
     }
 
-    private class ValidButtonTableCell extends TableCell<ValiditySummary, Object> {
+    private class ValidButtonTableCell extends TableCell<ValiditySummary, ValiditySummary> {
 
         protected final Button button = new Button();
 
@@ -399,33 +280,31 @@ public class FXValidationPane extends BorderPane {
             setGraphic(button);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setAlignment(Pos.CENTER);
-            button.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    Object t = getItem();
-                    if (t != null && t instanceof ValiditySummary) {
+            button.setOnAction((ActionEvent event) -> {
+                    final ValiditySummary vSummary = getItem();
+                    if (vSummary != null) {
                         final Session session = Injector.getSession();
-                        final AbstractSIRSRepository repo = session.getRepositoryForType(((ValiditySummary) t).getDocClass());
-                        final Element docu = (Element) repo.get(((ValiditySummary) t).getDocId());
+                        final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
+                        final Element document = (Element) repo.get(vSummary.getDocId());
 
                         // Si l'elementid est null, c'est que l'élément est le document lui-même
-                        if (((ValiditySummary) t).getElementId() == null) {
-                            docu.setValid(!docu.getValid());
-                        } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
+                        if (vSummary.getElementId() == null) {
+                            document.setValid(!document.getValid());
+                        } 
+                        // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
                         else {
-                            final Element elt = docu.getChildById(((ValiditySummary) t).getElementId());
+                            final Element elt = document.getChildById(vSummary.getElementId());
                             elt.setValid(!elt.getValid());
                         }
-                        repo.update(docu);
-                        ((ValiditySummary) t).setValid(!((ValiditySummary) t).getValid());
-                        updateButton(((ValiditySummary) t).getValid());
+                        repo.update(document);
+                        
+                        vSummary.setValid(!vSummary.getValid());
+                        updateButton(vSummary.getValid());
                     }
-                }
-            });
+                });
         }
 
-        protected void updateButton(final boolean valid) {
+        private void updateButton(final boolean valid) {
             if (!valid) {
                 button.setGraphic(new ImageView(ICON_EXCLAMATION_CIRCLE));
                 button.setText("Invalidé");
@@ -436,7 +315,7 @@ public class FXValidationPane extends BorderPane {
         }
 
         @Override
-        protected void updateItem(Object item, boolean empty) {
+        protected void updateItem(ValiditySummary item, boolean empty) {
             super.updateItem(item, empty);
 
             if(empty || item==null){
@@ -445,12 +324,12 @@ public class FXValidationPane extends BorderPane {
             }
             else{
                 setGraphic(button);
-                updateButton(((ValiditySummary) item).getValid());
+                updateButton(item.getValid());
             }
         }
     }
 
-    private class ValidColumn extends TableColumn<ValiditySummary, Object> {
+    private class ValidColumn extends TableColumn<ValiditySummary, ValiditySummary> {
 
         public ValidColumn() {
             super("État");
@@ -458,26 +337,14 @@ public class FXValidationPane extends BorderPane {
             setSortable(false);
             setResizable(true);
             setPrefWidth(120);
-//            setPrefWidth(24);
-//            setMinWidth(24);
-//            setMaxWidth(24);
-//            setGraphic(new ImageView(GeotkFX.ICON_MOVEUP));
 
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, Object>, ObservableValue<Object>>() {
-                @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<ValiditySummary, Object> param) {
+            setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) -> {
                     return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
+                });
 
-            setCellFactory(new Callback<TableColumn<ValiditySummary, Object>, TableCell<ValiditySummary, Object>>() {
-
-                @Override
-                public TableCell<ValiditySummary, Object> call(TableColumn<ValiditySummary, Object> param) {
-
+            setCellFactory((TableColumn<ValiditySummary, ValiditySummary> param) -> {
                     return new ValidButtonTableCell();
-                }
-            });
+                });
         }
     }
 }
