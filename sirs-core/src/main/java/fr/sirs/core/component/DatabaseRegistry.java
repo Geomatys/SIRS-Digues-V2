@@ -1,5 +1,8 @@
 package fr.sirs.core.component;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,9 +35,12 @@ import org.geotoolkit.util.FileUtilities;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
@@ -43,9 +49,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.ActiveTask;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.impl.StdReplicationTask;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -57,6 +66,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class DatabaseRegistry {
 
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
+    
+    private static final String PAUSE_FILTER = "function(doc, req) {return false}";
     
     private static final int SOCKET_TIMEOUT = 45000;
     private static final int CONNECTION_TIMEOUT = 5000;
@@ -276,7 +287,7 @@ public class DatabaseRegistry {
             if (accessException) {
                 try {
                     handleAccessException();
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     e.addSuppressed(ex);
                     throw e;
                 }
@@ -388,6 +399,76 @@ public class DatabaseRegistry {
     }
     
     /**
+     * Retrieve list of Synchronization tasks the input database is part of. Even 
+     * paused tasks are returned.
+     * 
+     * @param dbName Target database name or path for synchronizations.
+     * @return List of source database names or path for continuous copies on input database.
+     */
+    public Stream<ReplicationCommand> getSynchronizationTasks(final String dbName) throws IOException {
+        ArgumentChecks.ensureNonEmpty("Input database name", dbName);
+        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
+        return getReplicationTasksBySourceOrTarget(dbName)
+                .filter((ReplicationTask task)-> task.isContinuous())
+                .map(task -> builder.id(task.getReplicationId()).build());
+    }
+    
+    /**
+     * Retrieve list of Synchronization tasks the input database is part of. Only
+     * active tasks are returned.
+     * 
+     * @param dbName Target database name or path for synchronizations.
+     * @return List of source database names or path for continuous copies on input database.
+     */
+    public Stream<ReplicationCommand> getActiveSynchronizationTasks(final String dbName) throws IOException {
+        return getSynchronizationTasks(dbName).filter(cmd -> !PAUSE_FILTER.equals(cmd.filter));
+    }
+    
+    /**
+     * Retrieve list of Synchronization tasks the input database is part of. Only
+     * paused tasks are returned.
+     * 
+     * @param dbName Target database name or path for synchronizations.
+     * @return List of source database names or path for continuous copies on input database.
+     */
+    public Stream<ReplicationCommand> getPausedSynchronizationTasks(final String dbName) throws IOException {
+        return getSynchronizationTasks(dbName).filter(cmd -> PAUSE_FILTER.equals(cmd.filter));
+    }
+    
+    /**
+     * Pause all continuous replication tasks from or to the given database.
+     * @param withDb Name or path of the database implied in synchronization.
+     * @return Number of synchronizations paused by this call.
+     */
+    public int pauseSynchronizations(final String withDb) throws IOException {
+        final AtomicInteger paused = new AtomicInteger(0);
+        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
+        getActiveSynchronizationTasks(withDb).forEach(cmd -> {
+            couchDbInstance.replicate(builder.id(cmd.id).filter(PAUSE_FILTER).build());
+            paused.incrementAndGet();
+        });
+        return paused.get();
+    }
+    
+    /**
+     * Resume all previously paused synchronisation implying input database. Actually,
+     * we'll cancel all continuous replication tasks, then restart a new synchronisation 
+     * task for each stopped.
+     * @param withDb Name or path of the database implied in synchronization.
+     * @return Number of synchronizations resumed by this call.
+     */
+    public int resumeSynchronizations(final String withDb) throws IOException {
+        final AtomicInteger resumed = new AtomicInteger(0);
+        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
+        getPausedSynchronizationTasks(withDb).forEach(cmd -> {
+                    couchDbInstance.replicate(builder.id(cmd.id).cancel(true).build());
+                    couchDbInstance.replicate(copyWithoutPauseFilter(cmd));
+                    resumed.incrementAndGet();
+                });
+        return resumed.get();
+    }
+    
+    /**
      * Copy source database content to destination database. If destination database 
      * does not exists, it will be created. If the continuous flag is set, destination
      * database will pull source database changes over time.
@@ -408,7 +489,7 @@ public class DatabaseRegistry {
             try {
                 handleAccessException();
                 return copyDatabase(dbToCopy, dbToPasteInto, continuous);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 e.addSuppressed(ex);
                 throw e;
             }
@@ -441,32 +522,42 @@ public class DatabaseRegistry {
         }
     }
 
-    public void cancelReplication(CouchDbConnector connector) {
+    public void cancelReplication(CouchDbConnector connector) throws IOException {
         cancelReplication(buildDatabaseURL(connector.getDatabaseName()));
     }
 
-    private String cancelReplication(String databaseURL) {
+    private String cancelReplication(String databaseURL) throws IOException {
         getReplicationTasksBySourceOrTarget(databaseURL)
                 .map(t -> t.getReplicationId())
-                .map(id -> new ReplicationCommand.Builder().id(id).cancel(true)
+                .map(id -> new ReplicationCommand.Builder().id(id).docIds(null).cancel(true)
                         .build())
                 .forEach(cmd -> couchDbInstance.replicate(cmd));
         return databaseURL;
     }
 
-    ArrayList<ReplicationTask> getReplicationTasks() {
-        Collection<ActiveTask> activeTasks = couchDbInstance.getActiveTasks();
-        final ArrayList result = new ArrayList();
-        for (final ActiveTask task : activeTasks) {
-            if (task instanceof ReplicationTask) {
-                result.add(task);
+    ArrayList<ReplicationTask> getReplicationTasks() throws IOException {
+        HttpResponse httpResponse = couchDbInstance.getConnection().get("/_active_tasks");
+        
+        final ArrayList<ReplicationTask> result = new ArrayList();
+        
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JsonNode tasks = mapper.readTree(httpResponse.getContent());
+            if (tasks.isArray()) {
+                Iterator<JsonNode> elements = tasks.elements();
+                while (elements.hasNext()) {
+                    final JsonNode next = elements.next();
+                    if (next.has("type") && "replication".equals(next.get("type").asText())) {
+                        result.add(mapper.treeToValue(next, StdReplicationTask.class));
+                    }
+                }
             }
-        }
+            
         return result;
     }
 
-    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(String dst) {
-        final String dbName = dst.replaceFirst("/$", "").substring(dst.lastIndexOf('/'));
+    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(String dst) throws IOException {
+        final String dbName = dst.replaceFirst("/$", "").substring(dst.lastIndexOf('/')+1);
         return getReplicationTasks().stream().filter(
                 t -> (t.getSourceDatabaseName().equals(dbName) || t.getTargetDatabaseName().equals(dbName)));
     }
@@ -560,5 +651,29 @@ public class DatabaseRegistry {
         } catch (InterruptedException | ExecutionException ex) {
             return null;
         }
+    }
+    
+    /**
+     * Designed to create a new replication from a paused one, ignoring pause filter 
+     * to allow its activation.
+     */
+    private static ReplicationCommand copyWithoutPauseFilter(final ReplicationCommand source) {
+        ReplicationCommand.Builder builder = new ReplicationCommand.Builder()
+                .source(source.source)
+                .target(source.target)
+                .continuous(source.continuous)
+                .createTarget(source.createTarget)
+                .docIds(source.docIds)
+                .proxy(source.proxy);
+
+        if (!PAUSE_FILTER.equals(source.filter)) {
+            builder.filter(source.filter);
+        }
+
+        if (source.sinceSeq != null) {
+            builder.sinceSeq(source.sinceSeq.toString());
+        }
+        
+        return builder.build();
     }
 }

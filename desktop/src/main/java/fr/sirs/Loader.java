@@ -319,7 +319,7 @@ public class Loader extends Application {
                 
                 // COUCHDB TO SQL //////////////////////////////////////////////
                 updateMessage("Export vers la base RDBMS");
-                TaskManager.INSTANCE.submit(new H2Helper.ExportToRDBMS(context.getBean(CouchDbConnector.class)));                
+                H2Helper.init();
 
                 updateProgress(inc++, total);
                 

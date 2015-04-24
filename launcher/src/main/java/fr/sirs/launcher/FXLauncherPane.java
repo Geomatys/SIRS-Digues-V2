@@ -52,6 +52,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -70,6 +71,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -81,6 +83,8 @@ import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ReplicationStatus;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
@@ -103,7 +107,7 @@ public class FXLauncherPane extends BorderPane {
      * serialisés, on essaie d'atteindre le fichier suivant.
      */
     private static final String DEFAULT_PLUGIN_DESCRIPTOR = "plugins.json";
-    
+        
     @FXML private Label errorLabel;
     @FXML private TabPane uiTabPane;
     
@@ -168,6 +172,7 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.getColumns().add(new DeleteColumn());
         uiLocalBaseTable.getColumns().add(new CopyColumn());
         uiLocalBaseTable.getColumns().add(column);
+        uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         
@@ -666,6 +671,18 @@ public class FXLauncherPane extends BorderPane {
     }        
     
     
+    protected void deleteDatabase(final String databaseName) {        
+        new IdentificationStage(databaseName).showAndWait();
+        updateLocalDbList();
+    }
+    
+    /*
+     * INNER CLASSES
+     */
+    
+    /**
+     * A simple column which contains a button to allow suppresssion of a local database.
+     */
     public class DeleteColumn extends SimpleButtonColumn<String, String> {
 
         public DeleteColumn() {
@@ -702,9 +719,9 @@ public class FXLauncherPane extends BorderPane {
     }
     
     /**
-     * A table coumn offering to copy a local database to another.
+     * A table column offering to copy a local database to another.
      */
-    public class CopyColumn extends SimpleButtonColumn<String,String> {
+    private final class CopyColumn extends SimpleButtonColumn<String,String> {
         
         public CopyColumn() {
             super(GeotkFX.ICON_DUPLICATE,
@@ -748,11 +765,6 @@ public class FXLauncherPane extends BorderPane {
                     "Copier la base locale (pas de synchronisation)."
             );
         }
-    }
-    
-    protected void deleteDatabase(final String databaseName) {        
-        new IdentificationStage(databaseName).showAndWait();
-        updateLocalDbList();
     }
     
     private final class IdentificationStage extends Stage{
