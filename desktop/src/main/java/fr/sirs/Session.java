@@ -74,6 +74,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.collection.Cache;
@@ -574,16 +576,20 @@ public class Session extends SessionGen implements OwnableSession {
         }
     }
     
-    public void showEditionTab(final Object element) {
-        Optional<? extends Element> foundElement = getElement(element);
-        if (foundElement.isPresent()) {
-            getFrame().addTab(getOrCreateElementTab(foundElement.get()));
+    public void showEditionTab(final Object object) {
+        final Optional<? extends Element> element = getElement(object);
+        if (element.isPresent()){
+            if(element.get() instanceof ReferenceType) {
+                new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE).showAndWait();
+            } else {
+                getFrame().addTab(getOrCreateElementTab(element.get()));
+            }
         }
     }
     
     public FXFreeTab getOrCreateElementTab(final Element element) {
         if (element instanceof TronconDigue) {
-            DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
+            final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
             diguesTab.getDiguesController().displayTronconDigue((TronconDigue) element);
             diguesTab.setOnSelectionChanged((Event event) -> {
                 if (diguesTab.isSelected()) {

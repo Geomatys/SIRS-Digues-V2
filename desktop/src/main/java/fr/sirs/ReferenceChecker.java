@@ -49,26 +49,23 @@ public class ReferenceChecker extends Task<Void> {
         updateTitle("Vérification des références");
     }
 
-    private final Map<Class, Map<Object, Object>> incoherentReferences = new HashMap<>();
+    private final Map<Class<ReferenceType>, Map<ReferenceType, ReferenceType>> incoherentReferences = new HashMap<>();
+    
+    private final Map<Class, List<ReferenceType>> serverInstancesNotLocal = new HashMap<>();
 
-    public Map<Class, Map<Object, Object>> getIncoherentReferences() {
-        return incoherentReferences;
-    }
-    private final Map<Class, List<Object>> serverInstancesNotLocal = new HashMap<>();
-
-    public Map<Class, List<Object>> getServerInstancesNotLocal() {
+    public Map<Class, List<ReferenceType>> getServerInstancesNotLocal() {
         return serverInstancesNotLocal;
     }
 
-    private final Map<Class, List<Object>> localInstancesNotOnTheServer = new HashMap<>();
+    private final Map<Class<ReferenceType>, List<ReferenceType>> localInstancesNotOnTheServer = new HashMap<>();
 
-    public Map<Class, List<Object>> getLocalInstancesNotOnTheServer() {
+    public Map<Class<ReferenceType>, List<ReferenceType>> getLocalInstancesNotOnTheServer() {
         return localInstancesNotOnTheServer;
     }
 
-    private List<Class> serverClassReferences;
+    private List<Class<ReferenceType>> serverClassReferences;
 
-    public List<Class> getServerClassReferences() {
+    public List<Class<ReferenceType>> getServerClassReferences() {
         return serverClassReferences;
     }
 
@@ -147,9 +144,9 @@ public class ReferenceChecker extends Task<Void> {
 
     public final class ReferenceClassChecker {
 
-        private final Class referenceClass;
-        private List<Object> fileReferences;
-        private List<Object> localReferences;
+        private final Class<ReferenceType> referenceClass;
+        private List<ReferenceType> fileReferences;
+        private List<ReferenceType> localReferences;
 
         private ReferenceClassChecker(final Class referenceClass) {
             this.referenceClass = referenceClass;
@@ -168,7 +165,7 @@ public class ReferenceChecker extends Task<Void> {
                 fileReferences = readReferenceFile(referenceFile);
                 localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
 
-                final List<Object> currentServerInstances = new ArrayList(fileReferences);
+                final List<ReferenceType> currentServerInstances = new ArrayList(fileReferences);
 
                 /*
                  On vérifie que toutes les instances du serveur sont présentes localement.
@@ -183,12 +180,12 @@ public class ReferenceChecker extends Task<Void> {
                  3) Si elle est présente sur le serveur et que son état a changé, on enregistre les deux états dans la map dédiée.
                  4) Si elle n'est pas présente sur le serveur, on l'enregistre dans la liste dédiée.
                  */
-                for (final Object localReferenceInstance : localReferences) {
+                for (final ReferenceType localReferenceInstance : localReferences) {
                     boolean presentOnServer = false;
 
                     try {
                         final Object localId = getId.invoke(localReferenceInstance);
-                        for (final Object serverReferenceInstance : currentServerInstances) {
+                        for (final ReferenceType serverReferenceInstance : currentServerInstances) {
                             try {
                                 final Object serverId = getId.invoke(serverReferenceInstance);
                                 if (localId instanceof String
@@ -329,13 +326,13 @@ public class ReferenceChecker extends Task<Void> {
         }
         
 
-        private List<Object> readReferenceFile(final File file) throws FileNotFoundException, IOException {
+        private List<ReferenceType> readReferenceFile(final File file) throws FileNotFoundException, IOException {
             
             final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new FileReader(file));
-            final List<Object> fileRefs = new ArrayList<>();
+            final List<ReferenceType> fileRefs = new ArrayList<>();
             
             for (final CSVRecord record : records) {
-                final Object referenceInstance = buildReferenceInstance(record);
+                final ReferenceType referenceInstance = buildReferenceInstance(record);
                 if(referenceInstance!=null) fileRefs.add(referenceInstance);
             }
             return fileRefs;
@@ -376,9 +373,9 @@ public class ReferenceChecker extends Task<Void> {
                 }
             }
             
-            // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker.
+            // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
             serverInstancesNotLocal.get(referenceClass).removeAll(updated);
-            final Map<Object, Object> incoherentInstances = incoherentReferences.get(referenceClass);
+            final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
                 for(final Object updatedInstance : updated){
                     final Set keySet = incoherentInstances.keySet();
@@ -392,7 +389,7 @@ public class ReferenceChecker extends Task<Void> {
             }
         }
 
-        private void registerIncoherentReferences(final Object localReferenceInstance, final Object serverReferenceInstance) {
+        private void registerIncoherentReferences(final ReferenceType localReferenceInstance, final ReferenceType serverReferenceInstance) {
 
             if (referenceClass == null || localReferenceInstance == null || serverReferenceInstance == null) {
                 return;
@@ -402,7 +399,7 @@ public class ReferenceChecker extends Task<Void> {
                 incoherentReferences.put(referenceClass, new HashMap<>());
             }
 
-            final Map<Object, Object> classMap = incoherentReferences.get(referenceClass);
+            final Map<ReferenceType, ReferenceType> classMap = incoherentReferences.get(referenceClass);
 
             classMap.put(localReferenceInstance, serverReferenceInstance);
         }
@@ -475,14 +472,14 @@ public class ReferenceChecker extends Task<Void> {
      *
      * @return
      */
-    private List<Class> buildServerClassReferences() throws IOException {
+    private List<Class<ReferenceType>> buildServerClassReferences() throws IOException {
         final List<String> names = retrieveServerClassNameReferences();
-        final List<Class> classes = new ArrayList<>();
+        final List<Class<ReferenceType>> classes = new ArrayList<>();
         serverClassNameReferencesNotLocal = new ArrayList<>();
         for (final String name : names) {
             final String className = MODEL_PACKAGE + "." + name;
             try {
-                classes.add(Class.forName(className));
+                classes.add((Class<ReferenceType>) Class.forName(className));
             } catch (ClassNotFoundException ex) {
                 serverClassNameReferencesNotLocal.add(className);
             }

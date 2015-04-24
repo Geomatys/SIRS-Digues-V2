@@ -32,7 +32,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
-import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
@@ -42,7 +41,7 @@ public class FXReferencePane extends BorderPane {
     
     private final ReferencePojoTable references;
     private final Session session = Injector.getSession();
-    protected final ReferenceChecker referenceChecker;
+    private final ReferenceChecker referenceChecker;
         
     public FXReferencePane(final Class<ReferenceType> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName());
@@ -58,35 +57,23 @@ public class FXReferencePane extends BorderPane {
     
     private class ReferencePojoTable extends PojoTable{
         
-        private final Map<Object, Object> incoherentReferences;
-        private final List<Object> serverInstanceNotLocal;
-        private final List<Object> localInstancesNotOnTheServer;
+        private final List<? extends ReferenceType> serverInstanceNotLocal;
+        private final List<ReferenceType> localInstancesNotOnTheServer;
 
         public ReferencePojoTable(Class pojoClass, String title) {
             super(pojoClass, title);
             
-            referenceChecker.getIncoherentReferences().get(pojoClass);
-            
-            incoherentReferences = referenceChecker.getIncoherentReferences().get(pojoClass);
             serverInstanceNotLocal = referenceChecker.getServerInstancesNotLocal().get(pojoClass);
             localInstancesNotOnTheServer = referenceChecker.getLocalInstancesNotOnTheServer().get(pojoClass);
             
-            uiTable.getColumns().replaceAll(new UnaryOperator<TableColumn<Element, ?>>() {
-
-                @Override
-                public TableColumn<Element, ?> apply(TableColumn<Element, ?> t) {
+            uiTable.getColumns().replaceAll((TableColumn<Element, ?> t) -> {
                     if(t instanceof DeleteColumn) return new StateColumn();
                     else return t;
-                }
-            });
+                });
             
-            uiTable.setRowFactory(new Callback<TableView<Element>, TableRow<Element>>() {
-
-                @Override
-                public TableRow<Element> call(TableView<Element> param) {
+            uiTable.setRowFactory((TableView<Element> param) -> {
                     return new ReferenceTableRow();
-                }
-            });
+                });
             
             final ObservableList allItems = FXCollections.observableArrayList(repo.getAll());
             if(serverInstanceNotLocal!=null && !serverInstanceNotLocal.isEmpty()){
@@ -99,14 +86,7 @@ public class FXReferencePane extends BorderPane {
                 allItems.addAll(newServerInstances);
             }
             
-            setTableItems(new Supplier<ObservableList<Element>>() {
-
-                @Override
-                public ObservableList<Element> get() {
-                    return allItems;
-                }
-            });
-            
+            setTableItems(() -> {return allItems;});
         }
     
         @Override
@@ -145,20 +125,19 @@ public class FXReferencePane extends BorderPane {
             }
         }
         
-        
-        private class StateButtonTableCell extends ButtonTableCell<Element, Object>{
+        private class StateButtonTableCell extends ButtonTableCell<Element, ReferenceType>{
 
             private final Node defaultGraphic;
 
             public StateButtonTableCell(Node graphic) {
-                super(true, graphic, (Object t) -> true, new Function<Object, Object>() {
+                super(true, graphic, (ReferenceType t) -> true, new Function<ReferenceType, ReferenceType>() {
                     @Override
-                    public Object apply(Object t) {
+                    public ReferenceType apply(ReferenceType t) {
 
 //                        if (localInstancesNotOnTheServer != null
 //                                && localInstancesNotOnTheServer.contains(t)) {
                             final Tab tab = new FXFreeTab("Analyse de la base");
-                            tab.setContent(new FXReferenceAnalysePane((ReferenceType)t));
+                            tab.setContent(new FXReferenceAnalysePane(t));
                             Injector.getSession().getFrame().addTab(tab);
 //                        }
 //                        else{
@@ -171,7 +150,7 @@ public class FXReferencePane extends BorderPane {
             }
 
             @Override
-            protected void updateItem(Object item, boolean empty) {
+            protected void updateItem(ReferenceType item, boolean empty) {
                 super.updateItem(item, empty); 
                 
                 if(item!=null){
@@ -204,7 +183,7 @@ public class FXReferencePane extends BorderPane {
         
         
     
-    private class StateColumn extends TableColumn<Element,Object>{
+    private class StateColumn extends TableColumn<Element, ReferenceType>{
 
         public StateColumn() {
             super("État");     
@@ -213,17 +192,17 @@ public class FXReferencePane extends BorderPane {
             setResizable(true);
             setPrefWidth(70);
             
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Object>, ObservableValue<Object>>() {
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, ReferenceType>, ObservableValue<ReferenceType>>() {
                 @Override
-                public ObservableValue<Object> call(TableColumn.CellDataFeatures<Element, Object> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
+                public ObservableValue<ReferenceType> call(TableColumn.CellDataFeatures<Element, ReferenceType> param) {
+                    return new SimpleObjectProperty<>((ReferenceType)param.getValue());
                 }
             });
             
-            setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
+            setCellFactory(new Callback<TableColumn<Element, ReferenceType>, TableCell<Element, ReferenceType>>() {
 
                 @Override
-                public TableCell<Element, Object> call(TableColumn<Element,Object> param) {
+                public TableCell<Element, ReferenceType> call(TableColumn<Element,ReferenceType> param) {
                     
                     return new StateButtonTableCell(new ImageView(ICON_CHECK_CIRCLE)); 
                 }

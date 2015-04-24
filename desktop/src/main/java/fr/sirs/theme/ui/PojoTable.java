@@ -1115,14 +1115,18 @@ public class PojoTable extends BorderPane {
             setGraphic(new ImageView(SIRS.ICON_EDIT));
             
             setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> new SimpleObjectProperty<>(param.getValue()));
-            setCellFactory((TableColumn<Object,Object> param) -> new ButtonTableCell(
-                    false,new ImageView(SIRS.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
-                @Override
-                public Object apply(Object t) {
-                    editFct.accept(t);
-                    return t;
-                }
-            }));
+            setCellFactory(new Callback<TableColumn<Object, Object>, TableCell<Object, Object>>() {
+
+                public TableCell<Object, Object> call(TableColumn<Object,Object> param) {
+                    return new ButtonTableCell(
+                            false,new ImageView(SIRS.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
+                                @Override
+                                public Object apply(Object t) {
+                                    editFct.accept(t);
+                                    return t;
+                                }
+                            }); }
+            });
         }  
     }
     
