@@ -172,7 +172,7 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.getColumns().add(new DeleteColumn());
         uiLocalBaseTable.getColumns().add(new CopyColumn());
         uiLocalBaseTable.getColumns().add(column);
-        uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
+//        uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         

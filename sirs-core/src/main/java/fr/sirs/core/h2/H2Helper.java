@@ -26,16 +26,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sirs.core.DocHelper;
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 public class H2Helper {
     
@@ -44,6 +47,19 @@ public class H2Helper {
     
     private static FeatureStore STORE = null;
 
+    public static Task init() {
+        if (STORE != null) {
+            try {
+                STORE.close();
+            } catch (DataStoreException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot close H2 feature store.", ex);
+            }
+            STORE = null;
+        }
+        
+        return TaskManager.INSTANCE.submit(new H2Helper.ExportToRDBMS(InjectorCore.getBean(CouchDbConnector.class)));
+    }
+    
     public static Connection createConnection(CouchDbConnector connector) throws SQLException {
         Path file = getDBFile(connector);
         Connection connection = DriverManager.getConnection(

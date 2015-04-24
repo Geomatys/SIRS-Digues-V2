@@ -124,11 +124,13 @@ public class FXSearchPane extends BorderPane {
     public static final Image ICON_EXPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UPLOAD,22,Color.WHITE),null);
     public static final Image ICON_MODEL   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SHARE_ALT_SQUARE,22,Color.WHITE),null);
     public static final Image ICON_CARTO   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS,22,Color.WHITE),null);
+    public static final Image ICON_REFRESH = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_REFRESH,22,Color.WHITE),null);
 
     @FXML private Button uiSave;
     @FXML private Button uiOpen;
     @FXML private Button uiQueryManagement;
     @FXML private Button uiExportModel;
+    @FXML private Button uiRefreshModel;
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
     
@@ -194,19 +196,7 @@ public class FXSearchPane extends BorderPane {
         uiToggleSimple.setSelected(true);
 
         //h2 connection
-        Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
-            h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
-            
-            final Set<Name> names = h2Store.getNames();
-            final ObservableList observableNames = FXCollections.observableArrayList();
-            for(Name n : names) observableNames.add(n.getLocalPart());
-            Collections.sort(observableNames);
-            
-            SIRS.LOGGER.info("RDBMS CONNEXION FINISHED");
-            return observableNames;
-        });
-        
-        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiTableChoice.setItems(h2Names.getValue())));
+        connectToH2Store();
         
         uiTableChoice.getSelectionModel().selectedItemProperty().addListener(
             (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
@@ -223,6 +213,7 @@ public class FXSearchPane extends BorderPane {
         uiSave.setGraphic(new ImageView(ICON_SAVE));
         uiOpen.setGraphic(new ImageView(ICON_OPEN));
         uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
+        uiRefreshModel.setGraphic(new ImageView(ICON_REFRESH));
         uiExportQueries.setGraphic(new ImageView(ICON_EXPORT));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
@@ -283,6 +274,10 @@ public class FXSearchPane extends BorderPane {
         
         // Action on admin button
         uiQueryManagement.setOnAction((ActionEvent e)-> FXAdminQueryPane.showAndWait());
+        
+        // TODO : activate back when rdbms refresh is fixed
+        uiRefreshModel.setVisible(false);
+        uiRefreshModel.managedProperty().bind(uiRefreshModel.visibleProperty());
     }
 
     @FXML
@@ -311,7 +306,36 @@ public class FXSearchPane extends BorderPane {
         stage.setHeight(600);
         stage.show();
     }
+    
+    @FXML
+    private void refreshModel(ActionEvent event) {
+        uiRefreshModel.setDisable(true);
+        Task t = H2Helper.init();
+        t.setOnSucceeded(e -> {
+            connectToH2Store().setOnSucceeded(e2 -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
         
+        });
+        t.setOnFailed(e -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
+    }
+    
+    private Task connectToH2Store() {
+        //h2 connection
+        Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
+            h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
+            
+            final Set<Name> names = h2Store.getNames();
+            final ObservableList observableNames = FXCollections.observableArrayList();
+            for(Name n : names) observableNames.add(n.getLocalPart());
+            Collections.sort(observableNames);
+            
+            SIRS.LOGGER.fine("RDBMS CONNEXION FINISHED");
+            return observableNames;
+        });
+        
+        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiTableChoice.setItems(h2Names.getValue())));
+        return h2Names;
+    }
+    
     @FXML
     private void saveSQLQuery(ActionEvent event){
         final Dialog dialog = new Dialog();
