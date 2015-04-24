@@ -84,7 +84,7 @@
                               <Label text="Type : " GridPane.columnIndex="1" />
                               <ComboBox fx:id="uiDesignationClass" GridPane.columnIndex="2" />
                               <Label text="Désignation : " GridPane.columnIndex="4" />
-                              <TextField fx:id="uiDesignation" GridPane.columnIndex="5" />
+                              <TextField fx:id="uiDesignation" onAction="#search" GridPane.columnIndex="5" />
                            </children>
                            <padding>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -102,7 +102,7 @@
                           </rowConstraints>
                            <children>
                               <Label text="Mots clés :" />
-                              <TextField fx:id="uiElasticKeywords" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+                              <TextField fx:id="uiElasticKeywords" onAction="#search" GridPane.columnIndex="1" GridPane.columnSpan="3" />
                            </children>
                            <padding>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
