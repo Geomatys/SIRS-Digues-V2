@@ -15,6 +15,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
@@ -52,8 +54,14 @@ public class FXTronconMerge extends VBox{
     }
  
     public void processMerge() {
-        if (!task.isDone() || !task.isRunning()) {
-            TaskManager.INSTANCE.submit(task);
+        
+        final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les tronçons ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+        confirmCut.showAndWait();
+        final ButtonType result = confirmCut.getResult();
+        if(result==ButtonType.YES){
+            if (!task.isDone() || !task.isRunning()) {
+                TaskManager.INSTANCE.submit(task);
+            }
         }
     }
     

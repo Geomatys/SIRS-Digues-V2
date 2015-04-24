@@ -25,7 +25,10 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProprieteTroncon;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
@@ -67,21 +70,46 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
     @Override
     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
         TronconDigue troncon = target.get();
-        if (troncon != null) {
+        if (troncon != null && oldValue != null) { // TODO : fix behavior when no old value is present (Ex: troncon cut).
             // Value reset
             if (previousValue != null && previousValue.equals(newValue)) {
                 previousValue = null;
 
             // Another task still running
             } else if (task != null && !task.isDone()) {
-                new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show();
+                if (Platform.isFxApplicationThread()) {
+                    new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show();
+                } else {
+                    Platform.runLater(()->new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show());
+                }
                 previousValue = oldValue;
                 troncon.setSystemeRepDefautId(oldValue);
 
             // Ask user if he's sure of his change. 
             } else {
-                final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, CONFIRMATION_TEXT, ButtonType.NO, ButtonType.YES);
-                Optional<ButtonType> result = confirmation.showAndWait();
+                final Task<Optional<ButtonType>> confirmation = new Task<Optional<ButtonType>>() {
+
+                    @Override
+                    protected Optional<ButtonType> call() throws Exception {
+                        final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, CONFIRMATION_TEXT, ButtonType.NO, ButtonType.YES);
+                        return confirmation.showAndWait();
+                    }
+
+                };
+                        
+                final Optional<ButtonType> result;
+                if (Platform.isFxApplicationThread()) {
+                    confirmation.run();
+                } else {
+                    Platform.runLater(()->confirmation.run());
+                }
+                
+                try {
+                    result = confirmation.get();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                
                 if (result.isPresent() && result.get().equals(ButtonType.YES)) {
                     task = new ComputePRForStructures(troncon);
                     TaskManager.INSTANCE.submit(task);
@@ -89,6 +117,37 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
                     previousValue = oldValue;
                     troncon.setSystemeRepDefautId(oldValue);
                 }
+                
+                
+                
+                
+//                final Task<Optional<ButtonType>> confirmation = new Task<Optional<ButtonType>>() {
+//
+//                    @Override
+//                    protected Optional<ButtonType> call() throws Exception {
+//                        return new Alert(Alert.AlertType.CONFIRMATION, CONFIRMATION_TEXT, ButtonType.NO, ButtonType.YES).showAndWait();
+//                    }
+//                };
+//                        
+//                if (Platform.isFxApplicationThread()) {
+//                    confirmation.run();
+//                
+//                    final Optional<ButtonType> result;
+//                    try {
+//                        result = confirmation.get();
+//                    } catch (Exception ex) {
+//                        throw new RuntimeException(ex);
+//                    }
+//                } 
+//                
+//                if (!Platform.isFxApplicationThread() || 
+//                        result.isPresent() && result.get().equals(ButtonType.YES)) {
+//                    task = new ComputePRForStructures(troncon);
+//                    TaskManager.INSTANCE.submit(task);
+//                } else {
+//                    previousValue = oldValue;
+//                    troncon.setSystemeRepDefautId(oldValue);
+//                }
             }
         }
     }

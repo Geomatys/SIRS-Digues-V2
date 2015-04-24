@@ -146,36 +146,41 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         } else {
             // finish button is bound to troncon property state to avoid null value here.
             final TronconDigue troncon = editPane.tronconProperty().get();
-            Task submitted = TaskManager.INSTANCE.submit(new CutTask(
-                    troncon,
-                    // defensive copies
-                    FXCollections.observableArrayList(editPane.getCutpoints()),
-                    FXCollections.observableArrayList(segments)
-            ));
+            final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper le tronçon ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+            confirmCut.showAndWait();
+            final ButtonType result = confirmCut.getResult();
+            if(result==ButtonType.YES){
+                final Task submitted = TaskManager.INSTANCE.submit(new CutTask(
+                        troncon,
+                        // defensive copies
+                        FXCollections.observableArrayList(editPane.getCutpoints()),
+                        FXCollections.observableArrayList(segments)
+                ));
 
-            submitted.setOnFailed((Event event) -> {
-                // Warn user that something has gone wrong.
-                final Dialog d;
-                if (submitted.getException() != null) {
-                    d = GeotkFX.newExceptionDialog(null, submitted.getException());
-                } else {
-                    d = new Alert(Alert.AlertType.ERROR, "Cause : erreur inconnue.", ButtonType.OK);
-                }
-                d.setHeaderText("Le découpage de " + troncon.getLibelle() + " n'a pas pu être mené à son terme.");
-                d.show();
-            });
+                submitted.setOnFailed((Event event) -> {
+                    // Warn user that something has gone wrong.
+                    final Dialog d;
+                    if (submitted.getException() != null) {
+                        d = GeotkFX.newExceptionDialog(null, submitted.getException());
+                    } else {
+                        d = new Alert(Alert.AlertType.ERROR, "Cause : erreur inconnue.", ButtonType.OK);
+                    }
+                    d.setHeaderText("Le découpage de " + troncon.getLibelle() + " n'a pas pu être mené à son terme.");
+                    d.show();
+                });
 
-            // TODO : show a popup on success.
-            submitted.setOnSucceeded((Event event) -> {
-                new Alert(Alert.AlertType.INFORMATION,
-                        "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
-                        ButtonType.OK).showAndWait();
-                try {
-                    Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date());
-                } catch (Exception ex) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
-                }
-            });
+                // TODO : show a popup on success.
+                submitted.setOnSucceeded((Event event) -> {
+                    new Alert(Alert.AlertType.INFORMATION,
+                            "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
+                            ButtonType.OK).showAndWait();
+                    try {
+                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date());
+                    } catch (Exception ex) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
+                    }
+                });
+            }
             // empty our handler, to allow new operation.
             editPane.tronconProperty().set(null);
         }

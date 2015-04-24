@@ -101,30 +101,34 @@ public class FXMapPane extends BorderPane {
         MAPHINTS.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         MAPHINTS.put(GO2Hints.KEY_BEHAVIOR_MODE, GO2Hints.BEHAVIOR_KEEP_TILE);
     }
+        
+    private final FXMap uiMap1 = new FXMap(false, MAPHINTS);
+    private final FXCoordinateBar uiCoordBar1 = new FXCoordinateBar(uiMap1);
+    private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
+    private final FXMap uiMap2 = new FXMap(false, MAPHINTS);
+    private final FXCoordinateBar uiCoordBar2 = new FXCoordinateBar(uiMap2);
+    private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
+    private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
     
     private final SplitPane mapsplit = new SplitPane();
+    
     private final FXContextBar uiCtxBar;
     private final FXAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
     private final FXTronconEditBar uiEditBar;
-    private final FXMapContextTree uiTree;
     private final Button splitButton = new Button(null, new ImageView(ICON_SPLIT));
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
-        
-    private final FXMap uiMap1 = new FXMap(false, MAPHINTS);
-    private final FXMap uiMap2 = new FXMap(false, MAPHINTS);
-    private final FXCoordinateBar uiCoordBar1 = new FXCoordinateBar(uiMap1);
-    private final FXCoordinateBar uiCoordBar2 = new FXCoordinateBar(uiMap2);
-    private final BorderPane paneMap1 = new BorderPane(uiMap1, null, null, uiCoordBar1, null);
-    private final BorderPane paneMap2 = new BorderPane(uiMap2, null, null, uiCoordBar2, null);
-    private final Canvas2DSynchronizer synchronizer = new Canvas2DSynchronizer();
+    
+    private final FXMapContextTree uiTree;
     
     public FXMapPane() {
         
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         uiMap2.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
+        uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
+        uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
         synchronizer.addCanvas(uiMap1.getCanvas(),true,true);
         synchronizer.addCanvas(uiMap2.getCanvas(),true,true);
         
@@ -133,8 +137,7 @@ public class FXMapPane extends BorderPane {
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
         uiEditBar = new FXTronconEditBar(uiMap1);
-        uiCoordBar1.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
-        uiCoordBar2.setScaleBoxValues(new Long[]{200l,5000l,25000l,50000l});
+        
         uiTree = new FXMapContextTree();
         uiTree.getTreetable().getColumns().clear();
         uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
@@ -178,13 +181,14 @@ public class FXMapPane extends BorderPane {
             }
         });
         
-        final GridPane topgrid = new GridPane();
         uiCtxBar.setMaxHeight(Double.MAX_VALUE);
         uiAddBar.setMaxHeight(Double.MAX_VALUE);
         uiNavBar.setMaxHeight(Double.MAX_VALUE);
         uiToolBar.setMaxHeight(Double.MAX_VALUE);
         uiEditBar.setMaxHeight(Double.MAX_VALUE);
         uiSplitBar.setMaxHeight(Double.MAX_VALUE);
+        
+        final GridPane topgrid = new GridPane();
         topgrid.add(uiCtxBar,  0, 0);
         topgrid.add(uiAddBar,  1, 0);
         topgrid.add(uiNavBar,  2, 0);
@@ -192,25 +196,28 @@ public class FXMapPane extends BorderPane {
         topgrid.add(uiEditBar, 4, 0);
         topgrid.add(uiSplitBar, 5, 0);
         
-        final ColumnConstraints col0 = new ColumnConstraints();
-        final ColumnConstraints col1 = new ColumnConstraints();
-        final ColumnConstraints col2 = new ColumnConstraints();
-        final ColumnConstraints col3 = new ColumnConstraints();
+//        final ColumnConstraints col0 = new ColumnConstraints();
+//        final ColumnConstraints col1 = new ColumnConstraints();
+//        final ColumnConstraints col2 = new ColumnConstraints();
+//        final ColumnConstraints col3 = new ColumnConstraints();
+//        final ColumnConstraints col4 = new ColumnConstraints();
+//        final ColumnConstraints col5 = new ColumnConstraints();
+//        final ColumnConstraints col6 = new ColumnConstraints();
         final ColumnConstraints col4 = new ColumnConstraints();
-        final ColumnConstraints col5 = new ColumnConstraints();
-        final ColumnConstraints col6 = new ColumnConstraints();
         col4.setHgrow(Priority.ALWAYS);
+        topgrid.getColumnConstraints().addAll(new ColumnConstraints(), 
+                new ColumnConstraints(), new ColumnConstraints(), 
+                new ColumnConstraints(), col4);
+        
         final RowConstraints row0 = new RowConstraints();
         row0.setVgrow(Priority.ALWAYS);
-        topgrid.getColumnConstraints().addAll(col0,col1,col2,col3,col4,col5,col6);
-        topgrid.getRowConstraints().addAll(row0);
+        topgrid.getRowConstraints().add(row0);
         
         mapsplit.getItems().add(paneMap1);
         
         final BorderPane border = new BorderPane();
         border.setTop(topgrid);
         border.setCenter(mapsplit);
-        
         
         final SplitPane split = new SplitPane();
         split.setOrientation(Orientation.HORIZONTAL);
