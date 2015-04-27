@@ -557,9 +557,8 @@ public class DatabaseRegistry {
     }
 
     Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(String dst) throws IOException {
-        final String dbName = dst.replaceFirst("/$", "").substring(dst.lastIndexOf('/')+1);
         return getReplicationTasks().stream().filter(
-                t -> (t.getSourceDatabaseName().equals(dbName) || t.getTargetDatabaseName().equals(dbName)));
+                t -> (t.getSourceDatabaseName().equals(dst) || t.getTargetDatabaseName().equals(dst)));
     }
     
     ////////////////////////////////////////////////////////////////////////////
