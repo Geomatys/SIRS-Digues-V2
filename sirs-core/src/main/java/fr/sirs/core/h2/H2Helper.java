@@ -39,6 +39,7 @@ import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult;
 import org.geotoolkit.gui.javafx.util.TaskManager;
+import org.geotoolkit.jdbc.DBCPDataSource;
 
 public class H2Helper {
     
@@ -83,7 +84,7 @@ public class H2Helper {
             Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
             Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
             Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
-            Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(ds);
+            Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(new DBCPDataSource(ds));
 
             STORE = new H2FeatureStoreFactory().create(params);
         }

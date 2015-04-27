@@ -274,10 +274,6 @@ public class FXSearchPane extends BorderPane {
         
         // Action on admin button
         uiQueryManagement.setOnAction((ActionEvent e)-> FXAdminQueryPane.showAndWait());
-        
-        // TODO : activate back when rdbms refresh is fixed
-        uiRefreshModel.setVisible(false);
-        uiRefreshModel.managedProperty().bind(uiRefreshModel.visibleProperty());
     }
 
     @FXML
