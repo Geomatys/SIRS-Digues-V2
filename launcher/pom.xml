@@ -53,7 +53,7 @@
                 <groupId>com.zenjava</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
-                    <nativeReleaseVersion>0.8</nativeReleaseVersion>
+                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
