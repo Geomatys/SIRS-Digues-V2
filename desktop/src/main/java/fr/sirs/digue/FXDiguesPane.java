@@ -14,7 +14,6 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
-import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Popup;
 import org.apache.sis.referencing.CommonCRS;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -233,6 +233,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         
         final Popup popup = new Popup();
         final TextField textField = new TextField(currentSearch.get());
+        popup.setAutoHide(true);
         popup.getContent().add(textField);
         
         textField.setOnAction(new EventHandler<ActionEvent>() {

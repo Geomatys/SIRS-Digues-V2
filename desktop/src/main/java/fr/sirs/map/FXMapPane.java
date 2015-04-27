@@ -196,13 +196,6 @@ public class FXMapPane extends BorderPane {
         topgrid.add(uiEditBar, 4, 0);
         topgrid.add(uiSplitBar, 5, 0);
         
-//        final ColumnConstraints col0 = new ColumnConstraints();
-//        final ColumnConstraints col1 = new ColumnConstraints();
-//        final ColumnConstraints col2 = new ColumnConstraints();
-//        final ColumnConstraints col3 = new ColumnConstraints();
-//        final ColumnConstraints col4 = new ColumnConstraints();
-//        final ColumnConstraints col5 = new ColumnConstraints();
-//        final ColumnConstraints col6 = new ColumnConstraints();
         final ColumnConstraints col4 = new ColumnConstraints();
         col4.setHgrow(Priority.ALWAYS);
         topgrid.getColumnConstraints().addAll(new ColumnConstraints(), 
