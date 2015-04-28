@@ -34,7 +34,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
     @Test
     public void initDatabaseFromRemote() throws IOException {
-        new DatabaseRegistry().synchronizeDatabases(REPLICATION_SOURCE, REPLICATION_DEST, true);
+        new DatabaseRegistry().synchronizeSirsDatabases(REPLICATION_SOURCE, REPLICATION_DEST, true);
     }
 
     @Test
@@ -49,29 +49,4 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
                 t -> System.out.println(t.getReplicationId()));
 
     }
-
-    @DependsOnMethod("startReplication")
-    @Test
-    public void cancelReplication() throws IOException {
-        new DatabaseRegistry().cancelReplication(connector);
-    }
-
-    @Test
-    public void startReplication() throws IOException {
-        new DatabaseRegistry().startReplication(connector, REPLICATION_DEST, true);
-        // TODO : check content
-    }
-
-    @Test
-    public void replicate() throws IOException {
-        new DatabaseRegistry().startReplication(connector, REPLICATION_DEST, false);
-        // TODO : check content
-    }
-
-    @Ignore
-    public void replicateWihoutRemote() throws IOException {
-        new DatabaseRegistry().startReplication(connector, false);
-        // TODO : check content
-    }
-
 }

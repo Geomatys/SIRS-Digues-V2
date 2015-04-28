@@ -15,6 +15,7 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.LOGIN_DEFAULT_GUEST;
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
@@ -172,7 +173,7 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.getColumns().add(new DeleteColumn());
         uiLocalBaseTable.getColumns().add(new CopyColumn());
         uiLocalBaseTable.getColumns().add(column);
-//        uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
+        uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         
@@ -322,13 +323,15 @@ public class FXLauncherPane extends BorderPane {
         }
         
         final String distantUrl = uiDistantUrl.getText();
-        localRegistry.synchronizeDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
-        
-        //aller au panneau principale
-        Platform.runLater(() -> {
-            uiTabPane.getSelectionModel().clearAndSelect(0);
+        try {
+            localRegistry.synchronizeSirsDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
+            //aller au panneau principal
             updateLocalDbList();
-        });
+            uiTabPane.getSelectionModel().clearAndSelect(0);
+        } catch (Exception ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
+            GeotkFX.newExceptionDialog("Impossible de synchroniser les bases de données.", ex).show();
+        }
     }
 
     @FXML
@@ -363,7 +366,7 @@ public class FXLauncherPane extends BorderPane {
         new Thread(() -> {
             try (ConfigurableApplicationContext applicationContext = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
-                sirsDBInfoRepository.create(epsgCode);
+                sirsDBInfoRepository.setSRID(epsgCode);
                 final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
                 
                 createDefaultUsers(utilisateurRepository, uiCreateLogin.getText(), uiCreatePassword.getText());
@@ -450,7 +453,7 @@ public class FXLauncherPane extends BorderPane {
                 importer.cleanDb();
                 importer.importation();
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-                sirsDBInfoRepository.create(epsgCode);
+                sirsDBInfoRepository.setRemoteDatabase(epsgCode);
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
@@ -748,7 +751,7 @@ public class FXLauncherPane extends BorderPane {
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
-                                    ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName, false);
+                                    ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName);
                                     if (!copyStatus.isOk()) {
                                         localRegistry.cancelCopy(copyStatus);
                                         new Alert(

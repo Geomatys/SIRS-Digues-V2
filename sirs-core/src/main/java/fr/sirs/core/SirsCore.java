@@ -169,7 +169,7 @@ public class SirsCore {
         return TaskManager.INSTANCE;
     }
     
-        /**
+    /**
      * Try to expand a little an envelope. Main purpose is to ensure we won't 
      * have an envelope which is merely a point.
      * @param input The input to expand.

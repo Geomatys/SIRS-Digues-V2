@@ -26,9 +26,9 @@ public abstract class CouchDBTestCase {
         connector = applicationContext.getBean(CouchDbConnector.class);
         sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
         
-        Optional<SirsDBInfo> init = sirsDBInfoRepository.init();
+        Optional<SirsDBInfo> init = sirsDBInfoRepository.get();
         if (!init.isPresent())
-            sirsDBInfoRepository.create("EPSG:2154");
+            sirsDBInfoRepository.setRemoteDatabase("EPSG:2154");
     }
 
     public void test() {

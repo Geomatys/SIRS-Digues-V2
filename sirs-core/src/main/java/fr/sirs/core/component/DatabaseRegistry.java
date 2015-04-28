@@ -18,11 +18,9 @@ import org.ektorp.ReplicationCommand;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.util.StringUtils;
 
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
@@ -34,8 +32,6 @@ import org.geotoolkit.util.FileUtilities;
 
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
 import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -50,7 +46,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.ActiveTask;
+import org.ektorp.DbPath;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.ektorp.http.HttpResponse;
@@ -66,8 +62,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class DatabaseRegistry {
 
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
-    
-    private static final String PAUSE_FILTER = "function(doc, req) {return false}";
+    private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
+    private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
     
     private static final int SOCKET_TIMEOUT = 45000;
     private static final int CONNECTION_TIMEOUT = 5000;
@@ -82,7 +78,7 @@ public class DatabaseRegistry {
     private CouchDbInstance couchDbInstance;
     
     /**
-     * Create a connexion on local database, using address and login found in {@link SirsPreferences}.
+     * Create a connection on local database, using address and login found in {@link SirsPreferences}.
      * 
      * @throws IOException If URL found in configuration is not valid, or a connection problem occurs.
      */
@@ -246,8 +242,9 @@ public class DatabaseRegistry {
      * @return A connector to queried database.
      */
     public ConfigurableApplicationContext connectToSirsDatabase(String dbName, final boolean createIfNotExists, final boolean initIndex, final boolean initChangeListener) {
+        final String dbContext = getContextPath(dbName);
         try {
-            CouchDbConnector connector = couchDbInstance.createConnector(dbName, createIfNotExists);
+            CouchDbConnector connector = couchDbInstance.createConnector(dbContext, createIfNotExists);
             // Initializing application context will load application repositories, which will publish their views on the new database.
             final ClassPathXmlApplicationContext parentContext = new ClassPathXmlApplicationContext();
             parentContext.refresh();
@@ -256,12 +253,12 @@ public class DatabaseRegistry {
             final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
                     new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
 
-            appContext.getBean(SirsDBInfoRepository.class).init().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
+            appContext.getBean(SirsDBInfoRepository.class).get().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
 
             if (initIndex) {
 
                 ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
-                        couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbName, username, userPass);
+                        couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
                 appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
             }
 
@@ -291,7 +288,7 @@ public class DatabaseRegistry {
                     e.addSuppressed(ex);
                     throw e;
                 }
-                return connectToSirsDatabase(dbName, createIfNotExists, initIndex, initChangeListener);
+                return connectToSirsDatabase(dbContext, createIfNotExists, initIndex, initChangeListener);
             } else {
                 throw e;
             }
@@ -300,8 +297,8 @@ public class DatabaseRegistry {
 
     public void dropDatabase(String dbName) throws IOException {
         try {
-        cancelReplication(buildDatabaseURL(dbName));
-        couchDbInstance.deleteDatabase(dbName);
+            cancelAllSynchronizations(dbName);
+            couchDbInstance.deleteDatabase(dbName);
         } catch (DbAccessException e) {
             handleAccessException();
             dropDatabase(dbName);
@@ -360,6 +357,8 @@ public class DatabaseRegistry {
         }
     }
     
+    
+    
     ////////////////////////////////////////////////////////////////////////////
     //  
     // REPLICATION UTILITIES
@@ -369,28 +368,67 @@ public class DatabaseRegistry {
     /**
      * Synchronize two databases content.
      * 
-     * @param src The name of the first database if it's in current service, complete URL otherwise.
-     * @param dest Name of the second database if it's in current service, complete URL otherwise.
-     * @param continuous A flag to indicate if databases should be kept synchronized over time (true) or just once.
+     * @param distant The source database name if it's in current service, complete URL otherwise.
+     * @param local Name of target database. It have to be in current service.
+     * @param continuous True if we must keep databases synchronized over time. False for one shot synchronization.
+     * @throws java.io.IOException If an error occurs while rying to connect to one database.
+     * @throws java.io.IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
      */
-    public void synchronizeDatabases(String src, String dest, boolean continuous) {
+    public void synchronizeSirsDatabases(String distant, String local, boolean continuous) throws IOException {
+        Optional<SirsDBInfo> distantInfo = getInfo(distant);
+        if (!distantInfo.isPresent()) {
+            throw new IllegalArgumentException("Input distant database is not a SIRS application one.");
+        }
+
+        final String srid = distantInfo.get().getEpsgCode();
+
+        String localPath = getContextPath(local);
+            
         try {
+            CouchDbConnector localConnector = couchDbInstance.createConnector(localPath, true); 
+            Optional<SirsDBInfo> info = getInfo(localConnector);
+            if (info.isPresent()) {
+                SirsDBInfo localInfo = info.get();
+                
+                // TODO : check that SRID of local and distant database are one and the same.
+                if (localInfo.getEpsgCode() != null && !localInfo.getEpsgCode().equals(srid)) {
+                    throw new IllegalArgumentException("Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection :\n"
+                            + "Base distante : " + srid + "\n"
+                            + "Base locale : " + localInfo.getEpsgCode());
+                }
+                
+                if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
+                    Optional<ButtonType> showAndWait = new Alert(
+                            Alert.AlertType.WARNING, 
+                            "Vous êtes sur le point de changer le point de synchronisation de la base de données.", 
+                            ButtonType.CANCEL, ButtonType.OK).showAndWait();
+                    if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
+                        cancelAllSynchronizations(localPath);
+                    } else {
+                        return;
+                    }
+                }
+            }
+            
             // Copy source data in our database.
             ReplicationCommand cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(src).target(dest)
+                    .continuous(continuous).source(distant).target(localPath)
                     .createTarget(true).build();
 
             // Send back local data to source database.
             ReplicationCommand cmdRev = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(dest).target(src)
+                    .continuous(continuous).source(localPath).target(distant)
                     .createTarget(true).build();
 
             couchDbInstance.replicate(cmd);
             couchDbInstance.replicate(cmdRev);
+            
+            new SirsDBInfoRepository(localConnector).set(srid, distant);
+            
         } catch (DbAccessException e) {
             try {
                 handleAccessException();
-                synchronizeDatabases(src, dest, continuous);
+                synchronizeSirsDatabases(distant, localPath, continuous);
             } catch (IOException ex) {
                 e.addSuppressed(ex);
                 throw e;
@@ -405,90 +443,31 @@ public class DatabaseRegistry {
      * @param dbName Target database name or path for synchronizations.
      * @return List of source database names or path for continuous copies on input database.
      */
-    public Stream<ReplicationCommand> getSynchronizationTasks(final String dbName) throws IOException {
+    public Stream<ReplicationTask> getSynchronizationTasks(final String dbName) throws IOException {
         ArgumentChecks.ensureNonEmpty("Input database name", dbName);
-        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
         return getReplicationTasksBySourceOrTarget(dbName)
-                .filter((ReplicationTask task)-> task.isContinuous())
-                .map(task -> builder.id(task.getReplicationId()).build());
-    }
-    
-    /**
-     * Retrieve list of Synchronization tasks the input database is part of. Only
-     * active tasks are returned.
-     * 
-     * @param dbName Target database name or path for synchronizations.
-     * @return List of source database names or path for continuous copies on input database.
-     */
-    public Stream<ReplicationCommand> getActiveSynchronizationTasks(final String dbName) throws IOException {
-        return getSynchronizationTasks(dbName).filter(cmd -> !PAUSE_FILTER.equals(cmd.filter));
-    }
-    
-    /**
-     * Retrieve list of Synchronization tasks the input database is part of. Only
-     * paused tasks are returned.
-     * 
-     * @param dbName Target database name or path for synchronizations.
-     * @return List of source database names or path for continuous copies on input database.
-     */
-    public Stream<ReplicationCommand> getPausedSynchronizationTasks(final String dbName) throws IOException {
-        return getSynchronizationTasks(dbName).filter(cmd -> PAUSE_FILTER.equals(cmd.filter));
-    }
-    
-    /**
-     * Pause all continuous replication tasks from or to the given database.
-     * @param withDb Name or path of the database implied in synchronization.
-     * @return Number of synchronizations paused by this call.
-     */
-    public int pauseSynchronizations(final String withDb) throws IOException {
-        final AtomicInteger paused = new AtomicInteger(0);
-        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
-        getActiveSynchronizationTasks(withDb).forEach(cmd -> {
-            couchDbInstance.replicate(builder.id(cmd.id).filter(PAUSE_FILTER).build());
-            paused.incrementAndGet();
-        });
-        return paused.get();
-    }
-    
-    /**
-     * Resume all previously paused synchronisation implying input database. Actually,
-     * we'll cancel all continuous replication tasks, then restart a new synchronisation 
-     * task for each stopped.
-     * @param withDb Name or path of the database implied in synchronization.
-     * @return Number of synchronizations resumed by this call.
-     */
-    public int resumeSynchronizations(final String withDb) throws IOException {
-        final AtomicInteger resumed = new AtomicInteger(0);
-        ReplicationCommand.Builder builder = new ReplicationCommand.Builder();
-        getPausedSynchronizationTasks(withDb).forEach(cmd -> {
-                    couchDbInstance.replicate(builder.id(cmd.id).cancel(true).build());
-                    couchDbInstance.replicate(copyWithoutPauseFilter(cmd));
-                    resumed.incrementAndGet();
-                });
-        return resumed.get();
+                .filter((ReplicationTask task)-> task.isContinuous());
     }
     
     /**
      * Copy source database content to destination database. If destination database 
-     * does not exists, it will be created. If the continuous flag is set, destination
-     * database will pull source database changes over time.
+     * does not exists, it will be created. No synchronization over time here.
      * 
      * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
-     * @param continuous true if destination database must stay up to date with source content, false otherwise.
-     * @return A
+     * @return A status of started replication task.
      */
-    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto, final boolean continuous) {
+    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) {
         try {
             ReplicationCommand cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .continuous(false).source(dbToCopy).target(dbToPasteInto)
                     .createTarget(true).build();
 
             return couchDbInstance.replicate(cmd);
         } catch (DbAccessException e) {
             try {
                 handleAccessException();
-                return copyDatabase(dbToCopy, dbToPasteInto, continuous);
+                return copyDatabase(dbToCopy, dbToPasteInto);
             } catch (Exception ex) {
                 e.addSuppressed(ex);
                 throw e;
@@ -496,43 +475,30 @@ public class DatabaseRegistry {
         }
     }
     
+    /**
+     * Cancel the database copy pointed by given replication status.
+     * @param operationStatus Status of the copy to stop.
+     * @return The status of cancelled task.
+     */
     public ReplicationStatus cancelCopy(final ReplicationStatus operationStatus) {
         return couchDbInstance.replicate(new ReplicationCommand.Builder()
                 .id(operationStatus.getId()).cancel(true).build());
     }
-    
-    public void startReplication(CouchDbConnector connector,
-            String remoteDatabaseURL, boolean continuous)
-            throws MalformedURLException {
-        String buildDatabaseLocalURL = buildDatabaseURL(connector
-                .getDatabaseName());
-        synchronizeDatabases(buildDatabaseLocalURL, remoteDatabaseURL,
-                continuous);
-    }
-
-    public void startReplication(final CouchDbConnector connector, final boolean continuous) throws MalformedURLException {
-        String buildDatabaseLocalURL = buildDatabaseURL(connector
-                .getDatabaseName());
-
-        Optional<SirsDBInfo> filter = getInfo(connector).filter(info -> StringUtils.hasText(info.getRemoteDatabase()));
-        if (filter.isPresent()) {
-            synchronizeDatabases(buildDatabaseLocalURL, filter.get().getRemoteDatabase(), continuous);
-        } else {
-            throw new SirsCoreRuntimeExecption("Cannot start replication.");
-        }
-    }
-
-    public void cancelReplication(CouchDbConnector connector) throws IOException {
-        cancelReplication(buildDatabaseURL(connector.getDatabaseName()));
-    }
-
-    private String cancelReplication(String databaseURL) throws IOException {
-        getReplicationTasksBySourceOrTarget(databaseURL)
-                .map(t -> t.getReplicationId())
-                .map(id -> new ReplicationCommand.Builder().id(id).docIds(null).cancel(true)
-                        .build())
-                .forEach(cmd -> couchDbInstance.replicate(cmd));
-        return databaseURL;
+        
+    /**
+     * Cancel all replication tasks implying input database.
+     * @param dbName Name of the database to deconnect.
+     * @return Number of cancelled replication tasks.
+     * @throws IOException If a connection error happens while retrieving replication tasks. 
+     */
+    public int cancelAllSynchronizations(final String dbName) throws IOException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        ReplicationCommand.Builder cancel = new ReplicationCommand.Builder().cancel(true);
+        getReplicationTasksBySourceOrTarget(dbName).forEach(task -> {
+            couchDbInstance.replicate(cancel.id(task.getReplicationId()).build());
+            counter.incrementAndGet();
+        });
+        return counter.get();
     }
 
     ArrayList<ReplicationTask> getReplicationTasks() throws IOException {
@@ -561,6 +527,8 @@ public class DatabaseRegistry {
                 t -> (t.getSourceDatabaseName().equals(dst) || t.getTargetDatabaseName().equals(dst)));
     }
     
+    
+    
     ////////////////////////////////////////////////////////////////////////////
     //  
     // MINOR UTILITY METHODS
@@ -575,22 +543,86 @@ public class DatabaseRegistry {
      * @throws MalformedURLException If input string does not represent a path.
      */
     public static URL toURL(final String baseURL) throws MalformedURLException {
-        if (baseURL.matches("[A-Za-z]+://.*")) {
+        if (URL_START.matcher(baseURL).find()) {
             return new URL(baseURL);
         } else {
             return new URL("http://"+baseURL);
         }
     }
+    
+    private static CouchDbConnector connectToDistant(final String distantService) throws IOException {
+        // Connect to distant database.
+        final DatabaseRegistry regis = new DatabaseRegistry(distantService);
+        // Connection succeed, which means we must extract database name from it.
+        String dbPath = URL_START.matcher(distantService).replaceFirst("");
+        final String[] splittedPath = dbPath.split("/");
+        if (splittedPath.length < 1) throw new IllegalArgumentException("Input path does not contain database name.");
+        int splitIndex = splittedPath.length;
+        final StringBuilder pathBuilder = new StringBuilder(splittedPath[--splitIndex]);
+        while (splitIndex > 0) {
+            try {
+                return regis.couchDbInstance.createConnector(pathBuilder.toString(), false);
+            } catch (Exception e) {
+                pathBuilder.insert(0, '/').insert(0, splittedPath[--splitIndex]);
+            }
+        }
+        throw new IllegalArgumentException("Input path does not contain database name.");
+    }
+    
+    public Optional<SirsDBInfo> getInfo(final String dbName) {
+        final CouchDbConnector connector;
         
-    private String buildDatabaseURL(String database) {
-        if (database.matches("https?://.+")) {
-            return database;
+        final Optional<String> localPath = getLocalPath(dbName);
+        if (localPath.isPresent()) {
+            connector = couchDbInstance.createConnector(dbName, false);
+        } else {
+            try {
+                connector = connectToDistant(dbName);
+            } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                return Optional.empty();
+            }
         }
-        String localAdress = couchDbUrl.toExternalForm();
-        if (!localAdress.endsWith("/")) {
-            localAdress = localAdress + "/";
+        return getInfo(connector);
+    }
+    
+    /**
+     * Test if the given path or name represents a database instance hosted by current 
+     * service. If its true, we return a path whose all information before context has been truncated.
+     * @param dbName Name or URL of the database to test.
+     * @return true if given database has been found in current service, false otherwise.
+     */
+    private Optional<String> getLocalPath(final String dbName) {
+        String toTest = getContextPath(dbName);
+        try {
+            if (couchDbInstance.checkIfDbExists(toTest)) {
+                return Optional.of(toTest);
+            }
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.FINE, "An error occurred while testing existance of a database : " + dbName, e);
         }
-        return localAdress + database + "/";
+        return Optional.empty();
+    }
+    
+    /**
+     * If the given string represents an URL pointing on current service, truncate all information before context path.
+     * @param dbPath The path to truncate.
+     * @return The context path for input string, or untouched input if it does 
+     * not represent a local URL.
+     */
+    private String getContextPath(final String dbPath) {
+        Matcher urlMatcher;
+        if (isLocal && (urlMatcher = LOCAL_URL.matcher(dbPath)).find()) {
+            return urlMatcher.replaceFirst("");
+        } else {
+            final String tmpServiceURL = URL_START.matcher(couchDbUrl.toExternalForm()).replaceFirst("");
+            final String tmpParam = URL_START.matcher(dbPath).replaceFirst("");
+            if (tmpParam.startsWith(tmpServiceURL)) {
+                return tmpParam.replace(tmpServiceURL, "");
+            } else {
+                return dbPath;
+            }
+        }
     }
     
     private static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
@@ -628,7 +660,8 @@ public class DatabaseRegistry {
                 final Alert question = new Alert(Alert.AlertType.NONE, "Veuillez rentrer des identifiants de connexion à CouchDb : ", ButtonType.CANCEL, ButtonType.OK);
                 question.getDialogPane().setContent(gPane);
                 question.setResizable(true);
-                question.setHeaderText("Veuillez rentrer des identifiants de connexion à CouchDb : ");
+                question.setHeaderText("Veuillez rentrer des identifiants de connexion à CouchDb pour l'adresse suivante :\n"
+                        + (isLocal? "Service local" : couchDbUrl.toExternalForm()));
 
                 Optional<ButtonType> result = question.showAndWait();
                 if (result.isPresent() && result.get().equals(ButtonType.OK)) {
@@ -650,29 +683,5 @@ public class DatabaseRegistry {
         } catch (InterruptedException | ExecutionException ex) {
             return null;
         }
-    }
-    
-    /**
-     * Designed to create a new replication from a paused one, ignoring pause filter 
-     * to allow its activation.
-     */
-    private static ReplicationCommand copyWithoutPauseFilter(final ReplicationCommand source) {
-        ReplicationCommand.Builder builder = new ReplicationCommand.Builder()
-                .source(source.source)
-                .target(source.target)
-                .continuous(source.continuous)
-                .createTarget(source.createTarget)
-                .docIds(source.docIds)
-                .proxy(source.proxy);
-
-        if (!PAUSE_FILTER.equals(source.filter)) {
-            builder.filter(source.filter);
-        }
-
-        if (source.sinceSeq != null) {
-            builder.sinceSeq(source.sinceSeq.toString());
-        }
-        
-        return builder.build();
     }
 }

@@ -70,7 +70,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
     @Override
     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
         TronconDigue troncon = target.get();
-        if (troncon != null && oldValue != null) { // TODO : fix behavior when no old value is present (Ex: troncon cut).
+        if (troncon != null && oldValue != null && newValue != null) { // TODO : fix behavior when no old value is present (Ex: troncon cut).
             // Value reset
             if (previousValue != null && previousValue.equals(newValue)) {
                 previousValue = null;
