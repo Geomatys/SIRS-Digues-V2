@@ -8,7 +8,6 @@ import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.component.ValiditySummaryRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
@@ -18,9 +17,11 @@ import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXValiditySummaryToElementTableColumn;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,13 +37,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -95,16 +93,19 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
+import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -639,7 +640,7 @@ public class FXSearchPane extends BorderPane {
         if (layer == null || layer.getCollection().isEmpty()) {
             setCenter(new Label("Pas de résultat pour votre recherche."));
         } else {
-            final FXFeatureTable table = new FXFeatureTable("fr.sirs.core.model.");
+            final CustomizedFeatureTable table = new CustomizedFeatureTable("fr.sirs.core.model.");
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
@@ -671,4 +672,68 @@ public class FXSearchPane extends BorderPane {
         
         return CorePlugin.createStructureStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
     } 
+    
+    private static class CustomizedFeatureTable extends FXFeatureTable {
+        
+        FeatureCollection features;
+        
+        CustomizedFeatureTable(final String path){
+            super(path);
+        }
+        
+        @Override
+        public boolean init(Object candidate){
+            final  boolean result = super.init(candidate);
+            if(result){
+            table.getColumns().add(0, new PrintFeatureColumn());
+            features = ((FeatureMapLayer) layer).getCollection();
+            }
+            return result;
+        }
+        
+        private class PrintFeatureColumn extends TableColumn<Feature, Feature>{
+            PrintFeatureColumn(){
+                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT));
+                printAll.setOnAction(new EventHandler<ActionEvent>() {
+
+                    @Override
+                    public void handle(ActionEvent event) {
+                        try {
+                            final File file = PrinterUtilities.print(features, null);
+//                            file.deleteOnExit();
+//                            final Desktop desktop = Desktop.getDesktop();
+//                            desktop.open(file);
+                        } catch (Exception ex) {
+                            SIRS.LOGGER.log(Level.SEVERE, null, ex);
+                        }
+                    }
+                });
+                setGraphic(printAll);
+                setPrefWidth(50);
+                
+                setCellValueFactory((CellDataFeatures<Feature, Feature> param) -> {
+                    return new SimpleObjectProperty<>(param.getValue());
+                });
+                
+                setCellFactory(new Callback<TableColumn<Feature, Feature>, TableCell<Feature, Feature>>() {
+
+                    @Override
+                    public TableCell<Feature, Feature> call(TableColumn<Feature, Feature> param) {
+                        return new ButtonTableCell<>(false, new ImageView(SIRS.ICON_PRINT), (Feature t)-> {return true;}, 
+                            (Feature t) -> {
+                                try {
+                                    final File file = PrinterUtilities.print(FeatureStoreUtilities.collection(t), null);
+//                                    file.deleteOnExit();
+//                                    final Desktop desktop = Desktop.getDesktop();
+//                                    desktop.open(file);
+                                } catch (Exception ex) {
+                                    SIRS.LOGGER.log(Level.SEVERE, null, ex);
+                                }
+                                return t;
+                            });
+                    }
+                });
+            }
+        }
+    }
 }

@@ -8,7 +8,7 @@ import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
-import fr.sirs.util.PrinterUtilities;
+import fr.sirs.util.PrinterUtilitiesElement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.other.FXDoubleDesignationPane;
@@ -326,7 +326,7 @@ public class FXMainFrame extends BorderPane {
                     }
 
                     try {
-                        fileToPrint = PrinterUtilities.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
+                        fileToPrint = PrinterUtilitiesElement.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
                         fileToPrint.deleteOnExit();
 
                         final Desktop desktop = Desktop.getDesktop();

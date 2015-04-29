@@ -70,7 +70,7 @@ public class PrinterUtilitiesTest {
         System.out.println("Test print Digue.");
         final DigueRepository digueRepository = new DigueRepository(connector);
         final Digue digue = digueRepository.getAll().get(0);
-        print(digue, null);    
+//        print(digue, null);    
     }
     
     /**
@@ -83,7 +83,7 @@ public class PrinterUtilitiesTest {
         System.out.println("Test print TronconGestionDigue.");
         final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final TronconDigue tronconGestionDigue = tronconRepository.getAll().get(0);
-        print(tronconGestionDigue, null); 
+//        print(tronconGestionDigue, null); 
     }
     
     /**
@@ -108,7 +108,7 @@ public class PrinterUtilitiesTest {
         //borneDigue.setXPointOrigine(1.6);
         //borneDigue.setYPointOrigine(1.7);
          
-        print(borneDigue, null); 
+//        print(borneDigue, null); 
     }
 
     /**
