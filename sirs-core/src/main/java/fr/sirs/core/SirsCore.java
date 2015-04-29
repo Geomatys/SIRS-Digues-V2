@@ -68,8 +68,6 @@ public class SirsCore {
     
     public static final Path LOCAL_QUERIES_PATH = CONFIGURATION_PATH.resolve("queries.properties");
     
-    private static CoordinateReferenceSystem PROJECTION;
-    
     /**
      * User directory root folder.
      * 
@@ -86,19 +84,6 @@ public class SirsCore {
     public static Path getDatabaseFolder(){
         return DATABASE_PATH;
     }
-
-    public static void setEpsgCode(String epsgCode) {
-        try {
-            PROJECTION  = CRS.decode(epsgCode);
-        } catch (FactoryException e) {
-            throw new SirsCoreRuntimeExecption(e);
-         }
-        
-    }
-
-    public static CoordinateReferenceSystem getEpsgCode() {
-        return PROJECTION;
-    } 
     
     /**
      * Initialise la base EPSG et la grille NTV2 utilisée par l'application. Si  
@@ -145,14 +130,6 @@ public class SirsCore {
                 LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
                 GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourrait apparaître au sein de l'application.", ex).show();
             }
-        }
-    }
-
-    public static int getSrid() {
-        try {
-            return IdentifiedObjects.lookupEpsgCode(SirsCore.getEpsgCode(), true);
-        } catch (FactoryException e) {
-            throw new SirsCoreRuntimeExecption(e);
         }
     }
     

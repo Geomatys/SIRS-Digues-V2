@@ -22,11 +22,10 @@ import org.geotoolkit.parameter.Parameters;
 import org.h2.util.JdbcUtils;
 import org.h2gis.h2spatial.CreateSpatialExtension;
 import org.opengis.parameter.ParameterValueGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import fr.sirs.core.DocHelper;
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
@@ -43,7 +42,6 @@ import org.geotoolkit.jdbc.DBCPDataSource;
 
 public class H2Helper {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(H2Helper.class);
     private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
     
     private static FeatureStore STORE = null;
@@ -147,7 +145,7 @@ public class H2Helper {
 
             try (Connection conn = createConnection(couchConnector)) {
                 updateMessage("Création des tables.");
-                int srid = SirsCore.getSrid();
+                int srid = InjectorCore.getBean(SessionCore.class).getSrid();
                 SQLHelper.createTables(conn, srid);
                 conn.setAutoCommit(false);
 

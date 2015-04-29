@@ -3,7 +3,9 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.SIRS;
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.json.GeometryDeserializer;
@@ -129,7 +131,7 @@ public class FXTronconCut extends VBox {
                 segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
                 segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
                 segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
-                JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+                JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());
                 tmpSegments.add(segment);
             }
         }
@@ -141,7 +143,7 @@ public class FXTronconCut extends VBox {
             segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
             segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
             segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
-            JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+            JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());
             tmpSegments.add(segment);
         }
 
@@ -151,7 +153,7 @@ public class FXTronconCut extends VBox {
             segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
             segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
             segment.geometryProp.set(linear);
-            JTS.setCRS(segment.geometryProp.get(), GeometryDeserializer.PROJECTION);
+            JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());
             tmpSegments.add(segment);
         }
         segments.setAll(tmpSegments);

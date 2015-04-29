@@ -1,5 +1,5 @@
 
-package fr.sirs.query;
+package fr.sirs.index;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;

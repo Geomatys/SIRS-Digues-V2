@@ -54,7 +54,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public T get(String id) {
         try {
-            return cache.getOrCreate(id, () -> beforeCache(super.get(id)));
+            return cache.getOrCreate(id, () -> onLoad(super.get(id)));
         } catch (Exception ex) {
             // should never happen...
             throw new RuntimeException(ex);
@@ -70,7 +70,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
         super.add(entity);
-        cache.put(entity.getId(), beforeCache(entity));
+        cache.put(entity.getId(), onLoad(entity));
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         super.update(entity);
         // Put the updated entity into cache in case the old entity is different.
         if (entity != cache.get(entity.getId())) {
-            cache.put(entity.getId(), beforeCache(entity));
+            cache.put(entity.getId(), onLoad(entity));
         }
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         final ArrayList<T> result = new ArrayList<>(source.size());
         for (T element : source) {
             try {
-                result.add(cache.getOrCreate(element.getId(), () -> beforeCache(element)));
+                result.add(cache.getOrCreate(element.getId(), () -> onLoad(element)));
             } catch (Exception ex) {
                 // Should never happen ...
                 throw new RuntimeException(ex);
@@ -137,21 +137,13 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
     
     /**
-     * Perform an operation before caching an object. By default, nothing is done,
+     * Perform an operation when loading an object. By default, nothing is done,
      * but implementations can override this to work with an element before putting
      * it in cache. 
-     * @param toCache The object which will be cached.
-     * @return The object to cache. By default, the one in parameter.
+     * @param loaded The object which must be loaded.
+     * @return The object to load. By default, the one in parameter.
      */
-    protected T beforeCache(final T toCache) {
-        return toCache;
+    protected T onLoad(final T loaded) {
+        return loaded;
     }
-    
-//    @Override
-//    public T create(){
-//        final SessionGen session = InjectorCore.getBean(SessionGen.class);
-//        if(session!=null && session instanceof OwnableSession){
-//            ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
-//        }
-//    }
 }

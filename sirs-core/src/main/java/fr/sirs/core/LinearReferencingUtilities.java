@@ -3,7 +3,6 @@ package fr.sirs.core;
 
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.util.json.GeometryDeserializer;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -132,7 +131,8 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         }
 
         final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));
-        JTS.setCRS(geom, GeometryDeserializer.PROJECTION);
+        JTS.setCRS(geom, InjectorCore.getBean(SessionCore.class).getProjection());
+        
         return geom;
     }
     

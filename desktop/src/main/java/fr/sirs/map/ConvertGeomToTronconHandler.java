@@ -117,15 +117,15 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
                         final TronconDigue troncon = showTronconDialog();
                         if (troncon == null) return;
                         try{
+                            final Session session = Injector.getSession();
                             //convertion from data crs to base crs
                             geom = JTS.transform(geom, CRS.findMathTransform(
                                     f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(), 
-                                    SirsCore.getEpsgCode(), true));
-                            JTS.setCRS(geom, SirsCore.getEpsgCode());
+                                    session.getProjection(), true));
+                            JTS.setCRS(geom, session.getProjection());
                             troncon.setGeometry(geom);
 
                             //save troncon
-                            final Session session = Injector.getBean(Session.class);
                             session.getTronconDigueRepository().add(troncon);
                             TronconUtils.updateSRElementaire(troncon,session);
                             

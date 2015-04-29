@@ -400,7 +400,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 try {
                     //on crée un géométrie au centre de la france
                     final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84, 
-                            CRS.findMathTransform(CommonCRS.WGS84.normalizedGeographic(),SirsCore.getEpsgCode(),true));
+                            CRS.findMathTransform(CommonCRS.WGS84.normalizedGeographic(),session.getProjection(),true));
                     troncon.setGeometry(geom);
                 } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);

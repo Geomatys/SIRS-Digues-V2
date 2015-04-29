@@ -4,6 +4,7 @@ package fr.sirs.theme.ui;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Positionable;
@@ -175,9 +176,10 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
         
         //transform to RGF93 
         try{
-            final MathTransform trs = CRS.findMathTransform(dataCrs, SirsCore.getEpsgCode(), true);
+            final fr.sirs.Session session = Injector.getSession();
+            final MathTransform trs = CRS.findMathTransform(dataCrs, session.getProjection(), true);
             geom = (Point) JTS.transform(geom, trs);
-            JTS.setCRS(geom, SirsCore.getEpsgCode());
+            JTS.setCRS(geom, session.getProjection());
 
         }catch(TransformException | FactoryException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);

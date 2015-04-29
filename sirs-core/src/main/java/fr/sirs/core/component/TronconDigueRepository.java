@@ -552,8 +552,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     }
 
     @Override
-    protected TronconDigue beforeCache(TronconDigue toCache) {
-        new DefaultSRChangeListener(toCache);
-        return toCache;
+    protected TronconDigue onLoad(TronconDigue toLoad) {
+        new DefaultSRChangeListener(toLoad);
+        return toLoad;
     }
 }

@@ -245,7 +245,7 @@ public class FXMapPane extends BorderPane {
                 protected Object call() throws Exception {
                     uiMap1.getContainer().setContext(context);
                     final Date time = new Date();
-                    uiMap1.getCanvas().setObjectiveCRS(SirsCore.getEpsgCode());
+                    uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
                     uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
                     uiMap1.getCanvas().setTemporalRange(time, time);
                     uiMap2.getCanvas().setTemporalRange(time, time);

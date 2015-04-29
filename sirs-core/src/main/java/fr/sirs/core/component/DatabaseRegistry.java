@@ -46,7 +46,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.DbPath;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.ektorp.http.HttpResponse;
@@ -54,7 +53,7 @@ import org.ektorp.impl.StdReplicationTask;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Create a wrapper for connections on a couchDb service.
+ * Create a wrapper for connections on a CouchDb service.
  * 
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
@@ -64,15 +63,27 @@ public class DatabaseRegistry {
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
     private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
+    private static final Pattern AUTH_ERROR_CODE = Pattern.compile("40(1|3)");
     
     private static final int SOCKET_TIMEOUT = 45000;
     private static final int CONNECTION_TIMEOUT = 5000;
     
+    /**
+     * A boolean indicating if program runs on the same host than target CouchDb
+     * service (true). False if we work with a service on a distant host.
+     */
     private final boolean isLocal;
     
+    /**
+     * URL of the CouchDb service our registry is working with.
+     */
     public final URL couchDbUrl;
     
+    /**
+     * Login for connexion on CouchDb service.
+     */
     private String username;
+    /** Password for cconnexion on CouchDb service. */
     private String userPass;
     
     private CouchDbInstance couchDbInstance;
@@ -240,8 +251,9 @@ public class DatabaseRegistry {
      * @param initIndex True if we must start an elastic search index (creates an {@link ElasticSearchEngine}) on database.
      * @param initChangeListener True if we must start a {@link DocumentChangeEmiter} on database changes, false otherwise.
      * @return A connector to queried database.
+     * @throws java.io.IOException If an error occurs while connecting to couchDb database.
      */
-    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, final boolean createIfNotExists, final boolean initIndex, final boolean initChangeListener) {
+    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, final boolean createIfNotExists, final boolean initIndex, final boolean initChangeListener) throws IOException {
         final String dbContext = getContextPath(dbName);
         try {
             CouchDbConnector connector = couchDbInstance.createConnector(dbContext, createIfNotExists);
@@ -256,7 +268,6 @@ public class DatabaseRegistry {
             appContext.getBean(SirsDBInfoRepository.class).get().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
 
             if (initIndex) {
-
                 ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
                         couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
                 appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
@@ -272,35 +283,22 @@ public class DatabaseRegistry {
 
             // If an exception occurs, we check if its due to an authorization problem. If true, we ask for new login and retry.
         } catch (RuntimeException e) {
-            Throwable tmpEx = e;
-            boolean accessException = false;
-            while (!accessException && tmpEx != null) {
-                if (tmpEx instanceof DbAccessException) {
-                    accessException = true;
-                } else {
-                    tmpEx = tmpEx.getCause();
-                }
-            }
-            if (accessException) {
-                try {
-                    handleAccessException();
-                } catch (Exception ex) {
-                    e.addSuppressed(ex);
-                    throw e;
-                }
-                return connectToSirsDatabase(dbContext, createIfNotExists, initIndex, initChangeListener);
-            } else {
-                throw e;
-            }
+            handleAccessException(e);
+            return connectToSirsDatabase(dbContext, createIfNotExists, initIndex, initChangeListener);
         }
     }
 
+    /**
+     * Delete the queried database of current CouchDb service. 
+     * @param dbName Name of the database (must be a name valid on current CouchDb service) to remove.
+     * @throws IOException If an error happened while connecting to CouchDb service.
+     */
     public void dropDatabase(String dbName) throws IOException {
         try {
             cancelAllSynchronizations(dbName);
             couchDbInstance.deleteDatabase(dbName);
-        } catch (DbAccessException e) {
-            handleAccessException();
+        } catch (RuntimeException e) {
+            handleAccessException(e);
             dropDatabase(dbName);
         }
     }
@@ -344,7 +342,34 @@ public class DatabaseRegistry {
         }
     }    
     
-    private void handleAccessException() throws IOException {
+    /**
+     * Analyze input exception to determine if it's due to bad login. If true, we 
+     * ask for a login to user. If none provided, a DbAccessException is thrown.
+     * @throws IOException If an error happens when trying to connect to database
+     * with newly provided login.
+     * @throws  DbAccessException If user does not give any login.
+     * @throws T original exception, if it's not an authentication exception, or user cannot give valid login.
+     */
+    private <T extends Exception> void handleAccessException(final T origin) throws T, IOException {
+            Throwable tmpEx = origin;
+            boolean accessException = false;
+            while (!accessException && tmpEx != null) {
+                if (tmpEx instanceof DbAccessException) {
+                    accessException = true;
+                } else {
+                    tmpEx = tmpEx.getCause();
+                }
+            }
+            if (accessException) {
+                if (!AUTH_ERROR_CODE.matcher(tmpEx.getMessage()).find()) {
+                    accessException = false;
+                }
+            }
+            
+            if (!accessException) {
+                throw origin;
+            }
+            
         final Map.Entry<String, String> newLogin = askForLogin(username, userPass);
         if (newLogin != null) {
             username = newLogin.getKey();
@@ -353,7 +378,7 @@ public class DatabaseRegistry {
             // Refresh connection.
             connect();
         } else {
-            throw new DbAccessException("Pas de login fourni.");
+            throw origin;
         }
     }
     
@@ -425,14 +450,9 @@ public class DatabaseRegistry {
             
             new SirsDBInfoRepository(localConnector).set(srid, distant);
             
-        } catch (DbAccessException e) {
-            try {
-                handleAccessException();
-                synchronizeSirsDatabases(distant, localPath, continuous);
-            } catch (IOException ex) {
-                e.addSuppressed(ex);
-                throw e;
-            }
+        } catch (RuntimeException e) {
+            handleAccessException(e);
+            synchronizeSirsDatabases(distant, localPath, continuous);
         }
     }
     
@@ -457,21 +477,15 @@ public class DatabaseRegistry {
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @return A status of started replication task.
      */
-    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) {
+    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) throws IOException {
+        ReplicationCommand cmd = new ReplicationCommand.Builder()
+                .continuous(false).source(dbToCopy).target(dbToPasteInto)
+                .createTarget(true).build();
         try {
-            ReplicationCommand cmd = new ReplicationCommand.Builder()
-                    .continuous(false).source(dbToCopy).target(dbToPasteInto)
-                    .createTarget(true).build();
-
             return couchDbInstance.replicate(cmd);
         } catch (DbAccessException e) {
-            try {
-                handleAccessException();
-                return copyDatabase(dbToCopy, dbToPasteInto);
-            } catch (Exception ex) {
-                e.addSuppressed(ex);
-                throw e;
-            }
+            handleAccessException(e);
+            return copyDatabase(dbToCopy, dbToPasteInto);
         }
     }
     
@@ -625,7 +639,7 @@ public class DatabaseRegistry {
         }
     }
     
-    private static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
+    public static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
         if (connector.contains("$sirs")) {
             return Optional.of(connector.get(SirsDBInfo.class, "$sirs"));
         }

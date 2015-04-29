@@ -1,6 +1,7 @@
 
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.util.SirsStringConverter;
@@ -40,7 +41,7 @@ public abstract class FXAbstractImportCoordinate extends BorderPane {
     public FXAbstractImportCoordinate() {
         SIRS.loadFXML(this);
         
-        uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(Injector.getSession().getProjection(), FXPositionablePane.CRS_WGS84));
         uiCRS.setConverter(stringConverter);
         uiCRS.getSelectionModel().clearAndSelect(0);
         

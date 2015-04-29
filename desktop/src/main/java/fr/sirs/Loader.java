@@ -259,9 +259,6 @@ public class Loader extends Application {
                 // try to create it, won't do anything if already exist
                 SirsCore.initEpsgDB();
 
-                // GEOMETRY / JSON Converter
-                GeometryDeserializer.class.newInstance();
-
                 // IMAGE ///////////////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement des lecteurs d'images...");

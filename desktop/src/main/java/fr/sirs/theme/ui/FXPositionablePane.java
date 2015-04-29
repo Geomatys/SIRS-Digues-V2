@@ -129,7 +129,7 @@ public class FXPositionablePane extends BorderPane {
     
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
     private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
-    private final CoordinateReferenceSystem baseCrs = SirsCore.getEpsgCode();
+    private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
     
     /**
      * Reference to TronconDigue parent of the current positionable

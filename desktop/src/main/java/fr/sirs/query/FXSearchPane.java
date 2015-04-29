@@ -1,6 +1,7 @@
 
 package fr.sirs.query;
 
+import fr.sirs.index.ElementHit;
 import fr.sirs.CorePlugin;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SQLQueries;

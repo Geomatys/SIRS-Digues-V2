@@ -149,11 +149,12 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
         
         for(final Feature feature : features){
             final PointLeveXYZ leve;
+            final fr.sirs.Session sirsSession = Injector.getSession();
             
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){
-                leve = Injector.getSession().getElementCreator().createElement(XYZLeveProfilTravers.class);
+                leve = sirsSession.getElementCreator().createElement(XYZLeveProfilTravers.class);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
-                leve = Injector.getSession().getElementCreator().createElement(XYZProfilLong.class);
+                leve = sirsSession.getElementCreator().createElement(XYZProfilLong.class);
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }
@@ -177,9 +178,9 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
 
             //transform to RGF93 
             try{
-                final MathTransform trs = CRS.findMathTransform(dataCrs, SirsCore.getEpsgCode(), true);
+                final MathTransform trs = CRS.findMathTransform(dataCrs, sirsSession.getProjection(), true);
                 geom = (Point) JTS.transform(geom, trs);
-                JTS.setCRS(geom, SirsCore.getEpsgCode());
+                JTS.setCRS(geom, sirsSession.getProjection());
 
             }catch(TransformException | FactoryException ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -193,8 +194,8 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
             
             leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
             
-            leve.setAuthor(Injector.getSession().getUtilisateur().getId());
-            leve.setValid(!(Injector.getSession().getRole()==Role.EXTERN));
+            leve.setAuthor(sirsSession.getUtilisateur().getId());
+            leve.setValid(!(sirsSession.getRole()==Role.EXTERN));
             leves.add(leve);
         }
         return leves;

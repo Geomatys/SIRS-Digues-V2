@@ -25,7 +25,6 @@ public class SirsDBInfoRepository {
     public Optional<SirsDBInfo> get() {
         try {
             info = db.get(SirsDBInfo.class, "$sirs");
-            SirsCore.setEpsgCode(info.getEpsgCode());
             return Optional.of(info);
         } catch (DocumentNotFoundException e) {
             return Optional.empty();
@@ -54,8 +53,6 @@ public class SirsDBInfoRepository {
                 throw new IllegalStateException("Database SRID cannot be modified after creation !");
             }
             info.setEpsgCode(epsgCode);
-            // TODO : move SRID elsewhere, it's a session dependant data.
-            SirsCore.setEpsgCode(epsgCode);
         }
         
         if (remoteDatabase != null && !remoteDatabase.isEmpty()) {

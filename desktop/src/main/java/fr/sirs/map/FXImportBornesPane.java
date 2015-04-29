@@ -119,7 +119,7 @@ public class FXImportBornesPane extends BorderPane {
         SIRS.loadFXML(this);
 
         final SirsStringConverter stringConverter = new SirsStringConverter();
-        uiCRS.setItems(FXCollections.observableArrayList(SirsCore.getEpsgCode(), FXPositionablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(Injector.getSession().getProjection(), FXPositionablePane.CRS_WGS84));
         uiCRS.setConverter(stringConverter);
         uiCRS.getSelectionModel().clearAndSelect(0);
         uiAttX.setConverter(stringConverter);
@@ -309,7 +309,7 @@ public class FXImportBornesPane extends BorderPane {
 
                 final MathTransform trs = CRS.findMathTransform(
                         selection.getFeatureType().getCoordinateReferenceSystem(), // TODO : replace CRS with the one in uiCRS for CSV files.
-                        SirsCore.getEpsgCode(),
+Injector.getSession().getProjection(),
                         true);
                 final boolean isIdentity = trs.isIdentity();
 
@@ -330,7 +330,7 @@ public class FXImportBornesPane extends BorderPane {
                                 borneGeom = (Point) value;
                             } else {
                                 borneGeom = (Point) JTS.transform((Point) value, trs);
-                                JTS.setCRS(borneGeom, SirsCore.getEpsgCode());
+                                JTS.setCRS(borneGeom, Injector.getSession().getProjection());
                             }
                             BorneDigue newBorn = borneRepo.create();
                             newBorn.setGeometry(borneGeom);

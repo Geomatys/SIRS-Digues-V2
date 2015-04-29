@@ -323,7 +323,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 
                 final Coordinate coord = helperBorne.toCoord(startX,startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
-                JTS.setCRS(point, SirsCore.getEpsgCode());
+                JTS.setCRS(point, session.getProjection());
                 //les event vont induire le repaint de la carte
                 editPane.createBorne(point);
             }

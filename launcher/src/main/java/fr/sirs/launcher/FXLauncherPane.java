@@ -1,4 +1,3 @@
-
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -102,73 +101,102 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class FXLauncherPane extends BorderPane {
 
     private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
-    
+
     /**
-     * Si le serveur de plugins ne pointe pas sur une liste valide de {@link PluginInfo}
-     * serialisés, on essaie d'atteindre le fichier suivant.
+     * Si le serveur de plugins ne pointe pas sur une liste valide de
+     * {@link PluginInfo} serialisés, on essaie d'atteindre le fichier suivant.
      */
     private static final String DEFAULT_PLUGIN_DESCRIPTOR = "plugins.json";
-        
-    @FXML private Label errorLabel;
-    @FXML private TabPane uiTabPane;
-    
+
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private TabPane uiTabPane;
+
     // onglet base locales
-    @FXML private TableView<String> uiLocalBaseTable;
-    @FXML private Button uiConnectButton;
-    
+    @FXML
+    private TableView<String> uiLocalBaseTable;
+    @FXML
+    private Button uiConnectButton;
+
     // onglet base distantes    
-    @FXML private TextField uiDistantName;
-    @FXML private TextField uiDistantUrl;
-    @FXML private CheckBox uiDistantSync;
-    
+    @FXML
+    private TextField uiDistantName;
+    @FXML
+    private TextField uiDistantUrl;
+    @FXML
+    private CheckBox uiDistantSync;
+
     // onglet base creation
-    @FXML private TextField uiNewName;
-    @FXML private FXCRSButton uiNewCRS;
-    @FXML private ProgressBar uiProgressCreate;    
-    @FXML private Button uiCreateButton;
-    @FXML private TextField uiCreateLogin;
-    @FXML private PasswordField uiCreatePassword;
-    @FXML private PasswordField uiCreateConfirmPassword;
-    
+    @FXML
+    private TextField uiNewName;
+    @FXML
+    private FXCRSButton uiNewCRS;
+    @FXML
+    private ProgressBar uiProgressCreate;
+    @FXML
+    private Button uiCreateButton;
+    @FXML
+    private TextField uiCreateLogin;
+    @FXML
+    private PasswordField uiCreatePassword;
+    @FXML
+    private PasswordField uiCreateConfirmPassword;
+
     // onglet base importation
-    @FXML private TextField uiImportName;
-    @FXML private FXCRSButton uiImportCRS;
-    @FXML private TextField uiImportDBData;
-    @FXML private TextField uiImportDBCarto;
-    @FXML private ProgressBar uiProgressImport;
-    @FXML private Button uiImportButton;
-    @FXML private TextField uiImportLogin;
-    @FXML private PasswordField uiImportPassword;
-    @FXML private PasswordField uiImportConfirmPassword;
-    
+    @FXML
+    private TextField uiImportName;
+    @FXML
+    private FXCRSButton uiImportCRS;
+    @FXML
+    private TextField uiImportDBData;
+    @FXML
+    private TextField uiImportDBCarto;
+    @FXML
+    private ProgressBar uiProgressImport;
+    @FXML
+    private Button uiImportButton;
+    @FXML
+    private TextField uiImportLogin;
+    @FXML
+    private PasswordField uiImportPassword;
+    @FXML
+    private PasswordField uiImportConfirmPassword;
+
     // onglet mise à jour
-    @FXML private TextField uiMajServerURL;
-    @FXML private TableView<PluginInfo> uiInstalledPlugins;
-    @FXML private TableView<PluginInfo> uiAvailablePlugins;
-    
-    @FXML private Button uiInstallPluginBtn;
-    @FXML private Button uiDeletePluginBtn;
-    
-    @FXML private ProgressBar uiProgressPlugins;
-    
+    @FXML
+    private TextField uiMajServerURL;
+    @FXML
+    private TableView<PluginInfo> uiInstalledPlugins;
+    @FXML
+    private TableView<PluginInfo> uiAvailablePlugins;
+
+    @FXML
+    private Button uiInstallPluginBtn;
+    @FXML
+    private Button uiDeletePluginBtn;
+
+    @FXML
+    private ProgressBar uiProgressPlugins;
+
     private URL serverURL;
     private PluginList local = new PluginList();
     private PluginList distant = new PluginList();
-    
+
     private final DatabaseRegistry localRegistry;
-        
+
     public FXLauncherPane() throws IOException {
         SIRS.loadFXML(this);
-        
+
         localRegistry = new DatabaseRegistry();
-        
+
         errorLabel.setTextFill(Color.RED);
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
-        
-        final TableColumn<String,String> column = new TableColumn<>("Base de données");
+
+        final TableColumn<String, String> column = new TableColumn<>("Base de données");
         column.setCellValueFactory((TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()));
-        
+
         uiLocalBaseTable.getColumns().clear();
         uiLocalBaseTable.getColumns().add(new DeleteColumn());
         uiLocalBaseTable.getColumns().add(new CopyColumn());
@@ -176,28 +204,31 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.getColumns().add(new SynchronizationColumn(localRegistry));
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        
+
         uiInstallPluginBtn.setDisable(true);
         uiDeletePluginBtn.setDisable(true);
-        
+
         uiInstalledPlugins.getColumns().add(newNameColumn());
         uiInstalledPlugins.getColumns().add(newVersionColumn());
         uiInstalledPlugins.getColumns().add(newDescriptionColumn());
-        
+
         uiAvailablePlugins.getColumns().add(newNameColumn());
         uiAvailablePlugins.getColumns().add(newVersionColumn());
         uiAvailablePlugins.getColumns().add(newDescriptionColumn());
-        
-        uiInstalledPlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {          
+
+        uiInstalledPlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {
             if (newValue != null) {
                 uiDeletePluginBtn.setDisable(false);
-                uiDeletePluginBtn.setOnAction((ActionEvent event) -> {deletePlugin(newValue); updatePluginList(null);});
+                uiDeletePluginBtn.setOnAction((ActionEvent event) -> {
+                    deletePlugin(newValue);
+                    updatePluginList(null);
+                });
             } else {
                 uiDeletePluginBtn.setDisable(true);
             }
-        });        
-                
-        uiAvailablePlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {          
+        });
+
+        uiAvailablePlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {
             if (newValue != null) {
                 if (local.getPluginInfo(newValue.getName()).findAny().isPresent()) {
                     uiInstallPluginBtn.setText("Mettre à jour");
@@ -213,66 +244,70 @@ public class FXLauncherPane extends BorderPane {
                 uiInstallPluginBtn.setDisable(true);
             }
         });
-        
+
         uiProgressPlugins.visibleProperty().bind(
                 uiInstallPluginBtn.armedProperty().or(uiDeletePluginBtn.armedProperty()));
-        
+
         updateLocalDbList();
         updatePluginList(null);
         uiMajServerURL.textProperty().addListener(new ChangeListener<Object>() {
             @Override
             public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-                if (newValue != null && !((String)newValue).isEmpty() && !newValue.equals(oldValue)) updatePluginList(null);
+                if (newValue != null && !((String) newValue).isEmpty() && !newValue.equals(oldValue)) {
+                    updatePluginList(null);
+                }
             }
         });
-        
+
         final ChangeListener<Object> accentReplacer = new ChangeListener<Object>() {
             @Override
             public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-            final String nfdText = Normalizer.normalize((String)newValue, Normalizer.Form.NFD);
-            ((WritableValue)observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
+                final String nfdText = Normalizer.normalize((String) newValue, Normalizer.Form.NFD);
+                ((WritableValue) observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
             }
-        }; 
-        
+        };
+
         uiDistantName.textProperty().addListener(accentReplacer);
         uiImportName.textProperty().addListener(accentReplacer);
         uiNewName.textProperty().addListener(accentReplacer);
-        
-        try{
+
+        try {
             final CoordinateReferenceSystem baseCrs = CRS.decode("EPSG:2154");
             uiNewCRS.crsProperty().set(baseCrs);
             uiImportCRS.crsProperty().set(baseCrs);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
-        
+
     }
-    
-    /** 
-     * Cherche la liste des plugins installés localement, puis ceux disponibles 
+
+    /**
+     * Cherche la liste des plugins installés localement, puis ceux disponibles
      * sur le serveur de mise à jour (si l'utilisateur a donné une URL valide).
      */
-    private void updateLocalDbList(){
+    private void updateLocalDbList() {
         final ObservableList<String> names = FXCollections.observableList(listLocalDatabases());
         uiLocalBaseTable.setItems(names);
-        if(!names.isEmpty()){
+        if (!names.isEmpty()) {
             uiLocalBaseTable.getSelectionModel().select(0);
         }
         uiConnectButton.setDisable(names.isEmpty());
     }
-    
+
     @FXML
     void updatePluginList(ActionEvent event) {
         try {
             local = PluginInstaller.listLocalPlugins();
             uiInstalledPlugins.setItems(local.plugins);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Cannot update local plugin list !", ex);
             errorLabel.setText("Une erreur inattendue est survenue lors de la récupération des plugins installés.");
         }
-               
+
         final String majURL = uiMajServerURL.getText();
-        if (majURL == null || majURL.isEmpty()) return;
+        if (majURL == null || majURL.isEmpty()) {
+            return;
+        }
         try {
             serverURL = new URL(uiMajServerURL.getText());
         } catch (MalformedURLException e) {
@@ -280,18 +315,18 @@ public class FXLauncherPane extends BorderPane {
             errorLabel.setText("L'URL du serveur de plugins est invalide.");
             return;
         }
-        
+
         try {
             distant = PluginInstaller.listDistantPlugins(serverURL);
             uiAvailablePlugins.setItems(distant.plugins);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             try {
                 String serverStr = serverURL.toExternalForm();
                 if (!serverStr.endsWith("/")) {
                     serverStr = serverStr + "/";
                 }
                 distant = PluginInstaller.listDistantPlugins(
-                        new URL(serverStr+DEFAULT_PLUGIN_DESCRIPTOR));
+                        new URL(serverStr + DEFAULT_PLUGIN_DESCRIPTOR));
                 distant.plugins.removeAll(local.plugins);
                 uiAvailablePlugins.setItems(distant.plugins);
             } catch (Exception e) {
@@ -301,13 +336,12 @@ public class FXLauncherPane extends BorderPane {
             }
         }
     }
-        
-    
+
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
         final Window currentWindow = getScene().getWindow();
-        
+
         if (currentWindow instanceof Stage) {
             SIRS.setLauncher((Stage) currentWindow);
         }
@@ -317,11 +351,11 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void connectDistant(ActionEvent event) {
-        if(uiDistantName.getText().trim().isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
+        if (uiDistantName.getText().trim().isEmpty()) {
+            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
             return;
         }
-        
+
         final String distantUrl = uiDistantUrl.getText();
         try {
             localRegistry.synchronizeSirsDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
@@ -337,46 +371,46 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void createEmpty(ActionEvent event) {
         final String dbName = cleanDbName(uiNewName.getText());
-        if(dbName.isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
+        if (dbName.isEmpty()) {
+            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
             return;
         }
-        
-        if(listLocalDatabases().contains(dbName)){
-            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
+
+        if (listLocalDatabases().contains(dbName)) {
+            new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK).showAndWait();
             return;
         }
-        
-        if("".equals(uiCreatePassword.getText())
-                || !uiCreatePassword.getText().equals(uiCreateConfirmPassword.getText())){
-            new Alert(Alert.AlertType.ERROR,"Veuillez entrer, puis confirmer un mot de passe administrateur.",ButtonType.OK).showAndWait();
+
+        if ("".equals(uiCreatePassword.getText())
+                || !uiCreatePassword.getText().equals(uiCreateConfirmPassword.getText())) {
+            new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK).showAndWait();
             return;
         }
-        
+
         String epsg = "EPSG:2154";
-        try{
-            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiNewCRS.crsProperty().get(),true);
-            epsg = "EPSG:"+epsgNum;
-        }catch(Exception ex){
+        try {
+            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiNewCRS.crsProperty().get(), true);
+            epsg = "EPSG:" + epsgNum;
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
-        
-        final String epsgCode = epsg;        
+
+        final String epsgCode = epsg;
         uiCreateButton.setDisable(true);
         new Thread(() -> {
             try (ConfigurableApplicationContext applicationContext = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
                 final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
-                
+
                 createDefaultUsers(utilisateurRepository, uiCreateLogin.getText(), uiCreatePassword.getText());
-                
+
                 //aller au panneau principal
                 Platform.runLater(() -> {
                     uiTabPane.getSelectionModel().clearAndSelect(0);
                     updateLocalDbList();
                 });
-                
+
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 Platform.runLater(() -> {
@@ -389,23 +423,21 @@ public class FXLauncherPane extends BorderPane {
             }
         }).start();
     }
-    
-    
-    private void createDefaultUsers(final UtilisateurRepository utilisateurRepository, final String adminLogin, final String adminPassword){
+
+    private void createDefaultUsers(final UtilisateurRepository utilisateurRepository, final String adminLogin, final String adminPassword) {
         MessageDigest messageDigest = null;
         try {
             messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
         administrateur.setLogin(adminLogin);
         administrateur.setPassword(new String(messageDigest.digest(adminPassword.getBytes())));
         administrateur.setRole(Role.ADMIN);
         utilisateurRepository.add(administrateur);
-        
-        
+
         final Utilisateur defaultGuest = ElementCreator.createAnonymValidElement(Utilisateur.class);
         defaultGuest.setLogin(LOGIN_DEFAULT_GUEST);
         defaultGuest.setPassword(new String(messageDigest.digest("".getBytes())));
@@ -416,27 +448,27 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     synchronized void createFromAccess(ActionEvent event) {
         final String dbName = cleanDbName(uiImportName.getText());
-        if(dbName.isEmpty()){
-            new Alert(Alert.AlertType.ERROR,"Veuillez remplir le nom de la base de donnée.",ButtonType.OK).showAndWait();
+        if (dbName.isEmpty()) {
+            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
             return;
         }
-        
-        if(listLocalDatabases().contains(dbName)){
-            new Alert(Alert.AlertType.ERROR,"Le nom de la base de données est déjà utilisé.",ButtonType.OK).showAndWait();
+
+        if (listLocalDatabases().contains(dbName)) {
+            new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK).showAndWait();
             return;
         }
-        
-        if("".equals(uiImportPassword.getText())
-                || !uiImportPassword.getText().equals(uiImportConfirmPassword.getText())){
-            new Alert(Alert.AlertType.ERROR,"Veuillez entrer, puis confirmer un mot de passe administrateur.",ButtonType.OK).showAndWait();
+
+        if ("".equals(uiImportPassword.getText())
+                || !uiImportPassword.getText().equals(uiImportConfirmPassword.getText())) {
+            new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK).showAndWait();
             return;
         }
-        
+
         String epsg = "EPSG:2154";
-        try{
-            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiImportCRS.crsProperty().get(),true);
-            epsg = "EPSG:"+epsgNum;
-        }catch(Exception ex){
+        try {
+            final int epsgNum = IdentifiedObjects.lookupEpsgCode(uiImportCRS.crsProperty().get(), true);
+            epsg = "EPSG:" + epsgNum;
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         final String epsgCode = epsg;
@@ -455,7 +487,7 @@ public class FXLauncherPane extends BorderPane {
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setRemoteDatabase(epsgCode);
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
-                
+
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
 
                 //aller au panneau principale
@@ -483,7 +515,7 @@ public class FXLauncherPane extends BorderPane {
             fileChooser.setInitialDirectory(prevPath);
         }
         final File file = fileChooser.showOpenDialog(getScene().getWindow());
-        if(file!=null){
+        if (file != null) {
             setPreviousPath(file.getParentFile());
             uiImportDBData.setText(file.getAbsolutePath());
         }
@@ -497,12 +529,12 @@ public class FXLauncherPane extends BorderPane {
             fileChooser.setInitialDirectory(prevPath);
         }
         final File file = fileChooser.showOpenDialog(getScene().getWindow());
-        if(file!=null){
+        if (file != null) {
             setPreviousPath(file.getParentFile());
             uiImportDBCarto.setText(file.getAbsolutePath());
         }
     }
-        
+
     private void installPlugin(final PluginInfo input) {
         final String name = input.getName();
         Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
@@ -518,7 +550,7 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
         }
     }
-    
+
     private void deletePlugin(final PluginInfo input) {
         try {
             PluginInstaller.uninstall(input);
@@ -527,13 +559,12 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + input.getName(), e);
         }
     }
-    
-    
-    private static String cleanDbName(String name){
+
+    private static String cleanDbName(String name) {
         return name.trim();
     }
-    
-    private static void runDesktop(final String database){
+
+    private static void runDesktop(final String database) {
         try {
             Plugins.loadPlugins();
             (SIRS.LOADER = new Loader(database)).start(null);
@@ -542,13 +573,13 @@ public class FXLauncherPane extends BorderPane {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
     }
-    
+
     private static File getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(FXLauncherPane.class);
         final String str = prefs.get("path", null);
-        if(str!=null){
+        if (str != null) {
             final File file = new File(str);
-            if(file.isDirectory()){
+            if (file.isDirectory()) {
                 return file;
             }
         }
@@ -559,7 +590,7 @@ public class FXLauncherPane extends BorderPane {
         final Preferences prefs = Preferences.userNodeForPackage(FXLauncherPane.class);
         prefs.put("path", path.getAbsolutePath());
     }
- 
+
     private List<String> listLocalDatabases() {
         try {
             return localRegistry.listSirsDatabases();
@@ -568,13 +599,14 @@ public class FXLauncherPane extends BorderPane {
             return Collections.EMPTY_LIST;
         }
     }
-    
+
     /**
      * Permet de redémarrer l'application en cours d'éxecution.
+     *
      * @throws URISyntaxException Si l'application n'est pas démarrée en mode
      * natif, et que le chemin vers le JAR d'éxecution est corrompu.
-     * @throws IOException Si un problème survient lors de l'accès à l'éxecutable
-     * permettant de démarrer l'application.
+     * @throws IOException Si un problème survient lors de l'accès à
+     * l'éxecutable permettant de démarrer l'application.
      */
     private static void restartCore() throws URISyntaxException, IOException {
         final Pattern jarPattern = Pattern.compile("(?i).*\\.jar");
@@ -600,13 +632,13 @@ public class FXLauncherPane extends BorderPane {
             // uninstaller.
             Optional<Path> appExec = Files.walk(appDir, 1).filter(path -> {
                 final String str = path.getFileName().toString();
-                return str.matches("(?i)sirs.*") && 
-                        !str.toLowerCase().contains("unins")
-                        && Files.isExecutable(path) 
+                return str.matches("(?i)sirs.*")
+                        && !str.toLowerCase().contains("unins")
+                        && Files.isExecutable(path)
                         && Files.isRegularFile(path); // Check needed, cause a diectory can be marked executable...
             }).findFirst();
             if (appExec.isPresent()) {
-            LOGGER.log(Level.INFO, "Application executable {0}", appExec.toString());
+                LOGGER.log(Level.INFO, "Application executable {0}", appExec.toString());
                 args.add(appExec.get().toString());
             } else {
                 throw new IOException("No executable file can be found to restart SIRS application.");
@@ -642,49 +674,46 @@ public class FXLauncherPane extends BorderPane {
             }
             args.add(command);
         }
-        
+
         final ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(new File(System.getProperty("user.dir")));
         builder.start();
         System.exit(0);
     }
-    
+
     private static TableColumn newNameColumn() {
-        final TableColumn<PluginInfo,String> colName = new TableColumn<>("Plugin");
+        final TableColumn<PluginInfo, String> colName = new TableColumn<>("Plugin");
         colName.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
         return colName;
     }
-    
-        
-    private static TableColumn newVersionColumn() { 
-        final TableColumn<PluginInfo,String> colVersion = new TableColumn<>("Version");
+
+    private static TableColumn newVersionColumn() {
+        final TableColumn<PluginInfo, String> colVersion = new TableColumn<>("Version");
         colVersion.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> {
             final PluginInfo info = param.getValue();
-            final String version = info.getVersionMajor()+"."+info.getVersionMinor();
+            final String version = info.getVersionMajor() + "." + info.getVersionMinor();
             return new SimpleObjectProperty<>(version);
         });
         return colVersion;
     }
-    
-        
+
     private static TableColumn newDescriptionColumn() {
-        final TableColumn<PluginInfo,String> colDescription = new TableColumn<>("Description");
+        final TableColumn<PluginInfo, String> colDescription = new TableColumn<>("Description");
         colDescription.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().descriptionProperty());
         return colDescription;
-    }        
-    
-    
-    protected void deleteDatabase(final String databaseName) {        
+    }
+
+    protected void deleteDatabase(final String databaseName) {
         new IdentificationStage(databaseName).showAndWait();
         updateLocalDbList();
     }
-    
+
     /*
      * INNER CLASSES
      */
-    
     /**
-     * A simple column which contains a button to allow suppresssion of a local database.
+     * A simple column which contains a button to allow suppresssion of a local
+     * database.
      */
     public class DeleteColumn extends SimpleButtonColumn<String, String> {
 
@@ -703,63 +732,69 @@ public class FXLauncherPane extends BorderPane {
                         }
                     }, new Function<String, String>() {
 
-                public String apply(String toDelete) {
-                    final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                            ButtonType.NO, ButtonType.YES).showAndWait().get();
-                    if (ButtonType.YES == res) {
-                        try {
-                            deleteDatabase(toDelete);
-                        } catch (Exception ex) {
-                            GeotkFX.newExceptionDialog("Impossible de supprimer " + toDelete, ex).show();
+                        public String apply(String toDelete) {
+                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
+                            if (ButtonType.YES == res) {
+                                try {
+                                    deleteDatabase(toDelete);
+                                } catch (Exception ex) {
+                                    GeotkFX.newExceptionDialog("Impossible de supprimer " + toDelete, ex).show();
+                                }
+                            }
+                            return toDelete;
                         }
-                    }
-                    return toDelete;
-                }
-            },
+                    },
                     "Supprimer la base locale."
             );
         }
     }
-    
+
     /**
      * A table column offering to copy a local database to another.
      */
-    private final class CopyColumn extends SimpleButtonColumn<String,String> {
-        
+    private final class CopyColumn extends SimpleButtonColumn<String, String> {
+
         public CopyColumn() {
             super(GeotkFX.ICON_DUPLICATE,
                     (TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()),
-                    (String t) -> true, 
+                    (String t) -> true,
                     new Function<String, String>() {
                         public String apply(String sourceDb) {
                             final TextInputDialog nameChoice = new TextInputDialog();
                             nameChoice.setHeaderText("Veuillez donner un nom pour la base de destination.");
                             Optional<String> result = nameChoice.showAndWait();
 
-                            Alert alert = new Alert(
-                                    Alert.AlertType.WARNING,
-                                    "Vous allez ajouter vos données dans une base DÉJÀ EXISTANTE. Êtes-vous sûr ?",
-                                    ButtonType.NO, ButtonType.YES);
-
-                            // TODO : Remove when jvm will be fixed to give a proper default size.
-                            alert.setHeight(300);
-                            alert.setWidth(400);
-                            alert.setResizable(true);
-
                             if (result.isPresent() && !result.get().isEmpty()) {
                                 final String destDbName = result.get();
+
+                                Alert alert = new Alert(
+                                        Alert.AlertType.WARNING,
+                                        "Vous allez ajouter vos données dans une base DÉJÀ EXISTANTE. Êtes-vous sûr ?",
+                                        ButtonType.NO, ButtonType.YES);
+
+                                // TODO : Remove when jvm will be fixed to give a proper default size.
+                                alert.setHeight(300);
+                                alert.setWidth(400);
+                                alert.setResizable(true);
+
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
-                                    ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName);
-                                    if (!copyStatus.isOk()) {
-                                        localRegistry.cancelCopy(copyStatus);
-                                        new Alert(
-                                                Alert.AlertType.WARNING,
-                                                "Un problème est survenu pendant la copie. Certaines données poourraient ne pas avoir été copiées.",
-                                                ButtonType.NO, ButtonType.YES).show();
+                                    try {
+                                        final ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName);
+                                        if (!copyStatus.isOk()) {
+                                            localRegistry.cancelCopy(copyStatus);
+                                            new Alert(
+                                                    Alert.AlertType.WARNING,
+                                                    "Un problème est survenu pendant la copie. Certaines données pourraient ne pas avoir été copiées.",
+                                                    ButtonType.NO, ButtonType.YES).show();
+                                        }
+                                        updateLocalDbList();
+                                    } catch (IOException ex) {
+                                        SirsCore.LOGGER.log(Level.WARNING, "Database copy from " + sourceDb + " to " + destDbName + " failed", ex);
+                                        GeotkFX.newExceptionDialog("Impossible de copier les bases de données.", ex).show();
                                     }
-                                    updateLocalDbList();
                                 }
                             }
                             return "";
@@ -769,16 +804,16 @@ public class FXLauncherPane extends BorderPane {
             );
         }
     }
-    
-    private final class IdentificationStage extends Stage{
-        
+
+    private final class IdentificationStage extends Stage {
+
         private final String dbName;
         private final Button cancel;
         private final Button ok;
         private final TextField login;
         private final PasswordField password;
         private final Label label;
-        
+
         private IdentificationStage(final String databaseName) {
             super();
             setTitle("Identification");
@@ -788,7 +823,7 @@ public class FXLauncherPane extends BorderPane {
             ok = new Button("Effacer la base");
             login = new TextField();
             password = new PasswordField();
-            
+
             cancel.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -796,7 +831,7 @@ public class FXLauncherPane extends BorderPane {
                     hide();
                 }
             });
-            
+
             ok.setOnAction(new IdenfificationHandler());
             password.onActionProperty().bind(ok.onActionProperty());
 
@@ -811,14 +846,14 @@ public class FXLauncherPane extends BorderPane {
             gridpane.setHgap(5);
             gridpane.setVgap(5);
             gridpane.setPadding(new Insets(10));
-            
+
             final Scene scene = new Scene(gridpane);
             setScene(scene);
-            
+
         }
-        
-        private class IdenfificationHandler implements EventHandler<ActionEvent>{
-            
+
+        private class IdenfificationHandler implements EventHandler<ActionEvent> {
+
             @Override
             public void handle(ActionEvent event) {
 
@@ -846,7 +881,7 @@ public class FXLauncherPane extends BorderPane {
                     }
 
                 } catch (Exception ex) {
-                   throw new SirsCoreRuntimeExecption(ex);
+                    throw new SirsCoreRuntimeExecption(ex);
                 }
             }
         }

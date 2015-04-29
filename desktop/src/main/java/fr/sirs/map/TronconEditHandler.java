@@ -373,8 +373,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                         try {
                             Geometry geom = EditionHelper.createLine(coord1, coord2);
                             //convertion from base crs
-                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), SirsCore.getEpsgCode(), true));
-                            JTS.setCRS(geom, SirsCore.getEpsgCode());
+                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), session.getProjection(), true));
+                            JTS.setCRS(geom, session.getProjection());
                             tmpTroncon.setGeometry(geom);
 
                             //sauvegarde du troncon

@@ -19,7 +19,7 @@ import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.query.ElementHit;
+import fr.sirs.index.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;

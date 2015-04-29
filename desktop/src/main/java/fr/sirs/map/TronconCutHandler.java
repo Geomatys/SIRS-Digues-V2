@@ -114,7 +114,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         
         final FeatureTypeBuilder ftb = new FeatureTypeBuilder();
         ftb.setName("name");
-        ftb.add("geom", LineString.class,SirsCore.getEpsgCode());
+        ftb.add("geom", LineString.class,session.getProjection());
         ftb.setDefaultGeometry("geom");
         featureType = ftb.buildFeatureType();
     }

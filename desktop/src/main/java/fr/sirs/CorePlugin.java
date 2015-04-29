@@ -483,7 +483,7 @@ public class CorePlugin extends Plugin {
         public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
             super(clazz, "id", "geometry", 
                 (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),
-                null, SirsCore.getEpsgCode(), callable::get);
+                null, Injector.getSession().getProjection(), callable::get);
             Injector.getDocumentChangeEmiter().addListener(this);
         }
 
