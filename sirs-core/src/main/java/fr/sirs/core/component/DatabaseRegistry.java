@@ -3,6 +3,7 @@ package fr.sirs.core.component;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -60,6 +61,10 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class DatabaseRegistry {
 
+    private static final String HTTPD_SECTION = "httpd";
+    private static final String SOCKET_OPTION = "socket_options";
+    private static final String NO_DELAY_KEY = "nodelay";
+    
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
     private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
@@ -144,6 +149,10 @@ public class DatabaseRegistry {
         }
         
         connect();
+        
+        if (isLocal) {
+            ensureNoDelay();
+        }
     }
 
     /**
@@ -697,5 +706,32 @@ public class DatabaseRegistry {
         } catch (InterruptedException | ExecutionException ex) {
             return null;
         }
+    }
+
+    private void ensureNoDelay() {
+        String socketConfig;
+        try {
+            socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
+        } catch (Exception e) {
+            socketConfig = null;
+        }
+        if (socketConfig == null || socketConfig.trim().matches("\\[\\s*\\]")) {
+            socketConfig = "[{"+NO_DELAY_KEY+", true}]";
+        } else {
+            final Matcher matcher = Pattern.compile(NO_DELAY_KEY+"\\s*,\\s*(true|false)").matcher(socketConfig);
+            if (matcher.find()) {
+                if (matcher.group(1).equalsIgnoreCase("true")) {
+                    SirsCore.LOGGER.info("SOCKET configuration found with right value.");
+                    return;
+                } else {
+                    socketConfig = matcher.replaceAll(NO_DELAY_KEY+", true");
+                }
+            } else {
+                socketConfig = socketConfig.replaceFirst("\\]$", ", {"+NO_DELAY_KEY+", true}]");
+            }
+        }
+        
+        SirsCore.LOGGER.info("SOCKET configuration about to be SET");
+        couchDbInstance.setConfiguration(HTTPD_SECTION, SOCKET_OPTION, socketConfig);
     }
 }
