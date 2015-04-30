@@ -1,7 +1,6 @@
 package fr.sirs;
 
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCore;
 
 import java.util.List;
 
@@ -45,8 +44,11 @@ import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
+import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
@@ -74,10 +76,8 @@ public class Session extends SessionCore {
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceChecker referenceChecker;
     public ReferenceChecker getReferenceChecker(){return referenceChecker;}
+    
     ////////////////////////////////////////////////////////////////////////////
-    
-    private List<Element> objectsToPrint = null;
-    
     private MapContext mapContext;
     private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
@@ -208,18 +208,40 @@ public class Session extends SessionCore {
         getMapContext();
         return backgroundGroup;
     }
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // GESTION DES IMPRESSIONS PDF
+    ////////////////////////////////////////////////////////////////////////////
+    private List<Element> elementsToPrint = null;
+    private FeatureCollection featuresToPrint = null;
+    
+    public List<Element> getElementsToPrint(){return elementsToPrint;}
+    public FeatureCollection getFeaturesToPrint(){return featuresToPrint;}
 
     public void prepareToPrint(final Element object){
-        objectsToPrint = new ArrayList<>();
-        objectsToPrint.add(object);
+        featuresToPrint = null;
+        elementsToPrint = new ArrayList<>();
+        elementsToPrint.add(object);
     }
 
     public void prepareToPrint(final List<Element> objects){
-        objectsToPrint = objects;
+        featuresToPrint = null;
+        elementsToPrint = objects;
     }
     
-    public List<Element> getObjectToPrint(){return objectsToPrint;}
+    public void prepareToPrint(final Feature feature){
+        elementsToPrint = null;
+        featuresToPrint = FeatureStoreUtilities.collection(feature);
+    }
     
+    public void prepareToPrint(final FeatureCollection featureCollection){
+        elementsToPrint = null;
+        featuresToPrint = featureCollection;
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // GESTION DES PANNEAUX
+    ////////////////////////////////////////////////////////////////////////////
     public FXFreeTab getOrCreateThemeTab(final Theme theme) {
         try {
             return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {

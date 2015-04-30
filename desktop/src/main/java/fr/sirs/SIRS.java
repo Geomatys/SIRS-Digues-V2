@@ -96,7 +96,14 @@ public final class SIRS extends SirsCore {
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     
+    public static final String GEOMETRY_FIELD = "geometry";
+    public static final String DOCUMENT_ID_FIELD = "documentId";
+    public static final String ID_FIELD = "id";
+    public static final String STRUCTURES_FIELD = "stuctures";
+    public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
+    
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
+    public static final String BORNE_IDS_REFERENCE = "borneIds";
     
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";

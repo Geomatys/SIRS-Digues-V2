@@ -1,27 +1,27 @@
 package fr.sirs.util;
 
+import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.model.Element;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.xml.parsers.ParserConfigurationException;
+import javafx.util.StringConverter;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.display2d.service.OutputDef;
-import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.FeatureUtilities;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.report.JasperReportService;
-import org.xml.sax.SAXException;
 
 /**
  * <p>This class provides utilities for two purposes:</p>
@@ -37,6 +37,7 @@ public class PrinterUtilities {
     
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
+    
     private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
     private static final List<String> falseGetter = new ArrayList<>();
     
@@ -76,6 +77,54 @@ public class PrinterUtilities {
         
         JasperReportService.generateReport(report, featureCollection, parameters, output);
         return fout;
+    }
+    
+    private static final String META_TEMPLATE_ELEMENT = "/fr/sirs/jrxml/metaTemplateElement.jrxml";
+    
+    /**
+     * <p>Generate the specific Jasper Reports template for a given class.
+     * This method is based on a meta-template defined in 
+     * src/main/resources/fr/sirs/jrxml/metaTemplate.jrxml
+     * and produce a specific template : ClassName.jrxml".</p>
+     * 
+     * <p>Then, this specific template is used to print an object of the model.</p>
+     * @param element Pojo to print.
+     * @param avoidFields Names of the fields to avoid printing.
+     * @param previewLabelRepository
+     * @param stringConverter
+     * @return 
+     * @throws Exception 
+     */
+    static public File print(final Element element, final List<String> avoidFields, 
+            final PreviewLabelRepository previewLabelRepository, final StringConverter stringConverter) throws Exception {
+        
+        // Creates the Jasper Reports specific template from the generic template.
+        final File templateFile = File.createTempFile(element.getClass().getSimpleName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
+        
+        final JRDomWriterObject templateWriter = new JRDomWriterObject(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
+        templateWriter.setFieldsInterline(2);
+        templateWriter.setOutput(templateFile);
+        templateWriter.write(element.getClass(), avoidFields);
+        
+        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+        final Map<String, Object> parameters = new HashMap<>();
+        parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+        final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
+        
+        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
+        
+        // Generate the report -------------------------------------------------
+        final File fout = File.createTempFile(element.getClass().getSimpleName(), PDF_EXTENSION);
+        fout.deleteOnExit();
+        final OutputStream out = new FileOutputStream(fout);
+        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, out);
+        JasperReportService.generate(print, output);
+        return fout;
+    }
+    
+    static public File print(final Element objectToPrint, final List<String> avoidFields) throws Exception {
+        return print(objectToPrint, avoidFields, null, null);
     }
     
     /**

@@ -1,6 +1,12 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
+import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
+import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
+import static fr.sirs.SIRS.GEOMETRY_FIELD;
+import static fr.sirs.SIRS.ID_FIELD;
+import static fr.sirs.SIRS.STRUCTURES_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
@@ -8,7 +14,6 @@ import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
-import fr.sirs.util.PrinterUtilitiesElement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.other.FXDoubleDesignationPane;
@@ -18,6 +23,7 @@ import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.awt.Desktop;
@@ -302,42 +308,57 @@ public class FXMainFrame extends BorderPane {
     }
     
     @FXML
-    public void print() throws Exception {
+    private void print() throws Exception {
 
         final Thread t = new Thread() {
             @Override
             public void run() {
-
-                for(final Element obj : session.getObjectToPrint()){
-                    
-                    final File fileToPrint;
-                    final List avoidFields = new ArrayList<>();
-                    avoidFields.add("geometry");
-                    avoidFields.add("documentId");
-                    avoidFields.add("id");
-
-                    if(obj instanceof TronconDigue){
-                        avoidFields.add("stuctures");
-                        avoidFields.add("borneIds");
-                    }
-
-                    if(obj instanceof Element){
-                        avoidFields.add("couchDBDocument");
-                    }
-
-                    try {
-                        fileToPrint = PrinterUtilitiesElement.print(obj, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
-                        fileToPrint.deleteOnExit();
-
-                        final Desktop desktop = Desktop.getDesktop();
-                        desktop.open(fileToPrint);
-                    } catch (Exception e) {
-                        Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
-                    }
+                if(session.getElementsToPrint()!=null){
+                    printElements();
+                } else if(session.getFeaturesToPrint()!=null){
+                    printFeatures();
                 }
             }
         };
         t.start();
+    }
+    
+    private void printFeatures(){
+        try {
+            final File fileToPrint = PrinterUtilities.print(session.getFeaturesToPrint(), null);
+            fileToPrint.deleteOnExit();
+            Desktop.getDesktop().open(fileToPrint);
+        } catch (Exception ex) {
+            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void printElements(){
+        for(final Element element : session.getElementsToPrint()){
+                    
+            final File fileToPrint;
+            final List avoidFields = new ArrayList<>();
+            avoidFields.add(GEOMETRY_FIELD);
+            avoidFields.add(DOCUMENT_ID_FIELD);
+            avoidFields.add(ID_FIELD);
+
+            if(element instanceof TronconDigue){
+                avoidFields.add(STRUCTURES_FIELD);
+                avoidFields.add(BORNE_IDS_REFERENCE);
+            }
+
+            if(element instanceof Element){
+                avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
+            }
+
+            try {
+                fileToPrint = PrinterUtilities.print(element, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
+                fileToPrint.deleteOnExit();
+                Desktop.getDesktop().open(fileToPrint);
+            } catch (Exception e) {
+                Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
     }
     
     @FXML

@@ -693,20 +693,9 @@ public class FXSearchPane extends BorderPane {
         
         private class PrintFeatureColumn extends TableColumn<Feature, Feature>{
             PrintFeatureColumn(){
-                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT_BLACK));
-                printAll.setOnAction(new EventHandler<ActionEvent>() {
-
-                    @Override
-                    public void handle(ActionEvent event) {
-                        try {
-                            final File file = PrinterUtilities.print(features, null);
-//                            file.deleteOnExit();
-//                            final Desktop desktop = Desktop.getDesktop();
-//                            desktop.open(file);
-                        } catch (Exception ex) {
-                            SIRS.LOGGER.log(Level.SEVERE, null, ex);
-                        }
-                    }
+                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT));
+                printAll.setOnAction((ActionEvent event) -> {
+                   Injector.getSession().prepareToPrint(features);
                 });
                 setGraphic(printAll);
                 setPrefWidth(50);
@@ -721,14 +710,7 @@ public class FXSearchPane extends BorderPane {
                     public TableCell<Feature, Feature> call(TableColumn<Feature, Feature> param) {
                         return new ButtonTableCell<>(false, new ImageView(SIRS.ICON_PRINT_BLACK), (Feature t)-> {return true;}, 
                             (Feature t) -> {
-                                try {
-                                    final File file = PrinterUtilities.print(FeatureStoreUtilities.collection(t), null);
-//                                    file.deleteOnExit();
-//                                    final Desktop desktop = Desktop.getDesktop();
-//                                    desktop.open(file);
-                                } catch (Exception ex) {
-                                    SIRS.LOGGER.log(Level.SEVERE, null, ex);
-                                }
+                                Injector.getSession().prepareToPrint(t);
                                 return t;
                             });
                     }
