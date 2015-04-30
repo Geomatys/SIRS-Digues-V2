@@ -7,6 +7,7 @@ import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.MODEL_PACKAGE;
 import fr.sirs.Session;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.h2.H2Helper;
@@ -640,7 +641,7 @@ public class FXSearchPane extends BorderPane {
         if (layer == null || layer.getCollection().isEmpty()) {
             setCenter(new Label("Pas de résultat pour votre recherche."));
         } else {
-            final CustomizedFeatureTable table = new CustomizedFeatureTable("fr.sirs.core.model.");
+            final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE+".");
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
@@ -675,8 +676,6 @@ public class FXSearchPane extends BorderPane {
     
     private static class CustomizedFeatureTable extends FXFeatureTable {
         
-        FeatureCollection features;
-        
         CustomizedFeatureTable(final String path){
             super(path);
         }
@@ -684,38 +683,13 @@ public class FXSearchPane extends BorderPane {
         @Override
         public boolean init(Object candidate){
             final  boolean result = super.init(candidate);
-            if(result){
-            table.getColumns().add(0, new PrintFeatureColumn());
-            features = ((FeatureMapLayer) layer).getCollection();
-            }
+            table.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Feature> observable, Feature oldValue, Feature newValue) -> {
+                final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
+                if(ftrs!=null && !ftrs.isEmpty()){
+                    Injector.getSession().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
+                }
+            });
             return result;
-        }
-        
-        private class PrintFeatureColumn extends TableColumn<Feature, Feature>{
-            PrintFeatureColumn(){
-                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT));
-                printAll.setOnAction((ActionEvent event) -> {
-                   Injector.getSession().prepareToPrint(features);
-                });
-                setGraphic(printAll);
-                setPrefWidth(50);
-                
-                setCellValueFactory((CellDataFeatures<Feature, Feature> param) -> {
-                    return new SimpleObjectProperty<>(param.getValue());
-                });
-                
-                setCellFactory(new Callback<TableColumn<Feature, Feature>, TableCell<Feature, Feature>>() {
-
-                    @Override
-                    public TableCell<Feature, Feature> call(TableColumn<Feature, Feature> param) {
-                        return new ButtonTableCell<>(false, new ImageView(SIRS.ICON_PRINT_BLACK), (Feature t)-> {return true;}, 
-                            (Feature t) -> {
-                                Injector.getSession().prepareToPrint(t);
-                                return t;
-                            });
-                    }
-                });
-            }
         }
     }
 }

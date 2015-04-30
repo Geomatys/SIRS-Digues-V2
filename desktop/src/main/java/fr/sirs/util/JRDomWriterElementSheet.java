@@ -1,7 +1,6 @@
 
 package fr.sirs.util;
 
-import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
@@ -20,16 +19,7 @@ import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
-import static fr.sirs.util.JRUtils.BOOLEAN_CANONICAL_NAME;
 import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.DOUBLE_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.DOUBLE_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.FLOAT_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.FLOAT_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.INTEGER_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.INTEGER_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.LONG_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.LONG_PRIMITIVE_NAME;
 import fr.sirs.util.JRUtils.Markup;
 import fr.sirs.util.JRUtils.Mode;
 import fr.sirs.util.JRUtils.PositionType;
@@ -54,13 +44,14 @@ import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
 import fr.sirs.util.JRUtils.TextAlignment;
+import static fr.sirs.util.JRUtils.getCanonicalName;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -81,7 +72,7 @@ import org.xml.sax.SAXException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JRDomWriterObject {
+public class JRDomWriterElementSheet {
     
     // Template elements.
     private final Document document;
@@ -97,7 +88,6 @@ public class JRDomWriterObject {
     
     // Dynamic template parameters.
     private int fields_interline;
-    private int height_multiplicator;
     
     // Static template parameters.
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
@@ -118,7 +108,7 @@ public class JRDomWriterObject {
     private static final String TRUE_REPLACEMENT = "Oui";
     private static final String FALSE_REPLACEMENT = "Non";
     
-    private JRDomWriterObject(){
+    private JRDomWriterElementSheet(){
         this.document = null;
         this.root = null; 
         this.title = null; 
@@ -130,10 +120,9 @@ public class JRDomWriterObject {
         this.lastPageFooter = null;
         
         this.fields_interline = 8;
-        this.height_multiplicator = 1;
     }
     
-    public JRDomWriterObject(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+    public JRDomWriterElementSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder constructeur = factory.newDocumentBuilder();
@@ -150,7 +139,6 @@ public class JRDomWriterObject {
         lastPageFooter = (Element) root.getElementsByTagName(TAG_LAST_PAGE_FOOTER).item(0);
         
         fields_interline = 8;
-        height_multiplicator = 1;
     }
     
     /**
@@ -159,15 +147,6 @@ public class JRDomWriterObject {
      */
     public void setFieldsInterline(int fieldsInterline){
         fields_interline = fieldsInterline;
-    }
-    
-    /**
-     * This setter changes the default height multiplicator for comments or 
-     * description fields.
-     * @param heightMultiplicator 
-     */
-    public void setHeightMultiplicator(int heightMultiplicator){
-        height_multiplicator = heightMultiplicator;
     }
     
     /**
@@ -218,7 +197,7 @@ public class JRDomWriterObject {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final Class classToMap, List<String> avoidFields) throws Exception {
+    private void writeObject(final Class classToMap, List<String> avoidFields) {
         
         // Sets the initial fields used by the template.------------------------
         final Method[] methods = classToMap.getMethods();
@@ -226,21 +205,20 @@ public class JRDomWriterObject {
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
                 if (avoidFields==null || !avoidFields.contains(fieldName)) {
-                    SIRS.LOGGER.log(Level.FINE, fieldName);
                     this.writeField(method);
                 }
             }
         }
         
         // Modifies the title block.--------------------------------------------
-        this.writeTitle(classToMap);
+        writeTitle(classToMap);
         
         // Writes the headers.--------------------------------------------------
-        this.writePageHeader();
-        this.writeColumnHeader();
+        writePageHeader();
+        writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        this.writeDetail(classToMap, avoidFields);
+        writeDetail(classToMap, avoidFields);
     }
         
     /**
@@ -256,17 +234,9 @@ public class JRDomWriterObject {
         // Creates the field element.-------------------------------------------
         final Element field = document.createElement(TAG_FIELD);
         field.setAttribute(ATT_NAME, fieldName);
-        if(!method.getParameterTypes()[0].isPrimitive()){
-            field.setAttribute(ATT_CLASS, method.getParameterTypes()[0].getCanonicalName());
-        } else {
-            switch(method.getParameterTypes()[0].getCanonicalName()){
-                case BOOLEAN_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, BOOLEAN_CANONICAL_NAME);break;
-                case FLOAT_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, FLOAT_CANONICAL_NAME);break;
-                case DOUBLE_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, DOUBLE_CANONICAL_NAME);break;
-                case INTEGER_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, INTEGER_CANONICAL_NAME);break;
-                case LONG_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, LONG_CANONICAL_NAME);break;
-            }
-        }
+        
+        final Optional<String> canonicalName = getCanonicalName(method.getParameterTypes()[0]);
+        if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
         
         final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
         final CDATASection description = document.createCDATASection("Mettre ici une description du champ.");
@@ -318,7 +288,7 @@ public class JRDomWriterObject {
      * @param classToMap
      * @throws Exception 
      */
-    private void writeDetail(final Class classToMap, List<String> avoidFields) throws Exception{
+    private void writeDetail(final Class classToMap, List<String> avoidFields) {
         
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName());
         
@@ -333,20 +303,17 @@ public class JRDomWriterObject {
                 final Class fieldClass = method.getParameterTypes()[0];
                 
                 // Provides a multiplied height for comment and description fields.
-                final int heightMultiplicator;
                 final Markup markup;
                 if (fieldName.contains("escript") || fieldName.contains("omment")){
-                    heightMultiplicator=this.height_multiplicator;
                     markup = Markup.HTML;
                 } else {
-                    heightMultiplicator=1;
                     markup = Markup.NONE;
                 }
                 
                 // Writes the field.--------------------------------------------
                 if(avoidFields==null || !avoidFields.contains(fieldName)){
-                    this.writeDetailField(fieldName, fieldClass, i, heightMultiplicator, markup, resourceBundle);
-                    i+=heightMultiplicator;
+                    writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
+                    i++;
                 }
             }
         }
@@ -365,19 +332,28 @@ public class JRDomWriterObject {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailField(final String field, final Class fieldClass, final int order, final int heightMultiplicator, final Markup style, final ResourceBundle resourceBundle){
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup style, final ResourceBundle resourceBundle){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
         
-        // Sets the frame.------------------------------------------------------
-        final Element frame = this.document.createElement(TAG_FRAME);
         
-        final Element frameReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        frameReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL-INDENT_LABEL));
+        /*
+        Sets the frame, that will contain the field label and the corresponding field value.
+        
+        ------------------------------------------------------------------------
+        |                                                                      |   
+        |                               FRAME                                  |  
+        |                                                                      | 
+        ------------------------------------------------------------------------
+        */
+        final Element frame = document.createElement(TAG_FRAME);
+        
+        final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        frameReportElement.setAttribute(ATT_X, String.valueOf(0));
         frameReportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
         frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH));
-        frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
         frameReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         frameReportElement.setAttribute(ATT_MODE, Mode.OPAQUE.toString());
         if(order%2==0)
@@ -385,9 +361,9 @@ public class JRDomWriterObject {
         else
             frameReportElement.setAttribute(ATT_BACKCOLOR, "#F5F5F5");
         
-        final Element box = this.document.createElement(TAG_BOX);
+        final Element box = document.createElement(TAG_BOX);
         
-        final Element bottomPen = this.document.createElement(TAG_BOTTOM_PEN);
+        final Element bottomPen = document.createElement(TAG_BOTTOM_PEN);
         bottomPen.setAttribute(ATT_LINE_WIDTH, "0.25");
         bottomPen.setAttribute(ATT_LINE_COLOR, "#CCCCCC");
         
@@ -396,14 +372,25 @@ public class JRDomWriterObject {
         frame.appendChild(frameReportElement);
         frame.appendChild(box);
         
+        
+        /*
+        Sets the label, that will contain the field label.
+        
+        ------------------------------------------------------------------------
+        |    --------------------  FRAME                                       |   
+        |    |       LABEL      |                                              |  
+        |    --------------------                                              | 
+        ------------------------------------------------------------------------
+        */
+        
         // Sets the field's label.----------------------------------------------
         final Element staticText = this.document.createElement(TAG_STATIC_TEXT);
         
         final Element staticTextReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL-INDENT_LABEL));
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL));
         staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
         staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(LABEL_WIDTH));
-        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
         staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         
         final Element staticTextTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
@@ -431,6 +418,17 @@ public class JRDomWriterObject {
         staticText.appendChild(text);
         frame.appendChild(staticText);
         
+        
+        
+        /*
+        Sets the field, that will contain the field value.
+        
+        ------------------------------------------------------------------------
+        |    --------------------  FRAME  -------------------------------------|   
+        |    |       LABEL      |         |               FIELD               ||  
+        |    --------------------         -------------------------------------| 
+        ------------------------------------------------------------------------
+        */
         // Sets the field.------------------------------------------------------
         final Element textField = this.document.createElement(TAG_TEXT_FIELD);
         //if (c==Instant.class)
@@ -443,7 +441,7 @@ public class JRDomWriterObject {
         textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
         textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
         textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
-        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT*heightMultiplicator+fields_interline*(heightMultiplicator-1)));
+        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
         textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         
         final Element textFieldTextElement = document.createElement(TAG_TEXT_ELEMENT);

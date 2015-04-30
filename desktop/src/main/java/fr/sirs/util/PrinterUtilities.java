@@ -4,7 +4,6 @@ import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.model.Element;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +37,9 @@ public class PrinterUtilities {
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES DE RESULTATS DE REQUETES
+    ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
     private static final List<String> falseGetter = new ArrayList<>();
     
@@ -55,7 +57,7 @@ public class PrinterUtilities {
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
         // Creates the Jasper Reports specific template from the generic template.
-        final JRDomWriter writer = new JRDomWriter(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY));
+        final JRDomWriterQueryResultSheet writer = new JRDomWriterQueryResultSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY));
         writer.setFieldsInterline(2);
         final File template = File.createTempFile(featureCollection.getFeatureType().getName().getLocalPart(), JRXML_EXTENSION);
         template.deleteOnExit();
@@ -70,8 +72,8 @@ public class PrinterUtilities {
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().getLocalPart(), PDF_EXTENSION);
         fout.deleteOnExit();
-        OutputStream out = new FileOutputStream(fout);
-        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, out);
+        
+        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, new FileOutputStream(fout));
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
         
@@ -79,6 +81,9 @@ public class PrinterUtilities {
         return fout;
     }
     
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES SYNOPTIQUES D'ELEMENTS DU MODELE
+    ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_ELEMENT = "/fr/sirs/jrxml/metaTemplateElement.jrxml";
     
     /**
@@ -102,7 +107,7 @@ public class PrinterUtilities {
         final File templateFile = File.createTempFile(element.getClass().getSimpleName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
         
-        final JRDomWriterObject templateWriter = new JRDomWriterObject(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
+        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
         templateWriter.setFieldsInterline(2);
         templateWriter.setOutput(templateFile);
         templateWriter.write(element.getClass(), avoidFields);
@@ -117,8 +122,8 @@ public class PrinterUtilities {
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(element.getClass().getSimpleName(), PDF_EXTENSION);
         fout.deleteOnExit();
-        final OutputStream out = new FileOutputStream(fout);
-        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, out);
+        
+        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, new FileOutputStream(fout));
         JasperReportService.generate(print, output);
         return fout;
     }
@@ -127,6 +132,9 @@ public class PrinterUtilities {
         return print(objectToPrint, avoidFields, null, null);
     }
     
+    ////////////////////////////////////////////////////////////////////////////
+    // METHODES UTILITAIRES
+    ////////////////////////////////////////////////////////////////////////////
     /**
      * <p>This method detects if a method is a getter.</p>
      * @param method
@@ -156,5 +164,6 @@ public class PrinterUtilities {
                 && void.class.equals(method.getReturnType());
     }
     
+    ////////////////////////////////////////////////////////////////////////////
     private PrinterUtilities(){}
 }

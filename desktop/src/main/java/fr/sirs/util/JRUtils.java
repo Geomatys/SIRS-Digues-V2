@@ -1,5 +1,7 @@
 package fr.sirs.util;
 
+import java.util.Optional;
+
 /**
  *
  * @author Samuel Andrés (Geomatys)
@@ -58,18 +60,6 @@ public class JRUtils {
     public static final String TAG_TITLE = "title";
     public static final String TAG_TOP_MARGIN = "topMargin";
     
-    public static final String BOOLEAN_PRIMITIVE_NAME = "boolean";
-    public static final String FLOAT_PRIMITIVE_NAME = "float";
-    public static final String DOUBLE_PRIMITIVE_NAME = "double";
-    public static final String INTEGER_PRIMITIVE_NAME = "int";
-    public static final String LONG_PRIMITIVE_NAME = "long";
-    
-    public static final String BOOLEAN_CANONICAL_NAME = "java.lang.Boolean";
-    public static final String FLOAT_CANONICAL_NAME = "java.lang.Float";
-    public static final String DOUBLE_CANONICAL_NAME = "java.lang.Double";
-    public static final String INTEGER_CANONICAL_NAME = "java.lang.Integer";
-    public static final String LONG_CANONICAL_NAME = "java.lang.Long";
-    
     // Jasper Reports attributes.
     public static final String ATT_MODE = "mode";
     public enum Mode {
@@ -96,56 +86,78 @@ public class JRUtils {
         public String toString(){return textAlignment;}
     }; 
     
-    public static final String ATT_VERTICAL_ALIGNMENT = "verticalAlignment";
-    public static final String ATT_FONT_NAME = "fontName";
-    public static final String ATT_IS_BOLD = "isBold";
-    public static final String ATT_LANGUAGE = "language";
-    public static final String ATT_PAGE_WIDTH = "pageWidth";
-    public static final String ATT_PAGE_HEIGHT = "pageHeight";
-    public static final String ATT_COLUMN_WIDTH = "columnWidth";
-    public static final String ATT_LEFT_MARGIN = "leftMargin";
-    public static final String ATT_RIGHT_MARGIN = "rightMargin";
-    public static final String ATT_TOP_MARGIN = "topMargin";
     public static final String ATT_BOTTOM_MARGIN = "bottomMargin";
-    public static final String ATT_UUID = "uuid";
     public static final String ATT_CLASS = "class";
+    public static final String ATT_COLUMN_WIDTH = "columnWidth";
+    public static final String ATT_FONT_NAME = "fontName";
     public static final String ATT_HEIGHT = "height";
-    public static final String ATT_STYLE = "style";
-    public static final String ATT_X = "x";
-    public static final String ATT_Y = "y";
-    public static final String ATT_WIDTH = "width";
-    public static final String ATT_IS_STRETCH_WITH_OVERFLOW = "isStretchWithOverflow";
     public static final String ATT_IS_BLANK_WHEN_NULL = "isBlankWhenNull";
-    public static final String ATT_POSITION_TYPE = "positionType";
-    public static final String ATT_SUB_DATASET = "subDataset";
-    
+    public static final String ATT_IS_BOLD = "isBold";
+    public static final String ATT_IS_STRETCH_WITH_OVERFLOW = "isStretchWithOverflow";
     public static final String ATT_KEY = "key";
     public enum PositionType {
         FLOAT("Float"), FIX_RELATIVE_TO_TOP("FixRelativeToTop"), FIX_RELATIVE_TO_BOTTOM("FixRelativeToBottom");
         private final String positionType;
         private PositionType(final String positionType){this.positionType=positionType;}
-        
-        @Override
-        public String toString(){return positionType;}
+        @Override public String toString(){return positionType;}
     }; 
-    
-    public static final String ATT_STRETCH_TYPE = "stretchType";
-    public enum StretchType {
-        NO_STRETCH("NoStretch"), RELATIVE_TO_TALLEST_OBJECT("RelativeToTallestObject"), RELATIVE_TO_BAND_HEIGHT("RelativeToBandHeight");
-        private final String stretchType;
-        private StretchType(final String stretchType){this.stretchType=stretchType;}
-        
-        @Override
-        public String toString(){return stretchType;}
-    };
-    
+    public static final String ATT_LANGUAGE = "language";
+    public static final String ATT_LEFT_MARGIN = "leftMargin";
     public static final String ATT_MARKUP = "markup";
     public enum Markup {
         NONE("none"), STYLED("styled"), HTML("html"), RTF("rtf");
         private final String markup;
         private Markup(final String markup){this.markup=markup;}
-        
-        @Override
-        public String toString(){return markup;}
+        @Override public String toString(){return markup;}
     }; 
+    public static final String ATT_PAGE_HEIGHT = "pageHeight";
+    public static final String ATT_PAGE_WIDTH = "pageWidth";
+    public static final String ATT_POSITION_TYPE = "positionType";
+    public static final String ATT_RIGHT_MARGIN = "rightMargin";
+    public static final String ATT_STRETCH_TYPE = "stretchType";
+    public enum StretchType {
+        NO_STRETCH("NoStretch"), RELATIVE_TO_TALLEST_OBJECT("RelativeToTallestObject"), RELATIVE_TO_BAND_HEIGHT("RelativeToBandHeight");
+        private final String stretchType;
+        private StretchType(final String stretchType){this.stretchType=stretchType;}
+        @Override public String toString(){return stretchType;}
+    };
+    public static final String ATT_STYLE = "style";
+    public static final String ATT_SUB_DATASET = "subDataset";
+    public static final String ATT_TOP_MARGIN = "topMargin";
+    public static final String ATT_UUID = "uuid";
+    public static final String ATT_VERTICAL_ALIGNMENT = "verticalAlignment";
+    public static final String ATT_WIDTH = "width";
+    public static final String ATT_X = "x";
+    public static final String ATT_Y = "y";
+    
+    
+    ////////////////////////////////////////////////////////////////////////////
+    //  TYPAGE
+    ////////////////////////////////////////////////////////////////////////////
+    public static final String BOOLEAN_PRIMITIVE_NAME = "boolean";
+    public static final String FLOAT_PRIMITIVE_NAME = "float";
+    public static final String DOUBLE_PRIMITIVE_NAME = "double";
+    public static final String INTEGER_PRIMITIVE_NAME = "int";
+    public static final String LONG_PRIMITIVE_NAME = "long";
+    
+    public static final String BOOLEAN_CANONICAL_NAME = "java.lang.Boolean";
+    public static final String FLOAT_CANONICAL_NAME = "java.lang.Float";
+    public static final String DOUBLE_CANONICAL_NAME = "java.lang.Double";
+    public static final String INTEGER_CANONICAL_NAME = "java.lang.Integer";
+    public static final String LONG_CANONICAL_NAME = "java.lang.Long";
+    
+    public static Optional<String> getCanonicalName(final Class attributeClass){
+        if(!attributeClass.isPrimitive()){
+            return Optional.of(attributeClass.getCanonicalName());
+        } else {
+            switch(attributeClass.getCanonicalName()){
+                case BOOLEAN_PRIMITIVE_NAME: return Optional.of(BOOLEAN_CANONICAL_NAME);
+                case FLOAT_PRIMITIVE_NAME: return Optional.of(FLOAT_CANONICAL_NAME);
+                case DOUBLE_PRIMITIVE_NAME: return Optional.of(DOUBLE_CANONICAL_NAME);
+                case INTEGER_PRIMITIVE_NAME: return Optional.of(INTEGER_CANONICAL_NAME);
+                case LONG_PRIMITIVE_NAME: return Optional.of(LONG_CANONICAL_NAME);
+                default: return Optional.empty();
+            }
+        }
+    }
 }

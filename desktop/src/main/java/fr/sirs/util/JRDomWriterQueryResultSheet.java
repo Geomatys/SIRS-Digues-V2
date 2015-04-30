@@ -4,6 +4,7 @@ package fr.sirs.util;
 import fr.sirs.SIRS;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
+import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
 import static fr.sirs.util.JRUtils.ATT_KEY;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_STYLE;
@@ -11,17 +12,6 @@ import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
-import static fr.sirs.util.JRUtils.BOOLEAN_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.DOUBLE_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.DOUBLE_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.FLOAT_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.FLOAT_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.INTEGER_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.INTEGER_PRIMITIVE_NAME;
-import static fr.sirs.util.JRUtils.LONG_CANONICAL_NAME;
-import static fr.sirs.util.JRUtils.LONG_PRIMITIVE_NAME;
-import fr.sirs.util.JRUtils.Markup;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import static fr.sirs.util.JRUtils.TAG_COLUMN;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
@@ -48,11 +38,18 @@ import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
 import static fr.sirs.util.JRUtils.URI_JRXML;
 import static fr.sirs.util.JRUtils.URI_JRXML_COMPONENTS;
+import static fr.sirs.util.JRUtils.getCanonicalName;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.MissingResourceException;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -67,6 +64,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.geotoolkit.feature.type.AttributeType;
 import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.feature.type.PropertyDescriptor;
 import org.geotoolkit.report.FeatureCollectionDataSource;
 import org.opengis.feature.PropertyType;
 import org.w3c.dom.CDATASection;
@@ -78,7 +76,10 @@ import org.xml.sax.SAXException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JRDomWriter {
+public class JRDomWriterQueryResultSheet {
+    
+    private final Map<String, ResourceBundle> bundles = new HashMap<>();
+    private String bundlePrefix = SIRS.MODEL_PACKAGE+".";
     
     // Template elements.
     private final Document document;
@@ -107,14 +108,13 @@ public class JRDomWriter {
     private static final int LABEL_WIDTH = 140;
     private static final int PAGE_HEIGHT = 595;
     private static final int PAGE_WIDTH = 842;
-    private static final int COLUMN_WIDTH = 555;
     private static final int LEFT_MARGIN = 20;
     private static final int RIGHT_MARGIN = 20;
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
     
     
-    private JRDomWriter(){
+    private JRDomWriterQueryResultSheet(){
         document = null;
         root = null; 
         subDataset = null;
@@ -130,7 +130,7 @@ public class JRDomWriter {
         height_multiplicator = 1;
     }
     
-    public JRDomWriter(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+    public JRDomWriterQueryResultSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder constructeur = factory.newDocumentBuilder();
@@ -215,13 +215,13 @@ public class JRDomWriter {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final FeatureType featureType, List<String> avoidFields) throws Exception {
+    private void writeObject(final FeatureType featureType, List<String> avoidFields) {
         
         if(avoidFields==null) avoidFields=new ArrayList<>();
         writeSubDataset(featureType, avoidFields);
         
         // Modifies the title block.--------------------------------------------
-        writeTitle(featureType);
+        writeTitle();
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();
@@ -260,8 +260,8 @@ public class JRDomWriter {
         datasetRun.appendChild(datasourceExpression);
         
         table.appendChild(datasetRun);
-        for(final PropertyType propertyType : featureType.getProperties(true)){
-            writeColumn(propertyType, table);
+        for(final PropertyDescriptor propertyDescriptor : featureType.getDescriptors()){
+            writeColumn(propertyDescriptor, table);
         }
         
         componentElement.appendChild(componentElementReportElement);
@@ -272,15 +272,16 @@ public class JRDomWriter {
         root.appendChild(detail);
     }
     
-    private void writeColumn(final PropertyType propertyType, final Element table){
+    private void writeColumn(final PropertyDescriptor propertyDescriptor, final Element table){
         
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
         
-        
+        // Table header and footer
         final Element tableHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_HEADER);
         tableHeader.setAttribute(ATT_STYLE, "table_TH");
         tableHeader.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        
         final Element tableFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_FOOTER);
         tableFooter.setAttribute(ATT_STYLE, "table_TH");
         tableFooter.setAttribute(ATT_HEIGHT, String.valueOf(5));
@@ -290,21 +291,21 @@ public class JRDomWriter {
         jrColumnHeader.setAttribute(ATT_STYLE, "table_CH");
         jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(40));
         
-        final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
-        
-        final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
-        staticTextReportElement.setAttribute(ATT_X, String.valueOf(0));
-        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
-        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(30));
-//        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-        
-        final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-        final CDATASection labelField = document.createCDATASection(propertyType.getName().toString());
-        text.appendChild(labelField);
-        
-        staticText.appendChild(staticTextReportElement);
-        staticText.appendChild(text);
+            final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
+            
+                final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
+                staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+                staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+                staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+                staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        //        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+                staticText.appendChild(staticTextReportElement);
+
+                final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
+                final CDATASection labelField = document.createCDATASection(generateFinalColumnName(propertyDescriptor));
+                text.appendChild(labelField);
+
+            staticText.appendChild(text);
         jrColumnHeader.appendChild(staticText);
         
         // Column footer
@@ -318,21 +319,22 @@ public class JRDomWriter {
         detailCell.setAttribute(ATT_STYLE, "table_TD");
         detailCell.setAttribute(ATT_HEIGHT, String.valueOf(40));
         
-        final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
-        
-        final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        textFieldReportElement.setAttribute(ATT_X, String.valueOf(0));
-        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
-        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(30));
-//        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-        
-        final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-        final CDATASection valueField = document.createCDATASection("$F{"+propertyType.getName().toString()+"}");
-        textFieldExpression.appendChild(valueField);
-        
-        textField.appendChild(textFieldReportElement);
-        textField.appendChild(textFieldExpression);
+            final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
+            textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+
+            final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
+            textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+            textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
+            textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+            textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+    //        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+            textField.appendChild(textFieldReportElement);
+
+            final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
+            final CDATASection valueField = document.createCDATASection("$F{"+propertyDescriptor.getType().getName().toString()+"}");
+            textFieldExpression.appendChild(valueField);
+
+            textField.appendChild(textFieldExpression);
         detailCell.appendChild(textField);
         
         column.appendChild(tableHeader);
@@ -347,20 +349,7 @@ public class JRDomWriter {
     private void writeSubDataset(final FeatureType featureType, final List<String> avoidFields){
         
          for(final PropertyType propertyType : featureType.getProperties(true)){
-            final String fieldName = propertyType.getName().toString();
-            // Provides a multiplied height for comment and description fields.
-            final int heightMultiplicator;
-            final Markup markup;
-            if (fieldName.contains("escript") || fieldName.contains("omment")){
-                heightMultiplicator=this.height_multiplicator;
-                markup = Markup.HTML;
-            } else {
-                heightMultiplicator=1;
-                markup = Markup.NONE;
-            }
-
-             if (!avoidFields.contains(fieldName)) {
-                SIRS.LOGGER.log(Level.FINE, fieldName);
+             if (!avoidFields.contains(propertyType.getName().toString())) {
                 writeField(propertyType);
             }
         }
@@ -373,8 +362,6 @@ public class JRDomWriter {
     private void writeField(final PropertyType propertyType) {
         
         // Builds the name of the field.----------------------------------------
-//        final String fieldName = method.getName().substring(3, 4).toLowerCase() 
-//                        + method.getName().substring(4);
         final String fieldName = propertyType.getName().toString();
         
         // Creates the field element.-------------------------------------------
@@ -383,18 +370,8 @@ public class JRDomWriter {
         if(propertyType instanceof AttributeType){
             final AttributeType attributeType = (AttributeType) propertyType;
             final Class attributeClass = attributeType.getValueClass();
-        
-            if(!attributeClass.isPrimitive()){
-                field.setAttribute(ATT_CLASS, attributeClass.getCanonicalName());
-            } else {
-                switch(attributeClass.getCanonicalName()){
-                    case BOOLEAN_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, BOOLEAN_CANONICAL_NAME);break;
-                    case FLOAT_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, FLOAT_CANONICAL_NAME);break;
-                    case DOUBLE_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, DOUBLE_CANONICAL_NAME);break;
-                    case INTEGER_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, INTEGER_CANONICAL_NAME);break;
-                    case LONG_PRIMITIVE_NAME: field.setAttribute(ATT_CLASS, LONG_CANONICAL_NAME);break;
-                }
-            }
+            final Optional<String> canonicalName = getCanonicalName(attributeClass);
+            if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
         }
         
         final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
@@ -410,7 +387,7 @@ public class JRDomWriter {
      * <p>This method writes the title of the template.</p>
      * @param featureType 
      */
-    private void writeTitle(final FeatureType featureType) {
+    private void writeTitle() {
         
         // Looks for the title content.-----------------------------------------
         final Element band = (Element) this.title.getElementsByTagName(TAG_BAND).item(0);
@@ -418,7 +395,7 @@ public class JRDomWriter {
         final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
         
         // Sets the title.------------------------------------------------------
-        ((CDATASection) text.getChildNodes().item(0)).setData("Fiche synoptique de " + featureType.getName().getLocalPart());
+        ((CDATASection) text.getChildNodes().item(0)).setData("Résultat de requête");
         
         // Builds the DOM tree.-------------------------------------------------
         this.root.appendChild(this.title);
@@ -430,5 +407,75 @@ public class JRDomWriter {
     
     private void writeColumnHeader(){
         this.root.appendChild(this.columnHeader);
+    }
+    
+    private String generateFinalColumnName(final PropertyDescriptor prop) {
+        Map<String, Entry<String, String>> labelInfo;
+        try {
+            labelInfo = (Map) prop.getUserData().get("labelInfo");
+        } catch (Exception ex) {
+            SIRS.LOGGER.log(Level.INFO, ex.getMessage(), ex);
+            labelInfo = null;
+        }
+
+        final String labelName = prop.getName().toString();
+        String columnName = labelName;
+        String tableName = null;
+
+        // If exists, explore labelInfo to retrive table and column respect to this label.
+        if (labelInfo != null) {
+            final Entry<String, String> entry = labelInfo.get(labelName);
+            if (entry != null) {
+                if (entry.getKey() != null) {
+                    tableName = entry.getKey();
+                } else {
+                    tableName = null;
+                }
+                if (entry.getValue() != null) {
+                    columnName = entry.getValue();
+                } else {
+                    columnName = labelName;
+                }
+            }
+        }
+
+        //If table name is not null, try to found resourcebundle for this table.
+        if (tableName != null) {
+
+            // If there isn't resource bundles (or not for the curruen table), try to generate.
+            if (bundles.get(tableName) == null) {
+                if (bundlePrefix != null) {
+                    bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName));
+                }
+            }
+        }
+
+        final ResourceBundle bundle = bundles.get(tableName);
+
+        String finalColumnName;
+        if (labelName == null) {
+            finalColumnName = "";
+        } else if (bundle == null) {
+            if (!labelName.equals(columnName)) {
+                finalColumnName = columnName + " as " + labelName;
+            } else {
+                finalColumnName = columnName;
+            }
+        } else {
+            try {
+                if (!labelName.equals(columnName)) {
+                    finalColumnName = bundle.getString(columnName) + " as " + labelName;
+                } else {
+                    finalColumnName = bundle.getString(columnName);
+                }
+            } catch (MissingResourceException ex) {
+                if (!labelName.equals(columnName)) {
+                    finalColumnName = columnName + " as " + labelName;
+                } else {
+                    finalColumnName = columnName;
+                }
+            }
+        }
+        return finalColumnName;
     }
 }
