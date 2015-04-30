@@ -2,8 +2,10 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.Repository;
+import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Identifiable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
@@ -69,6 +71,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
+        if (entity instanceof AvecDateMaj) {
+            ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
+        }
         super.add(entity);
         cache.put(entity.getId(), onLoad(entity));
     }
@@ -76,6 +81,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
+        if (entity instanceof AvecDateMaj) {
+            ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
+        }
         super.update(entity);
         // Put the updated entity into cache in case the old entity is different.
         if (entity != cache.get(entity.getId())) {
