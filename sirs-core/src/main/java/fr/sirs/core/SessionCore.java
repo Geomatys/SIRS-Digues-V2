@@ -29,18 +29,7 @@ import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.index.ElementHit;
-import fr.sirs.util.property.Internal;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
@@ -130,47 +119,6 @@ public class SessionCore extends SessionGen implements OwnableSession {
     public ConfigurableApplicationContext getApplicationContext(){return applicationContext;}
     public void setApplicationContext(final ConfigurableApplicationContext applicationContext) {
         this.applicationContext=applicationContext;
-    }
-
-    private static final Class[] SUPPORTED_TYPES = new Class[]{
-        Boolean.class,
-        String.class,
-        Integer.class,
-        Float.class,
-        Double.class,
-        boolean.class,
-        int.class,
-        float.class,
-        double.class,
-        LocalDateTime.class
-    };
-        
-    private static final Map<String,Map<String,Integer>> SORTED_FIELDS = new HashMap<>();
-    static {
-        final Properties SORTED_PROPERTIES = new Properties();
-        final Properties SORTED_OVERRIDES = new Properties();
-        
-        for(Entry entry : SORTED_PROPERTIES.entrySet()){
-            final String name = (String) entry.getKey();
-            final String fields = (String) entry.getValue();
-            final String[] split = fields.split(",");
-            final Map<String,Integer> s = new HashMap<>();
-            for(int i=0;i<split.length;i++){
-                s.put(split[i].trim().toLowerCase(), i);
-            }
-            SORTED_FIELDS.put(name.toLowerCase(), s);
-        }
-        
-        for(Entry entry : SORTED_OVERRIDES.entrySet()){
-            final String name = (String) entry.getKey();
-            final String fields = (String) entry.getValue();
-            final String[] split = fields.split(",");
-            final Map<String,Integer> s = new HashMap<>();
-            for(int i=0;i<split.length;i++){
-                s.put(split[i].trim().toLowerCase(), i);
-            }
-            SORTED_FIELDS.put(name.toLowerCase(), s);
-        }
     }
 
     private final CouchDbConnector connector;
@@ -347,54 +295,6 @@ public class SessionCore extends SessionGen implements OwnableSession {
      */
     public void delete(final TronconDigue tronconDigue){
         repositories.get("TronconDigueRepository").remove(tronconDigue);
-    }
-    
-    /**
-     * Récupération des attributes simple pour affichage dans les tables.
-     * 
-     * @param clazz
-     * @return liste des propriétés simples
-     */
-    public static List<PropertyDescriptor> listSimpleProperties(Class clazz) {
-        final List<PropertyDescriptor> properties = new ArrayList<>();
-        try {
-            for (java.beans.PropertyDescriptor pd : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
-                final Method m = pd.getReadMethod();
-                
-                if(m==null || m.getAnnotation(Internal.class)!=null) continue;
-                
-                final Class propClass = m.getReturnType();
-                if(propClass.isEnum()){
-                    properties.add(pd);
-                }
-                else{
-                    for(Class c : SUPPORTED_TYPES){
-                        if(c.isAssignableFrom(propClass)){
-                            properties.add(pd);
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (IntrospectionException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        
-        final Map<String,Integer> fields = SORTED_FIELDS.get(clazz.getSimpleName().toLowerCase());
-        if(fields!=null){
-            Collections.sort(properties, new Comparator<PropertyDescriptor>() {
-                @Override
-                public int compare(PropertyDescriptor o1, PropertyDescriptor o2) {
-                    Integer idx1 = fields.get(o1.getName().toLowerCase());
-                    if(idx1==null) idx1= Integer.MAX_VALUE;
-                    Integer idx2 = fields.get(o2.getName().toLowerCase());
-                    if(idx2==null) idx2= Integer.MAX_VALUE;
-                    return idx1.compareTo(idx2);
-                }
-            });
-        }
-        
-        return properties;
     }
     
     /**

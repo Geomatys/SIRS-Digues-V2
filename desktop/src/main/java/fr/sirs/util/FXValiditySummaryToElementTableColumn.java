@@ -61,7 +61,7 @@ public class FXValiditySummaryToElementTableColumn  extends TableColumn<Validity
             super.updateItem(item, empty);
 
             if (item != null) {
-                button.setGraphic(new ImageView(SIRS.ICON_EYE));
+                button.setGraphic(new ImageView(SIRS.ICON_EYE_BLACK));
             }
         }
     }

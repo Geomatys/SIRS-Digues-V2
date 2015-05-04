@@ -128,7 +128,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
            
         // Layout
         uiSrTab.setCenter(srController);
-        uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
+        uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
         
         uiSRList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

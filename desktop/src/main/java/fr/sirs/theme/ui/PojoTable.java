@@ -10,7 +10,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import static fr.sirs.SIRS.DESIGNATION_FIELD;
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
@@ -30,12 +29,14 @@ import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
+import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -119,12 +120,9 @@ import org.geotoolkit.internal.GeotkFX;
 public class PojoTable extends BorderPane {
     
     private static final String BUTTON_STYLE = "btn-without-style";
-    private static final List<String> SPECIAL_DISPLAY_COLUMNS = new ArrayList<>();
-    static{
-        SPECIAL_DISPLAY_COLUMNS.add("author");
-        SPECIAL_DISPLAY_COLUMNS.add("valid");
-        SPECIAL_DISPLAY_COLUMNS.add("designation");
-    }
+    
+    private static final String[] COLUMNS_TO_IGNORE = new String[] {"author", "valid"};    
+    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {"designation", "PR_debut", "PR_fin"};
     
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -156,24 +154,24 @@ public class PojoTable extends BorderPane {
     
         
     // Icônes de la barre d'action
+    
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
-    protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
-    protected final Button uiSearch;
-    protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
-    protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH));
-    protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT));
-    protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE);
-    private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE);
     protected final ToggleButton uiFicheMode = new ToggleButton();
-    protected final HBox searchEditionToolbar = new HBox();
+    protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
+    protected final Button uiSearch = new Button(null, searchNone);;
+    protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
+    protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
+    protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
+    protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE_WHITE);
+    private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE_WHITE);
+    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiSearch, uiAdd, uiDelete);
     
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
     private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
     private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
-    protected final HBox navigationToolbar = new HBox();
-    
+    protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);    
     
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
     protected ObservableList<Element> allValues;
@@ -258,31 +256,53 @@ public class PojoTable extends BorderPane {
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn)editCol);
         
-        //contruction des colonnes editable
-        final List<PropertyDescriptor> properties = Session.listSimpleProperties(this.pojoClass);
-        
-        //On commence par la colonne des désignations
-        for(final PropertyDescriptor desc : properties){
-            if(desc.getName().equals(DESIGNATION_FIELD)){
-                final PropertyColumn col = new PropertyColumn(desc);
-                col.sortableProperty().bind(importPointProperty.not());
-                uiTable.getColumns().add(col);
+        try {
+            //contruction des colonnes editable
+            final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
+            
+            // On enlève les propriétés inutiles pour l'utilisateur
+            for (final String key : COLUMNS_TO_IGNORE) {
+                properties.remove(key);
             }
-        }
-        
-        for (final PropertyDescriptor desc : properties) {
-            if (!SPECIAL_DISPLAY_COLUMNS.contains(desc.getName())) {
-                final TableColumn col;
-                if ("password".equals(desc.getDisplayName())) {
-                    col = new PasswordColumn(desc);
-                } else if (desc.getReadMethod().getReturnType().isEnum()) {
-                    col = new EnumColumn(desc);
-                } else {
-                    col = new PropertyColumn(desc);
-                    col.sortableProperty().bind(importPointProperty.not());
-                } 
-                uiTable.getColumns().add(col);
+            
+            // Ensuite on ajoute les champs à prioriser
+            for (final String toPriorize : COLUMNS_TO_PRIORIZE) {
+                getPropertyColumn(properties.remove(toPriorize))
+                        .ifPresent(column -> uiTable.getColumns().add(column));                
             }
+            
+            // On donne toutes les informations de position.
+            if (Positionable.class.isAssignableFrom(this.pojoClass)) {
+                final Set<String> positionableKeys = SIRS.listSimpleProperties(Positionable.class).keySet();
+                final ArrayList<TableColumn> positionColumns = new ArrayList<>();
+                for (final String key : positionableKeys) {
+                    getPropertyColumn(properties.remove(key)).ifPresent(column -> {
+                        uiTable.getColumns().add(column);
+                        positionColumns.add(column);
+                    });
+                }
+                
+                // On permet de cacher toutes les infos de position d'un coup.
+                final ImageView viewOn = new ImageView(SIRS.ICON_COMPASS_WHITE);
+                final ToggleButton uiPositionVisibility = new ToggleButton(null, viewOn);
+                uiPositionVisibility.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    if (newValue == null) return;
+                    for (final TableColumn col : positionColumns) {
+                        col.setVisible(newValue);
+                    }
+                });
+                uiPositionVisibility.visibleProperty().bind(uiFicheMode.selectedProperty().not());
+                uiPositionVisibility.getStyleClass().add(BUTTON_STYLE);
+                uiPositionVisibility.setSelected(true);
+                searchEditionToolbar.getChildren().add(uiPositionVisibility);
+            }
+
+            for (final PropertyDescriptor desc : properties.values()) {
+                getPropertyColumn(desc)
+                        .ifPresent(column -> uiTable.getColumns().add(column));  
+            }
+        } catch (IntrospectionException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "property columns cannot be created.", ex);
         }
         
         uiTable.editableProperty().bind(editableProperty);
@@ -290,7 +310,6 @@ public class PojoTable extends BorderPane {
         /* barre d'outils. Si on a un accesseur sur la base, on affiche des
          * boutons de création / suppression.
          */
-        uiSearch = new Button(null, searchNone);
         uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add(BUTTON_STYLE);
         uiSearch.setOnAction((ActionEvent event) -> {search();});
@@ -303,7 +322,6 @@ public class PojoTable extends BorderPane {
         uiTitle.setAlignment(Pos.CENTER);
         
         searchEditionToolbar.getStyleClass().add("buttonbar");
-        searchEditionToolbar.getChildren().add(uiSearch);
                 
         uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction((ActionEvent event) -> {
@@ -337,15 +355,12 @@ public class PojoTable extends BorderPane {
             }
         });
         uiDelete.disableProperty().bind(editableProperty.not());
-
-        searchEditionToolbar.getChildren().addAll(uiAdd, uiDelete);
         
         topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
         setTop(topPane);
         uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         uiTable.setMaxWidth(Double.MAX_VALUE);
-        uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
-        uiTable.setPrefSize(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+        uiTable.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);
         // Load all elements only if the user gave us the repository.
@@ -384,7 +399,6 @@ public class PojoTable extends BorderPane {
         uiNext.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectNext();
         });
-        navigationToolbar.getChildren().addAll(uiPrevious, uiCurrent, uiNext);
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
         uiFicheMode.setGraphic(playIcon);
@@ -433,8 +447,6 @@ public class PojoTable extends BorderPane {
             }
         });
         uiFicheMode.disableProperty().bind(fichableProperty.not());
-
-        searchEditionToolbar.getChildren().add(0, uiFicheMode);
         
         uiImport.getStyleClass().add(BUTTON_STYLE);
         uiImport.disableProperty().bind(editableProperty.not());
@@ -460,7 +472,6 @@ public class PojoTable extends BorderPane {
                 dialog.show();
             }
         });
-        searchEditionToolbar.getChildren().add(1, uiImport);
         
         if(PointLeve.class.isAssignableFrom(pojoClass)){
             uiTable.getColumns().add(new DistanceComputedPropertyColumn());
@@ -822,6 +833,26 @@ public class PojoTable extends BorderPane {
         }
     }
     
+    protected Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
+        if (desc != null) {
+            final TableColumn col;
+            if (desc.getReadMethod().getReturnType().isEnum()) {
+                col = new EnumColumn(desc);
+            } else {
+                col = new PropertyColumn(desc);
+                col.sortableProperty().bind(importPointProperty.not());
+            }
+            return Optional.of(col);
+        }
+        return Optional.empty();
+    }
+    
+////////////////////////////////////////////////////////////////////////////////
+//
+// INTERNAL CLASSES
+//
+////////////////////////////////////////////////////////////////////////////////
+    
     private class EnumColumn extends TableColumn<Element, Role>{
         private EnumColumn(PropertyDescriptor desc){
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
@@ -1112,14 +1143,14 @@ public class PojoTable extends BorderPane {
             setPrefWidth(24);
             setMinWidth(24);
             setMaxWidth(24);
-            setGraphic(new ImageView(SIRS.ICON_EDIT));
+            setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
             
             setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> new SimpleObjectProperty<>(param.getValue()));
             setCellFactory(new Callback<TableColumn<Object, Object>, TableCell<Object, Object>>() {
 
                 public TableCell<Object, Object> call(TableColumn<Object,Object> param) {
                     return new ButtonTableCell(
-                            false,new ImageView(SIRS.ICON_EDIT), (Object t) -> true, new Function<Object, Object>() {
+                            false,new ImageView(SIRS.ICON_EDIT_BLACK), (Object t) -> true, new Function<Object, Object>() {
                                 @Override
                                 public Object apply(Object t) {
                                     editFct.accept(t);

@@ -8,8 +8,8 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import static fr.sirs.SIRS.ICON_IMPORT;
-import static fr.sirs.SIRS.ICON_VIEWOTHER;
+import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
+import static fr.sirs.SIRS.ICON_VIEWOTHER_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -140,8 +140,8 @@ public class FXPositionablePane extends BorderPane {
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
                 
-        uiImport.setGraphic(new ImageView(ICON_IMPORT));
-        uiView.setGraphic(new ImageView(ICON_VIEWOTHER));
+        uiImport.setGraphic(new ImageView(ICON_IMPORT_WHITE));
+        uiView.setGraphic(new ImageView(ICON_VIEWOTHER_WHITE));
         
         final SirsStringConverter sirsStringConverter = new SirsStringConverter();     
         uiSRs.setConverter(sirsStringConverter);

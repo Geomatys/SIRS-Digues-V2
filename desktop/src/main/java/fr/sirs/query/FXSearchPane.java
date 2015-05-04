@@ -693,7 +693,7 @@ public class FXSearchPane extends BorderPane {
         
         private class PrintFeatureColumn extends TableColumn<Feature, Feature>{
             PrintFeatureColumn(){
-                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT));
+                Button printAll = new Button("Imprimer", new ImageView(SIRS.ICON_PRINT_BLACK));
                 printAll.setOnAction(new EventHandler<ActionEvent>() {
 
                     @Override
@@ -719,7 +719,7 @@ public class FXSearchPane extends BorderPane {
 
                     @Override
                     public TableCell<Feature, Feature> call(TableColumn<Feature, Feature> param) {
-                        return new ButtonTableCell<>(false, new ImageView(SIRS.ICON_PRINT), (Feature t)-> {return true;}, 
+                        return new ButtonTableCell<>(false, new ImageView(SIRS.ICON_PRINT_BLACK), (Feature t)-> {return true;}, 
                             (Feature t) -> {
                                 try {
                                     final File file = PrinterUtilities.print(FeatureStoreUtilities.collection(t), null);

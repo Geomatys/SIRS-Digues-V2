@@ -84,7 +84,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     @FXML private MenuButton uiAdd;
 
     //etat de la recherche
-    private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH);
+    private final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
     private final ProgressIndicator searchRunning = new ProgressIndicator();
     private final StringProperty currentSearch = new SimpleStringProperty("");
 
@@ -120,7 +120,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         uiSearch.setGraphic(searchNone);
         uiSearch.textProperty().bind(currentSearch);
         
-        uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH));
+        uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiDelete.setOnAction(this::deleteSelection);
         uiDelete.setDisable(!session.nonGeometryEditionProperty().get());
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
