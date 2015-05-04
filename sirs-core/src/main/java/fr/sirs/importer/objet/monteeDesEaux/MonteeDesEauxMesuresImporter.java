@@ -111,7 +111,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             }
             
             if (row.getDouble(Columns.DEBIT_MAX.toString()) != null) {
-                mesure.setDebit_max(row.getDouble(Columns.DEBIT_MAX.toString()).floatValue());
+                mesure.setDebitMax(row.getDouble(Columns.DEBIT_MAX.toString()).floatValue());
             }
             
             if(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())!=null){

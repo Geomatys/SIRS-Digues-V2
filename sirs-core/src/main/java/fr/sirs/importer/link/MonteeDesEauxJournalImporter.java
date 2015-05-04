@@ -67,7 +67,7 @@ public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
             final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
             
             if(montee!=null && article!=null){
-                montee.getArticleId().add(article.getId());
+                montee.getArticleIds().add(article.getId());
             }
         }
     }

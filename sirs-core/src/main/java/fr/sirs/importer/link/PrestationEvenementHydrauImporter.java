@@ -67,8 +67,8 @@ public class PrestationEvenementHydrauImporter extends GenericEntityLinker {
             final EvenementHydraulique evenement = evenements.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
             
             if(prestation!=null && evenement!=null){
-                prestation.getEvenementHydraulique().add(evenement.getId());
-                evenement.getPrestation().add(prestation.getId());
+                prestation.getEvenementHydrauliqueIds().add(evenement.getId());
+                evenement.getPrestationIds().add(prestation.getId());
             }
         }
     }

@@ -67,7 +67,7 @@ public class LaisseCrueJournalImporter extends GenericEntityLinker {
             final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
             
             if(laisseCrue!=null && article!=null){
-                laisseCrue.getArticleId().add(article.getId());
+                laisseCrue.getArticleIds().add(article.getId());
             }
         }
     }

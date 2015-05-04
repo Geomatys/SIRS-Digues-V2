@@ -67,8 +67,8 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
             final EvenementHydraulique evenement = evenements.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));
             
             if(desordre!=null && evenement!=null){
-                desordre.getEvenementHydraulique().add(evenement.getId());
-                evenement.getDesordre().add(desordre.getId());
+                desordre.getEvenementHydrauliqueIds().add(evenement.getId());
+                evenement.getDesordreIds().add(desordre.getId());
             }
         }
     }

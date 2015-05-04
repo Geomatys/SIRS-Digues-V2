@@ -88,11 +88,11 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         date_maj.valueProperty().unbind();
         if (oldValue != null) {
             uiRaisonSocialeTextField.textProperty().unbindBidirectional(oldValue.nomProperty());
-            uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statut_juridiqueProperty());
+            uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statutJuridiqueProperty());
             uiTelTextField.textProperty().unbindBidirectional(oldValue.telephoneProperty());
             uiEmailTextField.textProperty().unbindBidirectional(oldValue.emailProperty());
             uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
-            uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.code_postalProperty());
+            uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.codePostalProperty());
             uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
             uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
@@ -110,11 +110,11 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         uiPseudoId.textProperty().bindBidirectional(organisme.designationProperty());
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
-        uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statut_juridiqueProperty());
+        uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statutJuridiqueProperty());
         uiTelTextField.textProperty().bindBidirectional(organisme.telephoneProperty());
         uiEmailTextField.textProperty().bindBidirectional(organisme.emailProperty());
         uiAdresseTextField.textProperty().bindBidirectional(organisme.adresseProperty());
-        uiCodePostalTextField.textProperty().bindBidirectional(organisme.code_postalProperty());
+        uiCodePostalTextField.textProperty().bindBidirectional(organisme.codePostalProperty());
         uiCommuneTextField.textProperty().bindBidirectional(organisme.communeProperty());
         
         if (organisme.getDate_debut() != null) {

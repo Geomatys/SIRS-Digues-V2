@@ -105,7 +105,7 @@ fr.sirs.core.model.RefUsageVoie
 fr.sirs.core.model.RefUtilisationConduite
 fr.sirs.core.model.RefVoieDigue
 fr.sirs.core.model.ReseauHydrauliqueFerme
-fr.sirs.core.model.ReseauHydroCielOuvert
+fr.sirs.core.model.ReseauHydrauliqueCielOuvert
 fr.sirs.core.model.ReseauTelecomEnergie
 fr.sirs.core.model.SommetRisberme
 fr.sirs.core.model.StationPompage

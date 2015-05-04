@@ -146,7 +146,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         final LigneEau ligneEau = new LigneEau();
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                ligneEau.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
+                ligneEau.setEvenementHydrauliqueId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
             }
             
             if (row.getDate(Columns.DATE.toString()) != null) {

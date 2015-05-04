@@ -67,7 +67,7 @@ public class MarcheFinanceurImporter extends GenericEntityLinker {
             final Organisme financeur = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
             
             if(marche!=null && financeur!=null){
-                marche.getFinanceurId().add(financeur.getId());
+                marche.getFinanceurIds().add(financeur.getId());
             }
         }
     }

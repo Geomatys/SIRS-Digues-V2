@@ -15,7 +15,7 @@ import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
@@ -98,7 +98,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
                     else if (elementReseau instanceof ReseauTelecomEnergie){
                         desordre.getReseauTelecomEnergieIds().add(elementReseau.getId());
                     }
-                    else if (elementReseau instanceof ReseauHydroCielOuvert){
+                    else if (elementReseau instanceof ReseauHydrauliqueCielOuvert){
                         desordre.getReseauHydrauliqueCielOuvertIds().add(elementReseau.getId());
                     }
                     else if (elementReseau instanceof ReseauHydrauliqueFerme){

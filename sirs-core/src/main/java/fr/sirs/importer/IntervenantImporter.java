@@ -83,7 +83,7 @@ public class IntervenantImporter extends GenericImporter {
                     + cleanNullString(row.getString(Columns.ADRESSE_L2_PERSO_INTERV.toString()))
                     + cleanNullString(row.getString(Columns.ADRESSE_L3_PERSO_INTERV.toString())));
             
-            intervenant.setCode_postal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
+            intervenant.setCodePostal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
             
             intervenant.setCommune(row.getString(Columns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
             

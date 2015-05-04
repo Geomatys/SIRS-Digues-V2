@@ -133,9 +133,9 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
             if (row.getString(Columns.REALISATION_INTERNE_OUI_NON.toString()) != null) {
                 final String realisation = row.getString(Columns.REALISATION_INTERNE_OUI_NON.toString());
                 if (OUI.equals(realisation)) {
-                    prestation.setRealisation_interne(true);
+                    prestation.setRealisationInterne(true);
                 } else if (NON.equals(realisation)) {
-                    prestation.setRealisation_interne(false);
+                    prestation.setRealisationInterne(false);
                 }
             }
         

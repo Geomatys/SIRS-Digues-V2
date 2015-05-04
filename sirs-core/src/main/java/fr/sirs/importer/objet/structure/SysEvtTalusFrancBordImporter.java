@@ -301,7 +301,7 @@ class SysEvtTalusFrancBordImporter extends GenericStructureImporter<FrontFrancBo
         }
 
         if (row.getDouble(Columns.PENTE_INTERIEURE.toString()) != null) {
-            talus.setPente_interieur(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
+            talus.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {

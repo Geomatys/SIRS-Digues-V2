@@ -288,7 +288,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         }
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
-            talusRisberme.setEpaisseur_sommet(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
+            talusRisberme.setEpaisseurSommet(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString()) != null) {
@@ -308,15 +308,15 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         }
 
         if (row.getDouble(Columns.LONG_RAMP_HAUT.toString()) != null) {
-            talusRisberme.setLongueur_rampart_haut(row.getDouble(Columns.LONG_RAMP_HAUT.toString()).floatValue());
+            talusRisberme.setLongueurRampantHaut(row.getDouble(Columns.LONG_RAMP_HAUT.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.LONG_RAMP_BAS.toString()) != null) {
-            talusRisberme.setLongueur_rampart_bas(row.getDouble(Columns.LONG_RAMP_BAS.toString()).floatValue());
+            talusRisberme.setLongueurRampantBas(row.getDouble(Columns.LONG_RAMP_BAS.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PENTE_INTERIEURE.toString()) != null) {
-            talusRisberme.setPente_interieur(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
+            talusRisberme.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {

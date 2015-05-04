@@ -137,7 +137,7 @@ public class PrestationImporter extends GenericPrestationImporter {
             {
                 final boolean realisation = row.getBoolean(Columns.REALISATION_INTERNE.toString());
                     if(nouvelObjet){
-                        objet.setRealisation_interne(realisation);
+                        objet.setRealisationInterne(realisation);
                     }
             }
             

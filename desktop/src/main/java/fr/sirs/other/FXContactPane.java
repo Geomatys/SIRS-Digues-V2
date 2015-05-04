@@ -141,7 +141,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiFax.textProperty().unbindBidirectional(oldValue.faxProperty());
             uiEmail.textProperty().unbindBidirectional(oldValue.emailProperty());
             uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
-            uiCodePostale.textProperty().unbindBidirectional(oldValue.code_postalProperty());
+            uiCodePostale.textProperty().unbindBidirectional(oldValue.codePostalProperty());
             uiCommune.textProperty().unbindBidirectional(oldValue.paysProperty());
             uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
@@ -162,7 +162,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiFax.textProperty().bindBidirectional(newValue.faxProperty());
         uiEmail.textProperty().bindBidirectional(newValue.emailProperty());
         uiAdresse.textProperty().bindBidirectional(newValue.adresseProperty());
-        uiCodePostale.textProperty().bindBidirectional(newValue.code_postalProperty());
+        uiCodePostale.textProperty().bindBidirectional(newValue.codePostalProperty());
         uiCommune.textProperty().bindBidirectional(newValue.paysProperty());
                
         // Retrieve all organisms current newValue is / was part of.

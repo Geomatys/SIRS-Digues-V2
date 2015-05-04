@@ -8,7 +8,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
@@ -64,7 +64,7 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauHydroCielOuvert reseauCielOuvert = (ReseauHydroCielOuvert) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_RESEAU_EAU.toString()));
+            final ReseauHydrauliqueCielOuvert reseauCielOuvert = (ReseauHydrauliqueCielOuvert) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_RESEAU_EAU.toString()));
             final Objet reseau =  reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             
             if(reseauCielOuvert!=null && reseau!=null){

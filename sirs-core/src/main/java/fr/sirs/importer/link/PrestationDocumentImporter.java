@@ -89,8 +89,8 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
                     } 
                     else if (rapportsEtude.get(document.getSirsdocument())!=null){
                         final RapportEtude rapport = rapportsEtude.get(document.getSirsdocument());
-                        rapport.getPrestation().add(prestation.getId());
-                        prestation.getRapportEtude().add(rapport.getId());
+                        rapport.getPrestationIds().add(prestation.getId());
+                        prestation.getRapportEtudeIds().add(rapport.getId());
                     }
                 }
             }

@@ -129,7 +129,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
         final MonteeEaux monteeEaux = new MonteeEaux();
 
         if (row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()) != null) {
-            monteeEaux.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
+            monteeEaux.setEvenementHydrauliqueId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
         }
 
         if (row.getDouble(Columns.PR_CALCULE.toString()) != null) {

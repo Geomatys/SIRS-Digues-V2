@@ -63,7 +63,7 @@ import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.core.model.SommetRisberme;
@@ -227,7 +227,7 @@ public class CorePlugin extends Plugin {
             suppliers.put(OuvrageHydrauliqueAssocie.class, new StructBeanSupplier(OuvrageHydrauliqueAssocie.class, () -> repository.getAllFromView(OuvrageHydrauliqueAssocie.class)));
             suppliers.put(ReseauTelecomEnergie.class, new StructBeanSupplier(ReseauTelecomEnergie.class, () -> repository.getAllFromView(ReseauTelecomEnergie.class)));
             suppliers.put(OuvrageTelecomEnergie.class, new StructBeanSupplier(OuvrageTelecomEnergie.class, () -> repository.getAllFromView(OuvrageTelecomEnergie.class)));
-            suppliers.put(ReseauHydroCielOuvert.class, new StructBeanSupplier(ReseauHydroCielOuvert.class, () -> repository.getAllFromView(ReseauHydroCielOuvert.class)));
+            suppliers.put(ReseauHydrauliqueCielOuvert.class, new StructBeanSupplier(ReseauHydrauliqueCielOuvert.class, () -> repository.getAllFromView(ReseauHydrauliqueCielOuvert.class)));
             suppliers.put(OuvrageParticulier.class, new StructBeanSupplier(OuvrageParticulier.class, () -> repository.getAllFromView(OuvrageParticulier.class)));
 
             // Désordres
@@ -359,7 +359,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(OuvrageHydrauliqueAssocie.class),
                     suppliers.get(ReseauTelecomEnergie.class),
                     suppliers.get(OuvrageTelecomEnergie.class),
-                    suppliers.get(ReseauHydroCielOuvert.class),
+                    suppliers.get(ReseauHydrauliqueCielOuvert.class),
                     suppliers.get(OuvrageParticulier.class));  
             final MapItem roLayer = MapBuilder.createItem();
             roLayer.setName("Réseaux et ouvrages");

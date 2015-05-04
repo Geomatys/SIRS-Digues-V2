@@ -13,7 +13,7 @@ import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
@@ -98,7 +98,7 @@ public class TypeElementReseauImporter extends GenericTypeInternalImporter<Class
                         classe = OuvrageVoirie.class;
                         break;
                     case SYS_EVT_RESEAU_EAU:
-                        classe = ReseauHydroCielOuvert.class;
+                        classe = ReseauHydrauliqueCielOuvert.class;
                         break;
                     case SYS_EVT_OUVRAGE_PARTICULIER:
                         classe = OuvrageParticulier.class;

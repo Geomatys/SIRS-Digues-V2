@@ -59,8 +59,8 @@ public class DesordrePrestationImporter extends GenericObjetLinker {
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             
             if(prestation!=null && desordre!=null){
-                prestation.getDesordre().add(desordre.getId());
-                desordre.getPrestation().add(prestation.getId());
+                prestation.getDesordreIds().add(desordre.getId());
+                desordre.getPrestationIds().add(prestation.getId());
                 
                 associations.add(new AbstractMap.SimpleEntry<>(prestation, desordre));
             }

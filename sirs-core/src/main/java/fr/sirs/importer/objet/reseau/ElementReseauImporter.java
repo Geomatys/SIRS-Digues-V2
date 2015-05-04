@@ -27,7 +27,7 @@ import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSeuil;
 import fr.sirs.core.model.RefTypeGlissiere;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
@@ -416,7 +416,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 final OuvertureBatardable ouverture = (OuvertureBatardable) objet;
 
                 if (row.getDouble(Columns.Z_SEUIL.toString()) != null) {
-                    ouverture.setZ_du_seuil(row.getDouble(Columns.Z_SEUIL.toString()).floatValue());
+                    ouverture.setZSeuil(row.getDouble(Columns.Z_SEUIL.toString()).floatValue());
                 }
                 
                 if(row.getInt(Columns.ID_TYPE_SEUIL.toString())!=null){
@@ -432,11 +432,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 }
             
                 if (row.getInt(Columns.NOMBRE.toString()) != null) {
-                    ouverture.setNombre_batardeaux(row.getInt(Columns.NOMBRE.toString()));
+                    ouverture.setNombreBatardeaux(row.getInt(Columns.NOMBRE.toString()));
                 }
 
                 if (row.getDouble(Columns.POIDS.toString()) != null) {
-                    ouverture.setPoids_unitaires_batardeaux(row.getDouble(Columns.POIDS.toString()).floatValue());
+                    ouverture.setPoidsUnitaireBatardeaux(row.getDouble(Columns.POIDS.toString()).floatValue());
                 }
                 
                 if(row.getInt(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())!=null){
@@ -499,7 +499,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
             return sysEvtOuvrageVoirieImporter.importRow(row);
         } else if(typeStructure==OuvrageFranchissement.class){
             return sysEvtPointAccesImporter.importRow(row);
-        } else if(typeStructure==ReseauHydroCielOuvert.class){
+        } else if(typeStructure==ReseauHydrauliqueCielOuvert.class){
             return sysEvtReseauEauImporter.importRow(row);
         } else if(typeStructure==ReseauTelecomEnergie.class){
             return sysEvtReseauTelecommunicationImporter.importRow(row);

@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -14,7 +15,7 @@ import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefReseauHydroCielOuvert;
 import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.SystemeReperage;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
@@ -41,7 +42,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuvert> {
+class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCielOuvert> {
 
     private final TypeReseauEauImporter typeReseauEauImporter;
 
@@ -153,13 +154,13 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ReseauHydroCielOuvert reseauEau = importRow(row);
+            final ReseauHydrauliqueCielOuvert reseauEau = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), reseauEau);
 
             // Set the list ByTronconId
-            List<ReseauHydroCielOuvert> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<ReseauHydrauliqueCielOuvert> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
                 structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -169,7 +170,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
     }
 
     @Override
-    public ReseauHydroCielOuvert importRow(Row row) throws IOException, AccessDbImporterException {
+    public ReseauHydrauliqueCielOuvert importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -180,7 +181,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydroCielOuver
 
         final Map<Integer, RefReseauHydroCielOuvert> typesReseauHydroCielOuvert = typeReseauEauImporter.getTypeReferences();
 
-        final ReseauHydroCielOuvert reseauEau = new ReseauHydroCielOuvert();
+        final ReseauHydrauliqueCielOuvert reseauEau = ElementCreator.createAnonymValidElement(ReseauHydrauliqueCielOuvert.class);
 
         reseauEau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
 

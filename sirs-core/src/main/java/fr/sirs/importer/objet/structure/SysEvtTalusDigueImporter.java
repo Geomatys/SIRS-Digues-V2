@@ -285,7 +285,7 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         talus.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
-            talus.setEpaisseur_sommet(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
+            talus.setEpaisseurSommet(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
@@ -310,15 +310,15 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         }
 
         if (row.getDouble(Columns.LONG_RAMP_HAUT.toString()) != null) {
-            talus.setLongueur_rampart_haut(row.getDouble(Columns.LONG_RAMP_HAUT.toString()).floatValue());
+            talus.setLongueurRampantHaut(row.getDouble(Columns.LONG_RAMP_HAUT.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.LONG_RAMP_BAS.toString()) != null) {
-            talus.setLongueur_rampart_bas(row.getDouble(Columns.LONG_RAMP_BAS.toString()).floatValue());
+            talus.setLongueurRampantBas(row.getDouble(Columns.LONG_RAMP_BAS.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PENTE_INTERIEURE.toString()) != null) {
-            talus.setPente_interieur(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
+            talus.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {

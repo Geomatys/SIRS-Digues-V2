@@ -157,7 +157,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         }
 
         if (row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()) != null) {
-            laisseCrue.setEvenementId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
+            laisseCrue.setEvenementHydrauliqueId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE.toString()) != null) {
@@ -246,7 +246,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
             laisseCrue.setObservateurId(intervenants.get(row.getInt(Columns.ID_INTERV_OBSERVATEUR.toString())).getId());
         }
 
-        laisseCrue.setPosition_laisse(cleanNullString(row.getString(Columns.POSITION.toString())));
+        laisseCrue.setPositionLaisse(cleanNullString(row.getString(Columns.POSITION.toString())));
         
         laisseCrue.setDesignation(String.valueOf(row.getInt(Columns.ID_LAISSE_CRUE.toString())));
         laisseCrue.setValid(true);

@@ -106,25 +106,14 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
                 convention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
             }
             
-//             List<ContactConvention> contacts;
-//            
-//            final List<ContactConvention> organisationsSignataires = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
-//            contacts=organisationsSignataires;
-//            
-//            final List<ContactConvention> intervenantsSignataires = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
-//            if(contacts != null && intervenantsSignataires!=null) contacts.addAll(intervenantsSignataires);
-//            else if(contacts==null) contacts=intervenantsSignataires;
-//            
-//            if(contacts!=null) convention.setContacts(contacts);
-            
             final List<String> organismesSignatairesIds = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(organismesSignatairesIds!=null){
-                convention.setOrganismesSignatairesIds(organismesSignatairesIds);
+                convention.setOrganismeSignataireIds(organismesSignatairesIds);
             }
             
             final List<String> intervenantsSignatairesIds = intSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));
             if(intervenantsSignatairesIds!=null){
-                convention.setContactsSignatairesIds(intervenantsSignatairesIds);
+                convention.setContactSignataireIds(intervenantsSignatairesIds);
             }
 
             convention.setDesignation(String.valueOf(row.getInt(Columns.ID_CONVENTION.toString())));

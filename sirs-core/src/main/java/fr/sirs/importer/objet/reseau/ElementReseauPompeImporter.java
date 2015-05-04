@@ -100,7 +100,7 @@ class ElementReseauPompeImporter extends GenericImporter {
             }
             
             if (row.getDouble(Columns.HAUTEUR_REFOUL.toString()) != null) {
-                pompe.setHauteur_refoulement(row.getDouble(Columns.HAUTEUR_REFOUL.toString()).floatValue());
+                pompe.setHauteurRefoulement(row.getDouble(Columns.HAUTEUR_REFOUL.toString()).floatValue());
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

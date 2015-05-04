@@ -3,6 +3,7 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ContactOrganisme;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Organisme;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
@@ -81,17 +82,17 @@ public class OrganismeImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Organisme organisme = new Organisme();
+            final Organisme organisme = ElementCreator.createAnonymValidElement(Organisme.class);
 
             organisme.setNom(row.getString(Columns.RAISON_SOCIALE.toString()));
             
-            organisme.setStatut_juridique(row.getString(Columns.STATUT_JURIDIQUE.toString()));
+            organisme.setStatutJuridique(row.getString(Columns.STATUT_JURIDIQUE.toString()));
             
             organisme.setAdresse(cleanNullString(row.getString(Columns.ADRESSE_L1_ORG.toString()))
                     + cleanNullString(row.getString(Columns.ADRESSE_L2_ORG.toString()))
                     + cleanNullString(row.getString(Columns.ADRESSE_L3_ORG.toString())));
             
-            organisme.setCode_postal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_ORG.toString()))));
+            organisme.setCodePostal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_ORG.toString()))));
             
             organisme.setCommune(row.getString(Columns.ADRESSE_NOM_COMMUNE_ORG.toString()));
             

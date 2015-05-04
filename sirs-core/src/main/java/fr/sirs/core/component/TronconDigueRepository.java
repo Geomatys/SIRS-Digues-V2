@@ -44,7 +44,7 @@ import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauHydroCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.StationPompage;
@@ -116,7 +116,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
         viewMapObjets.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
         viewMapObjets.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
-        viewMapObjets.put(OUVRAGEPARTICULIER, this::getAllOuvrageParticuliers);
+        viewMapObjets.put(OUVRAGE_PARTICULIER, this::getAllOuvrageParticuliers);
         viewMapObjets.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
         viewMapObjets.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
         viewMapObjets.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
@@ -126,8 +126,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(PRESTATION, this::getAllPrestations);
         viewMapObjets.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
         viewMapObjets.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
-        viewMapObjets.put(RESEAUHYDROCIELOUVERT, this::getAllReseauHydroCielOuverts);
-        viewMapObjets.put(RESEAUTELECOMENERGIE, this::getAllReseauTelecomEnergies);
+        viewMapObjets.put(RESEAU_HYDRAULIQUE_CIEL_OUVERT, this::getAllReseauHydrauliqueCielOuverts);
+        viewMapObjets.put(RESEAU_TELECOM_ENERGIE, this::getAllReseauTelecomEnergies);
         viewMapObjets.put(SOMMETRISBERME, this::getAllSommetRisbermes);
         viewMapObjets.put(STATIONPOMPAGE, this::getAllStationPompages);
         viewMapObjets.put(TALUSDIGUE, this::getAllTalusDigues);
@@ -309,11 +309,11 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 OuvrageHydrauliqueAssocie.class);
     }
 
-    public static final String RESEAUTELECOMENERGIE = "ReseauTelecomEnergie";
+    public static final String RESEAU_TELECOM_ENERGIE = "ReseauTelecomEnergie";
 
-    @View(name = RESEAUTELECOMENERGIE, map = "classpath:ReseauTelecomEnergie-map.js")
+    @View(name = RESEAU_TELECOM_ENERGIE, map = "classpath:ReseauTelecomEnergie-map.js")
     public List<ReseauTelecomEnergie> getAllReseauTelecomEnergies() {
-        return db.queryView(createQuery(RESEAUTELECOMENERGIE),
+        return db.queryView(createQuery(RESEAU_TELECOM_ENERGIE),
                 ReseauTelecomEnergie.class);
     }
 
@@ -325,19 +325,19 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 OuvrageTelecomEnergie.class);
     }
 
-    public static final String RESEAUHYDROCIELOUVERT = "ReseauHydroCielOuvert";
+    public static final String RESEAU_HYDRAULIQUE_CIEL_OUVERT = "ReseauHydrauliqueCielOuvert";
 
-    @View(name = RESEAUHYDROCIELOUVERT, map = "classpath:ReseauHydroCielOuvert-map.js")
-    public List<ReseauHydroCielOuvert> getAllReseauHydroCielOuverts() {
-        return db.queryView(createQuery(RESEAUHYDROCIELOUVERT),
-                ReseauHydroCielOuvert.class);
+    @View(name = RESEAU_HYDRAULIQUE_CIEL_OUVERT, map = "classpath:ReseauHydrauliqueCielOuvert-map.js")
+    public List<ReseauHydrauliqueCielOuvert> getAllReseauHydrauliqueCielOuverts() {
+        return db.queryView(createQuery(RESEAU_HYDRAULIQUE_CIEL_OUVERT),
+                ReseauHydrauliqueCielOuvert.class);
     }
 
-    public static final String OUVRAGEPARTICULIER = "OuvrageParticulier";
+    public static final String OUVRAGE_PARTICULIER = "OuvrageParticulier";
 
-    @View(name = OUVRAGEPARTICULIER, map = "classpath:OuvrageParticulier-map.js")
+    @View(name = OUVRAGE_PARTICULIER, map = "classpath:OuvrageParticulier-map.js")
     public List<OuvrageParticulier> getAllOuvrageParticuliers() {
-        return db.queryView(createQuery(OUVRAGEPARTICULIER),
+        return db.queryView(createQuery(OUVRAGE_PARTICULIER),
                 OuvrageParticulier.class);
     }
 
