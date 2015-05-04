@@ -119,7 +119,7 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class PojoTable extends BorderPane {
     
-    private static final String BUTTON_STYLE = "btn-without-style";
+    private static final String BUTTON_STYLE = "buttonbar-button";
     
     private static final String[] COLUMNS_TO_IGNORE = new String[] {"author", "valid"};    
     private static final String[] COLUMNS_TO_PRIORIZE = new String[] {"designation", "PR_debut", "PR_fin"};
@@ -156,14 +156,12 @@ public class PojoTable extends BorderPane {
     // Icônes de la barre d'action
     
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
-    protected final ToggleButton uiFicheMode = new ToggleButton();
+    protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
     protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
     protected final Button uiSearch = new Button(null, searchNone);;
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
     protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
-    protected final ImageView playIcon = new ImageView(SIRS.ICON_FILE_WHITE);
-    private final ImageView stopIcon = new ImageView(SIRS.ICON_TABLE_WHITE);
     protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiSearch, uiAdd, uiDelete);
     
     // Barre de gauche : navigation dans le parcours de fiches
@@ -290,8 +288,14 @@ public class PojoTable extends BorderPane {
                     for (final TableColumn col : positionColumns) {
                         col.setVisible(newValue);
                     }
+                    if (newValue) {
+                        uiPositionVisibility.setTooltip(new Tooltip("Cacher les informations de position"));
+                    } else {
+                        uiPositionVisibility.setTooltip(new Tooltip("Afficher les informations de position"));                        
+                    }
                 });
                 uiPositionVisibility.visibleProperty().bind(uiFicheMode.selectedProperty().not());
+                uiPositionVisibility.managedProperty().bind(uiPositionVisibility.visibleProperty());
                 uiPositionVisibility.getStyleClass().add(BUTTON_STYLE);
                 uiPositionVisibility.setSelected(true);
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
@@ -382,7 +386,7 @@ public class PojoTable extends BorderPane {
         //
         navigationToolbar.getStyleClass().add("buttonbarleft");
         
-        uiCurrent.setFont(Font.font(20));
+        uiCurrent.setFont(Font.font(16));
         uiCurrent.getStyleClass().add(BUTTON_STYLE); 
         uiCurrent.setAlignment(Pos.CENTER);
         uiCurrent.setTextFill(Color.WHITE);
@@ -401,7 +405,6 @@ public class PojoTable extends BorderPane {
         });
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
-        uiFicheMode.setGraphic(playIcon);
         uiFicheMode.getStyleClass().add(BUTTON_STYLE); 
         uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
         
@@ -424,8 +427,6 @@ public class PojoTable extends BorderPane {
                     }
                     elementPane.elementProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
                     
-                    // Prepare display
-                    uiFicheMode.setGraphic(stopIcon);
                     uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
                     
                     uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
@@ -441,7 +442,7 @@ public class PojoTable extends BorderPane {
                     // Update display
                     uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
                     setCenter(uiTable);
-                    uiFicheMode.setGraphic(playIcon);
+                    
                     uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
                 }
             }
