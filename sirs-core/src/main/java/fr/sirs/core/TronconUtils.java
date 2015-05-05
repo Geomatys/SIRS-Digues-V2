@@ -37,7 +37,10 @@ import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
 import fr.sirs.core.component.OwnableSession;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.ProprieteTroncon;
 import java.util.Iterator;
 import java.util.function.IntFunction;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -126,71 +129,16 @@ public class TronconUtils {
          * avec sa géométrie. Les objets qui intersectent le nouveau tronçons sont 
          * quand à eux découpés.
          */
-        final HashMap<SystemeReperage, List<Objet>> needSRIDUpdate = new HashMap<>();
-        ListIterator<Objet> structures = tronconCp.getStructures().listIterator();
-        while (structures.hasNext()) {
-            final Objet structure = structures.next();
-
-            //on vérifie que cet objet intersecte le segment
-            Geometry objGeom = structure.getGeometry();
-            if (objGeom == null) {
-                //on la calcule
-                objGeom = buildGeometry(troncon.getGeometry(), structure, bdRepo);
-                if (objGeom == null) {
-                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + structure);
-                }
-                structure.setGeometry(objGeom);
-            }
-
-            if (!cutLinear.intersects(objGeom)) {
-                structures.remove();
-                continue;
-            } else if (!cutLinear.contains(objGeom)) {
-                objGeom = cutLinear.intersection(objGeom);
-                structure.setGeometry(objGeom);
-            }
-
-            if (objGeom instanceof Point) {
-                structure.setPositionDebut((Point) objGeom);
-                structure.setPositionFin((Point) objGeom);
-            } else {
-                final LineString structureLine = asLineString(objGeom);
-                structure.setPositionDebut(structureLine.getStartPoint());
-                structure.setPositionFin(structureLine.getEndPoint());
-                structure.setGeometry(objGeom);
-            }
-
-            final SystemeReperage sr = newSRs.get(structure.getSystemeRepId());
-            if (sr == null) {
-                structure.setSystemeRepId(null);
-                structure.setBorneDebutId(null);
-                structure.setBorneFinId(null);
-                structure.setBorne_debut_distance(Float.NaN);
-                structure.setBorne_fin_distance(Float.NaN);
-            } else {
-                //le systeme de reperage existe toujours, on recalcule les positions relatives
-                final PosInfo info = new PosInfo(structure, tronconCp, session);
-                final PosSR posSr = info.getForSR(sr);
-
-                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
-                List<Objet> boundObjets = needSRIDUpdate.get(sr);
-                if (boundObjets == null) {
-                    boundObjets = new ArrayList<>();
-                    needSRIDUpdate.put(sr, boundObjets);
-                }
-                boundObjets.add(structure);
-                
-                structure.setBorneDebutId(posSr.borneStartId);
-                structure.setBorne_debut_distance((float) posSr.distanceStartBorne);
-                structure.setBorne_debut_aval(posSr.startAval);
-                structure.setBorneFinId(posSr.borneEndId);
-                structure.setBorne_fin_distance((float) posSr.distanceEndBorne);
-                structure.setBorne_fin_aval(posSr.endAval);
-                structure.setPositionDebut(null);
-                structure.setPositionFin(null);
-            }
-        }
-
+        final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
+        final ListIterator<Objet> structures = tronconCp.getStructures().listIterator();
+        cutPositionable(structures, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
+        final ListIterator<AbstractPositionDocument> positionsDocs = tronconCp.getDocumentTroncon().listIterator();
+        cutPositionable(positionsDocs, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
+        final ListIterator<GardeTroncon> gardes = tronconCp.getGardes().listIterator();
+        cutPositionable(gardes, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
+        final ListIterator<ProprieteTroncon> proprietes = tronconCp.getProprietes().listIterator();
+        cutPositionable(proprietes, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
+        
         // On sauvegarde les modifications
         // TODO : make it transactional.
         tdRepo.add(tronconCp);
@@ -207,10 +155,10 @@ public class TronconUtils {
         // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier 
         // les objets du tronçon à leur SR.
         if (!needSRIDUpdate.isEmpty()) {
-            Iterator<Map.Entry<SystemeReperage, List<Objet>>> it = needSRIDUpdate.entrySet().iterator();
+            Iterator<Map.Entry<SystemeReperage, List<Positionable>>> it = needSRIDUpdate.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<SystemeReperage, List<Objet>> next = it.next();
-                for (final Objet o : next.getValue()) {
+                Map.Entry<SystemeReperage, List<Positionable>> next = it.next();
+                for (final Positionable o : next.getValue()) {
                     o.setSystemeRepId(next.getKey().getId());
                 }
             }
@@ -218,6 +166,77 @@ public class TronconUtils {
             tdRepo.update(tronconCp);
         }
         return tronconCp;
+    }
+    
+    
+    private static void cutPositionable(final ListIterator<? extends Positionable> positionables, 
+             final TronconDigue troncon, final TronconDigue tronconCp, 
+             final BorneDigueRepository bdRepo,
+             final LineString cutLinear, final HashMap<String, SystemeReperage> newSRs,
+             final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate,
+             final SessionGen session){
+         
+        while (positionables.hasNext()) {
+            final Positionable positionable = positionables.next();
+        //on vérifie que cet objet intersecte le segment
+            Geometry objGeom = positionable.getGeometry();
+            if (objGeom == null) {
+                //on la calcule
+                objGeom = buildGeometry(troncon.getGeometry(), positionable, bdRepo);
+                if (objGeom == null) {
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + positionable);
+                }
+                positionable.setGeometry(objGeom);
+            }
+
+            if (!cutLinear.intersects(objGeom)) {
+                positionables.remove();
+                continue;
+            } else if (!cutLinear.contains(objGeom)) {
+                objGeom = cutLinear.intersection(objGeom);
+                positionable.setGeometry(objGeom);
+            }
+
+            if (objGeom instanceof Point) {
+                positionable.setPositionDebut((Point) objGeom);
+                positionable.setPositionFin((Point) objGeom);
+            } else {
+                final LineString structureLine = asLineString(objGeom);
+                positionable.setPositionDebut(structureLine.getStartPoint());
+                positionable.setPositionFin(structureLine.getEndPoint());
+                positionable.setGeometry(objGeom);
+            }
+
+            final SystemeReperage sr = newSRs.get(positionable.getSystemeRepId());
+            if (sr == null) {
+                positionable.setSystemeRepId(null);
+                positionable.setBorneDebutId(null);
+                positionable.setBorneFinId(null);
+                positionable.setBorne_debut_distance(Float.NaN);
+                positionable.setBorne_fin_distance(Float.NaN);
+            } else {
+                //le systeme de reperage existe toujours, on recalcule les positions relatives
+                final PosInfo info = new PosInfo(positionable, tronconCp, session);
+                final PosSR posSr = info.getForSR(sr);
+
+                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
+                List<Positionable> boundObjets = needSRIDUpdate.get(sr);
+                if (boundObjets == null) {
+                    boundObjets = new ArrayList<>();
+                    needSRIDUpdate.put(sr, boundObjets);
+                }
+                boundObjets.add(positionable);
+                
+                positionable.setBorneDebutId(posSr.borneStartId);
+                positionable.setBorne_debut_distance((float) posSr.distanceStartBorne);
+                positionable.setBorne_debut_aval(posSr.startAval);
+                positionable.setBorneFinId(posSr.borneEndId);
+                positionable.setBorne_fin_distance((float) posSr.distanceEndBorne);
+                positionable.setBorne_fin_aval(posSr.endAval);
+                positionable.setPositionDebut(null);
+                positionable.setPositionFin(null);
+            }
+        }
     }
     
     /**
