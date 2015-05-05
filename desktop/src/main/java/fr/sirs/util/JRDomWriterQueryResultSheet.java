@@ -228,14 +228,13 @@ public class JRDomWriterQueryResultSheet {
         writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-//        this.writeDetail(featureType, avoidFields);
         writeComponentElement(featureType);
     }
     
     
     private void writeComponentElement(final FeatureType featureType){
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
-        band.setAttribute(ATT_HEIGHT, String.valueOf(200));
+        band.setAttribute(ATT_HEIGHT, String.valueOf(491));
         
         // Set the component element
         final Element componentElement = document.createElement(TAG_COMPONENT_ELEMENT);
@@ -244,8 +243,8 @@ public class JRDomWriterQueryResultSheet {
         componentElementReportElement.setAttribute(ATT_STYLE, "table");
         componentElementReportElement.setAttribute(ATT_X, String.valueOf(0));
         componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(180));
-        componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(140));
+        componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
+        componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(491));
         
         // Set the table element
         final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
@@ -254,7 +253,7 @@ public class JRDomWriterQueryResultSheet {
         datasetRun.setAttribute(ATT_SUB_DATASET, "Query Dataset");
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+FeatureCollectionDataSource.class.getCanonicalName()+") $P{REPORT_DATA_SOURCE}).cloneDataSource()");
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+FeatureCollectionDataSource.class.getCanonicalName()+") $P{TABLE_DATA_SOURCE})");//.cloneDataSource()
         
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);
@@ -348,8 +347,8 @@ public class JRDomWriterQueryResultSheet {
     
     private void writeSubDataset(final FeatureType featureType, final List<String> avoidFields){
         
-         for(final PropertyType propertyType : featureType.getProperties(true)){
-             if (!avoidFields.contains(propertyType.getName().toString())) {
+        for(final PropertyType propertyType : featureType.getProperties(true)){
+            if (!avoidFields.contains(propertyType.getName().toString())) {
                 writeField(propertyType);
             }
         }

@@ -901,7 +901,7 @@ public class DbImporter {
 //            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
 //
 //            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
-            for(final Index index :importer.getDatabase().getTable(TableName.PROFIL_EN_LONG.toString()).getIndexes()){
+            for(final Index index :importer.getDatabase().getTable(TableName.MONTEE_DES_EAUX.toString()).getIndexes()){
                 System.out.println(index);
             }
 //            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){

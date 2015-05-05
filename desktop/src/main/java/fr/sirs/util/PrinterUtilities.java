@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -20,6 +21,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.report.FeatureCollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
 
 /**
@@ -76,8 +78,12 @@ public class PrinterUtilities {
         final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, new FileOutputStream(fout));
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+        parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource(featureCollection));
         
-        JasperReportService.generateReport(report, featureCollection, parameters, output);
+        
+        final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
+        JasperReportService.generate(print, output);
+//        JasperReportService.generateReport(report, featureCollection, parameters, output);
         return fout;
     }
     

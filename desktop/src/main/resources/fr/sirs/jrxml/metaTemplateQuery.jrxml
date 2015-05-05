@@ -30,18 +30,19 @@
 	<subDataset name="Query Dataset">
 	</subDataset>
 	<parameter name="logo" class="java.lang.Object"/>
+	<parameter name="TABLE_DATA_SOURCE" class="org.geotoolkit.report.FeatureCollectionDataSource"/>
 
 	<title>
 		<band height="60">
 			<staticText>
-				<reportElement x="153" y="17" width="371" height="22" uuid="4aa97ab1-b9d8-427d-8216-467ecde77d3b"/>
+				<reportElement x="153" y="17" width="371" height="22" />
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Serif" size="14" isBold="true" isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<image>
-				<reportElement x="0" y="0" width="135" height="59" uuid="86d8437d-7534-41b4-af3a-568c991be2ee"/>
+				<reportElement x="0" y="0" width="135" height="59"/>
 				<imageExpression class="java.io.InputStream"><![CDATA[$P{logo}]]></imageExpression>
 			</image>
 		</band>
