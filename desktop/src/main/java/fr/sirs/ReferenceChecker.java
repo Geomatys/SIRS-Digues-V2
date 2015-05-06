@@ -1,9 +1,11 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.MODEL_PACKAGE;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ReferenceType;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -37,8 +39,6 @@ import org.apache.commons.csv.CSVRecord;
  * @author Samuel Andrés (Geomatys)
  */
 public class ReferenceChecker extends Task<Void> {
-
-    private static final String MODEL_PACKAGE = "fr.sirs.core.model";
 
     private String referencesDirectoryPath;
     
@@ -339,11 +339,11 @@ public class ReferenceChecker extends Task<Void> {
         }
         
         private void update(){
-            final List<Object> updated = new ArrayList<>();
+            final List<ReferenceType> updated = new ArrayList<>();
             if(fileReferences!=null){
-                for(final Object fileReference : fileReferences){
-                    Object localInstance = null;
-                    for(final Object localReference : localReferences){
+                for(final ReferenceType fileReference : fileReferences){
+                    ReferenceType localInstance = null;
+                    for(final ReferenceType localReference : localReferences){
                         if(fileReference.equals(localReference)) {
                             localInstance = localReference;
                             break;
@@ -377,9 +377,9 @@ public class ReferenceChecker extends Task<Void> {
             serverInstancesNotLocal.get(referenceClass).removeAll(updated);
             final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
-                for(final Object updatedInstance : updated){
-                    final Set keySet = incoherentInstances.keySet();
-                    for(final Object localInstanceKey : keySet){
+                for(final ReferenceType updatedInstance : updated){
+                    final Set<ReferenceType> keySet = incoherentInstances.keySet();
+                    for(final ReferenceType localInstanceKey : keySet){
                         if(incoherentInstances.get(localInstanceKey)==updatedInstance){
                             incoherentInstances.remove(localInstanceKey);
                             break;
@@ -413,7 +413,8 @@ public class ReferenceChecker extends Task<Void> {
      * @param serverReferenceInstance
      * @return
      */
-    private static boolean sameReferences(final Object localReferenceInstance, final Object serverReferenceInstance) {
+    private static boolean sameReferences(final ReferenceType localReferenceInstance, 
+            final ReferenceType serverReferenceInstance) {
         // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
         if (localReferenceInstance.equals(serverReferenceInstance)) {
             // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
@@ -519,7 +520,7 @@ public class ReferenceChecker extends Task<Void> {
         }
 
         final List<String> result = new ArrayList<>();
-        final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 
         while (true) {
             final String line = bufferedReader.readLine();
@@ -533,5 +534,4 @@ public class ReferenceChecker extends Task<Void> {
         }
         return result;
     }
-
 }
