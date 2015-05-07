@@ -53,7 +53,7 @@ public class SirsTableCell<S, T> extends FXTableCell<S, T> {
     @Override
     protected void updateItem(final T item, final boolean empty) {
         super.updateItem(item, empty);
-        if(empty ||item == null){
+        if(empty || item == null){
             setText(null);
             setGraphic(null);
         }
@@ -77,7 +77,7 @@ public class SirsTableCell<S, T> extends FXTableCell<S, T> {
                 } else {
                     toDisplay = new SirsStringConverter().toString(item);
                 }
-                Platform.runLater(() -> setText(toDisplay));
+                setText(toDisplay);
             });
         }
     }
