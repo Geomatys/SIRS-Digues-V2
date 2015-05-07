@@ -186,13 +186,13 @@ public class FXPositionablePane extends BorderPane {
         uiAmontEnd.disableProperty().bind(disabledBinding);
         uiDistanceStart.disableProperty().bind(disabledBinding);
         uiDistanceEnd.disableProperty().bind(disabledBinding);
-        uiDistanceStart.valueProperty().addListener(new ChangeListener<Number>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                System.out.println("Changement de valeur de distance de début : "+oldValue+" => "+newValue);
-            }
-        });
+//        uiDistanceStart.valueProperty().addListener(new ChangeListener<Number>() {
+//
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                System.out.println("Changement de valeur de distance de début : "+oldValue+" => "+newValue);
+//            }
+//        });
         
         uiLongitudeStart.disableProperty().bind(disabledBinding);
         uiLatitudeStart.disableProperty().bind(disabledBinding);
@@ -218,13 +218,15 @@ public class FXPositionablePane extends BorderPane {
         // compute back linear referencing when geographic point is changed
         
         //compute back geographic points when linear referencing changes.
-        final GeographicStartFromLinear geoStartUpdater = new GeographicStartFromLinear();
+//        final GeographicStartFromLinear geoStartUpdater = new GeographicStartFromLinear();
+        final LinearChangeListener geoStartUpdater = new LinearChangeListener(uiBorneStart, uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), prDebut, uiDistanceStart.valueProperty(), uiAmontStart.selectedProperty());
         uiBorneStart.valueProperty().addListener(geoStartUpdater);
         uiBorneStart.focusedProperty().addListener(geoStartUpdater);
         uiAmontStart.selectedProperty().addListener(geoStartUpdater);
         uiDistanceStart.valueProperty().addListener(geoStartUpdater);
         
-        final GeographicEndFromLinear geoEndUpdater = new GeographicEndFromLinear();
+//        final GeographicEndFromLinear geoEndUpdater = new GeographicEndFromLinear();
+        final LinearChangeListener geoEndUpdater = new LinearChangeListener(uiBorneEnd, uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), prFin, uiDistanceEnd.valueProperty(), uiAmontEnd.selectedProperty());
         uiBorneEnd.valueProperty().addListener(geoEndUpdater);
         uiBorneEnd.focusedProperty().addListener(geoEndUpdater);
         uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
@@ -295,8 +297,10 @@ public class FXPositionablePane extends BorderPane {
         page.append("<html><body>");
 
         //calcul de la position geographique
-        Point startPoint = getOrCreateStartPoint();
-        Point endPoint = getOrCreateEndPoint();
+//        Point startPoint = getOrCreateStartPoint();
+//        Point endPoint = getOrCreateEndPoint();
+        Point startPoint = getOrCreatePoint(uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), uiDistanceStart.valueProperty(), uiBorneStart.valueProperty(), uiAmontStart.selectedProperty());
+        Point endPoint = getOrCreatePoint(uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), uiDistanceEnd.valueProperty(), uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty());
         if (startPoint == null && endPoint == null) {
             page.append("<h2>No sufficient position information</h2>");
         } else {
@@ -496,63 +500,68 @@ public class FXPositionablePane extends BorderPane {
         }
     }
     
-    /**
-     * Compute current positionable start point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
-     * 
-     * @return The point computed from starting borne. If we cannot, we return null.
-     * @deprecated Please use computeGeoFromLinear() for code factorisation.
-     */
-    @Deprecated
-    private Point computeGeoStartFromLinear() {
-        final Number distanceStart = uiDistanceStart.valueProperty().get();
-        if (distanceStart != null && uiBorneStart.getValue() != null && currentTroncon != null) {
-            //calcul à partir des bornes
-            final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
-            double distStart = distanceStart.doubleValue();
-            if (uiAmontStart.isSelected()) {
-                distStart *= -1;
-            }
-
-            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneStartPoint, distStart, 0);
-        } else {
-            return null;
-        }
-    }
-    
-    /**
-     * Compute current positionable end point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
-     * 
-     * @return The point computed from ending borne. If we cannot, we return null.
-     * @deprecated Please use computeGeoFromLinear() for code factorisation.
-     */
-    @Deprecated
-    private Point computeGeoEndFromLinear() {
-        final Number distanceEnd = uiDistanceEnd.valueProperty().get();
-        if (distanceEnd != null && uiBorneEnd.getValue() != null && currentTroncon != null) {
-            //calcul à partir des bornes
-            final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
-            double distEnd = distanceEnd.doubleValue();
-            if (uiAmontEnd.isSelected()) {
-                distEnd *= -1;
-            }
-
-            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneEndPoint, distEnd, 0);
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * Compute current positionable start point using linear referencing information
+//     * defined in the form. Returned point is expressed with Database CRS.
+//     * 
+//     * @return The point computed from starting borne. If we cannot, we return null.
+//     * @deprecated Please use computeGeoFromLinear() for code factorisation.
+//     */
+//    @Deprecated
+//    private Point computeGeoStartFromLinear() {
+//        final Number distanceStart = uiDistanceStart.valueProperty().get();
+//        if (distanceStart != null && uiBorneStart.getValue() != null && currentTroncon != null) {
+//            //calcul à partir des bornes
+//            final Point borneStartPoint = uiBorneStart.getValue().getGeometry();
+//            double distStart = distanceStart.doubleValue();
+//            if (uiAmontStart.isSelected()) {
+//                distStart *= -1;
+//            }
+//
+//            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneStartPoint, distStart, 0);
+//        } else {
+//            return null;
+//        }
+//    }
+//    
+//    /**
+//     * Compute current positionable end point using linear referencing information
+//     * defined in the form. Returned point is expressed with Database CRS.
+//     * 
+//     * @return The point computed from ending borne. If we cannot, we return null.
+//     * @deprecated Please use computeGeoFromLinear() for code factorisation.
+//     */
+//    @Deprecated
+//    private Point computeGeoEndFromLinear() {
+//        final Number distanceEnd = uiDistanceEnd.valueProperty().get();
+//        if (distanceEnd != null && uiBorneEnd.getValue() != null && currentTroncon != null) {
+//            //calcul à partir des bornes
+//            final Point borneEndPoint = uiBorneEnd.getValue().getGeometry();
+//            double distEnd = distanceEnd.doubleValue();
+//            if (uiAmontEnd.isSelected()) {
+//                distEnd *= -1;
+//            }
+//
+//            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), borneEndPoint, distEnd, 0);
+//        } else {
+//            return null;
+//        }
+//    }
         
     /**
      * Try to get geographic / projected position from the corresponding component fields.
      * If geographic pane fields are not filled, we will try to compute them from
-     * linear referencing information, using {@link #computeGeoStartFromLinear() }.
+     * linear referencing information, using {@link #computeGeoFromLinear() }.
      * 
      * @return Geographic / projected start point defined, or null. Returned point 
      * CRS is always {@link #baseCrs}.
      */
-    private Point getOrCreatePoint(ObjectProperty<Number> longitudeProp, ObjectProperty<Number> latitudeProp, ObjectProperty<Number> distance, ObjectProperty<BorneDigue> borne, BooleanProperty amontSelectedProperty) {
+    private Point getOrCreatePoint(final ObjectProperty<Number> longitudeProp, 
+            final ObjectProperty<Number> latitudeProp, 
+            final ObjectProperty<Number> distance, 
+            final ObjectProperty<BorneDigue> borne, 
+            final BooleanProperty amontSelectedProperty) {
+        
         Point point = null;
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
         CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
@@ -605,85 +614,85 @@ public class FXPositionablePane extends BorderPane {
 //    private Point getOrCreateEndPoint() {
 //        return getOrCreatePoint(uiLongitudeEnd, uiLatitudeEnd);
 //}
-    /**
-     * Try to get geographic / projected start position from this component fields.
-     * If geographic pane fields are not filled, we will try to compute them from
-     * linear referencing information, using {@link #computeGeoStartFromLinear() }.
-     * 
-     * @return Geographic / projected start point defined, or null. Returned point 
-     * CRS is always {@link #baseCrs}.
-     * @deprecated Please use getOrCreatePoint() for code factorisation.
-     */
-    @Deprecated
-    private Point getOrCreateStartPoint() {
-        Point ptStart = null;
-        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
-        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
-        if (selectedCRS != null) {
-            // On a un point de début valide : on le prends.
-            if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
-                ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                        fxNumberValue(uiLongitudeStart.valueProperty()),
-                        fxNumberValue(uiLatitudeStart.valueProperty())
-                ));
-            }
-
-            if (ptStart != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
-                try {
-                    ptStart = (Point) JTS.transform(ptStart,
-                            CRS.findMathTransform(selectedCRS, baseCrs, true));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        
-        if (ptStart == null) {
-            ptStart = computeGeoStartFromLinear();
-        }
-        
-        return ptStart;
-    }
-            
-    /**
-     * Try to get geographic / projected end position from this component fields.
-     * If geographic pane fields are not filled, we will try to compute them from
-     * linear referencing information, using {@link #computeGeoEndFromLinear() }.
-     * 
-     * @return Geographic / projected end point defined, or null. Returned point 
-     * CRS is always {@link #baseCrs}.
-     * @deprecated Please use getOrCreatePoint() for code factorisation.
-     */
-    @Deprecated
-    private Point getOrCreateEndPoint() {
-        Point ptEnd = null;
-        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
-        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
-        if (selectedCRS != null) {
-            // On a un point de fin valide : on le prends.
-            if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
-                ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                        fxNumberValue(uiLongitudeEnd.valueProperty()),
-                        fxNumberValue(uiLatitudeEnd.valueProperty())
-                ));
-            }
-
-            if (ptEnd != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
-                try {
-                    ptEnd = (Point) JTS.transform(ptEnd,
-                            CRS.findMathTransform(selectedCRS, baseCrs, true));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        if (ptEnd == null) {
-            ptEnd = computeGeoEndFromLinear();
-        }
-
-        return ptEnd;
-    }
+//    /**
+//     * Try to get geographic / projected start position from this component fields.
+//     * If geographic pane fields are not filled, we will try to compute them from
+//     * linear referencing information, using {@link #computeGeoStartFromLinear() }.
+//     * 
+//     * @return Geographic / projected start point defined, or null. Returned point 
+//     * CRS is always {@link #baseCrs}.
+//     * @deprecated Please use getOrCreatePoint() for code factorisation.
+//     */
+//    @Deprecated
+//    private Point getOrCreateStartPoint() {
+//        Point ptStart = null;
+//        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
+//        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+//        if (selectedCRS != null) {
+//            // On a un point de début valide : on le prends.
+//            if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart != null) {
+//                ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+//                        fxNumberValue(uiLongitudeStart.valueProperty()),
+//                        fxNumberValue(uiLatitudeStart.valueProperty())
+//                ));
+//            }
+//
+//            if (ptStart != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
+//                try {
+//                    ptStart = (Point) JTS.transform(ptStart,
+//                            CRS.findMathTransform(selectedCRS, baseCrs, true));
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        }
+//        
+//        if (ptStart == null) {
+//            ptStart = computeGeoStartFromLinear();
+//        }
+//        
+//        return ptStart;
+//    }
+//            
+//    /**
+//     * Try to get geographic / projected end position from this component fields.
+//     * If geographic pane fields are not filled, we will try to compute them from
+//     * linear referencing information, using {@link #computeGeoEndFromLinear() }.
+//     * 
+//     * @return Geographic / projected end point defined, or null. Returned point 
+//     * CRS is always {@link #baseCrs}.
+//     * @deprecated Please use getOrCreatePoint() for code factorisation.
+//     */
+//    @Deprecated
+//    private Point getOrCreateEndPoint() {
+//        Point ptEnd = null;
+//        // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
+//        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+//        if (selectedCRS != null) {
+//            // On a un point de fin valide : on le prends.
+//            if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd != null) {
+//                ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
+//                        fxNumberValue(uiLongitudeEnd.valueProperty()),
+//                        fxNumberValue(uiLatitudeEnd.valueProperty())
+//                ));
+//            }
+//
+//            if (ptEnd != null && !CRS.equalsApproximatively(selectedCRS, baseCrs)) {
+//                try {
+//                    ptEnd = (Point) JTS.transform(ptEnd,
+//                            CRS.findMathTransform(selectedCRS, baseCrs, true));
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        }
+//
+//        if (ptEnd == null) {
+//            ptEnd = computeGeoEndFromLinear();
+//        }
+//
+//        return ptEnd;
+//    }
     
     /**
      * Return the {@link TronconDigue} object associated to the current positionable.
@@ -990,8 +999,10 @@ public class FXPositionablePane extends BorderPane {
         }
         
         //on sauvegarde la position geo
-        pos.setPositionDebut(getOrCreateStartPoint());
-        pos.setPositionFin(getOrCreateEndPoint());
+//        pos.setPositionDebut(getOrCreateStartPoint());
+//        pos.setPositionFin(getOrCreateEndPoint());
+        pos.setPositionDebut(getOrCreatePoint(uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), uiDistanceStart.valueProperty(), uiBorneStart.valueProperty(), uiAmontStart.selectedProperty()));
+        pos.setPositionFin(getOrCreatePoint(uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), uiDistanceEnd.valueProperty(), uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty()));
         
         //sauvegarde de la position par borne
         final SystemeReperage selectedSR = uiSRs.getSelectionModel().selectedItemProperty().get();
@@ -1015,95 +1026,159 @@ public class FXPositionablePane extends BorderPane {
         pos.setGeometry(structGeom);        
     }
     
-    /**
-     * Compute geographic start point from linear start position.
-     */
-    private class GeographicStartFromLinear implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            // Update only if linear mode is selected. Otherwise, it means a modification on geographic
-            // panel modified linear one, which throw back an event. We do not update if borne combo box 
-            // is currently selected, as user could be browsing in borne list.
-            if (uiTypeBorne.isSelected() && !uiBorneStart.isFocused()) {
-                computingRunning.set(computingRunning.get()+1);
-//                TaskManager.INSTANCE.submit(() -> {
-                    try {
-                        Point startPoint = computeGeoStartFromLinear();
-                        if (startPoint != null) {
-                            CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
-                            if (!CRS.equalsApproximatively(baseCrs, selectedCRS)) {
-                                startPoint = (Point) JTS.transform(startPoint, CRS.findMathTransform(baseCrs, selectedCRS));
-                            }
-                            final double x = startPoint.getX();
-                            final double y = startPoint.getY();
-                            final Optional<SystemeReperage> sr = getDefaultSR();
-                            float computedPR = sr.isPresent()? 
-                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository())
-                                    : Float.NaN;
-//                            Platform.runLater(() -> {
-                                uiLongitudeStart.valueProperty().set(x);
-                                uiLatitudeStart.valueProperty().set(y);
-                                prDebut.set(computedPR);
-//                            });
-                        }
-//                        return null;
-                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
-                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
-                    } finally {
-//                        Platform.runLater(() -> 
-                                computingRunning.set(computingRunning.get()-1);
-//                        );
-                    }
-//                });
-            }
-        }
-    }
-
-    /**
-     * Compute geographic end point from linear ending position.
-     */
-    private class GeographicEndFromLinear implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            // Update only if linear mode is selected. Otherwise, it means a modification on geographic
-            // panel modified linear one, which throw back an event. We do not update if borne combo box 
-            // is currently selected, as user could be browsing in borne list.
-            if (uiTypeBorne.isSelected() && !uiBorneEnd.isFocused()) {
-                computingRunning.set(computingRunning.get()+1);
-//                TaskManager.INSTANCE.submit(() -> {
-                    try {
-                        Point endPoint = computeGeoEndFromLinear();
-                        if (endPoint != null) {
-                            CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
-                            if (!CRS.equalsApproximatively(baseCrs, selectedCRS)) {
-                                endPoint = (Point) JTS.transform(endPoint, CRS.findMathTransform(baseCrs, selectedCRS));
-                            }
-                            final double x = endPoint.getX();
-                            final double y = endPoint.getY();
-                            final Optional<SystemeReperage> sr = getDefaultSR();
-                            float computedPR = sr.isPresent()? 
-                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository())
-                                    : Float.NaN;
-//                            Platform.runLater(() -> {
-                                uiLongitudeEnd.valueProperty().set(x);
-                                uiLatitudeEnd.valueProperty().set(y);
-                                prFin.set(computedPR);
-//                            });
-                        }
-//                        return null;
-                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
-                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
-                    } finally {
-//                        Platform.runLater(() -> 
-                                computingRunning.set(computingRunning.get()-1);
-//                        );
-                    }
-//                });
-            }
-        }
-    }
+//    /**
+//     * Compute geographic start point from linear start position.
+//     * @deprecated Please use LinearChangeListener for code factorisation.
+//     */
+//    @Deprecated
+//    private class GeographicStartFromLinear implements ChangeListener {
+//        @Override
+//        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+//            // Update only if linear mode is selected. Otherwise, it means a modification on geographic
+//            // panel modified linear one, which throw back an event. We do not update if borne combo box 
+//            // is currently selected, as user could be browsing in borne list.
+//            if (uiTypeBorne.isSelected() && !uiBorneStart.isFocused()) {
+//                computingRunning.set(computingRunning.get()+1);
+////                TaskManager.INSTANCE.submit(() -> {
+//                    try {
+//                        Point startPoint = computeGeoStartFromLinear();
+//                        if (startPoint != null) {
+//                            CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+//                            if (!CRS.equalsApproximatively(baseCrs, selectedCRS)) {
+//                                startPoint = (Point) JTS.transform(startPoint, CRS.findMathTransform(baseCrs, selectedCRS));
+//                            }
+//                            final double x = startPoint.getX();
+//                            final double y = startPoint.getY();
+//                            final Optional<SystemeReperage> sr = getDefaultSR();
+//                            float computedPR = sr.isPresent()? 
+//                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository())
+//                                    : Float.NaN;
+////                            Platform.runLater(() -> {
+//                                uiLongitudeStart.valueProperty().set(x);
+//                                uiLatitudeStart.valueProperty().set(y);
+//                                prDebut.set(computedPR);
+////                            });
+//                        }
+////                        return null;
+//                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+//                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
+//                    } finally {
+////                        Platform.runLater(() -> 
+//                                computingRunning.set(computingRunning.get()-1);
+////                        );
+//                    }
+////                });
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Compute geographic end point from linear ending position.
+//     * @deprecated Please use LinearChangeListener for code factorisation.
+//     */
+//    @Deprecated
+//    private class GeographicEndFromLinear implements ChangeListener {
+//        @Override
+//        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+//            // Update only if linear mode is selected. Otherwise, it means a modification on geographic
+//            // panel modified linear one, which throw back an event. We do not update if borne combo box 
+//            // is currently selected, as user could be browsing in borne list.
+//            if (uiTypeBorne.isSelected() && !uiBorneEnd.isFocused()) {
+//                computingRunning.set(computingRunning.get()+1);
+////                TaskManager.INSTANCE.submit(() -> {
+//                    try {
+//                        Point endPoint = computeGeoEndFromLinear();
+//                        if (endPoint != null) {
+//                            CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+//                            if (!CRS.equalsApproximatively(baseCrs, selectedCRS)) {
+//                                endPoint = (Point) JTS.transform(endPoint, CRS.findMathTransform(baseCrs, selectedCRS));
+//                            }
+//                            final double x = endPoint.getX();
+//                            final double y = endPoint.getY();
+//                            final Optional<SystemeReperage> sr = getDefaultSR();
+//                            float computedPR = sr.isPresent()? 
+//                                    TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository())
+//                                    : Float.NaN;
+////                            Platform.runLater(() -> {
+//                                uiLongitudeEnd.valueProperty().set(x);
+//                                uiLatitudeEnd.valueProperty().set(y);
+//                                prFin.set(computedPR);
+////                            });
+//                        }
+////                        return null;
+//                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+//                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
+//                    } finally {
+////                        Platform.runLater(() -> 
+//                                computingRunning.set(computingRunning.get()-1);
+////                        );
+//                    }
+////                });
+//            }
+//        }
+//    }
 
     
+
+    /**
+     * Compute geographic point from linear position.
+     */
+    private class LinearChangeListener implements ChangeListener {
+
+        private final ComboBox<BorneDigue> uiBorne;
+        private final ObjectProperty<Number> longitudeProp;
+        private final ObjectProperty<Number> latitudeProp;
+        private final SimpleFloatProperty pr;
+        private final ObjectProperty<Number> distanceProp;
+        private final BooleanProperty amontSelectedProperty;
+        
+        public LinearChangeListener(ComboBox<BorneDigue> uiBorneEnd, ObjectProperty<Number> uiLongitude,
+            ObjectProperty<Number> uiLatitude, SimpleFloatProperty prFin, ObjectProperty<Number> distanceProp,
+            BooleanProperty amontSelectedProperty) {
+            this.uiBorne = uiBorneEnd;
+            this.longitudeProp = uiLongitude;
+            this.latitudeProp = uiLatitude;
+            this.pr = prFin;
+            this.distanceProp = distanceProp;
+            this.amontSelectedProperty = amontSelectedProperty;
+        }
+        
+        
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            // Update only if linear mode is selected. Otherwise, it means a modification on geographic
+            // panel modified linear one, which throw back an event. We do not update if borne combo box 
+            // is currently selected, as user could be browsing in borne list.
+            if (uiTypeBorne.isSelected() && !uiBorne.isFocused()) {
+                computingRunning.set(computingRunning.get()+1);
+                
+                try {
+                    Point point = computeGeoFromLinear(distanceProp, uiBorne.valueProperty(), amontSelectedProperty);
+                    if (point != null) {
+                        CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+                        if (!CRS.equalsApproximatively(baseCrs, selectedCRS)) {
+                            point = (Point) JTS.transform(point, CRS.findMathTransform(baseCrs, selectedCRS));
+                        }
+                        final double x = point.getX();
+                        final double y = point.getY();
+                        final Optional<SystemeReperage> sr = getDefaultSR();
+                        float computedPR = sr.isPresent()? 
+                                TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), point, Injector.getSession().getBorneDigueRepository())
+                                : Float.NaN;
+
+                            longitudeProp.set(x);
+                            latitudeProp.set(y);
+                            pr.set(computedPR);
+
+                    }
+                } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+                    SIRS.LOGGER.log(Level.SEVERE, null, ex);
+                } finally {
+                    computingRunning.set(computingRunning.get()-1);
+                }
+            }
+        }
+    }
     
     
     
@@ -1158,94 +1233,6 @@ public class FXPositionablePane extends BorderPane {
         }
     }
     
-//    computedLinear = computeLinearFromGeo(sr, endPoint);
-//                    aval = true;
-//                    distanceBorne = computedLinear.getValue();
-//                    if (distanceBorne < 0) {
-//                        distanceBorne = -distanceBorne;
-//                        aval = false;
-//                    }
-//                    computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, Injector.getSession().getBorneDigueRepository());
-    
-//    /**
-//     * Compute linear starting position from geographic/projected start point.
-//     * @deprecated Please use GeographicChangeListener for code factorisation.
-//     */
-//    @Deprecated
-//    private class LinearStartFromGeographic implements ChangeListener {
-//
-//        @Override
-//        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-//            // Update only if geographic mode is selected. Otherwise, it means a 
-//            // modification on linear panel has thrown back an event.
-//            if (uiTypeCoord.isSelected()) {
-//                computingRunning.set(computingRunning.get()+1);
-////                TaskManager.INSTANCE.submit(() -> {
-//                    try {
-//                        Point startPoint = getOrCreateStartPoint();
-//                        final Optional<SystemeReperage> sr = getDefaultSR();
-//                        if (startPoint != null && sr.isPresent()) {
-//                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), startPoint);
-//                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository());
-////                            Platform.runLater(() -> {
-//                                uiAmontStart.setSelected(computedLinear.getValue() < 0);
-//                                uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
-//                                uiBorneStart.setValue(computedLinear.getKey());
-//                                prDebut.set(computedPR);
-////                            });
-//                        }
-////                        return null;
-//                    } finally {
-////                        Platform.runLater(() -> 
-//                                computingRunning.set(computingRunning.get()-1);
-////                        );
-//                    }
-////                });
-//            }
-//        }
-//    }
-//    
-//    /**
-//     * Compute linear ending position from geographic/projected end point.
-//     * @deprecated Please use GeographicChangeListener for code factorisation.
-//     */
-//    @Deprecated
-//    private class LinearEndFromGeographic implements ChangeListener {
-//
-//        @Override
-//        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-//            // Update only if geographic mode is selected. Otherwise, it means a 
-//            // modification on linear panel has thrown back an event.
-//            if (uiTypeCoord.isSelected()) {
-//                computingRunning.set(computingRunning.get()+1);
-////                TaskManager.INSTANCE.submit(() -> {
-//                    try {
-//                        Point endPoint = getOrCreateEndPoint();
-//                        final Optional<SystemeReperage> sr = getDefaultSR();
-//                        if (endPoint != null && sr.isPresent()) {
-//                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), endPoint);
-//                            final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository());
-////                            Platform.runLater(() -> {
-//                                uiAmontEnd.setSelected(computedLinear.getValue() < 0);
-//                                uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
-//                                uiBorneEnd.setValue(computedLinear.getKey());
-//                                prFin.set(computedPR);
-////                            });
-//                        }
-////                        return null;
-//                    } finally {
-////                        Platform.runLater(() -> 
-//                                computingRunning.set(computingRunning.get()-1);
-////                        );
-//                    }
-////                });
-//            }
-//        }
-//    }
-    
-    
-    
-    
     private class DistanceChangeListener implements ChangeListener {
         
         private final ObjectProperty<BorneDigue> borneProp;
@@ -1299,19 +1286,6 @@ public class FXPositionablePane extends BorderPane {
             }
         }
     }
-    
-//    /**
-//     * 
-//     * @param spinner
-//     * @return
-//     * @deprecated Please use fxNumberValue(ObjectProperty<Number> spinnerNumber)
-//     * which argument is not a graphical component.
-//     */
-//    @Deprecated
-//    private double fxNumberValue(FXNumberSpinner spinner){
-//        if(spinner.valueProperty().get()==null) return 0;
-//        return spinner.valueProperty().get().doubleValue();
-//    }
     
     private double fxNumberValue(ObjectProperty<Number> spinnerNumber){
         if(spinnerNumber.get()==null) return 0;
