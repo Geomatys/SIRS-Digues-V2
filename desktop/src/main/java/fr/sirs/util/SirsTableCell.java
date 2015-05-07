@@ -9,12 +9,14 @@ import java.util.concurrent.Executors;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -52,34 +54,38 @@ public class SirsTableCell<S, T> extends FXTableCell<S, T> {
 
     @Override
     protected void updateItem(final T item, final boolean empty) {
-        super.updateItem(item, empty);
-        if(empty || item == null){
-            setText(null);
-            setGraphic(null);
-        }
-        else {
-            setGraphic(new ImageView(ICON_LINK));
-            THREAD_POOL.submit(() -> {
-                final String toDisplay;
+        THREAD_POOL.submit(() -> {
+            final String text;
+            final Node graphic;
+            if (empty || item == null) {
+                text = null;
+                graphic = null;
+            } else {
+                graphic = new ImageView(ICON_LINK);
                 if (item instanceof SystemeReperageBorne) {
                     final SystemeReperageBorne srb = (SystemeReperageBorne) item;
                     final Session session = Injector.getBean(Session.class);
-                    toDisplay = session.getBorneDigueRepository().get(srb.getBorneId()).getLibelle();
+                    text = session.getBorneDigueRepository().get(srb.getBorneId()).getLibelle();
                 } else if (item instanceof String) {
                     // On essaye de récupérer le preview label : si le résultat n'est pas nul, c'est que l'item est bien un id
                     final String tmpPreview = Injector.getSession().getPreviewLabelRepository().getPreview((String) item);
                     if (tmpPreview != null) {
-                        toDisplay = tmpPreview;
+                        text = tmpPreview;
                     } else {
                         // Si le résultat n'était pas null, alors c'est que l'item n'était certainement pas un id, mais déjà un libellé issu de preview label.
-                        toDisplay = (String) item;
+                        text = (String) item;
                     }
                 } else {
-                    toDisplay = new SirsStringConverter().toString(item);
+                    text = new SirsStringConverter().toString(item);
                 }
-                setText(toDisplay);
+            }
+            
+            Platform.runLater(() -> {
+                super.updateItem(item, empty);
+                setGraphic(graphic);
+                setText(text);
             });
-        }
+        });
     }
     
 }
