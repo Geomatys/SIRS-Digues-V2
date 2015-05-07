@@ -8,10 +8,11 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
+import static fr.sirs.SIRS.ICON_EXCLAMATION_TRIANGLE;
 import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
 import static fr.sirs.SIRS.ICON_VIEWOTHER_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -59,6 +61,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -72,6 +75,8 @@ import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
+import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -115,6 +120,8 @@ public class FXPositionablePane extends BorderPane {
     @FXML private CheckBox uiAmontEnd;
     @FXML private FXNumberSpinner uiDistanceStart;
     @FXML private FXNumberSpinner uiDistanceEnd;
+    @FXML private ImageView uiImageStartValid;
+    @FXML private ImageView uiImageEndValid;
     
     // Coordinate mode
     @FXML private GridPane uiCoordPane;
@@ -232,6 +239,10 @@ public class FXPositionablePane extends BorderPane {
         // Update PR information
         uiPRDebut.textProperty().bind(prDebut.asString("%.2f"));
         uiPRFin.textProperty().bind(prFin.asString("%.2f"));
+        
+        // Check if the positionable distances are on the troncon
+        prDebut.addListener(new DistanceStartChecker());
+        prFin.addListener(new DistanceEndChecker());
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
@@ -275,7 +286,6 @@ public class FXPositionablePane extends BorderPane {
             return;
         }
 
-        final Session session = Injector.getBean(Session.class);
         final StringBuilder page = new StringBuilder();
         page.append("<html><body>");
 
@@ -697,6 +707,85 @@ public class FXPositionablePane extends BorderPane {
                
     }
     
+    private class DistanceStartChecker implements ChangeListener{
+
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            
+            if(uiBorneStart.getValue()!=null 
+                    && uiBorneStart.getValue().getGeometry()!=null
+                    && uiSRs.getValue()!=null
+                    && uiDistanceStart.valueProperty().get()!=null){
+                
+                final LinearReferencing.SegmentInfo[] refLinear = getSourceLinear(uiSRs.getValue());
+                final ProjectedPoint startBorneProj = LinearReferencing.projectReference(refLinear, uiBorneStart.getValue().getGeometry());
+
+                double tronconLength = 0.;
+                for(int i=0; i<refLinear.length; i++){
+                    tronconLength+=refLinear[i].length;
+                }
+
+                // Les cas suivants doivent alerter l'utilisateur :
+
+                // cas amont pour le début : distance saisie supérieure à la distance de la borne de départ depuis le début du troncon
+                if((uiAmontStart.isSelected() && uiDistanceStart.valueProperty().get().doubleValue() > startBorneProj.distanceAlongLinear)
+                        // cas aval pour le début : distance saisie supérieure à la longueur du tronçon - la distance de la borne de depart depuis le début du tronçon
+                        || (!uiAmontStart.isSelected() && uiDistanceStart.valueProperty().get().doubleValue() > (tronconLength-startBorneProj.distanceAlongLinear))){
+                    uiDistanceStart.getNumberField().setStyle("-fx-text-fill: #cc0000");
+                    uiDistanceStart.getNumberField().setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
+                    uiImageStartValid.setImage(ICON_EXCLAMATION_TRIANGLE);
+                }
+
+                // Dans les autres cas, on restaure le texte en noir.
+                else {
+                    uiDistanceStart.getNumberField().setStyle("-fx-text-fill: #000000");
+                    uiDistanceStart.getNumberField().setTooltip(null);
+                    uiImageStartValid.setImage(ICON_CHECK_CIRCLE);
+                }
+            }
+        }
+    }
+    
+    
+    private class DistanceEndChecker implements ChangeListener{
+
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            
+            if(uiBorneEnd.getValue()!=null 
+                    && uiBorneEnd.getValue().getGeometry()!=null
+                    && uiSRs.getValue()!=null
+                    && uiDistanceEnd.valueProperty().get()!=null){
+                
+                final LinearReferencing.SegmentInfo[] refLinear = getSourceLinear(uiSRs.getValue());
+                final ProjectedPoint endBorneProj = LinearReferencing.projectReference(refLinear, uiBorneEnd.getValue().getGeometry());
+
+                double tronconLength = 0.;
+                for(int i=0; i<refLinear.length; i++){
+                    tronconLength+=refLinear[i].length;
+                }
+
+                // Les cas suivants doivent alerter l'utilisateur :
+
+                // cas amont pour la fin : distance saisie supérieure à la distance entre la borde de fin depuis le début du troncon
+                if((uiAmontEnd.isSelected() && uiDistanceEnd.valueProperty().get().doubleValue() > endBorneProj.distanceAlongLinear)
+                        // cas aval pour la fin : distance saisie supérieure à la distance entre la borne de fin et la fin du tronçon
+                        || (!uiAmontEnd.isSelected() && uiDistanceEnd.valueProperty().get().doubleValue() > (tronconLength-endBorneProj.distanceAlongLinear))){
+                    uiDistanceEnd.getNumberField().setStyle("-fx-text-fill: #cc0000");
+                    uiDistanceEnd.getNumberField().setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
+                    uiImageEndValid.setImage(ICON_EXCLAMATION_TRIANGLE);
+                }
+
+                // Dans les autres cas, on restaure le texte en noir.
+                else {
+                    uiDistanceEnd.getNumberField().setStyle("-fx-text-fill: #000000");
+                    uiDistanceEnd.getNumberField().setTooltip(null);
+                    uiImageEndValid.setImage(ICON_CHECK_CIRCLE);
+                }
+            }
+        }
+    }
+    
     private double fxNumberValue(FXNumberSpinner spinner){
         if(spinner.valueProperty().get()==null) return 0;
         return spinner.valueProperty().get().doubleValue();
@@ -921,7 +1010,7 @@ public class FXPositionablePane extends BorderPane {
             // is currently selected, as user could be browsing in borne list.
             if (uiTypeBorne.isSelected() && !uiBorneStart.isFocused()) {
                 computingRunning.set(computingRunning.get()+1);
-                TaskManager.INSTANCE.submit(() -> {
+//                TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point startPoint = computeGeoStartFromLinear();
                         if (startPoint != null) {
@@ -935,17 +1024,21 @@ public class FXPositionablePane extends BorderPane {
                             float computedPR = sr.isPresent()? 
                                     TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository())
                                     : Float.NaN;
-                            Platform.runLater(() -> {
+//                            Platform.runLater(() -> {
                                 uiLongitudeStart.valueProperty().set(x);
                                 uiLatitudeStart.valueProperty().set(y);
                                 prDebut.set(computedPR);
-                            });
+//                            });
                         }
-                        return null;
+//                        return null;
+                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
+//                        Platform.runLater(() -> 
+                                computingRunning.set(computingRunning.get()-1);
+//                        );
                     }
-                });
+//                });
             }
         }
     }
@@ -961,7 +1054,7 @@ public class FXPositionablePane extends BorderPane {
             // is currently selected, as user could be browsing in borne list.
             if (uiTypeBorne.isSelected() && !uiBorneEnd.isFocused()) {
                 computingRunning.set(computingRunning.get()+1);
-                TaskManager.INSTANCE.submit(() -> {
+//                TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point endPoint = computeGeoEndFromLinear();
                         if (endPoint != null) {
@@ -975,17 +1068,21 @@ public class FXPositionablePane extends BorderPane {
                             float computedPR = sr.isPresent()? 
                                     TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository())
                                     : Float.NaN;
-                            Platform.runLater(() -> {
+//                            Platform.runLater(() -> {
                                 uiLongitudeEnd.valueProperty().set(x);
                                 uiLatitudeEnd.valueProperty().set(y);
                                 prFin.set(computedPR);
-                            });
+//                            });
                         }
-                        return null;
+//                        return null;
+                    } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+                        SIRS.LOGGER.log(Level.SEVERE, null, ex);
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
+//                        Platform.runLater(() -> 
+                                computingRunning.set(computingRunning.get()-1);
+//                        );
                     }
-                });
+//                });
             }
         }
     }
@@ -1001,25 +1098,27 @@ public class FXPositionablePane extends BorderPane {
             // modification on linear panel has thrown back an event.
             if (uiTypeCoord.isSelected()) {
                 computingRunning.set(computingRunning.get()+1);
-                TaskManager.INSTANCE.submit(() -> {
+//                TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point startPoint = getOrCreateStartPoint();
                         final Optional<SystemeReperage> sr = getDefaultSR();
                         if (startPoint != null && sr.isPresent()) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), startPoint);
                             final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), startPoint, Injector.getSession().getBorneDigueRepository());
-                            Platform.runLater(() -> {
+//                            Platform.runLater(() -> {
                                 uiAmontStart.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceStart.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneStart.setValue(computedLinear.getKey());
                                 prDebut.set(computedPR);
-                            });
+//                            });
                         }
-                        return null;
+//                        return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
+//                        Platform.runLater(() -> 
+                                computingRunning.set(computingRunning.get()-1);
+//                        );
                     }
-                });
+//                });
             }
         }
     }
@@ -1035,25 +1134,27 @@ public class FXPositionablePane extends BorderPane {
             // modification on linear panel has thrown back an event.
             if (uiTypeCoord.isSelected()) {
                 computingRunning.set(computingRunning.get()+1);
-                TaskManager.INSTANCE.submit(() -> {
+//                TaskManager.INSTANCE.submit(() -> {
                     try {
                         Point endPoint = getOrCreateEndPoint();
                         final Optional<SystemeReperage> sr = getDefaultSR();
                         if (endPoint != null && sr.isPresent()) {
                             final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(sr.get(), endPoint);
                             final float computedPR = TronconUtils.computePR(getSourceLinear(sr.get()), sr.get(), endPoint, Injector.getSession().getBorneDigueRepository());
-                            Platform.runLater(() -> {
+//                            Platform.runLater(() -> {
                                 uiAmontEnd.setSelected(computedLinear.getValue() < 0);
                                 uiDistanceEnd.valueProperty().set(StrictMath.abs(computedLinear.getValue()));
                                 uiBorneEnd.setValue(computedLinear.getKey());
                                 prFin.set(computedPR);
-                            });
+//                            });
                         }
-                        return null;
+//                        return null;
                     } finally {
-                        Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
+//                        Platform.runLater(() -> 
+                                computingRunning.set(computingRunning.get()-1);
+//                        );
                     }
-                });
+//                });
             }
         }
     }
