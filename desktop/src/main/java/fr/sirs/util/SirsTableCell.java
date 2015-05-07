@@ -16,7 +16,6 @@ import javafx.scene.image.ImageView;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
