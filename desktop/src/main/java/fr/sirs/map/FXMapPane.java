@@ -113,7 +113,7 @@ public class FXMapPane extends BorderPane {
     private final SplitPane mapsplit = new SplitPane();
     
     private final FXContextBar uiCtxBar;
-    private final FXAddDataBar uiAddBar;
+    private final SIRSAddDataBar uiAddBar;
     private final FXNavigationBar uiNavBar;
     private final FXGeoToolBar uiToolBar;
     private final FXTronconEditBar uiEditBar;
@@ -133,7 +133,7 @@ public class FXMapPane extends BorderPane {
         synchronizer.addCanvas(uiMap2.getCanvas(),true,true);
         
         uiCtxBar = new FXContextBar(uiMap1);
-        uiAddBar = new FXAddDataBar(uiMap1,true);
+        uiAddBar = new SIRSAddDataBar(uiMap1);
         uiNavBar = new FXNavigationBar(uiMap1);
         uiToolBar = new FXGeoToolBar(uiMap1);
         uiEditBar = new FXTronconEditBar(uiMap1);

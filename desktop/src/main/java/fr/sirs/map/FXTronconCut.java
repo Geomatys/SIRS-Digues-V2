@@ -8,7 +8,6 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SimpleButtonColumn;
-import fr.sirs.util.json.GeometryDeserializer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
