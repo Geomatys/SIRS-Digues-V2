@@ -209,3 +209,7 @@
 .invalidRow:odd:selected {
     -fx-background-color: #DF7454;
 }
+.progress-bar > .bar {
+    -fx-background-insets: 1 1 2 1;
+    -fx-padding: 0.20em;
+}

@@ -4,6 +4,7 @@ package fr.sirs.theme;
 
 import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.TronconDigue;
@@ -29,7 +30,12 @@ public class FrancBordTheme extends AbstractTronconTheme {
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof PiedFrontFrancBord),
             (TronconDigue t, Object c) -> t.structures.remove(c));
         
-        setGroups(new ThemeGroup[]{group1, group2});
+        final String title3 = new LabelMapper(LargeurFrancBord.class).mapClassName();
+        final ThemeGroup group3 = new ThemeGroup(title3, LargeurFrancBord.class,
+            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof LargeurFrancBord),
+            (TronconDigue t, Object c) -> t.structures.remove(c));
+        
+        setGroups(new ThemeGroup[]{group1, group2, group3});
     }
     
 }

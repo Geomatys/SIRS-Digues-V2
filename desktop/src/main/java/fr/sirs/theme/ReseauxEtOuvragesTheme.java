@@ -2,6 +2,7 @@
 
 package fr.sirs.theme;
 
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
@@ -40,9 +41,12 @@ public class ReseauxEtOuvragesTheme extends AbstractTronconTheme {
     private static final ThemeGroup GROUP7 = new ThemeGroup("Ouvrage particulier",              OuvrageParticulier.class,           
             (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof OuvrageParticulier),
             (TronconDigue t, Object c) -> t.structures.remove(c));
+    private static final ThemeGroup GROUP8 = new ThemeGroup("Échelle limnimetrique",              EchelleLimnimetrique.class,           
+            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof EchelleLimnimetrique),
+            (TronconDigue t, Object c) -> t.structures.remove(c));
     
     public ReseauxEtOuvragesTheme() {
-        super("Réseaux et ouvrages", GROUP1,GROUP2,GROUP3,GROUP4,GROUP5,GROUP6,GROUP7);
+        super("Réseaux et ouvrages", GROUP1,GROUP2,GROUP3,GROUP4,GROUP5,GROUP6,GROUP7, GROUP8);
     }
     
 }

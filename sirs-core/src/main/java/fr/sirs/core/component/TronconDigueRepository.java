@@ -16,6 +16,7 @@ import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
@@ -108,32 +109,32 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         viewMapObjets.put(DEVERSOIR, this::getAllDeversoirs);
         viewMapObjets.put(EPI, this::getAllEpis);
         viewMapObjets.put(FONDATION, this::getAllFondations);
-        viewMapObjets.put(FRONTFRANCBORD, this::getAllFrontFrancBords);
-        viewMapObjets.put(LAISSECRUE, this::getAllLaisseCrues);
-        viewMapObjets.put(LARGEURFRANCBORD, this::getAllLargeurFrancBords);
-        viewMapObjets.put(LIGNEEAU, this::getAllLigneEaus);
-        viewMapObjets.put(MONTEEEAUX, this::getAllMonteeEaux);
-        viewMapObjets.put(OUVERTUREBATARDABLE, this::getAllOuvertureBatardables);
-        viewMapObjets.put(OUVRAGEFRANCHISSEMENT, this::getAllOuvrageFranchissements);
-        viewMapObjets.put(OUVRAGEHYDRAULIQUEASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
+        viewMapObjets.put(FRONT_FRANC_BORD, this::getAllFrontFrancBords);
+        viewMapObjets.put(LAISSE_CRUE, this::getAllLaisseCrues);
+        viewMapObjets.put(LARGEUR_FRANC_BORD, this::getAllLargeurFrancBords);
+        viewMapObjets.put(LIGNE_EAU, this::getAllLigneEaus);
+        viewMapObjets.put(MONTEE_EAUX, this::getAllMonteeEaux);
+        viewMapObjets.put(OUVERTURE_BATARDABLE, this::getAllOuvertureBatardables);
+        viewMapObjets.put(OUVRAGE_FRANCHISSEMENT, this::getAllOuvrageFranchissements);
+        viewMapObjets.put(OUVRAGE_HYDRAULIQUE_ASSOCIE, this::getAllOuvrageHydrauliqueAssocies);
         viewMapObjets.put(OUVRAGE_PARTICULIER, this::getAllOuvrageParticuliers);
-        viewMapObjets.put(OUVRAGEREVANCHE, this::getAllOuvrageRevanches);
-        viewMapObjets.put(OUVRAGETELECOMENERGIE, this::getAllOuvrageTelecomEnergies);
-        viewMapObjets.put(OUVRAGEVOIRIE, this::getAllOuvrageVoiries);
-        viewMapObjets.put(PIEDDIGUE, this::getAllPiedDigues);
-        viewMapObjets.put(PIEDFRONTFRANCBORD, this::getAllPiedFrontFrancBords);
-        viewMapObjets.put(PISTEPIEDDIGUE, this::getAllPistePiedDigues);
+        viewMapObjets.put(OUVRAGE_REVANCHE, this::getAllOuvrageRevanches);
+        viewMapObjets.put(OUVRAGE_TELECOM_ENERGIE, this::getAllOuvrageTelecomEnergies);
+        viewMapObjets.put(OUVRAGE_VOIRIE, this::getAllOuvrageVoiries);
+        viewMapObjets.put(PIED_DIGUE, this::getAllPiedDigues);
+        viewMapObjets.put(PIED_FRONT_FRANC_BORD, this::getAllPiedFrontFrancBords);
+        viewMapObjets.put(PISTE_PIED_DIGUE, this::getAllPistePiedDigues);
         viewMapObjets.put(PRESTATION, this::getAllPrestations);
-        viewMapObjets.put(PROFILFRONTFRANCBORD, this::getAllProfilFrontFrancBords);
-        viewMapObjets.put(RESEAUHYDRAULIQUEFERME, this::getAllReseauHydrauliqueFermes);
+        viewMapObjets.put(PROFIL_FRONT_FRANC_BORD, this::getAllProfilFrontFrancBords);
+        viewMapObjets.put(RESEAU_HYDRAULIQUE_FERME, this::getAllReseauHydrauliqueFermes);
         viewMapObjets.put(RESEAU_HYDRAULIQUE_CIEL_OUVERT, this::getAllReseauHydrauliqueCielOuverts);
         viewMapObjets.put(RESEAU_TELECOM_ENERGIE, this::getAllReseauTelecomEnergies);
-        viewMapObjets.put(SOMMETRISBERME, this::getAllSommetRisbermes);
-        viewMapObjets.put(STATIONPOMPAGE, this::getAllStationPompages);
-        viewMapObjets.put(TALUSDIGUE, this::getAllTalusDigues);
-        viewMapObjets.put(TALUSRISBERME, this::getAllTalusRisbermes);
-        viewMapObjets.put(VOIEACCES, this::getAllVoieAccess);
-        viewMapObjets.put(VOIEDIGUE, this::getAllVoieDigues);
+        viewMapObjets.put(SOMMET_RISBERME, this::getAllSommetRisbermes);
+        viewMapObjets.put(STATION_POMPAGE, this::getAllStationPompages);
+        viewMapObjets.put(TALUS_DIGUE, this::getAllTalusDigues);
+        viewMapObjets.put(TALUS_RISBERME, this::getAllTalusRisbermes);
+        viewMapObjets.put(VOIE_ACCES, this::getAllVoieAccess);
+        viewMapObjets.put(VOIE_DIGUE, this::getAllVoieDigues);
         viewMapDocuments.put(POSITION_DOCUMENT, this::getAllPositionDocuments);
         viewMapDocuments.put(POSITION_PROFIL_TRAVERS, this::getAllPositionProfilTravers);
         viewMapDocuments.put(PROFIL_LONG, this::getAllProfilLongs);
@@ -193,41 +194,41 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryView(createQuery(CRETE), Crete.class);
     }
 
-    public static final String OUVRAGEREVANCHE = "OuvrageRevanche";
+    public static final String OUVRAGE_REVANCHE = "OuvrageRevanche";
 
-    @View(name = OUVRAGEREVANCHE, map = "classpath:OuvrageRevanche-map.js")
+    @View(name = OUVRAGE_REVANCHE, map = "classpath:OuvrageRevanche-map.js")
     public List<OuvrageRevanche> getAllOuvrageRevanches() {
         return db
-                .queryView(createQuery(OUVRAGEREVANCHE), OuvrageRevanche.class);
+                .queryView(createQuery(OUVRAGE_REVANCHE), OuvrageRevanche.class);
     }
 
-    public static final String OUVERTUREBATARDABLE = "OuvertureBatardable";
+    public static final String OUVERTURE_BATARDABLE = "OuvertureBatardable";
 
-    @View(name = OUVERTUREBATARDABLE, map = "classpath:OuvertureBatardable-map.js")
+    @View(name = OUVERTURE_BATARDABLE, map = "classpath:OuvertureBatardable-map.js")
     public List<OuvertureBatardable> getAllOuvertureBatardables() {
-        return db.queryView(createQuery(OUVERTUREBATARDABLE),
+        return db.queryView(createQuery(OUVERTURE_BATARDABLE),
                 OuvertureBatardable.class);
     }
 
-    public static final String TALUSDIGUE = "TalusDigue";
+    public static final String TALUS_DIGUE = "TalusDigue";
 
-    @View(name = TALUSDIGUE, map = "classpath:TalusDigue-map.js")
+    @View(name = TALUS_DIGUE, map = "classpath:TalusDigue-map.js")
     public List<TalusDigue> getAllTalusDigues() {
-        return db.queryView(createQuery(TALUSDIGUE), TalusDigue.class);
+        return db.queryView(createQuery(TALUS_DIGUE), TalusDigue.class);
     }
 
-    public static final String TALUSRISBERME = "TalusRisberme";
+    public static final String TALUS_RISBERME = "TalusRisberme";
 
-    @View(name = TALUSRISBERME, map = "classpath:TalusRisberme-map.js")
+    @View(name = TALUS_RISBERME, map = "classpath:TalusRisberme-map.js")
     public List<TalusRisberme> getAllTalusRisbermes() {
-        return db.queryView(createQuery(TALUSRISBERME), TalusRisberme.class);
+        return db.queryView(createQuery(TALUS_RISBERME), TalusRisberme.class);
     }
 
-    public static final String SOMMETRISBERME = "SommetRisberme";
+    public static final String SOMMET_RISBERME = "SommetRisberme";
 
-    @View(name = SOMMETRISBERME, map = "classpath:SommetRisberme-map.js")
+    @View(name = SOMMET_RISBERME, map = "classpath:SommetRisberme-map.js")
     public List<SommetRisberme> getAllSommetRisbermes() {
-        return db.queryView(createQuery(SOMMETRISBERME), SommetRisberme.class);
+        return db.queryView(createQuery(SOMMET_RISBERME), SommetRisberme.class);
     }
 
     public static final String FONDATION = "Fondation";
@@ -242,70 +243,70 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryForStreamingView(createQuery(FONDATION));
     }
 
-    public static final String PIEDDIGUE = "PiedDigue";
+    public static final String PIED_DIGUE = "PiedDigue";
 
-    @View(name = PIEDDIGUE, map = "classpath:PiedDigue-map.js")
+    @View(name = PIED_DIGUE, map = "classpath:PiedDigue-map.js")
     public List<PiedDigue> getAllPiedDigues() {
-        return db.queryView(createQuery(PIEDDIGUE), PiedDigue.class);
+        return db.queryView(createQuery(PIED_DIGUE), PiedDigue.class);
     }
 
-    public static final String LARGEURFRANCBORD = "LargeurFrancBord";
+    public static final String LARGEUR_FRANC_BORD = "LargeurFrancBord";
 
-    @View(name = LARGEURFRANCBORD, map = "classpath:LargeurFrancBord-map.js")
+    @View(name = LARGEUR_FRANC_BORD, map = "classpath:LargeurFrancBord-map.js")
     public List<LargeurFrancBord> getAllLargeurFrancBords() {
-        return db.queryView(createQuery(LARGEURFRANCBORD),
+        return db.queryView(createQuery(LARGEUR_FRANC_BORD),
                 LargeurFrancBord.class);
     }
 
-    public static final String OUVRAGEFRANCHISSEMENT = "OuvrageFranchissement";
+    public static final String OUVRAGE_FRANCHISSEMENT = "OuvrageFranchissement";
 
-    @View(name = OUVRAGEFRANCHISSEMENT, map = "classpath:OuvrageFranchissement-map.js")
+    @View(name = OUVRAGE_FRANCHISSEMENT, map = "classpath:OuvrageFranchissement-map.js")
     public List<OuvrageFranchissement> getAllOuvrageFranchissements() {
-        return db.queryView(createQuery(OUVRAGEFRANCHISSEMENT),
+        return db.queryView(createQuery(OUVRAGE_FRANCHISSEMENT),
                 OuvrageFranchissement.class);
     }
 
-    public static final String VOIEACCES = "VoieAcces";
+    public static final String VOIE_ACCES = "VoieAcces";
 
-    @View(name = VOIEACCES, map = "classpath:VoieAcces-map.js")
+    @View(name = VOIE_ACCES, map = "classpath:VoieAcces-map.js")
     public List<VoieAcces> getAllVoieAccess() {
-        return db.queryView(createQuery(VOIEACCES), VoieAcces.class);
+        return db.queryView(createQuery(VOIE_ACCES), VoieAcces.class);
     }
 
-    public static final String VOIEDIGUE = "VoieDigue";
+    public static final String VOIE_DIGUE = "VoieDigue";
 
-    @View(name = VOIEDIGUE, map = "classpath:VoieDigue-map.js")
+    @View(name = VOIE_DIGUE, map = "classpath:VoieDigue-map.js")
     public List<VoieDigue> getAllVoieDigues() {
-        return db.queryView(createQuery(VOIEDIGUE), VoieDigue.class);
+        return db.queryView(createQuery(VOIE_DIGUE), VoieDigue.class);
     }
 
-    public static final String OUVRAGEVOIRIE = "OuvrageVoirie";
+    public static final String OUVRAGE_VOIRIE = "OuvrageVoirie";
 
-    @View(name = OUVRAGEVOIRIE, map = "classpath:OuvrageVoirie-map.js")
+    @View(name = OUVRAGE_VOIRIE, map = "classpath:OuvrageVoirie-map.js")
     public List<OuvrageVoirie> getAllOuvrageVoiries() {
-        return db.queryView(createQuery(OUVRAGEVOIRIE), OuvrageVoirie.class);
+        return db.queryView(createQuery(OUVRAGE_VOIRIE), OuvrageVoirie.class);
     }
 
-    public static final String STATIONPOMPAGE = "StationPompage";
+    public static final String STATION_POMPAGE = "StationPompage";
 
-    @View(name = STATIONPOMPAGE, map = "classpath:StationPompage-map.js")
+    @View(name = STATION_POMPAGE, map = "classpath:StationPompage-map.js")
     public List<StationPompage> getAllStationPompages() {
-        return db.queryView(createQuery(STATIONPOMPAGE), StationPompage.class);
+        return db.queryView(createQuery(STATION_POMPAGE), StationPompage.class);
     }
 
-    public static final String RESEAUHYDRAULIQUEFERME = "ReseauHydrauliqueFerme";
+    public static final String RESEAU_HYDRAULIQUE_FERME = "ReseauHydrauliqueFerme";
 
-    @View(name = RESEAUHYDRAULIQUEFERME, map = "classpath:ReseauHydrauliqueFerme-map.js")
+    @View(name = RESEAU_HYDRAULIQUE_FERME, map = "classpath:ReseauHydrauliqueFerme-map.js")
     public List<ReseauHydrauliqueFerme> getAllReseauHydrauliqueFermes() {
-        return db.queryView(createQuery(RESEAUHYDRAULIQUEFERME),
+        return db.queryView(createQuery(RESEAU_HYDRAULIQUE_FERME),
                 ReseauHydrauliqueFerme.class);
     }
 
-    public static final String OUVRAGEHYDRAULIQUEASSOCIE = "OuvrageHydrauliqueAssocie";
+    public static final String OUVRAGE_HYDRAULIQUE_ASSOCIE = "OuvrageHydrauliqueAssocie";
 
-    @View(name = OUVRAGEHYDRAULIQUEASSOCIE, map = "classpath:OuvrageHydrauliqueAssocie-map.js")
+    @View(name = OUVRAGE_HYDRAULIQUE_ASSOCIE, map = "classpath:OuvrageHydrauliqueAssocie-map.js")
     public List<OuvrageHydrauliqueAssocie> getAllOuvrageHydrauliqueAssocies() {
-        return db.queryView(createQuery(OUVRAGEHYDRAULIQUEASSOCIE),
+        return db.queryView(createQuery(OUVRAGE_HYDRAULIQUE_ASSOCIE),
                 OuvrageHydrauliqueAssocie.class);
     }
 
@@ -317,11 +318,11 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 ReseauTelecomEnergie.class);
     }
 
-    public static final String OUVRAGETELECOMENERGIE = "OuvrageTelecomEnergie";
+    public static final String OUVRAGE_TELECOM_ENERGIE = "OuvrageTelecomEnergie";
 
-    @View(name = OUVRAGETELECOMENERGIE, map = "classpath:OuvrageTelecomEnergie-map.js")
+    @View(name = OUVRAGE_TELECOM_ENERGIE, map = "classpath:OuvrageTelecomEnergie-map.js")
     public List<OuvrageTelecomEnergie> getAllOuvrageTelecomEnergies() {
-        return db.queryView(createQuery(OUVRAGETELECOMENERGIE),
+        return db.queryView(createQuery(OUVRAGE_TELECOM_ENERGIE),
                 OuvrageTelecomEnergie.class);
     }
 
@@ -341,6 +342,14 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
                 OuvrageParticulier.class);
     }
 
+    public static final String ECHELLE_LIMNIMETRIQUE = "EchelleLimnimetrique";
+
+    @View(name = ECHELLE_LIMNIMETRIQUE, map = "classpath:EchelleLimnimetrique-map.js")
+    public List<EchelleLimnimetrique> getAllEchelleLimnimetriques() {
+        return db.queryView(createQuery(ECHELLE_LIMNIMETRIQUE),
+                EchelleLimnimetrique.class);
+    }
+
     public static final String PRESTATION = "Prestation";
 
     @View(name = PRESTATION, map = "classpath:Prestation-map.js")
@@ -355,25 +364,25 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryView(createQuery(DESORDRE), Desordre.class);
     }
 
-    public static final String LAISSECRUE = "LaisseCrue";
+    public static final String LAISSE_CRUE = "LaisseCrue";
 
-    @View(name = LAISSECRUE, map = "classpath:LaisseCrue-map.js")
+    @View(name = LAISSE_CRUE, map = "classpath:LaisseCrue-map.js")
     public List<LaisseCrue> getAllLaisseCrues() {
-        return db.queryView(createQuery(LAISSECRUE), LaisseCrue.class);
+        return db.queryView(createQuery(LAISSE_CRUE), LaisseCrue.class);
     }
 
-    public static final String MONTEEEAUX = "MonteeEaux";
+    public static final String MONTEE_EAUX = "MonteeEaux";
 
-    @View(name = MONTEEEAUX, map = "classpath:MonteeEaux-map.js")
+    @View(name = MONTEE_EAUX, map = "classpath:MonteeEaux-map.js")
     public List<MonteeEaux> getAllMonteeEaux() {
-        return db.queryView(createQuery(MONTEEEAUX), MonteeEaux.class);
+        return db.queryView(createQuery(MONTEE_EAUX), MonteeEaux.class);
     }
 
-    public static final String LIGNEEAU = "LigneEau";
+    public static final String LIGNE_EAU = "LigneEau";
 
-    @View(name = LIGNEEAU, map = "classpath:LigneEau-map.js")
+    @View(name = LIGNE_EAU, map = "classpath:LigneEau-map.js")
     public List<LigneEau> getAllLigneEaus() {
-        return db.queryView(createQuery(LIGNEEAU), LigneEau.class);
+        return db.queryView(createQuery(LIGNE_EAU), LigneEau.class);
     }
 
     public static final String DEVERSOIR = "Deversoir";
@@ -383,18 +392,18 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryView(createQuery(DEVERSOIR), Deversoir.class);
     }
 
-    public static final String PISTEPIEDDIGUE = "PistePiedDigue";
+    public static final String PISTE_PIED_DIGUE = "PistePiedDigue";
 
-    @View(name = PISTEPIEDDIGUE, map = "classpath:PistePiedDigue-map.js")
+    @View(name = PISTE_PIED_DIGUE, map = "classpath:PistePiedDigue-map.js")
     public List<PistePiedDigue> getAllPistePiedDigues() {
-        return db.queryView(createQuery(PISTEPIEDDIGUE), PistePiedDigue.class);
+        return db.queryView(createQuery(PISTE_PIED_DIGUE), PistePiedDigue.class);
     }
 
-    public static final String PROFILFRONTFRANCBORD = "ProfilFrontFrancBord";
+    public static final String PROFIL_FRONT_FRANC_BORD = "ProfilFrontFrancBord";
 
-    @View(name = PROFILFRONTFRANCBORD, map = "classpath:ProfilFrontFrancBord-map.js")
+    @View(name = PROFIL_FRONT_FRANC_BORD, map = "classpath:ProfilFrontFrancBord-map.js")
     public List<ProfilFrontFrancBord> getAllProfilFrontFrancBords() {
-        return db.queryView(createQuery(PROFILFRONTFRANCBORD),
+        return db.queryView(createQuery(PROFIL_FRONT_FRANC_BORD),
                 ProfilFrontFrancBord.class);
     }
 
@@ -405,18 +414,18 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return db.queryView(createQuery(EPI), Epi.class);
     }
 
-    public static final String FRONTFRANCBORD = "FrontFrancBord";
+    public static final String FRONT_FRANC_BORD = "FrontFrancBord";
 
-    @View(name = FRONTFRANCBORD, map = "classpath:FrontFrancBord-map.js")
+    @View(name = FRONT_FRANC_BORD, map = "classpath:FrontFrancBord-map.js")
     public List<FrontFrancBord> getAllFrontFrancBords() {
-        return db.queryView(createQuery(FRONTFRANCBORD), FrontFrancBord.class);
+        return db.queryView(createQuery(FRONT_FRANC_BORD), FrontFrancBord.class);
     }
 
-    public static final String PIEDFRONTFRANCBORD = "PiedFrontFrancBord";
+    public static final String PIED_FRONT_FRANC_BORD = "PiedFrontFrancBord";
 
-    @View(name = PIEDFRONTFRANCBORD, map = "classpath:PiedFrontFrancBord-map.js")
+    @View(name = PIED_FRONT_FRANC_BORD, map = "classpath:PiedFrontFrancBord-map.js")
     public List<PiedFrontFrancBord> getAllPiedFrontFrancBords() {
-        return db.queryView(createQuery(PIEDFRONTFRANCBORD),
+        return db.queryView(createQuery(PIED_FRONT_FRANC_BORD),
                 PiedFrontFrancBord.class);
     }
 
