@@ -432,6 +432,8 @@
         eType="#//Observation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="#//ArticleJournal"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
+        upperBound="-1" eType="#//EchelleLimnimetrique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Observation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1503,5 +1505,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="DZLeveProfilTravers" eSuperTypes="#//PointLeveDZ"/>
   <eClassifiers xsi:type="ecore:EClass" name="XYZLeveProfilTravers" eSuperTypes="#//PointLeveXYZ"/>
   <eClassifiers xsi:type="ecore:EClass" name="XYZProfilLong" eSuperTypes="#//PointLeveXYZ"/>
-  <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//OuvrageParticulier"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//ObjetReseau">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
+  </eClassifiers>
 </ecore:EPackage>

@@ -12,6 +12,7 @@ fr.sirs.core.model.Digue
 fr.sirs.core.model.DocumentGrandeEchelle
 fr.sirs.core.model.DZLeveProfilTravers
 fr.sirs.core.model.Epi
+fr.sirs.core.model.EchelleLimnimetrique
 fr.sirs.core.model.EvenementHydraulique
 fr.sirs.core.model.Fondation
 fr.sirs.core.model.FrontFrancBord
