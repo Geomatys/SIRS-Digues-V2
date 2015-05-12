@@ -19,11 +19,11 @@ import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DesordreTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.FrancBordTheme;
-import fr.sirs.theme.MesureEvenementsTheme;
-import fr.sirs.theme.PrestationsTheme;
-import fr.sirs.theme.ReseauxDeVoirieTheme;
-import fr.sirs.theme.ReseauxEtOuvragesTheme;
-import fr.sirs.theme.StructuresTheme;
+import fr.sirs.theme.MesureEvenementTheme;
+import fr.sirs.theme.PrestationTheme;
+import fr.sirs.theme.ReseauDeVoirieTheme;
+import fr.sirs.theme.ReseauEtOuvrageTheme;
+import fr.sirs.theme.StructureTheme;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -652,13 +652,13 @@ public class CorePlugin extends Plugin {
     @Override
     public void load() throws SQLException, IOException {
         loadDataSuppliers();
-        themes.add(new StructuresTheme());
+        themes.add(new StructureTheme());
         themes.add(new FrancBordTheme());
-        themes.add(new ReseauxDeVoirieTheme());
-        themes.add(new ReseauxEtOuvragesTheme());
+        themes.add(new ReseauDeVoirieTheme());
+        themes.add(new ReseauEtOuvrageTheme());
         themes.add(new DesordreTheme());
-        themes.add(new PrestationsTheme());
-        themes.add(new MesureEvenementsTheme());
+        themes.add(new PrestationTheme());
+        themes.add(new MesureEvenementTheme());
         themes.add(new PositionDocumentTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());

@@ -282,13 +282,13 @@ implements DocumentsUpdatable {
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
         
-        for(final TronconDigue tronconDigue : tronconsDigue.values()){
-            List<Objet> structures = tronconDigue.getStructures();
-            structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
-
-            //Update the repository
-//            tronconDigueRepository.update(tronconDigue);
-        }
+//        for(final TronconDigue tronconDigue : tronconsDigue.values()){
+//            List<Objet> structures = tronconDigue.getStructures();
+//            structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
+//
+//            //Update the repository
+////            tronconDigueRepository.update(tronconDigue);
+//        }
         
         objetManager.link();
         
@@ -296,22 +296,24 @@ implements DocumentsUpdatable {
         for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
             final TronconDigue troncon = entry.getValue();
             final Geometry tronconGeom = (Geometry) troncon.getGeometry();
-            for(final Objet str : troncon.getStructures()){
-                try{
-                    final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
-                    str.setGeometry(structGeom);
-                    for(final Photo photo : str.getPhotos()){
-                        try{
-                            final LineString photoGeom = LinearReferencingUtilities.buildGeometry(structGeom, photo, borneDigueRepository);
-                            photo.setGeometry(photoGeom);
-                        }catch(IllegalArgumentException e){
-                            SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                        }
-                    }
-                }catch(IllegalArgumentException e){
-                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                }
-            }
+            
+            // NE PAS OUBLIER DE REBRANCHER LES PHOTOS AUX STRUCTURES !!!!!!
+//            for(final Objet str : troncon.getStructures()){
+//                try{
+//                    final LineString structGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, str, borneDigueRepository);
+//                    str.setGeometry(structGeom);
+//                    for(final Photo photo : str.getPhotos()){
+//                        try{
+//                            final LineString photoGeom = LinearReferencingUtilities.buildGeometry(structGeom, photo, borneDigueRepository);
+//                            photo.setGeometry(photoGeom);
+//                        }catch(IllegalArgumentException e){
+//                            SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+//                        }
+//                    }
+//                }catch(IllegalArgumentException e){
+//                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+//                }
+//            }
             for(final AbstractPositionDocument doc : troncon.getDocumentTroncon()){
                 try{
                     final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);

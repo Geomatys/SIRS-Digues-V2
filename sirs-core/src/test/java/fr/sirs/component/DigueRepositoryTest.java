@@ -17,6 +17,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 import fr.sirs.core.CouchDBTestCase;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Crete;
@@ -73,7 +74,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             crete.setCommentaire("Belle crete");
             stuctures.add(crete);
             
-            troncon.setStructures(stuctures);
+//            troncon.setStructures(stuctures);
 
             tronconRepository.add(troncon);
         }
@@ -88,7 +89,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
           TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
           for(TronconDigue troncon: tronconRepository.getAll()) {
-              for(Objet str: troncon.getStructures()) {
+              for(Objet str: TronconUtils.getObjetList(troncon)) {
                   System.out.println(str.getParent() + " " + str.getDocumentId());
               }
           }

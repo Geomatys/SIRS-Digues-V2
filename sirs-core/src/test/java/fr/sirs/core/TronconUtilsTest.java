@@ -84,7 +84,8 @@ public class TronconUtilsTest extends CouchDBTestCase {
         crete.setSystemeRepId(sr.getDocumentId());
         crete.setBorneDebutId(borne0.getDocumentId());
         crete.setBorneFinId(borne2.getDocumentId());
-        troncon.getStructures().add(crete);
+        
+//        troncon.getStructures().add(crete);
         session.getTronconDigueRepository().update(troncon);
     }
     
@@ -140,7 +141,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertTrue(GF.createPoint(new Coordinate(1, 1)).equals(cut0b0.getGeometry()));
         
         //on verifie que la crete a été coupée
-        final List<Objet> cut0Strs = cut0.getStructures();
+        final List<Objet> cut0Strs = TronconUtils.getObjetList(cut0);
         assertEquals(1, cut0Strs.size());
         final Crete cut0Crete = (Crete)cut0Strs.get(0);
         assertEquals(cut0sr.getDocumentId(), cut0Crete.getSystemeRepId());
@@ -201,7 +202,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertTrue(GF.createPoint(new Coordinate(99,-3)).equals(cut1b1.getGeometry()));
         
         //on verifie que la crete a été coupée
-        final List<Objet> cut1Strs = cut1.getStructures();
+        final List<Objet> cut1Strs = TronconUtils.getObjetList(cut1);
         assertEquals(1, cut1Strs.size());
         final Crete cut1Crete = (Crete)cut1Strs.get(0);
         assertEquals(cut1sr.getDocumentId(), cut1Crete.getSystemeRepId());

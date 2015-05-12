@@ -4,6 +4,7 @@ package fr.sirs;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
@@ -253,8 +254,10 @@ public final class SIRS extends SirsCore {
             return result;
         }
         
-        if (sourceTroncon instanceof TronconDigue && ((TronconDigue)sourceTroncon).getStructures() !=  null) {
-            final Iterator<Objet> it = ((TronconDigue)sourceTroncon).getStructures().iterator();
+        if (sourceTroncon instanceof TronconDigue 
+//                && ((TronconDigue)sourceTroncon).getStructures() !=  null
+                ) {
+            final Iterator<Objet> it = TronconUtils.getObjetList((TronconDigue)sourceTroncon).iterator();
             Objet o;
             while (objetIds.size() > 0 && it.hasNext()) {
                 o = it.next();

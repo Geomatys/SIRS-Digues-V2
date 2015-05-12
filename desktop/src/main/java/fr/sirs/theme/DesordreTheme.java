@@ -14,8 +14,8 @@ import fr.sirs.core.model.TronconDigue;
 public class DesordreTheme extends AbstractTronconTheme {
 
     private static final ThemeGroup GROUP1 = new ThemeGroup("Désordres", Desordre.class, 
-            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Desordre),
-            (TronconDigue t, Object c) -> t.structures.remove(c));
+            (TronconDigue t) -> {new UnsupportedOperationException("Implémenter"); return null;},
+            (TronconDigue t, Object c) -> new UnsupportedOperationException("Implémenter"));
         
     public DesordreTheme() {
         super("Désordres", GROUP1);

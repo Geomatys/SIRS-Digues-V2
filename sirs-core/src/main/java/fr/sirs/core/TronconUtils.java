@@ -130,7 +130,7 @@ public class TronconUtils {
          * quand à eux découpés.
          */
         final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
-        final ListIterator<Objet> structures = tronconCp.getStructures().listIterator();
+        final ListIterator<Objet> structures = getObjetList(tronconCp).listIterator();
         cutPositionable(structures, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
         final ListIterator<AbstractPositionDocument> positionsDocs = tronconCp.getDocumentTroncon().listIterator();
         cutPositionable(positionsDocs, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
@@ -166,6 +166,10 @@ public class TronconUtils {
             tdRepo.update(tronconCp);
         }
         return tronconCp;
+    }
+    
+    public static List<Objet> getObjetList(final TronconDigue troncon){
+        throw new UnsupportedOperationException("Implémenter la recherche des objets par troncon");
     }
     
     
@@ -306,13 +310,14 @@ public class TronconUtils {
         }
         
         // On ajoute les structures du tronçon paramètre. On les copie pour changer le SR associé.
-        for (final Objet objet : mergeParam.structures) {
+        for (final Objet objet : getObjetList(mergeParam)) {
             Objet copy = objet.copy();
             final String srId = modifiedSRs.get(copy.getSystemeRepId());
             if (srId != null) {
                 copy.setSystemeRepId(srId);
             }
-            mergeResult.structures.add(copy);
+            copy.setLinearId(mergeResult.getId());
+//            mergeResult.structures.add(copy); // On n'a plus à ajouter les nouvelles structures
         }
         
         //on combine les geometries
@@ -425,7 +430,7 @@ public class TronconUtils {
      * @param troncon 
      */
     public static void updatePositionableGeometry(TronconDigue troncon, SessionGen session){
-        for(Objet obj : troncon.getStructures()){
+        for(Objet obj : getObjetList(troncon)){
             final LineString structGeom = buildGeometry(
                     troncon.getGeometry(), obj, session.getBorneDigueRepository());
             obj.setGeometry(structGeom);

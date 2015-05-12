@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
+import static fr.sirs.core.TronconUtils.getObjetList;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
@@ -175,14 +176,14 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             
             ArgumentChecks.ensureNonNull("SR par défaut", troncon.getSystemeRepDefautId());
                     
-            final int progressMax = troncon.getStructures().size()
+            final int progressMax = getObjetList(troncon).size()
                     + troncon.getDocumentTroncon().size()
                     + troncon.getProprietes().size()
                     + troncon.getGardes().size();
             int currentProgress = 0;
             updateMessage("Parcours des objets");
             updateProgress(currentProgress, progressMax);
-            for (final Objet current : troncon.getStructures()) {
+            for (final Objet current : getObjetList(troncon)) {
                 recomputePositionable(current, linear);
                 for(final Photo photo : current.getPhotos()){
                     recomputePositionable(photo, linear);

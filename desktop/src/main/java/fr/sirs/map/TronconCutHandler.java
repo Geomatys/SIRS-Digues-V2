@@ -422,7 +422,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     //on marque comme terminé le troncon et ses structures
                     cut.dateMajProperty().set(LocalDateTime.now());
                     cut.date_finProperty().set(LocalDateTime.now());
-                    for (Objet obj : cut.structures) {
+                    for (Objet obj : TronconUtils.getObjetList(cut)) {
                         obj.dateMajProperty().set(LocalDateTime.now());
                         obj.date_finProperty().set(LocalDateTime.now());
                     }

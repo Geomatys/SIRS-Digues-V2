@@ -115,7 +115,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         super(map);
         session = Injector.getSession();
         troncon.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
-            if (newValue != null && !newValue.getStructures().isEmpty()) {
+            // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
+            if (newValue != null && !TronconUtils.getObjetList(newValue).isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.WARNING,
                         "Attention, ce tronçon contient des structures. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
                 alert.setResizable(true);
@@ -433,7 +434,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     
                     if (editGeometry.geometry != null) {
                         // Si le tronçon est vide, on peut inverser son tracé
-                        if (troncon.get().getStructures().isEmpty()) {
+                        // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
+                        if (TronconUtils.getObjetList(troncon.get()).isEmpty()) {
                             if (!popup.getItems().isEmpty()) {
                                 popup.getItems().add(new SeparatorMenuItem());
                             }

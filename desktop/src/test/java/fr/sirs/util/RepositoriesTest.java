@@ -125,7 +125,7 @@ public class RepositoriesTest {
             
             List<Objet> stuctures = new ArrayList<>();
             stuctures.add(ecluse);
-            tron.setStructures(stuctures);
+//            tron.setStructures(stuctures);
             tronconRepository.add(tron);
         }
         
@@ -210,7 +210,7 @@ public class RepositoriesTest {
 
             List<Objet> stuctures = new ArrayList<>();
             stuctures.add(ecluse);
-            troncon.setStructures(stuctures);
+//            troncon.setStructures(stuctures);
 
             troncon.setCommentaire("Traoncon2");
 

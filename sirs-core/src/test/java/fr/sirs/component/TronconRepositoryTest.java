@@ -30,6 +30,7 @@ import org.ektorp.ViewResult.Row;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.core.TronconUtils;
 
 /**
  *
@@ -50,7 +51,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
                 couchDbConnector);
         for (TronconDigue troncon : tronconRepository.getAll()) {
             System.out.println(troncon);
-            for (Objet struct : troncon.getStructures()) {
+            for (Objet struct : TronconUtils.getObjetList(troncon)) {
                 System.out.println("DocuumentId: " + struct.getDocumentId());
 
             }
@@ -74,7 +75,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
             while (allAsStream.hasNext()) {
                 TronconDigue troncon = allAsStream.next();
                 System.out.println(troncon);
-                for (Objet struct : troncon.getStructures()) {
+                for (Objet struct : TronconUtils.getObjetList(troncon)) {
                     System.out
                             .println("DocuumentId: " + struct.getDocumentId());
 
@@ -100,7 +101,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
             while (allAsStream.hasNext()) {
                 TronconDigue troncon = allAsStream.next();
                 System.out.println(troncon);
-                for (Objet struct : troncon.getStructures()) {
+                for (Objet struct : TronconUtils.getObjetList(troncon)) {
                     System.out
                             .println("DocuumentId: " + struct.getDocumentId());
 

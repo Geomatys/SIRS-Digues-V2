@@ -9,13 +9,13 @@ import fr.sirs.core.model.TronconDigue;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class PrestationsTheme extends AbstractTronconTheme {
+public class PrestationTheme extends AbstractTronconTheme {
 
     private static final ThemeGroup GROUP1 = new ThemeGroup("Prestations", Prestation.class, 
-            (TronconDigue t) -> t.structures.filtered((Objet t1) -> t1 instanceof Prestation),
-            (TronconDigue t, Object c) -> t.structures.remove(c));
+            (TronconDigue t) -> {new UnsupportedOperationException("Implémenter"); return null;},
+            (TronconDigue t, Object c) -> new UnsupportedOperationException("Implémenter"));
         
-    public PrestationsTheme() {
+    public PrestationTheme() {
         super("Prestations", GROUP1);
     }
         

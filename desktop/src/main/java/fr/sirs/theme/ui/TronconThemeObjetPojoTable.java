@@ -25,8 +25,8 @@ public class TronconThemeObjetPojoTable extends TronconThemePojoTable<Objet>{
             final TronconDigue trc = troncon.get();
             final Constructor pojoConstructor = pojoClass.getConstructor();
             pojo = (Objet) pojoConstructor.newInstance();
-            trc.getStructures().add(pojo);
-            pojo.setParent(trc);
+//            trc.getStructures().add(pojo);
+            pojo.setLinearId(trc.getId());
             pojo.setAuthor(session.getUtilisateur().getId());
             pojo.setValid(!(session.getRole().equals(Role.EXTERN)));
             session.getTronconDigueRepository().update(trc);

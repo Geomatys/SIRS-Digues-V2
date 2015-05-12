@@ -117,7 +117,7 @@ public class FXTronconMerge extends VBox{
                 LocalDateTime now = LocalDateTime.now();
                 current.dateMajProperty().set(now);
                 current.date_finProperty().set(now);
-                for (Objet obj : current.structures) {
+                for (Objet obj : TronconUtils.getObjetList(current)) {
                     obj.dateMajProperty().set(now);
                     obj.date_finProperty().set(now);
                 }
