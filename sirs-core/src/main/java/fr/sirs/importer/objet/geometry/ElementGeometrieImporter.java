@@ -5,20 +5,19 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ProfilFrontFrancBord;
-import fr.sirs.importer.objet.GenericObjetImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
@@ -30,7 +29,6 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 
     private final TypeElementGeometryImporter typeElementGeometryImporter;
     
-    private final List<GenericObjetImporter> structureImporters = new ArrayList<>();
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
     private final SysEvtLargeurFrancBordImporter largeurFrancBordImporter;
     private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
@@ -38,29 +36,26 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 
     public ElementGeometrieImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         typeElementGeometryImporter = new TypeElementGeometryImporter(
                 accessDatabase);
         typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
                 accessDatabase, couchDbConnector);
         largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase,
-                couchDbConnector,
+                couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
                 typeLargeurFrancBordImporter);
         typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
                 accessDatabase, couchDbConnector);
         profilFrontFrancBordImporter = new SysEvtProfilFrontFrancBordImporter(
-                accessDatabase, couchDbConnector, 
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeProfilFrontFrancBordImporter);
-        
-        // Commenté pour ignorer les tables d'événements.
-//        structureImporters.add(largeurFrancBordImporter);
-//        structureImporters.add(profilFrontFrancBordImporter);
     }
 
     private enum Columns {
@@ -101,82 +96,42 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_GEOMETRIE.toString();
+        return ELEMENT_GEOMETRIE.toString();
     }
     
     @Override
     protected void compute() throws IOException, AccessDbImporterException {    
-        structures = new HashMap<>();
-        structuresByTronconId = new HashMap<>();
-
-        // Remplissage initial des structures par les importateurs subordonnés.
-        for (final GenericObjetImporter gsi : structureImporters){
-            final Map<Integer, Objet> objets = gsi.getById();
-            if(objets!=null){
-                for (final Integer key : objets.keySet()){
-                    if(structures.get(key)!=null){
-                        throw new AccessDbImporterException(objets.get(key).getClass().getCanonicalName()+" : This structure ID is ever used ("+key+") by "+structures.get(key).getClass().getCanonicalName());
-                    }
-                    else {
-                        structures.put(key, objets.get(key));
-                    }
-                }
-            }
-            
-            final Map<Integer, List<Objet>> objetsByTronconId = gsi.getByTronconId();
-
-            if (objetsByTronconId != null) {
-                objetsByTronconId.keySet().stream().map((key) -> {
-                    if (structuresByTronconId.get(key) == null) {
-                        structuresByTronconId.put(key, new ArrayList<>());
-                    }
-                    return key;
-                }).forEach((key) -> {
-                    if (objetsByTronconId.get(key) != null) {
-                        structuresByTronconId.get(key).addAll(objetsByTronconId.get(key));
-                    }
-                });
-            }
-        }
-
-
+        objets = new HashMap<>();
+        objetsByTronconId = new HashMap<>();
+        
         // Vérification de la cohérence des structures au sens strict.
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final int structureId = row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString());
-            final Objet objet;
-            final boolean nouvelObjet;
-            
-            if(structures.get(structureId)!=null){
-                objet = structures.get(structureId);
-                nouvelObjet=false;
-            }
-            else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
-                objet = importRow(row);
-                nouvelObjet=true;
-            }
+            final Objet objet = importRow(row);
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
-            if (nouvelObjet) {
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), objet);
+                objets.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Objet> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<Objet> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(objet);
             }
         }
+        couchDbConnector.executeBulk(objets.values());
     }
     
     

@@ -2,12 +2,13 @@ package fr.sirs.importer.evenementHydraulique;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.Meteo;
 import fr.sirs.core.model.RefEvenementHydraulique;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.meteo.MeteoImporter;
@@ -74,7 +75,7 @@ implements DocumentsUpdatable {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.EVENEMENT_HYDRAU.toString();
+        return EVENEMENT_HYDRAU.toString();
     }
 
     @Override
@@ -88,7 +89,7 @@ implements DocumentsUpdatable {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final EvenementHydraulique evenement = new EvenementHydraulique();
+            final EvenementHydraulique evenement = createAnonymValidElement(EvenementHydraulique.class);
             
             evenement.setLibelle(row.getString(Columns.NOM_EVENEMENT_HYDRAU.toString()));
             
@@ -127,7 +128,6 @@ implements DocumentsUpdatable {
                 evenement.setMeteos(meteoEvt);
             }
             evenement.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
-            evenement.setValid(true);
             
             evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }

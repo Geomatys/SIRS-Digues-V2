@@ -7,11 +7,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -101,7 +102,7 @@ class GardienTronconGestionImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.GARDIEN_TRONCON_GESTION.toString();
+        return GARDIEN_TRONCON_GESTION.toString();
     }
 
     @Override
@@ -115,7 +116,7 @@ class GardienTronconGestionImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final GardeTroncon gardien = new GardeTroncon();
+            final GardeTroncon garde = createAnonymValidElement(GardeTroncon.class);
             
             
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
@@ -129,35 +130,35 @@ class GardienTronconGestionImporter extends GenericImporter {
             }
 
              if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                gardien.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                garde.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                gardien.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                garde.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                gardien.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+                garde.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
 
             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                gardien.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                garde.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
 
-            gardien.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+            garde.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
 
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                gardien.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                garde.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                gardien.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                garde.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
 
-            gardien.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            garde.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
 
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                gardien.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+                garde.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -168,7 +169,7 @@ class GardienTronconGestionImporter extends GenericImporter {
                 try {
 
                     if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        gardien.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        garde.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_DEBUT.toString()),
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
@@ -179,7 +180,7 @@ class GardienTronconGestionImporter extends GenericImporter {
                 try {
 
                     if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        gardien.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        garde.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_FIN.toString()),
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
@@ -193,20 +194,19 @@ class GardienTronconGestionImporter extends GenericImporter {
             // Set the references.
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
             if (intervenant.getId() != null) {
-                gardien.setContactId(intervenant.getId());
+                garde.setContactId(intervenant.getId());
             } else {
                 throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            gardien.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
-            gardien.setValid(true);
+            garde.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<GardeTroncon> listeGestions = gardiensByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeGestions == null){
                 listeGestions = new ArrayList<>();
             }
-            listeGestions.add(gardien);
+            listeGestions.add(garde);
             gardiensByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
         }
     }

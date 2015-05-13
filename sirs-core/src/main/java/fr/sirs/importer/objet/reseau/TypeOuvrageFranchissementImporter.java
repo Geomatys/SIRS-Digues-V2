@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOuvrageFranchissement;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<Ref
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_OUVRAGE_FRANCHISSEMENT.toString();
+        return TYPE_OUVRAGE_FRANCHISSEMENT.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<Ref
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOuvrageFranchissement typeOuvrage = new RefOuvrageFranchissement();
+            final RefOuvrageFranchissement typeOuvrage = createAnonymValidElement(RefOuvrageFranchissement.class);
             
             typeOuvrage.setId(typeOuvrage.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString())));
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_FRANCHISSEMENT.toString()));
@@ -61,7 +62,6 @@ class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<Ref
                 typeOuvrage.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString()))));
-            typeOuvrage.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString())), typeOuvrage);
         }

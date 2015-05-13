@@ -5,21 +5,23 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.RefProfilFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,11 +44,12 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
 
     SysEvtProfilFrontFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter) {
-        super(accessDatabase, couchDbConnector,
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         this.typeProfilFrontFrancBordImporter = typeProfilFrontFrancBordImporter;
     }
@@ -93,36 +96,13 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final ProfilFrontFrancBord profil = importRow(row);
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), profil);
-
-            // Set the list ByTronconId
-            List<ProfilFrontFrancBord> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(profil);
-        }
+        return SYS_EVT_PROFIL_FRONT_FRANC_BORD.toString();
     }
 
     @Override
     public ProfilFrontFrancBord importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -130,8 +110,10 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
 
         final Map<Integer, RefProfilFrancBord> typesProfil = typeProfilFrontFrancBordImporter.getTypeReferences();
 
-        final ProfilFrontFrancBord profil = new ProfilFrontFrancBord();
+        final ProfilFrontFrancBord profil = createAnonymValidElement(ProfilFrontFrancBord.class);
 
+        profil.setLinearId(troncon.getId());
+        
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             profil.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
@@ -213,7 +195,7 @@ class SysEvtProfilFrontFrancBordImporter extends GenericGeometrieImporter<Profil
         }
         
         profil.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
-        profil.setValid(true);
+        profil.setGeometry(buildGeometry(troncon.getGeometry(), profil, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return profil;
     }

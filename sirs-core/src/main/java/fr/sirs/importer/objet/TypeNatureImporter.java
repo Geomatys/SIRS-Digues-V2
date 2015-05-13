@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_NATURE.toString();
+        return TYPE_NATURE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefNature typeNature = new RefNature();
+            final RefNature typeNature = createAnonymValidElement(RefNature.class);
             
             typeNature.setId(typeNature.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString())));
             typeNature.setLibelle(row.getString(Columns.LIBELLE_TYPE_NATURE.toString()));
@@ -61,7 +62,6 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
                 typeNature.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeNature.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString()))));
-            typeNature.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE.toString())), typeNature);
         }

@@ -7,6 +7,7 @@ package fr.sirs.util.temp.dao.postgres;
 
 import fr.sirs.util.temp.dao.DigueDAO;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class DigueDAOPostgres extends DAOPostgres implements DigueDAO {
             this.executePreparedQuery();
 
             while (resultSet.next()) {
-                Digue digue = new Digue();
+                Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
                 digue.setLibelle(this.resultSet.getString("libelle_digue"));
                 digue.setCommentaire(this.resultSet.getString("commentaire_digue"));
                 if (this.resultSet.getString("date_derniere_maj")!=null)

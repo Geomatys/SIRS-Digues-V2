@@ -5,6 +5,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.TronconDigue;
 
 import java.io.File;
@@ -94,7 +95,7 @@ public class PrinterUtilitiesTest {
     @Ignore
     public void testPrintBorneDigue() throws Exception {
         System.out.println("Test print BorneDigue.");
-        final BorneDigue borneDigue = new BorneDigue();
+        final BorneDigue borneDigue = ElementCreator.createAnonymValidElement(BorneDigue.class);
         //borneDigue.setIdBorne(1);
         borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
         borneDigue.setDate_debut(LocalDateTime.now());

@@ -2,8 +2,9 @@ package fr.sirs.importer.evenementHydraulique.meteo;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOrientationVent;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ORIENTATION_VENT.toString();
+        return TYPE_ORIENTATION_VENT.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrientationVent typeOrientation = new RefOrientationVent();
+            final RefOrientationVent typeOrientation = createAnonymValidElement(RefOrientationVent.class);
             
             typeOrientation.setId(typeOrientation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_VENT.toString())));
             typeOrientation.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIENTATION_VENT.toString()));
@@ -61,7 +62,6 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
                 typeOrientation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrientation.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIENTATION_VENT.toString())));
-            typeOrientation.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_VENT.toString())), typeOrientation);
         }

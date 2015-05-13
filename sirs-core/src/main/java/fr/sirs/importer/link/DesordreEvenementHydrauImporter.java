@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE_EVENEMENT_HYDRAU.toString();
+        return DESORDRE_EVENEMENT_HYDRAU.toString();
     }
 
     @Override

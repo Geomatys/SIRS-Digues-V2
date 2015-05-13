@@ -2,10 +2,11 @@ package fr.sirs.importer.evenementHydraulique.meteo;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Meteo;
 import fr.sirs.core.model.RefOrientationVent;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class MeteoImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.METEO.toString();
+        return METEO.toString();
     }
 
     @Override
@@ -65,7 +66,7 @@ public class MeteoImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final Meteo meteo = new Meteo();
+            final Meteo meteo = createAnonymValidElement(Meteo.class);
             
             if (row.getDate(Columns.DATE_DEBUT_METEO.toString()) != null) {
                 meteo.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_METEO.toString()), dateTimeFormatter));
@@ -93,7 +94,6 @@ public class MeteoImporter extends GenericImporter {
             
             // La météo n'ayant pas d'ID, on affecte l'ID de l'événement hydraulique comme pseudo id.
             meteo.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
-            meteo.setValid(true);
             
             // Set the list ByTronconId
             List<Meteo> listByTronconId = meteos.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()));

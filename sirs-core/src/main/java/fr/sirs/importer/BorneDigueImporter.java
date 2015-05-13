@@ -6,6 +6,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.BORNE_DIGUE;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -85,7 +87,7 @@ public class BorneDigueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.BORNE_DIGUE.toString();
+        return BORNE_DIGUE.toString();
     }
     
     @Override
@@ -96,7 +98,7 @@ public class BorneDigueImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final BorneDigue borne = new BorneDigue();
+            final BorneDigue borne = createAnonymValidElement(BorneDigue.class);
 
             borne.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
             borne.setCommentaire(row.getString(Columns.COMMENTAIRE_BORNE.toString()));
@@ -132,7 +134,6 @@ public class BorneDigueImporter extends GenericImporter {
             }
             
             borne.setDesignation(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
-            borne.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             bornesDigue.put(row.getInt(Columns.ID_BORNE.toString()), borne);

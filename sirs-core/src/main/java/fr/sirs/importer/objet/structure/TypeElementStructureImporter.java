@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -16,6 +16,7 @@ import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericTypeInternalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ELEMENT_STRUCTURE.toString();
+        return TYPE_ELEMENT_STRUCTURE.toString();
     }
 
     @Override
@@ -64,7 +65,7 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
             final Row row = it.next();
             try {
                 final Class classe;
-                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
+                final DbImporter.TableName table = valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
                     case SYS_EVT_CRETE:
                         classe = Crete.class;

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefPosition;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_POSITION.toString();
+        return TYPE_POSITION.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefPosition typePosition = new RefPosition();
+            final RefPosition typePosition = createAnonymValidElement(RefPosition.class);
             
             typePosition.setId(typePosition.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_POSITION.toString())));
             typePosition.setLibelle(row.getString(Columns.LIBELLE_TYPE_POSITION.toString()));
@@ -61,7 +62,6 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
                 typePosition.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typePosition.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_POSITION.toString()))));
-            typePosition.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_POSITION.toString())), typePosition);
         }

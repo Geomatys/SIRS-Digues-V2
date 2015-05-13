@@ -3,7 +3,8 @@ package fr.sirs.importer.troncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Commune;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.COMMUNE;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -50,7 +51,7 @@ class CommuneImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.COMMUNE.toString();
+        return COMMUNE.toString();
     }
 
     @Override
@@ -60,7 +61,7 @@ class CommuneImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Commune commune = new Commune();
+            final Commune commune = createAnonymValidElement(Commune.class);
             
             commune.setCodeInsee(row.getString(Columns.CODE_INSEE_COMMUNE.toString()));
             
@@ -71,7 +72,6 @@ class CommuneImporter extends GenericImporter {
             }
             
             commune.setDesignation(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
-            commune.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);

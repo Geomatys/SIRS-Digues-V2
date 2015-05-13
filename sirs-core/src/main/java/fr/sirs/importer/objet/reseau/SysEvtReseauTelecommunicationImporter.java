@@ -5,10 +5,12 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefImplantation;
@@ -17,15 +19,15 @@ import fr.sirs.core.model.RefReseauTelecomEnergie;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,6 +51,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
 
     SysEvtReseauTelecommunicationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
@@ -56,7 +59,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
             final TypePositionImporter typePositionImporter,
             final ImplantationImporter typeImplantationImporter,
             final TypeReseauTelecommunicImporter typeReseauTelecomImporter) {
-        super(accessDatabase, couchDbConnector,
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
                 typePositionImporter, null);
@@ -145,36 +148,13 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_RESEAU_TELECOMMUNICATION.toString();
+        return SYS_EVT_RESEAU_TELECOMMUNICATION.toString();
     }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final ReseauTelecomEnergie reseau = importRow(row);
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), reseau);
-
-            // Set the list ByTronconId
-            List<ReseauTelecomEnergie> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(reseau);
-        }
-    }
-
+    
     @Override
     public ReseauTelecomEnergie importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -185,7 +165,9 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypeReferences();
         final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypeReferences();
 
-        final ReseauTelecomEnergie reseau = new ReseauTelecomEnergie();
+        final ReseauTelecomEnergie reseau = createAnonymValidElement(ReseauTelecomEnergie.class);
+        
+        reseau.setLinearId(troncon.getId());
 
         reseau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
 
@@ -292,7 +274,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         }
 
         reseau.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-        reseau.setValid(true);
+        reseau.setGeometry(buildGeometry(troncon.getGeometry(), reseau, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return reseau;
     }

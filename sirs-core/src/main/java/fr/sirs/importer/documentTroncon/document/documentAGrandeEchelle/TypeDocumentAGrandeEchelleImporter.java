@@ -2,8 +2,9 @@ package fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString();
+        return TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
 
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefDocumentGrandeEchelle typeDocument = new RefDocumentGrandeEchelle();
+            final RefDocumentGrandeEchelle typeDocument = createAnonymValidElement(RefDocumentGrandeEchelle.class);
             
             typeDocument.setId(typeDocument.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())));
             typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString()));
@@ -62,7 +63,6 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
             }
             
             typeDocument.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())));
-            typeDocument.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())), typeDocument);
             

@@ -6,12 +6,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
@@ -112,7 +113,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_RAPPORT_ETUDES.toString();
+        return SYS_EVT_RAPPORT_ETUDES.toString();
     }
 
     @Override
@@ -124,7 +125,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocument documentTroncon = new PositionDocument();
+            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -163,7 +164,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, RapportEtude> rapports = rapportEtudeImporter.getRelated();
 
-        final PositionDocument docTroncon = new PositionDocument();
+        final PositionDocument docTroncon = createAnonymValidElement(PositionDocument.class);
         
         docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
@@ -235,7 +236,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
             }
         }
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-        docTroncon.setValid(true);
+        
         return docTroncon;
     }
 }

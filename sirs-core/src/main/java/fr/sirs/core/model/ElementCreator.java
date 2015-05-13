@@ -27,6 +27,7 @@ public class ElementCreator {
     public <T extends Element> T createElement(final Class<T> clazz){
         try {
             final Constructor<T> constructor = clazz.getConstructor();
+            constructor.setAccessible(true);
             final T element = constructor.newInstance();
             
             if(ownableSession!=null){
@@ -57,7 +58,9 @@ public class ElementCreator {
     
     public static <T extends Element> T createAnonymValidElement(final Class<T> clazz){
         try{
-            final T element = clazz.getConstructor().newInstance();
+            final Constructor<T> constructor = clazz.getConstructor();
+            constructor.setAccessible(true);
+            final T element = constructor.newInstance();
             element.setValid(true);
             return element;
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {

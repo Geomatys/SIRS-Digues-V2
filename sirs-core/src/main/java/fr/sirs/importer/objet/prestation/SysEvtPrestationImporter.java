@@ -5,26 +5,28 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefPrestation;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -50,13 +52,14 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
 
     SysEvtPrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final MarcheImporter marcheImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePrestationImporter typePrestationImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,  marcheImporter, 
                 null, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = typePrestationImporter;
@@ -116,45 +119,13 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PRESTATION.toString();
-    }
-    
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-        
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Prestation prestation = importRow(row);
-
-            if (row.getString(Columns.REALISATION_INTERNE_OUI_NON.toString()) != null) {
-                final String realisation = row.getString(Columns.REALISATION_INTERNE_OUI_NON.toString());
-                if (OUI.equals(realisation)) {
-                    prestation.setRealisationInterne(true);
-                } else if (NON.equals(realisation)) {
-                    prestation.setRealisationInterne(false);
-                }
-            }
-        
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_PRESTATION.toString()), prestation);
-
-            // Set the list ByTronconId
-            List<Prestation> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-            }
-            listByTronconId.add(prestation);
-            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
+        return SYS_EVT_PRESTATION.toString();
     }
     
     @Override
     public Prestation importRow(Row row) throws IOException, AccessDbImporterException {
         
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
@@ -165,7 +136,9 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         
         final Map<Integer, Marche> marches = marcheImporter.getRelated();
         
-        final Prestation prestation = new Prestation();
+        final Prestation prestation = createAnonymValidElement(Prestation.class);
+        
+        prestation.setLinearId(troncon.getId());
         
         if (row.getInt(Columns.ID_TYPE_PRESTATION.toString()) != null) {
             prestation.setTypePrestationId(typesPrestation.get(row.getInt(Columns.ID_TYPE_PRESTATION.toString())).getId());
@@ -264,7 +237,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         prestation.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PRESTATION.toString())));
         
         prestation.setDesignation(String.valueOf(row.getInt(Columns.ID_PRESTATION.toString())));
-        prestation.setValid(true);
+        prestation.setGeometry(buildGeometry(troncon.getGeometry(), prestation, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return prestation;
     }

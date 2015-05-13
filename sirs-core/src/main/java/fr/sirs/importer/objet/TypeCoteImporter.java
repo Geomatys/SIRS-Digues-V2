@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefCote;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -43,7 +43,7 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_COTE.toString();
+        return TYPE_COTE.toString();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefCote typeCote = new RefCote();
+            final RefCote typeCote = createAnonymValidElement(RefCote.class);
             
             typeCote.setId(typeCote.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())));
             typeCote.setLibelle(row.getString(Columns.LIBELLE_TYPE_COTE.toString()));
@@ -62,7 +62,6 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
                 typeCote.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeCote.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString()))));
-            typeCote.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_COTE.toString())), typeCote);
         }

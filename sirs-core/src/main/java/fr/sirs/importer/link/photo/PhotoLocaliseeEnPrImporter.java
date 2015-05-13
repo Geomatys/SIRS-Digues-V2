@@ -10,7 +10,7 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.PositionDocument;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
@@ -23,6 +23,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.DbImporter.TableName;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -124,7 +126,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PHOTO_LOCALISEE_EN_PR.toString();
+        return PHOTO_LOCALISEE_EN_PR.toString();
     }
 
     @Override
@@ -144,18 +146,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Photo photo = new Photo();
-            
-//            photo.setObjet(null);
-//            photo.setPhotoIds(null);
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                photo.setTroncon_digue(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
+            final Photo photo = createAnonymValidElement(Photo.class);
             
             if(row.getInt(Columns.ID_ORIENTATION.toString())!=null){
                 photo.setOrientationPhoto(orientations.get(row.getInt(Columns.ID_ORIENTATION.toString())).getId());
@@ -263,9 +254,8 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 photo.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF.toString()).floatValue());
             }
             photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
-            photo.setValid(true);
 
-            final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(
+            final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<>(
                     row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 
                     row.getInt(Columns.ID_SOUS_GROUPE_DONNEES.toString()));
             

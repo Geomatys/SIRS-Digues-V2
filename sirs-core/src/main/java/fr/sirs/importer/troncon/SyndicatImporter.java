@@ -2,8 +2,9 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Syndicat;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
@@ -50,7 +51,7 @@ class SyndicatImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYNDICAT.toString();
+        return SYNDICAT.toString();
     }
 
     @Override
@@ -60,7 +61,7 @@ class SyndicatImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Syndicat syndicat = new Syndicat();
+            final Syndicat syndicat = createAnonymValidElement(Syndicat.class);
             
             syndicat.setLibelle(cleanNullString(row.getString(Columns.LIBELLE_SYNDICAT.toString())));
             
@@ -69,7 +70,6 @@ class SyndicatImporter extends GenericImporter {
             }
             
             syndicat.setDesignation(String.valueOf(row.getInt(Columns.ID_SYNDICAT.toString())));
-            syndicat.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             syndicats.put(row.getInt(Columns.ID_SYNDICAT.toString()), syndicat);

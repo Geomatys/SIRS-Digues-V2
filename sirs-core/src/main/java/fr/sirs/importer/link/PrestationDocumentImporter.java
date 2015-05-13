@@ -8,7 +8,7 @@ import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.documentTroncon.DocumentImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
@@ -63,7 +63,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PRESTATION_DOCUMENT.toString();
+        return PRESTATION_DOCUMENT.toString();
     }
 
     @Override

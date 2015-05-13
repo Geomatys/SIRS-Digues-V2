@@ -8,13 +8,13 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.PositionDocument;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOrientationPhoto;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
@@ -93,7 +93,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PHOTO_LOCALISEE_EN_XY.toString();
+        return PHOTO_LOCALISEE_EN_XY.toString();
     }
 
     @Override
@@ -109,15 +109,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Photo photo = new Photo();
-            
-//            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (troncon.getId() != null) {
-//                photo.setTroncon_digue(troncon.getId());
-//            } else {
-//                throw new AccessDbImporterException("Le tronçon "
-//                        + troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())) + " n'a pas encore d'identifiant CouchDb !");
-//            }
+            final Photo photo = createAnonymValidElement(Photo.class);
             
             if(row.getInt(Columns.ID_ORIENTATION.toString())!=null){
                 photo.setOrientationPhoto(orientations.get(row.getInt(Columns.ID_ORIENTATION.toString())).getId());
@@ -149,7 +141,6 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
                 }
             }
             photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
-            photo.setValid(true);
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;

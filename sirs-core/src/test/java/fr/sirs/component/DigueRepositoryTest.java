@@ -22,6 +22,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
@@ -50,7 +51,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         
         TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
       
-        Digue digue = new Digue();
+        Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
 
         digue.setLibelle("une digue");
 
@@ -59,17 +60,17 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         digueRepository.add(digue);
 
         for (int i = 0; i < 1; i++) {
-            TronconDigue troncon = new TronconDigue();
+            TronconDigue troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
             troncon.setCommentaire("Traoncon1");
             troncon.setDigueId(digue.getId());
             troncon.setGeometry(createPoint());
             troncon.setDateMaj(LocalDateTime.now());
 
             List<Objet> stuctures = new ArrayList<Objet>();
-            Fondation e = new Fondation();
+            Fondation e = ElementCreator.createAnonymValidElement(Fondation.class);
             // e.setDocument(troncon);
             stuctures.add(e);
-            Crete crete = new Crete();
+            Crete crete = ElementCreator.createAnonymValidElement(Crete.class);
             crete.setBorneDebutId("8");
             crete.setCommentaire("Belle crete");
             stuctures.add(crete);
@@ -100,7 +101,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     public void failDelete() {
 
         DigueRepository digueRepository = new DigueRepository(connector);
-        Digue digue = new Digue();
+        Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("toDelete");
         digueRepository.add(digue);
 
@@ -119,7 +120,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     @Test
     public void testInstances(){
         DigueRepository digueRepository = new DigueRepository(connector);
-        Digue digue = new Digue();
+        Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("coucou");
         digueRepository.add(digue);
         

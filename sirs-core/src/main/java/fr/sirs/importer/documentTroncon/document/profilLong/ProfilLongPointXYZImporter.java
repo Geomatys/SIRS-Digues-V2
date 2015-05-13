@@ -5,9 +5,10 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ class ProfilLongPointXYZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_LONG_XYZ.toString();
+        return PROFIL_EN_LONG_XYZ.toString();
     }
 
     @Override
@@ -80,7 +81,7 @@ class ProfilLongPointXYZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final XYZProfilLong levePoint = new XYZProfilLong();
+            final XYZProfilLong levePoint = createAnonymValidElement(XYZProfilLong.class);
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -108,7 +109,7 @@ class ProfilLongPointXYZImporter extends GenericImporter {
             }
             
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            levePoint.setValid(true);
+            
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
             List<XYZProfilLong> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));

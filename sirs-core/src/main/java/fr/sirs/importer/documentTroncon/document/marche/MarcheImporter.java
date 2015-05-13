@@ -3,8 +3,10 @@ package fr.sirs.importer.documentTroncon.document.marche;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
+import static fr.sirs.importer.DbImporter.TableName.MARCHE;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -53,7 +55,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.MARCHE.toString();
+        return MARCHE.toString();
     }
 
     @Override
@@ -72,7 +74,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
-        final Marche marche = new Marche();
+        final Marche marche = createAnonymValidElement(Marche.class);
             
         marche.setLibelle(row.getString(Columns.LIBELLE_MARCHE.toString()));
 
@@ -99,8 +101,6 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         }
         
         marche.setDesignation(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));
-        
-        marche.setValid(true);
         
         return marche;
     }

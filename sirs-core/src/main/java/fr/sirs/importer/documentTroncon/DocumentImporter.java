@@ -7,6 +7,7 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.ProfilLong;
@@ -15,7 +16,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -166,7 +167,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDo
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DOCUMENT.toString();
+        return DOCUMENT.toString();
     }
 
     private final Map<Integer, PositionDocument> properDocumentTroncons = new HashMap<>();
@@ -215,7 +216,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDo
             
             // If the document does not ever exists, add it.
             if(documentTroncons.get(rowId)==null){
-                final PositionDocument documentTroncon = new PositionDocument();
+                final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
                 documentTroncons.put(rowId, documentTroncon);
                 properDocumentTroncons.put(rowId, documentTroncon); // Memorize it for computation purpose.
                 
@@ -227,7 +228,6 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDo
                     documentTronconByTronconId.get(troncon).add(documentTroncon);
                 }
                 documentTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-                documentTroncon.setValid(true);
             }
         }
     }
@@ -249,8 +249,7 @@ public class DocumentImporter extends GenericDocumentImporter<AbstractPositionDo
             final Row row = it.next();
             final AbstractPositionDocument docTroncon = importRow(row);
             docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-            docTroncon.setValid(true);
-            //documentTroncons.get(row.getInt(Columns.ID_DOC.toString()));
+            
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                     documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
 

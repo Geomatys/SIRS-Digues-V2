@@ -3,8 +3,9 @@ package fr.sirs.importer.evenementHydraulique;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefEvenementHydraulique;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_EVENEMENT_HYDRAU.toString();
+        return TYPE_EVENEMENT_HYDRAU.toString();
     }
 
     @Override
@@ -56,7 +57,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefEvenementHydraulique typeEvenement = new RefEvenementHydraulique();
+            final RefEvenementHydraulique typeEvenement = createAnonymValidElement(RefEvenementHydraulique.class);
             
             typeEvenement.setId(typeEvenement.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())));
             typeEvenement.setLibelle(row.getString(Columns.LIBELLE_TYPE_EVENEMENT_HYDRAU.toString()));
@@ -65,19 +66,8 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
                 typeEvenement.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeEvenement.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())));
-            typeEvenement.setValid(true);
             
             try{
-//                final Class classe;
-//                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeEvenementHydrauliqueColumns.NOM_TABLE_EVT.toString()));
-//
-//                switch(table){
-//    //                case SYS_CRUE_OBSERVEE: break;
-//    //                case SIMULATION_HYDRAU: break;
-//                    default: classe = null;
-//                }
-//
-//                classesEvenement.put(row.getInt(String.valueOf(TypeEvenementHydrauliqueColumns.ID_TYPE_EVENEMENT_HYDRAU.toString())), classe);
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())), typeEvenement);
             } catch (IllegalArgumentException e) {
                 SirsCore.LOGGER.log(Level.FINE, e.getMessage());

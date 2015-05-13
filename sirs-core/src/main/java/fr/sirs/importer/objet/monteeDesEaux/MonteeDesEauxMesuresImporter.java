@@ -3,11 +3,12 @@ package fr.sirs.importer.objet.monteeDesEaux;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.MesureMonteeEaux;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
@@ -82,7 +83,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.MONTEE_DES_EAUX_MESURES.toString();
+        return MONTEE_DES_EAUX_MESURES.toString();
     }
 
     @Override
@@ -96,7 +97,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final MesureMonteeEaux mesure = new MesureMonteeEaux();
+            final MesureMonteeEaux mesure = createAnonymValidElement(MesureMonteeEaux.class);
             
             if (row.getDate(Columns.DATE.toString()) != null) {
                 mesure.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
@@ -130,7 +131,6 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             
             // En l'absence d'identifiant propre, on met celui de la montée des eaux comme pseudo id.
             mesure.setDesignation(String.valueOf(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString())));
-            mesure.setValid(true);
             
             // Set the list ByLigneEauId
             List<MesureMonteeEaux> listByEltReseauId = mesuresByMonteeDesEaux.get(row.getInt(Columns.ID_MONTEE_DES_EAUX.toString()));

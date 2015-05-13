@@ -3,8 +3,10 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
+import static fr.sirs.importer.DbImporter.TableName.BORNE_PAR_SYSTEME_REP;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,7 +83,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.BORNE_PAR_SYSTEME_REP.toString();
+        return BORNE_PAR_SYSTEME_REP.toString();
     }
 
     @Override
@@ -95,7 +97,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final SystemeReperageBorne systemeReperageBorne = new SystemeReperageBorne();
+            final SystemeReperageBorne systemeReperageBorne = createAnonymValidElement(SystemeReperageBorne.class);
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 systemeReperageBorne.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
@@ -110,7 +112,6 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             
             // Table de jointure, donc pas d'id propre : on affecte arbitrairement l'id de la borne comme pseudo id.
             systemeReperageBorne.setDesignation(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
-            systemeReperageBorne.setValid(true);
             
             final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){

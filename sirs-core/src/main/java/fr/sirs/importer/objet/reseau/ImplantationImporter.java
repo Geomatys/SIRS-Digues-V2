@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefImplantation;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.IMPLANTATION.toString();
+        return IMPLANTATION.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefImplantation typeImplantation = new RefImplantation();
+            final RefImplantation typeImplantation = createAnonymValidElement(RefImplantation.class);
             
             typeImplantation.setId(typeImplantation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString())));
             typeImplantation.setLibelle(row.getString(Columns.LIBELLE_IMPLANTATION.toString()));
@@ -61,7 +62,6 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
                 typeImplantation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeImplantation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString()))));
-            typeImplantation.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString())), typeImplantation);
         }

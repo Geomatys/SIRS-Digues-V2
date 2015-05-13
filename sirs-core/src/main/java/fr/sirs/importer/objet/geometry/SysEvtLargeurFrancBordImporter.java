@@ -5,21 +5,23 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.RefLargeurFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,11 +44,12 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
 
     SysEvtLargeurFrancBordImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter) {
-        super(accessDatabase, couchDbConnector,
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter);
         this.typeLargeurFrancBordImporter = typeLargeurFrancBordImporter;
     }
@@ -93,37 +96,13 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_LARGEUR_FRANC_BORD.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final LargeurFrancBord largeur = importRow(row);
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            //tronconDigue.setId(String.valueOf(row.getString(TronconDigueColumns.ID.toString())));
-            structures.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), largeur);
-
-            // Set the list ByTronconId
-            List<LargeurFrancBord> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(largeur);
-        }
+        return SYS_EVT_LARGEUR_FRANC_BORD.toString();
     }
 
     @Override
     public LargeurFrancBord importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -131,7 +110,9 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
 
         final Map<Integer, RefLargeurFrancBord> typesLargeur = typeLargeurFrancBordImporter.getTypeReferences();
 
-        final LargeurFrancBord largeur = new LargeurFrancBord();
+        final LargeurFrancBord largeur = createAnonymValidElement(LargeurFrancBord.class);
+        
+        largeur.setLinearId(troncon.getId());
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             largeur.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -214,7 +195,7 @@ class SysEvtLargeurFrancBordImporter extends GenericGeometrieImporter<LargeurFra
         }
 
         largeur.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString())));
-        largeur.setValid(true);
+        largeur.setGeometry(buildGeometry(troncon.getGeometry(), largeur, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return largeur;
     }

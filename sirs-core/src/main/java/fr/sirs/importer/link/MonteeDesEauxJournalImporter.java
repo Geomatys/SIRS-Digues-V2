@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
 import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.MONTEE_DES_EAUX_JOURNAL.toString();
+        return MONTEE_DES_EAUX_JOURNAL.toString();
     }
 
     @Override

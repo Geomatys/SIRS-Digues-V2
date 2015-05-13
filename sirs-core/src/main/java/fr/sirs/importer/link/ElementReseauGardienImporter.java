@@ -3,11 +3,12 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_GARDIEN.toString();
+        return ELEMENT_RESEAU_GARDIEN.toString();
     }
 
     @Override
@@ -72,7 +73,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
             
             if(reseau!=null && intervenant!=null){
-                final GardeObjet contactStructure = new GardeObjet();
+                final GardeObjet contactStructure = createAnonymValidElement(GardeObjet.class);
                 
                 contactStructure.setContactId(intervenant.getId());
             
@@ -90,7 +91,6 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gardien.
                 contactStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_GARDIEN.toString())));
-                contactStructure.setValid(true);
                 
                 reseau.getGardes().add(contactStructure);
             }

@@ -3,9 +3,10 @@ package fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DocumentGrandeEchelle;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.documentTroncon.TypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
@@ -90,7 +91,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
         // En l'absence de table spécifique, on considère que l'ensemble des 
         // informations relatives aux documents à grande échelle est contenue 
         // dans la table des documents.
-        return DbImporter.TableName.DOCUMENT.toString();
+        return DOCUMENT.toString();
     }
 
     @Override
@@ -103,7 +104,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final DocumentGrandeEchelle documentGrandeEchelle = new DocumentGrandeEchelle();
+            final DocumentGrandeEchelle documentGrandeEchelle = createAnonymValidElement(DocumentGrandeEchelle.class);
             
             // On ne s'intéresse qu'aux lignes qui sont de type "document à grande échelle"
             if(DocumentGrandeEchelle.class.equals(typesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())))){
@@ -126,7 +127,6 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
                 
                 // Faute de mieux, on référence le document à grande échelle avec l'id du document.
                 documentGrandeEchelle.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-                documentGrandeEchelle.setValid(true);
                 
                 related.put(row.getInt(Columns.ID_DOC.toString()), documentGrandeEchelle);
             }

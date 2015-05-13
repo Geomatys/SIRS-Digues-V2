@@ -3,6 +3,7 @@ package fr.sirs.importer.documentTroncon.document.journal;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.importer.DbImporter.TableName.JOURNAL;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ class JournalImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.JOURNAL.toString();
+        return JOURNAL.toString();
     }
 
     @Override

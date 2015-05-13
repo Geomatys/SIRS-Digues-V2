@@ -2276,7 +2276,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_RfXiEVUPEeSyt_5RCl16VA" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_RfXiElUPEeSyt_5RCl16VA" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_RfXiE1UPEeSyt_5RCl16VA" points="[15, -92, -88, 159]$[72, -92, -31, 159]$[72, -174, -31, 77]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_RfXiE1UPEeSyt_5RCl16VA" points="[15, -77, -88, 174]$[72, -77, -31, 174]$[72, -174, -31, 77]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_RfXiGlUPEeSyt_5RCl16VA" id="(0.8926174496644296,0.5723270440251572)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_RfXiG1UPEeSyt_5RCl16VA" id="(0.8360655737704918,0.21)"/>
           </edges>
@@ -5006,7 +5006,7 @@
           <cache xmi:type="diagram:DiagramElementMapping2ModelElement" xmi:id="_3FTjIEfeEeSoXJiONqf-1A">
             <key xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_5unH0PiPEeSDpfhQLXeXEA">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communeTroncon"/>
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communes"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_5unu4PiPEeSDpfhQLXeXEA" key="_Rd9z4FUPEeSyt_5RCl16VA">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_5unu5PiPEeSDpfhQLXeXEA" value="_5unu4fiPEeSDpfhQLXeXEA">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
@@ -5158,7 +5158,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_5u2YYPiPEeSDpfhQLXeXEA">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//CommuneTroncon/communeId"/>
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//PeriodeCommune/communeId"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_5u2YYfiPEeSDpfhQLXeXEA" key="_Lsp8kFUPEeSyt_5RCl16VA">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_5u2YZfiPEeSDpfhQLXeXEA" value="_5u2YYviPEeSDpfhQLXeXEA">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
@@ -8915,9 +8915,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_LrrsMFUPEeSyt_5RCl16VA" name="CommuneTroncon" tooltipText="" outgoingEdges="_Lsp8kFUPEeSyt_5RCl16VA _LsvcIFUPEeSyt_5RCl16VA" incomingEdges="_Rd9z4FUPEeSyt_5RCl16VA" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//CommuneTroncon"/>
-        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//CommuneTroncon"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_LrrsMFUPEeSyt_5RCl16VA" name="PeriodeCommune" tooltipText="" outgoingEdges="_Lsp8kFUPEeSyt_5RCl16VA _LsvcIFUPEeSyt_5RCl16VA" incomingEdges="_Rd9z4FUPEeSyt_5RCl16VA" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//PeriodeCommune"/>
+        <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//PeriodeCommune"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
@@ -8931,8 +8931,8 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_LsasAFUPEeSyt_5RCl16VA" name="date_debut : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/date_debut"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/date_debut"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/date_debut"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/date_debut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_LsasAVUPEeSyt_5RCl16VA" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_LsasAlUPEeSyt_5RCl16VA"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -8942,8 +8942,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_LsbTEFUPEeSyt_5RCl16VA" name="date_fin : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/date_fin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/date_fin"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/date_fin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/date_fin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_LsbTEVUPEeSyt_5RCl16VA" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_LsbTElUPEeSyt_5RCl16VA"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -8953,8 +8953,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_LsbTFVUPEeSyt_5RCl16VA" name="dateMaj : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/dateMaj"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/dateMaj"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/dateMaj"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/dateMaj"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_LsbTFlUPEeSyt_5RCl16VA" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_LsbTF1UPEeSyt_5RCl16VA"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -8964,8 +8964,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_MCvr4FUQEeSyt_5RCl16VA" name="commentaire : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/commentaire"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//CommuneTroncon/commentaire"/>
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/commentaire"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//PeriodeCommune/commentaire"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_MCvr4VUQEeSyt_5RCl16VA" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_MCvr4lUQEeSyt_5RCl16VA"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -8976,8 +8976,8 @@
         </ownedElements>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Lsp8kFUPEeSyt_5RCl16VA" name="[1..1] communeId" sourceNode="_LrrsMFUPEeSyt_5RCl16VA" targetNode="_ooquEFRNEeSyt_5RCl16VA">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//CommuneTroncon/communeId"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//CommuneTroncon/communeId"/>
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//PeriodeCommune/communeId"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//PeriodeCommune/communeId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_5u2YZviPEeSDpfhQLXeXEA" description="_5u2YYviPEeSDpfhQLXeXEA" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_5u2YZ_iPEeSDpfhQLXeXEA"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_5u2YaPiPEeSDpfhQLXeXEA" labelFormat="bold" showIcon="false">
@@ -8990,8 +8990,8 @@
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_LsvcIFUPEeSyt_5RCl16VA" sourceNode="_LrrsMFUPEeSyt_5RCl16VA" targetNode="_D2iPYEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EClass" href="sirs.ecore#//CommuneTroncon"/>
-        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//CommuneTroncon/@eGenericSuperTypes.0"/>
+        <target xmi:type="ecore:EClass" href="sirs.ecore#//PeriodeCommune"/>
+        <semanticElements xmi:type="ecore:EGenericType" href="sirs.ecore#//PeriodeCommune/@eGenericSuperTypes.0"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_LsvcIVUPEeSyt_5RCl16VA" targetArrow="InputClosedArrow" routingStyle="tree">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_LsvcIlUPEeSyt_5RCl16VA" red="136" green="136" blue="136"/>
@@ -9004,9 +9004,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Rd9z4FUPEeSyt_5RCl16VA" name="[0..*] communeTroncon" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_LrrsMFUPEeSyt_5RCl16VA">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communeTroncon"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communeTroncon"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Rd9z4FUPEeSyt_5RCl16VA" name="[0..*] communes" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_LrrsMFUPEeSyt_5RCl16VA">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communes"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/communes"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_5unu5fiPEeSDpfhQLXeXEA" description="_5unu4fiPEeSDpfhQLXeXEA" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_5unu5viPEeSDpfhQLXeXEA"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_5unu5_iPEeSDpfhQLXeXEA" showIcon="false">

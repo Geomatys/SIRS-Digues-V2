@@ -8,10 +8,11 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.DocumentGrandeEchelle;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import java.io.IOException;
@@ -112,7 +113,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter<Posit
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString();
+        return SYS_EVT_DOCUMENT_A_GRANDE_ECHELLE.toString();
     }
 
     @Override
@@ -124,7 +125,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter<Posit
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocument documentTroncon = new PositionDocument();
+            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -166,7 +167,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter<Posit
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, DocumentGrandeEchelle> documentsGrandeEchelle = documentAGrandeEchelleImporter.getRelated();
 
-        final PositionDocument docTroncon = new PositionDocument();
+        final PositionDocument docTroncon = createAnonymValidElement(PositionDocument.class);
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
             docTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
@@ -239,7 +240,6 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericDocumentImporter<Posit
             }
         }
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-        docTroncon.setValid(true);
         
         return docTroncon;
     }

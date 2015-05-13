@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefTypeGlissiere;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_GLISSIERE.toString();
+        return TYPE_GLISSIERE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefTypeGlissiere typeGlissiere = new RefTypeGlissiere();
+            final RefTypeGlissiere typeGlissiere = createAnonymValidElement(RefTypeGlissiere.class);
             
             typeGlissiere.setId(typeGlissiere.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString())));
             typeGlissiere.setLibelle(row.getString(Columns.LIBELLE_TYPE_GLISSIERE.toString()));
@@ -61,7 +62,6 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
                 typeGlissiere.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeGlissiere.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString()))));
-            typeGlissiere.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString())), typeGlissiere);
         }

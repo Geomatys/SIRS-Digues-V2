@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefReferenceHauteur;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_REF_HEAU.toString();
+        return TYPE_REF_HEAU.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefReferenceHauteur refHauteur = new RefReferenceHauteur();
+            final RefReferenceHauteur refHauteur = createAnonymValidElement(RefReferenceHauteur.class);
             
             refHauteur.setId(refHauteur.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString())));
             refHauteur.setLibelle(row.getString(Columns.LIBELLE_TYPE_REF_HEAU.toString()));
@@ -60,7 +61,6 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
                 refHauteur.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             refHauteur.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString()))));
-            refHauteur.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString())), refHauteur);
         }

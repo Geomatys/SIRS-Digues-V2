@@ -16,6 +16,7 @@ import org.junit.Test;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
@@ -64,7 +65,7 @@ public class RepositoriesTest {
         final DigueRepository digueRepository = new DigueRepository(connector);
         final int nbDigues = 10;
         for (int i = 0; i < nbDigues; i++) {
-            final Digue digue = new Digue();
+            final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
             digue.setLibelle("La digue " + i);
             digue.setCommentaire("<html><body><u>Digue "+ i + " :</u> Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. <b>Sed non risus.</b> Suspendisse <i>lectus</i> "
@@ -95,7 +96,7 @@ public class RepositoriesTest {
         final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final int nbTroncons = 30;
         for (int i = 0; i < nbTroncons; i++) {
-            final TronconDigue tron = new TronconDigue();
+            final TronconDigue tron = ElementCreator.createAnonymValidElement(TronconDigue.class);
             tron.setLibelle("Le tronçon " + i);
             tron.setCommentaire("<html><body><b>Tronçon " + i + " :</b> Lorem ipsum dolor sit amet, consectetur "
                     + "adipiscing elit. Sed non risus. Suspendisse lectus "
@@ -120,7 +121,7 @@ public class RepositoriesTest {
             
             tron.setGeometry(createPoint());
             
-            Fondation ecluse = new Fondation();
+            Fondation ecluse = ElementCreator.createAnonymValidElement(Fondation.class);
             ecluse.setCommentaire("Fondation");
             
             List<Objet> stuctures = new ArrayList<>();
@@ -191,21 +192,21 @@ public class RepositoriesTest {
         //assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to
         // fail.
-        final Digue digue = new Digue();
+        final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
 
         digue.setLibelle("une digue");
 
         List<String> set = new ArrayList<>();
         {
-            TronconDigue troncon = new TronconDigue();
+            TronconDigue troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
             troncon.setCommentaire("Traoncon1");
             tronconRepository.add(troncon);
             set.add(troncon.getId());
         }
         {
-            TronconDigue troncon = new TronconDigue();
+            TronconDigue troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
 
-            Fondation ecluse = new Fondation();
+            Fondation ecluse = ElementCreator.createAnonymValidElement(Fondation.class);
             ecluse.setCommentaire("Fondation");
 
             List<Objet> stuctures = new ArrayList<>();

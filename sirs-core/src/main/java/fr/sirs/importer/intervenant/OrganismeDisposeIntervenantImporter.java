@@ -5,6 +5,8 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.ORGANISME_DISPOSE_INTERVENANT;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,7 +61,7 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ORGANISME_DISPOSE_INTERVENANT.toString();
+        return ORGANISME_DISPOSE_INTERVENANT.toString();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ContactOrganisme contactOrganisme = new ContactOrganisme();
+            final ContactOrganisme contactOrganisme = createAnonymValidElement(ContactOrganisme.class);
 
             contactOrganisme.setContactId(organismes.get(row.getInt(Columns.ID_INTERVENANT.toString())).getId());
             
@@ -89,7 +91,6 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
             
             // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.
             contactOrganisme.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
-            contactOrganisme.setValid(true);
             
             List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(Columns.ID_ORGANISME.toString()));
             if (listByIntervenantId == null) {

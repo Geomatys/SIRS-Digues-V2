@@ -3,6 +3,8 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.INTERVENANT;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -62,7 +64,7 @@ public class IntervenantImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.INTERVENANT.toString();
+        return INTERVENANT.toString();
     }
 
     @Override
@@ -72,7 +74,7 @@ public class IntervenantImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Contact intervenant = new Contact();
+            final Contact intervenant = createAnonymValidElement(Contact.class);
 
             intervenant.setNom(row.getString(Columns.NOM_INTERVENANT.toString()));
             
@@ -110,7 +112,6 @@ public class IntervenantImporter extends GenericImporter {
             }
             
             intervenant.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
-            intervenant.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             intervenants.put(row.getInt(Columns.ID_INTERVENANT.toString()), intervenant);

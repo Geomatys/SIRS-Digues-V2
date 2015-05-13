@@ -3,6 +3,7 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
+import static fr.sirs.importer.DbImporter.TableName.CARTO_TRONCON_GESTION_DIGUE;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -69,7 +70,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.CARTO_TRONCON_GESTION_DIGUE.toString();
+        return CARTO_TRONCON_GESTION_DIGUE.toString();
     }
 
     @Override

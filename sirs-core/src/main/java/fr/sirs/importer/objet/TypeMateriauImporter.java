@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefMateriau;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_MATERIAU.toString();
+        return TYPE_MATERIAU.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefMateriau typeMateriau = new RefMateriau();
+            final RefMateriau typeMateriau = createAnonymValidElement(RefMateriau.class);
             
             typeMateriau.setId(typeMateriau.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString())));
             typeMateriau.setLibelle(row.getString(Columns.LIBELLE_TYPE_MATERIAU.toString()));
@@ -61,7 +62,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
                 typeMateriau.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeMateriau.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString()))));
-            typeMateriau.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_MATERIAU.toString())), typeMateriau);
         }
         couchDbConnector.executeBulk(types.values());

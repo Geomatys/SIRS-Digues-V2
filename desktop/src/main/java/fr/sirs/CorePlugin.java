@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.geotoolkit.data.bean.BeanStore;
 
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.component.PreviewLabelRepository;
@@ -29,7 +28,7 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.CommuneTroncon;
+import fr.sirs.core.model.PeriodeCommune;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
@@ -251,7 +250,7 @@ public class CorePlugin extends Plugin {
             suppliers.put(GardeTroncon.class, new StructBeanSupplier(GardeTroncon.class, () -> repository.getAllGardes()));
 
             // Emprises communales
-            suppliers.put(CommuneTroncon.class, new StructBeanSupplier(CommuneTroncon.class, () -> repository.getAllFromView(CommuneTroncon.class)));
+            suppliers.put(PeriodeCommune.class, new StructBeanSupplier(PeriodeCommune.class, () -> repository.getAllFromView(PeriodeCommune.class)));
     }
     
     @Override

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefSource;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> 
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SOURCE_INFO.toString();
+        return SOURCE_INFO.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> 
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefSource typeSource = new RefSource();
+            final RefSource typeSource = createAnonymValidElement(RefSource.class);
             
             typeSource.setId(typeSource.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_SOURCE.toString())));
             typeSource.setLibelle(row.getString(Columns.LIBELLE_SOURCE.toString()));
@@ -61,7 +62,6 @@ public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> 
                 typeSource.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeSource.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_SOURCE.toString()))));
-            typeSource.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_SOURCE.toString())), typeSource);
         }

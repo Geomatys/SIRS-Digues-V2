@@ -2,10 +2,11 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import java.io.IOException;
@@ -64,7 +65,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_LONG_EVT_HYDRAU.toString();
+        return PROFIL_EN_LONG_EVT_HYDRAU.toString();
     }
 
     @Override
@@ -76,7 +77,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ParametreHydrauliqueProfilLong profilLongEvenementHydraulique = new ParametreHydrauliqueProfilLong();
+            final ParametreHydrauliqueProfilLong profilLongEvenementHydraulique = createAnonymValidElement(ParametreHydrauliqueProfilLong.class);
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 profilLongEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
@@ -100,8 +101,6 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
             
             // Pas d'id car table de jointure : arbitrairement, on met l'id de l'événement hydrau
             profilLongEvenementHydraulique.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
-            
-            profilLongEvenementHydraulique.setValid(true);
             
             List<ParametreHydrauliqueProfilLong> listByLeve = evenementHydrauByProfilLongId.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));
             if (listByLeve == null) {

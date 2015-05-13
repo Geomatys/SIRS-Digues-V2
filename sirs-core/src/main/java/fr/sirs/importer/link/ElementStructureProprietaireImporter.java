@@ -3,11 +3,12 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
@@ -60,7 +61,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_STRUCTURE_PROPRIETAIRE.toString();
+        return ELEMENT_STRUCTURE_PROPRIETAIRE.toString();
     }
 
     @Override
@@ -79,15 +80,16 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_PROPRIO.toString()));
             
             if(structure!=null && (intervenant!=null || organisme!=null)){
+                final ProprieteObjet propriete;
                 if(intervenant!=null){
-                    final ProprieteObjet contactStructure = readContactStructure(row);
-                    contactStructure.setContactId(intervenant.getId());
-                    structure.getProprietes().add(contactStructure);
+                    propriete = readContactStructure(row);
+                    propriete.setContactId(intervenant.getId());
+                    structure.getProprietes().add(propriete);
                 }
                 else{
-                    final ProprieteObjet organismeStructure = readOrganismeStructure(row);
-                    organismeStructure.setOrganismeId(organisme.getId());
-                    structure.getProprietes().add(organismeStructure);
+                    propriete = readOrganismeStructure(row);
+                    propriete.setOrganismeId(organisme.getId());
+                    structure.getProprietes().add(propriete);
                 }
             }
         }
@@ -96,7 +98,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
     
     private ProprieteObjet readContactStructure(final Row row){
         
-        final ProprieteObjet contactStructure = new ProprieteObjet();
+        final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
             contactStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
@@ -110,15 +112,15 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
             contactStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
-        contactStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
-        contactStructure.setValid(true);
-        return contactStructure;
+        propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
+        
+        return propriete;
     }
     
     
     private ProprieteObjet readOrganismeStructure(final Row row){
         
-        final ProprieteObjet organismeStructure = new ProprieteObjet();
+        final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
             organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
@@ -132,8 +134,8 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
             organismeStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
-        organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));
-        organismeStructure.setValid(true);
-        return organismeStructure;
+        propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));
+        
+        return propriete;
     }
 }

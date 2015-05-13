@@ -2,8 +2,9 @@ package fr.sirs.importer.documentTroncon.document;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefSystemeReleveProfil;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_SYSTEME_RELEVE_PROFIL.toString();
+        return TYPE_SYSTEME_RELEVE_PROFIL.toString();
     }
 
     @Override
@@ -51,7 +52,7 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefSystemeReleveProfil typeSystemeReleve = new RefSystemeReleveProfil();
+            final RefSystemeReleveProfil typeSystemeReleve = createAnonymValidElement(RefSystemeReleveProfil.class);
             
             typeSystemeReleve.setId(typeSystemeReleve.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())));
             typeSystemeReleve.setLibelle(row.getString(Columns.LIBELLE_TYPE_SYSTEME_RELEVE_PROFIL.toString()));
@@ -59,7 +60,6 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
                 typeSystemeReleve.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeSystemeReleve.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())));
-            typeSystemeReleve.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())), typeSystemeReleve);
         }

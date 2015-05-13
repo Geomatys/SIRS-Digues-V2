@@ -2,11 +2,12 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_STRUCTURE_GESTIONNAIRE.toString();
+        return ELEMENT_STRUCTURE_GESTIONNAIRE.toString();
     }
 
     @Override
@@ -71,9 +72,9 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(structure!=null && organisme!=null){
-                final GestionObjet organismeStructure = new GestionObjet();
+                final GestionObjet gesion = createAnonymValidElement(GestionObjet.class);
                 
-                organismeStructure.setOrganismeId(organisme.getId());
+                gesion.setOrganismeId(organisme.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
                     organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
@@ -88,9 +89,9 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
-                organismeStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
-                organismeStructure.setValid(true);
-                structure.getGestions().add(organismeStructure);
+                gesion.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
+                
+                structure.getGestions().add(gesion);
             }
         }
     }

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefReseauTelecomEnergie;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_RESEAU_TELECOMMUNIC.toString();
+        return TYPE_RESEAU_TELECOMMUNIC.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefReseauTelecomEnergie typeReseau = new RefReseauTelecomEnergie();
+            final RefReseauTelecomEnergie typeReseau = createAnonymValidElement(RefReseauTelecomEnergie.class);
             
             typeReseau.setId(typeReseau.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())));
             typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
@@ -61,7 +62,6 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
                 typeReseau.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeReseau.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString()))));
-            typeReseau.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString())), typeReseau);
         }

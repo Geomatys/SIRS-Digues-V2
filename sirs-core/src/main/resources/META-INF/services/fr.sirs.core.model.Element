@@ -1,7 +1,6 @@
 fr.sirs.core.model.ArticleJournal
 fr.sirs.core.model.BorneDigue
 fr.sirs.core.model.Commune
-fr.sirs.core.model.CommuneTroncon
 fr.sirs.core.model.Contact
 fr.sirs.core.model.ContactOrganisme
 fr.sirs.core.model.Convention
@@ -41,6 +40,7 @@ fr.sirs.core.model.OuvrageTelecomEnergie
 fr.sirs.core.model.OuvrageVoirie
 fr.sirs.core.model.ParametreHydrauliqueProfilLong
 fr.sirs.core.model.ParametreHydrauliqueProfilTravers
+fr.sirs.core.model.PeriodeCommune
 fr.sirs.core.model.Photo
 fr.sirs.core.model.PiedDigue
 fr.sirs.core.model.PiedFrontFrancBord

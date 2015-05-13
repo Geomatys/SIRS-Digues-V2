@@ -3,10 +3,11 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_STRUCTURE_GARDIEN.toString();
+        return ELEMENT_STRUCTURE_GARDIEN.toString();
     }
 
     @Override
@@ -71,9 +72,9 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
             
             if(structure!=null && intervenant!=null){
-                final GardeObjet contactStructure = new GardeObjet();
+                final GardeObjet garde = createAnonymValidElement(GardeObjet.class);
                 
-                contactStructure.setContactId(intervenant.getId());
+                garde.setContactId(intervenant.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GARDIEN.toString()) != null) {
                     contactStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GARDIEN.toString()), dateTimeFormatter));
@@ -88,10 +89,9 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gardien.
-                contactStructure.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_GARDIEN.toString())));
-                contactStructure.setValid(true);
+                garde.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_GARDIEN.toString())));
                 
-                structure.getGardes().add(contactStructure);
+                structure.getGardes().add(garde);
             }
         }
     }

@@ -5,11 +5,13 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
@@ -17,15 +19,15 @@ import fr.sirs.core.model.RefRevetement;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefUsageVoie;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,6 +51,7 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
 
     SysEvtPointAccesImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
@@ -56,7 +59,7 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
             final TypePositionImporter typePositionImporter,
             final TypeUsageVoieImporter typeUsageVoieImporter,
             final TypeRevetementImporter typeRevetementImporter) {
-        super(accessDatabase, couchDbConnector,
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
                 typePositionImporter, null);
@@ -145,36 +148,13 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_POINT_ACCES.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final OuvrageFranchissement pointAcces = importRow(row);
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), pointAcces);
-
-            // Set the list ByTronconId
-            List<OuvrageFranchissement> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(pointAcces);
-        }
+        return SYS_EVT_POINT_ACCES.toString();
     }
 
     @Override
     public OuvrageFranchissement importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -185,7 +165,9 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypeReferences();
         final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypeReferences();
 
-        final OuvrageFranchissement pointAcces = new OuvrageFranchissement();
+        final OuvrageFranchissement pointAcces = createAnonymValidElement(OuvrageFranchissement.class);
+        
+        pointAcces.setLinearId(troncon.getId());
 
         pointAcces.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
 
@@ -291,7 +273,7 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         }
 
         pointAcces.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-        pointAcces.setValid(true);
+        pointAcces.setGeometry(buildGeometry(troncon.getGeometry(), pointAcces, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return pointAcces;
     }

@@ -8,24 +8,26 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -48,7 +50,8 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
     private final DesordreObservationImporter desordreObservationImporter;
 
     SysEvtDesordreImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
+            final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final DesordreObservationImporter desordreObservationImporter,
@@ -56,7 +59,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypeDesordreImporter typeDesordreImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = typeDesordreImporter;
@@ -112,36 +115,13 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_DESORDRE.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Desordre desordre = importRow(row);
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_DESORDRE.toString()), desordre);
-
-            // Set the list ByTronconId
-            List<Desordre> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-            }
-            listByTronconId.add(desordre);
-            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
+        return SYS_EVT_DESORDRE.toString();
     }
 
     @Override
     public Desordre importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -152,7 +132,9 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypeReferences();
         final Map<Integer, List<Observation>> observations = desordreObservationImporter.getObservationsByDesordreId();
 
-        final Desordre desordre = new Desordre();
+        final Desordre desordre = createAnonymValidElement(Desordre.class);
+        
+        desordre.setLinearId(troncon.getId());
 
         if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
             final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
@@ -260,7 +242,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
         
         desordre.setDesignation(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));
-        desordre.setValid(true);
+        desordre.setGeometry(buildGeometry(troncon.getGeometry(), desordre, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return desordre;
     }

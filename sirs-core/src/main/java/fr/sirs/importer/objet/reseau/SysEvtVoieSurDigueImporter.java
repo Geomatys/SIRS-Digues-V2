@@ -5,10 +5,12 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
@@ -17,11 +19,13 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefUsageVoie;
 import fr.sirs.core.model.RefVoieDigue;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,6 +55,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
 
     SysEvtVoieSurDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final SourceInfoImporter typeSourceImporter,
@@ -59,7 +64,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
             final TypeUsageVoieImporter typeUsageVoieImporter,
             final TypeRevetementImporter typeRevetementImporter,
             final TypeVoieSurDigueImporter typeVoieSurDigueImporter) {
-        super(accessDatabase, couchDbConnector,
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
                 typePositionImporter, null);
@@ -149,14 +154,14 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_VOIE_SUR_DIGUE.toString();
+        return SYS_EVT_VOIE_SUR_DIGUE.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
 
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
+        this.objets = new HashMap<>();
+        this.objetsByTronconId = new HashMap<>();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -164,13 +169,13 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
             final VoieDigue voie = importRow(row);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), voie);
+            objets.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), voie);
 
             // Set the list ByTronconId
-            List<VoieDigue> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<VoieDigue> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-                structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(voie);
         }
@@ -179,6 +184,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
     @Override
     public VoieDigue importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
@@ -190,7 +196,9 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypeReferences();
         final Map<Integer, RefRevetement> typesRevetement = typeRevetementImporter.getTypeReferences();
 
-        final VoieDigue voie = new VoieDigue();
+        final VoieDigue voie = createAnonymValidElement(VoieDigue.class);
+        
+        voie.setLinearId(troncon.getId());
 
         voie.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
 
@@ -299,7 +307,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         }
 
         voie.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
-        voie.setValid(true);
+        voie.setGeometry(buildGeometry(troncon.getGeometry(), voie, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return voie;
     }

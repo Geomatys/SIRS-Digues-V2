@@ -2,8 +2,9 @@ package fr.sirs.importer.documentTroncon.document.convention;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefConvention;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention>
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_CONVENTION.toString();
+        return TYPE_CONVENTION.toString();
     }
 
     @Override
@@ -51,7 +52,7 @@ class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention>
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefConvention typeConvention = new RefConvention();
+            final RefConvention typeConvention = createAnonymValidElement(RefConvention.class);
             
             typeConvention.setId(typeConvention.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_CONVENTION.toString())));
             typeConvention.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONVENTION.toString()));
@@ -60,7 +61,6 @@ class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention>
                 typeConvention.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeConvention.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_CONVENTION.toString())));
-            typeConvention.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONVENTION.toString())), typeConvention);
         }

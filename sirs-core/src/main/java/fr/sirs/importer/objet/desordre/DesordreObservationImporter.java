@@ -6,8 +6,9 @@ import java.util.logging.Level;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.importer.GenericImporter;
@@ -56,7 +57,7 @@ public class DesordreObservationImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE_OBSERVATION.toString();
+        return DESORDRE_OBSERVATION.toString();
     }
 
     @Override
@@ -70,7 +71,7 @@ public class DesordreObservationImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Observation observation = new Observation();
+            final Observation observation = createAnonymValidElement(Observation.class);
             
             if(row.getInt(Columns.ID_TYPE_URGENCE.toString())!=null){
                 observation.setUrgenceId(typesUrgence.get(row.getInt(Columns.ID_TYPE_URGENCE.toString())).getId());
@@ -106,7 +107,6 @@ public class DesordreObservationImporter extends GenericImporter {
             }
         
             observation.setDesignation(String.valueOf(row.getInt(Columns.ID_OBSERVATION.toString())));
-            observation.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             observations.put(row.getInt(Columns.ID_OBSERVATION.toString()), observation);

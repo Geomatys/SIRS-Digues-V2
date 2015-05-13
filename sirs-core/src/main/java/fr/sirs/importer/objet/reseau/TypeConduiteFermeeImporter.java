@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefConduiteFermee;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_CONDUITE_FERMEE.toString();
+        return TYPE_CONDUITE_FERMEE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefConduiteFermee typeConduite = new RefConduiteFermee();
+            final RefConduiteFermee typeConduite = createAnonymValidElement(RefConduiteFermee.class);
             
             typeConduite.setId(typeConduite.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())));
             typeConduite.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONDUITE_FERMEE.toString()));
@@ -62,7 +63,6 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
             }
             
             typeConduite.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString()))));
-            typeConduite.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString())), typeConduite);
         }

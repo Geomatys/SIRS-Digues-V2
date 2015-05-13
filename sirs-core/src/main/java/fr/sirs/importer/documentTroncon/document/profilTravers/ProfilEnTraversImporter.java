@@ -2,11 +2,12 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -61,7 +62,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS.toString();
+        return PROFIL_EN_TRAVERS.toString();
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ProfilTravers profil = new ProfilTravers();
+            final ProfilTravers profil = createAnonymValidElement(ProfilTravers.class);
             
             profil.setLibelle(row.getString(Columns.NOM.toString()));
             
@@ -84,7 +85,6 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
                 profil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             profil.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())));
-            profil.setValid(true);
             
             final List<LeveProfilTravers> leves = levesImport.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
             if(leves!=null) {
@@ -100,47 +100,4 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
         }
         couchDbConnector.executeBulk(related.values());
     }
-
-//    @Override
-//    public void update() throws IOException, AccessDbImporterException {
-//        if(related==null) compute();
-//        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-//        while(it.hasNext()){
-//            final Row row = it.next();
-//            final ProfilTravers profil = related.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
-//            final List<DocumentTroncon> docs = getDocumentTroncons(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()));
-//            if(docs!=null && !docs.isEmpty()){
-//                switch(docs.size()){
-//                    case 2: profil.setTronconB(getTronconId(docs.get(1)));
-//                    case 1: profil.setTronconA(getTronconId(docs.get(0))); break;
-//                    default: Logger.getLogger(ProfilEnTraversImporter.class.getName()).log(Level.SEVERE, "Trop de tonçons pour le profil en travers."); break;
-//                }
-//            }
-//        }
-//        couchDbConnector.executeBulk(related.values());
-//    }
-//    
-//    private List<DocumentTroncon> getDocumentTroncons(final Integer profilId) throws IOException, AccessDbImporterException{
-//        final List<DocumentTroncon> result = new ArrayList<>();
-//        final Map<Integer, List<Integer>> leveIds = profilTraversDescriptionImporter.getLeveProfilTraversIdsByProfilId();
-//        if(profilId==null || leveIds.get(profilId)==null) return result;
-//        
-//        for(final Integer leveId : leveIds.get(profilId)){
-//            final DocumentTroncon[] documentTroncons = profilTraversTronconImporter.getDocumentTronconsByLeveId().get(leveId);
-//            if(documentTroncons!=null){
-//                for(int i=0; i<=1; i++){
-//                    if(documentTroncons[i]!=null && !result.contains(documentTroncons[i])) result.add(documentTroncons[i]);
-//                }
-//            }
-//        }
-//        return result;
-//    }
-//    
-//    private String getTronconId(final DocumentTroncon documentTroncon){
-//        if(documentTroncon!=null
-//                && documentTroncon.getParent()!=null
-//                && documentTroncon.getParent() instanceof TronconDigue)
-//            return documentTroncon.getParent().getId();
-//        else return null;
-//    }
 }

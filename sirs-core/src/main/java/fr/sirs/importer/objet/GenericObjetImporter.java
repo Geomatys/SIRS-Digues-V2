@@ -1,6 +1,7 @@
 package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -19,10 +20,10 @@ import org.ektorp.CouchDbConnector;
  */
 public abstract class GenericObjetImporter<T extends Objet> extends GenericImporter {
 
-    protected Map<Integer, T> structures = null;
-    protected Map<Integer, List<T>> structuresByTronconId = null;
+    protected Map<Integer, T> objets = null;
+    protected Map<Integer, List<T>> objetsByTronconId = null;
     
-//    protected TronconGestionDigueImporter tronconGestionDigueImporter;
+    protected TronconGestionDigueImporter tronconGestionDigueImporter;
     protected SystemeReperageImporter systemeReperageImporter;
     protected BorneDigueImporter borneDigueImporter;
     
@@ -40,6 +41,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     
     public GenericObjetImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final SourceInfoImporter typeSourceImporter,
@@ -49,6 +51,7 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
             final TypeNatureImporter typeNatureImporter,
             final TypeFonctionImporter typeFonctionImporter) {
         this(accessDatabase, couchDbConnector);
+        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
         this.sourceInfoImporter = typeSourceImporter;
@@ -67,10 +70,10 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
      * @throws AccessDbImporterException
      */
     public Map<Integer, T> getById() throws IOException, AccessDbImporterException {
-        if (structures == null) {
+        if (objets == null) {
             compute();
         }
-        return structures;
+        return objets;
     }
 
     /**
@@ -81,9 +84,23 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
      * @throws AccessDbImporterException
      */
     public Map<Integer, List<T>> getByTronconId() throws IOException, AccessDbImporterException {
-        if (structuresByTronconId == null) {
+        if (objetsByTronconId == null) {
             compute();
         }
-        return structuresByTronconId;
+        return objetsByTronconId;
+    }
+    
+    /**
+     * 
+     * @param row
+     * @return The POJO mapping the row.
+     * @throws IOException
+     * @throws AccessDbImporterException 
+     */
+    public abstract T importRow(final Row row) throws IOException, AccessDbImporterException;
+
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
+        throw new UnsupportedOperationException("Do not use system table importers.");
     }
 }

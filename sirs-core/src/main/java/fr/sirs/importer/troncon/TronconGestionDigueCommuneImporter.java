@@ -7,17 +7,18 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Commune;
-import fr.sirs.core.model.CommuneTroncon;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import fr.sirs.core.model.PeriodeCommune;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,8 +40,8 @@ import org.opengis.util.FactoryException;
  */
 class TronconGestionDigueCommuneImporter extends GenericImporter {
 
-    private Map<Integer, CommuneTroncon> communesByTronconCommuneId = null;
-    private Map<Integer, List<CommuneTroncon>> communesByTronconId = null;
+    private Map<Integer, PeriodeCommune> communesByTronconCommuneId = null;
+    private Map<Integer, List<PeriodeCommune>> communesByTronconId = null;
     
     private final SystemeReperageImporter systemeReperageImporter;
     private final BorneDigueImporter borneDigueImporter;
@@ -91,7 +92,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
      * @throws IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    public Map<Integer, List<CommuneTroncon>> getCommunesByTronconId() 
+    public Map<Integer, List<PeriodeCommune>> getCommunesByTronconId() 
             throws IOException, AccessDbImporterException {
         if (communesByTronconId == null) compute();
         return communesByTronconId;
@@ -108,7 +109,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TRONCON_GESTION_DIGUE_COMMUNE.toString();
+        return TRONCON_GESTION_DIGUE_COMMUNE.toString();
     }
 
     @Override
@@ -126,26 +127,26 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final CommuneTroncon communeTroncon = new CommuneTroncon();
+            final PeriodeCommune periode = createAnonymValidElement(PeriodeCommune.class);
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                communeTroncon.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
+                periode.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                communeTroncon.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
+                periode.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                communeTroncon.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+                periode.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
             }
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                communeTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                periode.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                communeTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                periode.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();
@@ -156,7 +157,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
                 try {
 
                     if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        communeTroncon.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        periode.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_DEBUT.toString()),
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
@@ -167,7 +168,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
                 try {
 
                     if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        communeTroncon.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                        periode.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                                 row.getDouble(Columns.X_FIN.toString()),
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
@@ -179,54 +180,53 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             }
             
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-                communeTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+                periode.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
             }
             
             if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-                communeTroncon.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+                periode.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
             }
             
-            communeTroncon.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+            periode.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
             
             if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-                communeTroncon.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+                periode.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-                communeTroncon.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+                periode.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
             }
             
-            communeTroncon.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+            periode.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
             
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-                communeTroncon.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+                periode.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
             
-            communeTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+            periode.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                communeTroncon.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                periode.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             // Set the references.
             final Commune commune = communes.get(row.getInt(Columns.ID_COMMUNE.toString()));
             if (commune.getId() != null) {
-                communeTroncon.setCommuneId(commune.getId());
+                periode.setCommuneId(commune.getId());
             } else {
                 throw new AccessDbImporterException("L'organisme " + commune + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            communeTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_COMMUNE.toString())));
-            communeTroncon.setValid(true);
+            periode.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_COMMUNE.toString())));
             
-            communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), communeTroncon);
+            communesByTronconCommuneId.put(row.getInt(Columns.ID_TRONCON_COMMUNE.toString()), periode);
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<CommuneTroncon> listeCommunes = communesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            List<PeriodeCommune> listeCommunes = communesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(listeCommunes == null){
                 listeCommunes = new ArrayList<>();
             }
-            listeCommunes.add(communeTroncon);
+            listeCommunes.add(periode);
             communesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeCommunes);
         }
     }

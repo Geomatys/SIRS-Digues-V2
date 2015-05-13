@@ -3,17 +3,16 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DZLeveProfilTravers;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
-import fr.sirs.core.model.PointLeveDZ;
-import fr.sirs.core.model.PointLeveXYZ;
 import fr.sirs.core.model.RefOrigineProfilTravers;
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import fr.sirs.core.model.RefTypeProfilTravers;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
@@ -116,7 +115,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_DESCRIPTION.toString();
+        return PROFIL_EN_TRAVERS_DESCRIPTION.toString();
     }
 
     @Override
@@ -137,7 +136,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LeveProfilTravers leve = new LeveProfilTravers();
+            final LeveProfilTravers leve = createAnonymValidElement(LeveProfilTravers.class);
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
                 leve.setDateLevee(DbImporter.parse(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
@@ -157,10 +156,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             leve.setChemin(row.getString(Columns.REFERENCE_NUMERIQUE.toString()));
             
             leve.setReferenceCalque(row.getString(Columns.REFERENCE_CALQUE.toString()));
-            
-//            leve.setNomFichierCoupeImage(row.getString(Columns.NOM_FICHIER_COUPE_IMAGE.toString()));
-//            
-//            leve.setNomFichierPlanEnsemble(row.getString(Columns.NOM_FICHIER_PLAN_ENSEMBLE.toString()));
             
             if(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())!=null){
                 leve.setTypeProfilId(typesProfil.get(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())).getId());
@@ -190,7 +185,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             
             leve.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())));
-            leve.setValid(true);
             
             leves.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), leve);
             

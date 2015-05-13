@@ -6,7 +6,9 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 
 import fr.sirs.core.model.Convention;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefConvention;
+import static fr.sirs.importer.DbImporter.TableName.CONVENTION;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 
 import java.io.IOException;
@@ -66,7 +68,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.CONVENTION.toString();
+        return CONVENTION.toString();
     }
 
     @Override
@@ -74,15 +76,13 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
         related = new HashMap<>();
         
         final Map<Integer, RefConvention> typesConvention = typeConventionImporter.getTypeReferences();
-//        final Map<Integer, List<ContactConvention>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationSignataire();
-//        final Map<Integer, List<ContactConvention>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantSignataire();
         final Map<Integer, List<String>> orgSignataires = conventionSignataireOrganismeImporter.getOrganisationsSignatairesIds();
         final Map<Integer, List<String>> intSignataires = conventionSignataireIntervenantImporter.getIntervenantsSignatairesIds();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Convention convention = new Convention();
+            final Convention convention = createAnonymValidElement(Convention.class);
             
             convention.setLibelle(row.getString(Columns.LIBELLE_CONVENTION.toString()));
             
@@ -117,7 +117,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             }
 
             convention.setDesignation(String.valueOf(row.getInt(Columns.ID_CONVENTION.toString())));
-            convention.setValid(true);
+            
             related.put(row.getInt(Columns.ID_CONVENTION.toString()), convention);
         }
         couchDbConnector.executeBulk(related.values());

@@ -2,9 +2,10 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import fr.sirs.core.model.RefNatureBatardeaux;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -43,7 +44,7 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_MOYEN_MANIP_BATARDEAUX.toString();
+        return TYPE_MOYEN_MANIP_BATARDEAUX.toString();
     }
 
     @Override
@@ -53,7 +54,7 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefMoyenManipBatardeaux moyen = new RefMoyenManipBatardeaux();
+            final RefMoyenManipBatardeaux moyen = createAnonymValidElement(RefMoyenManipBatardeaux.class);
             
             moyen.setId(moyen.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())));
             moyen.setLibelle(row.getString(Columns.LIBELLE_TYPE_MOYEN_MANIP_BATARDEAUX.toString()));
@@ -62,7 +63,6 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
                 moyen.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             moyen.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString()))));
-            moyen.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_MOYEN_MANIP_BATARDEAUX.toString())), moyen);
         }

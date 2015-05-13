@@ -6,26 +6,28 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -46,13 +48,14 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
 
     SysEvtLaisseCrueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 intervenantImporter, evenementHydrauliqueImporter, 
                 typeSourceImporter, typeRefHeauImporter);
@@ -108,38 +111,13 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_LAISSE_CRUE.toString();
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-
-        this.structures = new HashMap<>();
-        this.structuresByTronconId = new HashMap<>();
-        
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final LaisseCrue laisseCrue = importRow(row);
-            
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            structures.put(row.getInt(Columns.ID_LAISSE_CRUE.toString()), laisseCrue);
-
-            // Set the list ByTronconId
-            List<LaisseCrue> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-            }
-            listByTronconId.add(laisseCrue);
-            structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
+        return SYS_EVT_LAISSE_CRUE.toString();
     }
 
     @Override
     public LaisseCrue importRow(Row row) throws IOException, AccessDbImporterException {
         
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
@@ -150,9 +128,11 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
         
-        final LaisseCrue laisseCrue = new LaisseCrue();
+        final LaisseCrue laisseCrue = createAnonymValidElement(LaisseCrue.class);
             
-            if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
+        laisseCrue.setLinearId(troncon.getId());
+        
+        if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             laisseCrue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
@@ -249,7 +229,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         laisseCrue.setPositionLaisse(cleanNullString(row.getString(Columns.POSITION.toString())));
         
         laisseCrue.setDesignation(String.valueOf(row.getInt(Columns.ID_LAISSE_CRUE.toString())));
-        laisseCrue.setValid(true);
+        laisseCrue.setGeometry(buildGeometry(troncon.getGeometry(), laisseCrue, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return laisseCrue;
     }

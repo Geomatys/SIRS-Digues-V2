@@ -2,8 +2,9 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefProprietaire;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_PROPRIETAIRE.toString();
+        return TYPE_PROPRIETAIRE.toString();
     }
 
     @Override
@@ -51,7 +52,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefProprietaire typeProprietaire = new RefProprietaire();
+            final RefProprietaire typeProprietaire = createAnonymValidElement(RefProprietaire.class);
             
             typeProprietaire.setId(typeProprietaire.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())));
             typeProprietaire.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROPRIETAIRE.toString()));
@@ -61,7 +62,6 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
             }
             
             typeProprietaire.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString()))));
-            typeProprietaire.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString())), typeProprietaire);
         }

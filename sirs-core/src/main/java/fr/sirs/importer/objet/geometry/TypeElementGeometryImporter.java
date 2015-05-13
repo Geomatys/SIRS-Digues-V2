@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.importer.GenericTypeInternalImporter;
@@ -44,7 +44,7 @@ class TypeElementGeometryImporter extends GenericTypeInternalImporter<Class> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ELEMENT_GEOMETRIE.toString();
+        return TYPE_ELEMENT_GEOMETRIE.toString();
     }
 
     @Override
@@ -59,7 +59,7 @@ class TypeElementGeometryImporter extends GenericTypeInternalImporter<Class> {
                 // La colonne NOM_TABLE_EVT étant vide dans la table de l'Isère, 
                 // on gère la correspondance en dur en espérant que toutes les 
                 //bases font le même lien !
-//                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(TypeElementGeometryColumns.NOM_TABLE_EVT.toString()));
+//                final DbImporter.TableName table = valueOf(row.getString(TypeElementGeometryColumns.NOM_TABLE_EVT.toString()));
                 final int table = (int) row.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString());
                 switch (table) {
                     case 1:

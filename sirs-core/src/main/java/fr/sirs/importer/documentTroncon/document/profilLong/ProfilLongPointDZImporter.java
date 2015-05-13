@@ -2,9 +2,10 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_LONG_DZ.toString();
+        return PROFIL_EN_LONG_DZ.toString();
     }
 
     @Override
@@ -68,7 +69,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final PrZProfilLong levePoint = new PrZProfilLong();
+            final PrZProfilLong levePoint = createAnonymValidElement(PrZProfilLong.class);
             
             if (row.getDouble(Columns.PR_CALCULE.toString()) != null) {
                 levePoint.setD(row.getDouble(Columns.PR_CALCULE.toString()).doubleValue());
@@ -79,7 +80,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
             }
             
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            levePoint.setValid(true);
+            
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
             List<PrZProfilLong> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_LONG.toString()));

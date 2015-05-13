@@ -6,13 +6,14 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.LevePositionProfilTravers;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.profilTravers.ProfilEnTraversImporter;
 import java.io.IOException;
@@ -113,7 +114,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionProf
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PROFIL_EN_TRAVERS.toString();
+        return SYS_EVT_PROFIL_EN_TRAVERS.toString();
     }
 
     @Override
@@ -125,7 +126,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionProf
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionProfilTravers documentTroncon = new PositionProfilTravers();
+            final PositionProfilTravers documentTroncon = createAnonymValidElement(PositionProfilTravers.class);
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -165,7 +166,7 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionProf
         final Map<Integer, ProfilTravers> profilsTravers = profilTraversImporter.getRelated();
         final Map<Integer, List<LevePositionProfilTravers>> levePositions = profilTraversImporter.getProfilEnTraversTronconImporter().getByLocalisationId();
         
-        final PositionProfilTravers docTroncon = new PositionProfilTravers();
+        final PositionProfilTravers docTroncon = createAnonymValidElement(PositionProfilTravers.class);
         final GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
@@ -239,7 +240,6 @@ class SysEvtProfilEnTraversImporter extends GenericDocumentImporter<PositionProf
         }
         
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-        docTroncon.setValid(true);
         
         return docTroncon;
     }

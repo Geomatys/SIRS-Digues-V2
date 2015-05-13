@@ -11,7 +11,7 @@ import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -53,7 +53,7 @@ DATE_DERNIERE_MAJ
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString();
+        return ELEMENT_RESEAU_VOIE_SUR_DIGUE.toString();
     }
 
     @Override

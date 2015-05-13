@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class PrestationIntervenantImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PRESTATION_INTERVENANT.toString();
+        return PRESTATION_INTERVENANT.toString();
     }
 
     @Override

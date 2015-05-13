@@ -2,12 +2,13 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.MaitreOeuvreMarche;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.RefFonctionMaitreOeuvre;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.MARCHE_MAITRE_OEUVRE.toString();
+        return MARCHE_MAITRE_OEUVRE.toString();
     }
 
     @Override
@@ -75,7 +76,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
             final Organisme maitreOeuvre = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
             
             if(marche!=null && maitreOeuvre!=null){
-                final MaitreOeuvreMarche maitreOeuvreMarche = new MaitreOeuvreMarche();
+                final MaitreOeuvreMarche maitreOeuvreMarche = createAnonymValidElement(MaitreOeuvreMarche.class);
                 
                 maitreOeuvreMarche.setFonctionMaitreOeuvre(fonctionsMo.get(row.getInt(Columns.ID_FONCTION_MO.toString())).getId());
             
@@ -87,7 +88,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
                 
                 // Jointure, donc pas d'ID propre : on affecte l'id de l'organisme comme pseudo-id.
                 maitreOeuvreMarche.setDesignation(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
-                maitreOeuvreMarche.setValid(true);
+                
                 marche.getMaitreOeuvre().add(maitreOeuvreMarche);
             }
         }

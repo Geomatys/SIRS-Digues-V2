@@ -7,13 +7,14 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefProprietaire;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
@@ -66,26 +67,26 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
     }
 
     private enum Columns {
-        ID_PROPRIETAIRE_TRONCON_GESTION, // Pas dans le nouveau modèle
+        ID_PROPRIETAIRE_TRONCON_GESTION,
         ID_TRONCON_GESTION,
         ID_TYPE_PROPRIETAIRE,
         DATE_DEBUT,
         DATE_FIN,
         ID_ORGANISME,
         ID_INTERVENANT,
-        PR_DEBUT_CALCULE, // Pas dans le nouveau modèle
-        PR_FIN_CALCULE, // Pas dans le nouveau modèle
-        X_DEBUT, // Pas dans le nouveau modèle
-        X_FIN, // Pas dans le nouveau modèle
-        Y_DEBUT, // Pas dans le nouveau modèle
-        Y_FIN, // Pas dans le nouveau modèle
-        ID_BORNEREF_DEBUT, // Pas dans le nouveau modèle
-        ID_BORNEREF_FIN, // Pas dans le nouveau modèle
-        ID_SYSTEME_REP, // Pas dans le nouveau modèle
-        DIST_BORNEREF_DEBUT, // Pas dans le nouveau modèle
-        DIST_BORNEREF_FIN, // Pas dans le nouveau modèle
-        AMONT_AVAL_DEBUT, // Pas dans le nouveau modèle
-        AMONT_AVAL_FIN, // Pas dans le nouveau modèle
+        PR_DEBUT_CALCULE,
+        PR_FIN_CALCULE,
+        X_DEBUT,
+        X_FIN,
+        Y_DEBUT,
+        Y_FIN,
+        ID_BORNEREF_DEBUT,
+        ID_BORNEREF_FIN,
+        ID_SYSTEME_REP,
+        DIST_BORNEREF_DEBUT,
+        DIST_BORNEREF_FIN,
+        AMONT_AVAL_DEBUT,
+        AMONT_AVAL_FIN,
         DATE_DERNIERE_MAJ
     };
     
@@ -113,7 +114,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROPRIETAIRE_TRONCON_GESTION.toString();
+        return PROPRIETAIRE_TRONCON_GESTION.toString();
     }
 
     @Override
@@ -130,7 +131,7 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ProprieteTroncon propriete = new ProprieteTroncon();
+            final ProprieteTroncon propriete = createAnonymValidElement(ProprieteTroncon.class);
             
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
@@ -228,7 +229,6 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
             }
             
             propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString())));
-            propriete.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<ProprieteTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

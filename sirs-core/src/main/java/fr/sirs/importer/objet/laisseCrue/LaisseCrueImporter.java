@@ -1,6 +1,5 @@
 package fr.sirs.importer.objet.laisseCrue;
 
-import fr.sirs.core.SirsCore;
 
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import com.healthmarketscience.jackcess.Database;
@@ -8,19 +7,18 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -33,18 +31,19 @@ public class LaisseCrueImporter extends GenericLaisseCrueImporter {
 
     public LaisseCrueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final IntervenantImporter intervenantImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, 
                 intervenantImporter, evenementHydrauliqueImporter, 
                 typeSourceImporter, typeRefHeauImporter);
         sysEvtLaisseCrueImporter = new SysEvtLaisseCrueImporter(
-                accessDatabase, couchDbConnector, 
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 intervenantImporter, evenementHydrauliqueImporter,
                 typeSourceImporter, typeRefHeauImporter);
@@ -93,52 +92,40 @@ public class LaisseCrueImporter extends GenericLaisseCrueImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.LAISSE_CRUE.toString();
+        return LAISSE_CRUE.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        structures = new HashMap<>();
-        structuresByTronconId = new HashMap<>();
-        
-        // Commenté pour ignorer la table d'événements.
-//        this.structures = sysEvtMonteeDesEauHydroImporter.getById();
-//        this.structuresByTronconId = sysEvtMonteeDesEauHydroImporter.getByTronconId();
+        objets = new HashMap<>();
+        objetsByTronconId = new HashMap<>();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final LaisseCrue objet;
-            final boolean nouvelObjet;
-            
-            if(structures.get(row.getInt(Columns.ID_LAISSE_CRUE.toString()))!=null){
-                objet = structures.get(row.getInt(Columns.ID_LAISSE_CRUE.toString()));
-                nouvelObjet=false;
-            }
-            else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
-                objet = importRow(row);
-                nouvelObjet=true;
-            }
+            final LaisseCrue objet = importRow(row);
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
-            if (nouvelObjet) {
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_LAISSE_CRUE.toString()), objet);
+                objets.put(row.getInt(Columns.ID_LAISSE_CRUE.toString()), objet);
 
                 // Set the list ByTronconId
-                List<LaisseCrue> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<LaisseCrue> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(objet);
             }
         }
+        couchDbConnector.executeBulk(objets.values());
     }
 }

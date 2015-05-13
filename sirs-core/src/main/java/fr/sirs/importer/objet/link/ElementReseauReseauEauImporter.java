@@ -10,7 +10,7 @@ import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -53,7 +53,7 @@ public class ElementReseauReseauEauImporter extends GenericObjetLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_RESEAU_EAU.toString();
+        return ELEMENT_RESEAU_RESEAU_EAU.toString();
     }
 
     @Override

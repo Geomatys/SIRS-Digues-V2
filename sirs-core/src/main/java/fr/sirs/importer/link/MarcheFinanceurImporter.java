@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class MarcheFinanceurImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.MARCHE_FINANCEUR.toString();
+        return MARCHE_FINANCEUR.toString();
     }
 
     @Override

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_DESORDRE.toString();
+        return TYPE_DESORDRE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefTypeDesordre typeDesordre = new RefTypeDesordre();
+            final RefTypeDesordre typeDesordre = createAnonymValidElement(RefTypeDesordre.class);
             
             typeDesordre.setId(typeDesordre.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_DESORDRE.toString())));
             typeDesordre.setLibelle(row.getString(Columns.LIBELLE_TYPE_DESORDRE.toString()));
@@ -62,7 +63,6 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
             }
         
             typeDesordre.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DESORDRE.toString())));
-            typeDesordre.setValid(true);
             
             types.put(row.getInt(Columns.ID_TYPE_DESORDRE.toString()), typeDesordre);
         }

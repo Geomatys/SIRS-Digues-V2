@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefUtilisationConduite;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.UTILISATION_CONDUITE;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -43,7 +44,7 @@ class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilis
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.UTILISATION_CONDUITE.toString();
+        return UTILISATION_CONDUITE.toString();
     }
 
     @Override
@@ -53,7 +54,7 @@ class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilis
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefUtilisationConduite typeUtilisation = new RefUtilisationConduite();
+            final RefUtilisationConduite typeUtilisation = createAnonymValidElement(RefUtilisationConduite.class);
             
             typeUtilisation.setId(typeUtilisation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())));
             typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_UTILISATION_CONDUITE.toString()));
@@ -62,7 +63,6 @@ class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilis
                 typeUtilisation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeUtilisation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString()))));
-            typeUtilisation.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString())), typeUtilisation);
         }

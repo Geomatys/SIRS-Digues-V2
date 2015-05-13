@@ -1,7 +1,5 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.component.DocumentChangeEmiter;
-import fr.sirs.core.component.DocumentListener;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.model.ElementCreator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +41,7 @@ public class DocumentChangeEmiterTestCase implements DocumentListener {
     @Test
     public void testListen() throws InterruptedException {
 
-        Digue digue = new Digue();
+        Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setCommentaire("my comment");
         digueRepository.add(digue);
         digue.setCommentaire("zozo");

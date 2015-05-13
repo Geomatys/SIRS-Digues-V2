@@ -1,24 +1,22 @@
 package fr.sirs.importer.objet.ligneEau;
 
-import fr.sirs.core.SirsCore;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LigneEau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -33,11 +31,12 @@ public class LigneEauImporter extends GenericLigneEauImporter {
 
     public LigneEauImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, 
                 evenementHydrauliqueImporter, typeRefHeauImporter);
         ligneEauMesuresPrzImporter = new LigneEauMesuresPrzImporter(
@@ -45,7 +44,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
         ligneEauMesuresXyzImporter = new LigneEauMesuresXyzImporter(
                 accessDatabase, couchDbConnector);
         sysEvtLigneEauImporter = new SysEvtLigneEauImporter(
-                accessDatabase, couchDbConnector, 
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, 
                 evenementHydrauliqueImporter, ligneEauMesuresPrzImporter, 
                 ligneEauMesuresXyzImporter, typeRefHeauImporter);
@@ -91,52 +90,40 @@ public class LigneEauImporter extends GenericLigneEauImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.LIGNE_EAU.toString();
+        return LIGNE_EAU.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        structures = new HashMap<>();
-        structuresByTronconId = new HashMap<>();
-        
-        // Commenté pour ignorer la table d'événements.
-//        this.structures = sysEvtLigneEauImporter.getById();
-//        this.structuresByTronconId = sysEvtLigneEauImporter.getByTronconId();
+        objets = new HashMap<>();
+        objetsByTronconId = new HashMap<>();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final LigneEau objet;
-            final boolean nouvelObjet;
-            
-            if(structures.get(row.getInt(Columns.ID_LIGNE_EAU.toString()))!=null){
-                objet = structures.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
-                nouvelObjet=false;
-            }
-            else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
-                objet = importRow(row);
-                nouvelObjet=true;
-            }
+            final LigneEau objet = importRow(row);
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
-            if (nouvelObjet) {
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), objet);
+                objets.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), objet);
 
                 // Set the list ByTronconId
-                List<LigneEau> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<LigneEau> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(objet);
             }
         }
+        couchDbConnector.executeBulk(objets.values());
     }
 }

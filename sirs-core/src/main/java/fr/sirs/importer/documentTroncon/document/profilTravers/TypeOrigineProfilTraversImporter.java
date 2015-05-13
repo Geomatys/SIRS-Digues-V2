@@ -2,8 +2,9 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOrigineProfilTravers;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString();
+        return TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrigineProfilTravers typeOrigineProfilTravers = new RefOrigineProfilTravers();
+            final RefOrigineProfilTravers typeOrigineProfilTravers = createAnonymValidElement(RefOrigineProfilTravers.class);
             
             typeOrigineProfilTravers.setId(typeOrigineProfilTravers.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())));
             typeOrigineProfilTravers.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString()));
@@ -61,7 +62,6 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
                 typeOrigineProfilTravers.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrigineProfilTravers.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())));
-            typeOrigineProfilTravers.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())), typeOrigineProfilTravers);
         }

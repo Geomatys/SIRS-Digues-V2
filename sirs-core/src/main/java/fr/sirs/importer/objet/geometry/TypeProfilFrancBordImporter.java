@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.geometry;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefProfilFrancBord;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_PROFIL_FRANC_BORD.toString();
+        return TYPE_PROFIL_FRANC_BORD.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefProfilFrancBord typeProfil = new RefProfilFrancBord();
+            final RefProfilFrancBord typeProfil = createAnonymValidElement(RefProfilFrancBord.class);
             
             typeProfil.setId(typeProfil.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_PROFIL_FB.toString())));
             typeProfil.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROFIL_FB.toString()));
@@ -61,7 +62,6 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
                 typeProfil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeProfil.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())));
-            typeProfil.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_PROFIL_FB.toString())), typeProfil);
         }

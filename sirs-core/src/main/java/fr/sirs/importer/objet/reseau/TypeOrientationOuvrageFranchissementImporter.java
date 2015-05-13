@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOrientationOuvrage;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeOrientationOuvrageFranchissementImporter extends GenericTypeReferenceI
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString();
+        return TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeOrientationOuvrageFranchissementImporter extends GenericTypeReferenceI
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrientationOuvrage typeUtilisation = new RefOrientationOuvrage();
+            final RefOrientationOuvrage typeUtilisation = createAnonymValidElement(RefOrientationOuvrage.class);
             
             typeUtilisation.setId(typeUtilisation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString())));
             typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString()));
@@ -61,7 +62,6 @@ class TypeOrientationOuvrageFranchissementImporter extends GenericTypeReferenceI
                 typeUtilisation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeUtilisation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString()))));
-            typeUtilisation.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString())), typeUtilisation);
         }

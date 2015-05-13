@@ -4,6 +4,8 @@ import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.JOURNAL_ARTICLE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
@@ -52,7 +54,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.JOURNAL_ARTICLE.toString();
+        return JOURNAL_ARTICLE.toString();
     }
 
     @Override
@@ -64,7 +66,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final ArticleJournal articleJournal = new ArticleJournal();
+            final ArticleJournal articleJournal = createAnonymValidElement(ArticleJournal.class);
             
             if(row.getInt(Columns.ID_JOURNAL.toString())!=null){
                 articleJournal.setNomJournal(cleanNullString(journaux.get(row.getInt(Columns.ID_JOURNAL.toString()))));
@@ -87,7 +89,6 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             }
             
             articleJournal.setDesignation(String.valueOf(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())));
-            articleJournal.setValid(true);
             
             related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.desordre;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefUrgence;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_URGENCE.toString();
+        return TYPE_URGENCE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefUrgence typeUrgence = new RefUrgence();
+            final RefUrgence typeUrgence = createAnonymValidElement(RefUrgence.class);
             
             typeUrgence.setId(typeUrgence.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_URGENCE.toString())));
             typeUrgence.setLibelle(row.getString(Columns.LIBELLE_TYPE_URGENCE.toString()));
@@ -61,7 +62,6 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
                 typeUrgence.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeUrgence.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_URGENCE.toString())));
-            typeUrgence.setValid(true);
             
             types.put(row.getInt(Columns.ID_TYPE_URGENCE.toString()), typeUrgence);
         }

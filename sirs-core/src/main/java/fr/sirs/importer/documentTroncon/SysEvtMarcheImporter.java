@@ -6,12 +6,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
@@ -112,7 +113,7 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<PositionDocument> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_MARCHE.toString();
+        return SYS_EVT_MARCHE.toString();
     }
 
     @Override
@@ -124,7 +125,7 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<PositionDocument> {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final PositionDocument documentTroncon = new PositionDocument();
+            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -164,7 +165,7 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<PositionDocument> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Marche> conventions = conventionImporter.getRelated();
 
-        final PositionDocument docTroncon = new PositionDocument();
+        final PositionDocument docTroncon = createAnonymValidElement(PositionDocument.class);
         final GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
@@ -231,7 +232,7 @@ class SysEvtMarcheImporter extends GenericDocumentImporter<PositionDocument> {
             docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-        docTroncon.setValid(true);
+        
         return docTroncon;
     }
 }

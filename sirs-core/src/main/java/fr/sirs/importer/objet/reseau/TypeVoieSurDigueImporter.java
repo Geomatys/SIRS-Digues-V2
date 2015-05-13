@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefVoieDigue;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_VOIE_SUR_DIGUE.toString();
+        return TYPE_VOIE_SUR_DIGUE.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefVoieDigue typeVoie = new RefVoieDigue();
+            final RefVoieDigue typeVoie = createAnonymValidElement(RefVoieDigue.class);
             
             typeVoie.setId(typeVoie.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString())));
             typeVoie.setLibelle(row.getString(Columns.LIBELLE_TYPE_VOIE_SUR_DIGUE.toString()));
@@ -61,7 +62,6 @@ class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue
                 typeVoie.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeVoie.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString()))));
-            typeVoie.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_VOIE_SUR_DIGUE.toString())), typeVoie);
         }

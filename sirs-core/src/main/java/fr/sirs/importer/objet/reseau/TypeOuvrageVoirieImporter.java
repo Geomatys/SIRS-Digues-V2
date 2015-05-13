@@ -2,9 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.RefOuvrageFranchissement;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOuvrageVoirie;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_OUVRAGE_VOIRIE.toString();
+        return TYPE_OUVRAGE_VOIRIE.toString();
     }
 
     @Override
@@ -53,7 +53,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOuvrageVoirie typeOuvrage = new RefOuvrageVoirie();
+            final RefOuvrageVoirie typeOuvrage = createAnonymValidElement(RefOuvrageVoirie.class);
             
             typeOuvrage.setId(typeOuvrage.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())));
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_VOIRIE.toString()));
@@ -62,7 +62,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
                 typeOuvrage.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString()))));
-            typeOuvrage.setValid(true);
+            
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())), typeOuvrage);
         }
         couchDbConnector.executeBulk(types.values());

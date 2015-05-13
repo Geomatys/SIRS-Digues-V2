@@ -3,10 +3,11 @@ package fr.sirs.importer.troncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.SyndicTroncon;
 import fr.sirs.core.model.Syndicat;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -81,7 +82,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString();
+        return TRONCON_GESTION_DIGUE_SYNDICAT.toString();
     }
 
     @Override
@@ -93,7 +94,7 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final SyndicTroncon periodeSyndicale = new SyndicTroncon();
+            final SyndicTroncon periodeSyndicale = createAnonymValidElement(SyndicTroncon.class);
             
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
@@ -117,7 +118,6 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
             }
             
             periodeSyndicale.setDesignation(String.valueOf(row.getInt(Columns.ID_TRONCON_SYNDICAT.toString())));
-            periodeSyndicale.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<SyndicTroncon> listeGestions = syndicatsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

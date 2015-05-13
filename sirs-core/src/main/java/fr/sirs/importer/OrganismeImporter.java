@@ -3,8 +3,9 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ContactOrganisme;
-import fr.sirs.core.model.ElementCreator;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Organisme;
+import static fr.sirs.importer.DbImporter.TableName.ORGANISME;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class OrganismeImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ORGANISME.toString();
+        return ORGANISME.toString();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class OrganismeImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Organisme organisme = ElementCreator.createAnonymValidElement(Organisme.class);
+            final Organisme organisme = createAnonymValidElement(Organisme.class);
 
             organisme.setNom(row.getString(Columns.RAISON_SOCIALE.toString()));
             
@@ -119,7 +120,6 @@ public class OrganismeImporter extends GenericImporter {
             }
             
             organisme.setDesignation(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
-            organisme.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             organismes.put(row.getInt(Columns.ID_ORGANISME.toString()), organisme);

@@ -3,6 +3,8 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Digue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.DIGUE;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,7 +55,7 @@ public class DigueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DIGUE.toString();
+        return DIGUE.toString();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class DigueImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Digue digue = new Digue();
+            final Digue digue = createAnonymValidElement(Digue.class);
 
             digue.setLibelle(row.getString(Columns.LIBELLE_DIGUE.toString()));
             digue.setCommentaire(row.getString(Columns.COMMENTAIRE_DIGUE.toString()));
@@ -71,7 +73,6 @@ public class DigueImporter extends GenericImporter {
                 digue.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             digue.setDesignation(String.valueOf(row.getInt(Columns.ID_DIGUE.toString())));
-            digue.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             digues.put(row.getInt(Columns.ID_DIGUE.toString()), digue);

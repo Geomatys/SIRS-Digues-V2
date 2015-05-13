@@ -8,12 +8,13 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,21 +35,22 @@ public class PrestationImporter extends GenericPrestationImporter {
 
     public PrestationImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter, 
             final MarcheImporter marcheImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, marcheImporter, 
                 typeSourceImporter, typePositionImporter, typeCoteImporter);
         this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
                 couchDbConnector);
         this.sysEvtPrestationImporter = new SysEvtPrestationImporter(
-                accessDatabase, couchDbConnector, systemeReperageImporter, 
-                borneDigueImporter, marcheImporter, typePositionImporter, 
-                typeCoteImporter, typePrestationImporter);
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter, marcheImporter, 
+                typePositionImporter, typeCoteImporter, typePrestationImporter);
     }
 
     private enum Columns {
@@ -94,19 +96,14 @@ public class PrestationImporter extends GenericPrestationImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PRESTATION.toString();
+        return PRESTATION.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        structures = new HashMap<>();
-        structuresByTronconId = new HashMap<>();
-        
-        // Commenté pour ignorer la table d'événements.
-//        this.structures = sysEvtPrestationImporter.getById();
-//        this.structuresByTronconId = sysEvtPrestationImporter.getByTronconId();
-        
+        objets = new HashMap<>();
+        objetsByTronconId = new HashMap<>();
         
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         
@@ -114,8 +111,7 @@ public class PrestationImporter extends GenericPrestationImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Prestation objet;
-            final boolean nouvelObjet;
+            final Prestation objet = importRow(row);
             
             if(structures.get(row.getInt(Columns.ID_PRESTATION.toString()))!=null){
                 objet = structures.get(row.getInt(Columns.ID_PRESTATION.toString()));
@@ -131,46 +127,45 @@ public class PrestationImporter extends GenericPrestationImporter {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
-            
-            
-            {
-                final boolean realisation = row.getBoolean(Columns.REALISATION_INTERNE.toString());
-                    if(nouvelObjet){
-                        objet.setRealisationInterne(realisation);
-                    }
-            }
-            
-            if (row.getDouble(Columns.COUT_AU_METRE.toString()) != null) {
-                objet.setCoutMetre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.COUT_GLOBAL.toString()) != null) {
-                objet.setCoutGlobal(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                final RefSource typeSource = typesSource.get(row.getInt(Columns.ID_SOURCE.toString()));
-                if(typeSource!=null){
-                    if(objet.getSourceId()==null){
-                        objet.setSourceId(typeSource.getId());
+                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                }
+                
+                {
+                    final boolean realisation = row.getBoolean(Columns.REALISATION_INTERNE.toString());
+                    objet.setRealisationInterne(realisation);
+                }
+
+                if (row.getDouble(Columns.COUT_AU_METRE.toString()) != null) {
+                    objet.setCoutMetre(row.getDouble(Columns.COUT_AU_METRE.toString()).floatValue());
+                }
+
+                if (row.getDouble(Columns.COUT_GLOBAL.toString()) != null) {
+                    objet.setCoutGlobal(row.getDouble(Columns.COUT_GLOBAL.toString()).floatValue());
+                }
+
+                if(row.getInt(Columns.ID_SOURCE.toString())!=null){
+                    final RefSource typeSource = typesSource.get(row.getInt(Columns.ID_SOURCE.toString()));
+                    if(typeSource!=null){
+                        if(objet.getSourceId()==null){
+                            objet.setSourceId(typeSource.getId());
+                        }
                     }
                 }
-            }
-            
-            if (nouvelObjet) {
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_PRESTATION.toString()), objet);
+                objets.put(row.getInt(Columns.ID_PRESTATION.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Prestation> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<Prestation> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(objet);
             }
         }
+        couchDbConnector.executeBulk(objets.values());
     }
     
     @Override

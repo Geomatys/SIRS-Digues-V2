@@ -1,6 +1,5 @@
 package fr.sirs.importer.objet.desordre;
 
-import fr.sirs.core.SirsCore;
 
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.TypeCoteImporter;
@@ -9,19 +8,17 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -36,13 +33,14 @@ public class DesordreImporter extends GenericDesordreImporter {
 
     public DesordreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,  
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter, 
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypePositionImporter typePositionImporter,
             final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
                 typeCoteImporter, typePositionImporter);
         this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase, 
@@ -50,7 +48,7 @@ public class DesordreImporter extends GenericDesordreImporter {
         this.desordreObservationImporter = new DesordreObservationImporter(
                 accessDatabase, couchDbConnector, intervenantImporter);
         this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase, 
-                couchDbConnector, 
+                couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, 
                 desordreObservationImporter, typeSourceImporter, 
                 typePositionImporter, typeCoteImporter, typeDesordreImporter);
@@ -90,14 +88,14 @@ public class DesordreImporter extends GenericDesordreImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE.toString();
+        return DESORDRE.toString();
     }
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        structures = new HashMap<>();
-        structuresByTronconId = new HashMap<>();
+        objets = new HashMap<>();
+        objetsByTronconId = new HashMap<>();
         
         // Commenté pour ignorer la table d'événements.
 //        this.structures = sysEvtDesordreImporter.getById();
@@ -108,36 +106,38 @@ public class DesordreImporter extends GenericDesordreImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre objet;
-            final boolean nouvelObjet;
+//            final boolean nouvelObjet;
             
-            if(structures.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
-                objet = structures.get(row.getInt(Columns.ID_DESORDRE.toString()));
-                nouvelObjet=false;
-            }
-            else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
+//            if(structures.get(row.getInt(Columns.ID_DESORDRE.toString()))!=null){
+//                objet = structures.get(row.getInt(Columns.ID_DESORDRE.toString()));
+//                nouvelObjet=false;
+//            }
+//            else{
+//                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
                 objet = importRow(row);
-                nouvelObjet=true;
-            }
+//                nouvelObjet=true;
+//            }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
-            if (nouvelObjet) {
+//            if (nouvelObjet) {
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                structures.put(row.getInt(Columns.ID_DESORDRE.toString()), objet);
+                objets.put(row.getInt(Columns.ID_DESORDRE.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Desordre> listByTronconId = structuresByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<Desordre> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
-                    structuresByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
                 }
                 listByTronconId.add(objet);
-            }
+//            }
         }
+        
+        couchDbConnector.executeBulk(objets.values());
     }
 
     @Override

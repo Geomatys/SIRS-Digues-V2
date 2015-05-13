@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
@@ -42,7 +42,7 @@ public class DesordrePrestationImporter extends GenericObjetLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE_PRESTATION.toString();
+        return DESORDRE_PRESTATION.toString();
     }
 
     @Override

@@ -5,9 +5,10 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ.toString();
+        return PROFIL_EN_TRAVERS_XYZ.toString();
     }
 
     @Override
@@ -79,7 +80,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final XYZLeveProfilTravers levePoint = new XYZLeveProfilTravers();
+            final XYZLeveProfilTravers levePoint = createAnonymValidElement(XYZLeveProfilTravers.class);
 
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -107,7 +108,6 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             }
 
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            levePoint.setValid(true);
             
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             

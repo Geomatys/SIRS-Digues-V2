@@ -1,11 +1,11 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Role;
+import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import java.lang.reflect.Constructor;
-import java.util.logging.Level;
+import static java.util.logging.Level.WARNING;
 import org.apache.sis.util.logging.Logging;
 
 /**
@@ -28,10 +28,10 @@ public class TronconThemeObjetPojoTable extends TronconThemePojoTable<Objet>{
 //            trc.getStructures().add(pojo);
             pojo.setLinearId(trc.getId());
             pojo.setAuthor(session.getUtilisateur().getId());
-            pojo.setValid(!(session.getRole().equals(Role.EXTERN)));
+            pojo.setValid(!(session.getRole().equals(EXTERN)));
             session.getTronconDigueRepository().update(trc);
         } catch (Exception ex) {
-            Logging.getLogger(TronconThemePojoTable.class).log(Level.WARNING, null, ex);
+            Logging.getLogger(TronconThemePojoTable.class).log(WARNING, null, ex);
         }
         return pojo;
     }

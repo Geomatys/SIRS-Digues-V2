@@ -2,8 +2,9 @@ package fr.sirs.importer.link.photo;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOrientationPhoto;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ORIENTATION.toString();
+        return ORIENTATION.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrientationPhoto orientation = new RefOrientationPhoto();
+            final RefOrientationPhoto orientation = createAnonymValidElement(RefOrientationPhoto.class);
             
             orientation.setId(orientation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_ORIENTATION.toString())));
             orientation.setLibelle(row.getString(Columns.LIBELLE_ORIENTATION.toString()));
@@ -63,7 +64,6 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
                 orientation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             orientation.setDesignation(String.valueOf(row.getInt(Columns.ID_ORIENTATION.toString())));
-            orientation.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_ORIENTATION.toString())), orientation);
         }

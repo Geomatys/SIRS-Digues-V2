@@ -2,8 +2,9 @@ package fr.sirs.importer.evenementHydraulique;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeReferenceImpo
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString();
+        return TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeReferenceImpo
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefFrequenceEvenementHydraulique typeFrequence = new RefFrequenceEvenementHydraulique();
+            final RefFrequenceEvenementHydraulique typeFrequence = createAnonymValidElement(RefFrequenceEvenementHydraulique.class);
             
             typeFrequence.setId(typeFrequence.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())));
             typeFrequence.setLibelle(row.getString(Columns.LIBELLE_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString()));
@@ -61,7 +62,6 @@ class TypeFrequenceEvenementHydrauliqueImporter extends GenericTypeReferenceImpo
                 typeFrequence.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeFrequence.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())));
-            typeFrequence.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_FREQUENCE_EVENEMENT_HYDRAU.toString())), typeFrequence);
         }

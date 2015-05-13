@@ -3,8 +3,9 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DZLeveProfilTravers;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ class ProfilTraversPointDZImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_DZ.toString();
+        return PROFIL_EN_TRAVERS_DZ.toString();
     }
 
     @Override
@@ -67,18 +68,18 @@ class ProfilTraversPointDZImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final DZLeveProfilTravers levePoint = new DZLeveProfilTravers();
+            final DZLeveProfilTravers levePoint = createAnonymValidElement(DZLeveProfilTravers.class);
             
             if (row.getDouble(Columns.DISTANCE.toString()) != null) {
-                levePoint.setD(row.getDouble(Columns.DISTANCE.toString()).doubleValue());
+                levePoint.setD(row.getDouble(Columns.DISTANCE.toString()));
             }
             
             if (row.getDouble(Columns.Z.toString()) != null) {
-                levePoint.setZ(row.getDouble(Columns.Z.toString()).doubleValue());
+                levePoint.setZ(row.getDouble(Columns.Z.toString()));
             }
             
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            levePoint.setValid(true);
+            
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
             
             List<DZLeveProfilTravers> listByProfil = pointsByProfil.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));

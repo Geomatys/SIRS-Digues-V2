@@ -2,7 +2,8 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.core.model.Pompe;
 import static fr.sirs.importer.DbImporter.cleanNullString;
@@ -76,7 +77,7 @@ class ElementReseauPompeImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_POMPE.toString();
+        return ELEMENT_RESEAU_POMPE.toString();
     }
 
     @Override
@@ -87,7 +88,7 @@ class ElementReseauPompeImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final Pompe pompe = new Pompe();
+            final Pompe pompe = createAnonymValidElement(Pompe.class);
             
             pompe.setMarque(cleanNullString(row.getString(Columns.NOM_POMPE.toString())));
             
@@ -108,7 +109,6 @@ class ElementReseauPompeImporter extends GenericImporter {
             }
             
             pompe.setDesignation(String.valueOf(row.getInt(Columns.ID_POMPE.toString())));
-            pompe.setValid(true);
             
             pompes.put(row.getInt(Columns.ID_POMPE.toString()), pompe);
 

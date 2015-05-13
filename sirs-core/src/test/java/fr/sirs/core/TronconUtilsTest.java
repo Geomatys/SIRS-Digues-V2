@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -38,19 +39,19 @@ public class TronconUtilsTest extends CouchDBTestCase {
     public static void prepareData() {
         final SessionGen session = new SessionGen(connector);
         //creation du troncon
-        troncon = new TronconDigue();
+        troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
         troncon.setLibelle("TC");
         troncon.setGeometry(GF.createLineString(new Coordinate[]{new Coordinate(0, 0),new Coordinate(100, 0)}));
         session.getTronconDigueRepository().add(troncon);
         
         //creation des bornes
-        borne0 = new BorneDigue();
+        borne0 = ElementCreator.createAnonymValidElement( BorneDigue.class);
         borne0.setLibelle("B0");
         borne0.setGeometry(GF.createPoint(new Coordinate(1, 1)));
-        borne1 = new BorneDigue();
+        borne1 = ElementCreator.createAnonymValidElement( BorneDigue.class);
         borne1.setLibelle("B1");
         borne1.setGeometry(GF.createPoint(new Coordinate(51, 2)));
-        borne2 = new BorneDigue();
+        borne2 = ElementCreator.createAnonymValidElement( BorneDigue.class);
         borne2.setLibelle("B2");
         borne2.setGeometry(GF.createPoint(new Coordinate(99, -3)));
         session.getBorneDigueRepository().add(borne0);
@@ -58,16 +59,16 @@ public class TronconUtilsTest extends CouchDBTestCase {
         session.getBorneDigueRepository().add(borne2);
         
         //creation du systeme de reperage
-        sr = new SystemeReperage();
+        sr = ElementCreator.createAnonymValidElement( SystemeReperage.class);
         sr.setLibelle("SR");
         sr.setTronconId(troncon.getDocumentId());
-        final SystemeReperageBorne srb0 = new SystemeReperageBorne();
+        final SystemeReperageBorne srb0 = ElementCreator.createAnonymValidElement( SystemeReperageBorne.class);
         srb0.setBorneId(borne0.getDocumentId());
         srb0.setValeurPR(0);
-        final SystemeReperageBorne srb1 = new SystemeReperageBorne();
+        final SystemeReperageBorne srb1 = ElementCreator.createAnonymValidElement( SystemeReperageBorne.class);
         srb1.setBorneId(borne1.getDocumentId());
         srb1.setValeurPR(10);
-        final SystemeReperageBorne srb2 = new SystemeReperageBorne();
+        final SystemeReperageBorne srb2 = ElementCreator.createAnonymValidElement( SystemeReperageBorne.class);
         srb2.setBorneId(borne2.getDocumentId());
         srb2.setValeurPR(20);
         sr.getSystemeReperageBorne().add(srb0);
@@ -76,7 +77,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         session.getSystemeReperageRepository().add(sr, troncon);
         
         //on ajoute une crète
-        crete = new Crete();
+        crete = ElementCreator.createAnonymValidElement( Crete.class);
         crete.setBorne_debut_aval(false);
         crete.setBorne_debut_distance(0.5f);
         crete.setBorne_fin_distance(0.3f);

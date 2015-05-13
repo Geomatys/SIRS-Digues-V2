@@ -3,8 +3,10 @@ package fr.sirs.importer.documentTroncon.document.rapportEtude;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefRapportEtude;
+import static fr.sirs.importer.DbImporter.TableName.RAPPORT_ETUDE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
@@ -54,7 +56,7 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.RAPPORT_ETUDE.toString();
+        return RAPPORT_ETUDE.toString();
     }
 
     @Override
@@ -66,7 +68,7 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RapportEtude rapport = new RapportEtude();
+            final RapportEtude rapport = createAnonymValidElement(RapportEtude.class);
             
             rapport.setAuteur(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
             
@@ -88,7 +90,6 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
                 rapport.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             rapport.setDesignation(String.valueOf(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())));
-            rapport.setValid(true);
             
             related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.ligneEau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.MesureLigneEau;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -60,7 +61,7 @@ class LigneEauMesuresPrzImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.LIGNE_EAU_MESURES_PRZ.toString();
+        return LIGNE_EAU_MESURES_PRZ.toString();
     }
 
     @Override
@@ -70,7 +71,7 @@ class LigneEauMesuresPrzImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final MesureLigneEau mesure = new MesureLigneEau();
+            final MesureLigneEau mesure = createAnonymValidElement(MesureLigneEau.class);
             
             if (row.getDouble(Columns.HAUTEUR_EAU.toString()) != null) {
                 mesure.setHauteur(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
@@ -82,7 +83,6 @@ class LigneEauMesuresPrzImporter extends GenericImporter {
 
             // Pas d'ID : on met arbitrairement celui de la ligne d'eau comme pseudo id.
             mesure.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
-            mesure.setValid(true);
             
             // Set the list ByLigneEauId
             List<MesureLigneEau> listByEltReseauId = mesuresByLigneEau.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));

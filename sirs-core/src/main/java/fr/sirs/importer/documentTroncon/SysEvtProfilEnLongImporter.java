@@ -6,12 +6,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.profilLong.ProfilEnLongImporter;
 import java.io.IOException;
@@ -112,7 +113,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<ProfilLong> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYS_EVT_PROFIL_EN_LONG.toString();
+        return SYS_EVT_PROFIL_EN_LONG.toString();
     }
 
     @Override
@@ -124,7 +125,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<ProfilLong> {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
-            final ProfilLong documentTroncon = new ProfilLong();
+            final ProfilLong documentTroncon = createAnonymValidElement(ProfilLong.class);
             documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
             
             final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
@@ -168,7 +169,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<ProfilLong> {
         if(profilsLong.get(row.getInt(Columns.ID_DOC.toString()))!=null){
             docTroncon = profilsLong.get(row.getInt(Columns.ID_DOC.toString()));
         } else{
-            docTroncon = new ProfilLong();
+            docTroncon = createAnonymValidElement(ProfilLong.class);
         }
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
@@ -260,7 +261,7 @@ class SysEvtProfilEnLongImporter extends GenericDocumentImporter<ProfilLong> {
         }
 
         docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-        docTroncon.setValid(true);
+        
         return docTroncon;
     }
 }

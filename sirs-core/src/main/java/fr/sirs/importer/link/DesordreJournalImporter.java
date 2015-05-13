@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class DesordreJournalImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DESORDRE_JOURNAL.toString();
+        return DESORDRE_JOURNAL.toString();
     }
 
     @Override

@@ -2,8 +2,9 @@ package fr.sirs.importer.documentTroncon.document.profilLong;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefOrigineProfilLong;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrig
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_ORIGINE_PROFIL_EN_LONG.toString();
+        return TYPE_ORIGINE_PROFIL_EN_LONG.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrig
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefOrigineProfilLong typeOrigineProfilLong = new RefOrigineProfilLong();
+            final RefOrigineProfilLong typeOrigineProfilLong = createAnonymValidElement(RefOrigineProfilLong.class);
             
             typeOrigineProfilLong.setId(typeOrigineProfilLong.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())));
             typeOrigineProfilLong.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIGINE_PROFIL_EN_LONG.toString()));
@@ -61,7 +62,6 @@ class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrig
                 typeOrigineProfilLong.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrigineProfilLong.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())));
-            typeOrigineProfilLong.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())), typeOrigineProfilLong);
         }

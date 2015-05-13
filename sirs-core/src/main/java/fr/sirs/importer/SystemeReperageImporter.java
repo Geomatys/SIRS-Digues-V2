@@ -2,7 +2,9 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.SystemeReperage;
+import static fr.sirs.importer.DbImporter.TableName.SYSTEME_REP_LINEAIRE;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -56,17 +58,6 @@ public class SystemeReperageImporter extends GenericImporter implements Document
         COMMENTAIRE_SYSTEME_REP, 
         DATE_DERNIERE_MAJ
     };
-    
-//    /**
-//     * 
-//     * @return A map containing the SystemeRepLineaire instances references by
-//     * the tronconDigue internal database identifier.
-//     * @throws IOException 
-//     */
-//    public Map<Integer, List<SystemeReperage>> getSystemeRepLineaireByTronconId() throws IOException{
-//        if(systemesReperageByTronconId==null) compute();
-//        return systemesReperageByTronconId;
-//    }
 
     /**
      * 
@@ -90,7 +81,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.SYSTEME_REP_LINEAIRE.toString();
+        return SYSTEME_REP_LINEAIRE.toString();
     }
     
     @Override
@@ -103,7 +94,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
         
         while (it.hasNext()) {
             final Row row = it.next();
-            final SystemeReperage systemeReperage = new SystemeReperage();
+            final SystemeReperage systemeReperage = createAnonymValidElement(SystemeReperage.class);
             
             systemeReperage.setLibelle(row.getString(Columns.LIBELLE_SYSTEME_REP.toString()));
             systemeReperage.setCommentaire(row.getString(Columns.COMMENTAIRE_SYSTEME_REP.toString()));
@@ -112,7 +103,6 @@ public class SystemeReperageImporter extends GenericImporter implements Document
             }
             
             systemeReperage.setDesignation(String.valueOf(row.getInt(Columns.ID_SYSTEME_REP.toString())));
-            systemeReperage.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             systemesReperage.put(row.getInt(Columns.ID_SYSTEME_REP.toString()), systemeReperage);
@@ -121,7 +111,6 @@ public class SystemeReperageImporter extends GenericImporter implements Document
             List<SystemeReperage> listByTronconId = systemesReperageByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if (listByTronconId == null) {
                 listByTronconId = new ArrayList<>();
-//                systemesReperageByTronconId.put(row.getInt(SystemeRepLineaireColumns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(systemeReperage);
             systemesReperageByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);

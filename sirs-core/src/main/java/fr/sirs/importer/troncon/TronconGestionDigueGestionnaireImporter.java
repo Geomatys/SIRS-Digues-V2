@@ -2,10 +2,11 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.OrganismeImporter;
 import java.io.IOException;
@@ -64,7 +65,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TRONCON_GESTION_DIGUE_GESTIONNAIRE.toString();
+        return TRONCON_GESTION_DIGUE_GESTIONNAIRE.toString();
     }
 
     @Override
@@ -76,7 +77,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final GestionTroncon gestion = new GestionTroncon();
+            final GestionTroncon gestion = createAnonymValidElement(GestionTroncon.class);
 
             if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
                 gestion.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
@@ -98,7 +99,6 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             
             // Pas d'ID propre car table de jointure : on affecte arbitrairement l'id de l'organisme.
             gestion.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
-            gestion.setValid(true);
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             List<GestionTroncon> listeGestions = gestionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

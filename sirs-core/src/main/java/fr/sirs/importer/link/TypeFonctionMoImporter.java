@@ -2,8 +2,9 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefFonctionMaitreOeuvre;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMai
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_FONCTION_MO.toString();
+        return TYPE_FONCTION_MO.toString();
     }
 
     @Override
@@ -51,7 +52,7 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMai
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefFonctionMaitreOeuvre typeFonctionMo = new RefFonctionMaitreOeuvre();
+            final RefFonctionMaitreOeuvre typeFonctionMo = createAnonymValidElement(RefFonctionMaitreOeuvre.class);
             
             typeFonctionMo.setId(typeFonctionMo.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString())));
             typeFonctionMo.setLibelle(row.getString(Columns.LIBELLE_FONCTION_MO.toString()));
@@ -61,7 +62,6 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMai
             }
             
             typeFonctionMo.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString()))));
-            typeFonctionMo.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString())), typeFonctionMo);
         }

@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.ELEMENT_RESEAU_CONVENTION.toString();
+        return ELEMENT_RESEAU_CONVENTION.toString();
     }
 
     @Override

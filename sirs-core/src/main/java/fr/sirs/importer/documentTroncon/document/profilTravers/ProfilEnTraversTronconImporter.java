@@ -2,10 +2,11 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.LevePositionProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -25,14 +26,12 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
 
     private Map<Integer, List<LevePositionProfilTravers>> byLocalisationId = null;
     private Collection<LevePositionProfilTravers> levesPositionProfilTravers = null;
-//    private DocumentImporter documentImporter;
-    private ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
+    private final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
 
     ProfilEnTraversTronconImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter) {
         super(accessDatabase, couchDbConnector);
-//        this.documentImporter = documentImporter;
         this.profilTraversDescriptionImporter = profilTraversDescriptionImporter;
     }
     
@@ -64,7 +63,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_TRONCON.toString();
+        return PROFIL_EN_TRAVERS_TRONCON.toString();
     }
 
     @Override
@@ -72,13 +71,12 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
         byLocalisationId = new HashMap<>();
         levesPositionProfilTravers = new ArrayList<>();
         
-//        final Map<Integer, AbstractDocumentTroncon> documents = documentImporter.getPrecomputedDocuments();
         final Map<Integer, LeveProfilTravers> leves = profilTraversDescriptionImporter.getLeveProfilTravers();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final LevePositionProfilTravers levePositionProfilTravers = new LevePositionProfilTravers();
+            final LevePositionProfilTravers levePositionProfilTravers = createAnonymValidElement(LevePositionProfilTravers.class);
             
             if (row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()) != null) {
                 levePositionProfilTravers.setCotePiedDigueRiviere(row.getDouble(Columns.COTE_RIVIERE_Z_NGF_PIED_DE_DIGUE.toString()));
@@ -114,7 +112,6 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             levePositionProfilTravers.setDesignation(
                     String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))+"/"+String.valueOf(row.getInt(Columns.ID_DOC.toString()))
             );
-            levePositionProfilTravers.setValid(true);
 
             levesPositionProfilTravers.add(levePositionProfilTravers);
             
@@ -125,15 +122,6 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             }
             listByLocalisationId.add(levePositionProfilTravers);
             
-//            AbstractDocumentTroncon[] docTroncons = documentTronconsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
-//            if(docTroncons==null){
-//                docTroncons = new AbstractDocumentTroncon[2];
-//                docTroncons[0]=documents.get(row.getInt(Columns.ID_DOC.toString()));//row.getInt(Columns.ID_DOC.toString());
-//                documentTronconsByLeve.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()), docTroncons);
-//            }
-//            else{
-//                docTroncons[1]=documents.get(row.getInt(Columns.ID_DOC.toString()));//row.getInt(Columns.ID_DOC.toString());
-//            }
         }
         couchDbConnector.executeBulk(levesPositionProfilTravers);
     }

@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefNatureBatardeaux;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_NATURE_BATARDEAUX.toString();
+        return TYPE_NATURE_BATARDEAUX.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefNatureBatardeaux nature = new RefNatureBatardeaux();
+            final RefNatureBatardeaux nature = createAnonymValidElement(RefNatureBatardeaux.class);
             
             nature.setId(nature.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString())));
             nature.setLibelle(row.getString(Columns.LIBELLE_TYPE_NATURE_BATARDEAUX.toString()));
@@ -61,7 +62,6 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
                 nature.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             nature.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString()))));
-            nature.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString())), nature);
         }

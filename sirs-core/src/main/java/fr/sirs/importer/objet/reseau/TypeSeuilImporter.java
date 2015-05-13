@@ -2,8 +2,9 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefSeuil;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_SEUIL.toString();
+        return TYPE_SEUIL.toString();
     }
 
     @Override
@@ -52,7 +53,7 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefSeuil typeSeuil = new RefSeuil();
+            final RefSeuil typeSeuil = createAnonymValidElement(RefSeuil.class);
             
             typeSeuil.setId(typeSeuil.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString())));
             typeSeuil.setLibelle(row.getString(Columns.LIBELLE_TYPE_SEUIL.toString()));
@@ -61,7 +62,6 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
                 typeSeuil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeSeuil.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString()))));
-            typeSeuil.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_SEUIL.toString())), typeSeuil);
         }

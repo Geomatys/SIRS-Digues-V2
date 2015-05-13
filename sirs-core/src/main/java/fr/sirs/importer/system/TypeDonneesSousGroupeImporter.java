@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -52,7 +53,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_DONNEES_SOUS_GROUPE.toString();
+        return TYPE_DONNEES_SOUS_GROUPE.toString();
     }
 
     @Override
@@ -66,7 +67,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
                     row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 
                     row.getInt(Columns.ID_SOUS_GROUPE_DONNEES.toString()));
             try{
-                types.put(entry, DbImporter.TableName.valueOf(row.getString(String.valueOf(Columns.NOM_TABLE_EVT.toString()))));
+                types.put(entry, valueOf(row.getString(String.valueOf(Columns.NOM_TABLE_EVT.toString()))));
             } catch(IllegalArgumentException e){
                 SirsCore.LOGGER.log(Level.FINE, e.getMessage());
             }

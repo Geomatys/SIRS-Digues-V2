@@ -7,11 +7,13 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -80,7 +82,7 @@ public class TypeDocumentImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_DOCUMENT.toString();
+        return TYPE_DOCUMENT.toString();
     }
 
     @Override
@@ -92,7 +94,7 @@ public class TypeDocumentImporter extends GenericImporter {
 
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefTypeDocument typeDocument = new RefTypeDocument();
+            final RefTypeDocument typeDocument = createAnonymValidElement(RefTypeDocument.class);
             
             typeDocument.setId(typeDocument.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_DOCUMENT.toString())));
             typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT.toString()));
@@ -102,18 +104,10 @@ public class TypeDocumentImporter extends GenericImporter {
             }
             
             typeDocument.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())));
-            typeDocument.setValid(true);
-            
-//            if (row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()) != null) {
-//                final RefDocumentGrandeEchelle typeDocumentGrandeEchelle = typeDocumentGrandeEchelleImporter.getTypeDocumentGrandeEchelle().get(row.getInt(TypeDocumentColumns.ID_TYPE_GENERAL_DOCUMENT.toString()));
-//                if(typeDocumentGrandeEchelle!=null){
-////                    typeDocument.set(typeDocumentGrandeEchelle.getId);
-//                }
-//            }
             
             try {
                 final Class classe;
-                final DbImporter.TableName table = DbImporter.TableName.valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
+                final DbImporter.TableName table = valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
                     case SYS_EVT_CONVENTION:
                         classe = Convention.class;

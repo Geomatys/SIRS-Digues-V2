@@ -2,8 +2,9 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefFonction;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericTypeReferenceImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.TYPE_FONCTION.toString();
+        return TYPE_FONCTION.toString();
     }
 
     @Override
@@ -51,7 +52,7 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final RefFonction typeFonction = new RefFonction();
+            final RefFonction typeFonction = createAnonymValidElement(RefFonction.class);
             
             typeFonction.setId(typeFonction.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString())));
             typeFonction.setLibelle(row.getString(Columns.LIBELLE_TYPE_FONCTION.toString()));
@@ -59,7 +60,6 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
                 typeFonction.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeFonction.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString()))));
-            typeFonction.setValid(true);
             
             types.put(row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString())), typeFonction);
         }

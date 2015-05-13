@@ -2,10 +2,11 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import java.io.IOException;
@@ -63,7 +64,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.PROFIL_EN_TRAVERS_EVT_HYDRAU.toString();
+        return PROFIL_EN_TRAVERS_EVT_HYDRAU.toString();
     }
 
     @Override
@@ -75,7 +76,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
-            final ParametreHydrauliqueProfilTravers profilTraversEvenementHydraulique = new ParametreHydrauliqueProfilTravers();
+            final ParametreHydrauliqueProfilTravers profilTraversEvenementHydraulique = createAnonymValidElement(ParametreHydrauliqueProfilTravers.class);
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
                 profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
@@ -101,7 +102,6 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             
             // Table de jointure : on prend l'id de l'événement hydraulique comme pseudo id en l'absence d'identifiant véritable
             profilTraversEvenementHydraulique.setDesignation(String.valueOf(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())));
-            profilTraversEvenementHydraulique.setValid(true);
             
             List<ParametreHydrauliqueProfilTravers> listByLeve = evenementHydrauByLeveId.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
