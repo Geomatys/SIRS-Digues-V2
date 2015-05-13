@@ -1,9 +1,6 @@
-
-
 package fr.sirs.theme;
 
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 

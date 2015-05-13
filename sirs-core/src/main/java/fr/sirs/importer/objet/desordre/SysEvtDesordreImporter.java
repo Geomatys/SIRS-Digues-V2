@@ -1,7 +1,7 @@
 package fr.sirs.importer.objet.desordre;
 
 import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;

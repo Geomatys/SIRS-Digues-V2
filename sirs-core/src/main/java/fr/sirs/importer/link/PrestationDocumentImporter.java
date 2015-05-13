@@ -10,7 +10,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import org.ektorp.CouchDbConnector;
 public class PrestationDocumentImporter extends GenericEntityLinker {
 
     private final PrestationImporter prestationImporter;
-    private final DocumentImporter documentImporter;
+    private final PositionDocumentImporter documentImporter;
     
     final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
     final RapportEtudeImporter rapportEtudeImporter;
@@ -37,7 +37,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
     public PrestationDocumentImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final PrestationImporter prestationImporter,
-            final DocumentImporter documentImporter) {
+            final PositionDocumentImporter documentImporter) {
         super(accessDatabase, couchDbConnector);
         this.prestationImporter = prestationImporter;
         this.documentImporter = documentImporter;
@@ -70,7 +70,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
     protected void compute() throws IOException, AccessDbImporterException {
         
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
-        final Map<Integer, AbstractPositionDocument> documents = documentImporter.getDocuments();
+        final Map<Integer, AbstractPositionDocument> documents = documentImporter.getPositions();
         final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
         final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         

@@ -21,20 +21,21 @@ public class TronconThemePositionDocumentPojoTable extends TronconThemePojoTable
 
     @Override
     protected AbstractPositionDocument createPojo() {
-        AbstractPositionDocument pojo = null;
-        try {
-            final TronconDigue trc = troncon.get();
-            final Constructor pojoConstructor = pojoClass.getConstructor();
-            pojo = (PositionDocument) pojoConstructor.newInstance();
-            trc.getDocumentTroncon().add(pojo);
-            pojo.setParent(trc);
-            pojo.setAuthor(session.getUtilisateur().getId());
-            pojo.setValid(!(session.getRole().equals(Role.EXTERN)));
-            session.getTronconDigueRepository().update(trc);
-        } catch (Exception ex) {
-            Logging.getLogger(TronconThemePojoTable.class).log(Level.WARNING, null, ex);
-        }
-        return pojo;
+        throw new UnsupportedOperationException("Réimplémenter");
+//        AbstractPositionDocument pojo = null;
+//        try {
+//            final TronconDigue trc = troncon.get();
+//            final Constructor pojoConstructor = pojoClass.getConstructor();
+//            pojo = (PositionDocument) pojoConstructor.newInstance();
+//            trc.getDocumentTroncon().add(pojo);
+//            pojo.setParent(trc);
+//            pojo.setAuthor(session.getUtilisateur().getId());
+//            pojo.setValid(!(session.getRole().equals(Role.EXTERN)));
+//            session.getTronconDigueRepository().update(trc);
+//        } catch (Exception ex) {
+//            Logging.getLogger(TronconThemePojoTable.class).log(Level.WARNING, null, ex);
+//        }
+//        return pojo;
     }
     
 }

@@ -291,7 +291,7 @@ public final class SIRS extends SirsCore {
             return result;
         }
         
-        List<? extends Objet> allFromView = Injector.getSession().getTronconDigueRepository().getAllFromView(objetClass.getSimpleName());
+        List<? extends Objet> allFromView = Injector.getSession().getRepositoryForClass(objetClass).getAll();
         if (allFromView != null) {
             final Iterator<? extends Objet> it = allFromView.iterator();
             Objet o;
@@ -323,7 +323,7 @@ public final class SIRS extends SirsCore {
             return result;
         }
         
-        List<? extends AbstractPositionDocument> allFromView = Injector.getSession().getTronconDigueRepository().getAllDocumentsFromView(documentTronconClass.getSimpleName());
+        List<? extends AbstractPositionDocument> allFromView = Injector.getSession().getRepositoryForClass(documentTronconClass).getAll();
         if (allFromView != null) {
             final Iterator<? extends AbstractPositionDocument> it = allFromView.iterator();
             AbstractPositionDocument o;
@@ -338,32 +338,32 @@ public final class SIRS extends SirsCore {
         return result;
     }
     
-    /**
-     * Return the DocumentTroncons linked to one document specified by the given
-     * id, from couchDB view. 
-     * 
-     * Note these DocumentTroncons are not the genuine ones, but copy of them, 
-     * that are not in their troncon container.
-     * 
-     * @deprecated 
-     * @param documentId
-     * @return 
-     */
-    @Deprecated
-    private static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
-        try {
-            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
-            final Class clazz = Class.forName(previewLabel.getType());
-            if(clazz==ProfilTravers.class){
-                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
-            } else {
-                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+//    /**
+//     * Return the DocumentTroncons linked to one document specified by the given
+//     * id, from couchDB view. 
+//     * 
+//     * Note these DocumentTroncons are not the genuine ones, but copy of them, 
+//     * that are not in their troncon container.
+//     * 
+//     * @deprecated 
+//     * @param documentId
+//     * @return 
+//     */
+//    @Deprecated
+//    private static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
+//        try {
+//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
+//            final Class clazz = Class.forName(previewLabel.getType());
+//            if(clazz==ProfilTravers.class){
+//                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
+//            } else {
+//                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return null;
+//    }
     
     /**
      * Return the DocumentTroncons linked to one document specified by the given
@@ -376,31 +376,32 @@ public final class SIRS extends SirsCore {
      * @return 
      */
     public static ObservableList<? extends AbstractPositionDocument> getTrueDocumentTroncons(final String documentId){
-        try {
-            final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
-            final Class clazz = Class.forName(previewLabel.getType());
-            final ObservableList<AbstractPositionDocument> falseDocumentTroncons;
-            if(clazz==ProfilTravers.class){
-                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
-            } else {
-                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
-            }
-
-            final ObservableList<AbstractPositionDocument> trueDocumentTroncons = FXCollections.observableArrayList();
-
-            for (final AbstractPositionDocument falseDocumentTroncon : falseDocumentTroncons){
-                final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
-                final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
-                final AbstractPositionDocument trueDocumentTroncon = (AbstractPositionDocument) tronconDigue.getChildById(falseDocumentTroncon.getId());
-                trueDocumentTroncons.add(trueDocumentTroncon);
-            }
-
-            return trueDocumentTroncons;
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        throw new UnsupportedOperationException("Réimplémenter");
+//        try {
+//            final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
+//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
+//            final Class clazz = Class.forName(previewLabel.getType());
+//            final ObservableList<AbstractPositionDocument> falseDocumentTroncons;
+//            if(clazz==ProfilTravers.class){
+//                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
+//            } else {
+//                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
+//            }
+//
+//            final ObservableList<AbstractPositionDocument> trueDocumentTroncons = FXCollections.observableArrayList();
+//
+//            for (final AbstractPositionDocument falseDocumentTroncon : falseDocumentTroncons){
+//                final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
+//                final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
+//                final AbstractPositionDocument trueDocumentTroncon = (AbstractPositionDocument) tronconDigue.getChildById(falseDocumentTroncon.getId());
+//                trueDocumentTroncons.add(trueDocumentTroncon);
+//            }
+//
+//            return trueDocumentTroncons;
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return null;
     }
     
     /**

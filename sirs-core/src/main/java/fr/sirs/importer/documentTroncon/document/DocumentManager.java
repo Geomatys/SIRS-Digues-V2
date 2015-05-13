@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.documentTroncon.TypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;

@@ -6,6 +6,7 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import static fr.sirs.core.TronconUtils.getObjetList;
+import static fr.sirs.core.TronconUtils.getPositionDocumentList;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
@@ -21,14 +22,10 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PointLeveDZ;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProprieteTroncon;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
@@ -177,7 +174,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             ArgumentChecks.ensureNonNull("SR par défaut", troncon.getSystemeRepDefautId());
                     
             final int progressMax = getObjetList(troncon).size()
-                    + troncon.getDocumentTroncon().size()
+                    + getPositionDocumentList(troncon).size()
                     + troncon.getProprietes().size()
                     + troncon.getGardes().size();
             int currentProgress = 0;
@@ -190,7 +187,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
                 }
                 updateProgress(currentProgress++, progressMax);
             }
-            for (final AbstractPositionDocument current : troncon.getDocumentTroncon()) {
+            for (final AbstractPositionDocument current : getPositionDocumentList(troncon)) {
                 recomputePositionable(current, linear);
                 if(current instanceof PositionProfilTravers){
                     for(final Photo photo : ((PositionProfilTravers) current).getPhotos()){

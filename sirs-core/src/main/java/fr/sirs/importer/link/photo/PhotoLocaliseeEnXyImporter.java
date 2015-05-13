@@ -17,9 +17,10 @@ import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -47,21 +48,25 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
     private final ObjetManager objetManager;
     private final TronconGestionDigueImporter tronconGestionDigueImporter;
     private final IntervenantImporter intervenantImporter;
-    private final DocumentImporter documentImporter;
+    private final PositionDocumentImporter documentImporter;
     private final OrientationImporter orientationImporter;
+    private final TypeCoteImporter typeCoteImporter;
 
     public PhotoLocaliseeEnXyImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
+            final ObjetManager objetManager,
             final IntervenantImporter intervenantImporter,
-            final DocumentImporter documentImporter,
-            final OrientationImporter orientationImporter) {
+            final PositionDocumentImporter documentImporter,
+            final OrientationImporter orientationImporter,
+            final TypeCoteImporter typeCoteImporter) {
         super(accessDatabase, couchDbConnector);
         this.orientationImporter = orientationImporter;
         this.tronconGestionDigueImporter = tronconGestionDigueImporter;
-        this.objetManager = tronconGestionDigueImporter.getObjetManager();
+        this.objetManager = objetManager;
         this.intervenantImporter = intervenantImporter;
         this.documentImporter = documentImporter;
+        this.typeCoteImporter = typeCoteImporter;
     }
 
     private enum Columns {
@@ -101,10 +106,10 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
         
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, AbstractPositionDocument> documents = documentImporter.getDocuments();
+        final Map<Integer, AbstractPositionDocument> documents = documentImporter.getPositions();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
-        final Map<Integer, RefCote> cotes = objetManager.getTypeCoteImporter().getTypeReferences();
+        final Map<Integer, RefCote> cotes = typeCoteImporter.getTypeReferences();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {

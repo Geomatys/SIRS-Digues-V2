@@ -132,7 +132,7 @@ public class TronconUtils {
         final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
         final ListIterator<Objet> structures = getObjetList(tronconCp).listIterator();
         cutPositionable(structures, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
-        final ListIterator<AbstractPositionDocument> positionsDocs = tronconCp.getDocumentTroncon().listIterator();
+        final ListIterator<AbstractPositionDocument> positionsDocs = getPositionDocumentList(tronconCp).listIterator();
         cutPositionable(positionsDocs, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
         final ListIterator<GardeTroncon> gardes = tronconCp.getGardes().listIterator();
         cutPositionable(gardes, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
@@ -169,6 +169,10 @@ public class TronconUtils {
     }
     
     public static List<Objet> getObjetList(final TronconDigue troncon){
+        throw new UnsupportedOperationException("Implémenter la recherche des objets par troncon");
+    }
+    
+    public static List<AbstractPositionDocument> getPositionDocumentList(final TronconDigue troncon){
         throw new UnsupportedOperationException("Implémenter la recherche des objets par troncon");
     }
     

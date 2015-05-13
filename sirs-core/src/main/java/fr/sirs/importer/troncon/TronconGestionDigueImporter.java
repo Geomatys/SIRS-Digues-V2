@@ -11,7 +11,6 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.PeriodeCommune;
 import fr.sirs.core.model.Digue;
@@ -33,9 +32,10 @@ import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconDigueGeomImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.ObjetManager;
+import fr.sirs.importer.TypeCoteImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -68,8 +68,6 @@ implements DocumentsUpdatable {
     private final BorneDigueImporter borneDigueImporter;
     private final SyndicatImporter syndicatImporter;
     private final CommuneImporter communeImporter;
-    private final ObjetManager objetManager;
-    private final DocumentImporter documentImporter;
     
     private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
@@ -86,7 +84,7 @@ implements DocumentsUpdatable {
             final BorneDigueImporter borneDigueImporter, 
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
-            final DocumentImporter documentImporter,
+            final TypeCoteImporter typeCoteImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
@@ -108,19 +106,14 @@ implements DocumentsUpdatable {
                 borneDigueImporter, intervenantImporter, organismeImporter);
         syndicatImporter = new SyndicatImporter(accessDatabase, couchDbConnector);
         communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
-        this.documentImporter = documentImporter;
-        objetManager = new ObjetManager(accessDatabase, couchDbConnector, this,
-                systemeReperageImporter, borneDigueImporter, organismeImporter, 
-                intervenantImporter, documentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter);
         this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(
                 accessDatabase, couchDbConnector, systemeReperageImporter, 
                 borneDigueImporter, communeImporter, 
-                objetManager.getTypeCoteImporter());
+                typeCoteImporter);
         this.tronconGestionDigueSyndicatImporter = new TronconGestionDigueSyndicatImporter(
                 accessDatabase, couchDbConnector, syndicatImporter);
     }
     
-    public ObjetManager getObjetManager(){return objetManager;}
     public BorneDigueRepository getBorneDigueRepository(){return borneDigueRepository;}
 
     @Override
@@ -186,16 +179,16 @@ implements DocumentsUpdatable {
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
         final Map<Integer, List<PeriodeCommune>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
-        final Map<Integer, List<AbstractPositionDocument>> documents = documentImporter.getDocumentsByTronconId();
+//        final Map<Integer, List<AbstractPositionDocument>> documents = documentImporter.getDocumentsByTronconId();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final TronconDigue tronconDigue = createAnonymValidElement(TronconDigue.class);
             
-            if(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()))!=null){
-                tronconDigue.setDocumentTroncon(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
-            }
+//            if(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()))!=null){
+//                tronconDigue.setDocumentTroncon(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
+//            }
             
             tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
             
@@ -309,14 +302,14 @@ implements DocumentsUpdatable {
 //                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
 //                }
 //            }
-            for(final AbstractPositionDocument doc : troncon.getDocumentTroncon()){
-                try{
-                    final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
-                    doc.setGeometry(docGeom);
-                }catch(IllegalArgumentException e){
-                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                }
-            }
+//            for(final AbstractPositionDocument doc : troncon.getDocumentTroncon()){
+//                try{
+//                    final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
+//                    doc.setGeometry(docGeom);
+//                }catch(IllegalArgumentException e){
+//                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
+//                }
+//            }
             for(final GardeTroncon doc : troncon.getGardes()){
                 try{
                     final LineString docGeom = LinearReferencingUtilities.buildGeometry(tronconGeom, doc, borneDigueRepository);
@@ -340,8 +333,5 @@ implements DocumentsUpdatable {
         couchDbConnector.executeBulk(tronconsDigue.values());
         
         
-        
-        objetManager.compute();
-        objetManager.link();
     }
 }

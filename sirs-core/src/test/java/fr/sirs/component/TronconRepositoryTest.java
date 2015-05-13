@@ -113,39 +113,39 @@ public class TronconRepositoryTest extends CouchDBTestCase {
         }
     }
 
-    @Test
-    public void listAllFondations() {
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
-        List<Fondation> all = tronconRepository.getAllFondations();
-        dumpAllStructure(all);
+//    @Test
+//    public void listAllFondations() {
+//        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
+//                couchDbConnector);
+//        List<Fondation> all = tronconRepository.getAllFondations();
+//        dumpAllStructure(all);
+//
+//    }
 
-    }
-
-    @Test
-    public void listAllFondationsAsStream() {
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
-        try (StreamingViewResult all = tronconRepository
-                .getAllFondationsIterator()) {
-            System.out.println(all.getTotalRows());
-            if (all.getTotalRows() == 0)
-                return;
-            Iterator<Row> iterator = all.iterator();
-            while (iterator.hasNext()) {
-                Row next = iterator.next();
-                JsonNode docAsNode = next.getValueAsNode();
-                JsonNode jsonNode = docAsNode.get("@class");
-                if (jsonNode == null)
-                    continue;
-                String json = jsonNode.asText();
-                Optional<Class<?>> asClass = DocHelper.asClass(json);
-                toElement(next.getValue(), asClass.get()).ifPresent(
-                        el -> System.out.println(el));
-
-            }
-        }
-    }
+//    @Test
+//    public void listAllFondationsAsStream() {
+//        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
+//                couchDbConnector);
+//        try (StreamingViewResult all = tronconRepository
+//                .getAllFondationsIterator()) {
+//            System.out.println(all.getTotalRows());
+//            if (all.getTotalRows() == 0)
+//                return;
+//            Iterator<Row> iterator = all.iterator();
+//            while (iterator.hasNext()) {
+//                Row next = iterator.next();
+//                JsonNode docAsNode = next.getValueAsNode();
+//                JsonNode jsonNode = docAsNode.get("@class");
+//                if (jsonNode == null)
+//                    continue;
+//                String json = jsonNode.asText();
+//                Optional<Class<?>> asClass = DocHelper.asClass(json);
+//                toElement(next.getValue(), asClass.get()).ifPresent(
+//                        el -> System.out.println(el));
+//
+//            }
+//        }
+//    }
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -159,23 +159,23 @@ public class TronconRepositoryTest extends CouchDBTestCase {
 
     }
 
-    @Test
-    public void listAllCretes() {
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
-        List<Crete> all = tronconRepository.getAllCretes();
-        dumpAllStructure(all);
-
-    }
-
-    @Test
-    public void listAllPiedDigue() {
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
-        List<PiedDigue> all = tronconRepository.getAllPiedDigues();
-        dumpAllStructure(all);
-
-    }
+//    @Test
+//    public void listAllCretes() {
+//        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
+//                couchDbConnector);
+//        List<Crete> all = tronconRepository.getAllCretes();
+//        dumpAllStructure(all);
+//
+//    }
+//
+//    @Test
+//    public void listAllPiedDigue() {
+//        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
+//                couchDbConnector);
+//        List<PiedDigue> all = tronconRepository.getAllPiedDigues();
+//        dumpAllStructure(all);
+//
+//    }
 
     private void dumpAllStructure(List<? extends Objet> allFondations) {
         for (Objet fondation : allFondations) {

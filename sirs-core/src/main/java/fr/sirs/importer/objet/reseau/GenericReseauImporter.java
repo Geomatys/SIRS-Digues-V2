@@ -1,5 +1,6 @@
 package fr.sirs.importer.objet.reseau;
 
+import fr.sirs.importer.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.BorneDigueImporter;

@@ -21,7 +21,7 @@ import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;

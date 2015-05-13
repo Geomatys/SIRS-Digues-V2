@@ -17,7 +17,7 @@ import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.TypeCoteImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

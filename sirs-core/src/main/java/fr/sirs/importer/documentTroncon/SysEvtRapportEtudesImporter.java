@@ -5,20 +5,21 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -35,16 +36,17 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocument> {
+class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<PositionDocument> {
 
     private final RapportEtudeImporter rapportEtudeImporter;
     
     SysEvtRapportEtudesImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final BorneDigueImporter borneDigueImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final RapportEtudeImporter rapportEtudeImporter) {
-        super(accessDatabase, couchDbConnector, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 borneDigueImporter, systemeReperageImporter);
         this.rapportEtudeImporter = rapportEtudeImporter;
     }
@@ -116,64 +118,67 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
         return SYS_EVT_RAPPORT_ETUDES.toString();
     }
 
-    @Override
-    protected void preCompute() throws IOException {
-        
-        documentTroncons = new HashMap<>();
-        documentTronconByTronconId = new HashMap<>();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()){
-            final Row row = it.next();
-            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
-            documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
-            
-            final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
-            if(documentTronconByTronconId.get(tronconId)==null)
-                documentTronconByTronconId.put(tronconId, new ArrayList<>());
-            documentTronconByTronconId.get(tronconId).add(documentTroncon);
-        }
-    }
-
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()){
-            final Row row = it.next();
-            final PositionDocument docTroncon = importRow(row);
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            documentTroncons.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
-
-            // Set the list ByTronconId
-            List<PositionDocument> listByTronconId = documentTronconByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                documentTronconByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(docTroncon);
-        }
-        computed=true;
-    }
+//    @Override
+//    protected void preCompute() throws IOException {
+//        
+//        positions = new HashMap<>();
+//        positionsByTronconId = new HashMap<>();
+//        
+//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        while (it.hasNext()){
+//            final Row row = it.next();
+//            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
+//            positions.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
+//            
+//            final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
+//            if(positionsByTronconId.get(tronconId)==null)
+//                positionsByTronconId.put(tronconId, new ArrayList<>());
+//            positionsByTronconId.get(tronconId).add(documentTroncon);
+//        }
+//    }
+//
+//    @Override
+//    protected void compute() throws IOException, AccessDbImporterException {
+//        
+//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        while (it.hasNext()){
+//            final Row row = it.next();
+//            final PositionDocument docTroncon = importRow(row);
+//
+//            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+//            positions.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
+//
+//            // Set the list ByTronconId
+//            List<PositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            if (listByTronconId == null) {
+//                listByTronconId = new ArrayList<>();
+//                positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+//            }
+//            listByTronconId.add(docTroncon);
+//        }
+//        computed=true;
+//    }
 
     @Override
     PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
 
+        final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, RapportEtude> rapports = rapportEtudeImporter.getRelated();
 
-        final PositionDocument docTroncon = createAnonymValidElement(PositionDocument.class);
+        final PositionDocument position = createAnonymValidElement(PositionDocument.class);
         
-        docTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
+        position.setLinearId(troncon.getId());
+        
+        position.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            docTroncon.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            position.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            docTroncon.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            position.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -184,7 +189,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
             try {
 
                 if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    docTroncon.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                    position.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                             row.getDouble(Columns.X_DEBUT.toString()),
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
@@ -195,7 +200,7 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
             try {
 
                 if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    docTroncon.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
+                    position.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
                             row.getDouble(Columns.X_FIN.toString()),
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
@@ -207,36 +212,37 @@ class SysEvtRapportEtudesImporter extends GenericDocumentImporter<PositionDocume
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
-            docTroncon.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
+            position.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
         }
 
         if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
-            docTroncon.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
+            position.setBorneDebutId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue()).getId());
         }
 
-        docTroncon.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
+        position.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
 
         if (row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()) != null) {
-            docTroncon.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
+            position.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
-            docTroncon.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
+            position.setBorneFinId(bornes.get((int) row.getDouble(Columns.ID_BORNEREF_FIN.toString()).doubleValue()).getId());
         }
 
-        docTroncon.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+        position.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
 
         if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
-            docTroncon.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
+            position.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_RAPPORT_ETUDE.toString()) != null) {
             if (rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())) != null) {
-                docTroncon.setSirsdocument(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
+                position.setSirsdocument(rapports.get(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())).getId());
             }
         }
-        docTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+        position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+        position.setGeometry(buildGeometry(troncon.getGeometry(), position, tronconGestionDigueImporter.getBorneDigueRepository()));
         
-        return docTroncon;
+        return position;
     }
 }

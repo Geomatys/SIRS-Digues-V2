@@ -199,58 +199,58 @@ public class CorePlugin extends Plugin {
             suppliers.put(BorneDigue.class, new StructBeanSupplier(BorneDigue.class, () -> getSession().getBorneDigueRepository().getAll()));
 
             //structures
-            suppliers.put(Crete.class, new StructBeanSupplier(Crete.class, () -> repository.getAllFromView(Crete.class)));
-            suppliers.put(OuvrageRevanche.class, new StructBeanSupplier(OuvrageRevanche.class, () -> repository.getAllFromView(OuvrageRevanche.class)));
-            suppliers.put(TalusDigue.class, new StructBeanSupplier(TalusDigue.class, () -> repository.getAllFromView(TalusDigue.class)));
-            suppliers.put(SommetRisberme.class, new StructBeanSupplier(SommetRisberme.class, () -> repository.getAllFromView(SommetRisberme.class)));
-            suppliers.put(TalusRisberme.class, new StructBeanSupplier(TalusRisberme.class, () -> repository.getAllFromView(TalusRisberme.class)));
-            suppliers.put(PiedDigue.class, new StructBeanSupplier(PiedDigue.class, () -> repository.getAllFromView(PiedDigue.class)));
-            suppliers.put(Fondation.class, new StructBeanSupplier(Fondation.class, () -> repository.getAllFromView(Fondation.class)));
-            suppliers.put(Epi.class, new StructBeanSupplier(Epi.class, () -> repository.getAllFromView(Epi.class)));
-            suppliers.put(Deversoir.class, new StructBeanSupplier(Deversoir.class, () -> repository.getAllFromView(Deversoir.class)));
+            suppliers.put(Crete.class, new StructBeanSupplier(Crete.class, () -> getSession().getRepositoryForClass(Crete.class).getAll()));
+            suppliers.put(OuvrageRevanche.class, new StructBeanSupplier(OuvrageRevanche.class, () -> getSession().getRepositoryForClass(OuvrageRevanche.class).getAll()));
+            suppliers.put(TalusDigue.class, new StructBeanSupplier(TalusDigue.class, () -> getSession().getRepositoryForClass(TalusDigue.class).getAll()));
+            suppliers.put(SommetRisberme.class, new StructBeanSupplier(SommetRisberme.class, () -> getSession().getRepositoryForClass(SommetRisberme.class).getAll()));
+            suppliers.put(TalusRisberme.class, new StructBeanSupplier(TalusRisberme.class, () -> getSession().getRepositoryForClass(TalusRisberme.class).getAll()));
+            suppliers.put(PiedDigue.class, new StructBeanSupplier(PiedDigue.class, () -> getSession().getRepositoryForClass(PiedDigue.class).getAll()));
+            suppliers.put(Fondation.class, new StructBeanSupplier(Fondation.class, () -> getSession().getRepositoryForClass(Fondation.class).getAll()));
+            suppliers.put(Epi.class, new StructBeanSupplier(Epi.class, () -> getSession().getRepositoryForClass(Epi.class).getAll()));
+            suppliers.put(Deversoir.class, new StructBeanSupplier(Deversoir.class, () -> getSession().getRepositoryForClass(Deversoir.class).getAll()));
 
             // Franc-bords
-            suppliers.put(FrontFrancBord.class, new StructBeanSupplier(FrontFrancBord.class, () -> repository.getAllFromView(FrontFrancBord.class)));
-            suppliers.put(PiedFrontFrancBord.class, new StructBeanSupplier(PiedFrontFrancBord.class, () -> repository.getAllFromView(PiedFrontFrancBord.class)));
+            suppliers.put(FrontFrancBord.class, new StructBeanSupplier(FrontFrancBord.class, () -> getSession().getRepositoryForClass(FrontFrancBord.class).getAll()));
+            suppliers.put(PiedFrontFrancBord.class, new StructBeanSupplier(PiedFrontFrancBord.class, () -> getSession().getRepositoryForClass(PiedFrontFrancBord.class).getAll()));
 
             // Réseaux de voirie
-            suppliers.put(VoieAcces.class, new StructBeanSupplier(VoieAcces.class, () -> repository.getAllFromView(VoieAcces.class)));
-            suppliers.put(OuvrageFranchissement.class, new StructBeanSupplier(OuvrageFranchissement.class, () -> repository.getAllFromView(OuvrageFranchissement.class)));
-            suppliers.put(OuvertureBatardable.class, new StructBeanSupplier(OuvertureBatardable.class, () -> repository.getAllFromView(OuvertureBatardable.class)));
-            suppliers.put(VoieDigue.class, new StructBeanSupplier(VoieDigue.class, () -> repository.getAllFromView(VoieDigue.class)));
-            suppliers.put(OuvrageVoirie.class, new StructBeanSupplier(OuvrageVoirie.class, () -> repository.getAllFromView(OuvrageVoirie.class)));
+            suppliers.put(VoieAcces.class, new StructBeanSupplier(VoieAcces.class, () -> getSession().getRepositoryForClass(VoieAcces.class).getAll()));
+            suppliers.put(OuvrageFranchissement.class, new StructBeanSupplier(OuvrageFranchissement.class, () -> getSession().getRepositoryForClass(OuvrageFranchissement.class).getAll()));
+            suppliers.put(OuvertureBatardable.class, new StructBeanSupplier(OuvertureBatardable.class, () -> getSession().getRepositoryForClass(OuvertureBatardable.class).getAll()));
+            suppliers.put(VoieDigue.class, new StructBeanSupplier(VoieDigue.class, () -> getSession().getRepositoryForClass(VoieDigue.class).getAll()));
+            suppliers.put(OuvrageVoirie.class, new StructBeanSupplier(OuvrageVoirie.class, () -> getSession().getRepositoryForClass(OuvrageVoirie.class).getAll()));
 
             // Réseaux et ouvrages
-            suppliers.put(StationPompage.class, new StructBeanSupplier(StationPompage.class, () -> repository.getAllFromView(StationPompage.class)));
-            suppliers.put(ReseauHydrauliqueFerme.class, new StructBeanSupplier(ReseauHydrauliqueFerme.class, () -> repository.getAllFromView(ReseauHydrauliqueFerme.class)));
-            suppliers.put(OuvrageHydrauliqueAssocie.class, new StructBeanSupplier(OuvrageHydrauliqueAssocie.class, () -> repository.getAllFromView(OuvrageHydrauliqueAssocie.class)));
-            suppliers.put(ReseauTelecomEnergie.class, new StructBeanSupplier(ReseauTelecomEnergie.class, () -> repository.getAllFromView(ReseauTelecomEnergie.class)));
-            suppliers.put(OuvrageTelecomEnergie.class, new StructBeanSupplier(OuvrageTelecomEnergie.class, () -> repository.getAllFromView(OuvrageTelecomEnergie.class)));
-            suppliers.put(ReseauHydrauliqueCielOuvert.class, new StructBeanSupplier(ReseauHydrauliqueCielOuvert.class, () -> repository.getAllFromView(ReseauHydrauliqueCielOuvert.class)));
-            suppliers.put(OuvrageParticulier.class, new StructBeanSupplier(OuvrageParticulier.class, () -> repository.getAllFromView(OuvrageParticulier.class)));
+            suppliers.put(StationPompage.class, new StructBeanSupplier(StationPompage.class, () -> getSession().getRepositoryForClass(StationPompage.class).getAll()));
+            suppliers.put(ReseauHydrauliqueFerme.class, new StructBeanSupplier(ReseauHydrauliqueFerme.class, () -> getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).getAll()));
+            suppliers.put(OuvrageHydrauliqueAssocie.class, new StructBeanSupplier(OuvrageHydrauliqueAssocie.class, () -> getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).getAll()));
+            suppliers.put(ReseauTelecomEnergie.class, new StructBeanSupplier(ReseauTelecomEnergie.class, () -> getSession().getRepositoryForClass(ReseauTelecomEnergie.class).getAll()));
+            suppliers.put(OuvrageTelecomEnergie.class, new StructBeanSupplier(OuvrageTelecomEnergie.class, () -> getSession().getRepositoryForClass(OuvrageTelecomEnergie.class).getAll()));
+            suppliers.put(ReseauHydrauliqueCielOuvert.class, new StructBeanSupplier(ReseauHydrauliqueCielOuvert.class, () -> getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).getAll()));
+            suppliers.put(OuvrageParticulier.class, new StructBeanSupplier(OuvrageParticulier.class, () -> getSession().getRepositoryForClass(OuvrageParticulier.class).getAll()));
 
             // Désordres
-            suppliers.put(Desordre.class, new StructBeanSupplier(Desordre.class, () -> repository.getAllFromView(Desordre.class)));
+            suppliers.put(Desordre.class, new StructBeanSupplier(Desordre.class, () -> getSession().getRepositoryForClass(Desordre.class).getAll()));
 
             // Prestations
-            suppliers.put(Prestation.class, new StructBeanSupplier(Prestation.class, () -> repository.getAllFromView(Prestation.class)));
+            suppliers.put(Prestation.class, new StructBeanSupplier(Prestation.class, () -> getSession().getRepositoryForClass(Prestation.class).getAll()));
 
             // Mesures d'évènements
-            suppliers.put(LaisseCrue.class, new StructBeanSupplier(LaisseCrue.class, () -> repository.getAllFromView(LaisseCrue.class)));
-            suppliers.put(MonteeEaux.class, new StructBeanSupplier(MonteeEaux.class, () -> repository.getAllFromView(MonteeEaux.class)));
-            suppliers.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> repository.getAllFromView(LigneEau.class)));
+            suppliers.put(LaisseCrue.class, new StructBeanSupplier(LaisseCrue.class, () -> getSession().getRepositoryForClass(LaisseCrue.class).getAll()));
+            suppliers.put(MonteeEaux.class, new StructBeanSupplier(MonteeEaux.class, () -> getSession().getRepositoryForClass(MonteeEaux.class).getAll()));
+            suppliers.put(LigneEau.class, new StructBeanSupplier(LigneEau.class, () -> getSession().getRepositoryForClass(LigneEau.class).getAll()));
             
             // Documents positionnés
-            suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> repository.getAllPositionDocuments()));
-            suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> repository.getAllPositionProfilTravers()));
-            suppliers.put(ProfilLong.class, new StructBeanSupplier(ProfilLong.class, () -> repository.getAllProfilLongs()));
+            suppliers.put(PositionDocument.class, new StructBeanSupplier(PositionDocument.class, () -> getSession().getRepositoryForClass(PositionDocument.class).getAll()));
+            suppliers.put(PositionProfilTravers.class, new StructBeanSupplier(PositionProfilTravers.class, () -> getSession().getRepositoryForClass(PositionProfilTravers.class).getAll()));
+            suppliers.put(ProfilLong.class, new StructBeanSupplier(ProfilLong.class, () -> getSession().getRepositoryForClass(ProfilLong.class).getAll()));
             
             // Propriétés et gardiennages de troncons
             suppliers.put(ProprieteTroncon.class, new StructBeanSupplier(ProprieteTroncon.class, () -> repository.getAllProprietes()));
             suppliers.put(GardeTroncon.class, new StructBeanSupplier(GardeTroncon.class, () -> repository.getAllGardes()));
 
             // Emprises communales
-            suppliers.put(PeriodeCommune.class, new StructBeanSupplier(PeriodeCommune.class, () -> repository.getAllFromView(PeriodeCommune.class)));
+//            suppliers.put(PeriodeCommune.class, new StructBeanSupplier(PeriodeCommune.class, () -> repository.getAllFromView(PeriodeCommune.class)));
     }
     
     @Override

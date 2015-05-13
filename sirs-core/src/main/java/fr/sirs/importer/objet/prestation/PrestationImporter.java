@@ -11,7 +11,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.objet.TypeCoteImporter;
+import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;

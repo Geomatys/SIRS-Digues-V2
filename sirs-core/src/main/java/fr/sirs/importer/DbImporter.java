@@ -89,7 +89,8 @@ import fr.sirs.importer.link.PrestationIntervenantImporter;
 import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
-import fr.sirs.importer.documentTroncon.DocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
+import fr.sirs.importer.objet.ObjetManager;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -205,11 +206,11 @@ public class DbImporter {
     private DigueImporter digueImporter;
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
-//    private MarcheImporter marcheImporter;
-    private DocumentImporter documentImporter;
+    private ObjetManager objetManager;
+    private PositionDocumentImporter documentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
-    
+    private TypeCoteImporter typeCoteImporter;
     
     private OrientationImporter orientationImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
@@ -728,16 +729,20 @@ public class DbImporter {
         tronconDigueGeomImporter = new TronconDigueGeomImporter(
                 accessCartoDatabase, couchDbConnector);
         
-        documentImporter = new DocumentImporter(accessDatabase, 
-                couchDbConnector, borneDigueImporter, intervenantImporter, 
-                organismeImporter, systemeReperageImporter, 
-                evenementHydrauliqueImporter);
+        typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector, tronconDigueRepository, 
                 digueRepository, borneDigueRepository, digueImporter, 
                 tronconDigueGeomImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter, 
-                documentImporter, evenementHydrauliqueImporter);
+                typeCoteImporter, evenementHydrauliqueImporter);
+        documentImporter = new PositionDocumentImporter(accessDatabase, 
+                couchDbConnector, tronconGestionDigueImporter, borneDigueImporter, 
+                intervenantImporter, organismeImporter, systemeReperageImporter, 
+                evenementHydrauliqueImporter);
+        objetManager = new ObjetManager(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter, organismeImporter, 
+                intervenantImporter, documentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter, typeCoteImporter);
         
         orientationImporter = new OrientationImporter(
                 accessDatabase, couchDbConnector);
@@ -745,77 +750,77 @@ public class DbImporter {
         // Linkers
         desordreEvenementHydrauImporter = new DesordreEvenementHydrauImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getDesordreImporter(), 
+                objetManager.getDesordreImporter(), 
                 evenementHydrauliqueImporter);
         linkers.add(desordreEvenementHydrauImporter);
         prestationEvenementHydrauImporter = new PrestationEvenementHydrauImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
+                objetManager.getPrestationImporter(), 
                 evenementHydrauliqueImporter);
         linkers.add(prestationEvenementHydrauImporter);
         desordreJournalImporter = new DesordreJournalImporter(accessDatabase, 
                 couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getDesordreImporter(), 
+                objetManager.getDesordreImporter(), 
                 documentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(desordreJournalImporter);
         elementReseauConventionImporter = new ElementReseauConventionImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                objetManager.getElementReseauImporter(), 
                 documentImporter.getDocumentManager().getConventionImporter());
         linkers.add(elementReseauConventionImporter);
         laisseCrueJournalImporter = new LaisseCrueJournalImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getLaisseCrueImporter(), 
+                objetManager.getLaisseCrueImporter(), 
                 documentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(laisseCrueJournalImporter);
         ligneEauJournalImporter = new LigneEauJournalImporter(accessDatabase, 
                 couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getLigneEauImporter(), 
+                objetManager.getLigneEauImporter(), 
                 documentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(ligneEauJournalImporter);
         monteeDesEauxJournalImporter = new MonteeDesEauxJournalImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getMonteeDesEauxImporter(), 
+                objetManager.getMonteeDesEauxImporter(), 
                 documentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(monteeDesEauxJournalImporter);
         prestationDocumentImporter = new PrestationDocumentImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
+                objetManager.getPrestationImporter(), 
                 documentImporter);
         linkers.add(prestationDocumentImporter);
         elementReseauGardienImporter = new ElementReseauGardienImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                objetManager.getElementReseauImporter(), 
                 intervenantImporter);
         linkers.add(elementReseauGardienImporter);
         elementReseauGestionnaireImporter = new ElementReseauGestionnaireImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                objetManager.getElementReseauImporter(), 
                 organismeImporter);
         linkers.add(elementReseauGestionnaireImporter);
         elementReseauProprietaireImporter = new ElementReseauProprietaireImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementReseauImporter(), 
+                objetManager.getElementReseauImporter(), 
                 intervenantImporter, organismeImporter);
         linkers.add(elementReseauProprietaireImporter);
         elementStructureGardienImporter = new ElementStructureGardienImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                objetManager.getElementStructureImporter(), 
                 intervenantImporter);
         linkers.add(elementStructureGardienImporter);
         elementStructureGestionnaireImporter = new ElementStructureGestionnaireImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                objetManager.getElementStructureImporter(), 
                 organismeImporter);
         linkers.add(elementStructureGestionnaireImporter);
         elementStructureProprietaireImporter = new ElementStructureProprietaireImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getElementStructureImporter(), 
+                objetManager.getElementStructureImporter(), 
                 intervenantImporter, organismeImporter);
         linkers.add(elementStructureProprietaireImporter);
         prestationIntervenantImporter = new PrestationIntervenantImporter(
                 accessDatabase, couchDbConnector, 
-                tronconGestionDigueImporter.getObjetManager().getPrestationImporter(), 
+                objetManager.getPrestationImporter(), 
                 intervenantImporter);
         linkers.add(prestationIntervenantImporter);
         marcheFinanceurImporter = new MarcheFinanceurImporter(accessDatabase, 
@@ -828,12 +833,14 @@ public class DbImporter {
         linkers.add(marcheMaitreOeuvreImporter);
         photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, 
-                intervenantImporter, documentImporter, orientationImporter);
+                objetManager, systemeReperageImporter, borneDigueImporter, 
+                intervenantImporter, documentImporter, orientationImporter,
+                typeCoteImporter);
         linkers.add(photoLocaliseeEnPrImporter);
         photoLocaliseeEnXyImporter = new PhotoLocaliseeEnXyImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                intervenantImporter, documentImporter, orientationImporter);
+                objetManager, intervenantImporter, documentImporter, 
+                orientationImporter, typeCoteImporter);
         linkers.add(photoLocaliseeEnXyImporter);
     }
     
@@ -883,7 +890,7 @@ public class DbImporter {
         systemeReperageImporter.update();
         
         systemeReperageBorneImporter.getByBorneId();
-        documentImporter.getDocuments();
+        documentImporter.getPositions();
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();
@@ -892,7 +899,7 @@ public class DbImporter {
         // pas affectées par les linkers car les liaisons sont en sens unique 
         // depuis les objets des troncons. Mais au cas où des associations 
         // bidirectionnelles seraient ajoutées on fait un update().
-        documentImporter.update(); 
+//        documentImporter.update(); 
         evenementHydrauliqueImporter.update();
     }
 

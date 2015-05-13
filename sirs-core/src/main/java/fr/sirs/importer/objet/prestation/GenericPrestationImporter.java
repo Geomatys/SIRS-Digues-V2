@@ -1,5 +1,6 @@
 package fr.sirs.importer.objet.prestation;
 
+import fr.sirs.importer.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.BorneDigueImporter;

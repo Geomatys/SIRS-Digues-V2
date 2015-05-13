@@ -1,5 +1,6 @@
 package fr.sirs.importer.objet;
 
+import fr.sirs.importer.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
@@ -39,7 +40,6 @@ import org.ektorp.CouchDbConnector;
 public class ObjetManager {
     
     private final SourceInfoImporter sourceInfoImporter;
-    private final TypeCoteImporter typeCoteImporter;
     private final TypePositionImporter typePositionImporter;
     private final TypeMateriauImporter typeMateriauImporter;
     private final TypeNatureImporter typeNatureImporter;
@@ -73,11 +73,10 @@ public class ObjetManager {
             final OrganismeImporter organismeImporter,
             final IntervenantImporter intervenantImporter,
             final MarcheImporter marcheImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final TypeCoteImporter typeCoteImporter){
         
         sourceInfoImporter = new SourceInfoImporter(accessDatabase, 
-                couchDbConnector);
-        typeCoteImporter = new TypeCoteImporter(accessDatabase, 
                 couchDbConnector);
         typePositionImporter = new TypePositionImporter(accessDatabase, 
                 couchDbConnector);
@@ -193,6 +192,4 @@ public class ObjetManager {
     public LaisseCrueImporter getLaisseCrueImporter(){return laisseCrueImporter;}
     public LigneEauImporter getLigneEauImporter() {return ligneEauImporter;}
     public MonteeDesEauxImporter getMonteeDesEauxImporter(){return monteeDesEauxImporter;}
-    
-    public TypeCoteImporter getTypeCoteImporter(){return typeCoteImporter;}
 }
