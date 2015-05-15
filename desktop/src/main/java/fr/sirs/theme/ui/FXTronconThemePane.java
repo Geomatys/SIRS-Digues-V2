@@ -33,11 +33,12 @@ public class FXTronconThemePane extends BorderPane {
     private final SimpleObjectProperty<TronconDigue> currentTronconProperty = new SimpleObjectProperty<>();
     private final Session session = Injector.getBean(Session.class);
         
-    public FXTronconThemePane(AbstractTronconTheme.ThemeGroup ... groups) {
+    public FXTronconThemePane(AbstractTronconTheme.ThemeManager ... groups) {
         SIRS.loadFXML(this);
         
         if(groups.length==1){
-            final TronconThemePojoTable table = getPojoTable(groups[0]);
+            final TronconThemePojoTable table = new TronconThemeObjetPojoTable(groups[0]);
+            table.setDeletor(groups[0].getDeletor());
             table.editableProperty.bind(session.nonGeometryEditionProperty());
             table.tronconProperty().bindBidirectional(currentTronconProperty);
             uiCenter.setCenter(table);
@@ -45,7 +46,8 @@ public class FXTronconThemePane extends BorderPane {
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
             for(int i=0; i<groups.length; i++){
-                final TronconThemePojoTable table = getPojoTable(groups[i]);
+                final TronconThemePojoTable table = new TronconThemeObjetPojoTable(groups[i]);
+                table.setDeletor(groups[i].getDeletor());
                 table.tronconProperty().bindBidirectional(currentTronconProperty);
                 final Tab tab = new Tab(groups[i].getName());
                 tab.setContent(table);
@@ -69,13 +71,4 @@ public class FXTronconThemePane extends BorderPane {
     }
     
     public SimpleObjectProperty<TronconDigue> currentTronconProperty(){return currentTronconProperty;}
-    
-    private TronconThemePojoTable getPojoTable(final AbstractTronconTheme.ThemeGroup group){
-        if(group.getDataClass() == PositionDocument.class
-                || group.getDataClass() == PositionProfilTravers.class
-                || group.getDataClass() == ProfilLong.class) 
-            return new TronconThemePositionDocumentPojoTable(group);
-        else 
-            return new TronconThemeObjetPojoTable(group);
-    }
 }

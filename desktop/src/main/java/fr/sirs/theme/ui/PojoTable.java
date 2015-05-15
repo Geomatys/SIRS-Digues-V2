@@ -715,17 +715,31 @@ public class PojoTable extends BorderPane {
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
             // la suppression.
             if(!authoriseElementDeletion(pojo)) continue;
+            deletor.accept(pojo);
+            items.remove(pojo);
+        }
+    }
+    
+    // Default deletor
+    private Consumer deletor = new Consumer<Element>() {
+
+        @Override
+        public void accept(Element pojo) {
             if (repo != null && createNewProperty.get()) {
                 repo.remove(pojo);
             }
-            
+
             if (parentElementProperty.get() != null) {
                 parentElementProperty.get().removeChild(pojo);
             }else if(ownerElementProperty.get() != null){
                 ownerElementProperty.get().removeChild(pojo);
             }
-            items.remove(pojo);
         }
+    };
+    
+    // Change the default deletor
+    public void setDeletor(final Consumer deletor){
+        this.deletor = deletor;
     }
     
     /**
@@ -780,10 +794,11 @@ public class PojoTable extends BorderPane {
         Object result = null;
         if (repo != null) {
             result = repo.create();
-            if(result instanceof Element) {
-                ((Element)result).setAuthor(session.getUtilisateur().getId());
-                ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
-            }
+            // Validity and Author are managed by element creator in repo
+//            if(result instanceof Element) {
+//                ((Element)result).setAuthor(session.getUtilisateur().getId());
+//                ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
+//            }
             repo.add(result);
         } 
         

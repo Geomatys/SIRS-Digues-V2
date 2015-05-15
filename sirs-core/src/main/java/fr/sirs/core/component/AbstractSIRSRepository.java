@@ -1,9 +1,7 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.AvecDateMaj;
-import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Identifiable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

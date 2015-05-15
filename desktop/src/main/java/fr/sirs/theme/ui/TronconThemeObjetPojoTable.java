@@ -14,7 +14,7 @@ import org.apache.sis.util.logging.Logging;
  */
 public class TronconThemeObjetPojoTable extends TronconThemePojoTable<Objet>{
 
-    public TronconThemeObjetPojoTable(AbstractTronconTheme.ThemeGroup group) {
+    public TronconThemeObjetPojoTable(AbstractTronconTheme.ThemeManager group) {
         super(group);
     }
 
@@ -22,7 +22,7 @@ public class TronconThemeObjetPojoTable extends TronconThemePojoTable<Objet>{
     protected Objet createPojo() {
         Objet pojo = null;
         try {
-            final TronconDigue trc = troncon.get();
+            final TronconDigue trc = tronconProperty.get();
             final Constructor pojoConstructor = pojoClass.getConstructor();
             pojo = (Objet) pojoConstructor.newInstance();
 //            trc.getStructures().add(pojo);
