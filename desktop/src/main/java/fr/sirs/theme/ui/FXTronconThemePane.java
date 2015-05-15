@@ -37,7 +37,7 @@ public class FXTronconThemePane extends BorderPane {
         SIRS.loadFXML(this);
         
         if(groups.length==1){
-            final TronconThemePojoTable table = new TronconThemeObjetPojoTable(groups[0]);
+            final TronconThemePojoTable table = new TronconThemePojoTable(groups[0]);
             table.setDeletor(groups[0].getDeletor());
             table.editableProperty.bind(session.nonGeometryEditionProperty());
             table.tronconProperty().bindBidirectional(currentTronconProperty);
@@ -46,7 +46,7 @@ public class FXTronconThemePane extends BorderPane {
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
             for(int i=0; i<groups.length; i++){
-                final TronconThemePojoTable table = new TronconThemeObjetPojoTable(groups[i]);
+                final TronconThemePojoTable table = new TronconThemePojoTable(groups[i]);
                 table.setDeletor(groups[i].getDeletor());
                 table.tronconProperty().bindBidirectional(currentTronconProperty);
                 final Tab tab = new Tab(groups[i].getName());

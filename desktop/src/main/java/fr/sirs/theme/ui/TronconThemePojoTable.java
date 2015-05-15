@@ -13,7 +13,7 @@ import javafx.collections.ObservableList;
  * @author Johann Sorel (Geomatys)
  * @param <T>
  */
-public abstract class TronconThemePojoTable<T extends Element> extends PojoTable {
+public class TronconThemePojoTable<T extends Element> extends PojoTable {
     
     protected final SimpleObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     private final AbstractTronconTheme.ThemeManager<T> group;

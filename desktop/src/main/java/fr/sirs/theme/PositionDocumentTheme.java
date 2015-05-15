@@ -87,7 +87,7 @@ public class PositionDocumentTheme extends AbstractTronconTheme {
                 }
             } 
             // Dans le cas où documentClass==null, on retourne les positions de documents non associées à des documents.
-            else if(documentClass==null){
+            else if(documentId==null && documentClass==null){
                 return true;
             }
             return false;
