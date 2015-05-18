@@ -30,7 +30,7 @@ public class FXTronconThemePane extends BorderPane {
 
     @FXML private BorderPane uiCenter;
     @FXML private ComboBox<PreviewLabel> uiTronconChoice;
-    private final SimpleObjectProperty<TronconDigue> currentTronconProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     private final Session session = Injector.getBean(Session.class);
         
     public FXTronconThemePane(AbstractTronconTheme.ThemeManager ... groups) {
@@ -40,7 +40,7 @@ public class FXTronconThemePane extends BorderPane {
             final TronconThemePojoTable table = new TronconThemePojoTable(groups[0]);
             table.setDeletor(groups[0].getDeletor());
             table.editableProperty.bind(session.nonGeometryEditionProperty());
-            table.tronconProperty().bindBidirectional(currentTronconProperty);
+            table.tronconProperty().bindBidirectional(tronconProperty);
             uiCenter.setCenter(table);
         }else{
             final TabPane pane = new TabPane();
@@ -48,7 +48,7 @@ public class FXTronconThemePane extends BorderPane {
             for(int i=0; i<groups.length; i++){
                 final TronconThemePojoTable table = new TronconThemePojoTable(groups[i]);
                 table.setDeletor(groups[i].getDeletor());
-                table.tronconProperty().bindBidirectional(currentTronconProperty);
+                table.tronconProperty().bindBidirectional(tronconProperty);
                 final Tab tab = new Tab(groups[i].getName());
                 tab.setContent(table);
                 pane.getTabs().add(tab);
@@ -62,7 +62,7 @@ public class FXTronconThemePane extends BorderPane {
 
         uiTronconChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) -> {
             final TronconDigueRepository tronconDigueRepository = session.getTronconDigueRepository();
-            currentTronconProperty.set(tronconDigueRepository.get(newValue.getObjectId()));
+            tronconProperty.set(tronconDigueRepository.get(newValue.getObjectId()));
         });
         
         if(!tronconPreviews.isEmpty()){
@@ -70,5 +70,5 @@ public class FXTronconThemePane extends BorderPane {
         }
     }
     
-    public SimpleObjectProperty<TronconDigue> currentTronconProperty(){return currentTronconProperty;}
+    public SimpleObjectProperty<TronconDigue> tronconProperty(){return tronconProperty;}
 }

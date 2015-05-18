@@ -250,14 +250,6 @@ public class Session extends SessionCore {
                     final FXFreeTab tab = new FXFreeTab(theme.getName());
                     Parent parent = theme.createPane();
                     tab.setContent(parent);
-                    if (parent instanceof FXTronconThemePane) {
-                        ((FXTronconThemePane) parent).currentTronconProperty().addListener(new ChangeListener<TronconDigue>() {
-                            @Override
-                            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-                                tab.setTextAbrege(theme.getName() + " (" + getPreviewLabelRepository().getPreview(newValue.getId()) + ")");
-                            }
-                        });
-                    }
                     return tab;
                 }
             });

@@ -32,17 +32,17 @@ import javafx.collections.FXCollections;
 public class PositionDocumentTheme extends AbstractTronconTheme {
     
     private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
-    private static final ThemeManager GROUP1 = generateThemeManager(PositionDocument.class, Convention.class);
-    private static final ThemeManager GROUP2 = generateThemeManager(PositionDocument.class, ArticleJournal.class);
-    private static final ThemeManager GROUP3 = generateThemeManager(PositionDocument.class, Marche.class);
-    private static final ThemeManager GROUP4 = generateThemeManager(PositionDocument.class, RapportEtude.class);
-    private static final ThemeManager GROUP5 = generateThemeManager(PositionDocument.class, DocumentGrandeEchelle.class);
-    private static final ThemeManager GROUP6 = generateThemeManager(PositionDocument.class, null);
-    private static final ThemeManager GROUP7 = generateThemeManager(ProfilLong.class);
-    private static final ThemeManager GROUP8 = generateThemeManager(PositionProfilTravers.class);
+    private static final ThemeManager CONVENTION = generateThemeManager(PositionDocument.class, Convention.class);
+    private static final ThemeManager ARTICLE = generateThemeManager(PositionDocument.class, ArticleJournal.class);
+    private static final ThemeManager MARCHE = generateThemeManager(PositionDocument.class, Marche.class);
+    private static final ThemeManager RAPPORT_ETUDE = generateThemeManager(PositionDocument.class, RapportEtude.class);
+    private static final ThemeManager DOCUMENT_GRANDE_ECHELLE = generateThemeManager(PositionDocument.class, DocumentGrandeEchelle.class);
+    private static final ThemeManager AUTRE = generateThemeManager(PositionDocument.class, null);
+    private static final ThemeManager PROFIL_LONG = generateThemeManager(ProfilLong.class);
+    private static final ThemeManager PROFIL_TRAVERS = generateThemeManager(PositionProfilTravers.class);
     
     public PositionDocumentTheme() {
-        super("Documents localisés", GROUP1, GROUP2, GROUP3, GROUP4, GROUP5, GROUP6, GROUP7, GROUP8);
+        super("Documents localisés", CONVENTION, ARTICLE, MARCHE, RAPPORT_ETUDE, DOCUMENT_GRANDE_ECHELLE, AUTRE, PROFIL_LONG, PROFIL_TRAVERS);
     }
     
     private static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){

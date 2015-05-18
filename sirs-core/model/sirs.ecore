@@ -47,7 +47,9 @@
         eType="#//Photo" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietes" upperBound="-1"
         eType="#//ProprieteObjet" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue">
+      <eAnnotations source="foreignParent"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
     <eAnnotations source="generation">
@@ -1435,7 +1437,9 @@
       interface="true" eSuperTypes="#//SIRSDocument"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractPositionDocument" abstract="true"
       eSuperTypes="#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue">
+      <eAnnotations source="foreignParent"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GestionTroncon">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
