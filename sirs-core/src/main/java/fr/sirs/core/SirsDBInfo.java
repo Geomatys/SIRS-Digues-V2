@@ -9,7 +9,7 @@ public class SirsDBInfo extends CouchDbDocument {
     
     private String uuid;
     
-    private String epsgCode = "EPSG:2154";
+    private String epsgCode;
     
     private String remoteDatabase;
 
