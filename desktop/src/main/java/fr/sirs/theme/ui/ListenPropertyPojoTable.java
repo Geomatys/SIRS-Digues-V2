@@ -53,12 +53,14 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  * associated for the first time to the "virtual container".
  * 
  * @author Samuel Andrés (Geomatys)
+ * 
+ * @param <T> The type of the listen property.
  */
-public class ListenPropertyPojoTable extends PojoTable {
+public class ListenPropertyPojoTable<T> extends PojoTable {
 
-    private final Map<Element, ChangeListener> listeners = new HashMap<>();
-    private Method propertyMethodToListen;
-    private Object propertyReference;
+    private final Map<Element, ChangeListener<T>> listeners = new HashMap<>();
+    protected Method propertyMethodToListen;
+    protected T propertyReference;
     
     public ListenPropertyPojoTable(Class pojoClass, String title) {
         super(pojoClass, title);
@@ -98,9 +100,9 @@ public class ListenPropertyPojoTable extends PojoTable {
             }
         });
         
-        tableUpdater.stateProperty().addListener(new ChangeListener() {
+        tableUpdater.stateProperty().addListener(new ChangeListener<Worker.State>() {
             @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
                 if (Worker.State.SUCCEEDED.equals(newValue)) {
                     Platform.runLater(() -> {
                         uiTable.setItems(filteredValues);
@@ -121,7 +123,7 @@ public class ListenPropertyPojoTable extends PojoTable {
         tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
     }
     
-    public void setPropertyToListen(String propertyToListen, Object propertyReference){
+    public void setPropertyToListen(String propertyToListen, T propertyReference){
         try {
             propertyMethodToListen = pojoClass.getMethod(propertyToListen);
         } catch (NoSuchMethodException | SecurityException ex) {
@@ -132,7 +134,7 @@ public class ListenPropertyPojoTable extends PojoTable {
     
     @Override
     protected Element createPojo() {
-        final Element element = (Element) super.createPojo();
+        final Element element = super.createPojo();
         addListener(element);
         return element;
     }
@@ -140,12 +142,12 @@ public class ListenPropertyPojoTable extends PojoTable {
     private void addListener(final Element element){
         if(propertyMethodToListen!=null){
             try {
-                final Property property = (Property) propertyMethodToListen.invoke(element);
+                final Property<T> property = (Property<T>) propertyMethodToListen.invoke(element);
                 if(listeners.get(element)==null){
-                    final ChangeListener changeListener = new ChangeListener() {
+                    final ChangeListener<T> changeListener = new ChangeListener<T>() {
 
                         @Override
-                        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                        public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
                             if(newValue.equals(propertyReference)){
                                 if(!uiTable.getItems().contains(element)){
                                     uiTable.getItems().add(element);

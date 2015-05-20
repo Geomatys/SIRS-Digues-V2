@@ -1,7 +1,7 @@
 package fr.sirs.core.model;
 
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
-import fr.sirs.core.component.OwnableSession;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
@@ -14,9 +14,9 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class ElementCreator {
     
-    private final OwnableSession ownableSession;
+    private final SessionCore ownableSession;
     
-    public ElementCreator(final OwnableSession ownableSession){
+    public ElementCreator(final SessionCore ownableSession){
         this.ownableSession = ownableSession;
     }
     

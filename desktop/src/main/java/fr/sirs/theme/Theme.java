@@ -1,4 +1,3 @@
-
 package fr.sirs.theme;
 
 import java.util.ArrayList;

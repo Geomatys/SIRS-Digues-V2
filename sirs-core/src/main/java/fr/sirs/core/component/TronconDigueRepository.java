@@ -9,17 +9,15 @@ import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.PeriodeLocaliseeTroncon;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -53,21 +51,23 @@ import org.apache.sis.util.ArgumentChecks;
  */
 @Views({
         @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
-        @View(name = "stream", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
-        @View(name = "streamLight", map = "classpath:TronconDigueLight-map.js"),
+        @View(name = TronconDigueRepository.STREAM, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
+        @View(name = TronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
         @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
     
+    public static final String STREAM = "stream";
+    public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
     
-    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap<>();
+//    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap<>();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
         super(TronconDigue.class, db);
         initStandardDesignDocument();
-        viewMapPeriodesTroncon.put(GARDE_TRONCON, this::getAllGardes);
-        viewMapPeriodesTroncon.put(PROPRIETE_TRONCON, this::getAllProprietes);
+//        viewMapPeriodesTroncon.put(GARDE_TRONCON, this::getAllGardes);
+//        viewMapPeriodesTroncon.put(PROPRIETE_TRONCON, this::getAllProprietes);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {
@@ -89,9 +89,9 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
 
     @Override
     public TronconDigue create() {
-        final SessionGen session = InjectorCore.getBean(SessionGen.class);
-        if(session!=null && session instanceof OwnableSession){
-            final ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
+        final SessionCore session = InjectorCore.getBean(SessionCore.class);
+        if(session!=null){
+            final ElementCreator elementCreator = session.getElementCreator();
             return elementCreator.createElement(TronconDigue.class);
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");
@@ -106,7 +106,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
      * @return 
      */
     public List<TronconDigue> getAllLight() {
-        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery("streamLight")));
+        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)));
         final List<TronconDigue> lst = new ArrayList<>();
         while (ite.hasNext()) {
             lst.add(ite.next());
@@ -118,26 +118,24 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
 
     @View(name = GARDE_TRONCON, map = "classpath:GardeTroncon-map.js")
     public List<GardeTroncon> getAllGardes() {
-        return db.queryView(createQuery(GARDE_TRONCON),
-                GardeTroncon.class);
+        return db.queryView(createQuery(GARDE_TRONCON), GardeTroncon.class);
     }
 
     public static final String PROPRIETE_TRONCON = "ProprieteTroncon";
 
     @View(name = PROPRIETE_TRONCON, map = "classpath:ProprieteTroncon-map.js")
     public List<ProprieteTroncon> getAllProprietes() {
-        return db.queryView(createQuery(PROPRIETE_TRONCON),
-                ProprieteTroncon.class);
+        return db.queryView(createQuery(PROPRIETE_TRONCON), ProprieteTroncon.class);
     }
 
     public JacksonIterator<TronconDigue> getAllIterator() {
         return JacksonIterator.create(TronconDigue.class,
-                db.queryForStreamingView(createQuery("stream")));
+                db.queryForStreamingView(createQuery(STREAM)));
     }
     
     public JacksonIterator<TronconDigue> getAllLightIterator() {
         return JacksonIterator.create(TronconDigue.class,
-                db.queryForStreamingView(createQuery("streamLight")));
+                db.queryForStreamingView(createQuery(STREAM_LIGHT)));
     }
     
     /**

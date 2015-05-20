@@ -1,18 +1,17 @@
-
-
 package fr.sirs;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.ValiditySummary;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
@@ -31,7 +30,8 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -94,7 +94,6 @@ public final class SIRS extends SirsCore {
     public static final String GEOMETRY_FIELD = "geometry";
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
-//    public static final String STRUCTURES_FIELD = "stuctures";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String VALID_FIELD = "valid";
@@ -143,7 +142,7 @@ public final class SIRS extends SirsCore {
         ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
         final Class cdtClass = candidate.getClass();
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        URL resource = cdtClass.getResource(fxmlpath);
+        final URL resource = cdtClass.getResource(fxmlpath);
         if (resource == null) {
             throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
         }
@@ -243,170 +242,26 @@ public final class SIRS extends SirsCore {
     }
     
     /**
-     * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
-     * le {@link Set} d'entrée. La recherche s'effectue uniquement sur le 
-     * tronçon donné en paramètre.
-     * 
-     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
-     * 
-     * @param objetIds Les identifiants des objets à retrouver.
-     * @param sourceTroncon Le tronçon où chercher les objets.
-     * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
-     */
-    public static ObservableList<Objet> getStructures(final Set<String> objetIds, final Element sourceTroncon) {
-        ObservableList<Objet> result = FXCollections.observableArrayList();
-        if (objetIds == null || objetIds.isEmpty()) {
-            return result;
-        }
-        
-        if (sourceTroncon instanceof TronconDigue 
-//                && ((TronconDigue)sourceTroncon).getStructures() !=  null
-                ) {
-            final Iterator<Objet> it = TronconUtils.getObjetList((TronconDigue)sourceTroncon).iterator();
-            Objet o;
-            while (objetIds.size() > 0 && it.hasNext()) {
-                o = it.next();
-                if (objetIds.remove(o.getId())) {
-                    result.add(o);
-                }
-            }
-        }
-        
-        return result;
-    }
-        
-    /**
-     * Retourne la liste d'{@link Objet}s dont les identifiants sont passés dans 
-     * le {@link Set} d'entrée. La recherche s'effectue sur tous les tronçons
-     * de la base de donnée chargée. Pour éviter un surcoût mémoire et processeur
-     * trop important, la recherche se limite aux objets du type passé en paramètre.
-     * 
-     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
-     * 
-     * @param objetIds Les identifiants des objets à retrouver.
-     * @param objetClass L'implémentation d'Objet sur laquelle se concentrer.
-     * @return Une liste d'objets. Elle peut être vide, mais jamais nulle.
-     */
-    public static ObservableList<Objet> getStructures(final Set<String> objetIds, final Class objetClass) {
-        ObservableList<Objet> result = FXCollections.observableArrayList();
-        if (objetClass == null 
-                || !Objet.class.isAssignableFrom(objetClass)
-                || objetIds == null 
-                || objetIds.isEmpty()) {
-            return result;
-        }
-        
-        List<? extends Objet> allFromView = Injector.getSession().getRepositoryForClass(objetClass).getAll();
-        if (allFromView != null) {
-            final Iterator<? extends Objet> it = allFromView.iterator();
-            Objet o;
-            while (objetIds.size() > 0 && it.hasNext()) {
-                o = it.next();
-                if (objetIds.remove(o.getId())) {
-                    result.add(o);
-                }
-            }
-        }
-        
-        return result;
-    }
-        
-    /**
-     * Retourne la liste d'{@link DocumentTroncon}s dont les identifiants sont passés dans 
-     * le {@link Set} d'entrée. La recherche s'effectue sur tous les tronçons
-     * de la base de donnée chargée. 
-     * 
-     * /!\ Pour chaque objet trouvé, son identifiant est supprimé du set d'entrée.
-     * 
-     * @param objetIds Les identifiants des DocumentTroncon à retrouver.
-     * @return Une liste de DocumentTroncon. Elle peut être vide, mais jamais nulle.
-     */
-    public static ObservableList<AbstractPositionDocument> getDocumentTroncons(final Set<String> objetIds, final Class<? extends AbstractPositionDocument> documentTronconClass) {
-        ObservableList<AbstractPositionDocument> result = FXCollections.observableArrayList();
-        if (objetIds == null 
-                || objetIds.isEmpty()) {
-            return result;
-        }
-        
-        List<? extends AbstractPositionDocument> allFromView = Injector.getSession().getRepositoryForClass(documentTronconClass).getAll();
-        if (allFromView != null) {
-            final Iterator<? extends AbstractPositionDocument> it = allFromView.iterator();
-            AbstractPositionDocument o;
-            while (objetIds.size() > 0 && it.hasNext()) {
-                o = it.next();
-                if (objetIds.remove(o.getId())) {
-                    result.add(o);
-                }
-            }
-        }
-        
-        return result;
-    }
-    
-//    /**
-//     * Return the DocumentTroncons linked to one document specified by the given
-//     * id, from couchDB view. 
-//     * 
-//     * Note these DocumentTroncons are not the genuine ones, but copy of them, 
-//     * that are not in their troncon container.
-//     * 
-//     * @deprecated 
-//     * @param documentId
-//     * @return 
-//     */
-//    @Deprecated
-//    private static ObservableList<? extends AbstractPositionDocument> getDocumentTroncons(final String documentId){
-//        try {
-//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
-//            final Class clazz = Class.forName(previewLabel.getType());
-//            if(clazz==ProfilTravers.class){
-//                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
-//            } else {
-//                return FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return null;
-//    }
-    
-    /**
-     * Return the DocumentTroncons linked to one document specified by the given
-     * id.
-     * 
-     * Note these DocumentTroncons are the genuine ones, referencing their own
-     * troncon container.
+     * Return the AbstractPositionDocumentAssociable linked to one document 
+     * specified by the given id.
      * 
      * @param documentId
      * @return 
      */
-    public static ObservableList<? extends AbstractPositionDocument> getTrueDocumentTroncons(final String documentId){
-        throw new UnsupportedOperationException("Réimplémenter");
-//        try {
-//            final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().get(documentId);
-//            final Class clazz = Class.forName(previewLabel.getType());
-//            final ObservableList<AbstractPositionDocument> falseDocumentTroncons;
-//            if(clazz==ProfilTravers.class){
-//                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionProfilTraversByDocumentId(documentId));
-//            } else {
-//                falseDocumentTroncons = FXCollections.observableArrayList(Injector.getSession().getTronconDigueRepository().getPositionDocumentsByDocumentId(documentId));
-//            }
-//
-//            final ObservableList<AbstractPositionDocument> trueDocumentTroncons = FXCollections.observableArrayList();
-//
-//            for (final AbstractPositionDocument falseDocumentTroncon : falseDocumentTroncons){
-//                final String documentTronconParentId = falseDocumentTroncon.getDocumentId();
-//                final TronconDigue tronconDigue = tronconDigueRepository.get(documentTronconParentId);
-//                final AbstractPositionDocument trueDocumentTroncon = (AbstractPositionDocument) tronconDigue.getChildById(falseDocumentTroncon.getId());
-//                trueDocumentTroncons.add(trueDocumentTroncon);
-//            }
-//
-//            return trueDocumentTroncons;
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return null;
+    public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
+        try {
+//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().
+            final PreviewLabel summary = Injector.getSession().getPreviewLabelRepository().get(documentId);
+            final Class clazz = Class.forName(summary.getType());
+            if(clazz==ProfilTravers.class){
+                return FXCollections.observableList(Injector.getSession().getPositionProfilTraversRepository().getByDocumentId(documentId));
+            } else {
+                return FXCollections.observableList(Injector.getSession().getPositionDocumentRepository().getByDocumentId(documentId));
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
     /**
@@ -419,19 +274,12 @@ public final class SIRS extends SirsCore {
         final AbstractFXElementPane content;
         if (pojo instanceof Contact) {
             content = new FXContactPane((Contact) pojo);
-            
         } else if (pojo instanceof Organisme) {
             content = new FXOrganismePane((Organisme) pojo);
-            
         } else if (pojo instanceof TronconDigue) {
-            final FXTronconDiguePane ctrl = new FXTronconDiguePane((TronconDigue) pojo);
-//            ctrl.setElement((TronconDigue) pojo);
-            content = ctrl;
-            
+            content = new FXTronconDiguePane((TronconDigue) pojo);
         } else if (pojo instanceof Digue) {
-            final FXDiguePane ctrl = new FXDiguePane((Digue) pojo);
-            content = ctrl;
-            
+            content = new FXDiguePane((Digue) pojo);
         } else {
             content = new FXElementContainerPane((Element) pojo);
         }
@@ -447,10 +295,8 @@ public final class SIRS extends SirsCore {
     public static void initCombo(ComboBox comboBox, final ObservableList items, final Object current) {
         comboBox.setConverter(new SirsStringConverter());
         comboBox.setEditable(true);
-        
         comboBox.setItems(items);
         comboBox.getSelectionModel().select(current);
-        
-        new ComboBoxCompletion(comboBox);
+        ComboBoxCompletion.autocomplete(comboBox);
     }
 }

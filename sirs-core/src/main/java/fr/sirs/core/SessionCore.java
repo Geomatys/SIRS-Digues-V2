@@ -4,7 +4,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.OwnableSession;
 
 import java.util.List;
 
@@ -60,14 +59,14 @@ import org.springframework.context.ConfigurableApplicationContext;
  * 
  * @author Johann Sorel
  */
-public class SessionCore extends SessionGen implements OwnableSession {
+public class SessionCore extends SessionGen {
     
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
     private final ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
     public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
-    @Override
+    
     public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
     public void setUtilisateur(final Utilisateur utilisateur){
         utilisateurProperty.set(utilisateur);
@@ -111,7 +110,6 @@ public class SessionCore extends SessionGen implements OwnableSession {
     
     private final ElementCreator elementCreator;
     
-    @Override
     public ElementCreator getElementCreator(){return elementCreator;}
     ////////////////////////////////////////////////////////////////////////////
     

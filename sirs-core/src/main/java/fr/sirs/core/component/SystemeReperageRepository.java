@@ -3,6 +3,7 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.model.ElementCreator;
 import org.ektorp.CouchDbConnector;
@@ -40,8 +41,8 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     @Override
     public SystemeReperage create(){
         final SessionGen session = InjectorCore.getBean(SessionGen.class);
-        if(session!=null && session instanceof OwnableSession){
-            final ElementCreator elementCreator = ((OwnableSession) session).getElementCreator();
+        if(session!=null && session instanceof SessionCore){
+            final ElementCreator elementCreator = ((SessionCore) session).getElementCreator();
             return elementCreator.createElement(SystemeReperage.class);
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");

@@ -654,7 +654,7 @@ public class CorePlugin extends Plugin {
         themes.add(new PositionDocumentTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
-        themes.add(new DocumentTheme<>("Profil en traver", ProfilTravers.class));
+        themes.add(new DocumentTheme<>("Profil en travers", ProfilTravers.class));
         themes.add(new DocumentTheme<>("Convention", Convention.class));
         themes.add(new DocumentTheme<>("Article de presse", ArticleJournal.class));
         themes.add(new DocumentTheme<>("Marché", Marche.class));

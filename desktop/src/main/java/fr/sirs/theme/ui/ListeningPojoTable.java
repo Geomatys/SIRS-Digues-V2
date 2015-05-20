@@ -1,28 +1,9 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Worker;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -44,6 +25,9 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  * order to refresh the tableview.
  * 
  * @author Samuel Andrés (Geomatys)
+ * 
+ * @param <T> The type of the elements in the list to listen. For instance, the
+ * type is String in the case of a list of ids.
  */
 public class ListeningPojoTable<T> extends PojoTable {
 
@@ -71,6 +55,7 @@ public class ListeningPojoTable<T> extends PojoTable {
     
     @Override
     public void setTableItems(Supplier<ObservableList<Element>> producer) {
+        // The producer has to be memorized to be used by the listener later.
         this.producer = producer;
         super.setTableItems(producer);
     }

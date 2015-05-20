@@ -1209,11 +1209,11 @@ public class PojoTable extends BorderPane {
             if (repo != null) {
                 result = repo.get(summary.getDocId());
             } 
-            else {
-                final Set<String> id = new HashSet<>();
-                id.add(summary.getElementId());
-                result = SIRS.getStructures(id, pojoClass).get(0);
-            }
+//            else {
+//                final Set<String> id = new HashSet<>();
+//                id.add(summary.getElementId());
+//                result = SIRS.getStructures(id, pojoClass).get(0);
+//            }
 
 
             if (result!=null && result instanceof Element) {

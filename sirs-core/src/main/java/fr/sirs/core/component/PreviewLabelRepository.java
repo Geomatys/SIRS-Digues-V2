@@ -1,7 +1,7 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.LeveProfilTravers;
+import static fr.sirs.core.component.PreviewLabelRepository.BY_CLASS;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
@@ -9,7 +9,6 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.PreviewLabel;
 import java.util.ArrayList;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sis.util.ArgumentChecks;
@@ -17,10 +16,11 @@ import org.ektorp.support.Views;
 
 @Views({
     @View(name = "all", map = "classpath:PreviewLabel-map.js"),
-    @View(name = "byClass", map = "classpath:PreviewLabelByClass-map.js")
+    @View(name = BY_CLASS, map = "classpath:PreviewLabelByClass-map.js")
 })
-public class PreviewLabelRepository extends
-        AbstractSIRSRepository<PreviewLabel> {
+public class PreviewLabelRepository extends AbstractSIRSRepository<PreviewLabel> {
+    
+    public static final String BY_CLASS = "byClass";
 
     public PreviewLabelRepository(CouchDbConnector couchDbConnector) {
         super(PreviewLabel.class, couchDbConnector);
@@ -83,7 +83,7 @@ public class PreviewLabelRepository extends
 
     public List<PreviewLabel> getPreviewLabels(final String type) {
         ArgumentChecks.ensureNonNull("Element type", type);
-        final List<PreviewLabel> all = db.queryView(createQuery("byClass").includeDocs(false).key(type), PreviewLabel.class);
+        final List<PreviewLabel> all = db.queryView(createQuery(BY_CLASS).includeDocs(false).key(type), PreviewLabel.class);
         final ArrayList<PreviewLabel> result = new ArrayList<>(all.size());
         for (PreviewLabel pl : all) {
             try {

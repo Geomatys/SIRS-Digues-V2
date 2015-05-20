@@ -3,62 +3,35 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
-import java.util.function.Function;
-import javafx.scene.control.TableColumn;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.beans.property.Property;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
- * @param <T>
+ * 
+ * @param <T> The type of the position of document.
  */
-public class PositionDocumentPojoTable<T extends AbstractPositionDocument> extends ListenPropertyPojoTable {
-    
-    private final Function<T, Void> addAction;
+public class PositionDocumentPojoTable<T extends AbstractPositionDocument> extends ListenPropertyPojoTable<String> {
 
-    public PositionDocumentPojoTable(Class<T> pojoClass, String title, 
-            final Function<T, Void> addAction) {
+    public PositionDocumentPojoTable(Class<T> pojoClass, String title) {
         super(pojoClass, title);
-        this.addAction = addAction;
     }
     
     @Override
     protected T createPojo() {
-        throw new UnsupportedOperationException("réimplémenter");
-//        final T position = (T) super.createPojo();
-//        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-//        final TronconDigue premierTroncon = tronconDigueRepository.getAll().get(0);
-//        premierTroncon.addChild(position);
-//        position.setParent(premierTroncon);
-//        addAction.apply(position);
-//        return position;
-    }
-    
-    @Override
-    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
-        final T obj = (T) event.getRowValue();
-        if(obj!=null && obj.getParent()!=null){
-            Injector.getSession().getTronconDigueRepository().update((TronconDigue) obj.getParent());
+        final T position = (T) super.createPojo();
+        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
+        final TronconDigue premierTroncon = tronconDigueRepository.getAll().get(0);
+        position.setForeignParentId(premierTroncon.getId());
+        try {
+            ((Property<String>) propertyMethodToListen.invoke(position)).setValue(propertyReference);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(PositionDocumentPojoTable.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return position;
     }
-    
-    @Override
-    protected void deletePojos(Element... pojos) {
-        throw new UnsupportedOperationException("réimplémenter");
-//        ObservableList<Element> items = uiTable.getItems();
-//        for (Element pojo : pojos) {
-//            final T dt = (T) pojo;
-//            final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-//            if(dt.getDocumentId()!=null){
-//                final TronconDigue tronconDigue = tronconDigueRepository.get(dt.getDocumentId());
-//                if(tronconDigue!=null && TronconUtils.getPositionDocumentList(tronconDigue).contains(dt)){
-////                    tronconDigue.getDocumentTroncon().remove(dt);
-//                    tronconDigueRepository.update(tronconDigue);
-//                }
-//            }
-//            items.remove(pojo);
-//        }
-    }
-    
 }
