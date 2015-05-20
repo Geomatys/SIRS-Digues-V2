@@ -213,7 +213,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
         }
 
         @Override
-        protected Object createPojo() {
+        protected Digue createPojo() {
             
             final ObservableList<Digue> digues = FXCollections.observableList(session.getDigues());
             //on retire les digues que l'on a deja

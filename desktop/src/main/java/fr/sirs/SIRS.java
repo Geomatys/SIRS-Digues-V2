@@ -6,15 +6,12 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PreviewLabel;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
@@ -35,8 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -46,10 +41,12 @@ import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Constants used for project.
@@ -57,6 +54,8 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  * @author Johann Sorel
  */
 public final class SIRS extends SirsCore {
+    
+    public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
     
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.BLACK),null);
@@ -95,8 +94,14 @@ public final class SIRS extends SirsCore {
     public static final String GEOMETRY_FIELD = "geometry";
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
-    public static final String STRUCTURES_FIELD = "stuctures";
+//    public static final String STRUCTURES_FIELD = "stuctures";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
+    public static final String LINEAR_ID_FIELD = "linearId";
+    public static final String VALID_FIELD = "valid";
+    public static final String AUTHOR_FIELD = "author";
+    public static final String DESIGNATION_FIELD = "designation";
+    public static final String PR_DEBUT_FIELD = "PR_debut";
+    public static final String PR_FIN_FIELD = "PR_fin";
     
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";

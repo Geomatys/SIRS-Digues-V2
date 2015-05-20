@@ -1,21 +1,19 @@
-
 package fr.sirs.theme.ui;
 
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.PreviewLabel;
-import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
@@ -29,8 +27,8 @@ import javafx.scene.layout.BorderPane;
 public class FXTronconThemePane extends BorderPane {
 
     @FXML private BorderPane uiCenter;
-    @FXML private ComboBox<PreviewLabel> uiTronconChoice;
-    private final SimpleObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
+    @FXML private ComboBox<PreviewLabel> uiLinearChoice;
+    private final StringProperty linearIdProperty = new SimpleStringProperty();
     private final Session session = Injector.getBean(Session.class);
         
     public FXTronconThemePane(AbstractTronconTheme.ThemeManager ... groups) {
@@ -40,7 +38,7 @@ public class FXTronconThemePane extends BorderPane {
             final TronconThemePojoTable table = new TronconThemePojoTable(groups[0]);
             table.setDeletor(groups[0].getDeletor());
             table.editableProperty.bind(session.nonGeometryEditionProperty());
-            table.tronconProperty().bindBidirectional(tronconProperty);
+            table.foreignParentProperty().bindBidirectional(linearIdProperty);
             uiCenter.setCenter(table);
         }else{
             final TabPane pane = new TabPane();
@@ -48,7 +46,7 @@ public class FXTronconThemePane extends BorderPane {
             for(int i=0; i<groups.length; i++){
                 final TronconThemePojoTable table = new TronconThemePojoTable(groups[i]);
                 table.setDeletor(groups[i].getDeletor());
-                table.tronconProperty().bindBidirectional(tronconProperty);
+                table.foreignParentProperty().bindBidirectional(linearIdProperty);
                 final Tab tab = new Tab(groups[i].getName());
                 tab.setContent(table);
                 pane.getTabs().add(tab);
@@ -56,19 +54,44 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
         
-        final List<PreviewLabel> tronconPreviews = session.getPreviewLabelRepository().getPreviewLabels(TronconDigue.class);
-        uiTronconChoice.setItems(FXCollections.observableList(tronconPreviews));        
-        uiTronconChoice.setConverter(new SirsStringConverter());
+        final List<PreviewLabel> linearPreviews = session.getPreviewLabelRepository().getPreviewLabels(TronconDigue.class);
+        uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));        
+        uiLinearChoice.setConverter(new SirsStringConverter());
 
-        uiTronconChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) -> {
-            final TronconDigueRepository tronconDigueRepository = session.getTronconDigueRepository();
-            tronconProperty.set(tronconDigueRepository.get(newValue.getObjectId()));
+        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) -> {
+            linearIdProperty.set(newValue.getObjectId());
         });
         
-        if(!tronconPreviews.isEmpty()){
-            uiTronconChoice.getSelectionModel().select(tronconPreviews.get(0));
+        if(!linearPreviews.isEmpty()){
+            uiLinearChoice.getSelectionModel().select(linearPreviews.get(0));
         }
     }
     
-    public SimpleObjectProperty<TronconDigue> tronconProperty(){return tronconProperty;}
+    private class TronconThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
+
+        private final AbstractTronconTheme.ThemeManager<T> group;
+        
+        public TronconThemePojoTable(AbstractTronconTheme.ThemeManager<T> group) {
+            super(group.getDataClass(), group.getTableTitle());
+            foreignParentIdProperty.addListener(this::updateTable);
+            this.group = group;
+        }
+        
+        private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
+            if(newValue==null || group==null) {
+                setTableItems(FXCollections::emptyObservableList);
+            } else {
+                //JavaFX bug : sortable is not possible on filtered list
+                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
+                // https://javafx-jira.kenai.com/browse/RT-32091
+//                setTableItems(() -> {
+//                    final SortedList<T> sortedList = new SortedList<>(group.getExtractor().apply(newValue));
+//                    sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
+//                    return sortedList;
+//                });
+                setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
+            }
+        }
+    }
+     
 }

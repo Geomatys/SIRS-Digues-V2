@@ -9,6 +9,7 @@ import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
@@ -121,9 +122,9 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         }
 
         @Override
-        protected Object createPojo() {
-            Object createdPojo = super.createPojo();
-            if (createdPojo instanceof TronconDigue && elementProperty.get() != null) {
+        protected TronconDigue createPojo() {
+            TronconDigue createdPojo = (TronconDigue) super.createPojo();
+            if (elementProperty.get() != null) {
                 ((TronconDigue)createdPojo).setDigueId(elementProperty.get().getId());
             }
             return createdPojo;

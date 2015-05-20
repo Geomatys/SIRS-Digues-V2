@@ -1,11 +1,10 @@
 package fr.sirs.map;
 
-import fr.sirs.theme.ui.*;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
+import static fr.sirs.SIRS.CRS_WGS84;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -119,7 +118,7 @@ public class FXImportBornesPane extends BorderPane {
         SIRS.loadFXML(this);
 
         final SirsStringConverter stringConverter = new SirsStringConverter();
-        uiCRS.setItems(FXCollections.observableArrayList(Injector.getSession().getProjection(), FXPositionablePane.CRS_WGS84));
+        uiCRS.setItems(FXCollections.observableArrayList(Injector.getSession().getProjection(), CRS_WGS84));
         uiCRS.setConverter(stringConverter);
         uiCRS.getSelectionModel().clearAndSelect(0);
         uiAttX.setConverter(stringConverter);

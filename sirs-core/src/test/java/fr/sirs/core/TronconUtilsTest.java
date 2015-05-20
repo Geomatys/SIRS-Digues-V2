@@ -61,7 +61,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         //creation du systeme de reperage
         sr = ElementCreator.createAnonymValidElement( SystemeReperage.class);
         sr.setLibelle("SR");
-        sr.setTronconId(troncon.getDocumentId());
+        sr.setLinearId(troncon.getDocumentId());
         final SystemeReperageBorne srb0 = ElementCreator.createAnonymValidElement( SystemeReperageBorne.class);
         srb0.setBorneId(borne0.getDocumentId());
         srb0.setValeurPR(0);

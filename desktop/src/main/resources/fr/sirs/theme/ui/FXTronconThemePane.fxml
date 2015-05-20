@@ -16,7 +16,7 @@
           <RowConstraints vgrow="NEVER" />
         </rowConstraints>
          <children>
-            <ComboBox fx:id="uiTronconChoice" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+            <ComboBox fx:id="uiLinearChoice" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
             <Label text="Tronçon" textFill="WHITE" />
          </children>
          <BorderPane.margin>

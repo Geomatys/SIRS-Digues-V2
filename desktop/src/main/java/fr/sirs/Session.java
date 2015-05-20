@@ -215,7 +215,7 @@ public class Session extends SessionCore {
     private List<Element> elementsToPrint = null;
     private FeatureCollection featuresToPrint = null;
     
-    public List<Element> getElementsToPrint(){return elementsToPrint;}
+    public List<? extends Element> getElementsToPrint(){return elementsToPrint;}
     public FeatureCollection getFeaturesToPrint(){return featuresToPrint;}
 
     public void prepareToPrint(final Element object){

@@ -1553,7 +1553,7 @@
               <styles xmi:type="notation:FilteringStyle" xmi:id="_oOD40rHbEeSHZrSyvrOwzA"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_oOCqsbHbEeSHZrSyvrOwzA" fontName="Lucida Grande" fontHeight="8" italic="true"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_oOCqsrHbEeSHZrSyvrOwzA" x="-590" y="-885" width="120" height="58"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_oOCqsrHbEeSHZrSyvrOwzA" x="-625" y="-910" width="120" height="58"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_BHROELHcEeSHZrSyvrOwzA" type="2003" element="_BFfscLHcEeSHZrSyvrOwzA">
             <children xmi:type="notation:Node" xmi:id="_BHR1ILHcEeSHZrSyvrOwzA" type="5007"/>
@@ -8964,7 +8964,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u2YafiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u2YaviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u2YaviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u2Ya_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -9041,7 +9041,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u2_efiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u2_eviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u2_eviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u2_e_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -9074,7 +9074,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u6p1PiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u6p1fiPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u6p1fiPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u6p1viPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -10539,7 +10539,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u-7SfiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u-7SviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u-7SviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u-7S_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -10659,9 +10659,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_SKtBUIeUEeS6PfS15pNzwA" name="[0..1] tronconId" sourceNode="_e0PzAEfeEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/tronconId"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/tronconId"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_SKtBUIeUEeS6PfS15pNzwA" name="[0..1] linearId" sourceNode="_e0PzAEfeEeSoXJiONqf-1A" targetNode="_DBuuUEfeEeSoXJiONqf-1A">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/linearId"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/linearId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_SKu2gIeUEeS6PfS15pNzwA" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_SKu2gYeUEeS6PfS15pNzwA"/>
@@ -11928,7 +11928,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vAwefiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vAweviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vAweviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vAwe_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -12006,7 +12006,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u1KSfiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u1KSviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u1KSviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u1KS_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -12182,7 +12182,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u1xWfiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u1xWviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5u1xWviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5u1xW_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -12229,7 +12229,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vBXifiPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vBXiviPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vBXiviPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vBXi_iPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>
@@ -12618,7 +12618,7 @@
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vClp_iPEeSDpfhQLXeXEA"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vClqPiPEeSDpfhQLXeXEA" showIcon="false">
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_5vClqPiPEeSDpfhQLXeXEA" labelSize="6" showIcon="false">
             <customFeatures>labelFormat</customFeatures>
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_5vClqfiPEeSDpfhQLXeXEA" red="39" green="76" blue="114"/>
           </endLabelStyle>

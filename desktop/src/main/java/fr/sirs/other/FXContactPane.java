@@ -194,7 +194,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         }
 
         @Override
-        protected void editPojo(Object pojo) {
+        protected void editPojo(Element pojo) {
             if (!(pojo instanceof ContactOrganisme)) {
                 return;
             }
@@ -229,7 +229,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         }
 
         @Override
-        protected Object createPojo() {
+        protected ContactOrganisme createPojo() {
             final ContactOrganisme co = Injector.getSession().getElementCreator().createElement(ContactOrganisme.class);
             co.setValid(session.getRole()!=Role.EXTERN);
             co.setAuthor(session.getUtilisateur().getId());

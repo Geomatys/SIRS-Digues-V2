@@ -10,7 +10,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
+import static fr.sirs.SIRS.AUTHOR_FIELD;
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
+import static fr.sirs.SIRS.DESIGNATION_FIELD;
+import static fr.sirs.SIRS.PR_DEBUT_FIELD;
+import static fr.sirs.SIRS.PR_FIN_FIELD;
+import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -32,8 +37,6 @@ import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +51,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
@@ -107,7 +109,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
-import org.geotoolkit.gui.javafx.util.FXPasswordTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -121,8 +122,8 @@ public class PojoTable extends BorderPane {
     
     private static final String BUTTON_STYLE = "buttonbar-button";
     
-    private static final String[] COLUMNS_TO_IGNORE = new String[] {"author", "valid"};    
-    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {"designation", "PR_debut", "PR_fin"};
+    private static final String[] COLUMNS_TO_IGNORE = new String[] {AUTHOR_FIELD, VALID_FIELD};    
+    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -144,11 +145,6 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
     // Créer un nouvel objet à l'ajout
     protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
-    /* Rechercher les objets dans un tronçon donné (sert uniquement si on ne 
-    crée pas les objets à l'ajout, mais si on cherche des objets préexisants.
-    Cette propriété sert alors à limiter la recherche à un tronçon donné (de 
-    manière à ne relier entre eux que des "objets" du même tronçon.*/
-    protected final StringProperty tronconSourceProperty = new SimpleStringProperty(null);
     /* Importer des points. Default : false */
     protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
     
@@ -179,10 +175,10 @@ public class PojoTable extends BorderPane {
     protected final BorderPane topPane;
     
     /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
-    protected final SimpleObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
+    protected final ObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
     /** The element to set as owner for any created element using {@linkplain #createPojo() }. 
      On the contrary to the parent, the owner purpose is not to contain the created pojo, but to reference it.*/
-    protected final SimpleObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
+    protected final ObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
     
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected Task tableUpdater;
@@ -223,11 +219,18 @@ public class PojoTable extends BorderPane {
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
         
-        uiTable.setRowFactory(new Callback<TableView<Element>, TableRow<Element>>() {
+        uiTable.setRowFactory((TableView<Element> param) ->  new TableRow<Element>() {
 
             @Override
-            public TableRow<Element> call(TableView<Element> param) {
-                return new ValidatedTableRow();
+            protected void updateItem(Element item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if(item!=null && !item.getValid()){
+                    getStyleClass().add("invalidRow");
+                }
+                else{
+                    getStyleClass().removeAll("invalidRow");
+                }
             }
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -329,7 +332,7 @@ public class PojoTable extends BorderPane {
                 
         uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction((ActionEvent event) -> {
-            final Object p;
+            final Element p;
             if(createNewProperty.get()){
                 p = createPojo();
             
@@ -340,7 +343,7 @@ public class PojoTable extends BorderPane {
             else{
                 final ChoiceStage stage = new ChoiceStage();
                 stage.showAndWait();
-                p=stage.getRetrievedElement().get();
+                p = stage.getRetrievedElement().get();
             }
         });
         uiAdd.disableProperty().bind(editableProperty.not());
@@ -508,7 +511,7 @@ public class PojoTable extends BorderPane {
      * @return La propriété contenant l'élément à affecter en tant que parent de
      *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
      */
-    public SimpleObjectProperty<Element> parentElementProperty() {
+    public ObjectProperty<Element> parentElementProperty() {
         return parentElementProperty;
     }
     
@@ -536,7 +539,7 @@ public class PojoTable extends BorderPane {
      * @return La propriété contenant l'élément à affecter en tant que principal référent de
      *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
      */
-    public SimpleObjectProperty<Element> ownerElementProperty() {
+    public ObjectProperty<Element> ownerElementProperty() {
         return ownerElementProperty;
     }
     
@@ -562,9 +565,6 @@ public class PojoTable extends BorderPane {
     }
     public BooleanProperty createNewProperty() {
         return createNewProperty;
-    }
-    public StringProperty tronconSourceProperty() {
-        return tronconSourceProperty;
     }
     public BooleanProperty importPointProperty() {
         return importPointProperty;
@@ -746,7 +746,7 @@ public class PojoTable extends BorderPane {
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
      */
-    protected void editPojo(Object pojo){
+    protected void editPojo(Element pojo){
         editElement(pojo);
     }
     
@@ -763,25 +763,6 @@ public class PojoTable extends BorderPane {
         }
     }
     
-    protected Object addExistingPojo(final ValiditySummary summary) {
-        Object result = null;
-        if (repo != null) {
-            result = repo.get(summary.getDocId());
-        } 
-        else {
-            final Set<String> id = new HashSet<>();
-            id.add(summary.getElementId());
-            result = SIRS.getStructures(id, pojoClass).get(0);
-        }
-        
-        
-        if (result!=null) {
-            uiTable.getItems().add((Element)result);
-        } else {
-            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
-        }
-        return result;
-    }
     
     /**
      * Create a new element and add it to table items. If the table {@link Repository}
@@ -790,21 +771,17 @@ public class PojoTable extends BorderPane {
      * is set.
      * @return The newly created object. 
      */
-    protected Object createPojo() {
+    protected Element createPojo() {
         Object result = null;
         if (repo != null) {
             result = repo.create();
-            // Validity and Author are managed by element creator in repo
-//            if(result instanceof Element) {
-//                ((Element)result).setAuthor(session.getUtilisateur().getId());
-//                ((Element)result).setValid(!(session.getRole()==Role.EXTERN));
-//            }
             repo.add(result);
         } 
         
         else if (pojoClass != null) {
             try {
-                result = pojoClass.newInstance();
+                result = session.getElementCreator().createElement(pojoClass);
+//                result = pojoClass.newInstance();
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -814,9 +791,9 @@ public class PojoTable extends BorderPane {
         
         // TODO : check and set date début
         if (result instanceof Element) {
-            final Element newlyCreated = (Element)result;
-            newlyCreated.setAuthor(session.getUtilisateur().getId());
-            newlyCreated.setValid(!(session.getRole()==Role.EXTERN));
+            final Element newlyCreated = (Element) result;
+//            newlyCreated.setAuthor(session.getUtilisateur().getId());
+//            newlyCreated.setValid(!(session.getRole()==Role.EXTERN));
             
             /* Dans le cas où on a un parent, il n'est pas nécessaire de faire
             addChild(), car la liste des éléments de la table est directement 
@@ -824,7 +801,8 @@ public class PojoTable extends BorderPane {
             if (parentElementProperty.get() != null) {
                 // this should do nothing for new 
                 newlyCreated.setParent(parentElementProperty.get());
-            } 
+            }
+            
             /* Mais dans le cas où on a un référant principal, il faut faire un
             addChild(), car la liste des éléments de la table n'est pas une 
             liste d'éléments enfants. Le référant principal n'a qu'une liste 
@@ -832,14 +810,15 @@ public class PojoTable extends BorderPane {
             else if(ownerElementProperty.get() != null){
                 ownerElementProperty.get().addChild(newlyCreated);
             }
-            uiTable.getItems().add((Element)result);
+            
+            uiTable.getItems().add(newlyCreated);
         } else {
             new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
         }
-        return result;
+        return (Element) result;
     }
         
-    public static void editElement(Object pojo) {
+    public static void editElement(Element pojo) {
         try {
             Injector.getSession().showEditionTab(pojo);
         } catch (Exception ex) {
@@ -895,38 +874,6 @@ public class PojoTable extends BorderPane {
             });
         }
     }
-
-    private class PasswordColumn extends TableColumn<Element, String>{
-        private PasswordColumn(PropertyDescriptor desc){
-            super(labelMapper.mapPropertyName(desc.getDisplayName()));
-            setEditable(false);
-            setCellValueFactory(new PropertyValueFactory<>("password"));
-            setCellFactory(new Callback<TableColumn<Element, String>, TableCell<Element, String>>() {
-
-                @Override
-                public TableCell<Element, String> call(TableColumn<Element, String> param) {
-                    MessageDigest messageDigest = null;
-                    try {
-                        messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(PojoTable.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    final TableCell<Element, String> cell = new FXPasswordTableCell<>(messageDigest);
-                    cell.setEditable(false);
-                    return cell;
-                }
-            });
-            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
-
-                @Override
-                public void handle(CellEditEvent<Element, Object> event) {
-                    final Element rowElement = event.getRowValue();
-                    new PropertyReference<>(rowElement.getClass(), "password").set(rowElement, event.getNewValue());
-                    elementEdited(event);
-                }
-            });
-        }
-    }
     
     private static abstract class PointLeveBinding<T extends PointLeve> extends DoubleBinding {
         
@@ -935,7 +882,6 @@ public class PojoTable extends BorderPane {
         public PointLeveBinding(final T pointLeve){
             this.pointLeve = pointLeve;
         }
-        
     }
     
     private static class DXYZBinding extends PointLeveBinding<PointLeveXYZ> {
@@ -952,7 +898,6 @@ public class PojoTable extends BorderPane {
         protected double computeValue() {
             return Math.sqrt(Math.pow(pointLeve.getX() - origine.getX(), 2) + Math.pow(pointLeve.getY() - origine.getY(), 2));
         }
-        
     }
     
     
@@ -975,7 +920,6 @@ public class PojoTable extends BorderPane {
                     Injector.getSession().getBorneDigueRepository());
             return result;
         }
-        
     }
     
     
@@ -1002,7 +946,6 @@ public class PojoTable extends BorderPane {
                     Injector.getSession().getBorneDigueRepository());
             return result;
         }
-        
     }
         
     private static abstract class ComputedPropertyColumn extends TableColumn<Element, Double>{
@@ -1049,7 +992,7 @@ public class PojoTable extends BorderPane {
         }
     }
         
-    public class PropertyColumn extends TableColumn<Element,Object>{
+    public class PropertyColumn extends TableColumn<Element, Object>{
         
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
@@ -1150,9 +1093,9 @@ public class PojoTable extends BorderPane {
         }  
     }
     
-    public static class EditColumn extends TableColumn<Object,Object>{
+    public static class EditColumn extends TableColumn<Element, Element>{
 
-        public EditColumn(Consumer editFct) {
+        public EditColumn(Consumer<Element> editFct) {
             super("Edition");        
             setSortable(false);
             setResizable(false);
@@ -1161,14 +1104,14 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
             
-            setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> new SimpleObjectProperty<>(param.getValue()));
-            setCellFactory(new Callback<TableColumn<Object, Object>, TableCell<Object, Object>>() {
+            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
+            setCellFactory(new Callback<TableColumn<Element, Element>, TableCell<Element, Element>>() {
 
-                public TableCell<Object, Object> call(TableColumn<Object,Object> param) {
+                public TableCell<Element, Element> call(TableColumn<Element, Element> param) {
                     return new ButtonTableCell(
-                            false,new ImageView(SIRS.ICON_EDIT_BLACK), (Object t) -> true, new Function<Object, Object>() {
+                            false,new ImageView(SIRS.ICON_EDIT_BLACK), (Object t) -> true, new Function<Element, Object>() {
                                 @Override
-                                public Object apply(Object t) {
+                                public Object apply(Element t) {
                                     editFct.accept(t);
                                     return t;
                                 }
@@ -1177,31 +1120,31 @@ public class PojoTable extends BorderPane {
         }  
     }
     
-    protected class ValidatedTableRow extends TableRow<Element>{
-
-        @Override
-        protected void updateItem(Element item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if(item!=null && !item.getValid()){
-                    getStyleClass().add("invalidRow");
-                }
-                else{
-                    getStyleClass().removeAll("invalidRow");
-                }
-        }
+    
+    
+    
+    
+    
+    /* Rechercher les objets dans un tronçon donné (sert uniquement si on ne 
+    crée pas les objets à l'ajout, mais si on cherche des objets préexisants.
+    Cette propriété sert alors à limiter la recherche à un tronçon donné (de 
+    manière à ne relier entre eux que des "objets" du même tronçon.*/
+    protected final StringProperty tronconSourceProperty = new SimpleStringProperty(null);
+    
+    public StringProperty tronconSourceProperty() {
+        return tronconSourceProperty;
     }
     
-    private class ChoiceStage extends Stage{
+    private class ChoiceStage extends Stage {
         
-        private ObjectProperty retrievedElement = new SimpleObjectProperty();
+        private ObjectProperty<Element> retrievedElement = new SimpleObjectProperty<>();
         
         private ChoiceStage(){
             super();
             setTitle("Choix de l'élément");
             
             final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName());
-            final String prefix = bundle.getString("classAbrege")+" : ";
+            final String prefix = bundle.getString(BUNDLE_KEY_CLASS_ABREGE)+" : ";
             final ComboBox<ValiditySummary> comboBox;
             if(tronconSourceProperty.get()==null){
                 comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(pojoClass)));
@@ -1257,9 +1200,28 @@ public class PojoTable extends BorderPane {
             setScene(new Scene(vBox));
         }
         
-        private ObjectProperty getRetrievedElement(){
+        private ObjectProperty<Element> getRetrievedElement(){
             return retrievedElement;
         }
+        
+        protected Element addExistingPojo(final ValiditySummary summary) {
+            Object result = null;
+            if (repo != null) {
+                result = repo.get(summary.getDocId());
+            } 
+            else {
+                final Set<String> id = new HashSet<>();
+                id.add(summary.getElementId());
+                result = SIRS.getStructures(id, pojoClass).get(0);
+            }
+
+
+            if (result!=null && result instanceof Element) {
+                uiTable.getItems().add((Element) result);
+            } else {
+                new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
+            }
+            return (Element) result;
+        }
     }
-    
 }

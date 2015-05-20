@@ -130,7 +130,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @throws NullPointerException if input list is null.
      */
     protected List<T> cacheList(List<T> source) {
-        final ArrayList<T> result = new ArrayList<>(source.size());
+        final List<T> result = new ArrayList<>(source.size());
         for (T element : source) {
             try {
                 result.add(cache.getOrCreate(element.getId(), () -> onLoad(element)));

@@ -60,7 +60,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     
     public static final String BY_DIGUE_ID = "byDigueId";
     
-    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap();
+    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap<>();
     
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
@@ -96,7 +96,6 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");
         }
-//        return new TronconDigue();
     }
 
     /**

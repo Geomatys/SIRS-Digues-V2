@@ -22,7 +22,7 @@ import org.ektorp.support.Views;
 @Component
 @Views({
     @View(name="all",         map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc._id, doc._id)}}"),
-    @View(name="byTronconId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.tronconId, doc._id)}}")
+    @View(name="byTronconId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.linearId, doc._id)}}")
 })
 public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage>{
 
@@ -67,8 +67,8 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void add(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         ArgumentChecks.ensureNonNull("SR to add", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to added SR", troncon);
-        if (entity.getTronconId() == null && troncon != null) {
-            entity.setTronconId(troncon.getId());
+        if (entity.getLinearId() == null && troncon != null) {
+            entity.setLinearId(troncon.getId());
         }
         super.add(entity);
         constraintBorneInTronconListBorne(entity,troncon, forceDefaultSR);
@@ -106,7 +106,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
      * @param entity 
      */
     private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
-        final String tcId = entity.getTronconId();
+        final String tcId = entity.getLinearId();
         if(tcId==null) return;
         if(entity.getSystemeReperageBorne().isEmpty()) return;
         

@@ -333,7 +333,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final String srName = opt.get();
         final SystemeReperage sr = session.getSystemeReperageRepository().create();
         sr.setLibelle(srName);
-        sr.setTronconId(troncon.getDocumentId());
+        sr.setLinearId(troncon.getDocumentId());
         session.getSystemeReperageRepository().add(sr, troncon);
         
         //maj de la liste des SR

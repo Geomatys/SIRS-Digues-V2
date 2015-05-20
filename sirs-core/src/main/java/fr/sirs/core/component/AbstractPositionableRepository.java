@@ -23,4 +23,9 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
         ArgumentChecks.ensureNonNull("Linear", linear);
         return this.queryView(BY_LINEAR_ID, linear.getId());
     }
+
+    public List<T> getByLinearId(final String linearId) {
+        ArgumentChecks.ensureNonNull("Linear", linearId);
+        return this.queryView(BY_LINEAR_ID, linearId);
+    }
 }

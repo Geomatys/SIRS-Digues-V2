@@ -1,4 +1,3 @@
-
 package fr.sirs.digue;
 
 import fr.sirs.Injector;
@@ -83,7 +82,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final Session session = Injector.getBean(Session.class);
         final SystemeReperageRepository repo = session.getSystemeReperageRepository();
         
-        final String tcId = sr.getTronconId();
+        final String tcId = sr.getLinearId();
         if (tcId == null || tcId.isEmpty()) {
             throw new IllegalArgumentException("Aucun tronçon n'est associé au SR. Sauvegarde impossible.");
         }

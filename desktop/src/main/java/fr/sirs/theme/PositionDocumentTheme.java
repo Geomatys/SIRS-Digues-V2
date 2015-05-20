@@ -16,7 +16,6 @@ import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.core.model.TronconDigue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +55,8 @@ public class PositionDocumentTheme extends AbstractTronconTheme {
         return new ThemeManager<>(title, 
                 "Thème "+title, 
                 themeClass,               
-            (TronconDigue t) -> {
-                return FXCollections.observableArrayList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinear(t)).filtered(new DocumentPredicate(documentClass));
+            (String linearId) -> {
+                return FXCollections.observableArrayList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
             },
             (T c) -> Injector.getSession().getRepositoryForClass(themeClass).remove(c));
     }

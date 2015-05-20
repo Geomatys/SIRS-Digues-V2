@@ -6,7 +6,6 @@ import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
 import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
-import static fr.sirs.SIRS.STRUCTURES_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
@@ -343,7 +342,6 @@ public class FXMainFrame extends BorderPane {
             avoidFields.add(ID_FIELD);
 
             if(element instanceof TronconDigue){
-                avoidFields.add(STRUCTURES_FIELD);
                 avoidFields.add(BORNE_IDS_REFERENCE);
             }
 

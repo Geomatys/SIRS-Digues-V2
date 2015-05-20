@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_TRIANGLE;
 import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
@@ -15,6 +16,7 @@ import fr.sirs.core.TronconUtils;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
@@ -36,12 +38,12 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -66,7 +68,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
-import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
@@ -91,10 +92,7 @@ import org.opengis.util.FactoryException;
  */
 public class FXPositionablePane extends BorderPane {
     
-    private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.#");
-    
-    public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
-    
+    private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.#");  
     
     @FXML private Button uiImport;
     @FXML private Button uiView;
@@ -106,8 +104,8 @@ public class FXPositionablePane extends BorderPane {
     // PR Information
     @FXML private Label uiPRDebut;
     @FXML private Label uiPRFin;
-    private final SimpleFloatProperty prDebut = new SimpleFloatProperty();
-    private volatile SimpleFloatProperty prFin = new SimpleFloatProperty();
+    private final FloatProperty prDebut = new SimpleFloatProperty();
+    private volatile FloatProperty prFin = new SimpleFloatProperty();
     
     // Borne mode
     @FXML private GridPane uiBornePane;
@@ -130,16 +128,16 @@ public class FXPositionablePane extends BorderPane {
     @FXML private FXNumberSpinner uiLatitudeEnd;
     
     /** A flag to notify when a component update is running, used to lock graphic components */
-    private final SimpleIntegerProperty computingRunning = new SimpleIntegerProperty(0);
+    private final IntegerProperty computingRunning = new SimpleIntegerProperty(0);
     
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
-    private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
+    private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
     
     /**
      * Reference to TronconDigue parent of the current positionable
      */
-    private TronconDigue currentTroncon;
+    private TronconDigue troncon;
     private LinearReferencing.SegmentInfo[] tronconSegments;
 
     public FXPositionablePane() {
@@ -429,11 +427,12 @@ public class FXPositionablePane extends BorderPane {
      * @return The linear associated, or null if we cannot get it.
      */
     private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
+        final TronconDigue t = getTroncon();
         if (tronconSegments == null) {
-            Geometry linearSource = (currentTroncon == null) ? null : currentTroncon.getGeometry();
+            Geometry linearSource = (t == null) ? null : t.getGeometry();
             if (linearSource == null) {
-                if (source != null && source.getTronconId() != null) {
-                    final TronconDigue tmpTroncon = Injector.getSession().getTronconDigueRepository().get(source.getTronconId());
+                if (source != null && source.getLinearId() != null) {
+                    final TronconDigue tmpTroncon = Injector.getSession().getTronconDigueRepository().get(source.getLinearId());
                     if (tmpTroncon != null) {
                         linearSource = tmpTroncon.getGeometry();
                     }
@@ -478,7 +477,9 @@ public class FXPositionablePane extends BorderPane {
             final ObjectProperty<BorneDigue> borneProperty, 
             final BooleanProperty amontSelectedProperty) {
         final Number distance = distanceProperty.get();
-        if (distance != null && borneProperty.get() != null && currentTroncon != null) {
+        final TronconDigue t = getTroncon();
+        
+        if (distance != null && borneProperty.get() != null && t != null) {
             //calcul à partir des bornes
             final Point bornePoint = borneProperty.get().getGeometry();
             double dist = distance.doubleValue();
@@ -486,7 +487,7 @@ public class FXPositionablePane extends BorderPane {
                 dist *= -1;
             }
 
-            return LinearReferencingUtilities.computeCoordinate(currentTroncon.getGeometry(), bornePoint, dist, 0);
+            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
         } else {
             return null;
         }
@@ -547,40 +548,43 @@ public class FXPositionablePane extends BorderPane {
      * if we cannot find it.
      */
     private TronconDigue getTroncon() {
-        if (currentTroncon == null) {
+        if (troncon == null) {
             final Positionable pos = positionableProperty.get();
             if (pos == null) {
                 return null;
             }
-            if (pos.getParent() != null) {
+            if(pos instanceof AvecForeignParent){
+                String id = ((AvecForeignParent) pos).getForeignParentId();
+                troncon = Injector.getSession().getTronconDigueRepository().get(id);
+            } else if (pos.getParent() != null) {
                 Element tmp = pos.getParent();
                 while (tmp != null && !(tmp instanceof TronconDigue)) {
                     tmp = tmp.getParent();
                 }
-                currentTroncon = (TronconDigue) tmp;
+                troncon = (TronconDigue) tmp;
             }
             // Maybe we have an incomplete version of the document, so we try by querying repository.
-            if (currentTroncon == null) {
+            if (troncon == null) {
                 try {
-                    currentTroncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
+                    troncon = Injector.getSession().getTronconDigueRepository().get(pos.getDocumentId());
                 } catch (Exception e) {
                     // Last chance, we must try to get it from SR
-                    if (currentTroncon == null && pos.getSystemeRepId() != null) {
+                    if (troncon == null && pos.getSystemeRepId() != null) {
                         final SystemeReperage sr = Injector.getSession().getSystemeReperageRepository().get(pos.getSystemeRepId());
-                        if (sr.getTronconId() != null) {
-                            currentTroncon = Injector.getSession().getTronconDigueRepository().get(sr.getTronconId());
+                        if (sr.getLinearId() != null) {
+                            troncon = Injector.getSession().getTronconDigueRepository().get(sr.getLinearId());
                         }
                     }
                 }
             }
         }
-        return currentTroncon;
+        return troncon;
     }
     
     private Optional<SystemeReperage> getDefaultSR() {
-        currentTroncon = getTroncon();
-        if (currentTroncon.getSystemeRepDefautId() != null) {
-            return Optional.of(Injector.getSession().getSystemeReperageRepository().get(currentTroncon.getSystemeRepDefautId()));
+        final TronconDigue t = getTroncon();
+        if (t.getSystemeRepDefautId() != null) {
+            return Optional.of(Injector.getSession().getSystemeReperageRepository().get(t.getSystemeRepDefautId()));
         }
         return Optional.empty();
     }
@@ -662,19 +666,19 @@ public class FXPositionablePane extends BorderPane {
         final Positionable pos = (Positionable) positionableProperty.get();
         if(pos==null) return;
         
-        currentTroncon = getTroncon();
+        final TronconDigue t = getTroncon();
         
-        if (currentTroncon != null) {
+        if (t != null) {
             computingRunning.set(computingRunning.get()+1);
             TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
                 try {
                     final SystemeReperageRepository srRepo = Injector.getSession().getSystemeReperageRepository();
-                    final List<SystemeReperage> srs = srRepo.getByTroncon(currentTroncon);
+                    final List<SystemeReperage> srs = srRepo.getByTroncon(t);
                     final SystemeReperage defaultSR;
                     if (pos.getSystemeRepId() != null) {
                         defaultSR = srRepo.get(pos.getSystemeRepId());
-                    } else if (currentTroncon.getSystemeRepDefautId() != null) {
-                        defaultSR = srRepo.get(currentTroncon.getSystemeRepDefautId());
+                    } else if (t.getSystemeRepDefautId() != null) {
+                        defaultSR = srRepo.get(t.getSystemeRepDefautId());
                     } else {
                         defaultSR = null;
                     }
@@ -801,7 +805,7 @@ public class FXPositionablePane extends BorderPane {
             uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
             uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
         }
-        currentTroncon = null;
+        troncon = null;
         
         if(newValue==null) return;
         
@@ -902,8 +906,7 @@ public class FXPositionablePane extends BorderPane {
         pos.pR_finProperty().setValue(prFin.get());
         
         //maj de la geometrie du positionable
-        final LineString structGeom = LinearReferencingUtilities.buildGeometry(
-                currentTroncon.getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
+        final LineString structGeom = LinearReferencingUtilities.buildGeometry(getTroncon().getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
         pos.setGeometry(structGeom);        
     }
 
@@ -915,14 +918,14 @@ public class FXPositionablePane extends BorderPane {
         private final ComboBox<BorneDigue> uiBorne;
         private final ObjectProperty<Number> longitudeProperty;
         private final ObjectProperty<Number> latitudeProperty;
-        private final SimpleFloatProperty prProperty;
+        private final FloatProperty prProperty;
         private final ObjectProperty<Number> distanceProperty;
         private final BooleanProperty amontSelectedProperty;
         
         public LinearChangeListener(final ComboBox<BorneDigue> uiBorne, 
                 final ObjectProperty<Number> longitudeProperty,
                 final ObjectProperty<Number> latitudeProperty, 
-                final SimpleFloatProperty prProperty, 
+                final FloatProperty prProperty, 
                 final ObjectProperty<Number> distanceProperty,
                 final BooleanProperty amontSelectedProperty) {
             this.uiBorne = uiBorne;
@@ -979,14 +982,14 @@ public class FXPositionablePane extends BorderPane {
         private final BooleanProperty amontSelectedProperty;
         private final ObjectProperty<Number> longitudeProperty;
         private final ObjectProperty<Number> latitudeProperty;
-        private final SimpleFloatProperty prProperty;
+        private final FloatProperty prProperty;
         
         GeographicChangeListener(final ObjectProperty<BorneDigue> borneProperty,
                 final ObjectProperty<Number> distanceProperty,
                 final BooleanProperty amontSelectedProperty,
                 final ObjectProperty<Number> longitudeProperty,
                 final ObjectProperty<Number> latitudeProperty,
-                final SimpleFloatProperty prProperty){
+                final FloatProperty prProperty){
             this.borneProperty = borneProperty;
             this.distanceProperty = distanceProperty;
             this.amontSelectedProperty = amontSelectedProperty;

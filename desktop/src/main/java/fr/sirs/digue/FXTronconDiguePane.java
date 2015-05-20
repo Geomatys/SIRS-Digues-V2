@@ -1,5 +1,3 @@
-
-
 package fr.sirs.digue;
 
 import fr.sirs.FXEditMode;
@@ -177,7 +175,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         final TronconDigue troncon = elementProperty.get();
         final SystemeReperage sr = Injector.getSession().getElementCreator().createElement(SystemeReperage.class);
         sr.setLibelle("Nouveau SR");
-        sr.setTronconId(troncon.getId());
+        sr.setLinearId(troncon.getId());
         repo.add(sr, troncon);
         
         //maj de la liste

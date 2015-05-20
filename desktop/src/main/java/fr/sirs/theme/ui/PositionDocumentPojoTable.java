@@ -24,14 +24,15 @@ public class PositionDocumentPojoTable<T extends AbstractPositionDocument> exten
     }
     
     @Override
-    protected Object createPojo() {
-        final T documentTroncon = (T) super.createPojo();
-        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-        final TronconDigue premierTroncon = tronconDigueRepository.getAll().get(0);
-        premierTroncon.addChild(documentTroncon);
-        documentTroncon.setParent(premierTroncon);
-        addAction.apply(documentTroncon);
-        return documentTroncon;
+    protected T createPojo() {
+        throw new UnsupportedOperationException("réimplémenter");
+//        final T position = (T) super.createPojo();
+//        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
+//        final TronconDigue premierTroncon = tronconDigueRepository.getAll().get(0);
+//        premierTroncon.addChild(position);
+//        position.setParent(premierTroncon);
+//        addAction.apply(position);
+//        return position;
     }
     
     @Override

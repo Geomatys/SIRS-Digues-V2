@@ -131,7 +131,7 @@ public class ListenPropertyPojoTable extends PojoTable {
     }
     
     @Override
-    protected Object createPojo() {
+    protected Element createPojo() {
         final Element element = (Element) super.createPojo();
         addListener(element);
         return element;

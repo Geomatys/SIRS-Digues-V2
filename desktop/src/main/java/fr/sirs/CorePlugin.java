@@ -1,5 +1,3 @@
-
-
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -177,7 +175,7 @@ public class CorePlugin extends Plugin {
         
     };
     
-    private final HashMap<Class, BeanFeatureSupplier> suppliers = new HashMap<Class, BeanFeatureSupplier>();
+    private final HashMap<Class, BeanFeatureSupplier> suppliers = new HashMap<>();
     
     public CorePlugin() {
         name = NAME;
@@ -648,22 +646,20 @@ public class CorePlugin extends Plugin {
         loadDataSuppliers();
         themes.add(new AbstractTronconTheme("Structure", Crete.class, OuvrageRevanche.class, TalusDigue.class, SommetRisberme.class, TalusRisberme.class, PiedDigue.class, Fondation.class, Epi.class, Deversoir.class));
         themes.add(new AbstractTronconTheme("Franc-bord", FrontFrancBord.class, PiedFrontFrancBord.class, LargeurFrancBord.class));
-        themes.add(new AbstractTronconTheme("Réseaux de voirie", VoieAcces.class, OuvrageFranchissement.class, OuvertureBatardable.class, VoieDigue.class, OuvrageVoirie.class));
-        themes.add(new AbstractTronconTheme("Réseaux et ouvrages", StationPompage.class, ReseauHydrauliqueFerme.class, OuvrageHydrauliqueAssocie.class, ReseauTelecomEnergie.class, OuvrageTelecomEnergie.class, ReseauHydrauliqueCielOuvert.class, OuvrageParticulier.class, EchelleLimnimetrique.class));
-        themes.add(new AbstractTronconTheme("Désordres", Desordre.class));
-        themes.add(new AbstractTronconTheme("Prestations", Prestation.class));
-        themes.add(new AbstractTronconTheme("Mesures d'événements hydrauliques", LaisseCrue.class, MonteeEaux.class, LigneEau.class));
+        themes.add(new AbstractTronconTheme("Réseau de voirie", VoieAcces.class, OuvrageFranchissement.class, OuvertureBatardable.class, VoieDigue.class, OuvrageVoirie.class));
+        themes.add(new AbstractTronconTheme("Réseau et ouvrage", StationPompage.class, ReseauHydrauliqueFerme.class, OuvrageHydrauliqueAssocie.class, ReseauTelecomEnergie.class, OuvrageTelecomEnergie.class, ReseauHydrauliqueCielOuvert.class, OuvrageParticulier.class, EchelleLimnimetrique.class));
+        themes.add(new AbstractTronconTheme("Désordre", Desordre.class));
+        themes.add(new AbstractTronconTheme("Prestation", Prestation.class));
+        themes.add(new AbstractTronconTheme("Mesure d'événement hydraulique", LaisseCrue.class, MonteeEaux.class, LigneEau.class));
         themes.add(new PositionDocumentTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
-        themes.add(new DocumentTheme<>(ProfilTravers.class));
-        themes.add(new DocumentTheme<>(Convention.class));
-        themes.add(new DocumentTheme<>(ArticleJournal.class));
-        themes.add(new DocumentTheme<>(Marche.class));
-        themes.add(new DocumentTheme<>(RapportEtude.class));
-        themes.add(new DocumentTheme<>(DocumentGrandeEchelle.class));
-//        themes.add(new DocumentTheme<>(ProfilLong.class));
-        
+        themes.add(new DocumentTheme<>("Profil en traver", ProfilTravers.class));
+        themes.add(new DocumentTheme<>("Convention", Convention.class));
+        themes.add(new DocumentTheme<>("Article de presse", ArticleJournal.class));
+        themes.add(new DocumentTheme<>("Marché", Marche.class));
+        themes.add(new DocumentTheme<>("Rapport d'étude", RapportEtude.class));
+        themes.add(new DocumentTheme<>("Document à grande échelle", DocumentGrandeEchelle.class));
     }
     
     public MapLayer createLayer(final Class beanClass, final Query query){

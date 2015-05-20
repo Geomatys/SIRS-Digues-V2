@@ -145,11 +145,11 @@ public class TronconUtils {
         // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
         final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
         if (newDefaultSR != null) {
-            newDefaultSR.setTronconId(tronconCp.getDocumentId());
+            newDefaultSR.setLinearId(tronconCp.getDocumentId());
             srRepo.add(newDefaultSR, tronconCp, true);
         }
         for (final SystemeReperage newSR : newSRs.values()) {
-            newSR.setTronconId(tronconCp.getDocumentId());
+            newSR.setLinearId(tronconCp.getDocumentId());
             srRepo.add(newSR, tronconCp, false);
         }
         // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier 
@@ -288,7 +288,7 @@ public class TronconUtils {
             if(sibling==null){
                 //on copy le SR
                 final SystemeReperage srCp = sr2.copy();
-                srCp.setTronconId(mergeResult.getDocumentId());
+                srCp.setLinearId(mergeResult.getDocumentId());
                 //sauvegarde du sr
                 srRepo.add(srCp, mergeResult);
                 modifiedSRs.put(sr2.getId(), srCp.getId());
@@ -366,7 +366,7 @@ public class TronconUtils {
         if(sr==null){
             sr = srRepo.create();
             sr.setLibelle(SR_ELEMENTAIRE);
-            sr.setTronconId(troncon.getDocumentId());
+            sr.setLinearId(troncon.getDocumentId());
             srRepo.add(sr,troncon);
         }
         
@@ -683,8 +683,8 @@ public class TronconUtils {
                 // Last chance, we must try to get it from SR
                 if (troncon == null && pos.getSystemeRepId() != null) {
                     SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
-                    if (sr.getTronconId() != null) {
-                        troncon = session.getTronconDigueRepository().get(sr.getTronconId());
+                    if (sr.getLinearId() != null) {
+                        troncon = session.getTronconDigueRepository().get(sr.getLinearId());
                     }
                 }
             }

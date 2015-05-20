@@ -45,7 +45,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
         for(final Map.Entry<Integer, List<SystemeReperage>> srsByTroncon : systemesReperageByTronconId.entrySet()){
             final Integer internalTronconId = srsByTroncon.getKey();
             for(final SystemeReperage sr : srsByTroncon.getValue()){
-                sr.setTronconId(tronconGestionDigueImporter.getTronconsDigues().get(internalTronconId).getId());
+                sr.setLinearId(tronconGestionDigueImporter.getTronconsDigues().get(internalTronconId).getId());
             }
         }
         couchDbConnector.executeBulk(systemesReperage.values());
