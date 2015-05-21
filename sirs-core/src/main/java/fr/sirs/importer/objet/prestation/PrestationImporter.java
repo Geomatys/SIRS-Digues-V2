@@ -1,7 +1,5 @@
 package fr.sirs.importer.objet.prestation;
 
-import fr.sirs.core.SirsCore;
-
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Prestation;
@@ -21,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**

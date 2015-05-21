@@ -32,9 +32,7 @@ import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconDigueGeomImporter;
-import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.TypeCoteImporter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -54,7 +52,7 @@ extends GenericImporter
 implements DocumentsUpdatable {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
-    private Map<String, Integer> tronconsIds = null;
+//    private Map<String, Integer> tronconsIds = null;
     
     private final TronconDigueGeomImporter tronconDigueGeomImporter;
     private final TypeRiveImporter typeRiveImporter;
@@ -167,7 +165,7 @@ implements DocumentsUpdatable {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         tronconsDigue = new HashMap<>();
-        tronconsIds = new HashMap<>();
+//        tronconsIds = new HashMap<>();
 
         final Map<Integer, Geometry> tronconDigueGeoms = tronconDigueGeomImporter.getTronconDigueGeoms();
         final Map<Integer, RefRive> typesRive = typeRiveImporter.getTypeReferences();
@@ -179,16 +177,11 @@ implements DocumentsUpdatable {
         final Map<Integer, SystemeReperage> systemesReperageById = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Digue> digues = digueImporter.getDigues();
         final Map<Integer, List<PeriodeCommune>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
-//        final Map<Integer, List<AbstractPositionDocument>> documents = documentImporter.getDocumentsByTronconId();
 
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final TronconDigue tronconDigue = createAnonymValidElement(TronconDigue.class);
-            
-//            if(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()))!=null){
-//                tronconDigue.setDocumentTroncon(documents.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
-//            }
             
             tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
             
@@ -215,7 +208,7 @@ implements DocumentsUpdatable {
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             tronconsDigue.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), tronconDigue);
-            tronconsIds.put(tronconDigue.getId(), row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+//            tronconsIds.put(tronconDigue.getId(), row.getInt(Columns.ID_TRONCON_GESTION.toString()));
 
 
             // Set simple references.
@@ -272,14 +265,6 @@ implements DocumentsUpdatable {
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
         
-//        for(final TronconDigue tronconDigue : tronconsDigue.values()){
-//            List<Objet> structures = tronconDigue.getStructures();
-//            structures.addAll(objetManager.getByTronconId(tronconsIds.get(tronconDigue.getId())));
-//
-//            //Update the repository
-////            tronconDigueRepository.update(tronconDigue);
-//        }
-        
         //reconstruction des geometries des structures
         for(final Map.Entry<Integer,TronconDigue> entry : tronconsDigue.entrySet()){
             final TronconDigue troncon = entry.getValue();
@@ -328,10 +313,8 @@ implements DocumentsUpdatable {
             }
             
             //Update the repository
-            tronconDigueRepository.update(troncon);
+//            tronconDigueRepository.update(troncon);
         }
         couchDbConnector.executeBulk(tronconsDigue.values());
-        
-        
     }
 }
