@@ -7,7 +7,6 @@ import fr.sirs.core.model.SystemeReperage;
 import static fr.sirs.importer.DbImporter.TableName.SYSTEME_REP_LINEAIRE;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

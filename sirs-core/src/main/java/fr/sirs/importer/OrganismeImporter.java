@@ -9,7 +9,6 @@ import static fr.sirs.importer.DbImporter.TableName.ORGANISME;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

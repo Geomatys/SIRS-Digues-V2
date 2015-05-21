@@ -2,15 +2,14 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.SyndicTroncon;
 import fr.sirs.core.model.Syndicat;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

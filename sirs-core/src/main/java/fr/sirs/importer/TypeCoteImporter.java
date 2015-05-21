@@ -6,7 +6,6 @@ import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefCote;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

@@ -10,10 +10,10 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ProfilFrontFrancBord;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -111,12 +111,10 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
 
             final Objet objet = importRow(row);
             
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            
+            if(objet!=null){
+                
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

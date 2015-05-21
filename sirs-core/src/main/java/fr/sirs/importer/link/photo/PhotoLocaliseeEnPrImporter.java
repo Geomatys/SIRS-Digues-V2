@@ -23,7 +23,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.DbImporter.TableName;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
@@ -35,8 +34,6 @@ import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,11 +174,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             }
             
             if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
-                try{
-                    photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
-                } catch (DateTimeParseException e){
-                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                }
+                photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
             }
             
             if (row.getDouble(Columns.PR_PHOTO.toString()) != null) {

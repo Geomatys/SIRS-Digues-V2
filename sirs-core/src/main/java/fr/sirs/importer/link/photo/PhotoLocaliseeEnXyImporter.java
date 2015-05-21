@@ -5,7 +5,6 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -14,6 +13,7 @@ import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOrientationPhoto;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
@@ -23,8 +23,6 @@ import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -139,11 +137,7 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
             }
             
             if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
-                try{
-                    photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
-                } catch (DateTimeParseException e){
-                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                }
+                photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
             }
             photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
             

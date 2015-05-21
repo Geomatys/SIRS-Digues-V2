@@ -22,13 +22,13 @@ import fr.sirs.core.model.RefUtilisationConduite;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -174,39 +174,6 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         final Map<Integer, RefImplantation> implantations = typeImplantationImporter.getTypeReferences();
         final Map<Integer, RefConduiteFermee> typesConduites = typeConduiteFermeeImporter.getTypeReferences();
         final Map<Integer, RefUtilisationConduite> typesUtilisationConduites = typeUtilisationConduiteImporter.getTypeReferences();
-        
-        final ReseauHydrauliqueFerme conduiteFermee = new ReseauHydrauliqueFerme();
-            
-            conduiteFermee.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                conduiteFermee.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                conduiteFermee.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                conduiteFermee.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                conduiteFermee.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                conduiteFermee.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                conduiteFermee.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
 
         final ReseauHydrauliqueFerme conduiteFermee = createAnonymValidElement(ReseauHydrauliqueFerme.class);
 
@@ -223,11 +190,11 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            conduiteFermee.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            conduiteFermee.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            conduiteFermee.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            conduiteFermee.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

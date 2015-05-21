@@ -2,7 +2,6 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Objet;
@@ -10,18 +9,16 @@ import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -105,19 +102,15 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
-            try{
-                contactStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
-            } catch (DateTimeParseException e) {
-                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-            }
+            propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
-            contactStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            contactStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
@@ -131,19 +124,15 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
-            try{
-                organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
-            } catch (DateTimeParseException e) {
-                SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-            }
+            propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
-            organismeStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            organismeStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));

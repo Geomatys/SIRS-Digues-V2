@@ -21,6 +21,7 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeFonctionImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
@@ -29,7 +30,6 @@ import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -177,37 +177,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
-        
-            final SommetRisberme sommetRisberme = new SommetRisberme();
-            
-            if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
-                sommetRisberme.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-            }
-            
-            if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                sommetRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                sommetRisberme.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                sommetRisberme.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                sommetRisberme.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                sommetRisberme.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
 
         final SommetRisberme sommetRisberme = createAnonymValidElement(SommetRisberme.class);
 
@@ -222,11 +191,11 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            sommetRisberme.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            sommetRisberme.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            sommetRisberme.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            sommetRisberme.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

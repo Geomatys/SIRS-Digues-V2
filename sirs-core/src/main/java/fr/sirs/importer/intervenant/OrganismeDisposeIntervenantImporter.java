@@ -8,7 +8,6 @@ import fr.sirs.core.model.ContactOrganisme;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import static fr.sirs.importer.DbImporter.TableName.ORGANISME_DISPOSE_INTERVENANT;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

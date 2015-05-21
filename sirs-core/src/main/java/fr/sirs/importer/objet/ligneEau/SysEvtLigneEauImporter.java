@@ -16,6 +16,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -23,7 +24,6 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -123,29 +123,6 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
 
         final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
         final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
-        
-        final LigneEau ligneEau = new LigneEau();
-            
-            if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                ligneEau.setEvenementHydrauliqueId(evenementsHydrau.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
-            }
-            
-            if (row.getDate(Columns.DATE.toString()) != null) {
-                ligneEau.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                ligneEau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
-            }
-            
-            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                ligneEau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
-            }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
 
         final LigneEau ligneEau = createAnonymValidElement(LigneEau.class);
 
@@ -156,7 +133,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         }
 
         if (row.getDate(Columns.DATE.toString()) != null) {
-            ligneEau.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
+            ligneEau.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

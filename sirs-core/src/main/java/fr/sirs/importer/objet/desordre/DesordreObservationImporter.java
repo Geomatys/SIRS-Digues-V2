@@ -1,7 +1,5 @@
 package fr.sirs.importer.objet.desordre;
 
-import fr.sirs.core.SirsCore;
-import java.util.logging.Level;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
@@ -11,11 +9,10 @@ import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefUrgence;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -82,12 +79,7 @@ public class DesordreObservationImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()) != null) {
-                try{
-                    observation.setDate(DbImporter.parse(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()), dateTimeFormatter));
-                }
-                catch(DateTimeParseException e){
-                    SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                }
+                observation.setDate(DbImporter.parse(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()), dateTimeFormatter));
             }
             
             if (row.getString(Columns.SUITE_A_APPORTER.toString()) != null) {

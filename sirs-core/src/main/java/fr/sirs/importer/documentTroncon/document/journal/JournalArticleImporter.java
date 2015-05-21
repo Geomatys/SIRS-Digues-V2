@@ -9,7 +9,6 @@ import static fr.sirs.importer.DbImporter.TableName.JOURNAL_ARTICLE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

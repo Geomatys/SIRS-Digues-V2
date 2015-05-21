@@ -7,11 +7,11 @@ import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,26 +72,26 @@ public class ElementStructureGestionnaireImporter extends GenericEntityLinker {
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(structure!=null && organisme!=null){
-                final GestionObjet gesion = createAnonymValidElement(GestionObjet.class);
+                final GestionObjet gestion = createAnonymValidElement(GestionObjet.class);
                 
-                gesion.setOrganismeId(organisme.getId());
+                gestion.setOrganismeId(organisme.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
-                    organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
+                    gestion.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                    organismeStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
+                    gestion.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    organismeStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    gestion.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
-                gesion.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
+                gestion.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_GESTION.toString())));
                 
-                structure.getGestions().add(gesion);
+                structure.getGestions().add(gestion);
             }
         }
     }

@@ -6,7 +6,6 @@ import fr.sirs.core.model.Digue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import static fr.sirs.importer.DbImporter.TableName.DIGUE;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

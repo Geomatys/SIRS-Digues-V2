@@ -30,6 +30,7 @@ import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.TypeCoteImporter;
@@ -38,7 +39,6 @@ import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -395,24 +395,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                     if (row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString()) != null) {
                         ouverture.setIntervenantManupulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
                     }
+                    
+                    if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+                        objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    }
                 }
-
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
-                }
-                
-                if(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())!=null){
-                    ouverture.setIntervenantManupulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
-                }       
-            }
-            
-            
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            
-            if (nouvelObjet) {
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 objets.put(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()), objet);

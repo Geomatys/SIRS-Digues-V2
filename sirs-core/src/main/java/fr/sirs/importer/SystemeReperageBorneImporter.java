@@ -8,7 +8,6 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import static fr.sirs.importer.DbImporter.TableName.BORNE_PAR_SYSTEME_REP;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

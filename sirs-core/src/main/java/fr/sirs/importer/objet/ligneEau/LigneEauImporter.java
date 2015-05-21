@@ -6,13 +6,13 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LigneEau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -104,12 +104,9 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             final Row row = it.next();
             final LigneEau objet = importRow(row);
             
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            
+            if(objet!=null){
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

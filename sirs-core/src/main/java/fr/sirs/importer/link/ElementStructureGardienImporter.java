@@ -7,11 +7,11 @@ import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,15 +77,15 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
                 garde.setContactId(intervenant.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GARDIEN.toString()) != null) {
-                    contactStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GARDIEN.toString()), dateTimeFormatter));
+                    garde.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GARDIEN.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GARDIEN.toString()) != null) {
-                    contactStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GARDIEN.toString()), dateTimeFormatter));
+                    garde.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GARDIEN.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    contactStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    garde.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gardien.

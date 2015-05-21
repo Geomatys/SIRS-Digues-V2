@@ -6,6 +6,7 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
@@ -110,22 +111,10 @@ public class PrestationImporter extends GenericPrestationImporter {
             final Row row = it.next();
             final Prestation objet = importRow(row);
             
-            if(structures.get(row.getInt(Columns.ID_PRESTATION.toString()))!=null){
-                objet = structures.get(row.getInt(Columns.ID_PRESTATION.toString()));
-                nouvelObjet=false;
-            }
-            else{
-                SirsCore.LOGGER.log(Level.FINE, "Nouvel objet !!");
-                objet = importRow(row);
-                nouvelObjet=true;
-            }
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
+            if(objet!=null){
             
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 {

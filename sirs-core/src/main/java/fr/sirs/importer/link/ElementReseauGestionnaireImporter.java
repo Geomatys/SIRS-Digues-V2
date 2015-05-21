@@ -2,24 +2,21 @@ package fr.sirs.importer.link;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.SirsCore;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -81,19 +78,15 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
                 gestion.setOrganismeId(organisme.getId());
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
-                    try{
-                        organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
-                    } catch (DateTimeParseException e) {
-                        SirsCore.LOGGER.log(Level.FINE, e.getMessage());
-                    }
+                    gestion.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                    organismeStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
+                    gestion.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    organismeStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    gestion.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.
