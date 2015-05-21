@@ -58,7 +58,7 @@ class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuv
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_PARTICULIER.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_PARTICULIER.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOuvrage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeOuvrage.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()))));
             typeOuvrage.setValid(true);

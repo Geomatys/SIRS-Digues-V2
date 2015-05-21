@@ -57,7 +57,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
             typeProprietaire.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROPRIETAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeProprietaire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeProprietaire.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             typeProprietaire.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_PROPRIETAIRE.toString()))));

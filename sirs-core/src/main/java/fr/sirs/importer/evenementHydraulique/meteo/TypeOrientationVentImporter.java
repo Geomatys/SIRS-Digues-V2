@@ -58,7 +58,7 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
             typeOrientation.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIENTATION_VENT.toString()));
             typeOrientation.setAbrege(row.getString(Columns.ABREGE_TYPE_ORIENTATION_VENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOrientation.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeOrientation.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrientation.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIENTATION_VENT.toString())));
             typeOrientation.setValid(true);

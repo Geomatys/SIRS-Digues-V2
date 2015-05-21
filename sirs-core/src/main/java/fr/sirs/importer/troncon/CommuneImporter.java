@@ -67,7 +67,7 @@ class CommuneImporter extends GenericImporter {
             commune.setLibelle(row.getString(Columns.LIBELLE_COMMUNE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                commune.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                commune.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             commune.setDesignation(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));

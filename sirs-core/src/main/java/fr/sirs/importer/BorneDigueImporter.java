@@ -101,13 +101,13 @@ public class BorneDigueImporter extends GenericImporter {
             borne.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
             borne.setCommentaire(row.getString(Columns.COMMENTAIRE_BORNE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                borne.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                borne.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                borne.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                borne.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                borne.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                borne.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
             }
             borne.setFictive(row.getBoolean(Columns.FICTIVE.toString()));
             GeometryFactory geometryFactory = new GeometryFactory();

@@ -81,11 +81,11 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
             rapport.setChemin(cleanNullString(row.getString(Columns.REFERENCE_NUMERIQUE.toString())));
             
             if (row.getDate(Columns.DATE_RAPPORT.toString()) != null) {
-                rapport.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_RAPPORT.toString()).toString(), dateTimeFormatter));
+                rapport.setDate(DbImporter.parse(row.getDate(Columns.DATE_RAPPORT.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                rapport.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                rapport.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             rapport.setDesignation(String.valueOf(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())));
             rapport.setValid(true);

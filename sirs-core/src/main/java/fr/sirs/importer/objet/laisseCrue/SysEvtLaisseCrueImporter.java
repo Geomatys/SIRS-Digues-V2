@@ -161,7 +161,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         }
 
         if (row.getDate(Columns.DATE.toString()) != null) {
-            laisseCrue.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
+            laisseCrue.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

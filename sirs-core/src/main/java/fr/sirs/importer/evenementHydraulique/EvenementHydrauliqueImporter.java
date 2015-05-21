@@ -105,13 +105,13 @@ implements DocumentsUpdatable {
             evenement.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                evenement.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                evenement.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                evenement.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                evenement.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                evenement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                evenement.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())!=null){

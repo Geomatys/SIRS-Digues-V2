@@ -99,7 +99,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             final MesureMonteeEaux mesure = new MesureMonteeEaux();
             
             if (row.getDate(Columns.DATE.toString()) != null) {
-                mesure.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
+                mesure.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_REF_HEAU.toString())!=null){
@@ -123,7 +123,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                mesure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                mesure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             mesure.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));

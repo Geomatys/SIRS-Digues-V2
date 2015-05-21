@@ -150,7 +150,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
             }
             
             if (row.getDate(Columns.DATE.toString()) != null) {
-                ligneEau.setDate(LocalDateTime.parse(row.getDate(Columns.DATE.toString()).toString(), dateTimeFormatter));
+                ligneEau.setDate(DbImporter.parse(row.getDate(Columns.DATE.toString()), dateTimeFormatter));
             }
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

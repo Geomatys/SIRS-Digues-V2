@@ -220,7 +220,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            piedDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            piedDigue.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
@@ -273,7 +273,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            piedDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            piedDigue.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

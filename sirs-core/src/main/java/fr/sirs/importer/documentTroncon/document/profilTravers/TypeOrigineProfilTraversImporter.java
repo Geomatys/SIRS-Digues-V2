@@ -58,7 +58,7 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
             typeOrigineProfilTravers.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOrigineProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeOrigineProfilTravers.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrigineProfilTravers.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.toString())));
             typeOrigineProfilTravers.setValid(true);

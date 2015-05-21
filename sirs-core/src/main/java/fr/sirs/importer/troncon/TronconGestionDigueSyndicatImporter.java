@@ -97,13 +97,13 @@ class TronconGestionDigueSyndicatImporter extends GenericImporter {
             
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                periodeSyndicale.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                periodeSyndicale.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                periodeSyndicale.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                periodeSyndicale.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             // Set the references.

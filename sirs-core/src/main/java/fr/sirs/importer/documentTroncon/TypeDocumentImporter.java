@@ -98,7 +98,7 @@ public class TypeDocumentImporter extends GenericImporter {
             typeDocument.setLibelle(row.getString(Columns.LIBELLE_TYPE_DOCUMENT.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeDocument.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeDocument.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             typeDocument.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DOCUMENT.toString())));

@@ -58,7 +58,7 @@ public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> 
             typeSource.setLibelle(row.getString(Columns.LIBELLE_SOURCE.toString()));
             typeSource.setAbrege(row.getString(Columns.ABREGE_TYPE_SOURCE_INFO.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeSource.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeSource.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeSource.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_SOURCE.toString()))));
             typeSource.setValid(true);

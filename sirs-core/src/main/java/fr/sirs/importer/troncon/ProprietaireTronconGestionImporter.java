@@ -134,13 +134,13 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
             
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                propriete.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                propriete.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                propriete.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                propriete.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                propriete.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())!=null){

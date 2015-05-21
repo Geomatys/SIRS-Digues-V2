@@ -129,11 +129,11 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             final CommuneTroncon communeTroncon = new CommuneTroncon();
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                communeTroncon.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                communeTroncon.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                communeTroncon.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                communeTroncon.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_COTE.toString())!=null){
@@ -205,7 +205,7 @@ class TronconGestionDigueCommuneImporter extends GenericImporter {
             communeTroncon.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                communeTroncon.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                communeTroncon.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             // Set the references.

@@ -65,7 +65,7 @@ class SyndicatImporter extends GenericImporter {
             syndicat.setLibelle(cleanNullString(row.getString(Columns.LIBELLE_SYNDICAT.toString())));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                syndicat.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                syndicat.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             syndicat.setDesignation(String.valueOf(row.getInt(Columns.ID_SYNDICAT.toString())));

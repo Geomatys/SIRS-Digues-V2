@@ -89,11 +89,11 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             convention.setTypeConventionId(typesConvention.get(row.getInt(Columns.ID_TYPE_CONVENTION.toString())).getId());
             
             if (row.getDate(Columns.DATE_DEBUT_CONVENTION.toString()) != null) {
-                convention.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_CONVENTION.toString()).toString(), dateTimeFormatter));
+                convention.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_CONVENTION.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_CONVENTION.toString()) != null) {
-                convention.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_CONVENTION.toString()).toString(), dateTimeFormatter));
+                convention.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_CONVENTION.toString()), dateTimeFormatter));
             }
             
             convention.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));
@@ -103,7 +103,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             convention.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                convention.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                convention.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             final List<String> organismesSignatairesIds = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));

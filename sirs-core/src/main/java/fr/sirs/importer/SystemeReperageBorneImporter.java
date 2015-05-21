@@ -98,7 +98,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             final SystemeReperageBorne systemeReperageBorne = new SystemeReperageBorne();
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                systemeReperageBorne.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                systemeReperageBorne.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if (row.getDouble(Columns.VALEUR_PR.toString())!=null){

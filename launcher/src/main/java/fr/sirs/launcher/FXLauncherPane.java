@@ -485,7 +485,7 @@ public class FXLauncherPane extends BorderPane {
                 importer.cleanDb();
                 importer.importation();
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-                sirsDBInfoRepository.setRemoteDatabase(epsgCode);
+                sirsDBInfoRepository.setSRID(epsgCode);
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
 
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());

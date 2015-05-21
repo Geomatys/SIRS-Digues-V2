@@ -58,7 +58,7 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
             typePosition.setLibelle(row.getString(Columns.LIBELLE_TYPE_POSITION.toString()));
             typePosition.setAbrege(row.getString(Columns.ABREGE_TYPE_POSITION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typePosition.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typePosition.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typePosition.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_POSITION.toString()))));
             typePosition.setValid(true);

@@ -206,7 +206,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
             try{
-                desordre.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+                desordre.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
             }
             catch(DateTimeParseException ex){
                 Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -214,7 +214,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
             try{
-                desordre.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+                desordre.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
             }
             catch(DateTimeParseException ex){
                 Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);

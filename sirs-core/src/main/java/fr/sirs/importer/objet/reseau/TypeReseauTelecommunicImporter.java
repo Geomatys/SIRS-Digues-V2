@@ -58,7 +58,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
             typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_COMMUNICATION.toString()));
             typeReseau.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_COMMUNICATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeReseau.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeReseau.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeReseau.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_COMMUNICATION.toString()))));
             typeReseau.setValid(true);

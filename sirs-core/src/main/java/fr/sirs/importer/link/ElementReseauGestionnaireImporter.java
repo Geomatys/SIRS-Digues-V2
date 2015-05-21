@@ -81,18 +81,18 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
             
                 if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
                     try{
-                        organismeStructure.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()).toString(), dateTimeFormatter));
+                        organismeStructure.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
                     } catch (DateTimeParseException e) {
                         SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                     }
                 }
 
                 if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                    organismeStructure.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    organismeStructure.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    organismeStructure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.

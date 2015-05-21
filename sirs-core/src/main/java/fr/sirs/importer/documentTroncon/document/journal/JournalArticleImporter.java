@@ -73,7 +73,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             articleJournal.setLibelle(cleanNullString(row.getString(Columns.INTITULE_ARTICLE.toString())));
             
             if (row.getDate(Columns.DATE_ARTICLE.toString()) != null) {
-                articleJournal.setDateArticle(LocalDateTime.parse(row.getDate(Columns.DATE_ARTICLE.toString()).toString(), dateTimeFormatter));
+                articleJournal.setDateArticle(DbImporter.parse(row.getDate(Columns.DATE_ARTICLE.toString()), dateTimeFormatter));
             }
             
             articleJournal.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));
@@ -83,7 +83,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             articleJournal.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                articleJournal.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                articleJournal.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             articleJournal.setDesignation(String.valueOf(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())));

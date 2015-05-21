@@ -92,7 +92,11 @@ import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.documentTroncon.DocumentImporter;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,6 +118,16 @@ public class DbImporter {
     
     public static final String cleanNullString(String string){
         return (NULL_STRING_VALUE.equals(string) || string==null) ? "" : string;
+    }    
+    
+    public static LocalDateTime parse(final Date date, final DateTimeFormatter dateTimeFormatter){
+        try{
+            return LocalDateTime.parse(date.toString(), dateTimeFormatter);
+        }
+        catch(DateTimeParseException ex){
+            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
     private final CouchDbConnector couchDbConnector;

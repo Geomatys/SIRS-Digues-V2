@@ -181,7 +181,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             
             if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
                 try{
-                    photo.setDate(LocalDateTime.parse(row.getDate(Columns.DATE_PHOTO.toString()).toString(), dateTimeFormatter));
+                    photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
                 } catch (DateTimeParseException e){
                     SirsCore.LOGGER.log(Level.FINE, e.getMessage());
                 }

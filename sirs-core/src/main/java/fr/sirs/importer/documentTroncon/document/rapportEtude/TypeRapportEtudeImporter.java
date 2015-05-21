@@ -58,7 +58,7 @@ class TypeRapportEtudeImporter extends GenericTypeReferenceImporter<RefRapportEt
             typeRapportEtude.setLibelle(row.getString(Columns.LIBELLE_TYPE_RAPPORT_ETUDE.toString()));
             typeRapportEtude.setAbrege(row.getString(Columns.ABREGE_TYPE_RAPPORT_ETUDE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeRapportEtude.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeRapportEtude.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeRapportEtude.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_RAPPORT_ETUDE.toString())));
             typeRapportEtude.setValid(true);

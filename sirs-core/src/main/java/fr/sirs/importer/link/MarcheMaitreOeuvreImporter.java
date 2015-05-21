@@ -80,7 +80,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
                 maitreOeuvreMarche.setFonctionMaitreOeuvre(fonctionsMo.get(row.getInt(Columns.ID_FONCTION_MO.toString())).getId());
             
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    maitreOeuvreMarche.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                    maitreOeuvreMarche.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
             
                 maitreOeuvreMarche.setOrganismeId(maitreOeuvre.getId());

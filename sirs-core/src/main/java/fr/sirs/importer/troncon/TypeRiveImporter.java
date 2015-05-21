@@ -56,7 +56,7 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
             typeRive.setId(typeRive.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString())));
             typeRive.setLibelle(row.getString(Columns.LIBELLE_TYPE_RIVE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeRive.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeRive.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             typeRive.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RIVE.toString()))));

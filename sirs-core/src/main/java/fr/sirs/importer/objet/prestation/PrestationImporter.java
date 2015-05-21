@@ -15,7 +15,6 @@ import fr.sirs.importer.objet.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,7 +128,7 @@ public class PrestationImporter extends GenericPrestationImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             

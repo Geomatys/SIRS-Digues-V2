@@ -108,7 +108,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
             systemeReperage.setLibelle(row.getString(Columns.LIBELLE_SYSTEME_REP.toString()));
             systemeReperage.setCommentaire(row.getString(Columns.COMMENTAIRE_SYSTEME_REP.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                systemeReperage.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                systemeReperage.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             systemeReperage.setDesignation(String.valueOf(row.getInt(Columns.ID_SYSTEME_REP.toString())));

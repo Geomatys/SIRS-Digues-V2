@@ -58,7 +58,7 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
             typeDesordre.setLibelle(row.getString(Columns.LIBELLE_TYPE_DESORDRE.toString()));
             typeDesordre.setAbrege(row.getString(Columns.ABREGE_TYPE_DESORDRE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeDesordre.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeDesordre.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
         
             typeDesordre.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_DESORDRE.toString())));

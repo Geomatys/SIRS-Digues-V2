@@ -56,7 +56,7 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
             typeSystemeReleve.setId(typeSystemeReleve.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())));
             typeSystemeReleve.setLibelle(row.getString(Columns.LIBELLE_TYPE_SYSTEME_RELEVE_PROFIL.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeSystemeReleve.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                typeSystemeReleve.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeSystemeReleve.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.toString())));
             typeSystemeReleve.setValid(true);

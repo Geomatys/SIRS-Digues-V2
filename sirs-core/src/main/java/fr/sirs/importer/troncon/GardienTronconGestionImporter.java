@@ -119,13 +119,13 @@ class GardienTronconGestionImporter extends GenericImporter {
             
             
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                gardien.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                gardien.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                gardien.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                gardien.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gardien.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                gardien.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
              if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

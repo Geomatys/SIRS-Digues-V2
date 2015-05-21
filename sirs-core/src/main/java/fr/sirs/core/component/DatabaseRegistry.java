@@ -312,22 +312,22 @@ public class DatabaseRegistry {
         }
     }
     
-    /**
-     * Creates a CouchDb user using login and password given in input URL.
-     * 
-     * @param urlWithBasicAuth URL to target database, embedding login as : 
-     * http://$USER:$PASSWORD@$HOST:$PORT
-     * @throws IOException If an error occurs while querying CouchDb
-     */
-    private static void createUser(final String urlWithBasicAuth) throws IOException {
-        Matcher matcher = BASIC_AUTH.matcher(urlWithBasicAuth);
-        if (!matcher.find()) {
-            throw new IllegalArgumentException("Input URL does not contain valid basic authentication login : "+urlWithBasicAuth);
-        }
-        final String username = matcher.group(1);
-        final String password = matcher.group(2);
-        createUser(new URL(matcher.replaceFirst("")), username, password);
-    }
+//    /**
+//     * Creates a CouchDb user using login and password given in input URL.
+//     * 
+//     * @param urlWithBasicAuth URL to target database, embedding login as : 
+//     * http://$USER:$PASSWORD@$HOST:$PORT
+//     * @throws IOException If an error occurs while querying CouchDb
+//     */
+//    private static void createUser(final String urlWithBasicAuth) throws IOException {
+//        Matcher matcher = BASIC_AUTH.matcher(urlWithBasicAuth);
+//        if (!matcher.find()) {
+//            throw new IllegalArgumentException("Input URL does not contain valid basic authentication login : "+urlWithBasicAuth);
+//        }
+//        final String username = matcher.group(1);
+//        final String password = matcher.group(2);
+//        createUser(new URL(matcher.replaceFirst("")), username, password);
+//    }
     
     /**
      * Try to create an user in the given database

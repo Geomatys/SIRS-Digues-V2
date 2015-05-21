@@ -103,15 +103,15 @@ public class OrganismeImporter extends GenericImporter {
             organisme.setFax(row.getString(Columns.FAX_ORG.toString()));
             
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
-                organisme.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT.toString()).toString(), dateTimeFormatter));
+                organisme.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN.toString()) != null) {
-                organisme.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN.toString()).toString(), dateTimeFormatter));
+                organisme.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                organisme.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                organisme.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if (contactsOrganismes.get(row.getInt(Columns.ID_ORGANISME.toString()))!=null){

@@ -186,11 +186,11 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            ouverture.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()).toString(), dateTimeFormatter));
+            ouverture.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            ouverture.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL.toString()).toString(), dateTimeFormatter));
+            ouverture.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

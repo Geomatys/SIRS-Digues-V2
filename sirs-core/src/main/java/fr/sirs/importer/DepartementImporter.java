@@ -62,7 +62,7 @@ public class DepartementImporter extends GenericImporter {
 //            departement.setLibelle(row.getString(Columns.LIBELLE_DEPARTEMENT.toString()));
 //            
 //            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                departement.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+//                departement.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
 //            }
 //            
 //            departement.setDesignation(String.valueOf(row.getInt(Columns.ID_DEPARTEMENT.toString())));

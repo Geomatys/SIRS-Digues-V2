@@ -105,7 +105,7 @@ public class ProfilEnTraversTronconImporter extends GenericImporter {
             }
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                levePositionProfilTravers.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                levePositionProfilTravers.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             levePositionProfilTravers.setLeveId(leves.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString())).getId());

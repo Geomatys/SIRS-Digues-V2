@@ -92,7 +92,7 @@ class ConventionSignataireIntervenantImporter extends GenericImporter {
             
             
 //            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-//                signataire.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+//                signataire.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
 //            }
 //            
 //            // Pas d'Id unique car table de jointure. Arbitrairement, on met comme Id celui du signataire.

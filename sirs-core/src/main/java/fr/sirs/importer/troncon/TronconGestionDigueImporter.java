@@ -204,15 +204,15 @@ implements DocumentsUpdatable {
             tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                tronconDigue.setDateMaj(LocalDateTime.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()).toString(), dateTimeFormatter));
+                tronconDigue.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()) != null) {
-                tronconDigue.setDate_debut(LocalDateTime.parse(row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
+                tronconDigue.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()) != null) {
-                tronconDigue.setDate_fin(LocalDateTime.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()).toString(), dateTimeFormatter));
+                tronconDigue.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString()), dateTimeFormatter));
             }
                 
             if(row.getInt(Columns.ID_SYSTEME_REP_DEFAUT.toString())!=null){
