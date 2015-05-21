@@ -2,6 +2,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.model.AvecDateMaj;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,10 +66,17 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public List<T> getAll() {
         return cacheList(super.getAll());
     }
+    
+    private void checkIntegrity(T entity){
+        if(entity instanceof AvecForeignParent){
+            if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
+        }
+    }
 
     @Override
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
+        checkIntegrity(entity);
         if (entity instanceof AvecDateMaj) {
             ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
         }
@@ -79,6 +87,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
+        checkIntegrity(entity);
         if (entity instanceof AvecDateMaj) {
             ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
         }
@@ -152,4 +161,19 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     protected T onLoad(final T loaded) {
         return loaded;
     }
+    
+    
+    /**
+     * Return the class of the managed object type.
+     * @return 
+     */
+    @Override
+    public abstract Class<T> getModelClass();
+    
+    /**
+     * Create a new instance of Pojo in memory. No creation in database.
+     * @return 
+     */
+    @Override
+    public abstract T create();
 }

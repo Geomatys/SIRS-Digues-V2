@@ -109,12 +109,11 @@ public final class SIRS extends SirsCore {
     public static final String BUNDLE_KEY_CLASS = "class";
     public static final String BUNDLE_KEY_CLASS_ABREGE = "classAbrege";
     
-    public static final String MODEL_PACKAGE="fr.sirs.core.model";
-    
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
     
     // Logins des utilisateurs par défaut
     public static final String LOGIN_DEFAULT_GUEST = "";
+    public static final String PASSWORD_DEFAULT_GUEST = "";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {

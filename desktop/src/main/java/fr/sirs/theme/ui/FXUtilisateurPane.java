@@ -40,7 +40,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     @FXML ComboBox<Role> ui_role;
     @FXML CheckBox ui_passwordChange;
     
-    private String currentUserLogin;
+    private String currentEditedUserLogin;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when
@@ -63,9 +63,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         
         this.elementProperty().set(utilisateur);
         if(utilisateur!=null){
-            currentUserLogin = utilisateur.getLogin();
+            currentEditedUserLogin = utilisateur.getLogin();
         }
-        this.administrableProperty().set(administrable);
+        administrableProperty().set(administrable);
         
         ui_role.disableProperty().bind(new SecurityBinding());
         ui_login.disableProperty().bind(disableFieldsProperty());
@@ -80,7 +80,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         ui_role.setConverter(new SirsStringConverter());
     }
     
-    public BooleanProperty administrableProperty(){return administrableProperty;}
+    public final BooleanProperty administrableProperty(){return administrableProperty;}
     public boolean isAdministrable(){return administrableProperty.get();}
     public void setAdministrable(final boolean administrable){
         administrableProperty.set(administrable);
@@ -139,12 +139,12 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         // Vérification de l'identifiant : 
         
         // Interdiction du compte de l'invité par défaut
-        if(LOGIN_DEFAULT_GUEST.equals(currentUserLogin)){
+        if(LOGIN_DEFAULT_GUEST.equals(currentEditedUserLogin)){
             new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez pas modifier le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
             throw new Exception("Le compte de l'invité par défaut n'est pas modifiable. Modification non enregistrée.");
         }
         
-        // Interdiction d'un indentifiant vide (qui écraserait l'invité par défaut).
+        // Interdiction d'un indentifiant vide.
         else if(ui_login == null 
                 || ui_login.getText()==null 
                 || "".equals(ui_login.getText())){
@@ -154,7 +154,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         }
         
         // Sinon, si on est susceptible d'avoir modifié le login.
-        else if(!ui_login.getText().equals(currentUserLogin)){ 
+        else if(!ui_login.getText().equals(currentEditedUserLogin)){ 
             
             session.getUtilisateurRepository().clearCache();
             final List<Utilisateur> utilisateurs = session.getUtilisateurRepository().getAll();
@@ -166,7 +166,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                 }
             }
             ui_labelLogin.setTextFill(Color.BLACK);
-            currentUserLogin = ui_login.getText();
+            currentEditedUserLogin = ui_login.getText();
             elementProperty.get().setLogin(ui_login.getText());
         }
         

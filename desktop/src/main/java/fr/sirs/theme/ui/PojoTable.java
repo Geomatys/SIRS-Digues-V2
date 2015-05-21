@@ -335,7 +335,9 @@ public class PojoTable extends BorderPane {
             final Element p;
             if(createNewProperty.get()){
                 p = createPojo();
-            
+                if(this.repo!=null){
+                    this.repo.add(p);
+                }
                 if (p != null && openEditorOnNewProperty.get()) {
                     editPojo(p);
                 }
@@ -773,15 +775,13 @@ public class PojoTable extends BorderPane {
      */
     protected Element createPojo() {
         Object result = null;
+        
         if (repo != null) {
             result = repo.create();
-            repo.add(result);
         } 
-        
         else if (pojoClass != null) {
             try {
                 result = session.getElementCreator().createElement(pojoClass);
-//                result = pojoClass.newInstance();
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -792,8 +792,6 @@ public class PojoTable extends BorderPane {
         // TODO : check and set date début
         if (result instanceof Element) {
             final Element newlyCreated = (Element) result;
-//            newlyCreated.setAuthor(session.getUtilisateur().getId());
-//            newlyCreated.setValid(!(session.getRole()==Role.EXTERN));
             
             /* Dans le cas où on a un parent, il n'est pas nécessaire de faire
             addChild(), car la liste des éléments de la table est directement 
