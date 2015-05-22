@@ -76,18 +76,12 @@ public class ObjetManager {
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeCoteImporter typeCoteImporter){
         
-        sourceInfoImporter = new SourceInfoImporter(accessDatabase, 
-                couchDbConnector);
-        typePositionImporter = new TypePositionImporter(accessDatabase, 
-                couchDbConnector);
-        typeMateriauImporter = new TypeMateriauImporter(accessDatabase, 
-                couchDbConnector);
-        typeNatureImporter = new TypeNatureImporter(accessDatabase, 
-                couchDbConnector);
-        typeFonctionImporter = new TypeFonctionImporter(accessDatabase, 
-                couchDbConnector);
-        typeRefHeauImporter = new TypeRefHeauImporter(accessDatabase, 
-                couchDbConnector);
+        sourceInfoImporter = new SourceInfoImporter(accessDatabase, couchDbConnector);
+        typePositionImporter = new TypePositionImporter(accessDatabase, couchDbConnector);
+        typeMateriauImporter = new TypeMateriauImporter(accessDatabase, couchDbConnector);
+        typeNatureImporter = new TypeNatureImporter(accessDatabase, couchDbConnector);
+        typeFonctionImporter = new TypeFonctionImporter(accessDatabase, couchDbConnector);
+        typeRefHeauImporter = new TypeRefHeauImporter(accessDatabase, couchDbConnector);
         
         structureImporter = new ElementStructureImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 
@@ -180,6 +174,13 @@ public class ObjetManager {
     public void link() throws IOException, AccessDbImporterException{
         for(final GenericObjetLinker gol : linkers){
             gol.link();
+        }
+    }
+    
+    
+    public void update() throws IOException, AccessDbImporterException{
+        for(final GenericObjetImporter goi : importers){
+            goi.update();
         }
     }
     

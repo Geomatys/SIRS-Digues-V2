@@ -139,6 +139,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         final Prestation prestation = createAnonymValidElement(Prestation.class);
         
         prestation.setLinearId(troncon.getId());
+        prestation.setDesignation(String.valueOf(row.getInt(Columns.ID_PRESTATION.toString())));
         
         if (row.getInt(Columns.ID_TYPE_PRESTATION.toString()) != null) {
             prestation.setTypePrestationId(typesPrestation.get(row.getInt(Columns.ID_TYPE_PRESTATION.toString())).getId());
@@ -157,11 +158,11 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         }
         
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            prestation.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
+            prestation.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, prestation));
         }
         
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            prestation.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
+            prestation.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, prestation));
         }
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
@@ -236,7 +237,6 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         
         prestation.setCommentaire(cleanNullString(row.getString(Columns.DESCRIPTION_PRESTATION.toString())));
         
-        prestation.setDesignation(String.valueOf(row.getInt(Columns.ID_PRESTATION.toString())));
         prestation.setGeometry(buildGeometry(troncon.getGeometry(), prestation, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return prestation;

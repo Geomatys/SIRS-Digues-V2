@@ -96,11 +96,7 @@ public class DesordreImporter extends GenericDesordreImporter {
 
         objets = new HashMap<>();
         objetsByTronconId = new HashMap<>();
-
-        // Commenté pour ignorer la table d'événements.
-//        this.structures = sysEvtDesordreImporter.getById();
-//        this.structuresByTronconId = sysEvtDesordreImporter.getByTronconId();
-        // Parcours de la table pour compléter l'importation.
+        
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();

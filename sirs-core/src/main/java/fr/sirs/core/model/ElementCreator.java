@@ -67,5 +67,4 @@ public class ElementCreator {
             throw new SirsCoreRuntimeExecption(ex.getMessage());
         }
     }
-    
 }

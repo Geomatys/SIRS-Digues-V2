@@ -537,6 +537,41 @@ public class FXPositionablePane extends BorderPane {
     }
     
     /**
+     * Searche recursively the troncon of the positionable.
+     * 
+     * @param pos
+     * @return 
+     */
+    private TronconDigue getTronconFromPositionable(final Positionable pos){
+        final Element currentElement = getTronconFromElement(pos);
+        if(currentElement instanceof TronconDigue) return (TronconDigue) currentElement;
+        else return null;
+    }
+    
+    private Element getTronconFromElement(final Element element){
+        Element candidate = null;
+        
+        // Si on arrive sur un Troncon, on renvoie le troncon.
+        if(element instanceof TronconDigue){
+            candidate = element;
+        } 
+        
+        // Sinon on cherche un troncon dans les parents
+        else {
+            // On privilégie le chemin AvecForeignParent
+            if(element instanceof AvecForeignParent){
+                String id = ((AvecForeignParent) element).getForeignParentId();
+                candidate = getTronconFromElement(Injector.getSession().getTronconDigueRepository().get(id));
+            }
+            // Si on n'a pas (ou pas trouvé) de troncon via la référence ForeignParent on cherche via le conteneur
+            if (candidate==null && element.getParent()!=null) {
+                candidate = getTronconFromElement(element.getParent());
+            }
+        }
+        return candidate;
+    }
+    
+    /**
      * Return the {@link TronconDigue} object associated to the current positionable.
      * 
      * There's a high probability that our Positionable is contained in its 
@@ -553,16 +588,7 @@ public class FXPositionablePane extends BorderPane {
             if (pos == null) {
                 return null;
             }
-            if(pos instanceof AvecForeignParent){
-                String id = ((AvecForeignParent) pos).getForeignParentId();
-                troncon = Injector.getSession().getTronconDigueRepository().get(id);
-            } else if (pos.getParent() != null) {
-                Element tmp = pos.getParent();
-                while (tmp != null && !(tmp instanceof TronconDigue)) {
-                    tmp = tmp.getParent();
-                }
-                troncon = (TronconDigue) tmp;
-            }
+            troncon = getTronconFromPositionable(pos);
             // Maybe we have an incomplete version of the document, so we try by querying repository.
             if (troncon == null) {
                 try {

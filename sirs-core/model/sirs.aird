@@ -2536,7 +2536,7 @@
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_ITU6QGpNEeSly6KCFHFN8A" type="4001" element="_IRIh4GpNEeSly6KCFHFN8A" source="_D240sEfeEeSoXJiONqf-1A" target="_AcxaEEflEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_ITVhUGpNEeSly6KCFHFN8A" type="6001">
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ITVhUWpNEeSly6KCFHFN8A" x="-18" y="22"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ITVhUWpNEeSly6KCFHFN8A" y="17"/>
             </children>
             <children xmi:type="notation:Node" xmi:id="_ITVhUmpNEeSly6KCFHFN8A" type="6002">
               <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ITVhU2pNEeSly6KCFHFN8A" y="10"/>

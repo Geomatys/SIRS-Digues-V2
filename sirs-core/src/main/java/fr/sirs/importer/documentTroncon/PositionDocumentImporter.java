@@ -7,7 +7,6 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
-import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
@@ -158,40 +157,6 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
         return DOCUMENT.toString();
     }
 
-//    private final Map<Integer, PositionDocument> properDocumentTroncons = new HashMap<>();
-    
-//    @Override
-//    protected void preCompute() throws IOException, AccessDbImporterException {
-//        
-//        positions = new HashMap<>();
-//        positionsByTronconId = new HashMap<>();
-//        
-//        // Then, precomputing documents that would not be into one SYS_EVT table
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-//        while (it.hasNext()){
-//            final Row row = it.next();
-//            final Integer rowId = row.getInt(Columns.ID_DOC.toString());
-//            
-//            // If the document does not ever exists, add it.
-//            if(positions.get(rowId)==null){
-//                final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
-//                positions.put(rowId, documentTroncon);
-//                properDocumentTroncons.put(rowId, documentTroncon); // Memorize it for computation purpose.
-//                
-//                final Integer troncon = row.getInt(Columns.ID_TRONCON_GESTION.toString());
-//                if(troncon!=null){
-//                    if(positionsByTronconId.get(troncon)==null)
-//                        positionsByTronconId.put(troncon, new ArrayList());
-//                    
-//                    positionsByTronconId.get(troncon).add(documentTroncon);
-//                }
-//                documentTroncon.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
-//            }
-//        }
-//        
-//        couchDbConnector.executeBulk(positions.values());
-//    }
-
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
@@ -218,8 +183,6 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
         }
         couchDbConnector.executeBulk(positions.values());
     }
-    
-    
 
     @Override
     AbstractPositionDocument importRow(Row row) throws IOException, AccessDbImporterException {

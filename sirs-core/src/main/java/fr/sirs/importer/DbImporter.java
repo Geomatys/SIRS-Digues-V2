@@ -66,6 +66,7 @@ import fr.sirs.core.component.RefUtilisationConduiteRepository;
 import fr.sirs.core.component.RefVoieDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
@@ -91,6 +92,7 @@ import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.objet.ObjetManager;
+import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -127,6 +129,16 @@ public class DbImporter {
         }
         catch(DateTimeParseException ex){
             SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    public static LocalDateTime parse(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
+        try{
+            return LocalDateTime.parse(date.toString(), dateTimeFormatter);
+        }
+        catch(DateTimeParseException ex){
+            SirsCore.LOGGER.log(Level.SEVERE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
         }
         return null;
     }
@@ -211,6 +223,7 @@ public class DbImporter {
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
     private TypeCoteImporter typeCoteImporter;
+    private TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter;
     
     private OrientationImporter orientationImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
@@ -232,7 +245,7 @@ public class DbImporter {
     private MarcheMaitreOeuvreImporter marcheMaitreOeuvreImporter;
     private PhotoLocaliseeEnPrImporter photoLocaliseeEnPrImporter;
     private PhotoLocaliseeEnXyImporter photoLocaliseeEnXyImporter;
-    private List<GenericEntityLinker> linkers = new ArrayList<>();
+    private final List<GenericEntityLinker> linkers = new ArrayList<>();
 
     public enum TableName{
      BORNE_DIGUE,
@@ -831,16 +844,18 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, 
                 documentImporter.getDocumentManager().getMarcheImporter(), organismeImporter);
         linkers.add(marcheMaitreOeuvreImporter);
+        typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
+                accessDatabase, couchDbConnector);
         photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 objetManager, systemeReperageImporter, borneDigueImporter, 
                 intervenantImporter, documentImporter, orientationImporter,
-                typeCoteImporter);
+                typeCoteImporter, typeDonneesSousGroupeImporter);
         linkers.add(photoLocaliseeEnPrImporter);
         photoLocaliseeEnXyImporter = new PhotoLocaliseeEnXyImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
                 objetManager, intervenantImporter, documentImporter, 
-                orientationImporter, typeCoteImporter);
+                orientationImporter, typeCoteImporter, typeDonneesSousGroupeImporter);
         linkers.add(photoLocaliseeEnXyImporter);
     }
     
@@ -891,6 +906,8 @@ public class DbImporter {
         
         systemeReperageBorneImporter.getByBorneId();
         documentImporter.getPositions();
+        objetManager.compute();
+        objetManager.link();
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();
@@ -901,6 +918,8 @@ public class DbImporter {
         // bidirectionnelles seraient ajoutées on fait un update().
 //        documentImporter.update(); 
         evenementHydrauliqueImporter.update();
+        objetManager.update();
+        documentImporter.update();
     }
 
     //TODO remove when import finished

@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -18,9 +19,9 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
+import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,14 +42,8 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
+public class PhotoLocaliseeEnXyImporter extends PhotoImporter {
     
-    private final ObjetManager objetManager;
-    private final TronconGestionDigueImporter tronconGestionDigueImporter;
-    private final IntervenantImporter intervenantImporter;
-    private final PositionDocumentImporter documentImporter;
-    private final OrientationImporter orientationImporter;
-    private final TypeCoteImporter typeCoteImporter;
 
     public PhotoLocaliseeEnXyImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -57,14 +52,12 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
             final IntervenantImporter intervenantImporter,
             final PositionDocumentImporter documentImporter,
             final OrientationImporter orientationImporter,
-            final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, couchDbConnector);
-        this.orientationImporter = orientationImporter;
-        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
-        this.objetManager = objetManager;
-        this.intervenantImporter = intervenantImporter;
-        this.documentImporter = documentImporter;
-        this.typeCoteImporter = typeCoteImporter;
+            final TypeCoteImporter typeCoteImporter,
+            final TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                objetManager, intervenantImporter, documentImporter, 
+                orientationImporter, typeCoteImporter,
+                typeDonneesSousGroupeImporter);
     }
 
     private enum Columns {
@@ -108,10 +101,13 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
         final Map<Integer, RefCote> cotes = typeCoteImporter.getTypeReferences();
+        final Map<Map.Entry<Integer, Integer>, DbImporter.TableName> types = typeDonneesSousGroupeImporter.getTypes();
         
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            
             final Photo photo = createAnonymValidElement(Photo.class);
             
             if(row.getInt(Columns.ID_ORIENTATION.toString())!=null){
@@ -139,7 +135,6 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
             if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
                 photo.setDate(DbImporter.parse(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
             }
-            photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
             
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
@@ -172,6 +167,25 @@ public class PhotoLocaliseeEnXyImporter extends GenericEntityLinker {
             } catch (FactoryException ex) {
                 Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
+            photo.setGeometry(buildGeometry(troncon.getGeometry(), photo, tronconGestionDigueImporter.getBorneDigueRepository()));
+            
+//            En l'absence de ID_ELEMENT_SOUS_GROUPE, on ne peut pas rattacher les éventuelles photos à des éléments
+//            De toutes facons la table est vide dans les bases de l'Isere comme du Rhone
+//            final Map.Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<>(
+//                    row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 
+//                    row.getInt(Columns.ID_SOUS_GROUPE_DONNEES.toString()));
+//            
+//            final DbImporter.TableName tableName = types.get(entry);
+//            final Integer id = row.getInt(Columns.ID_ELEMENT_SOUS_GROUPE.toString());
+//            
+//            if(tableName!=null && id!=null){
+//                attachPhoto(id, tableName, photo);
+//            }
+            
+            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+            photos.put(row.getInt(Columns.ID_PHOTO.toString()), photo);
         }
     }
 }

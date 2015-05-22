@@ -134,6 +134,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Desordre desordre = createAnonymValidElement(Desordre.class);
         
         desordre.setLinearId(troncon.getId());
+        desordre.setDesignation(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));
 
         if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
             final BorneDigue b = bornes.get((int) row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()).doubleValue());
@@ -186,11 +187,11 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            desordre.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
+            desordre.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, desordre));
         }
         
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            desordre.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
+            desordre.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, desordre));
         }
 
         if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {
@@ -231,7 +232,6 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             desordre.setObservations(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
         }
         
-        desordre.setDesignation(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));
         desordre.setGeometry(buildGeometry(troncon.getGeometry(), desordre, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return desordre;

@@ -104,4 +104,8 @@ public abstract class GenericObjetImporter<T extends Objet> extends GenericImpor
     protected void compute() throws IOException, AccessDbImporterException {
         throw new UnsupportedOperationException("Do not use system table importers.");
     }
+    
+    public void update() throws IOException, AccessDbImporterException{
+        couchDbConnector.executeBulk(getById().values());
+    }
 }

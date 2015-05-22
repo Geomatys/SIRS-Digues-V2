@@ -44,29 +44,6 @@ abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocumen
         this.systemeReperageImporter = systemeReperageImporter;
     }
     
-//    /**
-//     *
-//     * @return A map containing all Document instances accessibles from the
-//     * internal database identifier (documents may be empty).
-//     * @throws IOException
-//     * @throws AccessDbImporterException
-//     */
-//    public Map<Integer, T> getPrecomputedPositions() throws IOException, AccessDbImporterException {
-//        if (positions == null)  preCompute();
-//        return positions;
-//    }
-//    
-//    /**
-//     * 
-//     * @return
-//     * @throws IOException
-//     * @throws AccessDbImporterException 
-//     */
-//    public Map<Integer, List<T>> getPrecomputedPositionsByTronconId() throws IOException, AccessDbImporterException {
-//        if (positionsByTronconId == null)  preCompute();
-//        return positionsByTronconId;
-//    }
-    
     /**
      *
      * @return A map containing all Document instances accessibles from the
@@ -97,15 +74,6 @@ abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocumen
     }
     
     /**
-     * Registers documents into CouchDb and feed Document list, but do not map
-     * database fields
-     */
-//    protected abstract void preCompute() throws IOException, AccessDbImporterException;
-//    protected void preCompute() throws IOException, AccessDbImporterException {
-//        throw new UnsupportedOperationException("Do not use system table importers.");
-//    }
-    
-    /**
      * 
      * @param row
      * @return
@@ -115,10 +83,12 @@ abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocumen
     abstract T importRow(final Row row) 
             throws IOException, AccessDbImporterException;
     
-    
-
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         throw new UnsupportedOperationException("Do not use system table importers.");
+    }
+    
+    public void update() throws IOException, AccessDbImporterException{
+        couchDbConnector.executeBulk(getPositions().values());
     }
 }

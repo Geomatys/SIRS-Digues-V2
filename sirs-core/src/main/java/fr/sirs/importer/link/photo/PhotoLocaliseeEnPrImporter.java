@@ -5,17 +5,13 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Desordre;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.MonteeEaux;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOrientationPhoto;
 import fr.sirs.core.model.SystemeReperage;
@@ -28,7 +24,6 @@ import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
@@ -55,18 +50,10 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
+public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
 
-    private Map<Integer, Photo> photos = null;
-    private final TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter;
-    private final ObjetManager objetManager;
-    private final TronconGestionDigueImporter tronconGestionDigueImporter;
-    private final SystemeReperageImporter systemeReperageImporter;
-    private final BorneDigueImporter borneDigueImporter;
-    private final IntervenantImporter intervenantImporter;
-    private final PositionDocumentImporter documentImporter;
-    private final OrientationImporter orientationImporter;
-    private final TypeCoteImporter typeCoteImporter;
+    protected final SystemeReperageImporter systemeReperageImporter;
+    protected final BorneDigueImporter borneDigueImporter;
             
 
     public PhotoLocaliseeEnPrImporter(final Database accessDatabase,
@@ -78,18 +65,14 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             final IntervenantImporter intervenantImporter,
             final PositionDocumentImporter documentImporter,
             final OrientationImporter orientationImporter, 
-            final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, couchDbConnector);
-        this.typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
-                accessDatabase, couchDbConnector);;
-        this.orientationImporter = orientationImporter;
-        this.tronconGestionDigueImporter = tronconGestionDigueImporter;
-        this.objetManager = objetManager;
+            final TypeCoteImporter typeCoteImporter,
+            final TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter) {
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                objetManager, intervenantImporter, documentImporter, 
+                orientationImporter, typeCoteImporter,
+                typeDonneesSousGroupeImporter);
         this.systemeReperageImporter = systemeReperageImporter;
         this.borneDigueImporter = borneDigueImporter;
-        this.intervenantImporter = intervenantImporter;
-        this.documentImporter = documentImporter;
-        this.typeCoteImporter = typeCoteImporter;
     }
 
     private enum Columns {
@@ -149,6 +132,8 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
+            final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            
             final Photo photo = createAnonymValidElement(Photo.class);
             
             if(row.getInt(Columns.ID_ORIENTATION.toString())!=null){
@@ -253,6 +238,7 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
                 photo.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF.toString()).floatValue());
             }
             photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));
+            photo.setGeometry(buildGeometry(troncon.getGeometry(), photo, tronconGestionDigueImporter.getBorneDigueRepository()));
 
             final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<>(
                     row.getInt(Columns.ID_GROUPE_DONNEES.toString()), 
@@ -262,75 +248,11 @@ public class PhotoLocaliseeEnPrImporter extends GenericEntityLinker {
             final Integer id = row.getInt(Columns.ID_ELEMENT_SOUS_GROUPE.toString());
             
             if(tableName!=null && id!=null){
-            switch(tableName){
-                // STRUCTURES
-                case SYS_EVT_CRETE:
-                case SYS_EVT_EPIS:
-                case SYS_EVT_FONDATION:
-                case SYS_EVT_OUVRAGE_REVANCHE:
-                case SYS_EVT_PIED_DE_DIGUE:
-                case SYS_EVT_PIED_FRONT_FRANC_BORD:
-                case SYS_EVT_SOMMET_RISBERME:
-                case SYS_EVT_TALUS_DIGUE:
-                case SYS_EVT_TALUS_FRANC_BORD:
-                case SYS_EVT_TALUS_RISBERME:
-                    final Objet structure = objetManager.getElementStructureImporter().getById().get(id);
-                    structure.getPhotos().add(photo);
-                    break;
-                // RESEAUX
-                case SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE:
-                case SYS_EVT_CHEMIN_ACCES:
-                case SYS_EVT_CONDUITE_FERMEE:
-                case SYS_EVT_OUVERTURE_BATARDABLE:
-                case SYS_EVT_OUVRAGE_PARTICULIER:
-                case SYS_EVT_OUVRAGE_TELECOMMUNICATION:
-                case SYS_EVT_OUVRAGE_VOIRIE:
-                case SYS_EVT_POINT_ACCES:
-                case SYS_EVT_RESEAU_EAU:
-                case SYS_EVT_RESEAU_TELECOMMUNICATION:
-                case SYS_EVT_STATION_DE_POMPAGE:
-                case SYS_EVT_VOIE_SUR_DIGUE:
-                    final Objet reseau = objetManager.getElementReseauImporter().getById().get(id);
-                    reseau.getPhotos().add(photo);
-                    break;
-                // GEOMETRIES
-                case SYS_EVT_PROFIL_FRONT_FRANC_BORD:
-                case SYS_EVT_LARGEUR_FRANC_BORD:
-                    final Objet geometrie = objetManager.getElementGeometryImporter().getById().get(id);
-                    geometrie.getPhotos().add(photo);
-                    break;
-                // DESORDRES
-                case SYS_EVT_DESORDRE:
-                    final Desordre desordre = objetManager.getDesordreImporter().getById().get(id);
-                    if(desordre!=null){
-                        desordre.getPhotos().add(photo);
-                    } else {
-                        SirsCore.LOGGER.log(Level.FINE, "Désordre null : "+id);
-                    }
-                    break;
-                // PRESTATIONS
-                case SYS_EVT_PRESTATION:
-                    final Prestation prestation = objetManager.getPrestationImporter().getById().get(id);
-                    prestation.getPhotos().add(photo);
-                    break;
-                // MONTEES DES EAUX
-                case SYS_EVT_MONTEE_DES_EAUX_HYDRO:
-                    final MonteeEaux monteeEaux = objetManager.getMonteeDesEauxImporter().getById().get(id);
-                    monteeEaux.getPhotos().add(photo);
-                    break;
-                // LAISSE CRUES
-                case SYS_EVT_LAISSE_CRUE:
-                    final LaisseCrue laisseCrue = objetManager.getLaisseCrueImporter().getById().get(id);
-                    laisseCrue.getPhotos().add(photo);
-                    break;
-                default:
-                    SirsCore.LOGGER.log(Level.FINE, "Autre photo : "+tableName);
-            }
+                attachPhoto(id, tableName, photo);
             }
             
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             photos.put(row.getInt(Columns.ID_PHOTO.toString()), photo);
-
         }
     }
 }
