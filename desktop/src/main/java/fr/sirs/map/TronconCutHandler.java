@@ -336,7 +336,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     //ajout d'un point de coupe
                     Point pt = helper.toJTS(startX, startY);
                     //to data crs
-                    final MathTransform ptToData =  CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(),JTS.findCoordinateReferenceSystem(troncon.getGeometry()));
+                    final MathTransform ptToData =  CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), session.getProjection());
                     pt = (Point) JTS.transform(pt,ptToData);
 
                     final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
