@@ -9,6 +9,8 @@ import org.springframework.context.ApplicationContextAware;
 /**
  *
  * @author Alexis Manin (Geomatys)
+ * @author Olivier Nouguier (Géomatys)
+ * @author Samuel Andrés (Géomatys)
  */
 public class InjectorCore implements ApplicationContextAware {
 
@@ -17,7 +19,6 @@ public class InjectorCore implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext ac) throws BeansException {
         applicationContext = ac;
-
     }
 
     public static void injectDependencies(Object o) {

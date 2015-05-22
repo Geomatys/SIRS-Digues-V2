@@ -1,12 +1,19 @@
 package fr.sirs.core;
 
+import fr.sirs.util.property.Internal;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.measure.unit.SI;
@@ -23,7 +30,6 @@ import org.geotoolkit.internal.io.Installation;
 import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.geotoolkit.referencing.operation.transform.NTv2Transform;
 import org.opengis.geometry.Envelope;
@@ -177,5 +183,45 @@ public class SirsCore {
             }
         }
         return input;
+    }
+    
+    private static final Class[] SUPPORTED_TYPES = new Class[]{
+        Boolean.class,
+        String.class,
+        Number.class,
+        boolean.class,
+        int.class,
+        float.class,
+        double.class,
+        LocalDateTime.class
+    };
+
+    /**
+     * Récupération des attributes simple pour affichage dans les tables.
+     *
+     * @param clazz
+     * @return liste des propriétés simples
+     */
+    public static LinkedHashMap<String, PropertyDescriptor> listSimpleProperties(Class clazz) throws IntrospectionException {
+        final LinkedHashMap<String, PropertyDescriptor> properties = new LinkedHashMap<>();
+        for (java.beans.PropertyDescriptor pd : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
+            final Method m = pd.getReadMethod();
+
+            if (m == null || m.getAnnotation(Internal.class) != null) {
+                continue;
+            }
+
+            final Class propClass = m.getReturnType();
+            if (propClass.isEnum()) {
+                properties.put(pd.getName(), pd);
+            } else
+                for (Class c : SUPPORTED_TYPES) {
+                    if (c.isAssignableFrom(propClass)) {
+                        properties.put(pd.getName(), pd);
+                        break;
+                    }
+                }
+        }
+        return properties;
     }
 }

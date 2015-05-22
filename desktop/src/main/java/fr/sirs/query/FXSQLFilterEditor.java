@@ -261,11 +261,11 @@ public class FXSQLFilterEditor extends GridPane {
                 return FF.greaterOrEqual(propName, propValue);
             } else if (Condition.LIKE.equals(condition)) {
                 return FF.like(propName, String.valueOf(propValue.getValue()));
-            } else if (condition.EQUAL.equals(condition)) {
+            } else if (Condition.EQUAL.equals(condition)) {
                 return FF.equals(propName, propValue);
-            } else if (condition.NOT_EQUAL.equals(condition)) {
+            } else if (Condition.NOT_EQUAL.equals(condition)) {
                 return FF.notEqual(propName, propValue, true, null);
-            } else if (condition.NULL.equals(condition)) {
+            } else if (Condition.NULL.equals(condition)) {
                 return FF.isNull(propName);
             } else {
                 return FF.not(FF.isNull(propName));

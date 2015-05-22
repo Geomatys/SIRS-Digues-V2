@@ -22,22 +22,15 @@ import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -450,47 +443,5 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         
         new ComboBoxCompletion(comboBox);
-    }
-    
-    private static final Class[] SUPPORTED_TYPES = new Class[]{
-        Boolean.class,
-        String.class,
-        Integer.class,
-        Float.class,
-        Double.class,
-        boolean.class,
-        int.class,
-        float.class,
-        double.class,
-        LocalDateTime.class
-    };
-
-    
-    /**
-     * Récupération des attributes simple pour affichage dans les tables.
-     * 
-     * @param clazz
-     * @return liste des propriétés simples
-     */
-    public static LinkedHashMap<String, PropertyDescriptor> listSimpleProperties(Class clazz) throws IntrospectionException {
-        final LinkedHashMap<String, PropertyDescriptor> properties = new LinkedHashMap<>();
-        for (java.beans.PropertyDescriptor pd : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
-            final Method m = pd.getReadMethod();
-
-            if (m == null || m.getAnnotation(Internal.class) != null) {
-                continue;
-            }
-
-            final Class propClass = m.getReturnType();
-            if (propClass.isEnum()) {
-                properties.put(pd.getName(), pd);
-            } else for (Class c : SUPPORTED_TYPES) {
-                    if (c.isAssignableFrom(propClass)) {
-                        properties.put(pd.getName(), pd);
-                        break;
-                    }
-                }
-        }
-        return properties;
     }
 }
