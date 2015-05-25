@@ -14,15 +14,13 @@ import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXValiditySummaryToElementTableColumn;
-import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -64,7 +62,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -86,7 +83,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -106,7 +102,6 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -151,8 +146,8 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiDesignationPane;
     @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
     @FXML private TextField uiDesignation;
-    private TableView<ValiditySummary> designations;
-    private List<ValiditySummary> validitySummaries;
+    private TableView<Preview> designations;
+    private List<Preview> validitySummaries;
     
     // 2- Recherche SQL
     @FXML private ToggleButton uiToggleSQL;
@@ -608,10 +603,10 @@ public class FXSearchPane extends BorderPane {
     }
     
     private void searchDesignation(){
-        final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
+        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
 
-        validitySummaries = session.getValiditySummaryRepository().getDesignationsForClass(uiDesignationClass.getValue());
-        validitySummaries.removeIf((ValiditySummary t) -> {
+        validitySummaries = session.getPreviews().getByClass(uiDesignationClass.getValue());
+        validitySummaries.removeIf((Preview t) -> {
                 return (uiDesignation.getText()==null || "".equals(uiDesignation.getText())) ?
                         (t.getDesignation()!=null || !"".equals(t.getDesignation())) : 
                         !uiDesignation.getText().equals(t.getDesignation());
@@ -622,15 +617,15 @@ public class FXSearchPane extends BorderPane {
 
         designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
-        final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
+        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(bundle.getString("designation"));
+        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             });
         designations.getColumns().add(propertyColumn);
         
-        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
-        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
-                return new SimpleObjectProperty(param.getValue().getLabel());
+        final TableColumn<Preview, String> labelColumn = new TableColumn<>(bundle.getString("libelle"));
+        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
+                return new SimpleObjectProperty(param.getValue().getLibelle());
             });
         designations.getColumns().add(labelColumn);
         setCenter(designations);

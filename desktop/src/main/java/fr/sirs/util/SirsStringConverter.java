@@ -7,23 +7,23 @@ import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import fr.sirs.Session;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
-import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.index.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.StringConverter;
+import org.apache.sis.util.ArgumentChecks;
 import org.opengis.feature.PropertyType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -61,13 +61,9 @@ public class SirsStringConverter extends StringConverter {
             text = getDesignation((Element)item);
         } else if (item instanceof ElementHit) {
             text = ((ElementHit) item).getLibelle();
-        } else if (item instanceof PreviewLabel) {
-            final PreviewLabel label = (PreviewLabel) item;
+        } else if (item instanceof Preview) {
+            final Preview label = (Preview) item;
             text = getDesignation(label);
-            if (label.getLabel() != null) {
-                if (!text.isEmpty())  text += " : ";
-                text += label.getLabel();
-            }
         } else if (item instanceof String) {
             text = (String) item;
         } else if (item instanceof CoordinateReferenceSystem) {
@@ -106,8 +102,9 @@ public class SirsStringConverter extends StringConverter {
         return text;
     }
 
-    public static String getDesignation(final PreviewLabel source) {
-        final LabelMapper labelMapper = getLabelMapperForClass(source.getType());
+    public static String getDesignation(final Preview source) {
+        ArgumentChecks.ensureNonNull("Preview to get designation for", source);
+        final LabelMapper labelMapper = source.getElementClass() == null? null : getLabelMapperForClass(source.getElementClass());
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         if(source.getDesignation()!=null){
             if(!"".equals(prefixedDesignation)){
@@ -130,10 +127,10 @@ public class SirsStringConverter extends StringConverter {
         
         if(source instanceof PositionDocument){
             if(((PositionDocument)source).getSirsdocument()!=null){
-                final PreviewLabel preview = Injector.getSession().getPreviewLabelRepository().get(((PositionDocument)source).getSirsdocument());
-                if(preview!=null && preview.getType()!=null){
+                final Preview preview = Injector.getSession().getPreviews().get(((PositionDocument)source).getSirsdocument());
+                if(preview!=null && preview.getElementClass()!=null){
                     try {
-                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getType()));
+                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getElementClass()));
                         if(documentLabelMapper!=null){
                             prefixedDesignation+=" ["+documentLabelMapper.mapClassName()+"] ";
                         }
@@ -173,7 +170,7 @@ public class SirsStringConverter extends StringConverter {
         try {
             return getLabelMapperForClass(Class.forName(className));
         } catch (ClassNotFoundException ex) {
-            SIRS.LOGGER.log(Level.SEVERE, null, ex);
+            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
         return null;
     }

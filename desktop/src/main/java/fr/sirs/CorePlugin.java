@@ -11,7 +11,6 @@ import org.geotoolkit.data.bean.BeanStore;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
-import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -48,7 +47,7 @@ import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
@@ -420,19 +419,18 @@ public class CorePlugin extends Plugin {
     private static class DocumentFilter<T> implements Filter{
 
         private final Class<T> clazz;
-        private List<PreviewLabel> previews;
+        private List<Preview> previews;
         private Map<String, String> cache;
-        private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
 
         public DocumentFilter(final Class<T> clazz) {
             this.clazz = clazz;
             
             // Si la classe fournie est un sirsDocument, on aura besoin du cache dans la méthode evaluate(), donc on l'initialise.
             if(SIRSDocument.class.isAssignableFrom(clazz)){
-                previews = PREVIEW_LABEL_REPOSITORY.getPreviewLabels(clazz);
+                previews = Injector.getSession().getPreviews().getByClass(clazz);
                 cache = new HashMap<>();
-                for(final PreviewLabel preview : previews){
-                    cache.put(preview.getId(), preview.getType());
+                for(final Preview preview : previews){
+                    cache.put(preview.getElementId(), preview.getElementClass());
                 }
             }
         }

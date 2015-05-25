@@ -6,9 +6,9 @@ import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.ValiditySummaryRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import fr.sirs.util.FXValiditySummaryToElementTableColumn;
 import fr.sirs.util.SirsTableCell;
 import java.util.HashMap;
@@ -46,15 +46,15 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class FXValidationPane extends BorderPane {
 
-    private TableView<ValiditySummary> usages;
+    private TableView<Preview> usages;
     private final Session session = Injector.getSession();
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    private final ValiditySummaryRepository validitySummaryRepository = session.getValiditySummaryRepository();
+    private final Previews validitySummaryRepository = session.getPreviews();
     
     private enum ValiditySummaryChoice{VALID, INVALID, ALL};
 
     public FXValidationPane() {
-        final ResourceBundle bundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
+        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
 
         usages = new TableView<>();
         usages.setEditable(false);
@@ -62,12 +62,12 @@ public class FXValidationPane extends BorderPane {
         usages.getColumns().add(new DeleteColumn());
         usages.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
-        final TableColumn<ValiditySummary, Map.Entry<String, String>> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
-        docClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, Map.Entry<String, String>> param) -> {
+        final TableColumn<Preview, Map.Entry<String, String>> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
+        docClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, Map.Entry<String, String>> param) -> {
                     return new SimpleObjectProperty<>(new HashMap.SimpleImmutableEntry<String, String>(param.getValue().getDocId(), param.getValue().getDocClass()));
                 });
-        docClassColumn.setCellFactory((TableColumn<ValiditySummary, Map.Entry<String, String>> param) -> {
-                return new TableCell<ValiditySummary, Map.Entry<String, String>>() {
+        docClassColumn.setCellFactory((TableColumn<Preview, Map.Entry<String, String>> param) -> {
+                return new TableCell<Preview, Map.Entry<String, String>>() {
                     @Override
                     protected void updateItem(Map.Entry<String, String> item, boolean empty) {
                         super.updateItem(item, empty);
@@ -94,12 +94,12 @@ public class FXValidationPane extends BorderPane {
             });
         usages.getColumns().add(docClassColumn);
         
-        final TableColumn<ValiditySummary, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
-        elementClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
+        final TableColumn<Preview, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
+        elementClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                     return new SimpleStringProperty(param.getValue().getElementClass());
                 });
-        elementClassColumn.setCellFactory((TableColumn<ValiditySummary, String> param) -> {
-                return new TableCell<ValiditySummary, String>() {
+        elementClassColumn.setCellFactory((TableColumn<Preview, String> param) -> {
+                return new TableCell<Preview, String>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -128,23 +128,23 @@ public class FXValidationPane extends BorderPane {
             });
         usages.getColumns().add(elementClassColumn);
 
-        final TableColumn<ValiditySummary, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
-        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
+        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
+        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             });
         usages.getColumns().add(propertyColumn);
         
-        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(bundle.getString("label"));
-        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
-                return new SimpleObjectProperty(param.getValue().getLabel());
+        final TableColumn<Preview, String> labelColumn = new TableColumn<>(bundle.getString("label"));
+        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
+                return new SimpleObjectProperty(param.getValue().getLibelle());
             });
         usages.getColumns().add(labelColumn);
 
-        final TableColumn<ValiditySummary, String> authorColumn = new TableColumn<>(bundle.getString("author"));
-        authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, String> param) -> {
+        final TableColumn<Preview, String> authorColumn = new TableColumn<>(bundle.getString("author"));
+        authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
             });
-        authorColumn.setCellFactory((TableColumn<ValiditySummary, String> param) -> new SirsTableCell());
+        authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new SirsTableCell());
         usages.getColumns().add(authorColumn);
 
         usages.getColumns().add(new ValidColumn());
@@ -178,10 +178,10 @@ public class FXValidationPane extends BorderPane {
 
             @Override
             public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
-                final List<ValiditySummary> requiredList;
+                final List<Preview> requiredList;
                 switch(choiceBox.getSelectionModel().getSelectedItem()){
-                    case VALID: requiredList = validitySummaryRepository.getValidation(true); break;
-                    case INVALID: requiredList = validitySummaryRepository.getValidation(false); break;
+                    case VALID: requiredList = validitySummaryRepository.getAllByValidationState(true); break;
+                    case INVALID: requiredList = validitySummaryRepository.getAllByValidationState(false); break;
                     case ALL:
                     default: requiredList= validitySummaryRepository.getValidation();
                 }
@@ -208,7 +208,7 @@ public class FXValidationPane extends BorderPane {
     }
     
 
-    private class DeleteColumn extends TableColumn<ValiditySummary, ValiditySummary>{
+    private class DeleteColumn extends TableColumn<Preview, Preview>{
         
         public DeleteColumn() {
             super("Suppression");            
@@ -219,14 +219,14 @@ public class FXValidationPane extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
             
-            setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) -> {
+            setCellValueFactory((TableColumn.CellDataFeatures<Preview, Preview> param) -> {
                     return new SimpleObjectProperty<>(param.getValue());
                 });
             
 
-            setCellFactory((TableColumn<ValiditySummary, ValiditySummary> param) -> {
+            setCellFactory((TableColumn<Preview, Preview> param) -> {
                     return new ButtonTableCell<>(
-                        false, new ImageView(GeotkFX.ICON_DELETE) , (ValiditySummary t) -> true, (ValiditySummary vSummary) -> {
+                        false, new ImageView(GeotkFX.ICON_DELETE) , (Preview t) -> true, (Preview vSummary) -> {
                             if (vSummary != null) {
                                 final Session session = Injector.getSession();
                                 final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
@@ -266,7 +266,7 @@ public class FXValidationPane extends BorderPane {
         }  
     }
 
-    private class ValidButtonTableCell extends TableCell<ValiditySummary, ValiditySummary> {
+    private class ValidButtonTableCell extends TableCell<Preview, Preview> {
 
         protected final Button button = new Button();
 
@@ -276,7 +276,7 @@ public class FXValidationPane extends BorderPane {
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setAlignment(Pos.CENTER);
             button.setOnAction((ActionEvent event) -> {
-                    final ValiditySummary vSummary = getItem();
+                    final Preview vSummary = getItem();
                     if (vSummary != null) {
                         final Session session = Injector.getSession();
                         final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
@@ -310,7 +310,7 @@ public class FXValidationPane extends BorderPane {
         }
 
         @Override
-        protected void updateItem(ValiditySummary item, boolean empty) {
+        protected void updateItem(Preview item, boolean empty) {
             super.updateItem(item, empty);
 
             if(empty || item==null){
@@ -324,7 +324,7 @@ public class FXValidationPane extends BorderPane {
         }
     }
 
-    private class ValidColumn extends TableColumn<ValiditySummary, ValiditySummary> {
+    private class ValidColumn extends TableColumn<Preview, Preview> {
 
         public ValidColumn() {
             super("État");
@@ -333,11 +333,11 @@ public class FXValidationPane extends BorderPane {
             setResizable(true);
             setPrefWidth(120);
 
-            setCellValueFactory((TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) -> {
+            setCellValueFactory((TableColumn.CellDataFeatures<Preview, Preview> param) -> {
                     return new SimpleObjectProperty<>(param.getValue());
                 });
 
-            setCellFactory((TableColumn<ValiditySummary, ValiditySummary> param) -> {
+            setCellFactory((TableColumn<Preview, Preview> param) -> {
                     return new ValidButtonTableCell();
                 });
         }

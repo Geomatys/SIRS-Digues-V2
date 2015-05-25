@@ -350,7 +350,7 @@ public class FXMainFrame extends BorderPane {
             }
 
             try {
-                fileToPrint = PrinterUtilities.print(element, avoidFields, session.getPreviewLabelRepository(), new SirsStringConverter());
+                fileToPrint = PrinterUtilities.print(element, avoidFields, session.getPreviews(), new SirsStringConverter());
                 fileToPrint.deleteOnExit();
                 Desktop.getDesktop().open(fileToPrint);
             } catch (Exception e) {

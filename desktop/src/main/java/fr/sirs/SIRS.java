@@ -8,10 +8,9 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import fr.sirs.digue.FXDiguePane;
 import fr.sirs.digue.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
@@ -250,8 +249,8 @@ public final class SIRS extends SirsCore {
     public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
         try {
 //            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().
-            final PreviewLabel summary = Injector.getSession().getPreviewLabelRepository().get(documentId);
-            final Class clazz = Class.forName(summary.getType());
+            final Preview summary = Injector.getSession().getPreviews().get(documentId);
+            final Class clazz = Class.forName(summary.getElementClass());
             if(clazz==ProfilTravers.class){
                 return FXCollections.observableList(Injector.getSession().getPositionProfilTraversRepository().getByDocumentId(documentId));
             } else {

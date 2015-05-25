@@ -2,7 +2,7 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -18,7 +18,7 @@ import org.geotoolkit.gui.javafx.util.ButtonTableCell;
  * 
  * @author Samuel Andrés (Geomatys)
  */
-public class FXValiditySummaryToElementTableColumn  extends TableColumn<ValiditySummary, ValiditySummary> {
+public class FXValiditySummaryToElementTableColumn  extends TableColumn<Preview, Preview> {
 
     public FXValiditySummaryToElementTableColumn() {
         super("Détail");
@@ -27,29 +27,29 @@ public class FXValiditySummaryToElementTableColumn  extends TableColumn<Validity
         setResizable(true);
         setPrefWidth(70);
 
-        setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary>, ObservableValue<ValiditySummary>>() {
+        setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Preview, Preview>, ObservableValue<Preview>>() {
             @Override
-            public ObservableValue<ValiditySummary> call(TableColumn.CellDataFeatures<ValiditySummary, ValiditySummary> param) {
+            public ObservableValue<Preview> call(TableColumn.CellDataFeatures<Preview, Preview> param) {
                 return new SimpleObjectProperty<>(param.getValue());
             }
         });
 
-        setCellFactory(new Callback<TableColumn<ValiditySummary, ValiditySummary>, TableCell<ValiditySummary, ValiditySummary>>() {
+        setCellFactory(new Callback<TableColumn<Preview, Preview>, TableCell<Preview, Preview>>() {
 
             @Override
-            public TableCell<ValiditySummary, ValiditySummary> call(TableColumn<ValiditySummary, ValiditySummary> param) {
+            public TableCell<Preview, Preview> call(TableColumn<Preview, Preview> param) {
 
                 return new FXValiditySummaryToElementButtonTableCell();
             }
         });
     }
 
-    private class FXValiditySummaryToElementButtonTableCell extends ButtonTableCell<ValiditySummary, ValiditySummary> {
+    private class FXValiditySummaryToElementButtonTableCell extends ButtonTableCell<Preview, Preview> {
 
         public FXValiditySummaryToElementButtonTableCell() {
-            super(false, null, (ValiditySummary t) -> true, new Function<ValiditySummary, ValiditySummary>() {
+            super(false, null, (Preview t) -> true, new Function<Preview, Preview>() {
                 @Override
-                public ValiditySummary apply(ValiditySummary t) {
+                public Preview apply(Preview t) {
                     Injector.getSession().showEditionTab(t);
                     return t;
                 }
@@ -57,7 +57,7 @@ public class FXValiditySummaryToElementTableColumn  extends TableColumn<Validity
         }
 
         @Override
-        protected void updateItem(ValiditySummary item, boolean empty) {
+        protected void updateItem(Preview item, boolean empty) {
             super.updateItem(item, empty);
 
             if (item != null) {

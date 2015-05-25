@@ -1,12 +1,17 @@
 package fr.sirs.core.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
-public class ValiditySummary {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class Preview implements AvecLibelle {
     
     @JsonProperty("docId")
     private String docId;
@@ -29,9 +34,12 @@ public class ValiditySummary {
     @JsonProperty("designation")
     private String designation;
     
-    @JsonProperty("label")
-    private String label;
+    private final SimpleStringProperty libelleProperty = new SimpleStringProperty();
 
+    /**
+     * @return the ID of the current element if its a document, or the Id of its
+     * top-level container if target element is a contained element.
+     */
     public String getDocId() {
         return docId;
     }
@@ -48,6 +56,9 @@ public class ValiditySummary {
         this.docClass = docClass;
     }
 
+    /**
+     * @return the ID of the target element.
+     */
     public String getElementId() {
         return elementId;
     }
@@ -88,17 +99,25 @@ public class ValiditySummary {
         this.designation = designation;
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
+    @Override
+    public String toString() {
+        return "Preview{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", designation=" + designation + ", label=" + libelleProperty.get() + '}';
     }
 
     @Override
-    public String toString() {
-        return "ValiditySummary{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", designation=" + designation + ", label=" + label + '}';
+    public StringProperty libelleProperty() {
+        return libelleProperty;
+    }
+
+    @Override
+    public String getLibelle() {
+        return libelleProperty.get();
+    }
+
+    @JsonProperty("libelle")
+    @Override
+    public void setLibelle(String libelle) {
+        libelleProperty.set(libelle);
     }
     
 }

@@ -2,7 +2,7 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import java.util.List;
 import java.util.Optional;
 import javafx.collections.FXCollections;
@@ -45,8 +45,8 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
     @Override
     public Optional<Node> createFilterEditor(PropertyType target) {
         final Class refClass = getReferenceClass(target);
-        ObservableList<ValiditySummary> choices = FXCollections.observableList(
-                Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(refClass));
+        ObservableList<Preview> choices = FXCollections.observableList(
+                Injector.getSession().getPreviews().getByClass(refClass));
         if (choices.isEmpty())
             return Optional.empty();
         
@@ -83,9 +83,9 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
             choice = ((ComboBoxBase)filterEditor).valueProperty().get();
         }
         
-        if (choice instanceof ValiditySummary) {
+        if (choice instanceof Preview) {
             return GO2Utilities.FILTER_FACTORY.equals(toApplyOn, 
-                    GO2Utilities.FILTER_FACTORY.literal(((ValiditySummary)choice).getElementId()));
+                    GO2Utilities.FILTER_FACTORY.literal(((Preview)choice).getElementId()));
         } else {
             throw new IllegalArgumentException("L'éditeur des paramètres du filtre est invalide.");
         }

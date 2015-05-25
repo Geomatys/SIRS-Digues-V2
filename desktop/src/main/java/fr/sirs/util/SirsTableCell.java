@@ -3,6 +3,7 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperageBorne;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,9 +68,9 @@ public class SirsTableCell<S, T> extends FXTableCell<S, T> {
                     text = session.getBorneDigueRepository().get(srb.getBorneId()).getLibelle();
                 } else if (item instanceof String) {
                     // On essaye de récupérer le preview label : si le résultat n'est pas nul, c'est que l'item est bien un id
-                    final String tmpPreview = Injector.getSession().getPreviewLabelRepository().getPreview((String) item);
+                    final Preview tmpPreview = Injector.getSession().getPreviews().get((String) item);
                     if (tmpPreview != null) {
-                        text = tmpPreview;
+                        text = tmpPreview.getLibelle();
                     } else {
                         // Si le résultat n'était pas null, alors c'est que l'item n'était certainement pas un id, mais déjà un libellé issu de preview label.
                         text = (String) item;

@@ -3,8 +3,8 @@ package fr.sirs.other;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.Session;
-import fr.sirs.core.component.ValiditySummaryRepository;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.Preview;
 import fr.sirs.util.FXValiditySummaryToElementTableColumn;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,41 +31,41 @@ import javafx.util.StringConverter;
  */
 public class FXDoubleDesignationPane extends BorderPane {
 
-    private TableView<ValiditySummary> designations;
+    private TableView<Preview> designations;
     private final Session session = Injector.getSession();
-    private final ValiditySummaryRepository valididySummaryRepository = session.getValiditySummaryRepository();
-    private final List<ValiditySummary> validitySummaries;
+    private final Previews valididySummaryRepository = session.getPreviews();
+    private final List<Preview> validitySummaries;
 
     private enum ValiditySummaryChoice {
         DOUBLON, ALL
     };
 
     public FXDoubleDesignationPane(final Class type) {
-        final ResourceBundle vsBundle = ResourceBundle.getBundle(ValiditySummary.class.getName());
+        final ResourceBundle vsBundle = ResourceBundle.getBundle(Preview.class.getName());
 
-        validitySummaries = valididySummaryRepository.getDesignationsForClass(type);
+        validitySummaries = valididySummaryRepository.getByClass(type);
 
         designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
         designations.setEditable(false);
 
         designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
 
-        final TableColumn<ValiditySummary, String> designationColumn = new TableColumn<>(vsBundle.getString("pseudoId"));
-        designationColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<Preview, String> designationColumn = new TableColumn<>(vsBundle.getString("pseudoId"));
+        designationColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Preview, String>, ObservableValue<String>>() {
 
             @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Preview, String> param) {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             }
         });
         designations.getColumns().add(designationColumn);
         
-        final TableColumn<ValiditySummary, String> labelColumn = new TableColumn<>(vsBundle.getString("label"));
-        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ValiditySummary, String>, ObservableValue<String>>() {
+        final TableColumn<Preview, String> labelColumn = new TableColumn<>(vsBundle.getString("label"));
+        labelColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Preview, String>, ObservableValue<String>>() {
 
             @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<ValiditySummary, String> param) {
-                return new SimpleObjectProperty(param.getValue().getLabel());
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Preview, String> param) {
+                return new SimpleObjectProperty(param.getValue().getLibelle());
             }
         });
         designations.getColumns().add(labelColumn);
@@ -105,7 +105,7 @@ public class FXDoubleDesignationPane extends BorderPane {
 
             @Override
             public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
-                final List<ValiditySummary> referenceUsages;
+                final List<Preview> referenceUsages;
                 switch (choiceBox.getSelectionModel().getSelectedItem()) {
                     case DOUBLON:
                         referenceUsages = doublons();
@@ -129,13 +129,13 @@ public class FXDoubleDesignationPane extends BorderPane {
 
     }
 
-    private List<ValiditySummary> doublons() {
+    private List<Preview> doublons() {
 
         final List<String> doubleids = new ArrayList<>();
 
         // Détection des identifiants doublons
         final List<String> ids = new ArrayList<>();
-        for (final ValiditySummary validitySummary : validitySummaries) {
+        for (final Preview validitySummary : validitySummaries) {
 
             if (validitySummary.getDesignation() != null) {
                 if (!ids.contains(validitySummary.getDesignation())) {
@@ -148,9 +148,9 @@ public class FXDoubleDesignationPane extends BorderPane {
         }
 
         // Maintenant on sait quels sont les id doublons
-        final List<ValiditySummary> referenceUsages = new ArrayList<>();
+        final List<Preview> referenceUsages = new ArrayList<>();
 
-        for (final ValiditySummary validitySummary : validitySummaries) {
+        for (final Preview validitySummary : validitySummaries) {
             if (validitySummary.getDesignation() != null && doubleids.contains(validitySummary.getDesignation())) {
                 referenceUsages.add(validitySummary);
             }

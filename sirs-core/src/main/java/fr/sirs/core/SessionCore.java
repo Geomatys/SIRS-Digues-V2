@@ -10,12 +10,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.component.SessionGen;
-import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.component.ValiditySummaryRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
@@ -23,10 +22,9 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
-import fr.sirs.core.model.PreviewLabel;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElementHit;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
@@ -124,9 +122,8 @@ public class SessionCore extends SessionGen {
     ////////////////////////////////////////////////////////////////////////////
     // NON-GENERATED REPOSITORIES
     ////////////////////////////////////////////////////////////////////////////
-    private final PreviewLabelRepository previewLabelRepository;
     private final ReferenceUsageRepository referenceUsageRepository;
-    private final ValiditySummaryRepository validitySummaryRepository;
+    private final Previews previews;
     private final SQLQueryRepository sqlQueryRepository;
     
     private CoordinateReferenceSystem projection;
@@ -137,9 +134,8 @@ public class SessionCore extends SessionGen {
         super(couchDbConnector);
         this.connector = couchDbConnector;
         
-        previewLabelRepository = new PreviewLabelRepository(connector);
         referenceUsageRepository = new ReferenceUsageRepository(connector);
-        validitySummaryRepository = new ValiditySummaryRepository(connector);
+        previews = new Previews(connector);
         sqlQueryRepository = new SQLQueryRepository(connector);
         elementCreator = new ElementCreator(this);
     }
@@ -177,18 +173,14 @@ public class SessionCore extends SessionGen {
      */
     public TaskManager getTaskManager() {
         return SirsCore.getTaskManager();
-    }
-    
-    public PreviewLabelRepository getPreviewLabelRepository() {
-        return previewLabelRepository;
-    }    
+    }  
     
     public ReferenceUsageRepository getReferenceUsageRepository(){
         return referenceUsageRepository;
     }
     
-    public ValiditySummaryRepository getValiditySummaryRepository(){
-        return validitySummaryRepository;
+    public Previews getPreviews() {
+        return previews;
     }
 
     public SQLQueryRepository getSqlQueryRepository() {
@@ -234,65 +226,7 @@ public class SessionCore extends SessionGen {
     public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
     
     public List<Digue> getDigues() {
-        return ((DigueRepository) repositories.get("DigueRepository")).getAll();
-    }
-    
-    public Digue getDigueById(final String digueId){
-        return ((DigueRepository) repositories.get("DigueRepository")).get(digueId);
-    }
-    
-    public SystemeEndiguement getSystemeEndiguementById(final String systemeEndiguementId){
-        return ((SystemeEndiguementRepository) repositories.get("SystemeEndiguementRepository")).get(systemeEndiguementId);
-    }
-
-    public List<TronconDigue> getTroncons() {
-        return ((TronconDigueRepository) repositories.get("TronconDigueRepository")).getAll();
-    }
-
-    public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
-        return ((TronconDigueRepository) repositories.get("TronconDigueRepository")).getByDigue(digue);
-    }
-    
-    public void update(final Digue digue){
-        digue.setDateMaj(LocalDateTime.now());
-        this.repositories.get("DigueRepository").update(digue);
-    }
-    
-    /**
-     * Update a section of the database.
-     * @param tronconDigue 
-     */
-    public void update(final TronconDigue tronconDigue){
-        tronconDigue.setDateMaj(LocalDateTime.now());
-        SirsCore.LOGGER.log(Level.FINE, "enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
-        repositories.get("TronconDigueRepository").update(tronconDigue);
-    }
-    
-    /**
-     * Update a list of sections of the database.
-     * @param troncons 
-     */
-    public void update(final List<TronconDigue> troncons){
-        troncons.stream().forEach((troncon) -> {
-            this.update(troncon);
-        });
-    }
-    
-    /**
-     * Add a troncon to the database.
-     * @param tronconDigue 
-     */
-    public void add(final TronconDigue tronconDigue){
-        tronconDigue.setDateMaj(LocalDateTime.now());
-        repositories.get("TronconDigueRepository").add(tronconDigue);
-    }
-    
-    /**
-     * Remove a section from the database.
-     * @param tronconDigue 
-     */
-    public void delete(final TronconDigue tronconDigue){
-        repositories.get("TronconDigueRepository").remove(tronconDigue);
+        return getDigueRepository().getAll();
     }
     
     /**
@@ -317,8 +251,8 @@ public class SessionCore extends SessionGen {
             } else {
                 String documentId = e.getDocumentId();
                 if (documentId != null && !documentId.isEmpty()) {
-                    PreviewLabel label = previewLabelRepository.get(documentId);
-                    AbstractSIRSRepository targetRepo = getRepositoryForType(label.getType());
+                    Preview label = previews.get(documentId);
+                    AbstractSIRSRepository targetRepo = getRepositoryForType(label.getDocClass());
                     if (targetRepo != null) {
                         Identifiable parent = targetRepo.get(documentId);
                         if (parent instanceof Element) {
@@ -334,23 +268,15 @@ public class SessionCore extends SessionGen {
     /**
      * Analyse input object to find a matching {@link Element} registered in database.
      * @param toGetElementFor The object which represents the Element to retrieve.
-     * Can be a {@link PreviewLabel}, {@link ValiditySummary}, or {@link  ElementHit}
+     * Can be a {@link Preview}, {@link Preview}, or {@link  ElementHit}
      * @return An optional which contains the found value, if any.
      */
     public Optional<? extends Element> getElement(final Object toGetElementFor) {
         if (toGetElementFor instanceof Element) {
             return getCompleteElement((Element)toGetElementFor);
             
-        } else if (toGetElementFor instanceof PreviewLabel) {
-            PreviewLabel label = (PreviewLabel)toGetElementFor;
-            AbstractSIRSRepository repository = getRepositoryForType(label.getType());
-            Identifiable tmp = repository.get(label.getId());
-            if (tmp instanceof Element) {
-                return Optional.of((Element)tmp);
-            }
-            
-        } else if (toGetElementFor instanceof ValiditySummary) {
-            ValiditySummary summary = (ValiditySummary) toGetElementFor;
+        } else if (toGetElementFor instanceof Preview) {
+            Preview summary = (Preview) toGetElementFor;
             AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
             Identifiable tmp = repository.get(summary.getDocId());
             if (tmp instanceof Element) {
@@ -376,10 +302,8 @@ public class SessionCore extends SessionGen {
     public String getElementType(final Object o) {
         if (o instanceof Element) {
             return o.getClass().getCanonicalName();
-        } else if (o instanceof PreviewLabel) {
-            return ((PreviewLabel)o).getType();
-        } else if (o instanceof ValiditySummary) {
-            return ((ValiditySummary)o).getElementClass();
+        } else if (o instanceof Preview) {
+            return ((Preview)o).getElementClass();
         } else if (o instanceof ElementHit) {
             return ((ElementHit)o).geteElementClassName();
         } else {

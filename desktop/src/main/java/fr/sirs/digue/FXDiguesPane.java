@@ -203,7 +203,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 //on enleve la reference a la digue dans les troncons
-                final List<TronconDigue> troncons = session.getTronconDigueByDigue(digue);
+                final List<TronconDigue> troncons = session.getTronconDigueRepository().getByDigue(digue);
                 for(TronconDigue td : troncons){
                     td.setDigueId(null);
                     session.getTronconDigueRepository().update(td);

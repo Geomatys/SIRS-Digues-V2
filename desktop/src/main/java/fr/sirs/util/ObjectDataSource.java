@@ -1,8 +1,8 @@
 package fr.sirs.util;
 
-import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,21 +28,21 @@ public class ObjectDataSource<T> implements JRDataSource {
     
     private final Iterator<T> iterator;
     private T currentObject;
-    private final PreviewLabelRepository previewLabelRepository;
+    private final Previews previewRepository;
     private final StringConverter stringConverter;
     
     public ObjectDataSource(final Iterable<T> iterable){
         this(iterable, null);
     }
     
-    public ObjectDataSource(final Iterable<T> iterable, final PreviewLabelRepository previewLabelRepository){
+    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
         this(iterable, previewLabelRepository, null);
     }
     
-    public ObjectDataSource(final Iterable<T> iterable, final PreviewLabelRepository previewLabelRepository, final StringConverter stringConverter){
+    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final StringConverter stringConverter){
         ArgumentChecks.ensureNonNull("iterable", iterable);
         iterator = iterable.iterator();
-        this.previewLabelRepository = previewLabelRepository;
+        this.previewRepository = previewLabelRepository;
         this.stringConverter = stringConverter;
     }
 
@@ -90,8 +90,8 @@ public class ObjectDataSource<T> implements JRDataSource {
     private Object parsePropertyValue(final Object propertyValue, final Class clazz){
         final Object propertyValueToPrint;
         if(String.class.isAssignableFrom(clazz)){
-            if(previewLabelRepository!=null){
-                final PreviewLabel previewLabel = previewLabelRepository.get((String) propertyValue);
+            if(previewRepository!=null){
+                final Preview previewLabel = previewRepository.get((String) propertyValue);
                 if(previewLabel!=null && previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
                     if(stringConverter!=null){
                         propertyValueToPrint = stringConverter.toString(previewLabel);

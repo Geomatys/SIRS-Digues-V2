@@ -17,7 +17,6 @@ import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.theme.Theme;
-import fr.sirs.theme.ui.FXTronconThemePane;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;

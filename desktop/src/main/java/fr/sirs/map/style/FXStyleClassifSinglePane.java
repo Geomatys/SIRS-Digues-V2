@@ -2,7 +2,7 @@
 package fr.sirs.map.style;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyleFactory;
@@ -22,9 +22,9 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
     @Override
     protected MutableRule createRule(PropertyName property, Object obj, int idx) {
         String desc = String.valueOf(obj);
-        final PreviewLabel lbl = Injector.getSession().getPreviewLabelRepository().get(desc);
+        final Preview lbl = Injector.getSession().getPreviews().get(desc);
         if(lbl!=null){
-            desc = lbl.getLabel();
+            desc = lbl.getLibelle();
         }
 
         final MutableStyleFactory sf = GeotkFX.getStyleFactory();

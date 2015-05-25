@@ -5,8 +5,7 @@ import fr.sirs.CorePlugin;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -14,7 +13,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
@@ -22,7 +21,6 @@ import java.awt.RenderingHints;
 import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -69,7 +67,6 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemVisibleColumn;
 import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
-import org.geotoolkit.gui.javafx.render2d.FXAddDataBar;
 import org.geotoolkit.gui.javafx.render2d.FXContextBar;
 import org.geotoolkit.gui.javafx.render2d.FXCoordinateBar;
 import org.geotoolkit.gui.javafx.render2d.FXGeoToolBar;
@@ -280,18 +277,18 @@ public class FXMapPane extends BorderPane {
         } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
         } else if (element instanceof AbstractPositionDocument) {
-            final PreviewLabelRepository previewLabelRepository = Injector.getSession().getPreviewLabelRepository();
+            final Previews previews = Injector.getSession().getPreviews();
             if(element instanceof AbstractPositionDocumentAssociable){
                 if(element instanceof PositionProfilTravers){
                     return getMapLayerForElement(new LabelMapper(PositionProfilTravers.class).mapClassName());
                 } else {
                     final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
-                    final PreviewLabel previewLabel = previewLabelRepository.get(documentId);
+                    final Preview previewLabel = previews.get(documentId);
                     Class documentClass = null; 
                     try {
-                        documentClass = Class.forName(previewLabel.getType());
+                        documentClass = Class.forName(previewLabel.getElementClass());
                     } catch (ClassNotFoundException ex) {
-                        Logger.getLogger(FXMapPane.class.getName()).log(Level.SEVERE, null, ex);
+                        SIRS.LOGGER.log(Level.WARNING, null, ex);
                     }
 
                     final LabelMapper mapper = new LabelMapper(documentClass);

@@ -3,7 +3,6 @@ package fr.sirs.theme;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractPositionableRepository;
-import fr.sirs.core.component.PreviewLabelRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.Convention;
@@ -12,7 +11,7 @@ import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SIRSDocument;
@@ -30,7 +29,6 @@ import javafx.collections.FXCollections;
  */
 public class PositionDocumentTheme extends AbstractTronconTheme {
     
-    private static final PreviewLabelRepository PREVIEW_LABEL_REPOSITORY = Injector.getSession().getPreviewLabelRepository();
     private static final ThemeManager CONVENTION = generateThemeManager(PositionDocument.class, Convention.class);
     private static final ThemeManager ARTICLE = generateThemeManager(PositionDocument.class, ArticleJournal.class);
     private static final ThemeManager MARCHE = generateThemeManager(PositionDocument.class, Marche.class);
@@ -70,9 +68,9 @@ public class PositionDocumentTheme extends AbstractTronconTheme {
             this.documentClass = documentClass;
             cache = new HashMap<>();
             if(documentClass!=null){
-                List<PreviewLabel> previews = PREVIEW_LABEL_REPOSITORY.getPreviewLabels(documentClass);
-                for(final PreviewLabel preview : previews){
-                    cache.put(preview.getId(), preview.getType());
+                List<Preview> previews = Injector.getSession().getPreviews().getByClass(documentClass);
+                for(final Preview preview : previews){
+                    cache.put(preview.getElementId(), preview.getElementClass());
                 }
             }
         }

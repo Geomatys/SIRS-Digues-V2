@@ -4,7 +4,7 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTronconTheme;
 import fr.sirs.util.SirsStringConverter;
@@ -27,7 +27,7 @@ import javafx.scene.layout.BorderPane;
 public class FXTronconThemePane extends BorderPane {
 
     @FXML private BorderPane uiCenter;
-    @FXML private ComboBox<PreviewLabel> uiLinearChoice;
+    @FXML private ComboBox<Preview> uiLinearChoice;
     private final StringProperty linearIdProperty = new SimpleStringProperty();
     private final Session session = Injector.getBean(Session.class);
         
@@ -54,12 +54,12 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
         
-        final List<PreviewLabel> linearPreviews = session.getPreviewLabelRepository().getPreviewLabels(TronconDigue.class);
+        final List<Preview> linearPreviews = session.getPreviews().getByClass(TronconDigue.class);
         uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));        
         uiLinearChoice.setConverter(new SirsStringConverter());
 
-        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PreviewLabel> observable, PreviewLabel oldValue, PreviewLabel newValue) -> {
-            linearIdProperty.set(newValue.getObjectId());
+        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
+            linearIdProperty.set(newValue.getElementId());
         });
         
         if(!linearPreviews.isEmpty()){

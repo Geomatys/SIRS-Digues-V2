@@ -1,6 +1,6 @@
 package fr.sirs.util;
 
-import fr.sirs.core.component.PreviewLabelRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -107,7 +107,7 @@ public class PrinterUtilities {
      * @throws Exception 
      */
     static public File print(final Element element, final List<String> avoidFields, 
-            final PreviewLabelRepository previewLabelRepository, final StringConverter stringConverter) throws Exception {
+            final Previews previewLabelRepository, final StringConverter stringConverter) throws Exception {
         
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(element.getClass().getSimpleName(), JRXML_EXTENSION);

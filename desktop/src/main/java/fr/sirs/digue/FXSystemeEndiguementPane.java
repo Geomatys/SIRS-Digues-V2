@@ -12,12 +12,11 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.geom.NoninvertibleTransformException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -44,12 +43,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import jidefx.scene.control.field.NumberField;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -66,8 +62,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
     @FXML private TextField uiClassement;
     @FXML private FXNumberSpinner uiProtection;
     @FXML private FXNumberSpinner uiPopulation;
-    @FXML private ComboBox<PreviewLabel> uiDecret;
-    @FXML private ComboBox<PreviewLabel> uiTechnique;
+    @FXML private ComboBox<Preview> uiDecret;
+    @FXML private ComboBox<Preview> uiTechnique;
     @FXML private HTMLEditor uiComment;
     
     private final DigueTable uiDigueTable = new DigueTable(Digue.class, "Liste des digues");
@@ -103,10 +99,10 @@ public class FXSystemeEndiguementPane extends BorderPane {
     private void initCombo(ComboBox comboBox, final ObservableList items, final String currentId) {
         comboBox.setItems(items);
         if (currentId != null && !currentId.isEmpty()) {
-            final Iterator<PreviewLabel> it = items.iterator();
+            final Iterator<Preview> it = items.iterator();
             while (it.hasNext()) {
-                final PreviewLabel e = it.next();
-                if (e.getObjectId().equals(currentId)) {
+                final Preview e = it.next();
+                if (e.getElementId().equals(currentId)) {
                     comboBox.getSelectionModel().select(e);
                     break;
                 }
@@ -132,8 +128,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
             uiProtection.valueProperty().bindBidirectional(newValue.niveauProtectionProperty());
             uiPopulation.valueProperty().bindBidirectional(newValue.populationProtegeeProperty());
             uiComment.setHtmlText(newValue.getCommentaire());
-            initCombo(uiDecret, FXCollections.observableArrayList(session.getPreviewLabelRepository().getPreviewLabels(Organisme.class)), newValue.getGestionnaireDecret());
-            initCombo(uiTechnique, FXCollections.observableArrayList(session.getPreviewLabelRepository().getPreviewLabels(Organisme.class)), newValue.getGestionnaireTechnique());
+            initCombo(uiDecret, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireDecret());
+            initCombo(uiTechnique, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireTechnique());
             uiDigueTable.updateTable();
         }
     }
@@ -145,10 +141,10 @@ public class FXSystemeEndiguementPane extends BorderPane {
     private void save(){
         final SystemeEndiguement se = endiguementProp.get();
         se.setCommentaire(uiComment.getHtmlText());
-        final PreviewLabel decret = uiDecret.getValue();
-        se.setGestionnaireDecret( decret==null ? null : decret.getObjectId());
-        final PreviewLabel tech = uiTechnique.getValue();
-        se.setGestionnaireTechnique( tech==null ? null : tech.getObjectId());
+        final Preview decret = uiDecret.getValue();
+        se.setGestionnaireDecret( decret==null ? null : decret.getElementId());
+        final Preview tech = uiTechnique.getValue();
+        se.setGestionnaireTechnique( tech==null ? null : tech.getElementId());
         se.setDateMaj(LocalDateTime.now());
         session.getSystemeEndiguementRepository().update(se);
     }

@@ -71,7 +71,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     
     private void save() {
         preSave();
-        session.update(this.elementProperty.get());
+        session.getDigueRepository().update(this.elementProperty.get());
     }
 
     /**
@@ -102,7 +102,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             
             table.setTableItems(()->FXCollections.observableArrayList(
-                    session.getTronconDigueByDigue(newValue)));
+                    session.getTronconDigueRepository().getByDigue(newValue)));
         }
     }
 

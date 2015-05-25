@@ -30,7 +30,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.EXTERN;
-import fr.sirs.core.model.ValiditySummary;
+import fr.sirs.core.model.Preview;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -1143,29 +1143,29 @@ public class PojoTable extends BorderPane {
             
             final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName());
             final String prefix = bundle.getString(BUNDLE_KEY_CLASS_ABREGE)+" : ";
-            final ComboBox<ValiditySummary> comboBox;
+            final ComboBox<Preview> comboBox;
             if(tronconSourceProperty.get()==null){
-                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(pojoClass)));
+                comboBox = new ComboBox<Preview>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
             }
             else{
                 
-                comboBox = new ComboBox<ValiditySummary>(FXCollections.observableArrayList(Injector.getSession().getValiditySummaryRepository().getDesignationsForClass(pojoClass)).filtered(new Predicate<ValiditySummary>() {
+                comboBox = new ComboBox<Preview>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)).filtered(new Predicate<Preview>() {
 
                     @Override
-                    public boolean test(ValiditySummary t) {
+                    public boolean test(Preview t) {
                         return tronconSourceProperty.get().equals(t.getDocId());
                     }
                 }));
             }
-            comboBox.setConverter(new StringConverter<ValiditySummary>() {
+            comboBox.setConverter(new StringConverter<Preview>() {
 
                 @Override
-                public String toString(ValiditySummary object) {
-                    return prefix+object.getDesignation() + ((object.getLabel()==null) ? "" : " - "+object.getLabel());
+                public String toString(Preview object) {
+                    return prefix+object.getDesignation() + ((object.getLibelle()==null) ? "" : " - "+object.getLibelle());
                 }
 
                 @Override
-                public ValiditySummary fromString(String string) {
+                public Preview fromString(String string) {
                     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             });
@@ -1202,7 +1202,7 @@ public class PojoTable extends BorderPane {
             return retrievedElement;
         }
         
-        protected Element addExistingPojo(final ValiditySummary summary) {
+        protected Element addExistingPojo(final Preview summary) {
             Object result = null;
             if (repo != null) {
                 result = repo.get(summary.getDocId());

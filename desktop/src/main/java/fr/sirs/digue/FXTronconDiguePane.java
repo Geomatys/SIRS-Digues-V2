@@ -214,7 +214,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private void save(){
         elementProperty.get().setCommentaire(uiComment.getHtmlText());
         srController.save();
-        session.update(getTroncon());
+        session.getTronconDigueRepository().update(getTroncon());
     }
     
     private void initFields(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
@@ -236,7 +236,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             this.uiDigue.setItems(allDigues);
             Digue currentDigue = null;
             if (newValue.getDigueId() != null) {
-                currentDigue = session.getDigueById(newValue.getDigueId());
+                currentDigue = session.getDigueRepository().get(newValue.getDigueId());
             }
             this.uiDigue.setConverter(new SirsStringConverter());
             this.uiDigue.setValue(currentDigue);
@@ -249,7 +249,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                     }
                     Digue digue = null;
                     if (newValue.getDigueId() != null) {
-                        digue = session.getDigueById(newValue.getDigueId());
+                        digue = session.getDigueRepository().get(newValue.getDigueId());
                     }
                     // Do not open dialog if the levee list is reset to the old value.
                     if (!Objects.equals(newDigue, digue)) {

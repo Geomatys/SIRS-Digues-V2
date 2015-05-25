@@ -9,7 +9,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.PreviewLabel;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
@@ -142,7 +142,7 @@ public class FXImportBornesPane extends BorderPane {
         uiImportButton.setDisable(true);
         
         uiTronconBox.setItems(FXCollections.observableList(
-                Injector.getSession().getPreviewLabelRepository().getPreviewLabels(TronconDigue.class)));
+                Injector.getSession().getPreviews().getByClass(TronconDigue.class)));
         uiTronconBox.setConverter(stringConverter);
     }
 
@@ -300,8 +300,8 @@ public class FXImportBornesPane extends BorderPane {
                 TronconDigueRepository tdRepo = Injector.getSession().getTronconDigueRepository();
                 if (selectedTd instanceof TronconDigue) {
                     troncon = (TronconDigue) selectedTd;
-                } else if (selectedTd instanceof PreviewLabel) {
-                    troncon = tdRepo.get(((PreviewLabel) selectedTd).getObjectId());
+                } else if (selectedTd instanceof Preview) {
+                    troncon = tdRepo.get(((Preview) selectedTd).getDocId());
                 } else {
                     throw new IllegalStateException("Unknown object type for parameter Troncon");
                 }
