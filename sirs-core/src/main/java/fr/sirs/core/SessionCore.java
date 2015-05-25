@@ -240,28 +240,28 @@ public class SessionCore extends SessionGen {
     public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
     
     public List<Digue> getDigues() {
-        return ((DigueRepository) repositories.get(Digue.class)).getAll();
+        return getDigueRepository().getAll();
     }
     
     public Digue getDigueById(final String digueId){
-        return ((DigueRepository) repositories.get(Digue.class)).get(digueId);
+        return getDigueRepository().get(digueId);
     }
     
     public SystemeEndiguement getSystemeEndiguementById(final String systemeEndiguementId){
-        return ((SystemeEndiguementRepository) repositories.get(SystemeEndiguement.class)).get(systemeEndiguementId);
+        return getSystemeEndiguementRepository().get(systemeEndiguementId);
     }
 
     public List<TronconDigue> getTroncons() {
-        return ((TronconDigueRepository) repositories.get(TronconDigue.class)).getAll();
+        return getTronconDigueRepository().getAll();
     }
 
     public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
-        return ((TronconDigueRepository) repositories.get(TronconDigue.class)).getByDigue(digue);
+        return getTronconDigueRepository().getByDigue(digue);
     }
     
     public void update(final Digue digue){
         digue.setDateMaj(LocalDateTime.now());
-        this.repositories.get(Digue.class).update(digue);
+        getDigueRepository().update(digue);
     }
     
     /**
@@ -271,7 +271,7 @@ public class SessionCore extends SessionGen {
     public void update(final TronconDigue tronconDigue){
         tronconDigue.setDateMaj(LocalDateTime.now());
         SirsCore.LOGGER.log(Level.FINE, "enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
-        repositories.get(TronconDigue.class).update(tronconDigue);
+        getTronconDigueRepository().update(tronconDigue);
     }
     
     /**
@@ -290,7 +290,7 @@ public class SessionCore extends SessionGen {
      */
     public void add(final TronconDigue tronconDigue){
         tronconDigue.setDateMaj(LocalDateTime.now());
-        repositories.get(TronconDigue.class).add(tronconDigue);
+        getTronconDigueRepository().add(tronconDigue);
     }
     
     /**
@@ -298,7 +298,7 @@ public class SessionCore extends SessionGen {
      * @param tronconDigue 
      */
     public void delete(final TronconDigue tronconDigue){
-        repositories.get(TronconDigue.class).remove(tronconDigue);
+        getTronconDigueRepository().remove(tronconDigue);
     }
     
     /**
