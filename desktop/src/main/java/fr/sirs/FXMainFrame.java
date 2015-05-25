@@ -384,7 +384,7 @@ public class FXMainFrame extends BorderPane {
                             new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
                         } 
                         // On interdit également la suppression de l'invité par défaut !
-                        else if ("".equals(utilisateur.getLogin())){
+                        else if (SIRS.LOGIN_DEFAULT_GUEST.equals(utilisateur.getLogin())){
                             new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
                         }
                         else{
@@ -404,7 +404,6 @@ public class FXMainFrame extends BorderPane {
     private void openDocsTab(){
         final Tab docsTab = new Tab(bundle.getString(BUNDLE_KEY_VALIDATION));
         docsTab.setContent(new FXValidationPane());
-//        final PojoTable docsTable = new PojoTable(session.getPreviewLabelRepository(), "Table des documents");
         addTab(docsTab);
     }
     

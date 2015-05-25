@@ -510,8 +510,10 @@ public class FXPositionablePane extends BorderPane {
         Point point = null;
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
         CoordinateReferenceSystem selectedCRS = uiCRSs.getSelectionModel().getSelectedItem();
+        
+        // Priorite a l'information geographique absolue.
         if (selectedCRS != null) {
-            // On a un point de début valide : on le prends.
+            // On a un point valide : on le prends.
             if (longitudeProperty.get() != null && latitudeProperty != null) {
                 point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
                         fxNumberValue(longitudeProperty),
@@ -529,6 +531,7 @@ public class FXPositionablePane extends BorderPane {
             }
         }
         
+        // Si on n'a pas l'information suffisante on se fie au lineaire.
         if (point == null) {
             point = computeGeoFromLinear(distanceProperty, borneProperty, amontSelectedProperty);
         }

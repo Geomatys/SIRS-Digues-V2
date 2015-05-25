@@ -1,4 +1,3 @@
-
 package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -10,18 +9,20 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -39,7 +40,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -57,7 +57,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
@@ -116,11 +115,12 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         session = Injector.getSession();
         troncon.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
-            if (newValue != null && !TronconUtils.getObjetList(newValue).isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING,
+            
+            if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
+                final Alert alert = new Alert(Alert.AlertType.WARNING,
                         "Attention, ce tronçon contient des structures. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
                 alert.setResizable(true);
-                Optional<ButtonType> result = alert.showAndWait();
+                final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {
                 } else {
                     troncon.set(null);

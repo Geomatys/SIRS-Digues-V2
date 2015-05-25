@@ -11,6 +11,8 @@ import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.ViewQuery;
 import org.ektorp.support.CouchDbRepositorySupport;
 
 /**
@@ -72,6 +74,55 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
         }
     }
+    
+    /**
+     * Retrieve the elements of the given parameter class which Ids are provided 
+     * as parameters.
+     * 
+     * @param ids
+     * @param clazz
+     * @return 
+     */
+    public List<T> executeBulk(final List<String> ids, Class<T> clazz){
+
+        final List<String> nonCachedIds = new ArrayList<>(ids);
+        nonCachedIds.removeIf((String id) -> {return cache.containsKey(id);});
+        
+        // On va chercher uniquement les documents qui ne sont pas en cache
+        final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(nonCachedIds);
+        final List<T> bulkLoaded = db.queryView(q, clazz);
+        
+        // On ajoute les documents en cache dont l'id a été fourni
+        final List<String> cachedIds = new ArrayList<>(ids);
+        cachedIds.removeAll(nonCachedIds);
+        
+        for(final String cachedId : cachedIds){
+            bulkLoaded.add(cache.get(cachedId));
+        }
+        
+        return bulkLoaded;
+    }
+    
+    /**
+     * Execute bulk for add/update operation on several documents.
+     * 
+     * @param bulkList
+     * @return 
+     */
+    public List<DocumentOperationResult> executeBulk(final List<T> bulkList){
+        final List<T> cachedBulkList = new ArrayList<>();
+        for(final T entity : bulkList){
+            if (entity instanceof AvecDateMaj) {
+                ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
+            }
+            // Put the updated entity into cache in case the old entity is different.
+            if (entity != cache.get(entity.getId())) {
+                cache.put(entity.getId(), onLoad(entity));
+            }
+            cachedBulkList.add(cache.get(entity.getId()));
+        } 
+        return db.executeBulk(cachedBulkList);
+    }
 
     @Override
     public void add(T entity) {
@@ -89,7 +140,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj) {
-            ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
+            ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
         }
         super.update(entity);
         // Put the updated entity into cache in case the old entity is different.

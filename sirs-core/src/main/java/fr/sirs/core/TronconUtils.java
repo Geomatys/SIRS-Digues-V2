@@ -35,11 +35,17 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import java.util.Iterator;
+import java.util.logging.Level;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
@@ -59,6 +65,8 @@ public class TronconUtils {
      * 
      * @param troncon troncon a decouper
      * @param cutLinear partie du troncon a garder
+     * @param newName
+     * @param session
      * @return nouveau troncon découpé
      */
     public static TronconDigue cutTroncon(TronconDigue troncon, LineString cutLinear, String newName, SessionGen session) {
@@ -119,26 +127,54 @@ public class TronconUtils {
                 newSRs.put(sr.getId(), srCp);
             }
         }
+        
+        // On enregistre le tronçon maintenant que la copie est réalisée. 
+        // On sauvegarde les modifications
+        // TODO : make it transactional.
+        tdRepo.add(tronconCp);
+        
+        // Certains positionables n'ont pas été copiés en même temps que le 
+        // troncon car ce sont des documents séparés.
+        // Il faut donc commercer par les copier avant de les découper.
+        final ListIterator<Positionable> originalPositionables = getPositionableList(troncon).listIterator();
+        while(originalPositionables.hasNext()){
+            final Positionable originalPositionable = originalPositionables.next();
+            
+            /* 
+             Si le positionable est un foreignParent, il faut le copier à la
+             main car la copie n'aura pas été faite lors de la copie du troncon.
+            */
+            if(originalPositionable instanceof AvecForeignParent){
+                final AvecForeignParent copyOfPositionable = (AvecForeignParent) originalPositionable.copy();
+                copyOfPositionable.setForeignParentId(tronconCp.getId());
+                try{
+                    ((AbstractSIRSRepository) session.getRepositoryForClass(copyOfPositionable.getClass())).add(copyOfPositionable);
+                } catch(Exception ex){
+                    SirsCore.LOGGER.log(Level.SEVERE, "No repository found for {0}", copyOfPositionable.getClass());
+                }
+            }
+        }
+        
 
-        /* On va maintenant trier les structures du tronçon. Ceux qui sont en dehors
-         * du nouveau tronçon sont supprimés de ce dernier. Pour tout objet contenu,
+        /* On va maintenant découper les positionables liés au tronçon d'une 
+         * manière ou d'une autre. Ceux qui sont en dehors du nouveau tronçon 
+         * sont supprimés de ce dernier. Pour tout objet contenu,
          * on met simplement à jour ses positions linéaires pour rester cohérent
          * avec sa géométrie. Les objets qui intersectent le nouveau tronçons sont 
          * quand à eux découpés.
          */
         final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
-        final ListIterator<Objet> structures = getObjetList(tronconCp).listIterator();
-        cutPositionable(structures, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
-        final ListIterator<AbstractPositionDocument> positionsDocs = getPositionDocumentList(tronconCp).listIterator();
-        cutPositionable(positionsDocs, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
-        final ListIterator<GardeTroncon> gardes = tronconCp.getGardes().listIterator();
-        cutPositionable(gardes, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
-        final ListIterator<ProprieteTroncon> proprietes = tronconCp.getProprietes().listIterator();
-        cutPositionable(proprietes, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
         
-        // On sauvegarde les modifications
-        // TODO : make it transactional.
-        tdRepo.add(tronconCp);
+        
+        
+        /*
+        On découpe maintenant les positionables qui ont été copiés de manière à
+        ce que leurs géométries rentrent dans le troncon découpé. 
+        */
+        final ListIterator<Positionable> positionables = getPositionableList(tronconCp).listIterator();
+        cutPositionable(positionables, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
+        
+        
         // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
         final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
         if (newDefaultSR != null) {
@@ -165,25 +201,121 @@ public class TronconUtils {
         return tronconCp;
     }
     
-    public static List<Objet> getObjetList(final TronconDigue troncon){
-        throw new UnsupportedOperationException("Implémenter la recherche des objets par troncon");
+    /**
+     * Retrieve the list of objects linked to a linear which id is given as a 
+     * parameter.
+     * @param linearId
+     * @return 
+     */
+    public static List<Objet> getObjetList(final String linearId){
+        return InjectorCore.getBean(SessionCore.class).getObjetsByTronconId(linearId);
     }
     
-    public static List<AbstractPositionDocument> getPositionDocumentList(final TronconDigue troncon){
-        throw new UnsupportedOperationException("Implémenter la recherche des objets par troncon");
+    /**
+     * Retrieve the list of objects linked to a linear given as a parameter.
+     * @param linear
+     * @return 
+     */
+    public static List<Objet> getObjetList(final TronconDigue linear){
+        return getObjetList(linear.getId());
     }
     
+    /**
+     * Retrieve the list of document positions linked to a linear which id is 
+     * given as a parameter.
+     * @param linearId
+     * @return 
+     */
+    public static List<AbstractPositionDocument> getPositionDocumentList(final String linearId){
+        return InjectorCore.getBean(SessionCore.class).getPositionDocumentsByTronconId(linearId);
+    }
     
+    /**
+     * Retrieve the list of document positions linked to a linear given as a 
+     * parameter.
+     * @param linear
+     * @return 
+     */
+    public static List<AbstractPositionDocument> getPositionDocumentList(final TronconDigue linear){
+        return getPositionDocumentList(linear.getId());
+    }
+    
+    /**
+     * Retrieve the list of photographs contained in objects or profil en 
+     * travers positions linked to a linear which id is given as a parameter.
+     * @param linearId
+     * @return 
+     */
+    public static List<Photo> getPhotoList(final String linearId){
+        final List<Photo> photos = new ArrayList<>();
+        final List<PositionProfilTravers> positions = InjectorCore.getBean(SessionCore.class).getPositionProfilTraversRepository().getByLinearId(linearId);
+        final List<Objet> objets = getObjetList(linearId);
+        for(final PositionProfilTravers position : positions){
+            final List<Photo> p = position.getPhotos();
+            if(p!=null && !p.isEmpty()) photos.addAll(p);
+        }
+        for(final Objet objet : objets){
+            final List<Photo> p = objet.getPhotos();
+            if(p!=null && !p.isEmpty()) photos.addAll(p);
+        }
+        return photos;
+    }
+    
+    /**
+     * Return the positionable included, linked or included into linked elements
+     * for the linar given as a parameter.
+     * @param linear
+     * @return a list containing the objets, positions de documents, proprietes,
+     * gardes and photos related to the linear.
+     */
+    public static List<Positionable> getPositionableList(final TronconDigue linear){
+        final List<Positionable> positionables = new ArrayList<>();
+        
+        final List<Objet> objets = TronconUtils.getObjetList(linear);
+        if(objets !=null && !objets.isEmpty()) positionables.addAll(objets);
+        final List<AbstractPositionDocument> positions = TronconUtils.getPositionDocumentList(linear);
+        if(positions !=null && !positions.isEmpty()) positionables.addAll(positions);
+        final List<ProprieteTroncon> proprietes = linear.getProprietes();
+        if(proprietes !=null && !proprietes.isEmpty()) positionables.addAll(proprietes);
+        final List<GardeTroncon> gardes = linear.getGardes();
+        if(gardes !=null && !gardes.isEmpty()) positionables.addAll(gardes);
+        final List<Photo> photos = TronconUtils.getPhotoList(linear);
+        if(photos !=null && !photos.isEmpty()) positionables.addAll(photos);
+        
+        return positionables;
+    }
+    
+    /**
+     * Retrieve the list of photographs contained in objects or profil en 
+     * travers positions linked to a linear given as a parameter.
+     * @param linear
+     * @return 
+     */
+    public static List<Photo> getPhotoList(final TronconDigue linear){
+        return getPhotoList(linear.getId());
+    }
+    
+    /**
+     * 
+     * @param positionables Liste de postitionables à découper.
+     * @param troncon Troncon d'origine
+     * @param tronconCp Nouveau troncon
+     * @param bdRepo 
+     * @param linearLineString reference linear geomety
+     * @param newSRs
+     * @param needSRIDUpdate
+     * @param session 
+     */
     private static void cutPositionable(final ListIterator<? extends Positionable> positionables, 
              final TronconDigue troncon, final TronconDigue tronconCp, 
              final BorneDigueRepository bdRepo,
-             final LineString cutLinear, final HashMap<String, SystemeReperage> newSRs,
+             final LineString linearLineString, final HashMap<String, SystemeReperage> newSRs,
              final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate,
              final SessionGen session){
          
         while (positionables.hasNext()) {
             final Positionable positionable = positionables.next();
-        //on vérifie que cet objet intersecte le segment
+            //on vérifie que cet objet intersecte le segment
             Geometry objGeom = positionable.getGeometry();
             if (objGeom == null) {
                 //on la calcule
@@ -194,11 +326,11 @@ public class TronconUtils {
                 positionable.setGeometry(objGeom);
             }
 
-            if (!cutLinear.intersects(objGeom)) {
+            if (!linearLineString.intersects(objGeom)) {
                 positionables.remove();
                 continue;
-            } else if (!cutLinear.contains(objGeom)) {
-                objGeom = cutLinear.intersection(objGeom);
+            } else if (!linearLineString.contains(objGeom)) {
+                objGeom = linearLineString.intersection(objGeom);
                 positionable.setGeometry(objGeom);
             }
 
@@ -240,6 +372,14 @@ public class TronconUtils {
                 positionable.setBorne_fin_aval(posSr.endAval);
                 positionable.setPositionDebut(null);
                 positionable.setPositionFin(null);
+            }
+            
+            if(positionable instanceof AvecForeignParent){
+                try{
+                    ((AbstractSIRSRepository) session.getRepositoryForClass(positionable.getClass())).update(positionable);
+                } catch(Exception ex){
+                    SirsCore.LOGGER.log(Level.SEVERE, "No repository found for {0}", positionable.getClass());
+                }
             }
         }
     }
@@ -311,14 +451,31 @@ public class TronconUtils {
         }
         
         // On ajoute les structures du tronçon paramètre. On les copie pour changer le SR associé.
-        for (final Objet objet : getObjetList(mergeParam)) {
-            Objet copy = objet.copy();
-            final String srId = modifiedSRs.get(copy.getSystemeRepId());
-            if (srId != null) {
-                copy.setSystemeRepId(srId);
+        for (final Positionable objet : getPositionableList(mergeParam)) {
+            // si l'objet est une photo, alors il ne faut pas faire de copie car
+            // elle est gérée de manière récursive dans l'élément conteneur.
+            if(!(objet instanceof Photo)){
+                final Positionable copy = objet.copy();
+                final String srId = modifiedSRs.get(copy.getSystemeRepId());
+                if (srId != null) {
+                    copy.setSystemeRepId(srId);
+                }
+                if(copy instanceof AvecForeignParent) ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+                else if (copy instanceof ProprieteTroncon || copy instanceof GardeTroncon) mergeResult.addChild((ProprieteTroncon) copy);
+                
+                if(copy instanceof AvecPhotos){
+                    for(final Photo photo : ((AvecPhotos) copy).getPhotos()){
+                        if(srId!=null) photo.setSystemeRepId(srId);
+                    }
+                }
+                
+                // On vérifie que la copie a un dépôt pour l'enregistrer.
+                try{
+                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).update(copy);
+                } catch(Exception e){
+                    SirsCore.LOGGER.log(Level.FINEST, "No repo found for "+copy.getClass());
+                }
             }
-            copy.setLinearId(mergeResult.getId());
-//            mergeResult.structures.add(copy); // On n'a plus à ajouter les nouvelles structures
         }
         
         //on combine les geometries
@@ -336,6 +493,8 @@ public class TronconUtils {
         
         return mergeResult;
     }
+    
+    
     
     /**
      * Creation ou mise a jour du systeme de reperage elementaire .

@@ -1,5 +1,6 @@
 package fr.sirs.core;
 
+import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -15,6 +16,7 @@ import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
@@ -22,6 +24,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
@@ -31,7 +34,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -190,31 +192,43 @@ public class SessionCore extends SessionGen {
     public Collection<AbstractSIRSRepository> getModelRepositories(){
         return repositories.values();
     }
+    
+    public List<Objet> getObjetsByTronconId(final String tronconId){
+        final List<Objet> objets = new ArrayList<>();
+        for(final Element element : ServiceLoader.load(Element.class)){
+            if(element instanceof Objet){
+                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
+                final List elementList = repo.getByLinearId(tronconId);
+                for(final Object objet : elementList){
+                    objets.add((Objet) objet);
+                }
+            }
+        }
+        return objets;
+    }
+    
+    public List<AbstractPositionDocument> getPositionDocumentsByTronconId(final String tronconId){
+        final List<AbstractPositionDocument> positions = new ArrayList<>();
+        for(final Element element : ServiceLoader.load(Element.class)){
+            if(element instanceof AbstractPositionDocument){
+                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
+                final List elementList = repo.getByLinearId(tronconId);
+                for(final Object position : elementList){
+                    positions.add((AbstractPositionDocument) position);
+                }
+            }
+        }
+        return positions;
+    }
         
     // REFERENCES
     private static final List<Class<? extends ReferenceType>> REFERENCES = new ArrayList<>();
     private static final List<Class<? extends Element>> ELEMENTS = new ArrayList<>();
     private static void initReferences(){
-        
-        final ServiceLoader<ReferenceType> serviceLoader = ServiceLoader.load(ReferenceType.class);
-        serviceLoader.forEach(new Consumer<ReferenceType>() {
-
-            @Override
-            public void accept(ReferenceType t) {
-                REFERENCES.add(t.getClass());
-            }
-        });
+        ServiceLoader.load(ReferenceType.class).forEach((ReferenceType t) -> REFERENCES.add(t.getClass()));
     }
     private static void initElements(){
-        
-        final ServiceLoader<Element> serviceLoader = ServiceLoader.load(Element.class);
-        serviceLoader.forEach(new Consumer<Element>() {
-
-            @Override
-            public void accept(Element t) {
-                ELEMENTS.add(t.getClass());
-            }
-        });
+        ServiceLoader.load(Element.class).forEach((Element t) -> ELEMENTS.add(t.getClass()));
     }
     
     static{
@@ -226,7 +240,65 @@ public class SessionCore extends SessionGen {
     public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
     
     public List<Digue> getDigues() {
-        return getDigueRepository().getAll();
+        return ((DigueRepository) repositories.get(Digue.class)).getAll();
+    }
+    
+    public Digue getDigueById(final String digueId){
+        return ((DigueRepository) repositories.get(Digue.class)).get(digueId);
+    }
+    
+    public SystemeEndiguement getSystemeEndiguementById(final String systemeEndiguementId){
+        return ((SystemeEndiguementRepository) repositories.get(SystemeEndiguement.class)).get(systemeEndiguementId);
+    }
+
+    public List<TronconDigue> getTroncons() {
+        return ((TronconDigueRepository) repositories.get(TronconDigue.class)).getAll();
+    }
+
+    public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
+        return ((TronconDigueRepository) repositories.get(TronconDigue.class)).getByDigue(digue);
+    }
+    
+    public void update(final Digue digue){
+        digue.setDateMaj(LocalDateTime.now());
+        this.repositories.get(Digue.class).update(digue);
+    }
+    
+    /**
+     * Update a section of the database.
+     * @param tronconDigue 
+     */
+    public void update(final TronconDigue tronconDigue){
+        tronconDigue.setDateMaj(LocalDateTime.now());
+        SirsCore.LOGGER.log(Level.FINE, "enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
+        repositories.get(TronconDigue.class).update(tronconDigue);
+    }
+    
+    /**
+     * Update a list of sections of the database.
+     * @param troncons 
+     */
+    public void update(final List<TronconDigue> troncons){
+        troncons.stream().forEach((troncon) -> {
+            this.update(troncon);
+        });
+    }
+    
+    /**
+     * Add a troncon to the database.
+     * @param tronconDigue 
+     */
+    public void add(final TronconDigue tronconDigue){
+        tronconDigue.setDateMaj(LocalDateTime.now());
+        repositories.get(TronconDigue.class).add(tronconDigue);
+    }
+    
+    /**
+     * Remove a section from the database.
+     * @param tronconDigue 
+     */
+    public void delete(final TronconDigue tronconDigue){
+        repositories.get(TronconDigue.class).remove(tronconDigue);
     }
     
     /**

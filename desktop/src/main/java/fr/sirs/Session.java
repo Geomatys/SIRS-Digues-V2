@@ -178,7 +178,7 @@ public class Session extends SessionCore {
                     cml.setVisible(false);
                     backgroundGroup.items().add(cml);
                 }
-            }catch(Exception ex){
+            } catch(Exception ex){
                 ex.printStackTrace();
             }
             
