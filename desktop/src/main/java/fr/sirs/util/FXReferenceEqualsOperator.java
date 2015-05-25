@@ -21,7 +21,11 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 
 /**
- *
+ * A special filter case to allow equality test on SIRS links between objects.
+ * In application, we expect that links between elements are represented by a
+ * {@link FeatureAssociationRole}, whose inner feature type contains a 'class' 
+ * property. The class property is expected to be an attribute type whose value 
+ * class is the class of the element bound by its id.
  * @author Alexis Manin (Geomatys)
  */
 public class FXReferenceEqualsOperator implements FXFilterOperator {
