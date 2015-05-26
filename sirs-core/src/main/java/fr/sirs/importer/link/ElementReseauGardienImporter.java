@@ -5,7 +5,6 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeObjet;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
@@ -69,7 +68,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final ObjetReseau reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
             
             if(reseau!=null && intervenant!=null){

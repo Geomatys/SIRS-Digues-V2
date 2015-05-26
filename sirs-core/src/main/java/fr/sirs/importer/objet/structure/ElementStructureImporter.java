@@ -15,6 +15,7 @@ import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetStructure;
 import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
@@ -38,7 +39,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementStructureImporter extends GenericStructureImporter<Objet> {
+public class ElementStructureImporter extends GenericStructureImporter<ObjetStructure> {
 
     private final TypeElementStructureImporter typeElementStructureImporter;
 
@@ -249,7 +250,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final Objet objet = importRow(row);
+            final ObjetStructure objet = importRow(row);
 
             if (objet != null) {
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
@@ -260,7 +261,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
                 objets.put(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Objet> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<ObjetStructure> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
                     objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -272,7 +273,7 @@ public class ElementStructureImporter extends GenericStructureImporter<Objet> {
     }
 
     @Override
-    public Objet importRow(Row row) throws IOException, AccessDbImporterException {
+    public ObjetStructure importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Class typeStructure = typeElementStructureImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
         if (typeStructure == Crete.class) {

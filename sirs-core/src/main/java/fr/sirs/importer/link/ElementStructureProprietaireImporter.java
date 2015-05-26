@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetStructure;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.importer.AccessDbImporterException;
@@ -67,7 +68,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> structures = elementStructureImporter.getById();
+        final Map<Integer, ObjetStructure> structures = elementStructureImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
@@ -75,7 +76,7 @@ public class ElementStructureProprietaireImporter extends GenericEntityLinker {
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+            final ObjetStructure structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_PROPRIO.toString()));
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_PROPRIO.toString()));
             

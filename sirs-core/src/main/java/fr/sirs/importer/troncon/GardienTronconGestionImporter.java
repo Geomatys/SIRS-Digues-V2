@@ -5,16 +5,17 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import java.io.IOException;
@@ -37,23 +38,18 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class GardienTronconGestionImporter extends GenericImporter {
-
-    private Map<Integer, List<GardeTroncon>> gardiensByTronconId = null;
-    
-    private final SystemeReperageImporter systemeReperageImporter;
-    private final BorneDigueImporter borneDigueImporter;
+public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImporter<GardeTroncon> {
     
     private final IntervenantImporter intervenantImporter;
 
-    GardienTronconGestionImporter(final Database accessDatabase,
+    public GardienTronconGestionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter) {
-        super(accessDatabase, couchDbConnector);
-        this.systemeReperageImporter = systemeReperageImporter;
-        this.borneDigueImporter = borneDigueImporter;
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter);
         this.intervenantImporter = intervenantImporter;
     }
 
@@ -79,18 +75,6 @@ class GardienTronconGestionImporter extends GenericImporter {
         DATE_DERNIERE_MAJ
     };
 
-    /**
-     *
-     * @return A map containing all ContactTroncon instances accessibles from
-     * the internal database <em>TronconGestion</em> identifier.
-     * @throws IOException
-     * @throws fr.sirs.importer.AccessDbImporterException
-     */
-    public Map<Integer, List<GardeTroncon>> getGardiensByTronconId() throws IOException, AccessDbImporterException {
-        if (gardiensByTronconId == null) compute();
-        return gardiensByTronconId;
-    }
-
     @Override
     protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -106,8 +90,8 @@ class GardienTronconGestionImporter extends GenericImporter {
     }
 
     @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-        gardiensByTronconId = new HashMap<>();
+    public void compute() throws IOException, AccessDbImporterException {
+        objets = new HashMap<>();
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -117,7 +101,11 @@ class GardienTronconGestionImporter extends GenericImporter {
         while (it.hasNext()) {
             final Row row = it.next();
             final GardeTroncon garde = createAnonymValidElement(GardeTroncon.class);
+        
+            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            garde.setLinearId(troncon.getId());
             
+            garde.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
             
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
                 garde.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
@@ -129,7 +117,7 @@ class GardienTronconGestionImporter extends GenericImporter {
                 garde.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
-             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
+            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
                 garde.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
@@ -190,6 +178,8 @@ class GardienTronconGestionImporter extends GenericImporter {
             } catch (FactoryException ex) {
                 Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            garde.setGeometry(buildGeometry(troncon.getGeometry(), garde, tronconGestionDigueImporter.getBorneDigueRepository()));
 
             // Set the references.
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
@@ -199,15 +189,8 @@ class GardienTronconGestionImporter extends GenericImporter {
                 throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
             }
             
-            garde.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<GardeTroncon> listeGestions = gardiensByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(listeGestions == null){
-                listeGestions = new ArrayList<>();
-            }
-            listeGestions.add(garde);
-            gardiensByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
+            objets.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), garde);
         }
+        couchDbConnector.executeBulk(objets.values());
     }
 }

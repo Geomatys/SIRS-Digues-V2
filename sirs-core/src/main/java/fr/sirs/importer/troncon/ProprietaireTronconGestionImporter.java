@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -12,11 +13,11 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefProprietaire;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
@@ -40,26 +41,21 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProprietaireTronconGestionImporter extends GenericImporter {
-
-    private Map<Integer, List<ProprieteTroncon>> proprietairesByTronconId = null;
-    
-    private final SystemeReperageImporter systemeReperageImporter;
-    private final BorneDigueImporter borneDigueImporter;
+public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeImporter<ProprieteTroncon> {
                     
     private final IntervenantImporter intervenantImporter;
     private final OrganismeImporter organismeImporter;
     private final TypeProprietaireImporter typeProprietaireImporter;
 
-    ProprietaireTronconGestionImporter(final Database accessDatabase,
+    public ProprietaireTronconGestionImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
+            final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter) {
-        super(accessDatabase, couchDbConnector);
-        this.systemeReperageImporter = systemeReperageImporter;
-        this.borneDigueImporter = borneDigueImporter;
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+                systemeReperageImporter, borneDigueImporter);
         this.intervenantImporter = intervenantImporter;
         this.organismeImporter = organismeImporter;
         typeProprietaireImporter = new TypeProprietaireImporter(accessDatabase, 
@@ -89,19 +85,6 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
         AMONT_AVAL_FIN,
         DATE_DERNIERE_MAJ
     };
-    
-
-    /**
-     *
-     * @return A map containing all ContactTroncon instances accessibles from
-     * the internal database <em>TronconGestion</em> identifier.
-     * @throws IOException
-     * @throws fr.sirs.importer.AccessDbImporterException
-     */
-    public Map<Integer, List<ProprieteTroncon>> getProprietairesByTronconId() throws IOException, AccessDbImporterException {
-        if (proprietairesByTronconId == null) compute();
-        return proprietairesByTronconId;
-    }
 
     @Override
     protected List<String> getUsedColumns() {
@@ -118,8 +101,8 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
     }
 
     @Override
-    protected void compute() throws IOException, AccessDbImporterException {
-        proprietairesByTronconId = new HashMap<>();
+    public void compute() throws IOException, AccessDbImporterException {
+        objets = new HashMap<>();
 
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
@@ -133,6 +116,10 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
             final Row row = it.next();
             final ProprieteTroncon propriete = createAnonymValidElement(ProprieteTroncon.class);
             
+            final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+            propriete.setLinearId(troncon.getId());
+            
+            propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString())));
 
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
                 propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
@@ -210,6 +197,8 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
                 Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
             
+            propriete.setGeometry(buildGeometry(troncon.getGeometry(), propriete, tronconGestionDigueImporter.getBorneDigueRepository()));
+            
             // Set the references.
             if(row.getInt(Columns.ID_INTERVENANT.toString())!=null){
                 final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERVENANT.toString()));
@@ -228,15 +217,8 @@ class ProprietaireTronconGestionImporter extends GenericImporter {
                 }
             }
             
-            propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString())));
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            List<ProprieteTroncon> listeGestions = proprietairesByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if(listeGestions == null){
-                listeGestions = new ArrayList<>();
-            }
-            listeGestions.add(propriete);
-            proprietairesByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listeGestions);
+            objets.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), propriete);
         }
+        couchDbConnector.executeBulk(objets.values());
     }
 }

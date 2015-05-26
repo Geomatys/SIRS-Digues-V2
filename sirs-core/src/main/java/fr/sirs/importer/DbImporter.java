@@ -4,69 +4,17 @@ import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.ArticleJournalRepository;
 import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.CommuneRepository;
-import fr.sirs.core.component.ContactRepository;
-import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.EvenementHydrauliqueRepository;
-import fr.sirs.core.component.MarcheRepository;
-import fr.sirs.core.component.OrganismeRepository;
-import fr.sirs.core.component.ProfilTraversRepository;
-import fr.sirs.core.component.RapportEtudeRepository;
-import fr.sirs.core.component.RefConduiteFermeeRepository;
-import fr.sirs.core.component.RefConventionRepository;
-import fr.sirs.core.component.RefCoteRepository;
-import fr.sirs.core.component.RefDocumentGrandeEchelleRepository;
-import fr.sirs.core.component.RefEcoulementRepository;
-import fr.sirs.core.component.RefEvenementHydrauliqueRepository;
-import fr.sirs.core.component.RefFonctionMaitreOeuvreRepository;
-import fr.sirs.core.component.RefFonctionRepository;
-import fr.sirs.core.component.RefFrequenceEvenementHydrauliqueRepository;
-import fr.sirs.core.component.RefImplantationRepository;
-import fr.sirs.core.component.RefLargeurFrancBordRepository;
-import fr.sirs.core.component.RefMateriauRepository;
-import fr.sirs.core.component.RefMoyenManipBatardeauxRepository;
-import fr.sirs.core.component.RefNatureBatardeauxRepository;
-import fr.sirs.core.component.RefNatureRepository;
-import fr.sirs.core.component.RefOrientationOuvrageRepository;
-import fr.sirs.core.component.RefOrientationPhotoRepository;
-import fr.sirs.core.component.RefOrientationVentRepository;
-import fr.sirs.core.component.RefOrigineProfilLongRepository;
-import fr.sirs.core.component.RefOrigineProfilTraversRepository;
-import fr.sirs.core.component.RefOuvrageFranchissementRepository;
-import fr.sirs.core.component.RefOuvrageHydrauliqueAssocieRepository;
-import fr.sirs.core.component.RefOuvrageParticulierRepository;
-import fr.sirs.core.component.RefOuvrageTelecomEnergieRepository;
-import fr.sirs.core.component.RefOuvrageVoirieRepository;
-import fr.sirs.core.component.RefPositionProfilLongSurDigueRepository;
-import fr.sirs.core.component.RefPositionRepository;
-import fr.sirs.core.component.RefPrestationRepository;
-import fr.sirs.core.component.RefProfilFrancBordRepository;
-import fr.sirs.core.component.RefProprietaireRepository;
-import fr.sirs.core.component.RefRapportEtudeRepository;
-import fr.sirs.core.component.RefReferenceHauteurRepository;
-import fr.sirs.core.component.RefReseauHydroCielOuvertRepository;
-import fr.sirs.core.component.RefReseauTelecomEnergieRepository;
-import fr.sirs.core.component.RefRevetementRepository;
-import fr.sirs.core.component.RefRiveRepository;
-import fr.sirs.core.component.RefSeuilRepository;
-import fr.sirs.core.component.RefSourceRepository;
-import fr.sirs.core.component.RefSystemeReleveProfilRepository;
-import fr.sirs.core.component.RefTypeDesordreRepository;
-import fr.sirs.core.component.RefTypeDocumentRepository;
-import fr.sirs.core.component.RefTypeGlissiereRepository;
-import fr.sirs.core.component.RefTypeProfilTraversRepository;
-import fr.sirs.core.component.RefUrgenceRepository;
-import fr.sirs.core.component.RefUsageVoieRepository;
-import fr.sirs.core.component.RefUtilisationConduiteRepository;
-import fr.sirs.core.component.RefVoieDigueRepository;
-import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
@@ -93,6 +41,9 @@ import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
+import fr.sirs.importer.troncon.GardienTronconGestionImporter;
+import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueSyndicatImporter;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -100,7 +51,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ektorp.BulkDeleteDocument;
@@ -144,68 +97,7 @@ public class DbImporter {
     }
     
     private final CouchDbConnector couchDbConnector;
-
-    private final DigueRepository digueRepository;
-    private final TronconDigueRepository tronconDigueRepository;
-    private final OrganismeRepository organismeRepository;
-    private final ContactRepository contactRepository;
-    private final SystemeReperageRepository systemeReperageRepository;
-    private final BorneDigueRepository borneDigueRepository;
-    private final RefRiveRepository refRiveRepository;
-    private final ConventionRepository conventionRepository; 
-    private final RefConventionRepository refConventionRepository;
-    private final ProfilTraversRepository profilTraversRepository;
-    private final RefTypeProfilTraversRepository refTypeProfilTraversRepository;
-    private final RefTypeDesordreRepository refTypeDesordreRepository;
-    private final RefSourceRepository refSourceRepository;
-    private final RefCoteRepository refCoteRepository;
-    private final RefPositionRepository refPositionRepository;
-    private final RefEvenementHydrauliqueRepository refEvenementHydrauliqueRepository;
-    private final EvenementHydrauliqueRepository evenementHydrauliqueRepository;
-    private final RefFrequenceEvenementHydrauliqueRepository refFrequenceEvenementHydrauliqueRepository;
-    private final RefSystemeReleveProfilRepository refSystemeReleveProfilRepository;
-    private final RefRapportEtudeRepository refRapportEtudeRepository;
-    private final RapportEtudeRepository rapportEtudeRepository;
-    private final RefMateriauRepository refMateriauRepository;
-    private final RefNatureRepository refNatureRepository;
-    private final RefFonctionRepository refFonctionRepository;
-    private final RefOrigineProfilTraversRepository refOrigineProfilTraversRepository;
-    private final RefTypeDocumentRepository refTypeDocumentRepository;
-    private final RefPositionProfilLongSurDigueRepository refPositionProfilLongSurDigueRepository;
-    private final RefOrigineProfilLongRepository refOrigineProfilLongRepository;
-    private final ArticleJournalRepository articleJournalRepository;
-    private final RefLargeurFrancBordRepository refLargeurFrancBordRepository;
-    private final RefProfilFrancBordRepository refProfilFrancBordRepository;
-    private final RefEcoulementRepository refEcoulementRepository;
-    private final RefImplantationRepository refImplantationRepository;
-    private final RefConduiteFermeeRepository refConduiteFermeeRepository;
-    private final RefUtilisationConduiteRepository refUtilisationConduiteRepository;
-    private final RefReseauTelecomEnergieRepository refReseauTelecomEnergieRepository;
-    private final RefOuvrageTelecomEnergieRepository refOuvrageTelecomEnergieRepository;
-    private final RefOuvrageHydrauliqueAssocieRepository refOuvrageHydrauliqueAssocieRepository;
-    private final RefUsageVoieRepository refUsageVoieRepository;
-    private final RefRevetementRepository refRevetementRepository;
-    private final RefOrientationOuvrageRepository refOrientationOuvrageRepository;
-    private final RefOuvrageFranchissementRepository refOuvrageFranchissementRepository;
-    private final RefVoieDigueRepository refVoieDigueRepository;
-    private final RefOuvrageVoirieRepository refOuvrageVoirieRepository;
-    private final RefReseauHydroCielOuvertRepository refReseauHydroCielOuvertRepository;
-    private final RefOuvrageParticulierRepository refOuvrageParticulierRepository;
-    private final RefNatureBatardeauxRepository refNatureBatardeauxRepository;
-    private final RefMoyenManipBatardeauxRepository refMoyenManipBatardeauxRepository;
-    private final RefSeuilRepository refSeuilRepository;
-    private final RefTypeGlissiereRepository refTypeGlissiereRepository;
-    private final RefReferenceHauteurRepository refReferenceHauteurRepository;
-    private final RefPrestationRepository refPrestationRepository;
-    private final MarcheRepository marcheRepository;
-    private final RefOrientationVentRepository refOrientationVentRepository;
-    private final RefProprietaireRepository refProprietaireRepository;
-    private final RefFonctionMaitreOeuvreRepository refFonctionMaitreOeuvreRepository;
-    private final CommuneRepository communeRepository;
-    private final RefOrientationPhotoRepository refOrientationPhotoRepository;
-    private final RefUrgenceRepository refUrgenceRepository;
-    private final RefDocumentGrandeEchelleRepository refDocumentGrandeEchelleRepository;
-    private final List<CouchDbRepositorySupport> repositories = new ArrayList<>();
+    private final Map<Class<? extends Element>, CouchDbRepositorySupport> repositories = new HashMap<>();
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
@@ -219,6 +111,9 @@ public class DbImporter {
     private BorneDigueImporter borneDigueImporter;
     private SystemeReperageBorneImporter systemeReperageBorneImporter;
     private ObjetManager objetManager;
+    private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
+    private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
+    private TronconGestionDigueSyndicatImporter tronconGestionDigueSyndicatImporter;
     private PositionDocumentImporter documentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
@@ -590,130 +485,17 @@ public class DbImporter {
 
     public DbImporter(final CouchDbConnector couchDbConnector) throws IOException {
         this.couchDbConnector = couchDbConnector;
-        digueRepository = new DigueRepository(couchDbConnector); 
-        repositories.add(digueRepository);
-        tronconDigueRepository = new TronconDigueRepository(couchDbConnector); 
-        repositories.add(tronconDigueRepository);
-        organismeRepository = new OrganismeRepository(couchDbConnector); 
-        repositories.add(organismeRepository);
-        systemeReperageRepository = new SystemeReperageRepository(
-                couchDbConnector); 
-        repositories.add(systemeReperageRepository);
-        borneDigueRepository = new BorneDigueRepository(couchDbConnector); 
-        repositories.add(borneDigueRepository);
-        refRiveRepository = new RefRiveRepository(couchDbConnector);
-        repositories.add(refRiveRepository);
-        conventionRepository = new ConventionRepository(couchDbConnector);
-        repositories.add(conventionRepository);
-        refConventionRepository = new RefConventionRepository(couchDbConnector);
-        repositories.add(refConventionRepository);
-        refTypeDesordreRepository = new RefTypeDesordreRepository(couchDbConnector);
-        repositories.add(refTypeDesordreRepository);
-        refSourceRepository = new RefSourceRepository(couchDbConnector);
-        repositories.add(refSourceRepository);
-        refCoteRepository = new RefCoteRepository(couchDbConnector);
-        repositories.add(refCoteRepository);
-        refPositionRepository = new RefPositionRepository(couchDbConnector);
-        repositories.add(refPositionRepository);
-        refEvenementHydrauliqueRepository = new RefEvenementHydrauliqueRepository(couchDbConnector);
-        repositories.add(refEvenementHydrauliqueRepository);
-        refFrequenceEvenementHydrauliqueRepository = new RefFrequenceEvenementHydrauliqueRepository(couchDbConnector);
-        repositories.add(refFrequenceEvenementHydrauliqueRepository);
-        evenementHydrauliqueRepository = new EvenementHydrauliqueRepository(
-                couchDbConnector);
-        repositories.add(evenementHydrauliqueRepository);
-        profilTraversRepository = new ProfilTraversRepository(couchDbConnector);
-        repositories.add(profilTraversRepository);
-        refTypeProfilTraversRepository = new RefTypeProfilTraversRepository(
-                couchDbConnector);
-        repositories.add(refTypeProfilTraversRepository);
-        refSystemeReleveProfilRepository = new RefSystemeReleveProfilRepository(
-                couchDbConnector);
-        repositories.add(refSystemeReleveProfilRepository);
-        refRapportEtudeRepository = new RefRapportEtudeRepository(couchDbConnector);
-        repositories.add(refRapportEtudeRepository);
-        rapportEtudeRepository = new RapportEtudeRepository(couchDbConnector);
-        repositories.add(rapportEtudeRepository);
-        refMateriauRepository = new RefMateriauRepository(couchDbConnector);
-        repositories.add(refMateriauRepository);
-        refNatureRepository = new RefNatureRepository(couchDbConnector);
-        repositories.add(refNatureRepository);
-        contactRepository = new ContactRepository(couchDbConnector);
-        repositories.add(contactRepository);
-        refFonctionRepository = new RefFonctionRepository(couchDbConnector);
-        repositories.add(refFonctionRepository);
-        refOrigineProfilTraversRepository = new RefOrigineProfilTraversRepository(couchDbConnector);
-        repositories.add(refOrigineProfilTraversRepository);
-        refTypeDocumentRepository = new RefTypeDocumentRepository(couchDbConnector);
-        repositories.add(refTypeDocumentRepository);
-        refPositionProfilLongSurDigueRepository = new RefPositionProfilLongSurDigueRepository(couchDbConnector);
-        repositories.add(refPositionProfilLongSurDigueRepository);
-        refOrigineProfilLongRepository = new RefOrigineProfilLongRepository(couchDbConnector);
-        repositories.add(refOrigineProfilLongRepository);
-        articleJournalRepository = new ArticleJournalRepository(couchDbConnector);
-        repositories.add(articleJournalRepository);
-        refLargeurFrancBordRepository = new RefLargeurFrancBordRepository(couchDbConnector);
-        repositories.add(refLargeurFrancBordRepository);
-        refProfilFrancBordRepository = new RefProfilFrancBordRepository(couchDbConnector);
-        repositories.add(refProfilFrancBordRepository);
-        refEcoulementRepository = new RefEcoulementRepository(couchDbConnector);
-        repositories.add(refEcoulementRepository);
-        refImplantationRepository = new RefImplantationRepository(couchDbConnector);
-        repositories.add(refImplantationRepository);
-        refConduiteFermeeRepository = new RefConduiteFermeeRepository(couchDbConnector);
-        repositories.add(refConduiteFermeeRepository);
-        refUtilisationConduiteRepository = new RefUtilisationConduiteRepository(couchDbConnector);
-        repositories.add(refUtilisationConduiteRepository);
-        refReseauTelecomEnergieRepository = new RefReseauTelecomEnergieRepository(couchDbConnector);
-        repositories.add(refReseauTelecomEnergieRepository);
-        refOuvrageTelecomEnergieRepository = new RefOuvrageTelecomEnergieRepository(couchDbConnector);
-        repositories.add(refOuvrageTelecomEnergieRepository);
-        refOuvrageHydrauliqueAssocieRepository = new RefOuvrageHydrauliqueAssocieRepository(couchDbConnector);
-        repositories.add(refOuvrageHydrauliqueAssocieRepository);
-        refUsageVoieRepository = new RefUsageVoieRepository(couchDbConnector);
-        repositories.add(refUsageVoieRepository);
-        refRevetementRepository = new RefRevetementRepository(couchDbConnector);
-        repositories.add(refRevetementRepository);
-        refOrientationOuvrageRepository = new RefOrientationOuvrageRepository(couchDbConnector);
-        repositories.add(refOrientationOuvrageRepository);
-        refOuvrageFranchissementRepository = new RefOuvrageFranchissementRepository(couchDbConnector);
-        repositories.add(refOuvrageFranchissementRepository);
-        refVoieDigueRepository = new RefVoieDigueRepository(couchDbConnector);
-        repositories.add(refVoieDigueRepository);
-        refOuvrageVoirieRepository = new RefOuvrageVoirieRepository(couchDbConnector);
-        repositories.add(refOuvrageVoirieRepository);
-        refReseauHydroCielOuvertRepository = new RefReseauHydroCielOuvertRepository(couchDbConnector);
-        repositories.add(refReseauHydroCielOuvertRepository);
-        refOuvrageParticulierRepository = new RefOuvrageParticulierRepository(couchDbConnector);
-        repositories.add(refOuvrageParticulierRepository);
-        refNatureBatardeauxRepository = new RefNatureBatardeauxRepository(couchDbConnector);
-        repositories.add(refNatureBatardeauxRepository);
-        refMoyenManipBatardeauxRepository = new RefMoyenManipBatardeauxRepository(couchDbConnector);
-        repositories.add(refMoyenManipBatardeauxRepository);
-        refSeuilRepository = new RefSeuilRepository(couchDbConnector);
-        repositories.add(refSeuilRepository);
-        refTypeGlissiereRepository = new RefTypeGlissiereRepository(couchDbConnector);
-        repositories.add(refTypeGlissiereRepository);
-        refReferenceHauteurRepository = new RefReferenceHauteurRepository(couchDbConnector);
-        repositories.add(refReferenceHauteurRepository);
-        refPrestationRepository = new RefPrestationRepository(couchDbConnector);
-        repositories.add(refPrestationRepository);
-        marcheRepository = new MarcheRepository(couchDbConnector);
-        repositories.add(marcheRepository);
-        refOrientationVentRepository = new RefOrientationVentRepository(couchDbConnector);
-        repositories.add(refOrientationVentRepository);
-        refProprietaireRepository = new RefProprietaireRepository(couchDbConnector);
-        repositories.add(refProprietaireRepository);
-        refFonctionMaitreOeuvreRepository = new RefFonctionMaitreOeuvreRepository(couchDbConnector);
-        repositories.add(refFonctionMaitreOeuvreRepository);
-        communeRepository = new CommuneRepository(couchDbConnector);
-        repositories.add(communeRepository);
-        refOrientationPhotoRepository = new RefOrientationPhotoRepository(couchDbConnector);
-        repositories.add(refOrientationPhotoRepository);
-        refUrgenceRepository = new RefUrgenceRepository(couchDbConnector);
-        repositories.add(refUrgenceRepository);
-        refDocumentGrandeEchelleRepository = new RefDocumentGrandeEchelleRepository(couchDbConnector);
-        repositories.add(refDocumentGrandeEchelleRepository);
+//        repositories.put(Digue.class, new DigueRepository(couchDbConnector));
+//        repositories.put(TronconDigue.class, new TronconDigueRepository(couchDbConnector));
+//        repositories.put(BorneDigue.class, new BorneDigueRepository(couchDbConnector));
+        List<Class<? extends Element>> elementClasses = SessionCore.getElements();
+        for(final Class<? extends Element> elementClass : elementClasses){
+            try{
+            repositories.put(elementClass, InjectorCore.getBean(SessionCore.class).getRepositoryForClass(elementClass));
+            }catch(Exception ex){
+                SirsCore.LOGGER.log(Level.FINE, "No repo for class "+elementClass);
+            }
+        }
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -744,11 +526,24 @@ public class DbImporter {
         
         typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
-                accessDatabase, couchDbConnector, tronconDigueRepository, 
-                digueRepository, borneDigueRepository, digueImporter, 
-                tronconDigueGeomImporter, systemeReperageImporter, 
+                accessDatabase, couchDbConnector, 
+                (TronconDigueRepository) repositories.get(TronconDigue.class), 
+                (DigueRepository) repositories.get(Digue.class), 
+                (BorneDigueRepository) repositories.get(BorneDigue.class), 
+                digueImporter, tronconDigueGeomImporter, systemeReperageImporter, 
                 borneDigueImporter, organismeImporter, intervenantImporter, 
                 typeCoteImporter, evenementHydrauliqueImporter);
+        
+        tronconGestionDigueGardienImporter = new GardienTronconGestionImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter, intervenantImporter);
+        tronconGestionDigueProprietaireImporter = new ProprietaireTronconGestionImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter, intervenantImporter, 
+                organismeImporter);
+        tronconGestionDigueSyndicatImporter = new TronconGestionDigueSyndicatImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter);
         documentImporter = new PositionDocumentImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, borneDigueImporter, 
                 intervenantImporter, organismeImporter, systemeReperageImporter, 
@@ -880,7 +675,7 @@ public class DbImporter {
     }
     
     public void cleanDb(){
-        for(final CouchDbRepositorySupport repo : repositories){
+        for(final CouchDbRepositorySupport repo : repositories.values()){
             cleanRepo(repo);
         }
     }
@@ -908,6 +703,9 @@ public class DbImporter {
         documentImporter.getPositions();
         objetManager.compute();
         objetManager.link();
+        tronconGestionDigueGardienImporter.compute();
+        tronconGestionDigueProprietaireImporter.compute();
+        tronconGestionDigueSyndicatImporter.compute();
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();

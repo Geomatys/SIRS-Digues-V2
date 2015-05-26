@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GardeObjet;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetStructure;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
@@ -61,14 +61,14 @@ public class ElementStructureGardienImporter extends GenericEntityLinker {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         
-        final Map<Integer, Objet> structures = elementStructureImporter.getById();
+        final Map<Integer, ObjetStructure> structures = elementStructureImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
+            final ObjetStructure structure = structures.get(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString()));
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_GARDIEN.toString()));
             
             if(structure!=null && intervenant!=null){

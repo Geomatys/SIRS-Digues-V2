@@ -1,18 +1,11 @@
 package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.Commune;
-import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.COMMUNE;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -21,7 +14,7 @@ import org.ektorp.CouchDbConnector;
  */
 class CommuneImporter extends GenericImporter {
 
-    private Map<Integer, Commune> communes = null;
+//    private Map<Integer, Commune> communes = null;
 
     CommuneImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -35,10 +28,10 @@ class CommuneImporter extends GenericImporter {
         DATE_DERNIERE_MAJ
     };
 
-    public Map<Integer, Commune> getCommunes() throws IOException {
-        if (communes == null) compute();
-        return communes;
-    }
+//    public Map<Integer, Commune> getCommunes() throws IOException {
+//        if (communes == null) compute();
+//        return communes;
+//    }
 
     @Override
     protected List<String> getUsedColumns() {
@@ -56,26 +49,26 @@ class CommuneImporter extends GenericImporter {
 
     @Override
     protected void compute() throws IOException {
-        communes = new HashMap<>();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Commune commune = createAnonymValidElement(Commune.class);
-            
-            commune.setCodeInsee(row.getString(Columns.CODE_INSEE_COMMUNE.toString()));
-            
-            commune.setLibelle(row.getString(Columns.LIBELLE_COMMUNE.toString()));
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                commune.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            
-            commune.setDesignation(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);
-        }
-        couchDbConnector.executeBulk(communes.values());
+//        communes = new HashMap<>();
+//        
+//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        while (it.hasNext()) {
+//            final Row row = it.next();
+//            final Commune commune = createAnonymValidElement(Commune.class);
+//            
+//            commune.setCodeInsee(row.getString(Columns.CODE_INSEE_COMMUNE.toString()));
+//            
+//            commune.setLibelle(row.getString(Columns.LIBELLE_COMMUNE.toString()));
+//            
+//            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
+//                commune.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+//            }
+//            
+//            commune.setDesignation(String.valueOf(row.getInt(Columns.ID_COMMUNE.toString())));
+//            
+//            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+//            communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);
+//        }
+//        couchDbConnector.executeBulk(communes.values());
     }
 }

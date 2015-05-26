@@ -345,9 +345,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             uiGestionsTable.setParentElement(newValue);
             uiGestionsTable.setTableItems(() -> (ObservableList) newValue.gestions);
             uiProprietesTable.setParentElement(newValue);
-            uiProprietesTable.setTableItems(() -> (ObservableList) newValue.proprietes);
+//            uiProprietesTable.setTableItems(() -> (ObservableList) session.getProprietesByTronconId(newValue.getId()));
             uiGardesTable.setParentElement(newValue);
-            uiGardesTable.setTableItems(() -> (ObservableList) newValue.gardes);
+//            uiGardesTable.setTableItems(() -> (ObservableList) newValue.gardes);
 
         }
         initializing = false;

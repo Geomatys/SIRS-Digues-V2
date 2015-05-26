@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.structure;
 
 import fr.sirs.importer.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetStructure;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.*;
@@ -14,7 +14,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-abstract class GenericStructureImporter<T extends Objet> extends GenericObjetImporter<T> {
+abstract class GenericStructureImporter<T extends ObjetStructure> extends GenericObjetImporter<T> {
 
     public GenericStructureImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector, 

@@ -14,15 +14,19 @@ import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
+import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.index.ElementHit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -184,6 +188,48 @@ public class SessionCore extends SessionGen {
     
     public Collection<AbstractSIRSRepository> getModelRepositories(){
         return repositories.values();
+    }
+    
+    public <T extends Positionable> List<T> getByTronconId(final String tronconId, final Class<T> clazz){
+        final List<T> objets = new ArrayList<>();
+        for(final Element element : ServiceLoader.load(Element.class)){
+            if(clazz.isAssignableFrom(element.getClass()) && element instanceof AvecForeignParent){
+                final AbstractPositionableRepository<T> repo = (AbstractPositionableRepository<T>) getRepositoryForClass(element.getClass());
+                final List elementList = repo.getByLinearId(tronconId);
+                for(final Object objet : elementList){
+                    objets.add((T) objet);
+                }
+            }
+        }
+        return objets;
+    }
+    
+    public List<ProprieteTroncon> getProprietesByTronconId(final String tronconId){
+        final List<ProprieteTroncon> objets = new ArrayList<>();
+        for(final Element element : ServiceLoader.load(Element.class)){
+            if(element instanceof ProprieteTroncon){
+                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
+                final List elementList = repo.getByLinearId(tronconId);
+                for(final Object objet : elementList){
+                    objets.add((ProprieteTroncon) objet);
+                }
+            }
+        }
+        return objets;
+    }
+    
+    public List<GardeTroncon> getGardesByTronconId(final String tronconId){
+        final List<GardeTroncon> objets = new ArrayList<>();
+        for(final Element element : ServiceLoader.load(Element.class)){
+            if(element instanceof Objet){
+                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
+                final List elementList = repo.getByLinearId(tronconId);
+                for(final Object objet : elementList){
+                    objets.add((ProprieteTroncon) objet);
+                }
+            }
+        }
+        return objets;
     }
     
     public List<Objet> getObjetsByTronconId(final String tronconId){

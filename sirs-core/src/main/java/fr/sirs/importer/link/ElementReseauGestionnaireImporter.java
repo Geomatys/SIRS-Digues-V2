@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.GestionObjet;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
@@ -69,7 +68,7 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final ObjetReseau reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_GESTION.toString()));
             
             if(reseau!=null && organisme!=null){

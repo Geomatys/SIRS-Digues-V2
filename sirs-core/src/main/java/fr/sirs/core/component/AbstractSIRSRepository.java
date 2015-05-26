@@ -6,6 +6,8 @@ import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
@@ -83,24 +85,33 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @param clazz
      * @return 
      */
-    public List<T> executeBulk(final List<String> ids, Class<T> clazz){
-
-        final List<String> nonCachedIds = new ArrayList<>(ids);
-        nonCachedIds.removeIf((String id) -> {return cache.containsKey(id);});
+    public List<T> get(final String... ids) {
+        return get(Arrays.asList(ids));
+    }
+    
+    public List<T> get(final List<String> ids) {
+        final ArrayList result = new ArrayList();
         
-        // On va chercher uniquement les documents qui ne sont pas en cache
-        final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(nonCachedIds);
-        final List<T> bulkLoaded = db.queryView(q, clazz);
-        
-        // On ajoute les documents en cache dont l'id a été fourni
-        final List<String> cachedIds = new ArrayList<>(ids);
-        cachedIds.removeAll(nonCachedIds);
-        
-        for(final String cachedId : cachedIds){
-            bulkLoaded.add(cache.get(cachedId));
+        final List<String> toGet = new ArrayList<>(ids);
+        final Iterator<String> idIt = toGet.iterator();
+        while (idIt.hasNext()) {
+            final T cached = cache.get(idIt.next());
+            if (cached != null) {
+                result.add(cached);
+                idIt.remove();
+            }
         }
         
-        return bulkLoaded;
+        // On va chercher uniquement les documents qui ne sont pas en cache
+        final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(toGet);
+        final List<T> bulkLoaded = db.queryView(q, getModelClass());
+        
+        for(final T loaded : bulkLoaded) {
+            cache.put(loaded.getId(), loaded);
+            result.add(loaded);
+        }
+        
+        return result;
     }
     
     /**

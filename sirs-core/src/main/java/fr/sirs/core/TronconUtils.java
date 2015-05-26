@@ -257,6 +257,44 @@ public class TronconUtils {
     }
     
     /**
+     * Retrieve the list of properties linked to a linear which id is given as a 
+     * parameter.
+     * @param linearId
+     * @return 
+     */
+    public static List<ProprieteTroncon> getProprieteList(final String linearId){
+        return InjectorCore.getBean(SessionCore.class).getProprietesByTronconId(linearId);
+    }
+    
+    /**
+     * Retrieve the list of properties linked to a linear given as a parameter.
+     * @param linear
+     * @return 
+     */
+    public static List<ProprieteTroncon> getProprieteList(final TronconDigue linear){
+        return getProprieteList(linear.getId());
+    }
+    
+    /**
+     * Retrieve the list of gardes linked to a linear which id is given as a 
+     * parameter.
+     * @param linearId
+     * @return 
+     */
+    public static List<GardeTroncon> getGardeList(final String linearId){
+        return InjectorCore.getBean(SessionCore.class).getGardesByTronconId(linearId);
+    }
+    
+    /**
+     * Retrieve the list of gardes linked to a linear given as a parameter.
+     * @param linear
+     * @return 
+     */
+    public static List<GardeTroncon> getGardeList(final TronconDigue linear){
+        return getGardeList(linear.getId());
+    }
+    
+    /**
      * Retrieve the list of objects linked to a linear which id is given as a 
      * parameter.
      * @param linearId
@@ -330,9 +368,9 @@ public class TronconUtils {
         if(objets !=null && !objets.isEmpty()) positionables.addAll(objets);
         final List<AbstractPositionDocument> positions = TronconUtils.getPositionDocumentList(linear);
         if(positions !=null && !positions.isEmpty()) positionables.addAll(positions);
-        final List<ProprieteTroncon> proprietes = linear.getProprietes();
+        final List<ProprieteTroncon> proprietes = TronconUtils.getProprieteList(linear);
         if(proprietes !=null && !proprietes.isEmpty()) positionables.addAll(proprietes);
-        final List<GardeTroncon> gardes = linear.getGardes();
+        final List<GardeTroncon> gardes = TronconUtils.getGardeList(linear);
         if(gardes !=null && !gardes.isEmpty()) positionables.addAll(gardes);
         final List<Photo> photos = TronconUtils.getPhotoList(linear);
         if(photos !=null && !photos.isEmpty()) positionables.addAll(photos);
@@ -520,7 +558,7 @@ public class TronconUtils {
                 try{
                     ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).update(copy);
                 } catch(Exception e){
-                    SirsCore.LOGGER.log(Level.FINEST, "No repo found for "+copy.getClass());
+                    SirsCore.LOGGER.log(Level.WARNING, "No repo found for "+copy.getClass());
                 }
             }
         }

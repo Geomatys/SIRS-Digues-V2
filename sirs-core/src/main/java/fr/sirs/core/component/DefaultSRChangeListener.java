@@ -3,11 +3,15 @@ package fr.sirs.core.component;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
+import static fr.sirs.core.TronconUtils.getGardeList;
 import static fr.sirs.core.TronconUtils.getObjetList;
 import static fr.sirs.core.TronconUtils.getPositionDocumentList;
+import static fr.sirs.core.TronconUtils.getProprieteList;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -25,6 +29,11 @@ import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProprieteTroncon;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -170,44 +179,60 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             ArgumentChecks.ensureNonNull("Linéaire de réference", lineString);
             final LinearReferencing.SegmentInfo[] linear = LinearReferencing.buildSegments(lineString);
             
+            final Map<Class<? extends AvecForeignParent>, List> listes = new HashMap<>();
+            final Consumer<AvecForeignParent> listFeeder = (AvecForeignParent current) -> {
+                if(listes.get(current.getClass())==null) listes.put(current.getClass(), new ArrayList());
+                listes.get(current.getClass()).add(current);
+            };
             
             ArgumentChecks.ensureNonNull("SR par défaut", troncon.getSystemeRepDefautId());
                     
-            final int progressMax = getObjetList(troncon).size()
-                    + getPositionDocumentList(troncon).size()
-                    + troncon.getProprietes().size()
-                    + troncon.getGardes().size();
+            final List<Objet> objets = getObjetList(troncon);
+            final List<AbstractPositionDocument> positionsDoc = getPositionDocumentList(troncon);
+            final List<ProprieteTroncon> proprietes = getProprieteList(troncon);
+            final List<GardeTroncon> gardes = getGardeList(troncon);
+            
+            final int progressMax = objets.size() + positionsDoc.size()
+                    + proprietes.size() + gardes.size();
             int currentProgress = 0;
+            
             updateMessage("Parcours des objets");
             updateProgress(currentProgress, progressMax);
-            for (final Objet current : getObjetList(troncon)) {
+            
+            for (final Objet current : objets) {
                 recomputePositionable(current, linear);
                 for(final Photo photo : current.getPhotos()){
                     recomputePositionable(photo, linear);
                 }
+                listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);
             }
-            for (final AbstractPositionDocument current : getPositionDocumentList(troncon)) {
+            for (final AbstractPositionDocument current : positionsDoc) {
                 recomputePositionable(current, linear);
                 if(current instanceof PositionProfilTravers){
                     for(final Photo photo : ((PositionProfilTravers) current).getPhotos()){
                         recomputePositionable(photo, linear);
                     }
-                } 
-                
+                }
+                listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);
             }
-            for (final ProprieteTroncon current : troncon.getProprietes()) {
+            for (final ProprieteTroncon current : proprietes) {
                 recomputePositionable(current, linear);
+                listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);
             }
-            for (final GardeTroncon current : troncon.getGardes()) {
+            for (final GardeTroncon current : gardes) {
                 recomputePositionable(current, linear);
+                listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);
             }
             
             updateMessage("Mise à jour de la base de données");
-            InjectorCore.getBean(SessionGen.class).getTronconDigueRepository().update(troncon);
+            for(final Class c : listes.keySet()){
+                InjectorCore.getBean(SessionCore.class).getRepositoryForClass(c).executeBulk(listes.get(c));
+            }
+            InjectorCore.getBean(SessionCore.class).getTronconDigueRepository().update(troncon);
             
             return true;
         }

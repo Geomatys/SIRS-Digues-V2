@@ -76,7 +76,7 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         while (it.hasNext()) {
             final Row row = it.next();
             
-            final Objet reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
+            final ObjetReseau reseau = reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Contact intervenant = intervenants.get(row.getInt(Columns.ID_INTERV_PROPRIO.toString()));
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_PROPRIO.toString()));
             
