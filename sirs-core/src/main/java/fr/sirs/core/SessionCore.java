@@ -243,64 +243,6 @@ public class SessionCore extends SessionGen {
         return getDigueRepository().getAll();
     }
     
-    public Digue getDigueById(final String digueId){
-        return getDigueRepository().get(digueId);
-    }
-    
-    public SystemeEndiguement getSystemeEndiguementById(final String systemeEndiguementId){
-        return getSystemeEndiguementRepository().get(systemeEndiguementId);
-    }
-
-    public List<TronconDigue> getTroncons() {
-        return getTronconDigueRepository().getAll();
-    }
-
-    public List<TronconDigue> getTronconDigueByDigue(final Digue digue) {
-        return getTronconDigueRepository().getByDigue(digue);
-    }
-    
-    public void update(final Digue digue){
-        digue.setDateMaj(LocalDateTime.now());
-        getDigueRepository().update(digue);
-    }
-    
-    /**
-     * Update a section of the database.
-     * @param tronconDigue 
-     */
-    public void update(final TronconDigue tronconDigue){
-        tronconDigue.setDateMaj(LocalDateTime.now());
-        SirsCore.LOGGER.log(Level.FINE, "enregistrement de "+tronconDigue+" : : "+tronconDigue.getDigueId());
-        getTronconDigueRepository().update(tronconDigue);
-    }
-    
-    /**
-     * Update a list of sections of the database.
-     * @param troncons 
-     */
-    public void update(final List<TronconDigue> troncons){
-        troncons.stream().forEach((troncon) -> {
-            this.update(troncon);
-        });
-    }
-    
-    /**
-     * Add a troncon to the database.
-     * @param tronconDigue 
-     */
-    public void add(final TronconDigue tronconDigue){
-        tronconDigue.setDateMaj(LocalDateTime.now());
-        getTronconDigueRepository().add(tronconDigue);
-    }
-    
-    /**
-     * Remove a section from the database.
-     * @param tronconDigue 
-     */
-    public void delete(final TronconDigue tronconDigue){
-        getTronconDigueRepository().remove(tronconDigue);
-    }
-    
     /**
      * Take an element in input, and return the same, but with its {@link Element#parentProperty() }
      * and {@link Element#getCouchDBDocument() } set.
