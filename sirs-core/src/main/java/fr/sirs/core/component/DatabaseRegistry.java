@@ -709,29 +709,30 @@ public class DatabaseRegistry {
     }
 
     private void ensureNoDelay() {
-        String socketConfig;
         try {
-            socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
-        } catch (Exception e) {
-            socketConfig = null;
-        }
-        if (socketConfig == null || socketConfig.trim().matches("\\[\\s*\\]")) {
-            socketConfig = "[{"+NO_DELAY_KEY+", true}]";
-        } else {
-            final Matcher matcher = Pattern.compile(NO_DELAY_KEY+"\\s*,\\s*(true|false)").matcher(socketConfig);
-            if (matcher.find()) {
-                if (matcher.group(1).equalsIgnoreCase("true")) {
-                    SirsCore.LOGGER.info("SOCKET configuration found with right value.");
-                    return;
-                } else {
-                    socketConfig = matcher.replaceAll(NO_DELAY_KEY+", true");
-                }
+            String socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
+
+            if (socketConfig == null || socketConfig.trim().matches("\\[\\s*\\]")) {
+                socketConfig = "[{" + NO_DELAY_KEY + ", true}]";
             } else {
-                socketConfig = socketConfig.replaceFirst("\\]$", ", {"+NO_DELAY_KEY+", true}]");
+                final Matcher matcher = Pattern.compile(NO_DELAY_KEY + "\\s*,\\s*(true|false)").matcher(socketConfig);
+                if (matcher.find()) {
+                    if (matcher.group(1).equalsIgnoreCase("true")) {
+                        SirsCore.LOGGER.info("SOCKET configuration found with right value.");
+                        return;
+                    } else {
+                        socketConfig = matcher.replaceAll(NO_DELAY_KEY + ", true");
+                    }
+                } else {
+                    socketConfig = socketConfig.replaceFirst("\\]$", ", {" + NO_DELAY_KEY + ", true}]");
+                }
             }
+
+            SirsCore.LOGGER.info("SOCKET configuration about to be SET");
+            couchDbInstance.setConfiguration(HTTPD_SECTION, SOCKET_OPTION, socketConfig);
+
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot checck 'no delay' configuration", e);
         }
-        
-        SirsCore.LOGGER.info("SOCKET configuration about to be SET");
-        couchDbInstance.setConfiguration(HTTPD_SECTION, SOCKET_OPTION, socketConfig);
     }
 }

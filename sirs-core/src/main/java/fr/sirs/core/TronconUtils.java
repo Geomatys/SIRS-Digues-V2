@@ -127,53 +127,95 @@ public class TronconUtils {
                 newSRs.put(sr.getId(), srCp);
             }
         }
-        
-        // On enregistre le tronçon maintenant que la copie est réalisée. 
-        // On sauvegarde les modifications
-        // TODO : make it transactional.
-        tdRepo.add(tronconCp);
-        
-        // Certains positionables n'ont pas été copiés en même temps que le 
-        // troncon car ce sont des documents séparés.
-        // Il faut donc commercer par les copier avant de les découper.
-        final ListIterator<Positionable> originalPositionables = getPositionableList(troncon).listIterator();
-        while(originalPositionables.hasNext()){
-            final Positionable originalPositionable = originalPositionables.next();
-            
-            /* 
-             Si le positionable est un foreignParent, il faut le copier à la
-             main car la copie n'aura pas été faite lors de la copie du troncon.
-            */
-            if(originalPositionable instanceof AvecForeignParent){
-                final AvecForeignParent copyOfPositionable = (AvecForeignParent) originalPositionable.copy();
-                copyOfPositionable.setForeignParentId(tronconCp.getId());
-                try{
-                    ((AbstractSIRSRepository) session.getRepositoryForClass(copyOfPositionable.getClass())).add(copyOfPositionable);
-                } catch(Exception ex){
-                    SirsCore.LOGGER.log(Level.SEVERE, "No repository found for {0}", copyOfPositionable.getClass());
+                
+        /* On parcourt la liste des objets positionnés sur le tronçon originel.
+         * Pour tout objet contenu dans le morceau découpé (tronçon de sortie)
+         * on met simplement à jour ses positions linéaires pour rester cohérent
+         * avec sa géométrie. Les objets qui intersectent le nouveau tronçon sont 
+         * quand à eux découpés.
+         * Note : On fait une copie des objets à affecter au nouveau tronçon
+         */
+        final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
+        final ListIterator<Positionable> posIt = getPositionableList(troncon).listIterator();
+        final List<Positionable> newPositions = new ArrayList<>();
+        SegmentInfo[] cutTronconSegments = null;
+        while (posIt.hasNext()) {
+            final Positionable tmpPosition = posIt.next();
+
+            //on vérifie que cet objet intersecte le segment
+            Geometry objGeom = tmpPosition.getGeometry();
+            if (objGeom == null) {
+                //on la calcule
+                objGeom = buildGeometry(troncon.getGeometry(), tmpPosition, bdRepo);
+                if (objGeom == null) {
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + tmpPosition);
                 }
+                tmpPosition.setGeometry(objGeom);
+            }
+
+            if (!cutLinear.intersects(objGeom)) {
+                posIt.remove();
+                continue;
+            } 
+            
+            final Positionable position = tmpPosition.copy();
+            newPositions.add(position);
+            
+            // Mise à jour des infos géographiques
+            if (!cutLinear.contains(objGeom)) {
+                objGeom = cutLinear.intersection(objGeom);
+                position.setGeometry(objGeom);
+            }
+
+            if (objGeom instanceof Point) {
+                position.setPositionDebut((Point) objGeom);
+                position.setPositionFin((Point) objGeom);
+            } else {
+                final LineString structureLine = asLineString(objGeom);
+                position.setPositionDebut(structureLine.getStartPoint());
+                position.setPositionFin(structureLine.getEndPoint());
+                position.setGeometry(objGeom);
+            }
+
+            // Mise à jour du réferencement linéaire
+            final SystemeReperage sr = newSRs.get(position.getSystemeRepId());
+            if (sr == null) {
+                position.setSystemeRepId(null);
+                position.setBorneDebutId(null);
+                position.setBorneFinId(null);
+                position.setBorne_debut_distance(Float.NaN);
+                position.setBorne_fin_distance(Float.NaN);
+            } else {
+                final PosInfo info;
+                if (cutTronconSegments == null) {
+                    info = new PosInfo(position, tronconCp, session);
+                    cutTronconSegments = info.getTronconSegments(true);
+                } else {
+                    info = new PosInfo(position, tronconCp, cutTronconSegments, session);
+                }
+                final PosSR posSr = info.getForSR(sr);
+
+                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
+                List<Positionable> boundObjets = needSRIDUpdate.get(sr);
+                if (boundObjets == null) {
+                    boundObjets = new ArrayList<>();
+                    needSRIDUpdate.put(sr, boundObjets);
+                }
+                boundObjets.add(position);
+                
+                position.setBorneDebutId(posSr.borneStartId);
+                position.setBorne_debut_distance((float) posSr.distanceStartBorne);
+                position.setBorne_debut_aval(posSr.startAval);
+                position.setBorneFinId(posSr.borneEndId);
+                position.setBorne_fin_distance((float) posSr.distanceEndBorne);
+                position.setBorne_fin_aval(posSr.endAval);
+                position.setPositionDebut(null);
+                position.setPositionFin(null);
             }
         }
         
-
-        /* On va maintenant découper les positionables liés au tronçon d'une 
-         * manière ou d'une autre. Ceux qui sont en dehors du nouveau tronçon 
-         * sont supprimés de ce dernier. Pour tout objet contenu,
-         * on met simplement à jour ses positions linéaires pour rester cohérent
-         * avec sa géométrie. Les objets qui intersectent le nouveau tronçons sont 
-         * quand à eux découpés.
-         */
-        final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
-        
-        
-        
-        /*
-        On découpe maintenant les positionables qui ont été copiés de manière à
-        ce que leurs géométries rentrent dans le troncon découpé. 
-        */
-        final ListIterator<Positionable> positionables = getPositionableList(tronconCp).listIterator();
-        cutPositionable(positionables, troncon, tronconCp, bdRepo, cutLinear, newSRs, needSRIDUpdate, session);
-        
+        // On sauvegarde les modifications
+        tdRepo.add(tronconCp);
         
         // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
         final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
@@ -185,18 +227,31 @@ public class TronconUtils {
             newSR.setLinearId(tronconCp.getDocumentId());
             srRepo.add(newSR, tronconCp, false);
         }
+        
         // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier 
         // les objets du tronçon à leur SR.
         if (!needSRIDUpdate.isEmpty()) {
             Iterator<Map.Entry<SystemeReperage, List<Positionable>>> it = needSRIDUpdate.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<SystemeReperage, List<Positionable>> next = it.next();
+                final String srid = next.getKey().getId();
                 for (final Positionable o : next.getValue()) {
-                    o.setSystemeRepId(next.getKey().getId());
+                    o.setSystemeRepId(srid);
                 }
             }
             
-            tdRepo.update(tronconCp);
+            // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
+            for (final Positionable pos : newPositions) {
+                if (pos instanceof AvecForeignParent) {
+                    ((AvecForeignParent)pos).setForeignParentId(tronconCp.getId());
+                }
+                try {
+                    AbstractSIRSRepository repo = session.getRepositoryForClass(pos.getClass());
+                    repo.add(pos);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
+                }
+            }
         }
         return tronconCp;
     }
@@ -307,7 +362,7 @@ public class TronconUtils {
      * @param session 
      */
     private static void cutPositionable(final ListIterator<? extends Positionable> positionables, 
-             final TronconDigue troncon, final TronconDigue tronconCp, 
+             final TronconDigue troncon, final TronconDigue tronconCp,
              final BorneDigueRepository bdRepo,
              final LineString linearLineString, final HashMap<String, SystemeReperage> newSRs,
              final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate,
@@ -372,14 +427,6 @@ public class TronconUtils {
                 positionable.setBorne_fin_aval(posSr.endAval);
                 positionable.setPositionDebut(null);
                 positionable.setPositionFin(null);
-            }
-            
-            if(positionable instanceof AvecForeignParent){
-                try{
-                    ((AbstractSIRSRepository) session.getRepositoryForClass(positionable.getClass())).update(positionable);
-                } catch(Exception ex){
-                    SirsCore.LOGGER.log(Level.SEVERE, "No repository found for {0}", positionable.getClass());
-                }
             }
         }
     }

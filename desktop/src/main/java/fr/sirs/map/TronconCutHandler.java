@@ -13,6 +13,9 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.Positionable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -420,7 +423,6 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
 
                 } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
                     //on marque comme terminé le troncon et ses structures
-                    cut.dateMajProperty().set(LocalDateTime.now());
                     cut.date_finProperty().set(LocalDateTime.now());
                     for (Objet obj : TronconUtils.getObjetList(cut)) {
                         obj.dateMajProperty().set(LocalDateTime.now());
@@ -439,7 +441,20 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             //on archive l'ancien troncon
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
             toCut.setDate_fin(LocalDateTime.now());
+            
             session.getTronconDigueRepository().update(toCut);
+
+            for (Positionable obj : TronconUtils.getPositionableList(toCut)) {
+                if (obj instanceof AvecBornesTemporelles) {
+                    ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDateTime.now());
+                    try {
+                        AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
+                        repo.add(obj);
+                    } catch (Exception e) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
+                    }
+                }
+            }
 
             return true;
         }
