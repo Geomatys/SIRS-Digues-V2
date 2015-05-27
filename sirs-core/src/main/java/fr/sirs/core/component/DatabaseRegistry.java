@@ -710,8 +710,14 @@ public class DatabaseRegistry {
 
     private void ensureNoDelay() {
         try {
-            String socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
-
+            String socketConfig;
+            // Catch exception at read because if property does not exists, an error is thrown.
+            try {
+                socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
+            } catch (DbAccessException e) {
+                socketConfig = null;
+            }
+            
             if (socketConfig == null || socketConfig.trim().matches("\\[\\s*\\]")) {
                 socketConfig = "[{" + NO_DELAY_KEY + ", true}]";
             } else {
@@ -731,6 +737,7 @@ public class DatabaseRegistry {
             SirsCore.LOGGER.info("SOCKET configuration about to be SET");
             couchDbInstance.setConfiguration(HTTPD_SECTION, SOCKET_OPTION, socketConfig);
 
+            // Do not make application fail because of an optimisation.
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, "Cannot checck 'no delay' configuration", e);
         }
