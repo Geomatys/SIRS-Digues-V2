@@ -2,7 +2,9 @@ package fr.sirs.importer.objet.monteeDesEaux;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.MonteeEaux;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -12,12 +14,14 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
+import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -28,12 +32,15 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
 
     private final MonteeDesEauxMesuresImporter monteeDesEauxMesuresImporter;
     private final SysEvtMonteeDesEauHydroImporter sysEvtMonteeDesEauHydroImporter;
+    
+    private final ElementReseauImporter elementReseauImporter;
 
     public MonteeDesEauxImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
+            final ElementReseauImporter elementReseauImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final IntervenantImporter intervenantImporter,
             final TypeRefHeauImporter typeRefHeauImporter,
@@ -48,6 +55,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 evenementHydrauliqueImporter, monteeDesEauxMesuresImporter);
+        this.elementReseauImporter = elementReseauImporter;
     }
 
     private enum Columns {
@@ -63,7 +71,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
         //        AMONT_AVAL,
         //        DIST_BORNEREF,
         //        COMMENTAIRE,
-        ////        ID_ECHELLE_LIMNI,// Correspondance ?? Référence quelle table ??
+        ID_ECHELLE_LIMNI,// Correspondance ?? Référence quelle table ??
         DATE_DERNIERE_MAJ
     };
 
@@ -87,9 +95,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
         objets = new HashMap<>();
         objetsByTronconId = new HashMap<>();
 
-        // Commenté pour ignorer la table d'événements.
-//        this.structures = sysEvtMonteeDesEauHydroImporter.getById();
-//        this.structuresByTronconId = sysEvtMonteeDesEauHydroImporter.getByTronconId();
+        Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
@@ -97,6 +103,13 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                 objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            }
+            
+            if (row.getInt(Columns.ID_ECHELLE_LIMNI.toString()) != null) {
+                final ObjetReseau reseau = reseaux.get(row.getInt(Columns.ID_ECHELLE_LIMNI.toString()));
+                if(reseau instanceof EchelleLimnimetrique){
+                    objet.setEchelleLimnimetriqueId(reseau.getId());
+                }
             }
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

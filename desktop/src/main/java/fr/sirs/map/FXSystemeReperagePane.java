@@ -368,7 +368,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage sr = systemeReperageProperty().get();
         
         //on vérifie que la borne n'est pas deja dans la liste
-        for(SystemeReperageBorne srb : sr.getSystemeReperageBorne()){
+        for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
             if(borne.getDocumentId().equals(srb.borneIdProperty().get())){
                 //la borne fait deja partie de ce SR
                 return;
@@ -381,7 +381,7 @@ public class FXSystemeReperagePane extends BorderPane {
         srb.valeurPRProperty().set(0);
         
         //sauvegarde du SR
-        sr.systemeReperageBorne.add(srb);
+        sr.systemeReperageBornes.add(srb);
         session.getSystemeReperageRepository().update(sr, tronconProperty().get());
         updateBorneTable(null, null, null);
         
@@ -448,7 +448,7 @@ public class FXSystemeReperagePane extends BorderPane {
             }else{
                 mode.set(Mode.EDIT_BORNE);
             }
-            final ObservableList bornes = FXCollections.observableList(sr.getSystemeReperageBorne());
+            final ObservableList bornes = FXCollections.observableList(sr.getSystemeReperageBornes());
             uiBorneTable.setItems(bornes);
             sortBorneTable();
         }
@@ -467,7 +467,7 @@ public class FXSystemeReperagePane extends BorderPane {
                                     ButtonType.NO, ButtonType.YES).showAndWait().get();
                             if (ButtonType.YES == res) {
                                 final SystemeReperage sr = systemeReperageProperty().get();
-                                sr.getSystemeReperageBorne().remove(t);
+                                sr.getSystemeReperageBornes().remove(t);
                                 updateBorneTable(null, null, null);
                             }
                             return null;

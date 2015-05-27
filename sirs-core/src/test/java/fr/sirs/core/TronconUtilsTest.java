@@ -71,9 +71,9 @@ public class TronconUtilsTest extends CouchDBTestCase {
         final SystemeReperageBorne srb2 = ElementCreator.createAnonymValidElement( SystemeReperageBorne.class);
         srb2.setBorneId(borne2.getDocumentId());
         srb2.setValeurPR(20);
-        sr.getSystemeReperageBorne().add(srb0);
-        sr.getSystemeReperageBorne().add(srb1);
-        sr.getSystemeReperageBorne().add(srb2);
+        sr.getSystemeReperageBornes().add(srb0);
+        sr.getSystemeReperageBornes().add(srb1);
+        sr.getSystemeReperageBornes().add(srb2);
         session.getSystemeReperageRepository().add(sr, troncon);
         
         //on ajoute une crète
@@ -132,7 +132,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         final SystemeReperage cut0sr = cut0Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut0sr.getDocumentId());
         assertEquals("SR", cut0sr.getLibelle());
-        final List<SystemeReperageBorne> cut0srbs = cut0sr.getSystemeReperageBorne();
+        final List<SystemeReperageBorne> cut0srbs = cut0sr.getSystemeReperageBornes();
         assertEquals(1, cut0srbs.size());
         final SystemeReperageBorne cut0srb = cut0srbs.get(0);
         assertEquals(0.0f, cut0srb.getValeurPR(), DELTA);
@@ -181,7 +181,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         final SystemeReperage cut1sr = cut1Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut1sr.getDocumentId());
         assertEquals("SR", cut1sr.getLibelle());
-        final List<SystemeReperageBorne> cut1srbs = cut1sr.getSystemeReperageBorne();
+        final List<SystemeReperageBorne> cut1srbs = cut1sr.getSystemeReperageBornes();
         cut1srbs.sort((SystemeReperageBorne first, SystemeReperageBorne second) -> {
             final float diff = first.getValeurPR() - second.getValeurPR();
             if (diff > 0) return -1;

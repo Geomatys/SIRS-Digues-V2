@@ -37,6 +37,7 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import static fr.sirs.importer.objet.reseau.TypeOuvrageParticulierImporter.ECHELLE_LIMNIMETRIQUE;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,7 +85,8 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
     private final TypeReseauEauImporter typeReseauEauImporter;
     private final SysEvtReseauEauImporter sysEvtReseauEauImporter;
     private final TypeOuvrageParticulierImporter typeOuvrageParticulierImporter;
-    private final SysEvtOuvrageParticulierImporter sysEvtOuvrageParticulierImporter;
+    private final SysEvtOuvrageParticulierAutreImporter sysEvtOuvrageParticulierAutreImporter;
+    private final SysEvtOuvrageParticulierEchelleLimnimetriqueImporter sysEvtOuvrageParticulierEchelleLimnimetriqueImporter;
     private final TypeNatureBatardeauxImporter typeNatureBatardeauxImporter;
     private final TypeMoyenManipBatardeauxImporter typeMoyenManipBatardeauxImporter;
     private final TypeSeuilImporter typeSeuilImporter;
@@ -189,7 +191,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 typeCoteImporter, typePositionImporter, typeReseauEauImporter);
         typeOuvrageParticulierImporter = new TypeOuvrageParticulierImporter(
                 accessDatabase, couchDbConnector);
-        sysEvtOuvrageParticulierImporter = new SysEvtOuvrageParticulierImporter(
+        sysEvtOuvrageParticulierAutreImporter = new SysEvtOuvrageParticulierAutreImporter(
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter, typeSourceImporter,
+                typeCoteImporter, typePositionImporter);
+        sysEvtOuvrageParticulierEchelleLimnimetriqueImporter = new SysEvtOuvrageParticulierEchelleLimnimetriqueImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
                 typeCoteImporter, typePositionImporter);
@@ -346,10 +352,8 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                         pointAcces.setTypeOuvrageFranchissementId(typesOuvrageFranchissement.get(row.getInt(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString())).getId());
                     }
                 } else if (objet instanceof OuvrageParticulier) {
-
-                    final OuvrageParticulier ouvrage = (OuvrageParticulier) objet;
-
-                    if (row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()) != null) {
+                    if (row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()) != null && row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()) != ECHELLE_LIMNIMETRIQUE){             
+                        final OuvrageParticulier ouvrage = (OuvrageParticulier) objet;
                         ouvrage.setTypeOuvrageParticulierId(typesOuvrageParticulier.get(row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString())).getId());
                     }
                 } else if (objet instanceof OuvertureBatardable) {
@@ -428,7 +432,12 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
         } else if (typeStructure == OuvertureBatardable.class) {
             return sysEvtOuvertureBatardableImporter.importRow(row);
         } else if (typeStructure == OuvrageParticulier.class) {
-            return sysEvtOuvrageParticulierImporter.importRow(row);
+            if(row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()) != null 
+                    && row.getInt(Columns.ID_TYPE_OUVRAGE_PARTICULIER.toString()) == ECHELLE_LIMNIMETRIQUE){
+                return sysEvtOuvrageParticulierEchelleLimnimetriqueImporter.importRow(row);
+            } else {
+                return sysEvtOuvrageParticulierAutreImporter.importRow(row);
+            }
         } else if (typeStructure == OuvrageTelecomEnergie.class) {
             return sysEvtOuvrageTelecommunicationImporter.importRow(row);
         } else if (typeStructure == OuvrageVoirie.class) {

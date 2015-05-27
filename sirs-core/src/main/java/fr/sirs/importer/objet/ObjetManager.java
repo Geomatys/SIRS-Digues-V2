@@ -124,7 +124,7 @@ public class ObjetManager {
         importers.add(ligneEauImporter);
         monteeDesEauxImporter = new MonteeDesEauxImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, systemeReperageImporter, 
-                borneDigueImporter, evenementHydrauliqueImporter, 
+                borneDigueImporter, reseauImporter, evenementHydrauliqueImporter, 
                 intervenantImporter, typeRefHeauImporter, sourceInfoImporter);
         importers.add(monteeDesEauxImporter);
         
@@ -183,7 +183,6 @@ public class ObjetManager {
             goi.update();
         }
     }
-    
     
     public ElementStructureImporter getElementStructureImporter(){return structureImporter;}
     public DesordreImporter getDesordreImporter(){return desordreImporter;}

@@ -225,6 +225,7 @@ public class CorePlugin extends Plugin {
             suppliers.put(OuvrageTelecomEnergie.class, getSupplierForClass.apply(OuvrageTelecomEnergie.class));
             suppliers.put(ReseauHydrauliqueCielOuvert.class, getSupplierForClass.apply(ReseauHydrauliqueCielOuvert.class));
             suppliers.put(OuvrageParticulier.class, getSupplierForClass.apply(OuvrageParticulier.class));
+            suppliers.put(EchelleLimnimetrique.class, getSupplierForClass.apply(EchelleLimnimetrique.class));
 
             // Désordres
             suppliers.put(Desordre.class, getSupplierForClass.apply(Desordre.class));
@@ -356,7 +357,8 @@ public class CorePlugin extends Plugin {
                     suppliers.get(ReseauTelecomEnergie.class),
                     suppliers.get(OuvrageTelecomEnergie.class),
                     suppliers.get(ReseauHydrauliqueCielOuvert.class),
-                    suppliers.get(OuvrageParticulier.class));  
+                    suppliers.get(OuvrageParticulier.class),
+                    suppliers.get(EchelleLimnimetrique.class));  
             final MapItem roLayer = MapBuilder.createItem();
             roLayer.setName("Réseaux et ouvrages");
             roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createStructureSelectionStyle(),false) );

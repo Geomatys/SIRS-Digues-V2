@@ -71,7 +71,7 @@ public class FXSystemeReperagePane extends BorderPane {
         uiDate.valueProperty().bindBidirectional(newValue.dateMajProperty());
         uiComment.setHtmlText(newValue.getCommentaire());
                 
-        borneTable.getUiTable().setItems(newValue.systemeReperageBorne);
+        borneTable.getUiTable().setItems(newValue.systemeReperageBornes);
     }
     
     public void save(){

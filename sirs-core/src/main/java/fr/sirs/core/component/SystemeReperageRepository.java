@@ -109,7 +109,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         final String tcId = entity.getLinearId();
         if(tcId==null) return;
-        if(entity.getSystemeReperageBorne().isEmpty()) return;
+        if(entity.getSystemeReperageBornes().isEmpty()) return;
         
         final TronconDigueRepository tcRepo = new TronconDigueRepository(db);
         if(troncon==null){
@@ -124,7 +124,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         final List<String> borneIds = troncon.getBorneIds();
         
         boolean needSave = false;
-        for(SystemeReperageBorne srb : entity.getSystemeReperageBorne()){
+        for(SystemeReperageBorne srb : entity.getSystemeReperageBornes()){
             final String bid = srb.getBorneId();
             if(bid!=null && !borneIds.contains(bid)){
                 borneIds.add(bid);

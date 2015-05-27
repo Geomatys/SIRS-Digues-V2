@@ -271,7 +271,7 @@ public class Session extends SessionCore {
     public FXFreeTab getOrCreateElementTab(final Element element) {
         if (element instanceof TronconDigue) {
             final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
-            diguesTab.getDiguesController().displayTronconDigue((TronconDigue) element);
+            diguesTab.getDiguesController().displayElement(element);
             diguesTab.setOnSelectionChanged((Event event) -> {
                 if (diguesTab.isSelected()) {
                     prepareToPrint(element);

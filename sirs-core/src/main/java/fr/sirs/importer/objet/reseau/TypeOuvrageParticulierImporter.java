@@ -20,6 +20,9 @@ import org.ektorp.CouchDbConnector;
  */
 class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuvrageParticulier> {
     
+    // Identifiant des échelles limnimetriques
+    public static int ECHELLE_LIMNIMETRIQUE = 5;
+    
     TypeOuvrageParticulierImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);

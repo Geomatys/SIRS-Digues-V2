@@ -308,7 +308,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                             final String candidateId = candidate.getDocumentId();
                             
                             //on vérifie que la borne fait bien partie du SR sélectionné
-                            final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBorne();   
+                            final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBornes();   
                             for(SystemeReperageBorne srb : srbs){
                                 if(srb.getBorneId().equals(candidateId)){
                                     editPane.selectSRB(srb);

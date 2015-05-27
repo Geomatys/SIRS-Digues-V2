@@ -19,6 +19,7 @@ import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import fr.sirs.theme.ui.ForeignParentPojoTable;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
@@ -83,9 +84,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML private Tab uiGestionsTab;
     private final GestionsTable uiGestionsTable = new GestionsTable();
     @FXML private Tab uiProprietesTab;
-    private final ProprietesTable uiProprietesTable = new ProprietesTable();
+    private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable = new ForeignParentPojoTable<>(ProprieteTroncon.class, "Période de propriété");
     @FXML private Tab uiGardesTab;
-    private final GardesTable uiGardesTable = new GardesTable();
+    private final ForeignParentPojoTable<GardeTroncon> uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage");
     
     //flag afin de ne pas faire de traitement lors de l'initialisation
     private boolean initializing = false;
@@ -344,10 +345,10 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByTroncon(newValue)));
             uiGestionsTable.setParentElement(newValue);
             uiGestionsTable.setTableItems(() -> (ObservableList) newValue.gestions);
-            uiProprietesTable.setParentElement(newValue);
-//            uiProprietesTable.setTableItems(() -> (ObservableList) session.getProprietesByTronconId(newValue.getId()));
-            uiGardesTable.setParentElement(newValue);
-//            uiGardesTable.setTableItems(() -> (ObservableList) newValue.gardes);
+            uiProprietesTable.setForeignParentId(newValue.getId());
+            uiProprietesTable.setTableItems(() -> (ObservableList) FXCollections.observableList(session.getProprietesByTronconId(newValue.getId())));
+            uiGardesTable.setForeignParentId(newValue.getId());
+            uiGardesTable.setTableItems(() -> (ObservableList) FXCollections.observableList(session.getGardesByTronconId(newValue.getId())));
 
         }
         initializing = false;
@@ -362,30 +363,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         public GestionsTable() {
             super(GestionTroncon.class, "Périodes de gestion");
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            //on ne sauvegarde pas, le formulaire conteneur s'en charge
-        }
-    }
-    
-    private final class ProprietesTable extends PojoTable{
-
-        public ProprietesTable() {
-            super(ProprieteTroncon.class, "Périodes de propriétés");
-        }
-
-        @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            //on ne sauvegarde pas, le formulaire conteneur s'en charge
-        }
-    }
-    
-    private final class GardesTable extends PojoTable{
-
-        public GardesTable() {
-            super(GardeTroncon.class, "Périodes de gardiennage");
         }
 
         @Override

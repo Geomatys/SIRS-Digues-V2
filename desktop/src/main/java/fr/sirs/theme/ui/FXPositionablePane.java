@@ -454,8 +454,8 @@ public class FXPositionablePane extends BorderPane {
     private HashMap<Point, BorneDigue> getAvailableBornes(final SystemeReperage source) {
         ArgumentChecks.ensureNonNull("Système de repérage source", source);
         final BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
-        final HashMap<Point, BorneDigue> availableBornes = new HashMap<>(source.systemeReperageBorne.size());
-        for (final SystemeReperageBorne pr : source.systemeReperageBorne) {
+        final HashMap<Point, BorneDigue> availableBornes = new HashMap<>(source.systemeReperageBornes.size());
+        for (final SystemeReperageBorne pr : source.systemeReperageBornes) {
             if (pr.getBorneId() != null) {
                 final BorneDigue borne = borneRepo.get(pr.getBorneId());
                 if (borne != null && borne.getGeometry() != null) {
@@ -774,7 +774,7 @@ public class FXPositionablePane extends BorderPane {
                     final ArrayList<BorneDigue> bornes = new ArrayList<>();
                     final BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
                     BorneDigue defaultBorne = null;
-                    for (final SystemeReperageBorne srb : newSRValue.systemeReperageBorne) {
+                    for (final SystemeReperageBorne srb : newSRValue.systemeReperageBornes) {
                         final BorneDigue bd = borneRepo.get(srb.getBorneId());
                         if (bd != null) {
                             bornes.add(bd);

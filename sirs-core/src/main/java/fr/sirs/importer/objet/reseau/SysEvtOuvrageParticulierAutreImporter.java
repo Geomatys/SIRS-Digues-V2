@@ -42,9 +42,9 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtOuvrageParticulierImporter extends GenericReseauImporter<OuvrageParticulier> {
+class SysEvtOuvrageParticulierAutreImporter extends GenericReseauImporter<OuvrageParticulier> {
 
-    SysEvtOuvrageParticulierImporter(final Database accessDatabase,
+    SysEvtOuvrageParticulierAutreImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
@@ -196,7 +196,7 @@ class SysEvtOuvrageParticulierImporter extends GenericReseauImporter<OuvragePart
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtOuvrageParticulierImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvrageParticulierAutreImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             try {
@@ -207,10 +207,10 @@ class SysEvtOuvrageParticulierImporter extends GenericReseauImporter<OuvragePart
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtOuvrageParticulierImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvrageParticulierAutreImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtOuvrageParticulierImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtOuvrageParticulierAutreImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

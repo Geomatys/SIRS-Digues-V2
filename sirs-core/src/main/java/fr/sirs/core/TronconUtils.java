@@ -117,13 +117,13 @@ public class TronconUtils {
         final HashMap<String, SystemeReperage> newSRs = new HashMap<>();
         for (final SystemeReperage sr : srRepo.getByTroncon(troncon)) {
             final SystemeReperage srCp = sr.copy();
-            final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBorne().listIterator();
+            final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBornes().listIterator();
             while (srBorneIt.hasNext()) {
                 if (!keptBornes.contains(srBorneIt.next().getBorneId())) {
                     srBorneIt.remove();
                 }
             }
-            if (!srCp.systemeReperageBorne.isEmpty()) {
+            if (!srCp.systemeReperageBornes.isEmpty()) {
                 newSRs.put(sr.getId(), srCp);
             }
         }
@@ -389,87 +389,6 @@ public class TronconUtils {
     }
     
     /**
-     * 
-     * @param positionables Liste de postitionables à découper.
-     * @param troncon Troncon d'origine
-     * @param tronconCp Nouveau troncon
-     * @param bdRepo 
-     * @param linearLineString reference linear geomety
-     * @param newSRs
-     * @param needSRIDUpdate
-     * @param session 
-     */
-    private static void cutPositionable(final ListIterator<? extends Positionable> positionables, 
-             final TronconDigue troncon, final TronconDigue tronconCp,
-             final BorneDigueRepository bdRepo,
-             final LineString linearLineString, final HashMap<String, SystemeReperage> newSRs,
-             final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate,
-             final SessionGen session){
-         
-        while (positionables.hasNext()) {
-            final Positionable positionable = positionables.next();
-            //on vérifie que cet objet intersecte le segment
-            Geometry objGeom = positionable.getGeometry();
-            if (objGeom == null) {
-                //on la calcule
-                objGeom = buildGeometry(troncon.getGeometry(), positionable, bdRepo);
-                if (objGeom == null) {
-                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + positionable);
-                }
-                positionable.setGeometry(objGeom);
-            }
-
-            if (!linearLineString.intersects(objGeom)) {
-                positionables.remove();
-                continue;
-            } else if (!linearLineString.contains(objGeom)) {
-                objGeom = linearLineString.intersection(objGeom);
-                positionable.setGeometry(objGeom);
-            }
-
-            if (objGeom instanceof Point) {
-                positionable.setPositionDebut((Point) objGeom);
-                positionable.setPositionFin((Point) objGeom);
-            } else {
-                final LineString structureLine = asLineString(objGeom);
-                positionable.setPositionDebut(structureLine.getStartPoint());
-                positionable.setPositionFin(structureLine.getEndPoint());
-                positionable.setGeometry(objGeom);
-            }
-
-            final SystemeReperage sr = newSRs.get(positionable.getSystemeRepId());
-            if (sr == null) {
-                positionable.setSystemeRepId(null);
-                positionable.setBorneDebutId(null);
-                positionable.setBorneFinId(null);
-                positionable.setBorne_debut_distance(Float.NaN);
-                positionable.setBorne_fin_distance(Float.NaN);
-            } else {
-                //le systeme de reperage existe toujours, on recalcule les positions relatives
-                final PosInfo info = new PosInfo(positionable, tronconCp, session);
-                final PosSR posSr = info.getForSR(sr);
-
-                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
-                List<Positionable> boundObjets = needSRIDUpdate.get(sr);
-                if (boundObjets == null) {
-                    boundObjets = new ArrayList<>();
-                    needSRIDUpdate.put(sr, boundObjets);
-                }
-                boundObjets.add(positionable);
-                
-                positionable.setBorneDebutId(posSr.borneStartId);
-                positionable.setBorne_debut_distance((float) posSr.distanceStartBorne);
-                positionable.setBorne_debut_aval(posSr.startAval);
-                positionable.setBorneFinId(posSr.borneEndId);
-                positionable.setBorne_fin_distance((float) posSr.distanceEndBorne);
-                positionable.setBorne_fin_aval(posSr.endAval);
-                positionable.setPositionDebut(null);
-                positionable.setPositionFin(null);
-            }
-        }
-    }
-    
-    /**
      * On ajoute / copie les propriétés du second tronçon (incluant les structures) dans le premier.
      * 
      * TODO : check SR par défaut dans le troncon final.
@@ -516,8 +435,8 @@ public class TronconUtils {
                 modifiedSRs.put(sr2.getId(), srCp.getId());
             }else{
                 //on merge les bornes
-                final List<SystemeReperageBorne> srbs1 = sibling.getSystemeReperageBorne();
-                final List<SystemeReperageBorne> srbs2 = sr2.getSystemeReperageBorne();
+                final List<SystemeReperageBorne> srbs1 = sibling.getSystemeReperageBornes();
+                final List<SystemeReperageBorne> srbs2 = sr2.getSystemeReperageBornes();
                     
                 loop:
                 for(SystemeReperageBorne srb2 : srbs2){
@@ -612,11 +531,11 @@ public class TronconUtils {
         SystemeReperageBorne srbStart = null;
         SystemeReperageBorne srbEnd = null;
         
-        if(sr.systemeReperageBorne.size()>0){
-            srbStart = sr.systemeReperageBorne.get(0);
+        if(sr.systemeReperageBornes.size()>0){
+            srbStart = sr.systemeReperageBornes.get(0);
         }
-        if(sr.systemeReperageBorne.size()>1){
-            srbEnd = sr.systemeReperageBorne.get(sr.systemeReperageBorne.size()-1);
+        if(sr.systemeReperageBornes.size()>1){
+            srbEnd = sr.systemeReperageBornes.get(sr.systemeReperageBornes.size()-1);
         }
         
         BorneDigue bdStart = null;
@@ -630,7 +549,7 @@ public class TronconUtils {
             
             srbStart = session.getElementCreator().createElement(SystemeReperageBorne.class);
             srbStart.setBorneId(bdStart.getDocumentId());
-            sr.systemeReperageBorne.add(srbStart);
+            sr.systemeReperageBornes.add(srbStart);
         }else{
             bdStart = bdRepo.get(srbStart.getBorneId());
         }
@@ -644,7 +563,7 @@ public class TronconUtils {
             
             srbEnd = session.getElementCreator().createElement(SystemeReperageBorne.class);
             srbEnd.setBorneId(bdEnd.getDocumentId());
-            sr.systemeReperageBorne.add(srbEnd);
+            sr.systemeReperageBornes.add(srbEnd);
         }else{
             bdEnd = bdRepo.get(srbEnd.getBorneId());
         }
@@ -707,9 +626,9 @@ public class TronconUtils {
         
         // Map des bornes du SR de saisie des PR/Z : la clef contient le PR des bornes dans le SR de saisi. La valeur contient l'id de la borne.
         final Map.Entry<Float, String>[] orderedInitialSRBornes = 
-                initialSR.systemeReperageBorne.stream().map((SystemeReperageBorne srBorne) ->{
-           return new HashMap.SimpleEntry<Float, String>(srBorne.getValeurPR(), srBorne.getBorneId());
-        }).sorted((HashMap.SimpleEntry<Float, String> first, HashMap.SimpleEntry<Float, String> second)-> {
+                initialSR.systemeReperageBornes.stream().map((SystemeReperageBorne srBorne) ->{
+           return new HashMap.SimpleEntry<>(srBorne.getValeurPR(), srBorne.getBorneId());
+        }).sorted((Map.Entry<Float, String> first, Map.Entry<Float, String> second)-> {
                     return Float.compare(first.getKey(), second.getKey());// On trie suivant la valeurs des PR qui est en clef.
                 }).toArray((int size) -> {return new Map.Entry[size];});
         
@@ -793,7 +712,7 @@ public class TronconUtils {
          * borne is uphill from our object, positive if it's downhill).
          */
         ProjectedPoint startPoint = projectReference(refLinear, toGetPRFor);
-        double[][] prAndDistances = targetSR.systemeReperageBorne.stream()
+        double[][] prAndDistances = targetSR.systemeReperageBornes.stream()
                 .map((SystemeReperageBorne srBorne) -> {
                     BorneDigue borne = borneRepo.get(srBorne.getBorneId());
                     ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
@@ -1104,7 +1023,7 @@ public class TronconUtils {
             
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
-            for(SystemeReperageBorne srb : sr.systemeReperageBorne){
+            for(SystemeReperageBorne srb : sr.systemeReperageBornes){
                 final String bid = srb.getBorneId();
                 final BorneDigue bd = session.getBorneDigueRepository().get(bid);
                 if(bd!=null){ 

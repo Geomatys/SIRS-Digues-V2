@@ -114,7 +114,7 @@ public class SystemeReperageBorneImporter extends GenericImporter {
             
             final SystemeReperage systemeReperage = systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString()));
             if(systemeReperage!=null){
-                systemeReperage.systemeReperageBorne.add(systemeReperageBorne);
+                systemeReperage.systemeReperageBornes.add(systemeReperageBorne);
             }
             
             if(byBorneId.get(row.getInt(Columns.ID_BORNE.toString()))==null) {

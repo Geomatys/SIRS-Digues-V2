@@ -494,7 +494,7 @@ public class DbImporter {
             repositories.put(elementClass, InjectorCore.getBean(SessionCore.class).getRepositoryForClass(elementClass));
             }catch(Exception ex){
                 SirsCore.LOGGER.log(Level.FINE, "No repo for class "+elementClass);
-            }
+    }
         }
     }
     

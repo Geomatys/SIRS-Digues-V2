@@ -108,7 +108,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
                 }
             }
         }
-        new ComboBoxCompletion(comboBox);
+        ComboBoxCompletion.autocomplete(comboBox);
         comboBox.setConverter(new SirsStringConverter());
     }
     
@@ -128,8 +128,8 @@ public class FXSystemeEndiguementPane extends BorderPane {
             uiProtection.valueProperty().bindBidirectional(newValue.niveauProtectionProperty());
             uiPopulation.valueProperty().bindBidirectional(newValue.populationProtegeeProperty());
             uiComment.setHtmlText(newValue.getCommentaire());
-            initCombo(uiDecret, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireDecret());
-            initCombo(uiTechnique, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireTechnique());
+            initCombo(uiDecret, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireDecretId());
+            initCombo(uiTechnique, FXCollections.observableArrayList(session.getPreviews().getByClass(Organisme.class)), newValue.getGestionnaireTechniqueId());
             uiDigueTable.updateTable();
         }
     }
@@ -142,9 +142,9 @@ public class FXSystemeEndiguementPane extends BorderPane {
         final SystemeEndiguement se = endiguementProp.get();
         se.setCommentaire(uiComment.getHtmlText());
         final Preview decret = uiDecret.getValue();
-        se.setGestionnaireDecret( decret==null ? null : decret.getElementId());
+        se.setGestionnaireDecretId( decret==null ? null : decret.getElementId());
         final Preview tech = uiTechnique.getValue();
-        se.setGestionnaireTechnique( tech==null ? null : tech.getElementId());
+        se.setGestionnaireTechniqueId( tech==null ? null : tech.getElementId());
         se.setDateMaj(LocalDateTime.now());
         session.getSystemeEndiguementRepository().update(se);
     }
@@ -171,7 +171,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
             if(sd==null) return FXCollections.emptyObservableList();
             
             final DigueRepository digueRepository = session.getDigueRepository();
-            final List<String> digueIds = sd.getDigue();
+            final List<String> digueIds = sd.getDigueIds();
             final ObservableList<Element> digues = FXCollections.observableArrayList();
             for(String id : digueIds){
                 final Digue digue = digueRepository.get(id);
@@ -202,7 +202,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
                 // la suppression.
                 if(!authoriseElementDeletion(element)) continue;
                 final Digue d = (Digue)element;
-                sd.getDigue().remove(d.getDocumentId());
+                sd.getDigueIds().remove(d.getDocumentId());
             }
             
             updateTable();
@@ -247,7 +247,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
                 final Digue digue = lst.getSelectionModel().getSelectedItem();
                 if(digue!=null){
                     final SystemeEndiguement sd = endiguementProp.get();
-                    sd.getDigue().add(digue.getDocumentId());
+                    sd.getDigueIds().add(digue.getDocumentId());
                     updateTable();
                     return digue;
                 }

@@ -44,7 +44,7 @@ public class ForeignParentPojoTable<T extends AvecForeignParent> extends PojoTab
         return foreignParentIdProperty;
     }
 
-    public ForeignParentPojoTable(Class pojoClass, String title) {
+    public ForeignParentPojoTable(Class<T> pojoClass, String title) {
         super(pojoClass, title);
     }
     
