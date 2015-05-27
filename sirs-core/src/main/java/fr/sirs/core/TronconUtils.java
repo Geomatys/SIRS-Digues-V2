@@ -403,8 +403,8 @@ public class TronconUtils {
         
         final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
         
-        //on ajoute les bornes. Pas de copie / modification ici, car les bornes 
-        // indépendantes des tronçons.
+        // on ajoute les bornes. Pas de copie / modification ici, car les bornes 
+        // sont indépendantes des tronçons.
         final Set<String> borneIds = new HashSet<>();
         borneIds.addAll(mergeResult.getBorneIds());
         borneIds.addAll(mergeParam.getBorneIds());
@@ -427,7 +427,7 @@ public class TronconUtils {
             }
                  
             if(sibling==null){
-                //on copy le SR
+                //on copie le SR
                 final SystemeReperage srCp = sr2.copy();
                 srCp.setLinearId(mergeResult.getDocumentId());
                 //sauvegarde du sr
@@ -454,33 +454,48 @@ public class TronconUtils {
             }
         }
         
-        // On ajoute les structures du tronçon paramètre. On les copie pour changer le SR associé.
+        // On ajoute les structures du tronçon paramètre. 
+        final HashSet<Positionable> toSave = new HashSet<>();
         for (final Positionable objet : getPositionableList(mergeParam)) {
             // si l'objet est une photo, alors il ne faut pas faire de copie car
             // elle est gérée de manière récursive dans l'élément conteneur.
-            if(!(objet instanceof Photo)){
-                final Positionable copy = objet.copy();
-                final String srId = modifiedSRs.get(copy.getSystemeRepId());
-                if (srId != null) {
-                    copy.setSystemeRepId(srId);
-                }
-                if(copy instanceof AvecForeignParent) ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
-                else if (copy instanceof ProprieteTroncon || copy instanceof GardeTroncon) mergeResult.addChild((ProprieteTroncon) copy);
-                
-                if(copy instanceof AvecPhotos){
-                    for(final Photo photo : ((AvecPhotos) copy).getPhotos()){
-                        if(srId!=null) photo.setSystemeRepId(srId);
-                    }
-                }
-                
-                // On vérifie que la copie a un dépôt pour l'enregistrer.
-                try{
-                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).update(copy);
-                } catch(Exception e){
-                    SirsCore.LOGGER.log(Level.WARNING, "No repo found for "+copy.getClass());
-                }
+            Positionable copy = objet;
+            if (objet.getId().equals(objet.getDocumentId())) {
+                toSave.add(objet.copy());
             }
         }
+        
+        // On les persiste en bdd pour retrouver facilement tous les élements à modifier
+        for (final Positionable copy : toSave) {
+                // On vérifie que la copie a un dépôt pour l'enregistrer.
+                try {
+                    if (copy instanceof AvecForeignParent)
+                        ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
+                }
+            }
+              
+        // On change le SR des objets copiés
+        for (final Positionable copy : getPositionableList(mergeResult)) {
+            final String srId = modifiedSRs.get(copy.getSystemeRepId());
+            if (srId != null) {
+                copy.setSystemeRepId(srId);
+            }
+        }
+        
+        // On sauvegarde les changements.        
+        for (final Positionable copy : toSave) {
+                // On vérifie que la copie a un dépôt pour l'enregistrer.
+                try {
+                    if (copy instanceof AvecForeignParent)
+                        ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
+                }
+            }
         
         //on combine les geometries
         final Geometry line1 = mergeResult.getGeometry();

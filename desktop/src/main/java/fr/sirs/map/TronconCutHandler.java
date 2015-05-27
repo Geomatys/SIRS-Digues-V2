@@ -451,7 +451,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
                         repo.add(obj);
                     } catch (Exception e) {
-                        SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
+                        SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : "+obj.getId(), e);
                     }
                 }
             }

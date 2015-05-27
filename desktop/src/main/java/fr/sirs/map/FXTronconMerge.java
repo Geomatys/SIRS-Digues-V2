@@ -4,13 +4,18 @@ package fr.sirs.map;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Positionable;
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -115,11 +120,17 @@ public class FXTronconMerge extends VBox{
             while (it.hasNext()) {
                 final TronconDigue current = it.next();
                 LocalDateTime now = LocalDateTime.now();
-                current.dateMajProperty().set(now);
                 current.date_finProperty().set(now);
-                for (Objet obj : TronconUtils.getObjetList(current)) {
-                    obj.dateMajProperty().set(now);
-                    obj.date_finProperty().set(now);
+                for (Positionable obj : TronconUtils.getPositionableList(current)) {
+                    if (obj instanceof AvecBornesTemporelles) {
+                        ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDateTime.now());
+                        try {
+                            AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
+                            repo.add(obj);
+                        } catch (Exception e) {
+                            SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : " + obj.getId(), e);
+                        }
+                    }
                 }
                 session.getTronconDigueRepository().update(current);
                 it.remove();

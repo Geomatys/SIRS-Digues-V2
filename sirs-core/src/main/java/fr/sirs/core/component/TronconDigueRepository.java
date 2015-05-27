@@ -10,12 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.ElementCreator;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -76,7 +80,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     @Override
     public void remove(TronconDigue entity) {
         ArgumentChecks.ensureNonNull("Tronçon à supprimer", entity);
-        constraintDeleteBorneAndSR(entity);
+        constraintDeleteBoundEntities(entity);
         super.remove(entity);
     }
 
@@ -139,14 +143,22 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     /**
      * Cette contrainte s'assure de supprimer les SR et bornes associées au troncon
      * en cas de suppression.
-     * 
      */
-    private void constraintDeleteBorneAndSR(TronconDigue entity){
+    private void constraintDeleteBoundEntities(TronconDigue entity) {
         //on supprime tous les SR associés
         final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
         final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
-        for(SystemeReperage sr : srs){
+        for(SystemeReperage sr : srs) {
             srrepo.remove(sr, entity);
+        }
+        List<Positionable> boundPositions = TronconUtils.getPositionableList(entity);
+        for (Positionable p : boundPositions) {
+            try {
+                AbstractSIRSRepository repo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(p.getClass());
+                repo.remove(p);
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "An element bound to the troncon cannot be deleted : "+ p.getId(), e);
+            }
         }
         // TODO : Set an end date to bornes which are not used anymore.
     }
