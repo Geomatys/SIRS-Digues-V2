@@ -178,7 +178,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                             "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
                             ButtonType.OK).showAndWait();
                     try {
-                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date());
+                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date(), map);
                     } catch (Exception ex) {
                         SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
                     }

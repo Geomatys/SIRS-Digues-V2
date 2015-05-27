@@ -18,6 +18,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
@@ -228,38 +230,76 @@ public class FXMapPane extends BorderPane {
         TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
             
             final MapContext context = Injector.getSession().getMapContext();
-            
-            // Affect context and bounds in a JavaFX thread, because it will affect UI (Note : it should not, and may be fixed in a future version).
-            final Task t = new Task() {
+                        final Task t = new Task() {
                 @Override
                 protected Object call() throws Exception {
                     uiMap1.getContainer().setContext(context);
-                    final Date time = new Date();
                     uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
                     uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
-                    uiMap1.getCanvas().setTemporalRange(time, time);
-                    uiMap2.getCanvas().setTemporalRange(time, time);
-                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
-                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    setTemporalRange(new Date(), null);
                     return null;
                 }
             };
+            
+        if (Platform.isFxApplicationThread()) {
+            t.run();
+        } else {
             Platform.runLater(t);
+        }
+            
             return null;
         });
     }
 
+    /**
+     * Déplace la temporalité de la carte sélectionnée sur la date demandée.
+     * @param t La Date pour la carte. Ne doit pas être nulle.
+     * @param map La carte à mettre à jour. Nulle pour mettre à jour les deux cartes 
+     * par défaut.
+     */
+    public void setTemporalRange(final LocalDateTime t, FXMap map) {
+        ArgumentChecks.ensureNonNull("Date de visualisation", t);
+        setTemporalRange(new Date(t.toInstant(ZoneOffset.UTC).toEpochMilli()), map);
+    }
+    
+    /**
+     * Déplace la temporalité de la carte sélectionnée sur la date demandée.
+     * @param time La Date pour la carte. Ne doit pas être nulle.
+     * @param map La carte à mettre à jour. Nulle pour mettre à jour les deux cartes 
+     * par défaut.
+     */
+    public void setTemporalRange(final Date time, FXMap map) {
+        // Affect context and bounds in a JavaFX thread, because it will affect UI (Note : it should not, and may be fixed in a future version).
+        final Task t = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                if (map == null) {
+                    uiMap1.getCanvas().setTemporalRange(time, time);
+                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    
+                    uiMap2.getCanvas().setTemporalRange(time, time);
+                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                } else {
+                    map.getCanvas().setTemporalRange(time, time);
+                    if (uiMap1.equals(map)) {
+                        uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    } else if (uiMap2.equals(map)) {
+                        uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    }
+                }
+                return null;
+            }
+        };
+
+        if (Platform.isFxApplicationThread()) {
+            t.run();
+        } else {
+            Platform.runLater(t);
+        }
+    }
+    
     public FXMap getUiMap() {
         return uiMap1;
-    }
-
-    /**
-     * Ask map to display valid element at specified date.
-     * @param newTime Date to focus on map.
-     */
-    public void setTemporalRange(final Date newTime) throws TransformException {
-        uiMap1.getCanvas().setTemporalRange(newTime, newTime);
-        uiCoordBar1.getSliderview().moveTo(newTime.getTime() - TemporalConstants.DAY_MS * 8);
     }
     
     public void focusOnElement(Element target) {

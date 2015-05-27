@@ -11,9 +11,9 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -25,6 +25,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDeleteTableColumn;
 import org.geotoolkit.gui.javafx.util.FXMoveDownTableColumn;
 import org.geotoolkit.gui.javafx.util.FXMoveUpTableColumn;
@@ -39,8 +40,9 @@ public class FXTronconMerge extends VBox{
 
     private final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
     private final MergeTask task = new MergeTask();
+    private final FXMap map;
     
-    public FXTronconMerge() {
+    public FXTronconMerge(final FXMap map) {
         SIRS.loadFXML(this);
         
         final TableColumn<TronconDigue,String> col = new TableColumn<>("Nom");
@@ -52,6 +54,7 @@ public class FXTronconMerge extends VBox{
         uiTable.getColumns().add(new FXMoveDownTableColumn());
         uiTable.getColumns().add(col);
         uiTable.getColumns().add(new FXDeleteTableColumn(false));        
+        this.map = map;
     }
 
     public ObservableList<TronconDigue> getTroncons() {
@@ -134,6 +137,12 @@ public class FXTronconMerge extends VBox{
                 }
                 session.getTronconDigueRepository().update(current);
                 it.remove();
+            }
+            
+            try {
+                Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date(), map);
+            } catch (Exception ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
             }
             return true;
         }

@@ -56,7 +56,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
     public TronconMergeHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
-        editPane = new FXTronconMerge();
+        editPane = new FXTronconMerge(map);
         
         editPane.getTroncons().addListener(this::tronconChanged);        
     }
