@@ -117,7 +117,6 @@ fr.sirs.core.model.TalusDigue
 fr.sirs.core.model.TalusRisberme
 fr.sirs.core.model.TronconDigue
 fr.sirs.core.model.Utilisateur
-fr.sirs.core.model.Visite
 fr.sirs.core.model.VoieAcces
 fr.sirs.core.model.VoieDigue
 fr.sirs.core.model.XYZLeveProfilTravers

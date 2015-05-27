@@ -205,31 +205,13 @@ public class SessionCore extends SessionGen {
     }
     
     public List<ProprieteTroncon> getProprietesByTronconId(final String tronconId){
-//        final List<ProprieteTroncon> objets = new ArrayList<>();
-//        for(final Element element : ServiceLoader.load(Element.class)){
-//            if(element instanceof ProprieteTroncon){
-                final AbstractPositionableRepository<ProprieteTroncon> repo = (AbstractPositionableRepository<ProprieteTroncon>) getRepositoryForClass(ProprieteTroncon.class);
-                return repo.getByLinearId(tronconId);
-//                for(final Object objet : elementList){
-//                    objets.add((ProprieteTroncon) objet);
-//                }
-//            }
-//        }
-//        return objets;
+        final AbstractPositionableRepository<ProprieteTroncon> repo = (AbstractPositionableRepository<ProprieteTroncon>) getRepositoryForClass(ProprieteTroncon.class);
+        return repo.getByLinearId(tronconId);
     }
     
     public List<GardeTroncon> getGardesByTronconId(final String tronconId){
-//        final List<GardeTroncon> objets = new ArrayList<>();
-//        for(final Element element : ServiceLoader.load(Element.class)){
-//            if(element instanceof GardeTroncon){
-                final AbstractPositionableRepository<GardeTroncon> repo = (AbstractPositionableRepository<GardeTroncon>) getRepositoryForClass(GardeTroncon.class);
-                return repo.getByLinearId(tronconId);
-//                for(final Object objet : elementList){
-//                    objets.add((ProprieteTroncon) objet);
-//                }
-//            }
-//        }
-//        return objets;
+        final AbstractPositionableRepository<GardeTroncon> repo = (AbstractPositionableRepository<GardeTroncon>) getRepositoryForClass(GardeTroncon.class);
+        return repo.getByLinearId(tronconId);
     }
     
     public List<Objet> getObjetsByTronconId(final String tronconId){
