@@ -66,7 +66,6 @@ import org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemNameColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemSelectableColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemVisibleColumn;
-import org.geotoolkit.gui.javafx.contexttree.menu.EmptySelectionItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.OpacityItem;
 import org.geotoolkit.gui.javafx.contexttree.menu.ZoomToItem;
 import org.geotoolkit.gui.javafx.render2d.FXContextBar;
@@ -82,7 +81,6 @@ import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.temporal.object.TemporalConstants;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
-import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.GenericName;
 
 /**
