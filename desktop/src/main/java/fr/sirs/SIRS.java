@@ -72,6 +72,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_COMPASS_WHITE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS, 22, Color.WHITE),null);
     public static final Image ICON_EDIT_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE_O, 16, Color.BLACK),null);
     public static final Image ICON_PRINT_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PRINT, 16, Color.BLACK),null);
+    public static final Image ICON_ROTATE_LEFT_ALIAS = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ROTATE_LEFT_ALIAS, 16, Color.BLACK),null);
     public static final Image ICON_IMPORT_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
     public static final Image ICON_VIEWOTHER_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
     
@@ -107,6 +108,15 @@ public final class SIRS extends SirsCore {
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";
     public static final String BUNDLE_KEY_CLASS_ABREGE = "classAbrege";
+    
+    // Bundle des previews
+    public static final String PREVIEW_BUNDLE_KEY_DOC_ID = "docId";
+    public static final String PREVIEW_BUNDLE_KEY_DOC_CLASS = "docClass";
+    public static final String PREVIEW_BUNDLE_KEY_ELEMENT_ID = "elementId";
+    public static final String PREVIEW_BUNDLE_KEY_ELEMENT_CLASS = "elementClass";
+    public static final String PREVIEW_BUNDLE_KEY_LIBELLE = "libelle";
+    public static final String PREVIEW_BUNDLE_KEY_DESIGNATION = "designation";
+    public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
     
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
     

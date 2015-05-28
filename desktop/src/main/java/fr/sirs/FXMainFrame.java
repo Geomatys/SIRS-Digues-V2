@@ -9,13 +9,14 @@ import static fr.sirs.SIRS.ID_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
-import fr.sirs.other.FXDoubleDesignationPane;
+import fr.sirs.other.FXDesignationPane;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
@@ -30,7 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,38 +112,24 @@ public class FXMainFrame extends BorderPane {
             uiMenu.getMenus().add(1, uiAdmin);  
             
             final MenuItem uiUserAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_USERS));
-            uiUserAdmin.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    openUsersTab();
-                }
-            });
+            uiUserAdmin.setOnAction((ActionEvent event) -> {openUsersTab();});
             
-            final MenuItem uiDocsAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
-            uiDocsAdmin.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    openDocsTab();
-                }
-            });
+            final MenuItem uiValidation = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
+            uiValidation.setOnAction((ActionEvent event) -> {openValidationTab();});
              
-            final Menu uiRefs = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
-        
-            // Load references
+            final Menu uiReference = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
             for(final Class reference : Session.getReferences()){
-                uiRefs.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
+                uiReference.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
             }
             
-            final Menu uiPseudoId = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
+            final Menu uiDesignation = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
             for(final Class elementClass : Session.getElements()){
                 if(!Session.getReferences().contains(elementClass)){
-                    uiPseudoId.getItems().add(toMenuItem(elementClass, SummaryTab.MODEL));
+                    uiDesignation.getItems().add(toMenuItem(elementClass, SummaryTab.MODEL));
                 }
             }
             
-            uiAdmin.getItems().addAll(uiUserAdmin, uiDocsAdmin, uiRefs, uiPseudoId);
+            uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         }
         
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());     
@@ -163,6 +152,18 @@ public class FXMainFrame extends BorderPane {
         }
         return diguesTab;
     }
+
+    private Tab validationTab;
+    private void openValidationTab(){
+        if(validationTab==null){
+            validationTab = new Tab(bundle.getString(BUNDLE_KEY_VALIDATION));
+            validationTab.setContent(new FXValidationPane());
+        }
+        if(!uiTabs.getTabs().contains(validationTab)){
+            uiTabs.getTabs().add(validationTab);
+        }
+        uiTabs.getSelectionModel().select(validationTab);
+    }
         
     public synchronized void addTab(Tab tab){
         if (!uiTabs.equals(tab.getTabPane())) {
@@ -175,28 +176,16 @@ public class FXMainFrame extends BorderPane {
     private MenuItem toMenuItem(final Class clazz, final SummaryTab typeOfSummary){
         final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
         final MenuItem item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
-        final EventHandler handler;
+        final EventHandler<ActionEvent> handler;
         
         if(typeOfSummary==SummaryTab.REFERENCE){
-            handler = new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
-                    tab.setContent(new FXReferencePane(clazz));
-                    addTab(tab);
-                }
+            handler = (ActionEvent event) -> {
+                    addTab(Injector.getSession().getOrCreateReferenceTypeTab(clazz));
             };
         }
         else{
-            handler = new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    final Tab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
-                    tab.setContent(new FXDoubleDesignationPane(clazz));
-                    addTab(tab);
-                }
+            handler = (ActionEvent event) -> {
+                    addTab(Injector.getSession().getOrCreateDesignationTab(clazz));
             };
         }
         
@@ -399,12 +388,6 @@ public class FXMainFrame extends BorderPane {
         usersTable.cellEditableProperty().set(false);
         usersTab.setContent(usersTable);
         addTab(usersTab);
-    }
-
-    private void openDocsTab(){
-        final Tab docsTab = new Tab(bundle.getString(BUNDLE_KEY_VALIDATION));
-        docsTab.setContent(new FXValidationPane());
-        addTab(docsTab);
     }
     
     private class DisplayTheme implements EventHandler<ActionEvent> {

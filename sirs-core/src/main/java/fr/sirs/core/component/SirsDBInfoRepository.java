@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 
 @Component
@@ -24,7 +25,7 @@ public class SirsDBInfoRepository {
 
     public Optional<SirsDBInfo> get() {
         try {
-            info = db.get(SirsDBInfo.class, "$sirs");
+            info = db.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
             return Optional.of(info);
         } catch (DocumentNotFoundException e) {
             return Optional.empty();
@@ -62,7 +63,7 @@ public class SirsDBInfoRepository {
         if (optInfo.isPresent()) {
             db.update(info);
         } else {
-            db.create("$sirs", info);
+            db.create(INFO_DOCUMENT_ID, info);
         }
         
         return info;

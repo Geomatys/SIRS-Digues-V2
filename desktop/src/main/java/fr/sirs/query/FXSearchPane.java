@@ -17,7 +17,7 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.FXValiditySummaryToElementTableColumn;
+import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
@@ -619,7 +619,7 @@ public class FXSearchPane extends BorderPane {
         designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
         designations.setEditable(false);
 
-        designations.getColumns().add(new FXValiditySummaryToElementTableColumn());
+        designations.getColumns().add(new FXPreviewToElementTableColumn());
 
         final TableColumn<Preview, String> propertyColumn = new TableColumn<>(bundle.getString("designation"));
         propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {

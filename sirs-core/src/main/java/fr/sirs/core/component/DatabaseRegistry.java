@@ -3,7 +3,6 @@ package fr.sirs.core.component;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.BooleanNode;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,6 +21,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
@@ -649,8 +649,8 @@ public class DatabaseRegistry {
     }
     
     public static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
-        if (connector.contains("$sirs")) {
-            return Optional.of(connector.get(SirsDBInfo.class, "$sirs"));
+        if (connector.contains(INFO_DOCUMENT_ID)) {
+            return Optional.of(connector.get(SirsDBInfo.class, INFO_DOCUMENT_ID));
         }
         return Optional.empty();
     }

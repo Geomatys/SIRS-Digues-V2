@@ -1508,11 +1508,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetStructure" abstract="true" eSuperTypes="#//ObjetGerable"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetGerable" abstract="true" eSuperTypes="#//Objet">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gardes" upperBound="-1"
-        eType="#//GardeObjet" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietes" upperBound="-1"
-        eType="#//ProprieteObjet" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestions" upperBound="-1"
         eType="#//GestionObjet" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietes" upperBound="-1"
+        eType="#//ProprieteObjet" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gardes" upperBound="-1"
+        eType="#//GardeObjet" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>

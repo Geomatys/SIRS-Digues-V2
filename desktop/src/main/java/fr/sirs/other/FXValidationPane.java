@@ -1,15 +1,22 @@
 package fr.sirs.other;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
+import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_AUTHOR;
+import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_DESIGNATION;
+import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_DOC_CLASS;
+import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_ELEMENT_CLASS;
+import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_LIBELLE;
 import fr.sirs.Session;
+import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
-import fr.sirs.util.FXValiditySummaryToElementTableColumn;
+import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsTableCell;
 import java.util.HashMap;
 import java.util.List;
@@ -46,23 +53,26 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class FXValidationPane extends BorderPane {
 
-    private TableView<Preview> usages;
+    private TableView<Preview> table;
     private final Session session = Injector.getSession();
-    private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    private final Previews validitySummaryRepository = session.getPreviews();
+    private final Previews repository = session.getPreviews();
+    private final ChoiceBox<Choice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(Choice.values()));
     
-    private enum ValiditySummaryChoice{VALID, INVALID, ALL};
+    private List<Preview> previews;
+    private final Map<String, ResourceBundle> bundles = new HashMap<>();
+    
+    private enum Choice{VALID, INVALID, ALL};
 
     public FXValidationPane() {
-        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
+        final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName());
 
-        usages = new TableView<>();
-        usages.setEditable(false);
+        table = new TableView<>();
+        table.setEditable(false);
 
-        usages.getColumns().add(new DeleteColumn());
-        usages.getColumns().add(new FXValiditySummaryToElementTableColumn());
+        table.getColumns().add(new DeleteColumn());
+        table.getColumns().add(new FXPreviewToElementTableColumn());
 
-        final TableColumn<Preview, Map.Entry<String, String>> docClassColumn = new TableColumn<>(bundle.getString("docClass"));
+        final TableColumn<Preview, Map.Entry<String, String>> docClassColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_DOC_CLASS));
         docClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, Map.Entry<String, String>> param) -> {
                     return new SimpleObjectProperty<>(new HashMap.SimpleImmutableEntry<String, String>(param.getValue().getDocId(), param.getValue().getDocClass()));
                 });
@@ -71,7 +81,7 @@ public class FXValidationPane extends BorderPane {
                     @Override
                     protected void updateItem(Map.Entry<String, String> item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(empty || item==null){
+                        if(empty || item==null || INFO_DOCUMENT_ID.equals(item.getKey())){
                             setText(null);
                             setGraphic(null);
                         }
@@ -92,9 +102,9 @@ public class FXValidationPane extends BorderPane {
                     return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
             });
-        usages.getColumns().add(docClassColumn);
+        table.getColumns().add(docClassColumn);
         
-        final TableColumn<Preview, String> elementClassColumn = new TableColumn<>(bundle.getString("elementClass"));
+        final TableColumn<Preview, String> elementClassColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_ELEMENT_CLASS));
         elementClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                     return new SimpleStringProperty(param.getValue().getElementClass());
                 });
@@ -126,38 +136,37 @@ public class FXValidationPane extends BorderPane {
                     return rb1.getString(BUNDLE_KEY_CLASS).compareTo(rb2.getString(BUNDLE_KEY_CLASS));
                 }
             });
-        usages.getColumns().add(elementClassColumn);
+        table.getColumns().add(elementClassColumn);
 
-        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(bundle.getString("pseudoId"));
+        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION));
         propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             });
-        usages.getColumns().add(propertyColumn);
+        table.getColumns().add(propertyColumn);
         
-        final TableColumn<Preview, String> labelColumn = new TableColumn<>(bundle.getString("label"));
+        final TableColumn<Preview, String> labelColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_LIBELLE));
         labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLibelle());
             });
-        usages.getColumns().add(labelColumn);
+        table.getColumns().add(labelColumn);
 
-        final TableColumn<Preview, String> authorColumn = new TableColumn<>(bundle.getString("author"));
+        final TableColumn<Preview, String> authorColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_AUTHOR));
         authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
             });
         authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new SirsTableCell());
-        usages.getColumns().add(authorColumn);
+        table.getColumns().add(authorColumn);
 
-        usages.getColumns().add(new ValidColumn());
+        table.getColumns().add(new ValidColumn());
 
-        setCenter(usages);
+        setCenter(table);
 
-        usages.setItems(FXCollections.observableArrayList(validitySummaryRepository.getValidation()));
+        table.setItems(FXCollections.observableArrayList(repository.getValidation()));
 
-        final ChoiceBox<ValiditySummaryChoice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(ValiditySummaryChoice.values()));
-        choiceBox.setConverter(new StringConverter<ValiditySummaryChoice>() {
+        choiceBox.setConverter(new StringConverter<Choice>() {
 
             @Override
-            public String toString(ValiditySummaryChoice object) {
+            public String toString(Choice object) {
                 final String result;
                 switch(object){
                     case VALID: result = "Éléments validés"; break;
@@ -169,32 +178,35 @@ public class FXValidationPane extends BorderPane {
             }
 
             @Override
-            public ValiditySummaryChoice fromString(String string) {
+            public Choice fromString(String string) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
-        choiceBox.setValue(ValiditySummaryChoice.ALL);
-        choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ValiditySummaryChoice>() {
-
-            @Override
-            public void changed(ObservableValue<? extends ValiditySummaryChoice> observable, ValiditySummaryChoice oldValue, ValiditySummaryChoice newValue) {
-                final List<Preview> requiredList;
-                switch(choiceBox.getSelectionModel().getSelectedItem()){
-                    case VALID: requiredList = validitySummaryRepository.getAllByValidationState(true); break;
-                    case INVALID: requiredList = validitySummaryRepository.getAllByValidationState(false); break;
-                    case ALL:
-                    default: requiredList= validitySummaryRepository.getValidation();
-                }
-                usages.setItems(FXCollections.observableArrayList(requiredList));
-            }
+        choiceBox.setValue(Choice.ALL);
+        choiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Choice> observable, Choice oldValue, Choice newValue) -> {
+                fillTable();
         });
         
-        final HBox hBox = new HBox(choiceBox);
+        final Button reload = new Button("Recharger", new ImageView(SIRS.ICON_ROTATE_LEFT_ALIAS));
+        reload.setOnAction((ActionEvent e) -> {fillTable();});
+        
+        final HBox hBox = new HBox(choiceBox, reload);
         hBox.setAlignment(Pos.CENTER);
         hBox.setPadding(new Insets(20));
         hBox.setSpacing(100);
 
         setTop(hBox);
+    }
+    
+    private void fillTable(){
+        final List<Preview> requiredList;
+        switch(choiceBox.getSelectionModel().getSelectedItem()){
+            case VALID: requiredList = repository.getAllByValidationState(true); break;
+            case INVALID: requiredList = repository.getAllByValidationState(false); break;
+            case ALL:
+            default: requiredList= repository.getValidation();
+        }
+        table.setItems(FXCollections.observableArrayList(requiredList));
     }
 
     private ResourceBundle getBundleForClass(final String type) {
@@ -239,7 +251,7 @@ public class FXValidationPane extends BorderPane {
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             repo.remove(docu);
-                                            usages.getItems().remove(vSummary);
+                                            table.getItems().remove(vSummary);
                                         }
                                     }else{
                                         new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
@@ -253,7 +265,7 @@ public class FXValidationPane extends BorderPane {
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             elt.getParent().removeChild(elt);
                                             repo.update(docu);
-                                            usages.getItems().remove(vSummary);
+                                            table.getItems().remove(vSummary);
                                         }
                                     } else{
                                         new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();

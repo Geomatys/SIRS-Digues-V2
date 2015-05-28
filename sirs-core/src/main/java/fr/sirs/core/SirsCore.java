@@ -39,6 +39,7 @@ import org.opengis.util.FactoryException;
 
 public class SirsCore {
 
+    public static final String INFO_DOCUMENT_ID = "$sirs";
     public static final Logger LOGGER = Logging.getLogger(SirsCore.class);
     public static final String NAME = "sirs";
     

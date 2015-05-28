@@ -13,11 +13,9 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,14 +34,15 @@ import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @param <T>
  */
-public class FXReferencePane extends BorderPane {
+public class FXReferencePane<T extends ReferenceType> extends BorderPane {
     
     private final ReferencePojoTable references;
     private final Session session = Injector.getSession();
     private final ReferenceChecker referenceChecker;
         
-    public FXReferencePane(final Class<ReferenceType> type) {
+    public FXReferencePane(final Class<T> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName());
         referenceChecker = session.getReferenceChecker();
         references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS));
@@ -60,7 +59,7 @@ public class FXReferencePane extends BorderPane {
         private final List<? extends ReferenceType> serverInstanceNotLocal;
         private final List<ReferenceType> localInstancesNotOnTheServer;
 
-        public ReferencePojoTable(Class pojoClass, String title) {
+        public ReferencePojoTable(Class<T> pojoClass, String title) {
             super(pojoClass, title);
             
             serverInstanceNotLocal = referenceChecker.getServerInstancesNotLocal().get(pojoClass);

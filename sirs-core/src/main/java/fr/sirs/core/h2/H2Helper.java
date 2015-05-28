@@ -27,6 +27,7 @@ import fr.sirs.core.DocHelper;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -91,7 +92,7 @@ public class H2Helper {
     }
 
     public static Path getDBFile(CouchDbConnector connector) {
-        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, "$sirs");
+        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
         Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
         return file;
     }

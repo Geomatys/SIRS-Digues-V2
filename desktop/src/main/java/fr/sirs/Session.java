@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SessionCore;
 
 import java.util.List;
@@ -16,6 +17,8 @@ import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.digue.DiguesTab;
+import fr.sirs.other.FXDesignationPane;
+import fr.sirs.other.FXReferencePane;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
@@ -27,6 +30,7 @@ import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -36,6 +40,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -85,6 +90,8 @@ public class Session extends SessionCore {
     
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
+    private final Cache<Class<? extends ReferenceType>, FXFreeTab> openReferencePanes = new Cache<>(12, 0, false);
+    private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
@@ -241,6 +248,18 @@ public class Session extends SessionCore {
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES PANNEAUX
     ////////////////////////////////////////////////////////////////////////////
+    
+    public void showEditionTab(final Object object) {
+        final Optional<? extends Element> element = getElement(object);
+        if (element.isPresent()){
+            if(element.get() instanceof ReferenceType) {
+                new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE).showAndWait();
+            } else {
+                getFrame().addTab(getOrCreateElementTab(element.get()));
+            }
+        }
+    }
+    
     public FXFreeTab getOrCreateThemeTab(final Theme theme) {
         try {
             return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
@@ -258,14 +277,35 @@ public class Session extends SessionCore {
         }
     }
     
-    public void showEditionTab(final Object object) {
-        final Optional<? extends Element> element = getElement(object);
-        if (element.isPresent()){
-            if(element.get() instanceof ReferenceType) {
-                new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE).showAndWait();
-            } else {
-                getFrame().addTab(getOrCreateElementTab(element.get()));
-            }
+    public FXFreeTab getOrCreateDesignationTab(final Class<? extends Element> clazz){
+        try {
+            return openDesignationPanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
+                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+                @Override
+                public FXFreeTab call() throws Exception {
+                    final FXFreeTab tab = new FXFreeTab("Désignations du type " + bdl.getString(BUNDLE_KEY_CLASS));
+                    tab.setContent(new FXDesignationPane(clazz));
+                    return tab;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public FXFreeTab getOrCreateReferenceTypeTab(final Class<? extends ReferenceType> clazz){
+        try {
+            return openReferencePanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
+                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+                @Override
+                public FXFreeTab call() throws Exception {
+                    final FXFreeTab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
+                    tab.setContent(new FXReferencePane(clazz));
+                    return tab;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
     

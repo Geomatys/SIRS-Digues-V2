@@ -31,5 +31,4 @@ public class FXMapTab extends Tab {
         final int index = tabs.getTabs().indexOf(this);
         tabs.getSelectionModel().clearAndSelect(index);
     }
-    
 }
