@@ -449,7 +449,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDateTime.now());
                     try {
                         AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
-                        repo.add(obj);
+                        repo.update(obj);
                     } catch (Exception e) {
                         SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : "+obj.getId(), e);
                     }
