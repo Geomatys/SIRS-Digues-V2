@@ -4,6 +4,7 @@ import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
@@ -733,16 +734,17 @@ public class DbImporter {
                     DatabaseBuilder.open(new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_carto.mdb")),null);
             
 //            SirsCore.LOGGER.log(Level.FINE, "=======================");
-//            importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getColumns().stream().forEach((column) -> {
-//                SirsCore.LOGGER.log(Level.FINE, column.getName());
-//            });
+            importer.getDatabase().getTable(TableName.CARTO_TRONCON_GESTION_DIGUE.toString()).getColumns().stream().forEach((column) -> {
+                SirsCore.LOGGER.log(Level.FINE, column.getName());
+            });
 //            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
 //
 //            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
-            for(final Index index :importer.getDatabase().getTable(TableName.PHOTO_LOCALISEE_EN_PR.toString()).getIndexes()){
-                System.out.println(index);
-            }
-//            for(final Row row : importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString())){
+//            for(final Index index :importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE.toString()).getIndexes()){
+//                System.out.println(index);
+//            }
+//            for(final Row row : importer.getDatabase().getTable(TableName.CARTO_TRONCON_GESTION_DIGUE.toString())){
+//                System.out.println(index);
 //                SirsCore.LOGGER.log(Level.FINE, row.toString());
 //            }
 //            SirsCore.LOGGER.log(Level.FINE, "=======================");

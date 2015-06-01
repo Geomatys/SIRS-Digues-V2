@@ -147,7 +147,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     private void constraintDeleteBoundEntities(TronconDigue entity) {
         //on supprime tous les SR associés
         final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
-        final List<SystemeReperage> srs = srrepo.getByTroncon(entity);
+        final List<SystemeReperage> srs = srrepo.getByLinearId(entity.getId());
         for(SystemeReperage sr : srs) {
             srrepo.remove(sr, entity);
         }

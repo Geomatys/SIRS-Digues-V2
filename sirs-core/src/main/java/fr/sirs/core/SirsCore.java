@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.measure.unit.SI;
@@ -29,6 +30,7 @@ import org.geotoolkit.internal.io.IOUtilities;
 import org.geotoolkit.internal.io.Installation;
 import org.geotoolkit.internal.referencing.CRSUtilities;
 import org.geotoolkit.internal.sql.DefaultDataSource;
+import org.geotoolkit.lang.Setup;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
 import org.geotoolkit.referencing.operation.transform.NTv2Transform;
@@ -110,6 +112,11 @@ public class SirsCore {
         // create a database in user directory
         Files.createDirectories(SirsCore.EPSG_PATH);
         
+        // Geotoolkit startup. We specify that we don't want to use Java preferences,
+        // because it does not work on most systems anyway.
+        final Properties noJavaPrefs = new Properties();
+        noJavaPrefs.put("platform", "server");
+        Setup.initialize(noJavaPrefs);
         final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.toString()+"/db";
         
         final DataSource ds = new DefaultDataSource(url);

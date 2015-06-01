@@ -16,10 +16,13 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.other.FXDesignationPane;
 import fr.sirs.other.FXReferencePane;
+import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -40,7 +43,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -88,10 +90,12 @@ public class Session extends SessionCore {
 
     private FXMainFrame frame = null;
     
-    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
+    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Class<? extends ReferenceType>, FXFreeTab> openReferencePanes = new Cache<>(12, 0, false);
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
+    public enum AdminTab{VALIDATION, USERS}
+    private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
     
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
@@ -116,6 +120,9 @@ public class Session extends SessionCore {
     public void clearCache(){
         openEditors.clear();
         openThemes.clear();
+        openReferencePanes.clear();
+        openDesignationPanes.clear();
+        openAdminTabs.clear();
     }
     
     @Autowired
@@ -257,6 +264,55 @@ public class Session extends SessionCore {
             } else {
                 getFrame().addTab(getOrCreateElementTab(element.get()));
             }
+        }
+    }
+    
+    public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title){
+        
+        try {
+            switch(adminTab){
+                case USERS:
+                    return openAdminTabs.getOrCreate(AdminTab.USERS, () -> {
+                        final FXFreeTab tab = new FXFreeTab(title);
+                        final PojoTable usersTable = new PojoTable(getUtilisateurRepository(), "Table des utilisateurs"){
+                            @Override
+                            protected void deletePojos(final Element... pojos) {
+                                final List<Element> pojoList = new ArrayList<>();
+                                for (final Element pojo : pojos) {
+                                    if(pojo instanceof Utilisateur){
+                                        final Utilisateur utilisateur = (Utilisateur) pojo;
+                                        // On interdit la suppression de l'utilisateur courant !
+                                        if(utilisateur.equals(session.getUtilisateur())){
+                                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
+                                        } 
+                                        // On interdit également la suppression de l'invité par défaut !
+                                        else if (SIRS.LOGIN_DEFAULT_GUEST.equals(utilisateur.getLogin())){
+                                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
+                                        }
+                                        else{
+                                            pojoList.add(pojo);
+                                        }
+                                    }
+                                }
+                                super.deletePojos(pojoList.toArray(new Element[0]));
+                            }
+                        };
+                        usersTable.cellEditableProperty().unbind();
+                        usersTable.cellEditableProperty().set(false);
+                        tab.setContent(usersTable);
+                        return tab;
+                    });
+                case VALIDATION:
+                    return openAdminTabs.getOrCreate(AdminTab.VALIDATION, () -> {
+                        final FXFreeTab tab = new FXFreeTab(title);
+                        tab.setContent(new FXValidationPane());
+                        return tab;
+                    });
+                default: 
+                    throw new UnsupportedOperationException("Unsupported administration pane.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
     

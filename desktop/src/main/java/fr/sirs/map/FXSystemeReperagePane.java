@@ -402,7 +402,7 @@ public class FXSystemeReperagePane extends BorderPane {
             uiSrComboBox.setItems(FXCollections.emptyObservableList());
         } else {
             mode.set(Mode.NONE);
-            final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByTroncon(troncon);
+            final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByLinear(troncon);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
             
             final String defaultSRID = troncon.getSystemeRepDefautId();

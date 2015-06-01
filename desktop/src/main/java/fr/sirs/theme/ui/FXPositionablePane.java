@@ -702,7 +702,7 @@ public class FXPositionablePane extends BorderPane {
             TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
                 try {
                     final SystemeReperageRepository srRepo = Injector.getSession().getSystemeReperageRepository();
-                    final List<SystemeReperage> srs = srRepo.getByTroncon(t);
+                    final List<SystemeReperage> srs = srRepo.getByLinear(t);
                     final SystemeReperage defaultSR;
                     if (pos.getSystemeRepId() != null) {
                         defaultSR = srRepo.get(pos.getSystemeRepId());

@@ -13,7 +13,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefRevetement;
 import fr.sirs.core.model.RefSource;
@@ -125,7 +124,7 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         //        ID_OUVRAGE_COMM_NRJ,
         //        ID_TYPE_VOIE_SUR_DIGUE,
         //        ID_OUVRAGE_VOIRIE,
-        ID_TYPE_REVETEMENT,
+//        ID_TYPE_REVETEMENT,
         ID_TYPE_USAGE_VOIE,
         ID_TYPE_POSITION,
         LARGEUR,
@@ -139,9 +138,9 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
 //        LIBELLE_TYPE_NATURE_HAUT,
 //        ID_TYPE_NATURE_BAS,
 //        LIBELLE_TYPE_NATURE_BAS,
-//        ID_TYPE_REVETEMENT_HAUT,
+        ID_TYPE_REVETEMENT_HAUT,
 //        LIBELLE_TYPE_REVETEMENT_HAUT,
-//        ID_TYPE_REVETEMENT_BAS,
+        ID_TYPE_REVETEMENT_BAS,
 //        LIBELLE_TYPE_REVETEMENT_BAS,
 //        ID_AUTO
     };
@@ -159,7 +158,6 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypeReferences();
@@ -170,10 +168,6 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         pointAcces.setLinearId(troncon.getId());
 
         pointAcces.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            pointAcces.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             pointAcces.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -253,8 +247,12 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
 
         pointAcces.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
-        if (row.getInt(Columns.ID_TYPE_REVETEMENT.toString()) != null) {
-            pointAcces.setRevetementId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT.toString())).getId());
+        if (row.getInt(Columns.ID_TYPE_REVETEMENT_HAUT.toString()) != null) {
+            pointAcces.setRevetementHautId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_HAUT.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_REVETEMENT_BAS.toString()) != null) {
+            pointAcces.setRevetementBasId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_BAS.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_USAGE_VOIE.toString()) != null) {

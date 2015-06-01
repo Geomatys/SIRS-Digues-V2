@@ -12,11 +12,9 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.SystemeReperage;
@@ -172,8 +170,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
@@ -181,10 +177,6 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         final SommetRisberme sommetRisberme = createAnonymValidElement(SommetRisberme.class);
 
         sommetRisberme.setLinearId(troncon.getId());
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            sommetRisberme.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             sommetRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -279,10 +271,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
             sommetRisberme.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            sommetRisberme.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-        }
+        
         sommetRisberme.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         sommetRisberme.setGeometry(buildGeometry(troncon.getGeometry(), sommetRisberme, tronconGestionDigueImporter.getBorneDigueRepository()));
 

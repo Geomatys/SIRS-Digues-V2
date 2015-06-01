@@ -180,7 +180,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         repo.add(sr, troncon);
         
         //maj de la liste
-        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
+        final List<SystemeReperage> srs = repo.getByLinear(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
 
@@ -200,7 +200,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         repo.remove(sr, troncon);
         
         //maj de la liste
-        final List<SystemeReperage> srs = repo.getByTroncon(troncon);
+        final List<SystemeReperage> srs = repo.getByLinear(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
     
@@ -286,7 +286,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 }
             });
 
-            final List<SystemeReperage> allSrs = session.getSystemeReperageRepository().getByTroncon(newValue);
+            final List<SystemeReperage> allSrs = session.getSystemeReperageRepository().getByLinear(newValue);
             allSrs.add(0, null);
             uiSrDefault.setItems(FXCollections.observableArrayList(allSrs));
             uiSrDefault.setConverter(new SirsStringConverter());
@@ -342,7 +342,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             this.uiDateEnd.valueProperty().bindBidirectional(newValue.date_finProperty());
 
             //liste des systemes de reperage
-            uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByTroncon(newValue)));
+            uiSRList.setItems(FXCollections.observableArrayList(session.getSystemeReperageRepository().getByLinear(newValue)));
             uiGestionsTable.setParentElement(newValue);
             uiGestionsTable.setTableItems(() -> (ObservableList) newValue.gestions);
             uiProprietesTable.setForeignParentId(newValue.getId());

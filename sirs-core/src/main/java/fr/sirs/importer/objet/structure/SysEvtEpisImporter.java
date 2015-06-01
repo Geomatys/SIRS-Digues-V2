@@ -13,7 +13,6 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Epi;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -163,16 +162,11 @@ class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final Epi epi = createAnonymValidElement(Epi.class);
         
         epi.setLinearId(troncon.getId());
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            epi.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             epi.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

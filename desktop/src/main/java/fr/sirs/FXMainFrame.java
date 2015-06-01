@@ -9,19 +9,12 @@ import static fr.sirs.SIRS.ID_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.Utilisateur;
-import fr.sirs.other.FXDesignationPane;
 import fr.sirs.query.FXSearchPane;
-import fr.sirs.other.FXReferencePane;
-import fr.sirs.other.FXValidationPane;
-import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
@@ -31,9 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,8 +33,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
@@ -82,10 +71,10 @@ public class FXMainFrame extends BorderPane {
     private static final String BUNDLE_KEY_DESIGNATIONS = "designations";
     private static final String BUNDLE_KEY_SEARCH = "search";
     
-    /** A cache to get back tab as long as their displayed in application, 
+    /** 
+     * A cache to get back tab as long as their displayed in application, 
      * allowing fast search on Theme keys.
-     */ 
-    //private final Cache<Theme, Tab> themeTabs = new Cache<>(12, 1, false);
+     */
     
     private Stage prefEditor;
 
@@ -112,20 +101,24 @@ public class FXMainFrame extends BorderPane {
             uiMenu.getMenus().add(1, uiAdmin);  
             
             final MenuItem uiUserAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_USERS));
-            uiUserAdmin.setOnAction((ActionEvent event) -> {openUsersTab();});
+            uiUserAdmin.setOnAction((ActionEvent event) -> {
+                addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.USERS, bundle.getString(BUNDLE_KEY_USERS)));
+            });
             
             final MenuItem uiValidation = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
-            uiValidation.setOnAction((ActionEvent event) -> {openValidationTab();});
+            uiValidation.setOnAction((ActionEvent event) -> {
+                addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.VALIDATION, bundle.getString(BUNDLE_KEY_VALIDATION)));
+            });
              
             final Menu uiReference = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
             for(final Class reference : Session.getReferences()){
-                uiReference.getItems().add(toMenuItem(reference, SummaryTab.REFERENCE));
+                uiReference.getItems().add(toMenuItem(reference, Choice.REFERENCE));
             }
             
             final Menu uiDesignation = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
             for(final Class elementClass : Session.getElements()){
                 if(!Session.getReferences().contains(elementClass)){
-                    uiDesignation.getItems().add(toMenuItem(elementClass, SummaryTab.MODEL));
+                    uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
                 }
             }
             
@@ -152,40 +145,28 @@ public class FXMainFrame extends BorderPane {
         }
         return diguesTab;
     }
-
-    private Tab validationTab;
-    private void openValidationTab(){
-        if(validationTab==null){
-            validationTab = new Tab(bundle.getString(BUNDLE_KEY_VALIDATION));
-            validationTab.setContent(new FXValidationPane());
-        }
-        if(!uiTabs.getTabs().contains(validationTab)){
-            uiTabs.getTabs().add(validationTab);
-        }
-        uiTabs.getSelectionModel().select(validationTab);
-    }
         
-    public synchronized void addTab(Tab tab){
+    public final synchronized void addTab(Tab tab){
         if (!uiTabs.equals(tab.getTabPane())) {
             uiTabs.getTabs().add(tab);
         }
         uiTabs.getSelectionModel().select(tab);
     }
     
-    private enum SummaryTab{REFERENCE, MODEL};
-    private MenuItem toMenuItem(final Class clazz, final SummaryTab typeOfSummary){
+    private enum Choice{REFERENCE, MODEL};
+    private MenuItem toMenuItem(final Class clazz, final Choice typeOfSummary){
         final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
         final MenuItem item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
         final EventHandler<ActionEvent> handler;
         
-        if(typeOfSummary==SummaryTab.REFERENCE){
+        if(typeOfSummary==Choice.REFERENCE){
             handler = (ActionEvent event) -> {
-                    addTab(Injector.getSession().getOrCreateReferenceTypeTab(clazz));
+                addTab(Injector.getSession().getOrCreateReferenceTypeTab(clazz));
             };
         }
         else{
             handler = (ActionEvent event) -> {
-                    addTab(Injector.getSession().getOrCreateDesignationTab(clazz));
+                addTab(Injector.getSession().getOrCreateDesignationTab(clazz));
             };
         }
         
@@ -356,38 +337,6 @@ public class FXMainFrame extends BorderPane {
         infoStage.setScene(new Scene(new FXAboutPane()));
         infoStage.setResizable(false);
         infoStage.show();
-    }
-    
-    private void openUsersTab(){
-        final Tab usersTab = new Tab(bundle.getString(BUNDLE_KEY_USERS));
-        
-        final PojoTable usersTable = new PojoTable(session.getUtilisateurRepository(), "Table des utilisateurs"){
-            @Override
-            protected void deletePojos(final Element... pojos) {
-                final List<Element> pojoList = new ArrayList<>();
-                for (final Element pojo : pojos) {
-                    if(pojo instanceof Utilisateur){
-                        final Utilisateur utilisateur = (Utilisateur) pojo;
-                        // On interdit la suppression de l'utilisateur courant !
-                        if(utilisateur.equals(session.getUtilisateur())){
-                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
-                        } 
-                        // On interdit également la suppression de l'invité par défaut !
-                        else if (SIRS.LOGIN_DEFAULT_GUEST.equals(utilisateur.getLogin())){
-                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
-                        }
-                        else{
-                            pojoList.add(pojo);
-                        }
-                    }
-                }
-                super.deletePojos(pojoList.toArray(new Element[0]));
-            }
-        };
-        usersTable.cellEditableProperty().unbind();
-        usersTable.cellEditableProperty().set(false);
-        usersTab.setContent(usersTable);
-        addTab(usersTab);
     }
     
     private class DisplayTheme implements EventHandler<ActionEvent> {

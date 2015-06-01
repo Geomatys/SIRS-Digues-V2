@@ -12,11 +12,9 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TalusRisberme;
@@ -172,8 +170,6 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
@@ -181,10 +177,6 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         final TalusRisberme talusRisberme = createAnonymValidElement(TalusRisberme.class);
         
         talusRisberme.setLinearId(troncon.getId());
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            talusRisberme.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             talusRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -300,10 +292,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         if (row.getDouble(Columns.PENTE_INTERIEURE.toString()) != null) {
             talusRisberme.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            talusRisberme.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-        }
+        
         talusRisberme.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
         talusRisberme.setGeometry(buildGeometry(troncon.getGeometry(), talusRisberme, tronconGestionDigueImporter.getBorneDigueRepository()));
         

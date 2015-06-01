@@ -13,7 +13,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
@@ -150,7 +149,6 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final OuvertureBatardable ouverture = createAnonymValidElement(OuvertureBatardable.class);
@@ -158,10 +156,6 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         ouverture.setLinearId(troncon.getId());
 
         ouverture.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            ouverture.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             ouverture.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -240,10 +234,6 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         }
 
         ouverture.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            ouverture.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
-        }
 
         if (row.getDouble(Columns.LARGEUR.toString()) != null) {
             ouverture.setLargeur(row.getDouble(Columns.LARGEUR.toString()).floatValue());

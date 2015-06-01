@@ -5,6 +5,7 @@ package fr.sirs.core.component;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
+import static fr.sirs.core.component.SystemeReperageRepository.BY_LINEAR_ID;
 import fr.sirs.core.model.ElementCreator;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -23,9 +24,11 @@ import org.ektorp.support.Views;
 @Component
 @Views({
     @View(name="all",         map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc._id, doc._id)}}"),
-    @View(name="byTronconId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.linearId, doc._id)}}")
+    @View(name=BY_LINEAR_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.linearId, doc._id)}}")
 })
 public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage>{
+    
+    public static final String BY_LINEAR_ID = "byLinarId";
 
     @Autowired
     public SystemeReperageRepository ( CouchDbConnector db) {
@@ -50,8 +53,12 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
 //        return new SystemeReperage();
     }
     
-    public List<SystemeReperage> getByTroncon(final TronconDigue troncon) {
-        return this.queryView("byTronconId", troncon.getId());
+    public List<SystemeReperage> getByLinear(final TronconDigue linear) {
+        return this.queryView(BY_LINEAR_ID, linear.getId());
+    }
+    
+    public List<SystemeReperage> getByLinearId(final String linearId) {
+        return this.queryView(BY_LINEAR_ID, linearId);
     }
     
     public void update(SystemeReperage entity, TronconDigue troncon) {

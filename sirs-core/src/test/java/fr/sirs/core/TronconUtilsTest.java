@@ -127,7 +127,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertEquals(1, cut0brs.length);
         assertEquals(borne0.getDocumentId(), cut0brs[0]);
         
-        final List<SystemeReperage> cut0Srs = session.getSystemeReperageRepository().getByTroncon(cut0);
+        final List<SystemeReperage> cut0Srs = session.getSystemeReperageRepository().getByLinear(cut0);
         assertEquals(1, cut0Srs.size());
         final SystemeReperage cut0sr = cut0Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut0sr.getDocumentId());
@@ -176,7 +176,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne1.getDocumentId()));
         assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne2.getDocumentId()));
         
-        final List<SystemeReperage> cut1Srs = session.getSystemeReperageRepository().getByTroncon(cut1);
+        final List<SystemeReperage> cut1Srs = session.getSystemeReperageRepository().getByLinear(cut1);
         assertEquals(1, cut1Srs.size());
         final SystemeReperage cut1sr = cut1Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut1sr.getDocumentId());

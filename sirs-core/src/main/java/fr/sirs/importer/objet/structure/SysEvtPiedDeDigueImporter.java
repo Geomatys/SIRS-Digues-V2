@@ -13,11 +13,9 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -183,8 +181,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
@@ -192,10 +188,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         final PiedDigue piedDigue = createAnonymValidElement(PiedDigue.class);
         
         piedDigue.setLinearId(troncon.getId());
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            piedDigue.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             piedDigue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -286,10 +278,6 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
             }
         } catch (FactoryException ex) {
             Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            piedDigue.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         piedDigue.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));

@@ -13,11 +13,9 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Crete;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -174,8 +172,6 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
@@ -248,10 +244,6 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
             crete.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
 
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            crete.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
-
         GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
@@ -280,10 +272,6 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
             }
         } catch (FactoryException ex) {
             Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            crete.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         crete.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));

@@ -38,7 +38,6 @@ import static fr.sirs.core.LinearReferencingUtilities.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Photo;
@@ -115,7 +114,7 @@ public class TronconUtils {
          * des structures.
          */
         final HashMap<String, SystemeReperage> newSRs = new HashMap<>();
-        for (final SystemeReperage sr : srRepo.getByTroncon(troncon)) {
+        for (final SystemeReperage sr : srRepo.getByLinearId(troncon.getId())) {
             final SystemeReperage srCp = sr.copy();
             final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBornes().listIterator();
             while (srBorneIt.hasNext()) {
@@ -415,11 +414,11 @@ public class TronconUtils {
          * des deux. Pour le reste, on fait une simple copie des SR.
          */
         final HashMap<String, String> modifiedSRs = new HashMap<>(); 
-        for(SystemeReperage sr2 : srRepo.getByTroncon(mergeParam)){
+        for(SystemeReperage sr2 : srRepo.getByLinearId(mergeParam.getId())){
             
             //on cherche le SR du meme nom
             SystemeReperage sibling = null;
-            for(SystemeReperage sr1 : srRepo.getByTroncon(mergeResult)){
+            for(SystemeReperage sr1 : srRepo.getByLinearId(mergeResult.getId())){
                 if(sr1.getLibelle().equals(sr2.getLibelle())){
                     sibling = sr1;
                     break;
@@ -467,15 +466,15 @@ public class TronconUtils {
         
         // On les persiste en bdd pour retrouver facilement tous les élements à modifier
         for (final Positionable copy : toSave) {
-                // On vérifie que la copie a un dépôt pour l'enregistrer.
-                try {
-                    if (copy instanceof AvecForeignParent)
-                        ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
-                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
-                } catch (Exception e) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
-                }
+            // On vérifie que la copie a un dépôt pour l'enregistrer.
+            try {
+                if (copy instanceof AvecForeignParent)
+                    ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+                ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
             }
+        }
               
         // On change le SR des objets copiés
         for (final Positionable copy : getPositionableList(mergeResult)) {
@@ -487,15 +486,15 @@ public class TronconUtils {
         
         // On sauvegarde les changements.        
         for (final Positionable copy : toSave) {
-                // On vérifie que la copie a un dépôt pour l'enregistrer.
-                try {
-                    if (copy instanceof AvecForeignParent)
-                        ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
-                    ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
-                } catch (Exception e) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
-                }
+            // On vérifie que la copie a un dépôt pour l'enregistrer.
+            try {
+                if (copy instanceof AvecForeignParent)
+                    ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+                ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
             }
+        }
         
         //on combine les geometries
         final Geometry line1 = mergeResult.getGeometry();
@@ -519,13 +518,14 @@ public class TronconUtils {
      * Creation ou mise a jour du systeme de reperage elementaire .
      * 
      * @param troncon 
+     * @param session 
      */
     public static void updateSRElementaire(TronconDigue troncon, SessionCore session){
                 
         final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
         final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
         
-        final List<SystemeReperage> srs = srRepo.getByTroncon(troncon);
+        final List<SystemeReperage> srs = srRepo.getByLinearId(troncon.getId());
         
         SystemeReperage sr = null;
         for(SystemeReperage csr : srs){

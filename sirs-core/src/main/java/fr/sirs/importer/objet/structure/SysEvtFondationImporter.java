@@ -13,11 +13,9 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -172,8 +170,6 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
-        final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
@@ -181,10 +177,6 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
         final Fondation fondation = createAnonymValidElement(Fondation.class);
         
         fondation.setLinearId(troncon.getId());
-
-        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
-            fondation.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
-        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             fondation.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
@@ -278,10 +270,6 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
             fondation.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
-        }
-
-        if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            fondation.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         fondation.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));

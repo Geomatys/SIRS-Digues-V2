@@ -241,6 +241,7 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
             }
         }
         position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+        
         position.setGeometry(buildGeometry(troncon.getGeometry(), position, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return position;
