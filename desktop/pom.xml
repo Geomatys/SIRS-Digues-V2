@@ -80,18 +80,19 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-dwg</artifactId>
+      <artifactId>geotk-feature-sql</artifactId>
       <version>${geotoolkit.version}</version>
+    </dependency>
+    <!-- Moved out of Geotk, it does not follow the same versioning. -->
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-feature-dwg</artifactId>
+      <version>4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-esri-geodb</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-sql</artifactId>
-      <version>${geotoolkit.version}</version>
+      <version>4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
