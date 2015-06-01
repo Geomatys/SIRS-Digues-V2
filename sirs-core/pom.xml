@@ -163,7 +163,7 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-h2</artifactId>
-      <version>4.0-SNAPSHOT</version>
+      <version>${geotoolkit.version}</version>
     </dependency>
 
     <dependency>
