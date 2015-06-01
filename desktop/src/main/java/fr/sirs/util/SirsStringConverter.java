@@ -51,32 +51,42 @@ public class SirsStringConverter extends StringConverter {
             item = session.getBorneDigueRepository().get(srb.getBorneId());
         }
 
-        String text = "";
+        StringBuilder text = new StringBuilder();
+        // Start title with element designation
+        if (item instanceof Element) {
+            text.append(getDesignation((Element)item));
+        }  else if (item instanceof Preview) {
+            text.append(getDesignation((Preview) item));
+        }
+        
+        // Search for a name or label associated to input object
         if (item instanceof Contact) {
             final Contact c = (Contact) item;
-            text = getDesignation((Element)item)+" : "+c.getNom() + " " + c.getPrenom();
+            if (c.getNom() != null && !c.getNom().isEmpty()) {
+                text.append(" : ").append(c.getNom());
+            }
+            if (c.getPrenom() != null && !c.getPrenom().isEmpty()) {
+                text.append(' ').append(c.getPrenom());
+            }
         } else if (item instanceof Organisme) {
-            text = getDesignation((Element)item)+" : "+((Organisme)item).getNom();
-        } else if (item instanceof Element) {
-            text = getDesignation((Element)item);
+            final Organisme o = (Organisme)item;
+            if (o.getNom() != null && !o.getNom().isEmpty()) {
+                text.append(" : ").append(o.getNom());
+            }
         } else if (item instanceof ElementHit) {
-            text = ((ElementHit) item).getLibelle();
-        } else if (item instanceof Preview) {
-            final Preview label = (Preview) item;
-            text = getDesignation(label);
+            text.append(((ElementHit) item).getLibelle());
         } else if (item instanceof String) {
-            text = (String) item;
+            text.append((String) item);
         } else if (item instanceof CoordinateReferenceSystem) {
-            text = ((CoordinateReferenceSystem) item).getName().toString();
+            text.append(((CoordinateReferenceSystem) item).getName().toString());
         } else if (item instanceof PropertyType) {
-            text = ((PropertyType) item).getName().tip().toString();
+            text = text.append(((PropertyType) item).getName().tip().toString());
         } else if (item instanceof Role){
-            if(item==ADMIN) text="Administrateur";
-            else if(item==USER) text="Utilisateur";
-            else if(item==GUEST) text="Invité";
-            else if(item==EXTERN) text="Externe";
-            else text="";
-        } else if (item instanceof Class){
+            if(item==ADMIN) text.append("Administrateur");
+            else if(item==USER) text.append("Utilisateur");
+            else if(item==GUEST) text.append("Invité");
+            else if(item==EXTERN) text.append("Externe");
+        } else if (item instanceof Class) {
             if(Element.class.isAssignableFrom((Class) item)){
                 return getLabelMapperForClass((Class) item).mapClassName();
             }
@@ -85,21 +95,18 @@ public class SirsStringConverter extends StringConverter {
         // Whatever object we've got, if we can append a libelle, we do.
         if (item instanceof AvecLibelle) {
             final AvecLibelle libelle = (AvecLibelle) item;
-            if (!text.isEmpty() 
-                    && libelle.getLibelle()!=null 
+            if (text.length() > 0 
+                    && libelle.getLibelle() != null 
                     && !libelle.getLibelle().isEmpty()) {
-                text += " : ";
-            }
-            if (libelle.getLibelle()!=null 
-                    && !libelle.getLibelle().isEmpty()) {
-                text += libelle.getLibelle();
+                text.append(" : ").append(libelle.getLibelle());
             }
         }
-            
-        if (text != null && !text.isEmpty()) {
-            fromString.put(text, item);
+        
+        final String result = text.toString();
+        if (result != null && !result.isEmpty()) {
+            fromString.put(result, item);
         }
-        return text;
+        return result;
     }
 
     public static String getDesignation(final Preview source) {
