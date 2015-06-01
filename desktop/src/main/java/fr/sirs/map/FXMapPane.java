@@ -8,6 +8,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
@@ -45,6 +46,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -400,6 +402,7 @@ public class FXMapPane extends BorderPane {
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Calcul de la zone à afficher");
             
+            // Envelope spatiale
             final FeatureType fType = fLayer.getCollection().getFeatureType();
             final GenericName typeName = fType.getName();
             QueryBuilder queryBuilder = new QueryBuilder(
@@ -420,11 +423,53 @@ public class FXMapPane extends BorderPane {
             }
             final Envelope selectionEnvelope = SIRS.pseudoBuffer(tmpEnvelope);
             
+            // Envelope temporelle
+            final Date selectionTime;
+            if (toFocusOn instanceof AvecBornesTemporelles) {
+                long minTime = Long.MIN_VALUE;
+                long maxTime = Long.MAX_VALUE;
+                AvecBornesTemporelles tmpBornes = (AvecBornesTemporelles) toFocusOn;
+                LocalDateTime tmpDate = ((AvecBornesTemporelles) toFocusOn).getDate_debut();
+                if (tmpDate != null) {
+                    minTime = tmpDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+                }
+                tmpDate = ((AvecBornesTemporelles) toFocusOn).getDate_fin();
+                if (tmpDate != null) {
+                    maxTime = tmpDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+                }
+
+                final NumberRange<Long> elementRange = NumberRange.create(minTime, true, maxTime, true);
+
+                minTime = Long.MIN_VALUE;
+                maxTime = Long.MAX_VALUE;
+                Date[] temporalRange = uiMap1.getCanvas().getTemporalRange();
+                if (temporalRange != null && temporalRange.length > 0) {
+                    minTime = temporalRange[0].getTime();
+                    if (temporalRange.length > 1) {
+                        maxTime = temporalRange[1].getTime();
+                    }
+                }
+
+                final NumberRange<Long> mapRange = NumberRange.create(minTime, true, maxTime, true);
+
+                // If map temporal envelope does not intersect our element, we must 
+                // change it.
+                if (!mapRange.intersects(elementRange))
+                    selectionTime = new Date(elementRange.getMinValue());
+                else 
+                    selectionTime = null;
+            } else {
+                selectionTime = null;
+            }
+            
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Mise à jour de l'affichage");
             
             final TaskManager.MockTask displayUpdate = new TaskManager.MockTask(() -> {
                     uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+                    if (selectionTime != null) {
+                        setTemporalRange(selectionTime, uiMap1);
+                    }
                     return null;
             });
             
