@@ -40,6 +40,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -179,6 +180,9 @@ public class FXSearchPane extends BorderPane {
         final ToggleGroup group = new ToggleGroup();
         uiToggleSimple.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
+        group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
+            if (newValue == null) group.selectToggle(oldValue);
+        });
         
         final List<Class<? extends Element>> modelClasses = Session.getElements();
         modelClasses.removeIf(new Predicate<Class<? extends Element>>() {
@@ -221,6 +225,7 @@ public class FXSearchPane extends BorderPane {
         simpleRadio.selectedToggleProperty().addListener(
             (ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             setCenter(null);
+            if (newValue == null) simpleRadio.selectToggle(oldValue);
         });
         
         uiSQLPane.visibleProperty().bind(uiToggleSQL.selectedProperty());
@@ -233,7 +238,6 @@ public class FXSearchPane extends BorderPane {
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
         
         uiPlainTextPane.visibleProperty().bind(new BooleanBinding() {
-
             {super.bind(uiRadioPlainText.selectedProperty(), uiToggleSimple.selectedProperty());}
             
             @Override
