@@ -1,16 +1,19 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.SIRS;
+import fr.sirs.core.model.AvecCommentaire;
+import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
+import java.util.List;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
@@ -22,8 +25,6 @@ import javafx.scene.web.WebView;
 /**
  * Un panneau qui affiche (en lecture seule) le commentaire et les éventuelles 
  * photos attachées à un objet.
- * 
- * TODO : Etendre la gestion à des éléments qui ne sont pas forcément des {@link Objet}
  * 
  * @author Alexis Manin (Geomatys)
  */
@@ -64,14 +65,20 @@ public class FXCommentPhotoView extends SplitPane {
     }
     
     private void elementSet(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
-        if (!(newValue instanceof Objet)) {
-            return;
+        if (newValue instanceof AvecCommentaire) {
+            uiCommentArea.getEngine().loadContent(((AvecCommentaire)newValue).getCommentaire());
         }
-        final Objet obj = (Objet) newValue;
-        uiCommentArea.getEngine().loadContent(obj.getCommentaire());
-        if (obj.photos != null && obj.photos.size() > 1 ) {
+        if (newValue instanceof AvecPhotos) {
+            final AvecPhotos photoContainer = (AvecPhotos) newValue;
             uiPhotoScroll.setVisible(true);
-            uiPhotoScroll.setMax(obj.photos.size()-1);
+            if (photoContainer.getPhotos() != null && !photoContainer.getPhotos().isEmpty()) {
+                uiPhotoScroll.setMax(photoContainer.getPhotos().size() - 1);
+            } else {
+                uiPhotoScroll.setMax(0);
+            }
+        } else if (newValue instanceof Photo) {
+            uiPhotoScroll.setVisible(true);
+            uiPhotoScroll.setMax(0);
         } else {
             uiPhotoScroll.setVisible(false);
         }
@@ -93,33 +100,44 @@ public class FXCommentPhotoView extends SplitPane {
         uiPhotoLibelle.setText("Pas de photo associée");
         uiPhotoDate.textProperty().unbind();
         uiPhotoDate.setText("");
-        if (!(valueProperty.get() instanceof Objet)) {
-            return;
+        
+        uiPhotoView.setImage(null);
+        
+        final Photo selected;
+        final Object value = valueProperty.get();
+        if (value instanceof AvecPhotos) {
+            final List<Photo> photos = ((AvecPhotos)value).getPhotos();
+            final int imageIndex = uiPhotoScroll.valueProperty().intValue();
+            if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
+                selected = null;
+            } else {
+                selected = photos.get(imageIndex);
+            }
+            
+        } else if (value instanceof Photo) {
+            selected = (Photo)value;
+        } else {
+            selected = null;
         }
-
-        final ObservableList<Photo> photos = ((Objet) valueProperty.get()).photos;
-        final int imageIndex = uiPhotoScroll.valueProperty().intValue();
-        if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
-            uiPhotoView.setImage(null);
+        
+        if (selected == null) {
             uiPhotoLibelle.setText("");
-            return;
-        }
-
-        final Photo selected = photos.get(imageIndex);
-
-        if(selected==null || selected.getChemin()==null || selected.getChemin().isEmpty()){
+        } else if (selected.getChemin()==null || selected.getChemin().isEmpty()) {
             uiPhotoLibelle.setText("Aucun fichier n'est associé à la photo.");
-        } 
-        else {
+        } else {
             try {
-                /* TODO : It appears that image relative path is stored in 
-                 * libelle property. It's a bit strange, it should be watched.
-                 */
                 final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getChemin());
                 // TODO : How to manage image loading error ? No exception is thrown here...
                 uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
                 uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
-                uiPhotoDate.textProperty().bind(selected.dateProperty().asString());
+                // Do not bind directly date as string because it can return ugly "null" text.
+                uiPhotoDate.textProperty().bind(
+                        Bindings.createStringBinding(() -> {
+                            String result =  selected.dateProperty().asString().get();
+                            if (result == null || result.equals("null")) 
+                                result = "";
+                            return result;
+                        }, selected.dateProperty()));
             } catch (IllegalStateException e) {
                 uiPhotoLibelle.setText(e.getLocalizedMessage());
             } catch (IllegalArgumentException | MalformedURLException e) {
