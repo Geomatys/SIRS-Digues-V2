@@ -6,7 +6,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Positionable;
 import java.beans.PropertyChangeEvent;
 import java.io.File;

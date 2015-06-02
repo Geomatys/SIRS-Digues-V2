@@ -5,12 +5,14 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
@@ -50,6 +52,7 @@ public class FXFileTextField extends AbstractPathTextField {
             }
         } catch (Exception e) {
             // Well, we'll try without it...
+            SirsCore.LOGGER.log(Level.FINE, "Input path cannot be deccoded.", e);
         }
         File returned = chooser.showOpenDialog(null);
         if (returned == null) {
@@ -64,7 +67,7 @@ public class FXFileTextField extends AbstractPathTextField {
     protected URI getURIForText(String inputText) throws Exception {
         rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
         if (rootPath.get() == null) {
-            return new URI(inputText.matches("[A-Za-z]+://.+")? inputText : "file://"+inputText);
+            return inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
         } else {
             return Paths.get(rootPath.get(), inputText == null? "" : inputText).toUri();
         }
