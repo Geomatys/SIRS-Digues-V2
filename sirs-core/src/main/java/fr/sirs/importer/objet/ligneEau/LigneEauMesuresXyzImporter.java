@@ -3,7 +3,7 @@ package fr.sirs.importer.objet.ligneEau;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.core.model.MesureLigneEau;
+import fr.sirs.core.model.MesureLigneEauXYZ;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  */
 class LigneEauMesuresXyzImporter extends GenericImporter {
 
-    private Map<Integer, List<MesureLigneEau>> mesuresByLigneEau = null;
+    private Map<Integer, List<MesureLigneEauXYZ>> mesuresByLigneEau = null;
 
     LigneEauMesuresXyzImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
@@ -30,12 +30,12 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
 
     private enum Columns {
         ID_LIGNE_EAU,
-//        X,
-//        Y,
+        X,
+        Y,
         HAUTEUR_EAU,
 //        PR_CALCULE,
-//        ID_POINT,
-        DATE_DERNIERE_MAJ
+        ID_POINT,
+//        DATE_DERNIERE_MAJ
     };
 
     /**
@@ -44,7 +44,7 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
      * referenced by the corresponding element reseau internal ID.
      * @throws IOException
      */
-    public Map<Integer, List<MesureLigneEau>> getMesuresByLigneEau() throws IOException {
+    public Map<Integer, List<MesureLigneEauXYZ>> getMesuresByLigneEau() throws IOException {
         if (mesuresByLigneEau == null) {
             compute();
         }
@@ -72,21 +72,25 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            final MesureLigneEau mesure = createAnonymValidElement(MesureLigneEau.class);
+            final MesureLigneEauXYZ mesure = createAnonymValidElement(MesureLigneEauXYZ.class);
             
             if (row.getDouble(Columns.HAUTEUR_EAU.toString()) != null) {
-                mesure.setHauteur(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
+                mesure.setZ(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
             }
             
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                mesure.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            if (row.getDouble(Columns.X.toString()) != null) {
+                mesure.setX(row.getDouble(Columns.X.toString()).floatValue());
+            }
+            
+            if (row.getDouble(Columns.Y.toString()) != null) {
+                mesure.setY(row.getDouble(Columns.Y.toString()).floatValue());
             }
 
             // Pas d'ID : on met arbitrairement celui de la ligne d'eau comme pseudo id.
             mesure.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
             
             // Set the list ByLigneEauId
-            List<MesureLigneEau> listByEltReseauId = mesuresByLigneEau.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
+            List<MesureLigneEauXYZ> listByEltReseauId = mesuresByLigneEau.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
             if (listByEltReseauId == null) {
                 listByEltReseauId = new ArrayList<>();
                 mesuresByLigneEau.put(row.getInt(Columns.ID_LIGNE_EAU.toString()), listByEltReseauId);

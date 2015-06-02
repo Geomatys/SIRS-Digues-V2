@@ -5,7 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.DZLeveProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
-import fr.sirs.core.model.PointLeveDZ;
+import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
@@ -44,7 +44,7 @@ import org.opengis.filter.Id;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
+public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
     
     @FXML private ComboBox<PropertyType> uiAttD;
     
@@ -120,23 +120,19 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
                 }
             });
             
-        }catch(Exception ex){
+        } catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
             new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
-            return;
         }
-        
     }
     
     @Override
-    protected ObservableList<PointLeveDZ> getSelectionPoint(){
+    protected ObservableList<PointDZ> getSelectionPoint(){
         final ObservableList<Feature> features = selectionProperty;
-        final ObservableList<PointLeveDZ> leves = FXCollections.observableArrayList();
-        
+        final ObservableList<PointDZ> leves = FXCollections.observableArrayList();
         
         for(final Feature feature : features){
-            final PointLeveDZ leve;
-            
+            final PointDZ leve;
             
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){
                 leve = Injector.getSession().getElementCreator().createElement(DZLeveProfilTravers.class);
@@ -152,8 +148,6 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointLeveDZ> {
             
             leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
             
-            leve.setAuthor(Injector.getSession().getUtilisateur().getId());
-            leve.setValid(!(Injector.getSession().getRole()==Role.EXTERN));
             leves.add(leve);
         }
         return leves;

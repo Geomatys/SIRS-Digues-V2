@@ -10,7 +10,8 @@ import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.MesureLigneEau;
+import fr.sirs.core.model.MesureLigneEauXYZ;
+import fr.sirs.core.model.MesureLigneEauPrZ;
 import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -121,8 +122,8 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
 
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
 
-        final Map<Integer, List<MesureLigneEau>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
-        final Map<Integer, List<MesureLigneEau>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
+        final Map<Integer, List<MesureLigneEauPrZ>> mesuresPrz = ligneEauMesuresPrzImporter.getMesuresByLigneEau();
+        final Map<Integer, List<MesureLigneEauXYZ>> mesuresXyz = ligneEauMesuresXyzImporter.getMesuresByLigneEau();
 
         final LigneEau ligneEau = createAnonymValidElement(LigneEau.class);
 
@@ -211,11 +212,11 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
         }
 
         if (mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())) != null) {
-            ligneEau.getMesures().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+            ligneEau.getMesuresDZ().addAll(mesuresPrz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
         }
 
         if (mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())) != null) {
-            ligneEau.getMesures().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
+            ligneEau.getMesuresXYZ().addAll(mesuresXyz.get(row.getInt(Columns.ID_LIGNE_EAU.toString())));
         }
 
         ligneEau.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));

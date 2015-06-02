@@ -54,7 +54,7 @@ public class PositionDocumentTheme extends AbstractTronconTheme {
                 "Thème "+title, 
                 themeClass,               
             (String linearId) -> {
-                return FXCollections.observableArrayList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
+                return FXCollections.observableArrayList(FXCollections.observableArrayList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass)));
             },
             (T c) -> Injector.getSession().getRepositoryForClass(themeClass).remove(c));
     }

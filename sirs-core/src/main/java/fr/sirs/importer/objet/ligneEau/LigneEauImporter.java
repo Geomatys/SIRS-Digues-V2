@@ -4,6 +4,7 @@ package fr.sirs.importer.objet.ligneEau;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.ektorp.CouchDbConnector;
 
 /**
@@ -73,7 +75,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
 //        AMONT_AVAL_FIN,
 //        DIST_BORNEREF_FIN,
 //        ID_TYPE_REF_HEAU,
-//        ID_SYSTEME_REP_PRZ,
+        ID_SYSTEME_REP_PRZ,
 //        DATE,
 //        COMMENTAIRE,
         DATE_DERNIERE_MAJ
@@ -99,6 +101,8 @@ public class LigneEauImporter extends GenericLigneEauImporter {
         objets = new HashMap<>();
         objetsByTronconId = new HashMap<>();
         
+        final Map<Integer, SystemeReperage> srs = systemeReperageImporter.getSystemeRepLineaire();
+        
         final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
@@ -107,6 +111,10 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             if(objet!=null){
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
                     objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                }
+            
+                if(row.getInt(Columns.ID_SYSTEME_REP_PRZ.toString())!=null){
+                    objet.setSystemeRepDzId(srs.get(row.getInt(Columns.ID_SYSTEME_REP_PRZ.toString())).getId());
                 }
             
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

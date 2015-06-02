@@ -505,12 +505,19 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="mesures" upperBound="-1"
         eType="#//MesureMonteeEaux" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LigneEau" eSuperTypes="#//ObjetMesure">
+  <eClassifiers xsi:type="ecore:EClass" name="LigneEau" eSuperTypes="#//ObjetMesure #//PrZPointImporter">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="mesures" upperBound="-1"
-        eType="#//MesureLigneEau" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="mesuresXYZ" upperBound="-1"
+        eType="#//MesureLigneEauXYZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="mesuresDZ" upperBound="-1"
+        eType="#//MesureLigneEauPrZ" containment="true">
+      <eAnnotations source="importPoint"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDzId" eType="#//SystemeReperage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MesureMonteeEaux">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -523,14 +530,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="MesureLigneEau">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -1185,7 +1184,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//AbstractPositionDocument">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//AbstractPositionDocument #//PrZPointImporter">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1255,7 +1254,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PointLeve" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="PointZ" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="z" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1469,11 +1468,11 @@
         eType="#//LeveProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PointLeveDZ" abstract="true" eSuperTypes="#//PointLeve">
+  <eClassifiers xsi:type="ecore:EClass" name="PointDZ" abstract="true" eSuperTypes="#//PointZ">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="d" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PointLeveXYZ" abstract="true" eSuperTypes="#//PointLeve">
+  <eClassifiers xsi:type="ecore:EClass" name="PointXYZ" abstract="true" eSuperTypes="#//PointZ">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
@@ -1492,10 +1491,10 @@
       <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PrZProfilLong" eSuperTypes="#//PointLeveDZ"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DZLeveProfilTravers" eSuperTypes="#//PointLeveDZ"/>
-  <eClassifiers xsi:type="ecore:EClass" name="XYZLeveProfilTravers" eSuperTypes="#//PointLeveXYZ"/>
-  <eClassifiers xsi:type="ecore:EClass" name="XYZProfilLong" eSuperTypes="#//PointLeveXYZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PrZProfilLong" eSuperTypes="#//PointDZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DZLeveProfilTravers" eSuperTypes="#//PointDZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="XYZLeveProfilTravers" eSuperTypes="#//PointXYZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="XYZProfilLong" eSuperTypes="#//PointXYZ"/>
   <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -1510,5 +1509,16 @@
         eType="#//ProprieteObjet" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gardes" upperBound="-1"
         eType="#//GardeObjet" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MesureLigneEauXYZ" eSuperTypes="#//PointXYZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MesureLigneEauPrZ" eSuperTypes="#//PointDZ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PrZPointImporter" abstract="true" interface="true">
+    <eOperations name="getSystemeRepDzId" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    <eOperations name="setSystemeRepDzId">
+      <eParameters name="ref" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+    </eOperations>
+    <eOperations name="systemeRepDzIdProperty" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference">
+      <eAnnotations source="fxProperty"/>
+    </eOperations>
   </eClassifiers>
 </ecore:EPackage>

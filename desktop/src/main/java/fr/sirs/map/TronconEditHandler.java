@@ -12,11 +12,6 @@ import fr.sirs.Injector;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
@@ -26,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -103,7 +99,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
     
     //edition variables
     private FeatureMapLayer tronconLayer;
-    private final SimpleObjectProperty<TronconDigue> troncon = new SimpleObjectProperty<>();
+    private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
     private EditionHelper helper;
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     private final Session session;
@@ -113,7 +109,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
     public TronconEditHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
-        troncon.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
+        tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
             
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
@@ -123,13 +119,13 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                 final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {
                 } else {
-                    troncon.set(null);
+                    tronconProperty.set(null);
                 }
             }
 
             editGeometry.reset();
-            if (troncon.get() != null) {
-                editGeometry.geometry = (Geometry) troncon.get().getGeometry().clone();
+            if (tronconProperty.get() != null) {
+                editGeometry.geometry = (Geometry) tronconProperty.get().getGeometry().clone();
             }
             updateGeometry();
 
@@ -157,7 +153,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         
         //recuperation du layer de troncon
         tronconLayer = null;
-        troncon.set(null);
+        tronconProperty.set(null);
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
@@ -185,7 +181,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        if (troncon.get()==null || 
+        if (tronconProperty.get()==null || 
                 ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.", 
                         ButtonType.YES,ButtonType.NO).showAndWait().get())) {
             super.uninstall(component);
@@ -344,7 +340,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            if (troncon.get() == null) {
+            if (tronconProperty.get() == null) {
                 //actions en l'absence de troncon
 
                 if (mousebutton == MouseButton.PRIMARY) {
@@ -354,7 +350,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                         final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if (bean instanceof TronconDigue) {
                             //on recupere le troncon complet, celui ci n'est qu'une mise a plat
-                            troncon.set(session.getTronconDigueRepository().get(((TronconDigue) bean).getDocumentId()));
+                            tronconProperty.set(session.getTronconDigueRepository().get(((TronconDigue) bean).getDocumentId()));
                         }
                     }
 
@@ -384,7 +380,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             TronconUtils.updateSRElementaire(tmpTroncon, session);
                             
                             // Prepare l'edition du tronçon
-                            troncon.set(tmpTroncon);
+                            tronconProperty.set(tmpTroncon);
 
                         } catch (TransformException | FactoryException ex) {
                             // TODO : better error management
@@ -436,46 +432,46 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     if (editGeometry.geometry != null) {
                         // Si le tronçon est vide, on peut inverser son tracé
                         // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
-                        if (TronconUtils.getObjetList(troncon.get()).isEmpty()) {
+                        if (TronconUtils.getObjetList(tronconProperty.get()).isEmpty()) {
                             if (!popup.getItems().isEmpty()) {
                                 popup.getItems().add(new SeparatorMenuItem());
                             }
                             final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
-                                troncon.get().setGeometry(editGeometry.geometry.reverse());
-                                session.getTronconDigueRepository().update(troncon.get());
-                                TronconUtils.updateSRElementaire(troncon.get(), session);
-                                troncon.set(null);
+                                tronconProperty.get().setGeometry(editGeometry.geometry.reverse());
+                                session.getTronconDigueRepository().update(tronconProperty.get());
+                                TronconUtils.updateSRElementaire(tronconProperty.get(), session);
+                                tronconProperty.set(null);
                             });
                             popup.getItems().add(invert);
                         }
 
                     // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
                         // diffère de celle de l'éditeur.
-                        if (!editGeometry.geometry.equals(troncon.get().getGeometry())) {
+                        if (!editGeometry.geometry.equals(tronconProperty.get().getGeometry())) {
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
-                                troncon.get().setGeometry(editGeometry.geometry);
-                                session.getTronconDigueRepository().update(troncon.get());
+                                tronconProperty.get().setGeometry(editGeometry.geometry);
+                                session.getTronconDigueRepository().update(tronconProperty.get());
 
-                                TronconUtils.updateSRElementaire(troncon.get(), session);
+                                TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 //on recalcule les geometries des positionables du troncon.
-                                TronconUtils.updatePositionableGeometry(troncon.get(), session);
+                                TronconUtils.updatePositionableGeometry(tronconProperty.get(), session);
 
-                                troncon.set(null);
+                                tronconProperty.set(null);
                             });
                             popup.getItems().add(saveItem);
 
                         }
 
                         //action : annuler edition
-                        final String cancelTitle = (!editGeometry.geometry.equals(troncon.get().getGeometry()))?
+                        final String cancelTitle = (!editGeometry.geometry.equals(tronconProperty.get().getGeometry()))?
                                 "Annuler les modifications" : "Désélectionner le tronçon";
                                 
                         final MenuItem cancelItem = new MenuItem(cancelTitle);
                         cancelItem.setOnAction((ActionEvent event) -> {
-                            troncon.set(null);
+                            tronconProperty.set(null);
                         });
                         popup.getItems().add(cancelItem);
                     }
@@ -486,8 +482,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     }
                     final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        session.getTronconDigueRepository().remove(troncon.get());
-                        troncon.set(null);
+                        session.getTronconDigueRepository().remove(tronconProperty.get());
+                        tronconProperty.set(null);
                     });
                     popup.getItems().add(deleteItem);
 
@@ -499,7 +495,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         @Override
         public void mousePressed(final MouseEvent e) {
             super.mousePressed(e);
-            if(troncon==null) return;
+            if(tronconProperty==null) return;
             
             startX = getMouseX(e);
             startY = getMouseY(e);

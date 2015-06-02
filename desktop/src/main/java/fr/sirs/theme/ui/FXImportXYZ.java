@@ -6,9 +6,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.LeveProfilTravers;
-import fr.sirs.core.model.PointLeveXYZ;
+import fr.sirs.core.model.PointXYZ;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.XYZLeveProfilTravers;
@@ -55,7 +54,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
+public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
     
     @FXML private ComboBox<PropertyType> uiAttX;
     @FXML private ComboBox<PropertyType> uiAttY;
@@ -143,12 +142,12 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointLeveXYZ> {
     }
     
     @Override
-    protected ObservableList<PointLeveXYZ> getSelectionPoint(){
+    protected ObservableList<PointXYZ> getSelectionPoint(){
         final ObservableList<Feature> features = selectionProperty;
-        final ObservableList<PointLeveXYZ> leves = FXCollections.observableArrayList();
+        final ObservableList<PointXYZ> leves = FXCollections.observableArrayList();
         
         for(final Feature feature : features){
-            final PointLeveXYZ leve;
+            final PointXYZ leve;
             final fr.sirs.Session sirsSession = Injector.getSession();
             
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){

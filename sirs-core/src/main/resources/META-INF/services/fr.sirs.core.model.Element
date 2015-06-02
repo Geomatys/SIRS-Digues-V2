@@ -24,7 +24,8 @@ fr.sirs.core.model.LeveProfilTravers
 fr.sirs.core.model.LigneEau
 fr.sirs.core.model.MaitreOeuvreMarche
 fr.sirs.core.model.Marche
-fr.sirs.core.model.MesureLigneEau
+fr.sirs.core.model.MesureLigneEauPrZ
+fr.sirs.core.model.MesureLigneEauXYZ
 fr.sirs.core.model.MesureMonteeEaux
 fr.sirs.core.model.Meteo
 fr.sirs.core.model.MonteeEaux
