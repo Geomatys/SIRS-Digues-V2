@@ -162,9 +162,9 @@ public class FXDataImportPane extends BorderPane {
         final Task submit = TaskManager.INSTANCE.submit("Connexion à une source de données", () -> {
             final DataStore store;
             if (selectedItem instanceof CoverageStoreFactory) {
-                store = ((CoverageStoreFactory) selectedItem).create(parameters);
+                store = ((CoverageStoreFactory) selectedItem).open(parameters);
             } else if (selectedItem instanceof FeatureStoreFactory) {
-                store = ((FeatureStoreFactory) selectedItem).create(parameters);
+                store = ((FeatureStoreFactory) selectedItem).open(parameters);
             } else {
                 throw new UnsupportedOperationException("Type de donnée inconnu");
             }
