@@ -181,6 +181,8 @@ public class FXLauncherPane extends BorderPane {
     private PluginList distant = new PluginList();
 
     private final DatabaseRegistry localRegistry;
+    
+    private final DatabaseNameFormatter dbNameFormat = new DatabaseNameFormatter();
 
     public FXLauncherPane() throws IOException {
         SIRS.loadFXML(this);
@@ -256,17 +258,9 @@ public class FXLauncherPane extends BorderPane {
             }
         });
 
-        final ChangeListener<Object> accentReplacer = new ChangeListener<Object>() {
-            @Override
-            public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-                final String nfdText = Normalizer.normalize((String) newValue, Normalizer.Form.NFD);
-                ((WritableValue) observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
-            }
-        };
-
-        uiDistantName.textProperty().addListener(accentReplacer);
-        uiImportName.textProperty().addListener(accentReplacer);
-        uiNewName.textProperty().addListener(accentReplacer);
+        uiDistantName.textProperty().addListener(dbNameFormat);
+        uiImportName.textProperty().addListener(dbNameFormat);
+        uiNewName.textProperty().addListener(dbNameFormat);
 
         try {
             final CoordinateReferenceSystem baseCrs = CRS.decode("EPSG:2154");
@@ -759,6 +753,7 @@ public class FXLauncherPane extends BorderPane {
                     new Function<String, String>() {
                         public String apply(String sourceDb) {
                             final TextInputDialog nameChoice = new TextInputDialog();
+                            nameChoice.getEditor().textProperty().addListener(dbNameFormat);
                             nameChoice.setHeaderText("Veuillez donner un nom pour la base de destination.");
                             Optional<String> result = nameChoice.showAndWait();
 
@@ -882,5 +877,14 @@ public class FXLauncherPane extends BorderPane {
                 }
             }
         }
+    }
+    
+    private static class DatabaseNameFormatter implements ChangeListener<String> {
+        @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (newValue == null) return;
+                final String nfdText = Normalizer.normalize(newValue, Normalizer.Form.NFD);
+                ((WritableValue) observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
+            }
     }
 }
