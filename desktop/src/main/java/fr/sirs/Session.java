@@ -249,6 +249,7 @@ public class Session extends SessionCore {
                     final FXFreeTab tab = new FXFreeTab(theme.getName());
                     Parent parent = theme.createPane();
                     tab.setContent(parent);
+                    tab.setOnClosed(event -> openThemes.remove(theme));
                     return tab;
                 }
             });
@@ -313,6 +314,9 @@ public class Session extends SessionCore {
                                 prepareToPrint(element);
                             }
                         });
+                        
+                        // Remove from cache when tab is closed.
+                        tab.setOnClosed(event -> openEditors.remove(element));
                         return tab;
                     }
                 });
