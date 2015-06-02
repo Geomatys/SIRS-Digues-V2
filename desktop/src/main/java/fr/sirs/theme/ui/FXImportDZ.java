@@ -5,6 +5,8 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.DZLeveProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
+import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MesureLigneEauPrZ;
 import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.core.model.ProfilLong;
@@ -138,6 +140,8 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                 leve = Injector.getSession().getElementCreator().createElement(DZLeveProfilTravers.class);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
                 leve = Injector.getSession().getElementCreator().createElement(PrZProfilLong.class);
+            } else if(pojoTable.getParentElement() instanceof LigneEau){
+                leve = Injector.getSession().getElementCreator().createElement(MesureLigneEauPrZ.class);
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }
