@@ -72,7 +72,7 @@ public class FXEditMode extends VBox {
         uiConsult.setToggleGroup(group);
         uiEdit.setToggleGroup(group);
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-                if(newValue==null) group.selectToggle(uiConsult);
+                if(newValue==null) group.selectToggle(oldValue);
             });
         
         authorIDProperty = new SimpleStringProperty();
