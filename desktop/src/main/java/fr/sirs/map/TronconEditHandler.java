@@ -165,7 +165,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
                 try {
-                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(true));
+                    //TODO : activate back graduation after Geotk milestone MC0044
+                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
                     updateGeometry();
                 } catch (URISyntaxException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
