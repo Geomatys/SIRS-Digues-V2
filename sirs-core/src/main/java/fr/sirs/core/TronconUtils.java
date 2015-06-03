@@ -40,6 +40,7 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
+import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
@@ -347,8 +348,10 @@ public class TronconUtils {
             if(p!=null && !p.isEmpty()) photos.addAll(p);
         }
         for(final Objet objet : objets){
-            final List<Photo> p = objet.getPhotos();
-            if(p!=null && !p.isEmpty()) photos.addAll(p);
+            if (objet instanceof ObjetPhotographiable){
+                final List<Photo> p = ((ObjetPhotographiable) objet).getPhotos();
+                if(p!=null && !p.isEmpty()) photos.addAll(p);
+            }
         }
         return photos;
     }

@@ -8,7 +8,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
@@ -25,7 +25,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
+public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhotographiable> {
 
     private final TypeElementGeometryImporter typeElementGeometryImporter;
     
@@ -109,7 +109,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
         while (it.hasNext()) {
             final Row row = it.next();
 
-            final Objet objet = importRow(row);
+            final ObjetPhotographiable objet = importRow(row);
             
             if(objet!=null){
                 
@@ -121,7 +121,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
                 objets.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), objet);
 
                 // Set the list ByTronconId
-                List<Objet> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                List<ObjetPhotographiable> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                 if (listByTronconId == null) {
                     listByTronconId = new ArrayList<>();
                     objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -134,7 +134,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<Objet> {
     
     
     @Override
-    public Objet importRow(Row row) throws IOException, AccessDbImporterException {
+    public ObjetPhotographiable importRow(Row row) throws IOException, AccessDbImporterException {
         final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString()));
         if(typeStructure==LargeurFrancBord.class){
             return largeurFrancBordImporter.importRow(row);

@@ -333,7 +333,7 @@ public class ReferenceChecker extends Task<Void> {
 
         private List<ReferenceType> readReferenceFile(final File file) throws FileNotFoundException, IOException {
             
-            final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new FileReader(file));
+            final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             final List<ReferenceType> fileRefs = new ArrayList<>();
             
             for (final CSVRecord record : records) {
@@ -529,7 +529,7 @@ public class ReferenceChecker extends Task<Void> {
 
         while (true) {
             final String line = bufferedReader.readLine();
-
+            
             if (line == null) {
                 break;
             }

@@ -12,6 +12,7 @@ import static fr.sirs.core.TronconUtils.getPositionDocumentList;
 import static fr.sirs.core.TronconUtils.getProprieteList;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -25,6 +26,7 @@ import javafx.scene.control.ButtonType;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
@@ -201,8 +203,12 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             
             for (final Objet current : objets) {
                 recomputePositionable(current, linear);
-                for(final Photo photo : current.getPhotos()){
-                    recomputePositionable(photo, linear);
+                if(current instanceof ObjetPhotographiable){
+                    for(final Photo photo : ((ObjetPhotographiable)current).getPhotos()){
+                        recomputePositionable(photo, linear);
+                    }
+                } else if(current instanceof Desordre) {
+                    // Cas des désordres qui ne sont pas des objets photographiables mais qui contiennent des observations qui elles-mêmes contiennent des photos.
                 }
                 listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);

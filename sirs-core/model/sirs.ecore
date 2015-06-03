@@ -32,8 +32,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue">
       <eAnnotations source="foreignParent"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
-        eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
     <eAnnotations source="generation">
@@ -258,7 +256,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LargeurFrancBord" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="LargeurFrancBord" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeLargeurFrancBord" eType="#//RefLargeurFrancBord"/>
@@ -381,7 +379,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageParticulierId"
         eType="#//RefOuvrageParticulier"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Prestation" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="Prestation" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutMetre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -403,7 +401,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="documentGrandeEchelleIds"
         upperBound="-1" eType="#//DocumentGrandeEchelle"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -1102,7 +1100,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeSecurite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeAlimentation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PistePiedDigue" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="PistePiedDigue" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
@@ -1232,7 +1230,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilFrontFrancBord" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="ProfilFrontFrancBord" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBordId"
@@ -1445,7 +1443,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactId" eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObjetMesure" abstract="true" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetMesure" abstract="true" eSuperTypes="#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
         eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
@@ -1502,7 +1500,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObjetStructure" abstract="true" eSuperTypes="#//ObjetGerable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObjetGerable" abstract="true" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetGerable" abstract="true" eSuperTypes="#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestions" upperBound="-1"
         eType="#//GestionObjet" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietes" upperBound="-1"
@@ -1520,5 +1518,10 @@
     <eOperations name="systemeRepDzIdProperty" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference">
       <eAnnotations source="fxProperty"/>
     </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetPhotographiable" abstract="true"
+      eSuperTypes="#//Objet">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
+        eType="#//Photo" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
