@@ -20,6 +20,7 @@ import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
@@ -273,18 +274,16 @@ public class FXMapPane extends BorderPane {
         final Task t = new Task() {
             @Override
             protected Object call() throws Exception {
+                LocalDateTime ldt = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
                 if (map == null) {
                     uiMap1.getCanvas().setTemporalRange(time, time);
-                    uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
-                    
-                    uiMap2.getCanvas().setTemporalRange(time, time);
-                    uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                    uiCoordBar1.getDateField().valueProperty().setValue(ldt);
                 } else {
                     map.getCanvas().setTemporalRange(time, time);
                     if (uiMap1.equals(map)) {
-                        uiCoordBar1.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                        uiCoordBar1.getDateField().valueProperty().setValue(ldt);
                     } else if (uiMap2.equals(map)) {
-                        uiCoordBar2.getSliderview().moveTo(time.getTime() - TemporalConstants.DAY_MS * 8);
+                        uiCoordBar2.getDateField().valueProperty().setValue(ldt);
                     }
                 }
                 return null;
