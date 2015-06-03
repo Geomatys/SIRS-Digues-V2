@@ -911,12 +911,16 @@ public class PojoTable extends BorderPane {
 
         @Override
         protected double computeValue() {
-            final double result = (double) TronconUtils.computePR(
-                    posInfo.getTronconSegments(false), 
-                    Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()), 
-                    new GeometryFactory().createPoint(new Coordinate(point.getX(),point.getY())), 
-                    Injector.getSession().getBorneDigueRepository());
-            return result;
+            if(posInfo.getTroncon()==null) throw new IllegalStateException("L'élément positionable doit être associé à un linéaire.");
+            else if(posInfo.getTroncon().getSystemeRepDefautId()==null) throw new IllegalStateException("Le linéaire associé doit avoir un système de repérage par défaut.");
+            else{
+                final double result = (double) TronconUtils.computePR(
+                        posInfo.getTronconSegments(false), 
+                        Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()), 
+                        new GeometryFactory().createPoint(new Coordinate(point.getX(),point.getY())), 
+                        Injector.getSession().getBorneDigueRepository());
+                return result;
+            }
         }
     }
     

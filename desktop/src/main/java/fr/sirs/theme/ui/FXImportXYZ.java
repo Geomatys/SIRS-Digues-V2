@@ -7,6 +7,8 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.LeveProfilTravers;
+import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MesureLigneEauXYZ;
 import fr.sirs.core.model.PointXYZ;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.XYZLeveProfilTravers;
@@ -153,6 +155,8 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
                 leve = sirsSession.getElementCreator().createElement(XYZLeveProfilTravers.class);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
                 leve = sirsSession.getElementCreator().createElement(XYZProfilLong.class);
+            } else if(pojoTable.getParentElement() instanceof LigneEau){
+                leve = sirsSession.getElementCreator().createElement(MesureLigneEauXYZ.class);
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }

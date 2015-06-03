@@ -119,6 +119,10 @@ public final class SIRS extends SirsCore {
     public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
     
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
+    
+    // Méthodes utilisées pour les références
+    public static final String REFERENCE_GET_ID = "getId";
+    public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {

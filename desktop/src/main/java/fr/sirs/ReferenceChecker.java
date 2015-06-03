@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import static fr.sirs.SIRS.REFERENCE_GET_ID;
 
 /**
  *
@@ -171,7 +172,7 @@ public class ReferenceChecker extends Task<Void> {
                  On vérifie que toutes les instances du serveur sont présentes localement.
                  Sinon, on récupère les instances du serveur non présentes localement.
                  */
-                final Method getId = referenceClass.getMethod("getId");
+                final Method getId = referenceClass.getMethod(REFERENCE_GET_ID);
 
                 /*
                  Pour toutes les instances de références locales :
@@ -298,9 +299,13 @@ public class ReferenceChecker extends Task<Void> {
                     final Method setter = referenceClass.getMethod("set" + header.substring(0, 1).toUpperCase() + header.substring(1), type);
 
                     if (String.class.equals(type)) {
+                        
+                        // POUR LES REFERENCES, L'identifiant sert
                         if ("id".equals(header)) {
+                            // On construit un identifiant couchDB en concaténant le nom de la référence à l'identifiant avec le séparateur ":"
                             setter.invoke(referenceInstance, referenceClass.getSimpleName() + ":" + record.get(header));
-                            referenceClass.getMethod("setDesignation", String.class).invoke(referenceInstance, record.get(header));
+                            // Pour les références, l'identifiant des fichiers sert à construire la désignation
+                            referenceClass.getMethod(SIRS.REFERENCE_SET_DESIGNATION, String.class).invoke(referenceInstance, record.get(header));
                         } else {
                             setter.invoke(referenceInstance, record.get(header));
                         }
