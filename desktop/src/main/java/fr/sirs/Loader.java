@@ -1,13 +1,10 @@
 package fr.sirs;
 
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.USER;
 
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -26,7 +23,6 @@ import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
 
-import org.ektorp.CouchDbConnector;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.lang.Setup;
@@ -35,17 +31,16 @@ import org.geotoolkit.sld.xml.StyleXmlIO;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DatabaseRegistry;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.GUEST;
+import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.json.GeometryDeserializer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -132,69 +127,71 @@ public class Loader extends Application {
 
                     controller.uiLogInfo.setText("Recherche…");
                     final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
-
+                        
                     if (candidateUsers.isEmpty()) {
                         controller.uiLogInfo.setText("Identifiants erronés.");
                         controller.uiPassword.setText("");
-                    } else {
-
-                        Utilisateur user = null;
-                        MessageDigest messageDigest = null;
-                        String encryptedPassword = null;
-                        try {
-                            messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
-                            encryptedPassword = new String(messageDigest.digest(controller.uiPassword.getText().getBytes()));
-                        } catch (NoSuchAlgorithmException ex) {
-                            Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                        return;
+                    }
+                    
+                    // Database passwords are encrypted, so we encrypt input password to compare both.
+                        final String passwordText = controller.uiPassword.getText();
+                        final String encryptedPassword;
+                        if (passwordText == null || passwordText.isEmpty()) {
+                            encryptedPassword = null;                            
+                        } else {
+                            try {
+                                final MessageDigest messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
+                                encryptedPassword = new String(messageDigest.digest(passwordText.getBytes()));
+                            } catch (NoSuchAlgorithmException ex) {
+                                SirsCore.LOGGER.log(Level.SEVERE, "Un problème est survenu lors de la récupération du mot de passe. Impossible de procéder à la connexion.", ex);
+                                GeotkFX.newExceptionDialog("Un problème est survenu lors de la récupération du mot de passe. Impossible de procéder à la connexion.", ex);
+                                return;
+                            }
                         }
 
+                        Utilisateur user = null;
                         for (final Utilisateur candidate : candidateUsers) {
-                            if (candidate.getPassword().equals(encryptedPassword)) {
+                            if (Objects.equals(encryptedPassword, candidate.getPassword())) {
                                 user = candidate;
                                 break;
                             }
                         }
 
-                        if (user == null) {
-                            controller.uiLogInfo.setText("Identifiants erronés.");
-                            controller.uiPassword.setText("");
-                        } else {
-                            session.setUtilisateur(user);
-                            if (session.getRole() == ADMIN
-                                    || session.getRole() == USER
-                                    || session.getRole() == GUEST
-                                    || session.getRole() == EXTERN) {
-                                controller.uiLogInfo.setText("Identifiants valides.");
-                                final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                                fadeSplash.setFromValue(1.0);
-                                fadeSplash.setToValue(0.0);
-                                fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                                    @Override
-                                    public void handle(ActionEvent actionEvent) {
-                                        splashStage.hide();
-                                        root.setOpacity(1.0);
-                                        try {
-                                            showMainStage();
-                                        } catch (Throwable ex) {
-                                            try {
-                                                SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
-                                                ExceptionDialog exDialog = GeotkFX.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
-                                                exDialog.setOnHidden((DialogEvent de)-> System.exit(1));
-                                                exDialog.show();
-                                                
-                                            } catch (Throwable e) {
-                                                SIRS.LOGGER.log(Level.WARNING, "Cannot show error dialofg to user", e);
-                                                System.exit(1);
-                                            }
-                                        }
-                                    }
-                                });
-                                fadeSplash.play();
+                    if (user == null) {
+                        controller.uiLogInfo.setText("Identifiants erronés.");
+                        controller.uiPassword.setText("");
 
-                                session.getTaskManager().submit(session.getReferenceChecker());
-                                    
+                    } else {
+                        session.setUtilisateur(user);
+                        controller.uiLogInfo.setText("Identifiants valides.");
+                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                        fadeSplash.setFromValue(1.0);
+                        fadeSplash.setToValue(0.0);
+                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent actionEvent) {
+                                splashStage.hide();
+                                root.setOpacity(1.0);
+                                try {
+                                    createMainStage();
+                                } catch (Throwable ex) {
+                                    try {
+                                        SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
+                                        ExceptionDialog exDialog = GeotkFX.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
+                                        exDialog.setOnHidden((DialogEvent de) -> System.exit(1));
+                                        exDialog.show();
+
+                                    } catch (Throwable e) {
+                                        SIRS.LOGGER.log(Level.WARNING, "Cannot show error dialog to user", e);
+                                        System.exit(1);
+                                    }
+                                }
                             }
-                        }
+                        });
+                        fadeSplash.play();
+
+                        session.getTaskManager().submit(session.getReferenceChecker());
                     }
                 } finally {
                     controller.uiConnexion.setDisable(false);
@@ -207,38 +204,39 @@ public class Loader extends Application {
     /**
      * Display the main frame.
      */
-    private static synchronized void showMainStage() throws IOException {
+    private static synchronized void createMainStage() throws IOException {
         final Session session = Injector.getSession();
-        FXMainFrame frame = session.getFrame();
-        if (frame == null) {
-            frame = new FXMainFrame();
-            session.setFrame(frame);
-        }
+        final FXMainFrame frame = new FXMainFrame();
+        session.setFrame(frame);
+        Scene mainScene = new Scene(frame);
         
-        Scene mainScene = frame.getScene();
-        if (mainScene == null) {
-            mainScene = new Scene(frame);
-        }
-        
-        final Stage mainStage;
-        if (mainScene.getWindow() instanceof Stage) {
-            mainStage = (Stage) mainScene.getWindow();
-        } else {
-            mainStage = new Stage();
-            String userInfo = "";
-            String login = session.getUtilisateur().getLogin();
-            String role = new SirsStringConverter().toString(session.getRole());
-            if(!"".equals(login) || !"".equals(role)){
-                userInfo += " - Connecté en tant que "+session.getUtilisateur().getLogin()+ " ("+role+")";
+        final Stage mainStage = new Stage();
+        mainStage.titleProperty().bind(Bindings.createStringBinding(() -> {
+            StringBuilder builder = new StringBuilder("SIRS-Digues V2 - Utilisateur ");
+            Utilisateur user = session.utilisateurProperty().get();
+            if (user == null || user.equals(UtilisateurRepository.GUEST_USER)) {
+                builder.append("invité");
+            } else {
+                builder.append(user.getLogin());
             }
-            mainStage.setTitle("SIRS-Digues V2"+userInfo);
-            mainStage.setScene(mainScene);
-            mainStage.setMaximized(true);
-            mainStage.setMinWidth(800);
-            mainStage.setMinHeight(600);
-            mainStage.setOnCloseRequest((WindowEvent event) -> {System.exit(0);});
-        }
-            
+            builder.append(" (rôle ");
+            if (user == null || user.getRole() == null) {
+                builder.append(new SirsStringConverter().toString(Role.GUEST));
+            } else {
+                builder.append(new SirsStringConverter().toString(user.getRole()));
+            }
+            builder.append(")");
+            return builder.toString();
+        }, session.utilisateurProperty()));
+
+        mainStage.setScene(mainScene);
+        mainStage.setMaximized(true);
+        mainStage.setMinWidth(800);
+        mainStage.setMinHeight(600);
+        mainStage.setOnCloseRequest((WindowEvent event) -> {
+            System.exit(0);
+        });
+
         mainStage.show();
         frame.getMapTab().show();
     }

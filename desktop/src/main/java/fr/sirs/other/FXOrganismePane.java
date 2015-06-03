@@ -3,10 +3,6 @@ package fr.sirs.other;
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.AvecDateMaj;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
@@ -14,7 +10,6 @@ import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -59,7 +54,6 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
 
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.requireEditionForElement(organisme);
         disableFieldsProperty().bind(uiMode.editionState().not());
         for (final Node child : uiDescriptionGrid.getChildren()) {

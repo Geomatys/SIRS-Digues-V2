@@ -2,6 +2,7 @@ package fr.sirs;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
 
@@ -286,7 +287,7 @@ public class Session extends SessionCore {
                                             new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
                                         } 
                                         // On interdit également la suppression de l'invité par défaut !
-                                        else if (SIRS.LOGIN_DEFAULT_GUEST.equals(utilisateur.getLogin())){
+                                        else if (UtilisateurRepository.GUEST_USER.equals(utilisateur)){
                                             new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
                                         }
                                         else{

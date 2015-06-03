@@ -31,7 +31,6 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
-import static fr.sirs.core.model.Role.EXTERN;
 import fr.sirs.core.model.Preview;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
@@ -694,8 +693,8 @@ public class PojoTable extends BorderPane {
      * @return True if we can delete the element in parameter, false otherwise.
      */
     protected boolean authoriseElementDeletion(final Element pojo) {
-        if (session.getRole() == EXTERN) {
-            if (!session.getUtilisateur().getId().equals(pojo.getAuthor())
+        if (Boolean.TRUE.equals(session.needValidationProperty().get())) {
+            if (session.getUtilisateur() == null || session.getUtilisateur().getId() == null || !session.getUtilisateur().getId().equals(pojo.getAuthor())
                     || pojo.getValid()) {
                 new Alert(Alert.AlertType.INFORMATION, "En tant qu'utilisateur externe, vous ne pouvez supprimer que des éléments invalidés dont vous êtes l'auteur.", ButtonType.OK).showAndWait();
                 return false;
@@ -750,7 +749,7 @@ public class PojoTable extends BorderPane {
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
      */
-    protected void editPojo(Element pojo){
+    protected void editPojo(Object pojo){
         editElement(pojo);
     }
     
@@ -818,7 +817,7 @@ public class PojoTable extends BorderPane {
         return (Element) result;
     }
         
-    public static void editElement(Element pojo) {
+    public static void editElement(Object pojo) {
         try {
             Injector.getSession().showEditionTab(pojo);
         } catch (Exception ex) {
@@ -1104,37 +1103,38 @@ public class PojoTable extends BorderPane {
         }  
     }
     
-    public static class EditColumn extends TableColumn<Element, Element>{
+    public static class EditColumn extends TableColumn {
 
-        public EditColumn(Consumer<Element> editFct) {
-            super("Edition");        
+        public EditColumn(Consumer editFct) {
+            super("Edition");
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
-            
-            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
-            setCellFactory(new Callback<TableColumn<Element, Element>, TableCell<Element, Element>>() {
 
-                public TableCell<Element, Element> call(TableColumn<Element, Element> param) {
-                    return new ButtonTableCell(
-                            false,new ImageView(SIRS.ICON_EDIT_BLACK), 
-                            (Object t) -> true, new Function<Element, Object>() {
-                                @Override
-                                public Object apply(Element t) {
-                                    editFct.accept(t);
-                                    return t;
-                                }
-                            }); }
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
+
+                @Override
+                public ObservableValue call(TableColumn.CellDataFeatures param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
             });
-        }  
+
+            setCellFactory(new Callback<TableColumn, TableCell>() {
+
+                public TableCell call(TableColumn param) {
+                    return new ButtonTableCell(
+                            false, new ImageView(SIRS.ICON_EDIT_BLACK),
+                            (Object t) -> true, (Object t) -> {
+                                editFct.accept(t);
+                                return t;
+                            });
+                }
+            });
+        }
     }
-    
-    
-    
-    
     
     
     /* Rechercher les objets dans un tronçon donné (sert uniquement si on ne 

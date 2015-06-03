@@ -5,16 +5,12 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.OrganismeRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.Role;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDateTime;
@@ -76,7 +72,6 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         this.contactRepository = session.getContactRepository();
         this.orgRepository = session.getOrganismeRepository();
         
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.requireEditionForElement(contact);
         disableFieldsProperty().bind(uiMode.editionState().not());
         uiNom.disableProperty().bind(disableFieldsProperty());
@@ -194,7 +189,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         }
 
         @Override
-        protected void editPojo(Element pojo) {
+        protected void editPojo(Object pojo) {
             if (!(pojo instanceof ContactOrganisme)) {
                 return;
             }
@@ -231,8 +226,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         @Override
         protected ContactOrganisme createPojo() {
             final ContactOrganisme co = Injector.getSession().getElementCreator().createElement(ContactOrganisme.class);
-            co.setValid(session.getRole()!=Role.EXTERN);
-            co.setAuthor(session.getUtilisateur().getId());
+            co.setValid(!session.needValidationProperty().get());
+            co.setAuthor(session.getUtilisateur() == null? null : session.getUtilisateur().getId());
             co.setContactId(elementProperty.get().getId());
             co.setDateDebutIntervenant(LocalDateTime.now());
             orgsOfContact.add(co);

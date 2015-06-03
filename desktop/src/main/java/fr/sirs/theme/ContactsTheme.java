@@ -1,7 +1,6 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.Role;
 import fr.sirs.Session;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
@@ -26,13 +25,10 @@ public class ContactsTheme extends Theme {
         final TabPane tabPane = new TabPane();
         
         final Session session = Injector.getSession();
-        final boolean editable = ((session.getRole()==Role.ADMIN) 
-                || (session.getRole()==Role.USER) 
-                || (session.getRole()==Role.EXTERN));
         final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Personnes physiques");
-        tableContact.editableProperty().set(editable);
+        tableContact.editableProperty().bind(session.nonGeometryEditionProperty());
         final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Organismes");
-        tableOrganisme.editableProperty().set(editable);
+        tableOrganisme.editableProperty().bind(session.nonGeometryEditionProperty());
         
         final Tab tabIntervenant = new Tab("Personnes physiques");
         tabIntervenant.setContent(tableContact);

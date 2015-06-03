@@ -119,10 +119,6 @@ public final class SIRS extends SirsCore {
     public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
     
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
-    
-    // Logins des utilisateurs par défaut
-    public static final String LOGIN_DEFAULT_GUEST = "";
-    public static final String PASSWORD_DEFAULT_GUEST = "";
 
     private static Stage LAUNCHER;
     public static void setLauncher(Stage currentWindow) {

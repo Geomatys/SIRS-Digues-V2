@@ -2,9 +2,9 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.LOGIN_DEFAULT_GUEST;
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.*;
 import fr.sirs.util.SirsStringConverter;
 import java.security.MessageDigest;
@@ -139,7 +139,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         // Vérification de l'identifiant : 
         
         // Interdiction du compte de l'invité par défaut
-        if(LOGIN_DEFAULT_GUEST.equals(currentEditedUserLogin)){
+        if(UtilisateurRepository.GUEST_USER.getId().equals(currentEditedUserLogin)){
             new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez pas modifier le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
             throw new Exception("Le compte de l'invité par défaut n'est pas modifiable. Modification non enregistrée.");
         }

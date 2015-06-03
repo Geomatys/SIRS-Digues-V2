@@ -5,12 +5,14 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import static fr.sirs.core.component.UtilisateurRepository.BY_LOGIN;
 import fr.sirs.core.model.ElementCreator;
+import fr.sirs.core.model.Role;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 import fr.sirs.core.model.Utilisateur;
+import java.util.Collections;
 import java.util.List;
 import org.ektorp.support.Views;
 
@@ -22,6 +24,11 @@ import org.ektorp.support.Views;
 public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
 
     public static final String BY_LOGIN = "byLogin";
+    
+    public static final Utilisateur GUEST_USER = ElementCreator.createAnonymValidElement(Utilisateur.class);
+    static {
+        GUEST_USER.setRole(Role.GUEST);
+    }
     
     @Autowired
     public UtilisateurRepository ( CouchDbConnector db) {
@@ -46,6 +53,8 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
     }
 
     public List<Utilisateur> getByLogin(final String login) {
+        if (login == null || login.isEmpty()) 
+            return Collections.singletonList(GUEST_USER);
         return this.queryView(BY_LOGIN, login);
     }
    

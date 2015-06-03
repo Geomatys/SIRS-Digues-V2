@@ -7,6 +7,7 @@ import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
+import fr.sirs.core.model.Utilisateur;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -64,7 +65,8 @@ public class FXEditMode extends VBox {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
         getStylesheets().add(CSS_PATH);
-                
+        
+        uiEdit.disableProperty().bind(session.nonGeometryEditionProperty().not());
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
         
@@ -98,40 +100,6 @@ public class FXEditMode extends VBox {
     
     public StringProperty authorIDProperty(){return authorIDProperty;}
     public BooleanProperty validProperty(){return validProperty;}
-    
-    public void setAllowedRoles(final Role... allowed) {
-        uiEdit.disableProperty().bind(new BooleanBinding() {
-
-            {
-                bind(validProperty, authorIDProperty, session.utilisateurProperty());
-            }
-
-            @Override
-            protected boolean computeValue() {
-                boolean editionGranted = false;
-                for (final Role role : allowed) {
-                    // Si le role du visiteur fait partie des roles autorisés à éditer
-                    if (session.getRole() == role) {
-
-                        // Dans le cas des externes, il y a une vérification supplémentaire à effectuer
-                        if (session.getRole() == Role.EXTERN) {
-                            // Si l'utilisateur est bien l'auteur et que le document n'est pas validé
-                            if (session.getUtilisateur().getId().equals(authorIDProperty().get())
-                                    && !validProperty().get()) {
-                                editionGranted = true;
-                            } else {
-                                editionGranted = false;
-                            }
-                        } // Dans les autres cas, on accorde l'édition.
-                        else {
-                            editionGranted = true;
-                        }
-                    }
-                }
-                return editionGranted;
-            }
-        }.not());
-    }
     
     private void requireEdition(){
         if(!uiEdit.isDisabled()){

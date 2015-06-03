@@ -2,9 +2,6 @@ package fr.sirs.core.model;
 
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.GUEST;
-import static fr.sirs.core.model.Role.USER;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -30,18 +27,11 @@ public class ElementCreator {
             constructor.setAccessible(true);
             final T element = constructor.newInstance();
             
-            if(ownableSession!=null){
-                if(ownableSession.getUtilisateur()!=null){
-                    final Utilisateur utilisateur = ownableSession.getUtilisateur();
-                    if(utilisateur.getRole()!=null){
-                        final Role role = utilisateur.getRole();
-                        element.setValid(role==ADMIN||role==USER||role==GUEST);
-                    }else{ // Si on a un utilisateur qui n'a pas de role
-                        element.setValid(false);
-                    }
-                    if(utilisateur.getId()!=null){
-                        element.setAuthor(utilisateur.getId());
-                    }
+            if(ownableSession!=null) {
+                element.setValid(!ownableSession.needValidationProperty().get());
+                final Utilisateur utilisateur = ownableSession.getUtilisateur();
+                if(ownableSession.getUtilisateur()!=null) {
+                    element.setAuthor(utilisateur.getId());
                 }
             }
             

@@ -14,6 +14,7 @@ import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.PrinterUtilities;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -96,35 +98,40 @@ public class FXMainFrame extends BorderPane {
             }
         }
         
-        if(session.getRole()==Role.ADMIN){
-            final Menu uiAdmin = new Menu(bundle.getString(BUNDLE_KEY_ADMINISTATION));
-            uiMenu.getMenus().add(1, uiAdmin);  
-            
-            final MenuItem uiUserAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_USERS));
-            uiUserAdmin.setOnAction((ActionEvent event) -> {
-                addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.USERS, bundle.getString(BUNDLE_KEY_USERS)));
-            });
-            
-            final MenuItem uiValidation = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
-            uiValidation.setOnAction((ActionEvent event) -> {
-                addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.VALIDATION, bundle.getString(BUNDLE_KEY_VALIDATION)));
-            });
-             
-            final Menu uiReference = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
-            for(final Class reference : Session.getReferences()){
-                uiReference.getItems().add(toMenuItem(reference, Choice.REFERENCE));
-            }
-            
-            final Menu uiDesignation = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
-            for(final Class elementClass : Session.getElements()){
-                if(!Session.getReferences().contains(elementClass)){
-                    uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
-                }
-            }
-            
-            uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
+        final Menu uiAdmin = new Menu(bundle.getString(BUNDLE_KEY_ADMINISTATION));
+        uiMenu.getMenus().add(1, uiAdmin);
+
+        final MenuItem uiUserAdmin = new MenuItem(bundle.getString(BUNDLE_KEY_USERS));
+        uiUserAdmin.setOnAction((ActionEvent event) -> {
+            addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.USERS, bundle.getString(BUNDLE_KEY_USERS)));
+        });
+
+        final MenuItem uiValidation = new MenuItem(bundle.getString(BUNDLE_KEY_VALIDATION));
+        uiValidation.setOnAction((ActionEvent event) -> {
+            addTab(Injector.getSession().getOrCreateAdminTab(Session.AdminTab.VALIDATION, bundle.getString(BUNDLE_KEY_VALIDATION)));
+        });
+
+        final Menu uiReference = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
+        for (final Class reference : Session.getReferences()) {
+            uiReference.getItems().add(toMenuItem(reference, Choice.REFERENCE));
         }
-        
+
+        final Menu uiDesignation = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
+        for (final Class elementClass : Session.getElements()) {
+            if (!Session.getReferences().contains(elementClass)) {
+                uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
+            }
+        }
+
+        uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
+        uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
+            Utilisateur user = session.utilisateurProperty().get();
+            if (user != null && Role.ADMIN.equals(user.getRole())) {
+                return true;
+            }
+            return false;
+        }, session.utilisateurProperty()));
+                    
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());     
     }
     
@@ -259,7 +266,7 @@ public class FXMainFrame extends BorderPane {
         session.setUtilisateur(null);
         session.clearCache();
         session.getTaskManager().reset();
-        if(SIRS.getLauncher()!=null){
+        if (SIRS.getLauncher()!=null) {
             session.getApplicationContext().close();
             SIRS.getLauncher().show();
         } else {

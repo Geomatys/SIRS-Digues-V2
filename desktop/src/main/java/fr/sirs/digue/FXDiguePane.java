@@ -4,12 +4,8 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.USER;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDateTime;
@@ -48,7 +44,6 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         
         //mode edition
         uiMode.setSaveAction(this::save);
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.requireEditionForElement(digue);
         disableFieldsProperty().bind(uiMode.editionState().not());
         

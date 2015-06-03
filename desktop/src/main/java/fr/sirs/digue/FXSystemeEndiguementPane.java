@@ -3,9 +3,6 @@ package fr.sirs.digue;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
-import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.USER;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.DigueRepository;
@@ -73,7 +70,6 @@ public class FXSystemeEndiguementPane extends BorderPane {
     public FXSystemeEndiguementPane() {
         SIRS.loadFXML(this);
         endiguementProp.addListener(this::changed);
-        uiEditMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiEditMode.setSaveAction(this::save);
         
         uiMaj.disableProperty().set(true);

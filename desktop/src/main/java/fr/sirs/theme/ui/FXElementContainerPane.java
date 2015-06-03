@@ -6,8 +6,6 @@ import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import static fr.sirs.core.model.Role.ADMIN;
-import static fr.sirs.core.model.Role.EXTERN;
-import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.Element;
@@ -52,7 +50,6 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         date_maj.setDisable(true);
         
         uiMode.setSaveAction(this::save);
-        uiMode.setAllowedRoles(ADMIN, USER, EXTERN);
         uiMode.requireEditionForElement(element);
         disableFieldsProperty().bind(uiMode.editionState().not());
         

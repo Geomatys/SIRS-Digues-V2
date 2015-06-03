@@ -9,7 +9,6 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.PointXYZ;
 import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.Role;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.core.model.XYZProfilLong;
 import java.beans.PropertyChangeEvent;
@@ -193,8 +192,8 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             
             leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
             
-            leve.setAuthor(sirsSession.getUtilisateur().getId());
-            leve.setValid(!(sirsSession.getRole()==Role.EXTERN));
+            leve.setAuthor(sirsSession.getUtilisateur() == null? null : sirsSession.getUtilisateur().getId());
+            leve.setValid(!sirsSession.needValidationProperty().get());
             leves.add(leve);
         }
         return leves;

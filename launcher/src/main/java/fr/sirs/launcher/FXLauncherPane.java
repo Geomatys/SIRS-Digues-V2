@@ -11,8 +11,6 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.LOGIN_DEFAULT_GUEST;
-import static fr.sirs.SIRS.PASSWORD_DEFAULT_GUEST;
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
@@ -428,12 +426,6 @@ public class FXLauncherPane extends BorderPane {
         administrateur.setPassword(new String(messageDigest.digest(adminPassword.getBytes())));
         administrateur.setRole(Role.ADMIN);
         utilisateurRepository.add(administrateur);
-
-        final Utilisateur defaultGuest = ElementCreator.createAnonymValidElement(Utilisateur.class);
-        defaultGuest.setLogin(LOGIN_DEFAULT_GUEST);
-        defaultGuest.setPassword(new String(messageDigest.digest(PASSWORD_DEFAULT_GUEST.getBytes())));
-        defaultGuest.setRole(Role.GUEST);
-        utilisateurRepository.add(defaultGuest);
     }
 
     @FXML

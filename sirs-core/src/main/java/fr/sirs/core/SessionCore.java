@@ -36,6 +36,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.referencing.CRS;
@@ -65,33 +67,8 @@ public class SessionCore extends SessionGen {
     public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
     
     public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
-    public void setUtilisateur(final Utilisateur utilisateur){
+    public void setUtilisateur(final Utilisateur utilisateur) {
         utilisateurProperty.set(utilisateur);
-        if(utilisateur!=null){
-            role.set(utilisateur.getRole());
-            needValidationProperty.set(false);
-            geometryEditionProperty.set(false);
-            nonGeometryEditionProperty.set(false);
-            if(role.get()==Role.ADMIN || role.get()==Role.EXTERN){
-                geometryEditionProperty.set(true);
-                nonGeometryEditionProperty.set(true);
-                if(role.get()==Role.EXTERN){
-                    needValidationProperty.set(true);
-                }
-            }
-            else if(role.get()==Role.USER){
-                geometryEditionProperty.set(false);
-                nonGeometryEditionProperty.set(true);
-            }
-            else if(role.get()==Role.GUEST){
-                geometryEditionProperty.set(false);
-                nonGeometryEditionProperty.set(false);
-            }
-        }else{
-            this.role.set(null);
-            geometryEditionProperty.set(false);
-            nonGeometryEditionProperty.set(false);
-        }
     }
     
     private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
@@ -100,7 +77,6 @@ public class SessionCore extends SessionGen {
     public BooleanProperty nonGeometryEditionProperty() {return nonGeometryEditionProperty;}
     private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
-    
     
     private final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
@@ -137,8 +113,38 @@ public class SessionCore extends SessionGen {
         previews = new Previews(connector);
         sqlQueryRepository = new SQLQueryRepository(connector);
         elementCreator = new ElementCreator(this);
+        
+        // Listen on user change
+        utilisateurProperty.addListener(this::userChanged);
     }
 
+    private void userChanged(ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) {
+        if (newValue == null || newValue.getRole() == null) {
+            role.set(Role.GUEST);
+        } else {
+            role.set(newValue.getRole());
+        }
+        
+        // reset rights to most restricted, then unlock authorization regarding user role.
+        needValidationProperty.set(true);
+        geometryEditionProperty.set(false);
+        nonGeometryEditionProperty.set(false);
+        switch (role.get()) {
+            case USER:
+                nonGeometryEditionProperty.set(true);
+                needValidationProperty.set(false);
+                break;
+            case ADMIN:
+                nonGeometryEditionProperty.set(true);
+                geometryEditionProperty.set(true);
+                needValidationProperty.set(false);
+                break;
+            case EXTERN:
+                nonGeometryEditionProperty.set(true);
+                geometryEditionProperty.set(true);
+        }
+    }
+    
     public CouchDbConnector getConnector() {
         return connector;
     }
