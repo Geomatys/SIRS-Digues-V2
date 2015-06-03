@@ -27,6 +27,7 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetPhotographiable;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
@@ -207,8 +208,14 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
                     for(final Photo photo : ((ObjetPhotographiable)current).getPhotos()){
                         recomputePositionable(photo, linear);
                     }
-                } else if(current instanceof Desordre) {
-                    // Cas des désordres qui ne sont pas des objets photographiables mais qui contiennent des observations qui elles-mêmes contiennent des photos.
+                } 
+                // Les désordres ne contiennent pas directement les photos : ce sont les observations qui les contiennent.
+                else if(current instanceof Desordre) {
+                    for(final Observation observation : ((Desordre) current).getObservations()){
+                        for(final Photo photo : observation.getPhotos()){
+                            recomputePositionable(photo, linear);
+                        }
+                    }
                 }
                 listFeeder.accept(current);
                 updateProgress(currentProgress++, progressMax);

@@ -38,9 +38,11 @@ import static fr.sirs.core.LinearReferencingUtilities.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.ObjetPhotographiable;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
@@ -351,6 +353,11 @@ public class TronconUtils {
             if (objet instanceof ObjetPhotographiable){
                 final List<Photo> p = ((ObjetPhotographiable) objet).getPhotos();
                 if(p!=null && !p.isEmpty()) photos.addAll(p);
+            } else if (objet instanceof Desordre){
+                for (final Observation observation : ((Desordre) objet).getObservations()){
+                    final List<Photo> p = observation.getPhotos();
+                    if(p!=null && !p.isEmpty()) photos.addAll(p);
+                }
             }
         }
         return photos;

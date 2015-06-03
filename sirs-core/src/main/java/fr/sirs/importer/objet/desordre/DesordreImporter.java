@@ -42,15 +42,19 @@ public class DesordreImporter extends GenericDesordreImporter {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
                 typeCoteImporter, typePositionImporter);
-        this.typeDesordreImporter = new TypeDesordreImporter(accessDatabase,
+        typeDesordreImporter = new TypeDesordreImporter(accessDatabase,
                 couchDbConnector);
-        this.desordreObservationImporter = new DesordreObservationImporter(
+        desordreObservationImporter = new DesordreObservationImporter(
                 accessDatabase, couchDbConnector, intervenantImporter);
-        this.sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase,
+        sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase,
                 couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 desordreObservationImporter, typeSourceImporter,
                 typePositionImporter, typeCoteImporter, typeDesordreImporter);
+    }
+    
+    public DesordreObservationImporter getDesordreObservationImporter(){
+        return desordreObservationImporter;
     }
 
     private enum Columns {

@@ -10,6 +10,7 @@ import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Prestation;
@@ -99,12 +100,12 @@ public abstract class PhotoImporter extends GenericEntityLinker {
                 objetManager.getElementGeometryImporter().getById().get(id).getPhotos().add(photo);
                 break;
             // DESORDRES
-            case SYS_EVT_DESORDRE:
-                final Desordre desordre = objetManager.getDesordreImporter().getById().get(id);
-                if (desordre != null) {
-                    desordre.getPhotos().add(photo);
+            case SYS_EVT_DESORDRE: //ATTENTION, L'indication de la table des désordres est trompeuse : l'id fourni est en réalité un id d'observation !!!!
+                final Observation observation = objetManager.getDesordreImporter().getDesordreObservationImporter().getObservations().get(id);
+                if (observation != null) {
+                    observation.getPhotos().add(photo);
                 } else {    
-                    SirsCore.LOGGER.log(Level.FINE, "Désordre null : " + id);
+                    SirsCore.LOGGER.log(Level.FINE, "Observation nulle : " + id);
                 }
                 break;
             // PRESTATIONS

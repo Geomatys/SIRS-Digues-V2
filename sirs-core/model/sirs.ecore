@@ -401,7 +401,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="documentGrandeEchelleIds"
         upperBound="-1" eType="#//DocumentGrandeEchelle"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//ObjetPhotographiable">
+  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -445,6 +445,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
+        eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LaisseCrue" eSuperTypes="#//ObjetMesure">
     <eAnnotations source="generation"/>
