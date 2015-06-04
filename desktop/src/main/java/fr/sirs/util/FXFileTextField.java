@@ -5,6 +5,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
@@ -13,7 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
@@ -26,9 +30,14 @@ public class FXFileTextField extends AbstractPathTextField {
 
     private final SimpleStringProperty rootPath = new SimpleStringProperty();
     
+    public final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
+    
     public FXFileTextField() {
         rootPath.addListener(this::updateRoot);
-        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));        
+        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
+        
+        inputText.disableProperty().bind(disableFieldsProperty);
+        choosePathButton.disableProperty().bind(disableFieldsProperty);
     }
     
     private void updateRoot(final ObservableValue<? extends String> obs, final String oldValue, final String newValue) {
@@ -52,7 +61,7 @@ public class FXFileTextField extends AbstractPathTextField {
             }
         } catch (Exception e) {
             // Well, we'll try without it...
-            SirsCore.LOGGER.log(Level.FINE, "Input path cannot be deccoded.", e);
+            SirsCore.LOGGER.log(Level.FINE, "Input path cannot be decoded.", e);
         }
         File returned = chooser.showOpenDialog(null);
         if (returned == null) {
@@ -69,8 +78,10 @@ public class FXFileTextField extends AbstractPathTextField {
         if (rootPath.get() == null) {
             return inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
         } else {
-            return Paths.get(rootPath.get(), inputText == null? "" : inputText).toUri();
+            return SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
         }
     }
+    
+    
     
 }
