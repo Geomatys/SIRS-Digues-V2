@@ -26,7 +26,7 @@ import org.geotoolkit.map.MapItem;
  * 
  * @author Johann Sorel (Geomatys)
  */
-public class Plugin {
+public abstract class Plugin {
     
     public static String PLUGIN_FLAG = "pluginSirs";
     
@@ -82,7 +82,14 @@ public class Plugin {
     public List<MenuItem> getMapActions(Object candidate) {
         return Collections.EMPTY_LIST;
     }
-    
+
+    /**
+     * Récupère le titre du plugin.
+     *
+     * @return Le titre du plugin, jamais nulle ou vide.
+     */
+    public abstract CharSequence getTitle();
+
     /**
      * Chargement du plugin.
      * Cette méthode est appelée au démarrage de l'application.
@@ -91,9 +98,7 @@ public class Plugin {
      * 
      * @throws java.lang.Exception : en cas d'erreur de chargement du plugin
      */
-    public void load() throws Exception {
-        
-    }
+    public abstract void load() throws Exception;
     
     /**
      * Cherche une configuration valide pour le plugin courant. Par défaut, la

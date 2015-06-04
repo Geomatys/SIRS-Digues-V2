@@ -63,7 +63,7 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
-import fr.sirs.theme.AbstractTronconTheme;
+import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 
@@ -649,13 +649,13 @@ public class CorePlugin extends Plugin {
     @Override
     public void load() throws SQLException, IOException {
         loadDataSuppliers();
-        themes.add(new AbstractTronconTheme("Structure", Crete.class, OuvrageRevanche.class, TalusDigue.class, SommetRisberme.class, TalusRisberme.class, PiedDigue.class, Fondation.class, Epi.class, Deversoir.class));
-        themes.add(new AbstractTronconTheme("Franc-bord", FrontFrancBord.class, PiedFrontFrancBord.class, LargeurFrancBord.class));
-        themes.add(new AbstractTronconTheme("Réseau de voirie", VoieAcces.class, OuvrageFranchissement.class, OuvertureBatardable.class, VoieDigue.class, OuvrageVoirie.class));
-        themes.add(new AbstractTronconTheme("Réseau et ouvrage", StationPompage.class, ReseauHydrauliqueFerme.class, OuvrageHydrauliqueAssocie.class, ReseauTelecomEnergie.class, OuvrageTelecomEnergie.class, ReseauHydrauliqueCielOuvert.class, OuvrageParticulier.class, EchelleLimnimetrique.class));
-        themes.add(new AbstractTronconTheme("Désordre", Desordre.class));
-        themes.add(new AbstractTronconTheme("Prestation", Prestation.class));
-        themes.add(new AbstractTronconTheme("Mesure d'événement hydraulique", LaisseCrue.class, MonteeEaux.class, LigneEau.class));
+        themes.add(new TronconTheme("Structure", Crete.class, OuvrageRevanche.class, TalusDigue.class, SommetRisberme.class, TalusRisberme.class, PiedDigue.class, Fondation.class, Epi.class, Deversoir.class));
+        themes.add(new TronconTheme("Franc-bord", FrontFrancBord.class, PiedFrontFrancBord.class, LargeurFrancBord.class));
+        themes.add(new TronconTheme("Réseau de voirie", VoieAcces.class, OuvrageFranchissement.class, OuvertureBatardable.class, VoieDigue.class, OuvrageVoirie.class));
+        themes.add(new TronconTheme("Réseau et ouvrage", StationPompage.class, ReseauHydrauliqueFerme.class, OuvrageHydrauliqueAssocie.class, ReseauTelecomEnergie.class, OuvrageTelecomEnergie.class, ReseauHydrauliqueCielOuvert.class, OuvrageParticulier.class, EchelleLimnimetrique.class));
+        themes.add(new TronconTheme("Désordre", Desordre.class));
+        themes.add(new TronconTheme("Prestation", Prestation.class));
+        themes.add(new TronconTheme("Mesure d'événement hydraulique", LaisseCrue.class, MonteeEaux.class, LigneEau.class));
         themes.add(new PositionDocumentTheme());
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
@@ -666,7 +666,12 @@ public class CorePlugin extends Plugin {
         themes.add(new DocumentTheme<>("Rapport d'étude", RapportEtude.class));
         themes.add(new DocumentTheme<>("Document à grande échelle", DocumentGrandeEchelle.class));
     }
-    
+
+    @Override
+    public CharSequence getTitle() {
+        return NAME;
+    }
+
     public MapLayer createLayer(final Class beanClass, final Query query){
         final BeanFeatureSupplier supplier = suppliers.get(beanClass);
         final BeanStore store = new BeanStore(supplier);

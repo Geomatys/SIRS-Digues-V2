@@ -95,11 +95,19 @@ public class FXMainFrame extends BorderPane {
                 uiThemesLocalized.getItems().add(toMenuItem(theme));
             } else if (Theme.Type.UNLOCALIZED.equals(theme.getType())) {
                 uiThemesUnlocalized.getItems().add(toMenuItem(theme));
-            } else if (Theme.Type.PLUGINS.equals(theme.getType())) {
-                uiPlugins.getItems().add(toMenuItem(theme));
             }
         }
-        
+
+        // Load plugins
+        for (Plugin plugin : Plugins.getPlugins()) {
+            if (plugin.name.equals(CorePlugin.NAME)) {
+                continue;
+            }
+            uiPlugins.getItems().add(toMenuItem(plugin));
+        }
+        uiPlugins.visibleProperty().bind(Bindings.isNotEmpty(uiPlugins.getItems()));
+        uiPlugins.managedProperty().bind(uiPlugins.visibleProperty());
+
         final Menu uiAdmin = new Menu(bundle.getString(BUNDLE_KEY_ADMINISTATION));
         uiMenu.getMenus().add(1, uiAdmin);
 
@@ -191,7 +199,15 @@ public class FXMainFrame extends BorderPane {
             repo.clearCache();
         }
     }
-    
+
+    private MenuItem toMenuItem(final Plugin plugin) {
+        final Menu item = new Menu(plugin.getTitle().toString());
+        for (Theme theme : plugin.getThemes()) {
+            item.getItems().add(toMenuItem(theme));
+        }
+        return item;
+    }
+
     private MenuItem toMenuItem(final Theme theme) {
         final List<Theme> subs = theme.getSubThemes();
         final MenuItem item;

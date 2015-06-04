@@ -14,7 +14,7 @@ import org.apache.sis.util.ArgumentChecks;
 public abstract class Theme {
     
     /**
-     * Les thèmes sont classés en deux catégories (Type) :
+     * Les thèmes sont classés en trois catégories (Type) :
      * - LOCALIZED : pour les thèmes d'objets rattachés aux tronçons et qui ont une représentation graphique.
      * - UNLOCALIZED : pour les thèmes sans relations ni représentation graphique.
      * - PLUGINS : regroupe les plugins additionnels chargés par l'utilisateur pour son application.

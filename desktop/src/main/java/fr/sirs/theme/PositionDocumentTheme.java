@@ -27,7 +27,7 @@ import javafx.collections.FXCollections;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class PositionDocumentTheme extends AbstractTronconTheme {
+public class PositionDocumentTheme extends TronconTheme {
     
     private static final ThemeManager CONVENTION = generateThemeManager(PositionDocument.class, Convention.class);
     private static final ThemeManager ARTICLE = generateThemeManager(PositionDocument.class, ArticleJournal.class);
@@ -48,7 +48,7 @@ public class PositionDocumentTheme extends AbstractTronconTheme {
             final ResourceBundle bundle = ResourceBundle.getBundle(documentClass.getCanonicalName());
             title = bundle.getString(SIRS.BUNDLE_KEY_CLASS);
         } else{
-            title = "sans document associé";
+            title = "Sans document associé";
         }
         return new ThemeManager<>(title, 
                 "Thème "+title, 
