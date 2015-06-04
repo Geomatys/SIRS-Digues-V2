@@ -98,6 +98,8 @@ public final class SIRS extends SirsCore {
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String VALID_FIELD = "valid";
     public static final String AUTHOR_FIELD = "author";
+    public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
+    public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String DESIGNATION_FIELD = "designation";
     public static final String PR_DEBUT_FIELD = "PR_debut";
     public static final String PR_FIN_FIELD = "PR_fin";

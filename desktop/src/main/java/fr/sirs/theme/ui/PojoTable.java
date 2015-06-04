@@ -12,7 +12,9 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
+import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DESIGNATION_FIELD;
+import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.PR_DEBUT_FIELD;
 import static fr.sirs.SIRS.PR_FIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
@@ -123,7 +125,7 @@ public class PojoTable extends BorderPane {
     
     private static final String BUTTON_STYLE = "buttonbar-button";
     
-    private static final String[] COLUMNS_TO_IGNORE = new String[] {AUTHOR_FIELD, VALID_FIELD};    
+    private static final String[] COLUMNS_TO_IGNORE = new String[] {AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD};    
     private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;
