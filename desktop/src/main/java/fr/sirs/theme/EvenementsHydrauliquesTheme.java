@@ -11,7 +11,7 @@ import javafx.scene.Parent;
 public class EvenementsHydrauliquesTheme extends Theme {
         
     public EvenementsHydrauliquesTheme() {
-        super("Evènements hydrauliques", Type.OTHER);
+        super("Evènements hydrauliques", Type.UNLOCALIZED);
     }
 
     @Override

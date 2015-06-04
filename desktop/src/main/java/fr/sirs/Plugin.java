@@ -96,13 +96,13 @@ public class Plugin {
     }
     
     /**
-     * Cherche une description valide pour le plugin courant. Par défaut, la 
+     * Cherche une configuration valide pour le plugin courant. Par défaut, la
      * méthode cherche un JSON descriptif dans le dossier des plugins. Si aucun
      * fichier ne peut être utilisé, on essaie de construire un descriptif grâce
      * aux informations de la classe Java.
      * @return 
      */
-    public PluginInfo getDescription() {
+    public PluginInfo getConfiguration() {
         final String pluginName = name == null? this.getClass().getSimpleName() : name;
         final Path pluginPath = SirsCore.PLUGINS_PATH.resolve(pluginName);
         final Pattern jsonPattern = Pattern.compile("(?i)" + pluginName + ".*(\\.json)$");

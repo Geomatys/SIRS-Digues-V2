@@ -15,7 +15,7 @@ public class DocumentTheme<T extends SIRSDocument> extends Theme {
     private final Class<T> documentClass;
     
     public DocumentTheme(final String name, final Class<T> documentClass) {
-        super(name, Type.OTHER);
+        super(name, Type.UNLOCALIZED);
         this.documentClass = documentClass;
     }
 

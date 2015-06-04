@@ -16,7 +16,7 @@ import javafx.scene.layout.BorderPane;
 public class ContactsTheme extends Theme {
 
     public ContactsTheme() {
-        super("Organismes et personnes physiques", Type.OTHER);
+        super("Organismes et personnes physiques", Type.UNLOCALIZED);
     }
 
     @Override

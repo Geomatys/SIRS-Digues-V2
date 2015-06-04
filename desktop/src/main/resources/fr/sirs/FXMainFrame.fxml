@@ -6,7 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="731.0" prefWidth="1045.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
     <top>
       <BorderPane>
          <top>
@@ -58,14 +58,19 @@
                                 </Button>
                                 <VBox translateX="10.0">
                                     <children>
-                                        <MenuButton fx:id="uiThemes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%localizedThemes" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiThemesLocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%localizedThemes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                        <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%unlocalizedThemes" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiThemesUnlocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%unlocalizedThemes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
                                     </children>
                                 </VBox>
+                        <VBox prefHeight="71.0" prefWidth="125.0">
+                           <children>
+                              <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="71.0" prefWidth="150.0" styleClass="buttonbar-button" text="%pluginsThemes" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
                         <Pane HBox.hgrow="ALWAYS" />
                         <Button contentDisplay="TOP" mnemonicParsing="false" onAction="#openSearchTab" styleClass="buttonbar-button" text="%search">
                            <graphic>

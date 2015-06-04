@@ -57,7 +57,8 @@ public class FXMainFrame extends BorderPane {
     private final Session session = Injector.getBean(Session.class);
     private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName());
     
-    @FXML private MenuButton uiThemes;
+    @FXML private MenuButton uiThemesLocalized;
+    @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
@@ -90,10 +91,11 @@ public class FXMainFrame extends BorderPane {
         // Load themes
         final Theme[] themes = Plugins.getThemes();
         for(final Theme theme : themes){
-            if(theme.getType().equals(Theme.Type.STANDARD)){
-                uiThemes.getItems().add(toMenuItem(theme));
-            }
-            else{
+            if (Theme.Type.LOCALIZED.equals(theme.getType())) {
+                uiThemesLocalized.getItems().add(toMenuItem(theme));
+            } else if (Theme.Type.UNLOCALIZED.equals(theme.getType())) {
+                uiThemesUnlocalized.getItems().add(toMenuItem(theme));
+            } else if (Theme.Type.PLUGINS.equals(theme.getType())) {
                 uiPlugins.getItems().add(toMenuItem(theme));
             }
         }

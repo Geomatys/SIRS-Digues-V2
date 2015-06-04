@@ -15,12 +15,13 @@ public abstract class Theme {
     
     /**
      * Les thèmes sont classés en deux catégories (Type) :
-     * - STANDARD : pour les thèmes d'objets rattachés aux tronçons et qui ont une représentation graphique.
-     * - OTHER : pour les thèmes sans relations ni représentation graphique.
+     * - LOCALIZED : pour les thèmes d'objets rattachés aux tronçons et qui ont une représentation graphique.
+     * - UNLOCALIZED : pour les thèmes sans relations ni représentation graphique.
      */
     public static enum Type{
-        STANDARD,
-        OTHER
+        LOCALIZED,
+        UNLOCALIZED,
+        PLUGINS
     }
     
     private final String name;

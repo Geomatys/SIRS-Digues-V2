@@ -5,7 +5,7 @@ import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.theme.ui.FXTronconThemePane;
-import fr.sirs.theme.Theme.Type;
+
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -66,7 +66,7 @@ public class AbstractTronconTheme extends Theme {
     
     
     public AbstractTronconTheme(String name, Class... classes) {
-        super(name, Type.STANDARD);
+        super(name, Type.LOCALIZED);
         final ThemeManager[] mngrs = new ThemeManager[classes.length];
         for(int i = 0; i<classes.length; i++){
             mngrs[i] = generateThemeManager(classes[i]);
@@ -76,7 +76,7 @@ public class AbstractTronconTheme extends Theme {
     }
     
     protected AbstractTronconTheme(String name, ThemeManager... managers) {
-        super(name, Type.STANDARD);
+        super(name, Type.LOCALIZED);
         this.managers = managers;
         initThemeManager(managers);
     }
