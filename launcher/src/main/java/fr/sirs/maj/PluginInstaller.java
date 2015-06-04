@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sirs.CorePlugin;
 import fr.sirs.core.SirsCore;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,10 +69,7 @@ public class PluginInstaller {
                         input, PluginInfo.class)));
             }
         }
-        // TODO : allow core plugin to appear un available plugin list ?
-        list.plugins.filtered((PluginInfo info) -> {
-            return !info.getName().equalsIgnoreCase(CorePlugin.NAME);
-        });
+
         return list;
     }
         

@@ -307,6 +307,7 @@ public class FXLauncherPane extends BorderPane {
 
         try {
             distant = PluginInstaller.listDistantPlugins(serverURL);
+            distant.plugins.removeAll(local.plugins);
             uiAvailablePlugins.setItems(distant.plugins);
         } catch (Exception ex) {
             try {
