@@ -2,6 +2,7 @@
 package fr.sirs.maj;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.CorePlugin;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * Classe utilitaire permettant de retrouver / installer des plugins.
  * Note : Le chargement des plugins est fait au chargement de l'application, 
- * dans {@link Loader}.
+ * dans {@link fr.sirs.Loader}.
  */
 public class PluginInstaller {
         
@@ -59,6 +61,13 @@ public class PluginInstaller {
         try (final InputStream input = connection.getInputStream()) {
             list.setPlugins(new ObjectMapper().readValue(
                     input, new TypeReference<List<PluginInfo>>(){}));
+        } catch (JsonMappingException e) {
+            // Allow URL pointing on a local plugin, try to load it
+            URLConnection connection2 = serverUrl.openConnection();
+            try (final InputStream input = connection2.getInputStream()) {
+                list.setPlugins(Collections.singletonList(new ObjectMapper().readValue(
+                        input, PluginInfo.class)));
+            }
         }
         // TODO : allow core plugin to appear un available plugin list ?
         list.plugins.filtered((PluginInfo info) -> {
