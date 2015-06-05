@@ -58,7 +58,7 @@
 	<groupId>org.slf4j</groupId>
 	<artifactId>jul-to-slf4j</artifactId>
 	<version>${slf4j.version}</version>
-</dependency>
+    </dependency>
     
     
     <dependency>
@@ -166,7 +166,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.64-SNAPSHOT</version>
+          <version>0.5.65-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>

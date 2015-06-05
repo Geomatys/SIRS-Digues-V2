@@ -8,7 +8,7 @@
     <version>1.0</version>
     <packaging>jar</packaging>
     
-    <name>plugin archetype</name>
+    <name>plugin-reglementary</name>
     <description>Plugin réglementaire</description>
     <!--url>http://www.myorganization.org</url-->
 
@@ -78,6 +78,49 @@
                     </archive>
                 </configuration>
             </plugin>
+            
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>        <!-- The -source argument for the Java compiler. -->
+                    <target>1.8</target>        <!-- The -target argument for the Java compiler. -->
+                    <debug>true</debug>         <!-- Whether to include debugging information. -->
+                    <optimize>true</optimize>   <!-- Whether to optimize the compiled code. -->
+                    <encoding>${project.encoding}</encoding>  <!-- The -encoding argument for the Java compiler. -->
+                </configuration>
+            </plugin>
+            
+            
+
+            <plugin>
+                <groupId>com.geomatys.maven</groupId>
+                <artifactId>maven-fxmodel-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>fxmodel</id>
+                        <goals>
+                            <goal>fxmodel</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>fxmodel2sql</id>
+                        <goals>
+                            <goal>fxmodel2sql</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateEquals>true</generateEquals>
+                    <model>model/reglementary.ecore</model>
+                    <modelPackage>fr.sirs.core.model</modelPackage>
+                    <repositoryPackage>fr.sirs.core.component</repositoryPackage>
+                    <repositoryInterface>fr.sirs.core.Repository</repositoryInterface>
+                </configuration>
+            </plugin>
+            
+            
             
         </plugins>
     </build>
