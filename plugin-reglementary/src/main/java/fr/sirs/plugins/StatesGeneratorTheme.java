@@ -9,9 +9,9 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public class StatesGeneratorTheme extends AbstractPluginsButtonTheme {
+public final class StatesGeneratorTheme extends AbstractPluginsButtonTheme {
     public StatesGeneratorTheme() {
-        super("Générateur d'états", Type.PLUGINS, "Générateur d'états", null);
+        super("Générateur d'états", "Générateur d'états", null);
     }
 
     @Override

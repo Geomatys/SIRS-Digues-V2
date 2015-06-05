@@ -9,9 +9,9 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public class DocumentsTheme extends AbstractPluginsButtonTheme {
+public final class DocumentsTheme extends AbstractPluginsButtonTheme {
     public DocumentsTheme() {
-        super("Suivi des documents", Type.PLUGINS, "Suivi des documents", null);
+        super("Suivi des documents", "Suivi des documents", null);
     }
 
     @Override

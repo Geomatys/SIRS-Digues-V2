@@ -69,8 +69,8 @@ public abstract class Theme {
     }
         
     /**
-     * Creation d'un panneau d'interface utilisateur permettant la consultation
-     * et l'édition des objets de se thème.
+     * Création d'un panneau d'interface utilisateur permettant la consultation
+     * et l'édition des objets de ce thème.
      * 
      * @return Composant d'interface, jamais nulle.
      */
