@@ -38,7 +38,7 @@
                   </HBox>
                   <HBox>
                      <children>
-                              <ToolBar maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS">
+                              <ToolBar minWidth="0.0">
                                   <items>
                                       <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" styleClass="buttonbar-button" text="%carto">
                                           <graphic>
@@ -75,6 +75,7 @@
                               </VBox>
                                   </items>
                               </ToolBar>
+                        <ToolBar fx:id="uiToolBarPlugins" maxHeight="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
                         <ToolBar maxHeight="1.7976931348623157E308" HBox.hgrow="NEVER">
                            <items>
                               <Button contentDisplay="TOP" mnemonicParsing="false" onAction="#openSearchTab" styleClass="buttonbar-button" text="%search">

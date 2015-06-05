@@ -7,6 +7,10 @@ import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
@@ -60,6 +64,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiThemesLocalized;
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
+    @FXML private ToolBar uiToolBarPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
 
@@ -200,14 +205,52 @@ public class FXMainFrame extends BorderPane {
         }
     }
 
+    /**
+     * Génère le menu déroulant pour le plugin donné.
+     *
+     * @param plugin Plugin à montrer.
+     * @return
+     */
     private MenuItem toMenuItem(final Plugin plugin) {
-        final Menu item = new Menu(plugin.getTitle().toString());
-        for (Theme theme : plugin.getThemes()) {
-            item.getItems().add(toMenuItem(theme));
-        }
+        final MenuItem item = new MenuItem(plugin.getTitle().toString());
+        item.setOnAction(event -> {
+            uiPlugins.setText(plugin.getTitle().toString());
+            uiToolBarPlugins.getItems().clear();
+            for (Theme theme : plugin.getThemes()) {
+                uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
+            }
+        });
         return item;
     }
 
+    /**
+     * Créé un bouton pour représenter le sous menu d'un plugin.
+     *
+     * @param theme
+     * @return
+     */
+    private Button toButton(final AbstractPluginsButtonTheme theme) {
+        final Button button = new Button(theme.getName());
+        if (theme.getDescription() != null && !theme.getDescription().isEmpty()) {
+            button.setTooltip(new Tooltip(theme.getDescription()));
+        }
+        if (theme.getImg() != null) {
+            final ImageView imageView = new ImageView();
+            imageView.setFitHeight(40);
+            imageView.setFitWidth(40);
+            imageView.setImage(theme.getImg());
+            button.setGraphic(imageView);
+        }
+        button.setOnAction(new DisplayTheme(theme));
+        return button;
+    }
+
+    /**
+     * Créé un item de menu et son arborescence pour le thème choisi.
+     *
+     * @param theme
+     * @return
+     */
     private MenuItem toMenuItem(final Theme theme) {
         final List<Theme> subs = theme.getSubThemes();
         final MenuItem item;
