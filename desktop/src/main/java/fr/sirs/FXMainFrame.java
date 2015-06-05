@@ -327,6 +327,7 @@ public class FXMainFrame extends BorderPane {
         session.setUtilisateur(null);
         session.clearCache();
         session.getTaskManager().reset();
+        Plugins.clearCache();
         if (SIRS.getLauncher()!=null) {
             session.getApplicationContext().close();
             SIRS.getLauncher().show();

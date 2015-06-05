@@ -78,7 +78,15 @@ public class Plugins {
         }
         return THEMES.toArray(new Theme[0]);
     }
-    
+
+    /**
+     * Vide les caches de plugins et de thèmes.
+     */
+    public static void clearCache() {
+        THEMES = null;
+        REGISTERED_PLUGINS = null;
+    }
+
     public static void loadPlugins() throws IOException, IllegalStateException {
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
             // TODO : Keep list of jars in a static variable to perform scan only once ?
