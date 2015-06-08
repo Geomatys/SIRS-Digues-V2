@@ -106,7 +106,8 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(toGet);
         final List<T> bulkLoaded = db.queryView(q, getModelClass());
         
-        for(final T loaded : bulkLoaded) {
+        for(T loaded : bulkLoaded) {
+            loaded = onLoad(loaded);
             cache.put(loaded.getId(), loaded);
             result.add(loaded);
         }
