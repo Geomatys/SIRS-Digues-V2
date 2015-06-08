@@ -323,15 +323,10 @@ public class FXMainFrame extends BorderPane {
     
     @FXML 
     void deconnect(ActionEvent event) throws IOException{
-        this.getScene().getWindow().hide();
-        session.setUtilisateur(null);
-        session.clearCache();
-        session.getTaskManager().reset();
-        Plugins.clearCache();
-        if (SIRS.getLauncher()!=null) {
-            session.getApplicationContext().close();
-            SIRS.getLauncher().show();
+        if (SIRS.getLauncher() != null) {
+            SIRS.getLauncher().restart();
         } else {
+            // Ne devrait pas arriver car on a toujours une instance de Stage à la création.
             SIRS.LOADER.showSplashStage();
         }
     }

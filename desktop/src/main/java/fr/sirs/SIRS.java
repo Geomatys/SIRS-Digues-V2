@@ -126,11 +126,11 @@ public final class SIRS extends SirsCore {
     public static final String REFERENCE_GET_ID = "getId";
     public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
 
-    private static Stage LAUNCHER;
-    public static void setLauncher(Stage currentWindow) {
+    private static AbstractRestartableStage LAUNCHER;
+    public static void setLauncher(AbstractRestartableStage currentWindow) {
         LAUNCHER=currentWindow;
     }
-    public static Stage getLauncher() {
+    public static AbstractRestartableStage getLauncher() {
         return LAUNCHER;
     }
 

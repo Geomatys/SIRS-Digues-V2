@@ -2,6 +2,7 @@ package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 
+import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
 import fr.sirs.Plugins;
 import fr.sirs.importer.AccessDbImporterException;
@@ -333,7 +334,8 @@ public class FXLauncherPane extends BorderPane {
         final Window currentWindow = getScene().getWindow();
 
         if (currentWindow instanceof Stage) {
-            SIRS.setLauncher((Stage) currentWindow);
+            final RestartableStage restartableStage = new RestartableStage((Stage) currentWindow);
+            SIRS.setLauncher(restartableStage);
         }
         currentWindow.hide();
         runDesktop(db);
@@ -602,7 +604,7 @@ public class FXLauncherPane extends BorderPane {
          * If we cannot find java executable in java home, it means application
          * has been deployed and started from a native package context. We have
          * to find the native executable and launch it.
-         * Into native package, jre is located into : 
+         * Into native package, jre is located into :
          * $APP_DIR/runtime/jre
          * Application executable should be named sirs-launcher* and located in :
          * $APP_DIR/
@@ -631,7 +633,7 @@ public class FXLauncherPane extends BorderPane {
         } else {
             args.add(javaBin.toString());
             String command = System.getProperty("sun.java.command");
-            /* If java command has not been saved (which is really unlikely to 
+            /* If java command has not been saved (which is really unlikely to
              * happen), we must retrieve the Launcher application context (jar
              * or class).
              */
@@ -879,5 +881,20 @@ public class FXLauncherPane extends BorderPane {
                 final String nfdText = Normalizer.normalize(newValue, Normalizer.Form.NFD);
                 ((WritableValue) observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
             }
+    }
+
+    private final class RestartableStage extends AbstractRestartableStage {
+        public RestartableStage(Stage stage) {
+            super(stage);
+        }
+
+        @Override
+        public void restart() {
+            try {
+                restartCore();
+            } catch (URISyntaxException | IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        }
     }
 }
