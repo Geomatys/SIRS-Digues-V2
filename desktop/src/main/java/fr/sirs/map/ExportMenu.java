@@ -24,6 +24,7 @@ import fr.sirs.theme.ui.FXPositionablePane;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.storage.FactoryMetadata;
+import org.geotoolkit.temporal.object.TemporalUtilities;
 import org.opengis.geometry.Geometry;
 
 /**
@@ -151,10 +153,22 @@ public class ExportMenu extends TreeMenuItem {
                                 final String inTypeName = inType.getName().getLocalPart();
                                 
                                 //output file path
-                                final File file= new File(folder, inTypeName+factory.getFileExtensions()[0]);
+                                File file= new File(folder, inTypeName+factory.getFileExtensions()[0]);
+
+                                //if file exist, add date aside it
+                                if(file.exists()){
+                                    //generate name + time
+                                    String name = inTypeName+" "+TemporalUtilities.toISO8601(new Date())+factory.getFileExtensions()[0];
+                                    name = name.replace(':', '_');
+                                    file = new File(folder, name);
+                                    //it should not exist, but delete it if there is one in case
+                                    file.delete();
+                                }
 
                                 //create output store
                                 final FeatureStore store = factory.createDataStore(file.toURI().toURL());
+
+                                //delete feature types
 
                                 //create output type
                                 store.createFeatureType(inType.getName(), inType);
