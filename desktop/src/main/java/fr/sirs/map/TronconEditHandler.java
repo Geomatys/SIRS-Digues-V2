@@ -12,6 +12,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
@@ -129,9 +130,10 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             }
             updateGeometry();
 
-            selectionFilter = GO2Utilities.FILTER_FACTORY.id(
-                    Collections.singleton(new DefaultFeatureId(newValue.getId())));
-            
+            if (newValue != null) {
+                selectionFilter = GO2Utilities.FILTER_FACTORY.id(
+                        Collections.singleton(new DefaultFeatureId(newValue.getId())));
+            }
             if (Platform.isFxApplicationThread()) {
                 tronconLayer.setSelectionFilter(selectionFilter);
             } else {
@@ -220,8 +222,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
      */
     public static TronconDigue showTronconDialog() {
         final Session session = Injector.getBean(Session.class);
-        final List<Digue> digues = session.getDigues();
-        final ComboBox<Digue> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
+        final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
+        final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
         final ComboBox<RefRive> rives = new ComboBox<RefRive>(
                 FXCollections.observableList(session.getRefRiveRepository().getAll()));
         
@@ -269,6 +271,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         });
         
         cancelBtn.setOnAction((ActionEvent e)-> {
+            nameField.setText(null);
             dialog.close();
         });
         
@@ -280,7 +283,6 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         
         dialog.setScene(new Scene(main));
         dialog.showAndWait();
-  
         
         String tronconName = nameField.getText();
         if (tronconName == null || tronconName.isEmpty()) {
@@ -288,9 +290,9 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         } else {
             final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(TronconDigue.class);
             tmpTroncon.setLibelle(tronconName);
-            final Digue digue = diguesChoice.getValue();
+            final Preview digue = diguesChoice.getValue();
             if (digue != null) {
-                tmpTroncon.setDigueId(digue.getId());
+                tmpTroncon.setDigueId(digue.getElementId());
             }
             final RefRive rive = rives.getValue();
             if (rive != null) {
@@ -381,7 +383,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             
                             // Prepare l'edition du tronçon
                             tronconProperty.set(tmpTroncon);
-
+                            
                         } catch (TransformException | FactoryException ex) {
                             // TODO : better error management
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
