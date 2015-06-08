@@ -134,18 +134,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     }
 
     @Override
-    public void preSave() throws Exception {
-        
-        // Vérification de l'identifiant : 
-        
-        // Interdiction du compte de l'invité par défaut
-        if(UtilisateurRepository.GUEST_USER.getId().equals(currentEditedUserLogin)){
-            new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez pas modifier le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
-            throw new Exception("Le compte de l'invité par défaut n'est pas modifiable. Modification non enregistrée.");
-        }
-        
+    public void preSave() throws Exception {        
         // Interdiction d'un indentifiant vide.
-        else if(ui_login == null 
+        if(ui_login == null 
                 || ui_login.getText()==null 
                 || "".equals(ui_login.getText())){
             ui_labelLogin.setTextFill(Color.RED);
