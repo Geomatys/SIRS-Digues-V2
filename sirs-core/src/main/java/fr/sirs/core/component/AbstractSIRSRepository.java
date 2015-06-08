@@ -122,15 +122,16 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      */
     public List<DocumentOperationResult> executeBulk(final List<T> bulkList){
         final List<T> cachedBulkList = new ArrayList<>();
-        for(final T entity : bulkList){
+        for(T entity : bulkList){
             if (entity instanceof AvecDateMaj) {
                 ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
             }
             // Put the updated entity into cache in case the old entity is different.
             if (entity != cache.get(entity.getId())) {
-                cache.put(entity.getId(), onLoad(entity));
+                entity = onLoad(entity);
+                cache.put(entity.getId(), entity);
             }
-            cachedBulkList.add(cache.get(entity.getId()));
+            cachedBulkList.add(entity);
         } 
         return db.executeBulk(cachedBulkList);
     }
