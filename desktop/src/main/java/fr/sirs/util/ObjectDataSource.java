@@ -1,5 +1,6 @@
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -18,6 +19,7 @@ import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
 import org.apache.sis.util.UnconvertibleObjectException;
 import org.apache.sis.util.logging.Logging;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.report.FeatureCollectionDataSource;
 
 /**
@@ -91,7 +93,12 @@ public class ObjectDataSource<T> implements JRDataSource {
         final Object propertyValueToPrint;
         if(String.class.isAssignableFrom(clazz)){
             if(previewRepository!=null){
-                final Preview previewLabel = previewRepository.get((String) propertyValue);
+                Preview previewLabel = null;
+                try{
+                    previewLabel = previewRepository.get((String) propertyValue);
+                } catch(DocumentNotFoundException e){
+                    SIRS.LOGGER.log(Level.FINEST, e.getMessage());
+                }
                 if(previewLabel!=null && previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
                     if(stringConverter!=null){
                         propertyValueToPrint = stringConverter.toString(previewLabel);
