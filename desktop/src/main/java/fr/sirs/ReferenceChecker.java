@@ -448,25 +448,29 @@ public class ReferenceChecker extends Task<Void> {
         final File file = File.createTempFile("tempReference", ".csv"); 
         file.deleteOnExit();
         final URLConnection connection = url.openConnection();
-        try (final InputStream inputStream = connection.getInputStream()) {
+        try{
+            try (final InputStream inputStream = connection.getInputStream()) {
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final FileOutputStream fos = new FileOutputStream(file);
-            final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fos);
+                final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                final FileOutputStream fos = new FileOutputStream(file);
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fos);
 
-            int r = 0;
-            while (true) {
-                r = inputStreamReader.read();
-                if (r != -1) {
-                    outputStreamWriter.write(r);
-                } else {
-                    break;
+                int r = 0;
+                while (true) {
+                    r = inputStreamReader.read();
+                    if (r != -1) {
+                        outputStreamWriter.write(r);
+                    } else {
+                        break;
+                    }
                 }
-            }
-            outputStreamWriter.flush();
-            outputStreamWriter.close();
-            fos.close();
-            inputStreamReader.close();
+                outputStreamWriter.flush();
+                outputStreamWriter.close();
+                fos.close();
+                inputStreamReader.close();
+            } 
+        } catch (NullPointerException ex){
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage());
         }
         return file;
     }
