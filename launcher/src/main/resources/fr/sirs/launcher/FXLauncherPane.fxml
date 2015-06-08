@@ -9,7 +9,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -60,7 +60,7 @@
                     </rowConstraints>
                      <children>
                         <Label text="Adresse" GridPane.columnSpan="2" />
-                        <TextField fx:id="uiDistantUrl" promptText="http://user:password@server.com/database" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                        <TextField fx:id="uiDistantUrl" promptText="http://user:password@server.com:port/database" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                         <CheckBox fx:id="uiDistantSync" mnemonicParsing="false" selected="true" text="Synchroniser localement" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                         <Button mnemonicParsing="false" onAction="#connectDistant" text="Créer" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
                         <Label text="Nom de la base locale" GridPane.columnSpan="2" GridPane.rowIndex="4" />
