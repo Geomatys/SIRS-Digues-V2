@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.EventObject;
+import java.util.Set;
 import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -80,21 +81,32 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
         try{
             if(url.toLowerCase().endsWith(".shp")){
                 store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
-                uiPaneConfig.setDisable(true);
+                
             }else if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
                 final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);
                 store = new CSVFeatureStore(file, "no namespace", separator);
-                uiPaneConfig.setDisable(false);
+                
             }else{
                 new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK).showAndWait();
                 return;
             }
             
             final Session session = store.createSession(true);
-            final Name typeName = store.getNames().iterator().next();
+            final Set<Name> typeNames = store.getNames();
+            if (typeNames == null || typeNames.isEmpty()) {
+                throw new IllegalArgumentException("Impossible de trouver des données dans le fichier d'entrée.");
+            }
+            final Name typeName = typeNames.iterator().next();
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);
+            
+            // Activate property choice only when no geometry field can be found.
+            if (col.getFeatureType().getGeometryDescriptor() == null) {
+                uiPaneConfig.setDisable(false);
+            } else {
+                uiPaneConfig.setDisable(true);
+            }
             
             //liste des propriétés
             final Collection<? extends PropertyType> properties = col.getFeatureType().getProperties(true);
