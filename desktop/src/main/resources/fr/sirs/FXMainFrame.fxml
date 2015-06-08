@@ -68,9 +68,16 @@
                                         </MenuButton>
                                           </children>
                                       </VBox>
-                              <VBox prefHeight="71.0" prefWidth="125.0">
+                              <VBox prefHeight="71.0">
                                  <children>
-                                    <MenuButton fx:id="uiPlugins" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="71.0" prefWidth="150.0" styleClass="buttonbar-button" text="%pluginsThemes" VBox.vgrow="ALWAYS" />
+                                    <MenuButton fx:id="uiPlugins" alignment="CENTER" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="135.0" styleClass="buttonbar-button" text="%pluginsThemes" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" VBox.vgrow="ALWAYS">
+                                       <graphic>
+                                          <ImageView fx:id="uiPluginsImg" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@images/menu-modules.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic></MenuButton>
                                  </children>
                               </VBox>
                                   </items>

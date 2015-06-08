@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import org.geotoolkit.map.MapItem;
 
 /**
@@ -89,6 +90,11 @@ public abstract class Plugin {
      * @return Le titre du plugin, jamais nulle ou vide.
      */
     public abstract CharSequence getTitle();
+
+    /**
+     * Renvoit l'image du plugin, si une image a été fournie. Peut être {@code null}.
+     */
+    public abstract Image getImage();
 
     /**
      * Chargement du plugin.

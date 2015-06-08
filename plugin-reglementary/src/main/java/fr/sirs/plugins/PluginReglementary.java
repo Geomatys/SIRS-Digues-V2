@@ -1,6 +1,7 @@
 package fr.sirs.plugins;
 
 import fr.sirs.Plugin;
+import javafx.scene.image.Image;
 
 /**
  * Plugin correspondant au module réglementaire, permettant de gérer des documents de suivis.
@@ -26,5 +27,11 @@ public class PluginReglementary extends Plugin {
     @Override
     public CharSequence getTitle() {
         return TITLE;
+    }
+
+    @Override
+    public Image getImage() {
+        // TODO: choisir une image pour ce plugin
+        return null;
     }
 }

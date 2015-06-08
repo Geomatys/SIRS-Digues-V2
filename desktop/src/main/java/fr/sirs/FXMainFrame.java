@@ -64,6 +64,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiThemesLocalized;
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
+    @FXML private ImageView uiPluginsImg;
     @FXML private ToolBar uiToolBarPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
@@ -213,6 +214,13 @@ public class FXMainFrame extends BorderPane {
      */
     private MenuItem toMenuItem(final Plugin plugin) {
         final MenuItem item = new MenuItem(plugin.getTitle().toString());
+        if (plugin.getImage() != null) {
+            // Une image a été fournie pour le plugin, elle remplacera l'icône générale des modules.
+            uiPluginsImg.setImage(plugin.getImage());
+        } else {
+            // chargement de l'image par défaut
+            uiPluginsImg.setImage(new Image(this.getClass().getResourceAsStream("images/menu-modules.png")));
+        }
         item.setOnAction(event -> {
             uiPlugins.setText(plugin.getTitle().toString());
             uiToolBarPlugins.getItems().clear();

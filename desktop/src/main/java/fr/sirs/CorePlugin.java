@@ -7,6 +7,8 @@ import static fr.sirs.SIRS.MODEL_PACKAGE;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import java.io.IOException;
 import java.sql.SQLException;
+
+import javafx.scene.image.Image;
 import org.geotoolkit.data.bean.BeanStore;
 
 import fr.sirs.core.component.DocumentChangeEmiter;
@@ -670,6 +672,11 @@ public class CorePlugin extends Plugin {
     @Override
     public CharSequence getTitle() {
         return NAME;
+    }
+
+    @Override
+    public Image getImage() {
+        return null;
     }
 
     public MapLayer createLayer(final Class beanClass, final Query query){
