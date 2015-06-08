@@ -2,7 +2,10 @@
 package fr.sirs.map.style;
 
 import fr.sirs.Injector;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Preview;
+import java.util.logging.Level;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyleFactory;
@@ -22,11 +25,15 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
     @Override
     protected MutableRule createRule(PropertyName property, Object obj, int idx) {
         String desc = String.valueOf(obj);
-        final Preview lbl = Injector.getSession().getPreviews().get(desc);
-        if(lbl!=null){
-            desc = lbl.getLibelle();
+        try {
+            final Preview lbl = Injector.getSession().getPreviews().get(desc);
+            if (lbl != null) {
+                desc = lbl.getLibelle();
+            }
+        } catch (DocumentNotFoundException e) {
+            SirsCore.LOGGER.log(Level.FINE, "No document found for id : " + desc, e);
         }
-
+        
         final MutableStyleFactory sf = GeotkFX.getStyleFactory();
         final FilterFactory ff = GeotkFX.getFilterFactory();
 
