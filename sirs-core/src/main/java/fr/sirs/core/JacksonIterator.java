@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
 
-    private StreamingViewResult result;
+    private final StreamingViewResult result;
     private Iterator<Row> iterator;
-    private Class<? extends T> clazz;
+    private final Class<? extends T> clazz;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

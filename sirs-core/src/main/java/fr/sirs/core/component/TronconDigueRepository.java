@@ -115,20 +115,6 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         }
         return lst;
     }
-    
-//    public static final String GARDE_TRONCON = "GardeTroncon";
-//
-//    @View(name = GARDE_TRONCON, map = "classpath:GardeTroncon-map.js")
-//    public List<GardeTroncon> getAllGardes() {
-//        return db.queryView(createQuery(GARDE_TRONCON), GardeTroncon.class);
-//    }
-//
-//    public static final String PROPRIETE_TRONCON = "ProprieteTroncon";
-//
-//    @View(name = PROPRIETE_TRONCON, map = "classpath:ProprieteTroncon-map.js")
-//    public List<ProprieteTroncon> getAllProprietes() {
-//        return db.queryView(createQuery(PROPRIETE_TRONCON), ProprieteTroncon.class);
-//    }
 
     public JacksonIterator<TronconDigue> getAllIterator() {
         return JacksonIterator.create(TronconDigue.class,

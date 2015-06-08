@@ -24,6 +24,7 @@ import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
@@ -135,7 +136,7 @@ public class FXCoordinateBar extends GridPane {
                         map.getCanvas().setTemporalRange(null,null);
                     }else{
                         final LocalDateTime date = dateField.valueProperty().get();
-                        final Instant time = date.atZone(ZoneOffset.systemDefault()).toInstant();
+                        final Instant time = date.toInstant(ZoneOffset.UTC);
                         map.getCanvas().setTemporalRange(Date.from(time),Date.from(time));
                     }
                 } catch (TransformException ex) {

@@ -17,6 +17,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -178,7 +179,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                             "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
                             ButtonType.OK).showAndWait();
                     try {
-                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date(), map);
+                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDateTime.now(), map);
                     } catch (Exception ex) {
                         SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
                     }

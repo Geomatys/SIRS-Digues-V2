@@ -13,6 +13,7 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -140,7 +141,7 @@ public class FXTronconMerge extends VBox{
             }
             
             try {
-                Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(new Date(), map);
+                Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDateTime.now(), map);
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
             }

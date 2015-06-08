@@ -1,4 +1,3 @@
-
 package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
@@ -19,6 +18,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -82,7 +82,7 @@ import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.temporal.object.TemporalConstants;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
 import org.opengis.util.GenericName;
@@ -240,7 +240,7 @@ public class FXMapPane extends BorderPane {
                     uiMap1.getContainer().setContext(context);
                     uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
                     uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
-                    setTemporalRange(new Date(), null);
+                    setTemporalRange(LocalDateTime.now(), null);
                     return null;
                 }
             };
@@ -254,35 +254,20 @@ public class FXMapPane extends BorderPane {
             return null;
         });
     }
-
-    /**
-     * Déplace la temporalité de la carte sélectionnée sur la date demandée.
-     * @param t La Date pour la carte. Ne doit pas être nulle.
-     * @param map La carte à mettre à jour. Nulle pour mettre à jour les deux cartes 
-     * par défaut.
-     */
-    public void setTemporalRange(final LocalDateTime t, FXMap map) {
-        ArgumentChecks.ensureNonNull("Date de visualisation", t);
-        setTemporalRange(new Date(t.toInstant(ZoneOffset.UTC).toEpochMilli()), map);
-    }
     
     /**
      * Déplace la temporalité de la carte sélectionnée sur la date demandée.
-     * @param time La Date pour la carte. Ne doit pas être nulle.
+     * @param ldt La Date pour la carte. Ne doit pas être nulle.
      * @param map La carte à mettre à jour. Nulle pour mettre à jour les deux cartes 
      * par défaut.
      */
-    public void setTemporalRange(final Date time, FXMap map) {
-        // Affect context and bounds in a JavaFX thread, because it will affect UI (Note : it should not, and may be fixed in a future version).
+    public void setTemporalRange(final LocalDateTime ldt, FXMap map) {
         final Task t = new Task() {
             @Override
             protected Object call() throws Exception {
-                LocalDateTime ldt = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
                 if (map == null) {
-                    uiMap1.getCanvas().setTemporalRange(time, time);
                     uiCoordBar1.getDateField().valueProperty().setValue(ldt);
                 } else {
-                    map.getCanvas().setTemporalRange(time, time);
                     if (uiMap1.equals(map)) {
                         uiCoordBar1.getDateField().valueProperty().setValue(ldt);
                     } else if (uiMap2.equals(map)) {
@@ -426,18 +411,19 @@ public class FXMapPane extends BorderPane {
             final Envelope selectionEnvelope = SIRS.pseudoBuffer(tmpEnvelope);
             
             // Envelope temporelle
-            final Date selectionTime;
+            final LocalDateTime selectionTime;
             if (toFocusOn instanceof AvecBornesTemporelles) {
                 long minTime = Long.MIN_VALUE;
                 long maxTime = Long.MAX_VALUE;
-                AvecBornesTemporelles tmpBornes = (AvecBornesTemporelles) toFocusOn;
-                LocalDateTime tmpDate = ((AvecBornesTemporelles) toFocusOn).getDate_debut();
-                if (tmpDate != null) {
-                    minTime = tmpDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+                
+                LocalDateTime tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_debut();
+                if (tmpTime != null) {
+                    minTime = tmpTime.toInstant(ZoneOffset.of(ZoneId.systemDefault().getId())).toEpochMilli();
                 }
-                tmpDate = ((AvecBornesTemporelles) toFocusOn).getDate_fin();
-                if (tmpDate != null) {
-                    maxTime = tmpDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+                
+                tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_fin();
+                if (tmpTime != null) {
+                    maxTime = tmpTime.toInstant(ZoneOffset.of(ZoneId.systemDefault().getId())).toEpochMilli();
                 }
 
                 final NumberRange<Long> elementRange = NumberRange.create(minTime, true, maxTime, true);
@@ -457,7 +443,7 @@ public class FXMapPane extends BorderPane {
                 // If map temporal envelope does not intersect our element, we must 
                 // change it.
                 if (!mapRange.intersects(elementRange))
-                    selectionTime = new Date(elementRange.getMinValue());
+                    selectionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(elementRange.getMinValue()), ZoneId.systemDefault());
                 else 
                     selectionTime = null;
             } else {
