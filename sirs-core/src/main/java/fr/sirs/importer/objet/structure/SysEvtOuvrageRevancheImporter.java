@@ -13,6 +13,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.OuvrageRevanche;
+import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
@@ -168,6 +169,7 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
         final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
         final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
@@ -175,6 +177,10 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
         final OuvrageRevanche ouvrage = createAnonymValidElement(OuvrageRevanche.class);
         
         ouvrage.setLinearId(troncon.getId());
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            ouvrage.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

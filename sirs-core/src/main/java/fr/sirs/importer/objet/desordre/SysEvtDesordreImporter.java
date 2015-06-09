@@ -13,6 +13,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefTypeDesordre;
@@ -124,6 +125,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final Map<Integer, RefTypeDesordre> typesDesordre = typeDesordreImporter.getTypeReferences();
@@ -178,6 +180,10 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
             desordre.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            desordre.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {

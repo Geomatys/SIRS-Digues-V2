@@ -13,6 +13,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -154,6 +155,7 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         final Map<Integer, RefOuvrageHydrauliqueAssocie> typesOuvrage = typeOuvrageAssocieImporter.getTypeReferences();
@@ -163,6 +165,10 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
         ouvrage.setLinearId(troncon.getId());
 
         ouvrage.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
+
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            ouvrage.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
+        }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
             ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());

@@ -10,6 +10,7 @@ import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefPrestation;
 import fr.sirs.core.model.SystemeReperage;
@@ -129,6 +130,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
+        final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         
         final Map<Integer, RefPrestation> typesPrestation = typePrestationImporter.getTypeReferences();
         
@@ -149,6 +151,10 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
             prestation.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+        }
+        
+        if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
+            prestation.setCoteId(typesCote.get(row.getInt(Columns.ID_TYPE_COTE.toString())).getId());
         }
         
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
