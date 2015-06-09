@@ -70,7 +70,11 @@ public class ElasticSearchEngine implements Closeable {
      * @return ElasticSearch response, never null.
      */
     public SearchResponse search(final QueryBuilder query) {
-        return client.prepareSearch("_river").setTypes(currentDbName).addFields(HIT_FIELDS).setQuery(query)
+        return client.prepareSearch("_river")
+                .setTypes(currentDbName)
+                .addFields(HIT_FIELDS)
+                .setQuery(query)
+                .setSize(Integer.MAX_VALUE)
                 .execute().actionGet();
     }
     

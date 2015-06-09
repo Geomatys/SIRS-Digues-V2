@@ -244,11 +244,9 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                         }
                     }
 
-                    if (!resultSet.isEmpty()) {
-                        filter = (Element t) -> {
-                            return resultSet.contains(t.getDocumentId());
-                        };
-                    }
+                    filter = (Element t) -> {
+                        return resultSet.contains(t.getDocumentId());
+                    };
                 }
                 
                 //creation de l'arbre

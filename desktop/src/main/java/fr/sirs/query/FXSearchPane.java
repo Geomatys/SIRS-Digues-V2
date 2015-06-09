@@ -1,21 +1,21 @@
 
 package fr.sirs.query;
 
-import fr.sirs.index.ElementHit;
 import fr.sirs.CorePlugin;
-import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.SQLQueries;
+import fr.sirs.FXMainFrame;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.MODEL_PACKAGE;
 import fr.sirs.Session;
-import org.geotoolkit.gui.javafx.util.TaskManager;
+import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
-import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SQLQueries;
+import fr.sirs.core.model.SQLQuery;
 import fr.sirs.index.ElasticSearchEngine;
+import fr.sirs.index.ElementHit;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsStringConverter;
@@ -26,15 +26,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -64,7 +61,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -86,7 +82,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -106,7 +101,7 @@ import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -564,23 +559,28 @@ public class FXSearchPane extends BorderPane {
     }
     
     private void searchText(){
+        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
+
         final TableColumn editCol = new PojoTable.EditColumn(PojoTable::editElement);
 
-        final TableColumn<ElementHit,String> typeCol = new TableColumn<>();
+        final TableColumn<ElementHit,String> typeCol = new TableColumn<>("Type");
         typeCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, String> param) -> {
                 String str = param.getValue().geteElementClassName();
                 String[] split = str.split("\\.");
                 str = split[split.length-1];
                 return new SimpleObjectProperty(str);
             });
+        typeCol.setMinWidth(100);
 
-        final TableColumn<ElementHit,Object> libelleCol = new TableColumn<>();
+        final TableColumn<ElementHit,Object> libelleCol = new TableColumn<>(bundle.getString("libelle"));
         libelleCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, Object> param) -> {
                 return new SimpleObjectProperty(param.getValue());
             });
         libelleCol.setCellFactory((TableColumn<ElementHit, Object> param) -> {
                 return new SirsTableCell<>();
             });
+        libelleCol.setPrefWidth(300);
+        libelleCol.setMinWidth(300);
 
         final TableView<ElementHit> uiTable = new TableView<>();
         uiTable.setPlaceholder(new Label(""));
@@ -595,14 +595,14 @@ public class FXSearchPane extends BorderPane {
         final SearchResponse response = engine.search(qb);
         final SearchHits hits = response.getHits();
 
-        final List<ElementHit> results = new ArrayList<>();
+        final ObservableList<ElementHit> results = FXCollections.observableArrayList();
         final Iterator<SearchHit> ite = hits.iterator();
         while(ite.hasNext()){
             final SearchHit hit = ite.next();
             results.add(new ElementHit(hit));
         }
 
-        uiTable.setItems(FXCollections.observableList(results));
+        uiTable.setItems(results);
 
         final ScrollPane scroll = new ScrollPane(uiTable);
         scroll.setFitToHeight(true);
@@ -629,12 +629,15 @@ public class FXSearchPane extends BorderPane {
         propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty<>(param.getValue().getDesignation());
             });
+        propertyColumn.setMinWidth(100);
         designations.getColumns().add(propertyColumn);
         
         final TableColumn<Preview, String> labelColumn = new TableColumn<>(bundle.getString("libelle"));
         labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLibelle());
             });
+        labelColumn.setPrefWidth(300);
+        labelColumn.setMinWidth(300);
         designations.getColumns().add(labelColumn);
         setCenter(designations);
     }
