@@ -2,6 +2,7 @@ package fr.sirs.plugins;
 
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -10,8 +11,11 @@ import javafx.scene.layout.BorderPane;
  * @author Cédric Briançon (Geomatys)
  */
 public final class StatesGeneratorTheme extends AbstractPluginsButtonTheme {
+    private static final Image BUTTON_IMAGE = new Image(
+            StatesGeneratorTheme.class.getResourceAsStream("images/gen_etats.png"));
+
     public StatesGeneratorTheme() {
-        super("Générateur d'états", "Générateur d'états", null);
+        super("Générateur d'états", "Générateur d'états", BUTTON_IMAGE);
     }
 
     @Override

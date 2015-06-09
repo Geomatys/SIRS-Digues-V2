@@ -8,9 +8,13 @@ import static fr.sirs.SIRS.GEOMETRY_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
+import javafx.scene.text.TextAlignment;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
@@ -249,6 +253,20 @@ public class FXMainFrame extends BorderPane {
             imageView.setImage(theme.getImg());
             button.setGraphic(imageView);
         }
+        // Button style
+        button.setTextOverrun(OverrunStyle.CLIP);
+        button.setTextAlignment(TextAlignment.CENTER);
+        button.setWrapText(true);
+        button.setMinWidth(USE_PREF_SIZE);
+        button.setMinHeight(USE_COMPUTED_SIZE);
+        button.setPrefWidth(115);
+        button.setPrefHeight(USE_COMPUTED_SIZE);
+        button.setMaxWidth(USE_PREF_SIZE);
+        button.setMaxHeight(USE_COMPUTED_SIZE);
+        button.setContentDisplay(ContentDisplay.TOP);
+        button.setAlignment(Pos.CENTER);
+        button.getStyleClass().add("buttonbar-button");
+
         button.setOnAction(new DisplayTheme(theme));
         return button;
     }
