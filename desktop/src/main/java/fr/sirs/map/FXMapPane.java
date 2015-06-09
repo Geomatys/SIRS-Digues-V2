@@ -18,6 +18,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -418,12 +419,12 @@ public class FXMapPane extends BorderPane {
                 
                 LocalDateTime tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_debut();
                 if (tmpTime != null) {
-                    minTime = tmpTime.toInstant(ZoneOffset.of(ZoneId.systemDefault().getId())).toEpochMilli();
+                    minTime = Timestamp.valueOf(tmpTime).getTime();
                 }
                 
                 tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_fin();
                 if (tmpTime != null) {
-                    maxTime = tmpTime.toInstant(ZoneOffset.of(ZoneId.systemDefault().getId())).toEpochMilli();
+                    maxTime = Timestamp.valueOf(tmpTime).getTime();
                 }
 
                 final NumberRange<Long> elementRange = NumberRange.create(minTime, true, maxTime, true);
@@ -443,7 +444,7 @@ public class FXMapPane extends BorderPane {
                 // If map temporal envelope does not intersect our element, we must 
                 // change it.
                 if (!mapRange.intersects(elementRange))
-                    selectionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(elementRange.getMinValue()), ZoneId.systemDefault());
+                    selectionTime = new Timestamp(elementRange.getMinValue()).toLocalDateTime();
                 else 
                     selectionTime = null;
             } else {
