@@ -763,9 +763,10 @@ public class FXPositionablePane extends BorderPane {
             final Point point = getOrCreatePoint(longitudeProperty, latitudeProperty, distanceProperty, uiBorne.valueProperty(), amontSelectedProperty);
             
             // Si la nouvelle valeur est nulle on passe une liste vide.
-            if (newSRValue == null) {
+            if (newSRValue == null || newSRValue.systemeReperageBornes == null || newSRValue.systemeReperageBornes.isEmpty()) {
                 final ObservableList<BorneDigue> emptyBornes = FXCollections.emptyObservableList();
                 uiBorne.setItems(emptyBornes);
+                return;
             }
             
             computingRunning.set(computingRunning.get() + 1);
@@ -787,7 +788,6 @@ public class FXPositionablePane extends BorderPane {
                         
                     // Si on a de quoi recalculer, on privilégie le recalcul de la borne, et pour être certain de la cohérence, de la distance, de la position relative et du PR.
                     if (point != null) {
-
                         final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(newSRValue, point);
                         final float computedPR = TronconUtils.computePR(getSourceLinear(newSRValue), newSRValue, point, Injector.getSession().getBorneDigueRepository());
                         Platform.runLater(() -> {
@@ -806,13 +806,13 @@ public class FXPositionablePane extends BorderPane {
 
                     // Si on n'a pas de quoi recalculer mais que la nouvelle valeur n'est pas nulle, on va chercher la borne enregistrée en base.
                     else {
-
                         final BorneDigue finalCopy = defaultBorne;
                         Platform.runLater(() -> {
                             uiBorne.setItems(FXCollections.observableList(bornes));
                             uiBorne.getSelectionModel().select(finalCopy);
                         });
                     }
+                    
                 } finally {
                     Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
                 }
