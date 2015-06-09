@@ -378,7 +378,11 @@ public class ReferenceChecker extends Task<Void> {
             }
             
             // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
-            serverInstancesNotLocal.get(referenceClass).removeAll(updated);
+            if(serverInstancesNotLocal.get(referenceClass)!=null){
+                serverInstancesNotLocal.get(referenceClass).removeAll(updated);
+            } else {
+                SIRS.LOGGER.log(Level.WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
+            }
             final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
                 for(final ReferenceType updatedInstance : updated){
