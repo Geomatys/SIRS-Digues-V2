@@ -4,11 +4,11 @@ package fr.sirs.index;
 import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.Closeable;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
@@ -30,6 +30,7 @@ public class ElasticSearchEngine implements Closeable {
     private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
     static {
         DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString());
+        DEFAULT_CONFIGURATION.put("index.mapping.ignore_malformed", "true");
     }
     
     /**
@@ -42,30 +43,19 @@ public class ElasticSearchEngine implements Closeable {
     public final String currentDbName;
     
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) {
-        
+        // TODO : erase existing index ?
         /*
          * Elastic search configuration. We want a local index on the input 
          * couchDb database.
          */
-        final String config = 
-        "{\n" +
-        "    \"path\" : {\n" +
-        "        \"home\" : \""+DEFAULT_CONFIGURATION.toString()+"\"\n" +
-        "    },\n" +
-        "    \"type\" : \"couchdb\",\n" +
-        "    \"couchdb\" : {\n" +
-        "        \"host\" : \""+dbHost+"\",\n" +
-        "        \"port\" : "+dbPort+",\n" +
-        "        \"db\" : \""+dbName+"\",\n" +
-        "        \"filter\" : null,\n" +
-        "        \"user\" : \""+user+"\",\n" +
-        "        \"password\" : \""+password+"\"\n" +
-        "    },\n" +
-        "    \"index\" : {\n" +
-        "        \"index\" : \"_river\",\n" +
-        "        \"type\" : \""+dbName+"\"\n" +
-        "    }\n" +
-        "}";        
+        final String config;
+        try (final InputStream confStream = ElasticSearchEngine.class.getResourceAsStream("es-config.yml")) {
+            config = IOUtils.toString(confStream);
+        } catch (Exception e) {
+            throw new RuntimeException("Configuration illisible !", e);
+        }
+        
+        System.out.println(config);
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
         this.client = node.client();        
         currentDbName = dbName;
