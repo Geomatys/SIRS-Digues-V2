@@ -1,6 +1,7 @@
 
 package fr.sirs.index;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -10,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -30,11 +32,12 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
-        
+    
     // TODO : put elastic search configuration in a properties file.
     private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
     static {
-        DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString());
+        // We are forced to escape backslashes, or elastic search crash on windows platforms.
+        DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString().replace("\\", "\\\\"));
         DEFAULT_CONFIGURATION.put("index.mapping.ignore_malformed", "true");
     }
     
@@ -51,14 +54,13 @@ public class ElasticSearchEngine implements Closeable {
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) throws IOException {
         String riverConfig = readConfig("/fr/sirs/db/riverConfig.json");
         String indexConfig = readConfig("/fr/sirs/db/indexConfig.json");
-        riverConfig = riverConfig.replace("$DC", DEFAULT_CONFIGURATION.toString());
+        riverConfig = riverConfig.replace("$DC", DEFAULT_CONFIGURATION.get("path.home"));
         riverConfig = riverConfig.replace("$dbHost", dbHost);
         riverConfig = riverConfig.replace("$dbPort", ""+dbPort);
         riverConfig = riverConfig.replace("$dbName", dbName);
         riverConfig = riverConfig.replace("$user", user);
         riverConfig = riverConfig.replace("$password", password);
         final String cstConfig = riverConfig;
-
 
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
         this.client = node.client();        
