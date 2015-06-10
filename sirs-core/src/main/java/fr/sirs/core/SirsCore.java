@@ -46,6 +46,7 @@ public class SirsCore {
     public static final String NAME = "sirs";
     
     public static final String MODEL_PACKAGE="fr.sirs.core.model";
+    public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
     
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
     

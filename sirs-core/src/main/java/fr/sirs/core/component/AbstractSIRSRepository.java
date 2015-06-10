@@ -230,8 +230,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     /**
      * Return the class of the managed object type.
      * @return 
+     * @deprecated Use upper defined method getHandledType()
      */
-    @Override
+    @Override @Deprecated
     public abstract Class<T> getModelClass();
     
     /**

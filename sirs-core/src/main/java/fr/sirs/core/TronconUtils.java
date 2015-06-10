@@ -5,6 +5,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SessionGen;
@@ -48,6 +50,8 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import java.util.Iterator;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.elasticsearch.common.geo.ShapesAvailability;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
@@ -84,9 +88,9 @@ public class TronconUtils {
         final double startDistance = index.project(cutLinear.getStartPoint().getCoordinate());
         final double endDistance = index.project(cutLinear.getEndPoint().getCoordinate());
 
-        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
-        final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
-        final TronconDigueRepository tdRepo = session.getTronconDigueRepository();
+        final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+        final BorneDigueRepository bdRepo = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
+        final TronconDigueRepository tdRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
 
         final TronconDigue tronconCp = troncon.copy();
         tronconCp.setGeometry(cutLinear);
@@ -145,17 +149,42 @@ public class TronconUtils {
             final Positionable tmpPosition = posIt.next();
 
             //on vérifie que cet objet intersecte le segment
-            Geometry objGeom = tmpPosition.getGeometry();
-            if (objGeom == null) {
+            Geometry rawObjGeom = tmpPosition.getGeometry();
+            
+            if (rawObjGeom == null) {
                 //on la calcule
-                objGeom = buildGeometry(troncon.getGeometry(), tmpPosition, bdRepo);
-                if (objGeom == null) {
+                rawObjGeom = buildGeometry(troncon.getGeometry(), tmpPosition, bdRepo);
+                if (rawObjGeom == null) {
                     throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + tmpPosition);
                 }
-                tmpPosition.setGeometry(objGeom);
+                tmpPosition.setGeometry(rawObjGeom);
             }
 
-            if (!cutLinear.intersects(objGeom)) {
+            /*
+            Les opérations de vividsolutions "intersects", "contains" et "intersection"
+            ne donnent pas les mêmes résultats selon qu'un point est représenté par
+            une géométrie de type "POINT(x y)" ou par une géométrie de type "LINESTRING(x y, x y)"
+            c'est-à-dire une ligne formée de deux points de même coordonnées.
+            
+            Dans les lignes suivantes la géométrie interpObjGeom est destinée
+            à représenter temporairement sous forme de géométrie "POINT" les 
+            géométries "LINESTRING" qui, de fait représentent des points, de manière
+            à obtenir les bons résultats d'opérations topologiques.
+            */
+            
+            // Dinstinction des cas entre les points et les polylignes
+            Geometry interpObjGeom = rawObjGeom;
+            if(rawObjGeom instanceof LineString){
+                final LineString line = (LineString) rawObjGeom;
+                
+                // Si l'objet est ponctuel il faut transformer sa géométrie en point pour détecter intersection
+                if(line.getNumPoints()==2 && line.getPointN(0).equals(line.getPointN(1))){
+                    interpObjGeom = line.getPointN(0);
+                }
+            }
+            
+            
+            if (!cutLinear.intersects(interpObjGeom)) {
                 posIt.remove();
                 continue;
             } 
@@ -164,19 +193,19 @@ public class TronconUtils {
             newPositions.add(position);
             
             // Mise à jour des infos géographiques
-            if (!cutLinear.contains(objGeom)) {
-                objGeom = cutLinear.intersection(objGeom);
-                position.setGeometry(objGeom);
+            if (!cutLinear.contains(interpObjGeom)) {
+                rawObjGeom = cutLinear.intersection(interpObjGeom);
+                position.setGeometry(rawObjGeom);
             }
 
-            if (objGeom instanceof Point) {
-                position.setPositionDebut((Point) objGeom);
-                position.setPositionFin((Point) objGeom);
+            if (rawObjGeom instanceof Point) {
+                position.setPositionDebut((Point) rawObjGeom);
+                position.setPositionFin((Point) rawObjGeom);
             } else {
-                final LineString structureLine = asLineString(objGeom);
+                final LineString structureLine = asLineString(rawObjGeom);
                 position.setPositionDebut(structureLine.getStartPoint());
                 position.setPositionFin(structureLine.getEndPoint());
-                position.setGeometry(objGeom);
+                position.setGeometry(rawObjGeom);
             }
 
             // Mise à jour du réferencement linéaire

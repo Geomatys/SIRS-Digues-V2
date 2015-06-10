@@ -39,7 +39,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;

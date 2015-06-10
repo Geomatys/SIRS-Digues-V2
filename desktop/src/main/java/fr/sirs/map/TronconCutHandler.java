@@ -418,8 +418,8 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
 
                         //on sauvegarde les modifications
-                        session.getTronconDigueRepository().update(aggregate);
-                        session.getTronconDigueRepository().remove(cut);
+                        session.getRepositoryForClass(TronconDigue.class).update(aggregate);
+                        session.getRepositoryForClass(TronconDigue.class).remove(cut);
                     }
 
                 } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
@@ -430,7 +430,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         obj.date_finProperty().set(LocalDateTime.now());
                     }
                     //on le sauvegarde
-                    session.getTronconDigueRepository().update(cut);
+                    session.getRepositoryForClass(TronconDigue.class).update(cut);
 
                 } else if (FXTronconCut.SegmentType.SECTIONNER.equals(type)) {
                     //rien a faire
@@ -443,7 +443,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
             toCut.setDate_fin(LocalDateTime.now());
             
-            session.getTronconDigueRepository().update(toCut);
+            session.getRepositoryForClass(TronconDigue.class).update(toCut);
 
             for (Positionable obj : TronconUtils.getPositionableList(toCut)) {
                 if (obj instanceof AvecBornesTemporelles) {

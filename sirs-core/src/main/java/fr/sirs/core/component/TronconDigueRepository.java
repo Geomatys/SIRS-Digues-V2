@@ -21,6 +21,7 @@ import fr.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
+import org.springframework.stereotype.Component;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
@@ -56,6 +57,7 @@ import org.apache.sis.util.ArgumentChecks;
         @View(name = TronconDigueRepository.STREAM, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
         @View(name = TronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
         @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
+@Component("fr.sirs.core.component.TronconDigueRepository")
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
     
     public static final String STREAM = "stream";

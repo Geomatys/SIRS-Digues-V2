@@ -13,6 +13,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.util.HashMap;
@@ -103,9 +104,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 displayElement((Element) obj);
             } else if (obj instanceof TronconDigue) {
                 //le troncon dans l'arbre est une version 'light'
-                TronconDigue td = (TronconDigue) obj;
-                td = session.getTronconDigueRepository().get(td.getDocumentId());
-                displayElement(td);
+                displayElement(session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) obj).getDocumentId()));
             }
         });
         
@@ -157,7 +156,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             );
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
-                session.getSystemeEndiguementRepository().remove(se);
+                session.getRepositoryForClass(SystemeEndiguement.class).remove(se);
             }
                         
         }else if(obj instanceof Digue){
@@ -170,13 +169,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 //on enleve la reference a la digue dans les troncons
-                final List<TronconDigue> troncons = session.getTronconDigueRepository().getByDigue(digue);
-                for(TronconDigue td : troncons){
+                final List<TronconDigue> troncons = ((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(digue);
+                for(final TronconDigue td : troncons){
                     td.setDigueId(null);
-                    session.getTronconDigueRepository().update(td);
+                    session.getRepositoryForClass(TronconDigue.class).update(td);
                 }
                 //on supprime la digue
-                session.getDigueRepository().remove(digue);
+                session.getRepositoryForClass(Digue.class).remove(digue);
             }
         }else if(obj instanceof TronconDigue){
             final TronconDigue td = (TronconDigue) obj;
@@ -186,7 +185,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             );
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
-                session.getTronconDigueRepository().remove(td);
+                session.getRepositoryForClass(TronconDigue.class).remove(td);
             }
         }
     }
@@ -233,7 +232,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 Predicate<Element> filter = null;
                 if (str != null && !str.isEmpty()) {
                     final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
-                    final String type = TronconDigue.class.getSimpleName();
+//                    final String type = TronconDigue.class.getSimpleName();
                     HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
                     final HashSet resultSet = new HashSet();
                     HashSet tmp;
@@ -253,13 +252,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 final TreeItem treeRootItem = new TreeItem("root");
                 
                 //on recupere tous les elements
-                final List<SystemeEndiguement> sds = session.getSystemeEndiguementRepository().getAll();
-                final Set<Digue> digues = new HashSet<>(session.getDigues());
-                final Set<TronconDigue> troncons = new HashSet<>(session.getTronconDigueRepository().getAllLight());
+                final List<SystemeEndiguement> sds = session.getRepositoryForClass(SystemeEndiguement.class).getAll();
+                final Set<Digue> digues = new HashSet<>(session.getRepositoryForClass(Digue.class).getAll());
+                final Set<TronconDigue> troncons = new HashSet<>(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getAllLight());
                 final Set<Digue> diguesFound = new HashSet<>();
                 final Set<TronconDigue> tronconsFound = new HashSet<>();
                 
-                for(SystemeEndiguement sd : sds){
+                for(final SystemeEndiguement sd : sds){
                     final TreeItem sdItem = new TreeItem(sd);
                     treeRootItem.getChildren().add(sdItem);
                     sdItem.setExpanded(extendeds.contains(sd));
@@ -280,13 +279,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 ncItem.setExpanded(extendeds.contains(ncItem.getValue()));
                 treeRootItem.getChildren().add(ncItem);
                 
-                for(Digue digue : digues){
+                for(final Digue digue : digues){
                     final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
                     ncItem.getChildren().add(digueItem);
                     digueItem.setExpanded(extendeds.contains(digue));
                 }
                 troncons.removeAll(tronconsFound);
-                for(TronconDigue tc : troncons){
+                for(final TronconDigue tc : troncons){
                     ncItem.getChildren().add(new TreeItem(tc));
                 }
                 
@@ -311,7 +310,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     
     private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<Element> filter){
         final TreeItem digueItem = new TreeItem(digue);
-        for(TronconDigue td : troncons){
+        for(final TronconDigue td : troncons){
             if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
             tronconsFound.add(td);
             if(filter==null || filter.test(td)){
@@ -336,7 +335,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         if(candidate.get(SystemeEndiguement.class) != null  ||
            candidate.get(Digue.class) != null ||
            candidate.get(TronconDigue.class) != null) {
-            updateTree();
+           updateTree();
         }
     }
 
@@ -345,7 +344,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         if(candidate.get(SystemeEndiguement.class) != null  ||
            candidate.get(Digue.class) != null ||
            candidate.get(TronconDigue.class) != null) {
-            updateTree();
+           updateTree();
         }
     }
     
@@ -354,7 +353,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewTronconMenuItem(TreeItem parent) {
             super("Créer un nouveau tronçon",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final TronconDigue troncon = Injector.getSession().getElementCreator().createElement(TronconDigue.class);
+                final TronconDigue troncon = session.getElementCreator().createElement(TronconDigue.class);
                 troncon.setLibelle("Tronçon vide");
                 if(parent!=null){
                     final Digue digue = (Digue) parent.getValue();
@@ -371,9 +370,9 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                     troncon.setGeometry((Geometry) TRONCON_GEOM_WGS84.clone());
                 }
 
-                session.getTronconDigueRepository().add(troncon);
+                session.getRepositoryForClass(TronconDigue.class).add(troncon);
                 //mise en place du SR élémentaire
-                TronconUtils.updateSRElementaire(troncon,session);
+                TronconUtils.updateSRElementaire(troncon, session);
             });
         }
     }
@@ -383,15 +382,15 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewDigueMenuItem(TreeItem parent) {
             super("Créer une nouvelle digue",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final Digue digue = Injector.getSession().getElementCreator().createElement(Digue.class);
+                final Digue digue = session.getElementCreator().createElement(Digue.class);
                 digue.setLibelle("Digue vide");
-                session.getDigueRepository().add(digue);
+                session.getRepositoryForClass(Digue.class).add(digue);
                 
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
                     se.getDigueIds().add(digue.getDocumentId());
                     digue.setSystemeEndiguementId(se.getId());
-                    session.getSystemeEndiguementRepository().update(se);
+                    session.getRepositoryForClass(SystemeEndiguement.class).update(se);
                 }
                 
             });
@@ -403,9 +402,9 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         public NewSystemeMenuItem(TreeItem parent) {
             super("Créer un nouveau système d'endiguement",new ImageView(SIRS.ICON_ADD_WHITE));
             this.setOnAction((ActionEvent t) -> {
-                final SystemeEndiguement systemeEndiguement = Injector.getSession().getElementCreator().createElement(SystemeEndiguement.class);
+                final SystemeEndiguement systemeEndiguement = session.getElementCreator().createElement(SystemeEndiguement.class);
                 systemeEndiguement.setLibelle("Système vide");
-                session.getSystemeEndiguementRepository().add(systemeEndiguement);
+                session.getRepositoryForClass(SystemeEndiguement.class).add(systemeEndiguement);
             });
         }
     }

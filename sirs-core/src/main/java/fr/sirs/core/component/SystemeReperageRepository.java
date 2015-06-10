@@ -21,11 +21,11 @@ import org.ektorp.DocumentNotFoundException;
 import org.ektorp.support.Views;
 
 
-@Component
 @Views({
     @View(name="all",         map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc._id, doc._id)}}"),
     @View(name=BY_LINEAR_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.linearId, doc._id)}}")
 })
+@Component("fr.sirs.core.component.SystemeReperageRepository")
 public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage>{
     
     public static final String BY_LINEAR_ID = "byLinarId";

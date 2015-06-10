@@ -1,5 +1,6 @@
 package fr.sirs.core;
 
+import static fr.sirs.core.SirsCore.COMPONENT_PACKAGE;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -36,7 +37,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 import org.ektorp.CouchDbConnector;
@@ -91,6 +91,13 @@ public class SessionCore extends SessionGen {
     public void setApplicationContext(final ConfigurableApplicationContext applicationContext) {
         this.applicationContext=applicationContext;
     }
+    
+//    @Override
+//    public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
+//        AbstractSIRSRepository repo = this.applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
+//        System.out.println("repo :: "+repo);
+//        return repo;
+//    }
 
     private final CouchDbConnector connector;
     
@@ -265,10 +272,6 @@ public class SessionCore extends SessionGen {
     
     public static List<Class<? extends ReferenceType>> getReferences(){return REFERENCES;}
     public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
-    
-    public List<Digue> getDigues() {
-        return getDigueRepository().getAll();
-    }
     
     /**
      * Take an element in input, and return the same, but with its {@link Element#parentProperty() }
