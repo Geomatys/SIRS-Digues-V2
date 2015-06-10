@@ -2,13 +2,17 @@
 package fr.sirs.index;
 
 import fr.sirs.core.SirsCore;
-import org.geotoolkit.gui.javafx.util.TaskManager;
+import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.apache.commons.io.IOUtils;
+import java.util.concurrent.Callable;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
@@ -19,6 +23,7 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  * TODO : Improve configuration to allow nested documents (Crete, Photo, etc.) as return type. 
@@ -41,27 +46,37 @@ public class ElasticSearchEngine implements Closeable {
     private final Node node;
     private final Client client;
     public final String currentDbName;
+    private final String adName = "_river";
     
-    public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) {
-        // TODO : erase existing index ?
-        /*
-         * Elastic search configuration. We want a local index on the input 
-         * couchDb database.
-         */
-        final String config;
-        try (final InputStream confStream = ElasticSearchEngine.class.getResourceAsStream("es-config.yml")) {
-            config = IOUtils.toString(confStream);
-        } catch (Exception e) {
-            throw new RuntimeException("Configuration illisible !", e);
-        }
-        
-        System.out.println(config);
+    public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) throws IOException {
+        String riverConfig = readConfig("/fr/sirs/db/riverConfig.json");
+        String indexConfig = readConfig("/fr/sirs/db/indexConfig.json");
+        riverConfig = riverConfig.replace("$DC", DEFAULT_CONFIGURATION.toString());
+        riverConfig = riverConfig.replace("$dbHost", dbHost);
+        riverConfig = riverConfig.replace("$dbPort", ""+dbPort);
+        riverConfig = riverConfig.replace("$dbName", dbName);
+        riverConfig = riverConfig.replace("$user", user);
+        riverConfig = riverConfig.replace("$password", password);
+        final String cstConfig = riverConfig;
+
+
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
         this.client = node.client();        
         currentDbName = dbName;
         
-        TaskManager.INSTANCE.submit("Mise à jour des index", () -> client.index(
-                Requests.indexRequest("_river").type(dbName).id("_meta").source(config)).actionGet());
+        TaskManager.INSTANCE.submit("Mise à jour des index", new Callable<IndexResponse>() {
+
+            public IndexResponse call() {
+                IndicesExistsResponse res = client.admin().indices().exists(Requests.indicesExistsRequest(adName)).actionGet();
+                if(res.isExists()){
+                    client.admin().indices().close(Requests.closeIndexRequest(adName)).actionGet();
+                    client.admin().indices().delete(Requests.deleteIndexRequest(adName)).actionGet();
+                }
+                client.admin().indices().create(Requests.createIndexRequest(adName).settings(indexConfig)).actionGet();
+                client.index(Requests.indexRequest(adName).type(dbName).id("_meta").source(cstConfig)).actionGet();
+                return null;
+            }
+        });
     }
 
     /**
@@ -70,7 +85,7 @@ public class ElasticSearchEngine implements Closeable {
      * @return ElasticSearch response, never null.
      */
     public SearchResponse search(final QueryBuilder query) {
-        return client.prepareSearch("_river")
+        return client.prepareSearch(adName)
                 .setTypes(currentDbName)
                 .addFields(HIT_FIELDS)
                 .setQuery(query)
@@ -111,4 +126,20 @@ public class ElasticSearchEngine implements Closeable {
     public void close(){
         node.close();
     }
+
+    private static String readConfig(String path) throws IOException {
+        final InputStream is = ElasticSearchEngine.class.getResourceAsStream(path);
+        final StringBuilder sb = new StringBuilder();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String line;
+        try{
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        }finally{
+            br.close();
+        }
+        return sb.toString();
+    }
+
 }

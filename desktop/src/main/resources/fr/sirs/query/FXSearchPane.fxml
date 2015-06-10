@@ -102,7 +102,7 @@
                           </rowConstraints>
                            <children>
                               <Label text="Mots clés :" />
-                              <TextField fx:id="uiElasticKeywords" onAction="#search" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+                              <TextField fx:id="uiElasticKeywords" onAction="#search" promptText="La recherche est insensible à la casse et aux accents. Caractère joker : *" GridPane.columnIndex="1" GridPane.columnSpan="3" />
                            </children>
                            <padding>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
