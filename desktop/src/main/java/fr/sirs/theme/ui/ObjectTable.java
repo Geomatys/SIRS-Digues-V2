@@ -1,0 +1,278 @@
+
+package fr.sirs.theme.ui;
+
+import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import static fr.sirs.SIRS.AUTHOR_FIELD;
+import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
+import static fr.sirs.SIRS.VALID_FIELD;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
+import fr.sirs.index.ElementHit;
+import static fr.sirs.theme.ui.PojoTable.editElement;
+import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.property.Reference;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.util.Callback;
+import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.FXTableView;
+
+/**
+ *
+ * @author Johann Sorel (Geomatys)
+ */
+public class ObjectTable extends BorderPane {
+
+    private static final String BUTTON_STYLE = "buttonbar-button";
+    private static final String[] COLUMNS_TO_IGNORE = new String[] {
+        "documentId", //ElementHit
+        "docClass","elementId","elementClass","docId", //Preview
+        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD};
+
+    // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
+    protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
+    protected final HBox searchEditionToolbar = new HBox(uiFicheMode);
+    private final LabelMapper labelMapper;
+
+    // Barre de gauche : navigation dans le parcours de fiches
+    protected FXElementPane elementPane = null;
+    private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
+    private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
+    private final Button uiCurrent = new Button();
+    protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);    
+
+    protected final Class pojoClass;
+    protected final BorderPane topPane;
+    protected final TableView<Object> uiTable = new FXTableView<>();
+
+
+    public ObjectTable(final Class pojoClass, final String title) {
+        this.pojoClass = pojoClass;
+        getStylesheets().add(SIRS.CSS_PATH);
+        this.labelMapper = new LabelMapper(this.pojoClass);
+
+        final Label uiTitle = new Label(title);
+        uiTitle.getStyleClass().add("pojotable-header");
+        uiTitle.setAlignment(Pos.CENTER);
+
+        searchEditionToolbar.getStyleClass().add("buttonbar");
+
+
+        topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
+        setTop(topPane);
+        uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        uiTable.setMaxWidth(Double.MAX_VALUE);
+        uiTable.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+        uiTable.setPlaceholder(new Label(""));
+        uiTable.setTableMenuButtonVisible(true);
+        uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        
+        final EditColumn editCol = new EditColumn(this::editPojo);
+        uiTable.getColumns().add(editCol);
+        try {
+            final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
+            // On enlève les propriétés inutiles pour l'utilisateur
+            for (final String key : COLUMNS_TO_IGNORE) {
+                properties.remove(key);
+            }
+            //contruction des colonnes editable
+            for (final PropertyDescriptor desc : properties.values()) {
+                getPropertyColumn(desc).ifPresent(column -> uiTable.getColumns().add(column));
+            }
+        } catch (IntrospectionException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "property columns cannot be created.", ex);
+        }
+
+        //
+        // NAVIGATION FICHE PAR FICHE
+        //
+        navigationToolbar.getStyleClass().add("buttonbarleft");
+
+        uiCurrent.setFont(Font.font(16));
+        uiCurrent.getStyleClass().add(BUTTON_STYLE);
+        uiCurrent.setAlignment(Pos.CENTER);
+        uiCurrent.setTextFill(Color.WHITE);
+
+        uiPrevious.getStyleClass().add(BUTTON_STYLE);
+        uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
+        uiPrevious.setOnAction((ActionEvent event) -> {
+            uiTable.getSelectionModel().selectPrevious();
+        });
+
+        uiNext.getStyleClass().add(BUTTON_STYLE);
+        uiNext.setTooltip(new Tooltip("Fiche suivante."));
+        uiNext.setOnAction((ActionEvent event) -> {
+            uiTable.getSelectionModel().selectNext();
+        });
+        navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
+
+        uiFicheMode.getStyleClass().add(BUTTON_STYLE);
+        uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+
+        // Update counter when we change selected element.
+        final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            uiCurrent.setText(""+(newValue.intValue()+1) + " / " + uiTable.getItems().size());
+            updateFiche();
+        };
+        uiFicheMode.setSelected(true);
+        uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    // If there's no selection, initialize on first element.
+                    if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
+                        uiTable.getSelectionModel().select(0);
+                    }
+                    uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
+                    updateFiche();
+
+                } else {
+                    // Update display
+                    uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
+                    setCenter(uiTable);
+
+                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+                }
+            }
+        });
+
+        topPane.setLeft(navigationToolbar);
+
+        uiFicheMode.setSelected(false);
+    }
+
+    private void updateFiche(){
+        final Object cdt = uiTable.getSelectionModel().getSelectedItem();
+        final Optional<? extends Element> ele = Injector.getSession().getElement(cdt);
+        if(!ele.isPresent()){
+            setCenter(new Label("Pas d'éditeur disponible pour cet objet"));
+        }else{
+            elementPane = SIRS.generateEditionPane(ele.get());
+            elementPane.elementProperty().set(ele.get());
+
+            uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
+
+            uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
+            setCenter((Node) elementPane);
+        }
+    }
+
+    public void setTableItems(ObservableList elements){
+        uiTable.setItems(elements);
+    }
+
+    /**
+     * Try to find and display a form to edit input object.
+     * @param pojo The object we want to edit.
+     */
+    protected void editPojo(Object pojo){
+        editElement(pojo);
+    }
+
+    protected Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
+        if (desc != null) {
+            final TableColumn col = new PropertyColumn(desc);
+            col.sortableProperty().setValue(Boolean.TRUE);
+            return Optional.of(col);
+        }
+        return Optional.empty();
+    }
+
+    public class PropertyColumn extends TableColumn<Object, Object>{
+
+        public PropertyColumn(final PropertyDescriptor desc) {
+            super(labelMapper.mapPropertyName(desc.getDisplayName()));
+
+            final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
+
+            //choix de l'editeur en fonction du type de données
+            if (ref != null) {
+                //reference vers un autre objet
+                setEditable(false);
+                setCellFactory((TableColumn<Object, Object> param) -> new SirsTableCell());
+                try {
+                    final Method propertyAccessor = pojoClass.getMethod(desc.getName()+"Property");
+                    setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> {
+                        try {
+                            return (ObservableValue) propertyAccessor.invoke(param.getValue());
+                        } catch (Exception ex) {
+                            SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                            return null;
+                        }
+                    });
+                } catch (Exception ex) {
+                    setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                }
+
+            } else {
+                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                setEditable(false);
+            }
+        }
+    }
+
+
+    public static class EditColumn extends TableColumn {
+
+        public EditColumn(Consumer editFct) {
+            super("Edition");
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
+
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
+
+                @Override
+                public ObservableValue call(TableColumn.CellDataFeatures param) {
+                    return new SimpleObjectProperty<>(param.getValue());
+                }
+            });
+
+            setCellFactory(new Callback<TableColumn, TableCell>() {
+
+                public TableCell call(TableColumn param) {
+                    return new ButtonTableCell(
+                            false, new ImageView(SIRS.ICON_EDIT_BLACK),
+                            (Object t) -> true, (Object t) -> {
+                                editFct.accept(t);
+                                return t;
+                            });
+                }
+            });
+        }
+    }
+    
+
+}

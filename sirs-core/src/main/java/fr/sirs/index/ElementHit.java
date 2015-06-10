@@ -33,8 +33,9 @@ public final class ElementHit {
         return libelle;
     }
 
-    public String geteElementClassName() {
-        return clazz;
+    public String getElementClassName() {
+        final String[] parts = clazz.split("\\.");
+        return parts[parts.length-1];
     }
 
     public Class geteElementClass() throws ClassNotFoundException {

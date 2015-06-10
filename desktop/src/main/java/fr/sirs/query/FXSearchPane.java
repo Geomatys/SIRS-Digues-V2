@@ -2,7 +2,6 @@
 package fr.sirs.query;
 
 import fr.sirs.CorePlugin;
-import fr.sirs.FXMainFrame;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -16,6 +15,7 @@ import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.ElementHit;
+import fr.sirs.theme.ui.ObjectTable;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsStringConverter;
@@ -146,7 +146,6 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiDesignationPane;
     @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
     @FXML private TextField uiDesignation;
-    private TableView<Preview> designations;
     private List<Preview> validitySummaries;
     
     // 2- Recherche SQL
@@ -559,35 +558,6 @@ public class FXSearchPane extends BorderPane {
     }
     
     private void searchText(){
-        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
-
-        final TableColumn editCol = new PojoTable.EditColumn(PojoTable::editElement);
-
-        final TableColumn<ElementHit,String> typeCol = new TableColumn<>("Type");
-        typeCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, String> param) -> {
-                String str = param.getValue().geteElementClassName();
-                String[] split = str.split("\\.");
-                str = split[split.length-1];
-                return new SimpleObjectProperty(str);
-            });
-        typeCol.setMinWidth(100);
-
-        final TableColumn<ElementHit,Object> libelleCol = new TableColumn<>(bundle.getString("libelle"));
-        libelleCol.setCellValueFactory((TableColumn.CellDataFeatures<ElementHit, Object> param) -> {
-                return new SimpleObjectProperty(param.getValue());
-            });
-        libelleCol.setCellFactory((TableColumn<ElementHit, Object> param) -> {
-                return new SirsTableCell<>();
-            });
-        libelleCol.setPrefWidth(300);
-        libelleCol.setMinWidth(300);
-
-        final TableView<ElementHit> uiTable = new TableView<>();
-        uiTable.setPlaceholder(new Label(""));
-        uiTable.getColumns().add(editCol);
-        uiTable.getColumns().add(typeCol);
-        uiTable.getColumns().add(libelleCol);
-
 
         final ElasticSearchEngine engine = Injector.getElasticSearchEngine();
         final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
@@ -602,16 +572,16 @@ public class FXSearchPane extends BorderPane {
             results.add(new ElementHit(hit));
         }
 
-        uiTable.setItems(results);
+        final ObjectTable table = new ObjectTable(ElementHit.class, "Résultats");
+        table.setTableItems(results);
 
-        final ScrollPane scroll = new ScrollPane(uiTable);
+        final ScrollPane scroll = new ScrollPane(table);
         scroll.setFitToHeight(true);
         scroll.setFitToWidth(true);
         setCenter(scroll);
     }
     
     private void searchDesignation(){
-        final ResourceBundle bundle = ResourceBundle.getBundle(Preview.class.getName());
 
         validitySummaries = session.getPreviews().getByClass(uiDesignationClass.getValue());
         validitySummaries.removeIf((Preview t) -> {
@@ -620,26 +590,13 @@ public class FXSearchPane extends BorderPane {
                         !uiDesignation.getText().equals(t.getDesignation());
             });
 
-        designations = new TableView<>(FXCollections.observableArrayList(validitySummaries));
-        designations.setEditable(false);
+        final ObjectTable table = new ObjectTable(Preview.class, "Résultats");
+        table.setTableItems(FXCollections.observableArrayList(validitySummaries));
 
-        designations.getColumns().add(new FXPreviewToElementTableColumn());
-
-        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(bundle.getString("designation"));
-        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
-                return new SimpleObjectProperty<>(param.getValue().getDesignation());
-            });
-        propertyColumn.setMinWidth(100);
-        designations.getColumns().add(propertyColumn);
-        
-        final TableColumn<Preview, String> labelColumn = new TableColumn<>(bundle.getString("libelle"));
-        labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
-                return new SimpleObjectProperty(param.getValue().getLibelle());
-            });
-        labelColumn.setPrefWidth(300);
-        labelColumn.setMinWidth(300);
-        designations.getColumns().add(labelColumn);
-        setCenter(designations);
+        final ScrollPane scroll = new ScrollPane(table);
+        scroll.setFitToHeight(true);
+        scroll.setFitToWidth(true);
+        setCenter(scroll);
     }
 
     private void searchSQL(String query){

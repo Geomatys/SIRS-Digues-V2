@@ -333,7 +333,7 @@ public class SessionCore extends SessionGen {
             
         } else if (toGetElementFor instanceof ElementHit) {
             ElementHit hit = (ElementHit) toGetElementFor;
-            AbstractSIRSRepository repository = getRepositoryForType(hit.geteElementClassName());
+            AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
             Identifiable tmp = repository.get(hit.getDocumentId());
             if (tmp instanceof Element) {
                 return Optional.of((Element)tmp);
@@ -349,7 +349,7 @@ public class SessionCore extends SessionGen {
         } else if (o instanceof Preview) {
             return ((Preview)o).getElementClass();
         } else if (o instanceof ElementHit) {
-            return ((ElementHit)o).geteElementClassName();
+            return ((ElementHit)o).getElementClassName();
         } else {
             return null;
         }

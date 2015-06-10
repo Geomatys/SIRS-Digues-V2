@@ -67,7 +67,7 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
     }
     
     @Override
-    public void setTableItems(Supplier<ObservableList<Element>> producer) {        
+    public void setTableItems(Supplier<ObservableList<Element>> producer) {
         if (tableUpdater != null && !tableUpdater.isDone()) {
             tableUpdater.cancel();
         }
