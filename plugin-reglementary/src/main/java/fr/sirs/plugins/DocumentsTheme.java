@@ -2,10 +2,11 @@ package fr.sirs.plugins;
 
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
-import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import fr.sirs.theme.ui.ObligationsPojoTable;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
@@ -25,19 +26,27 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
     @Override
     public Parent createPane() {
         final BorderPane borderPane = new BorderPane();
-        
-        ObligationReglementaire or = Injector.getSession().getElementCreator().createElement(ObligationReglementaire.class);
+        final TabPane tabPane = new TabPane();
 
-        or.setDesignation("jojo");
-        ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
-        
-        orr.add(or);
-        
-        
-//        PojoTable pt = new PojoTable(orr, "coucou");
-        
-        borderPane.setCenter(new Label(or.getId()+""+or.getDesignation()));
-        
+        final Tab listTab = buildListTab();
+        final Tab calendarTab = buildCalendarTab();
+        tabPane.getTabs().add(listTab);
+        tabPane.getTabs().add(calendarTab);
+
+        borderPane.setCenter(tabPane);
         return borderPane;
+    }
+
+    private Tab buildListTab() {
+        final Tab listTab = new Tab("Liste");
+        final ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
+        final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(orr);
+        listTab.setContent(obligationsPojoTable);
+        return listTab;
+    }
+
+    private Tab buildCalendarTab() {
+        final Tab calendarTab = new Tab("Calendrier");
+        return calendarTab;
     }
 }
