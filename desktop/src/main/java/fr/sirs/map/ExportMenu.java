@@ -58,6 +58,7 @@ import org.geotoolkit.feature.Attribute;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.Property;
 import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -140,7 +141,6 @@ public class ExportMenu extends TreeMenuItem {
                     }
                 }
             });
-            
         }
 
     }
@@ -240,6 +240,7 @@ public class ExportMenu extends TreeMenuItem {
                 }
 
                 for(FeatureCollection col : cols){
+                    if(col.isEmpty()) continue;
 
                     final FeatureType inType = col.getFeatureType();
                     final String inTypeName = inType.getName().getLocalPart();
