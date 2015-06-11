@@ -4,7 +4,6 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 import fr.sirs.Session;
-import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.*;
 import fr.sirs.util.SirsStringConverter;
 import java.security.MessageDigest;

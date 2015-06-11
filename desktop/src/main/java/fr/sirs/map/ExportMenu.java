@@ -20,7 +20,6 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.theme.ui.FXPositionablePane;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;

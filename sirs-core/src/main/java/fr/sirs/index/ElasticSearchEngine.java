@@ -1,7 +1,6 @@
 
 package fr.sirs.index;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -11,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.index.IndexResponse;
