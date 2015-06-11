@@ -57,6 +57,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -148,6 +149,8 @@ public class FXSearchPane extends BorderPane {
     @FXML private ComboBox<String> uiTableChoice;
     @FXML private BorderPane uiFilterPane;
     @FXML private TextArea uiSQLText;
+    //nom de la requete si affichage sur carte
+    private String sqlLibelle;
     private FXSQLFilterEditor uiFilterEditor;
     
     
@@ -338,6 +341,7 @@ public class FXSearchPane extends BorderPane {
             try{
                 final List<SQLQuery> queries = SQLQueries.getLocalQueries();
                 queries.add(query);
+                sqlLibelle = query.getName();
                 SQLQueries.saveQueriesLocally(queries);
             }catch(IOException ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -376,6 +380,7 @@ public class FXSearchPane extends BorderPane {
                 //sauvegarde s'il y a eu des changements
                 final SQLQuery selected = table.getSelection();
                 if (selected != null) {
+                    sqlLibelle = selected.getName();
                     uiSQLText.setText(selected.sql.get());
                 }
             }
@@ -406,7 +411,18 @@ public class FXSearchPane extends BorderPane {
         
         final FeatureMapLayer layer = searchSQLLayer(query);
         if(layer==null) return;
+
         
+        final String name = sqlLibelle==null ? query : sqlLibelle;
+        final TextInputDialog d = new TextInputDialog(name);
+        d.setTitle("Nom de la couche");
+        d.setHeaderText("Titre de la couche affichant les résultats de la requête SQL");
+        d.setContentText("");
+        d.setGraphic(null);
+        final Optional<String> opt = d.showAndWait();
+        if(!opt.isPresent()) return;
+
+        layer.setName(opt.get());
         final MapContext context = session.getMapContext();
         
         MapItem querygroup = null;
