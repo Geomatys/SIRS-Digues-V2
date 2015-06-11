@@ -18,8 +18,11 @@ package fr.sirs.map;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.Preview;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -29,10 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -42,6 +44,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.FeatureStoreFinder;
@@ -51,12 +54,15 @@ import org.geotoolkit.data.FileFeatureStoreFactory;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.memory.WrapFeatureCollection;
 import org.geotoolkit.data.session.Session;
+import org.geotoolkit.feature.Attribute;
 import org.geotoolkit.feature.Feature;
+import org.geotoolkit.feature.Property;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.TreeMenuItem;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -129,72 +135,14 @@ public class ExportMenu extends TreeMenuItem {
                     
                     final File folder = chooser.showDialog(null);
 
-                    if(folder!=null){                    
-                        try {
-                            final FeatureCollection baseCol = new FillCoordCollection(layer.getCollection());
-                            final FeatureType baseType = baseCol.getFeatureType();
-
-                            final FactoryMetadata metadata = factory.getMetadata();
-                            final Class<Geometry>[] supportedGeometryTypes = metadata.supportedGeometryTypes();
-
-                            //detect if we need one or multiple types.
-                            final FeatureCollection[] cols;
-                            if(ArraysExt.contains(supportedGeometryTypes,baseType.getGeometryDescriptor().getType().getBinding()) ){
-                                cols = new FeatureCollection[]{baseCol};
-                            }else{
-                                //split the feature collection in sub geometry types
-                                cols = FeatureStoreUtilities.decomposeByGeometryType(baseCol, supportedGeometryTypes);
-                            }
-
-                            for(FeatureCollection col : cols){
-
-                                final FeatureType inType = col.getFeatureType();
-                                final String inTypeName = inType.getName().getLocalPart();
-                                
-                                //output file path
-                                File file= new File(folder, inTypeName+factory.getFileExtensions()[0]);
-
-                                //if file exist, add date aside it
-                                if(file.exists()){
-                                    //generate name + time
-                                    String name = inTypeName+" "+TemporalUtilities.toISO8601(new Date())+factory.getFileExtensions()[0];
-                                    name = name.replace(':', '_');
-                                    file = new File(folder, name);
-                                    //it should not exist, but delete it if there is one in case
-                                    file.delete();
-                                }
-
-                                //create output store
-                                final FeatureStore store = factory.createDataStore(file.toURI().toURL());
-
-                                //delete feature types
-
-                                //create output type
-                                store.createFeatureType(inType.getName(), inType);
-                                final FeatureType outType = store.getFeatureType(inTypeName);
-                                final Name outName = outType.getName();
-
-                                //write datas
-                                final Session session = store.createSession(false);
-                                session.addFeatures(outName, col);
-
-                                //close store
-                                store.close();
-                            }
-
-                        } catch (MalformedURLException | DataStoreException ex) {
-                            Loggers.DATA.log(Level.WARNING, ex.getMessage(),ex);
-                            final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
-                            alert.setResizable(true);
-                            alert.showAndWait();
-                        }
-
+                    if(folder!=null){
+                        TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));
                     }
                 }
             });
             
         }
-        
+
     }
     
     private static class FillCoordCollection extends WrapFeatureCollection{
@@ -230,7 +178,112 @@ public class ExportMenu extends TreeMenuItem {
             
             return feature;
         }
-        
     }
-    
+
+    private static class ExportTask extends Task<Boolean>{
+
+        private final FeatureMapLayer layer;
+        private final FileFeatureStoreFactory factory;
+        private final File folder;
+
+        public ExportTask(FeatureMapLayer layer, File folder, FileFeatureStoreFactory factory) {
+            updateTitle("Export de "+layer.getName());
+            this.folder = folder;
+            this.factory = factory;
+            this.layer = layer;
+        }
+
+        @Override
+        protected Boolean call() throws Exception {
+            try {
+                final FeatureCollection baseCol = new FillCoordCollection(layer.getCollection());
+                final FeatureType baseType = baseCol.getFeatureType();
+
+                final FactoryMetadata metadata = factory.getMetadata();
+                final Class<Geometry>[] supportedGeometryTypes = metadata.supportedGeometryTypes();
+
+                //detect if we need one or multiple types.
+                final FeatureCollection[] cols;
+                if(ArraysExt.contains(supportedGeometryTypes,baseType.getGeometryDescriptor().getType().getBinding()) ){
+                    cols = new FeatureCollection[]{baseCol};
+                }else{
+                    //split the feature collection in sub geometry types
+                    cols = FeatureStoreUtilities.decomposeByGeometryType(baseCol, supportedGeometryTypes);
+                }
+
+                //transforme each collection
+                //replace ids by libellé when possible
+                for(int i=0;i<cols.length;i++){
+                    final Previews previews = Injector.getSession().getPreviews();
+                    cols[i] = new WrapFeatureCollection(cols[i]) {
+                        @Override
+                        protected Feature modify(Feature ftr) throws FeatureStoreRuntimeException {
+                            for(Property p : ftr.getProperties()){
+                                if(p instanceof Attribute){
+                                    final Class<?> binding = p.getType().getBinding();
+                                    if(String.class.isAssignableFrom(binding)){
+                                        final String value = String.valueOf(p.getValue());
+                                        try {
+                                            final Preview lbl = previews.get(value);
+                                            if (lbl != null) {
+                                                p.setValue(lbl.getLibelle());
+                                            }
+                                        } catch (DocumentNotFoundException e) {
+                                            SirsCore.LOGGER.log(Level.FINEST, "No document found for id : {0}", value);
+                                        }
+                                    }
+                                }
+                            }
+                            return ftr;
+                        }
+                    };
+                }
+
+                for(FeatureCollection col : cols){
+
+                    final FeatureType inType = col.getFeatureType();
+                    final String inTypeName = inType.getName().getLocalPart();
+
+                    //output file path
+                    File file= new File(folder, inTypeName+factory.getFileExtensions()[0]);
+
+                    //if file exist, add date aside it
+                    if(file.exists()){
+                        //generate name + time
+                        String name = inTypeName+" "+TemporalUtilities.toISO8601(new Date())+factory.getFileExtensions()[0];
+                        name = name.replace(':', '_');
+                        file = new File(folder, name);
+                        //it should not exist, but delete it if there is one in case
+                        file.delete();
+                    }
+
+                    //create output store
+                    final FeatureStore store = factory.createDataStore(file.toURI().toURL());
+
+                    //delete feature types
+
+                    //create output type
+                    store.createFeatureType(inType.getName(), inType);
+                    final FeatureType outType = store.getFeatureType(inTypeName);
+                    final Name outName = outType.getName();
+
+                    //write datas
+                    final Session session = store.createSession(false);
+                    session.addFeatures(outName, col);
+
+                    //close store
+                    store.close();
+                }
+
+                done();
+            } catch (MalformedURLException | DataStoreException ex) {
+                Loggers.DATA.log(Level.WARNING, ex.getMessage(),ex);
+                setException(ex);
+                return false;
+            }
+            return true;
+        }
+
+    }
+
 }
