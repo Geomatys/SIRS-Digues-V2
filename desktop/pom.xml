@@ -110,6 +110,7 @@
       <plugin>
         <groupId>com.geomatys.maven</groupId>
         <artifactId>maven-fxmodel-plugin</artifactId>
+        
         <executions>
           <execution>
             <id>fxml</id>
@@ -129,8 +130,8 @@
               <packageName>fr.sirs.theme.ui</packageName>
             </configuration>
           </execution>
-
         </executions>
+        
         <configuration>
           <model>../sirs-core/model/sirs.ecore</model>
         </configuration>

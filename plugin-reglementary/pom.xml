@@ -110,6 +110,24 @@
                             <goal>fxmodel2sql</goal>
                         </goals>
                     </execution>
+                    <execution>
+                      <id>fxml</id>
+                      <goals>
+                        <goal>fxml</goal>
+                      </goals>
+                      <configuration>
+                        <packageName>fr.sirs.theme.ui</packageName>
+                      </configuration>
+                    </execution>
+                    <execution>
+                      <id>fx-controller</id>
+                      <goals>
+                        <goal>fxcontroller</goal>
+                      </goals>
+                      <configuration>
+                        <packageName>fr.sirs.theme.ui</packageName>
+                      </configuration>
+                    </execution>
                 </executions>
                 <configuration>
                     <generateEquals>true</generateEquals>
@@ -119,9 +137,6 @@
                     <repositoryInterface>fr.sirs.core.Repository</repositoryInterface>
                 </configuration>
             </plugin>
-            
-            
-            
         </plugins>
     </build>
 
