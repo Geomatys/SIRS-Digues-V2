@@ -65,6 +65,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -107,7 +108,17 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     private Label errorLabel;
     @FXML
+    private Label uiRestartLbl;
+    @FXML
     private TabPane uiTabPane;
+    @FXML
+    private Tab uiLocalTab;
+    @FXML
+    private Tab uiDistantTab;
+    @FXML
+    private Tab uiCreateTab;
+    @FXML
+    private Tab uiImportTab;
 
     // onglet base locales
     @FXML
@@ -171,6 +182,8 @@ public class FXLauncherPane extends BorderPane {
     private Button uiInstallPluginBtn;
     @FXML
     private Button uiDeletePluginBtn;
+    @FXML
+    private Button uiRestartAppBtn;
 
     @FXML
     private ProgressBar uiProgressPlugins;
@@ -218,6 +231,7 @@ public class FXLauncherPane extends BorderPane {
             if (newValue != null) {
                 uiDeletePluginBtn.setDisable(false);
                 uiDeletePluginBtn.setOnAction((ActionEvent event) -> {
+                    restartApplicationNeeded();
                     deletePlugin(newValue);
                     updatePluginList(null);
                 });
@@ -235,6 +249,7 @@ public class FXLauncherPane extends BorderPane {
                 }
                 uiInstallPluginBtn.setDisable(false);
                 uiInstallPluginBtn.setOnAction((ActionEvent event) -> {
+                    restartApplicationNeeded();
                     installPlugin(newValue);
                     updatePluginList(null);
                 });
@@ -245,6 +260,14 @@ public class FXLauncherPane extends BorderPane {
 
         uiProgressPlugins.visibleProperty().bind(
                 uiInstallPluginBtn.armedProperty().or(uiDeletePluginBtn.armedProperty()));
+
+        uiRestartAppBtn.setOnAction((ActionEvent event) -> {
+            try {
+                restartCore();
+            } catch (URISyntaxException | IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        });
 
         updateLocalDbList();
         updatePluginList(null);
@@ -269,6 +292,15 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
 
+    }
+
+    private void restartApplicationNeeded() {
+        uiRestartLbl.setVisible(true);
+        uiRestartAppBtn.setVisible(true);
+        uiLocalTab.setDisable(true);
+        uiDistantTab.setDisable(true);
+        uiCreateTab.setDisable(true);
+        uiImportTab.setDisable(true);
     }
 
     /**

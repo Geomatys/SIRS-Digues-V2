@@ -9,11 +9,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
-          <Tab text="Base locale">
+          <Tab fx:id="uiLocalTab" text="Base locale">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
@@ -41,7 +41,7 @@
                   </GridPane>
                </content>
             </Tab>
-          <Tab text="Base distante">
+          <Tab fx:id="uiDistantTab" text="Base distante">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
@@ -72,7 +72,7 @@
                   </GridPane>
                </content>
             </Tab>
-            <Tab text="Création">
+            <Tab fx:id="uiCreateTab" text="Création">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
@@ -112,7 +112,7 @@
                   </GridPane>
                </content>
             </Tab>
-            <Tab text="Importation">
+            <Tab fx:id="uiImportTab" text="Importation">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                      <children>
@@ -158,7 +158,7 @@
                   </GridPane>
                </content>
             </Tab>
-            <Tab text="Plugins et Mise à jour">
+            <Tab fx:id="uiPLuginsTab" text="Plugins et Mise à jour">
                <content>
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
@@ -207,6 +207,8 @@
                            </children>
                         </HBox>
                         <ProgressBar fx:id="uiProgressPlugins" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                        <Label fx:id="uiRestartLbl" text="L'application doit être redémarrée pour appliquer les changements" textFill="#eb0808" visible="false" />
+                        <Button fx:id="uiRestartAppBtn" mnemonicParsing="false" text="Redémarrer" textFill="RED" visible="false" GridPane.columnIndex="1" />
                      </children>
                      <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
